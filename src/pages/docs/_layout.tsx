@@ -2,6 +2,7 @@
 
 import { lazy, type PropsWithChildren, Suspense } from 'react'
 import DocsHeader from '../../components/DocsHeader'
+import DocsPageActions from '../../components/DocsPageActions'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
 import { usePageSettled } from '../../lib/pageSettled'
@@ -60,6 +61,7 @@ export default function DocsLayout(
       <DocsSectionNav />
       <DocsSidebarDrawer />
       {props.children}
+      <DocsPageActions openApi />
       <Suspense fallback={null}>
         {needsToaster && (
           <Toaster

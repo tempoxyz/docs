@@ -1,9 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, custom, type Hex, parseAbi, parseUnits } from 'viem'
-import { Actions, tempoActions } from 'viem/tempo'
-import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
+import { custom, type Hex, parseAbi, parseUnits } from 'viem'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -14,6 +12,7 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
+import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone-sandbox-sdk'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { ousd } from '../tokens'
@@ -88,12 +87,12 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_ID),
+            chain: Zone.a,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
               getZoneRpcTransportConfig(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
@@ -114,7 +113,8 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
 
   const zoneAuthorization = useZoneAuthorization({
     address,
-    chainId: zoneModerato(ZONE_ID).id,
+    chainId: Zone.a.id,
+    zoneId: ZONE_ID,
     queryKey: ['guide-private-zones-auth', address, ZONE_ID],
     zoneClient,
   })
@@ -222,7 +222,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
     },
   })
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: switching modes should clear the previous submission state.
   React.useEffect(() => {
     depositMutation.reset()
   }, [mode])

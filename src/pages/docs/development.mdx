@@ -1,0 +1,126 @@
+---
+title: Tempo EVM
+seoTitle: Tempo EVM | Tempo Docs
+description: Build stablecoin payments with dedicated payment capacity, stablecoin fees, fast finality, and native account and token controls.
+---
+
+import { DocsLinkCards } from '../../components/DocsLinkCards'
+import { Cards, Card } from 'vocs'
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<span id="developer-resources" />
+<span id="developer-guides" />
+
+<DocsProductOverview image="tempo-evm" alt="Transaction calls pass through Tempo EVM and become entries in the ledger.">
+
+# Tempo EVM
+
+Tempo is a blockchain for payments. Tempo EVM is its Ethereum-compatible execution environment: use Solidity contracts, Ethereum JSON-RPC, and familiar tools like Foundry, Viem, and Wagmi to build with stablecoins.
+
+[Send your first test payment →](/get-started/quickstart) · [RPC endpoints and chain IDs →](/docs/quickstart/connection-details)
+
+</DocsProductOverview>
+
+Build wallets, payment applications, and financial services on Tempo EVM. It combines Ethereum’s smart contract model with infrastructure designed for moving money: stablecoin fees, fast finality, and dedicated capacity for eligible payments. Use it to accept customer deposits, send payouts, issue stablecoins, or build your own onchain application.
+
+Accounts, tokens, and transactions come with payment capabilities built in. Give customers passkey-based accounts, cover their fees, and automate payments with limited signing permissions. Issue tokens with configurable controls and exchange stablecoins through shared onchain liquidity. Start with these native capabilities, then use Solidity to add the logic your application needs.
+
+<span id="use-your-existing-tools" />
+<span id="try-a-walkthrough" />
+<span id="set-up-your-development-tools" />
+<span id="choose-your-tools" />
+<span id="build-wallet-support" />
+<span id="build-a-wallet" />
+<span id="work-with-tempo-partners" />
+<span id="inspect-transactions-and-run-infrastructure" />
+<span id="find-infrastructure" />
+<span id="contracts-and-infrastructure" />
+
+## Build on Tempo
+
+Start with a wallet integration, an interactive token walkthrough, or a Solidity contract. Use the setup guides to connect your application to Tempo.
+
+<DocsLinkCards collection="build" />
+
+Read the [protocol specifications](/docs/protocol) for the underlying execution rules.
+
+<span id="core-ideas" />
+<span id="accounts-and-payments" />
+<span id="connect-and-test-your-integration" />
+<span id="connect-an-application" />
+<span id="tokens-and-exchange" />
+
+## Payment features
+
+Start with a transfer or contract call, then add the capabilities your application needs. Standard EVM transactions work for basic transfers and calls; use [Tempo Transactions](/docs/guide/tempo-transaction) for features such as batching, fee sponsorship, and access keys.
+
+<Cards>
+  <div id="payment-lanes" style={{ display: 'grid' }}>
+    <Card
+      title="Payment lanes"
+      description="Reserved capacity for eligible payment calls when other applications are busy. Qualifying transactions use it automatically; payment capacity is still finite."
+      to="/docs/protocol/blockspace/payment-lane-specification"
+      icon="lucide:route"
+    />
+  </div>
+  <div id="stablecoin-fees" style={{ display: 'grid' }}>
+    <Card
+      title="Stablecoin fees"
+      description="Pay fees in supported USD stablecoins or sponsor them for customers. The base fee stays within fixed bounds; total cost depends on gas usage and priority fees."
+      to="/docs/network/fees"
+      icon="lucide:coins"
+    />
+  </div>
+  <div id="fast-finality" style={{ display: 'grid' }}>
+    <Card
+      title="Fast finality"
+      description="Transactions normally reach deterministic finality in less than a second. Once finalized, they need no additional confirmation blocks."
+      to="/docs/protocol/blockspace/consensus"
+      icon="lucide:zap"
+    />
+  </div>
+  <div id="payment-operations" style={{ display: 'grid' }}>
+    <Card
+      title="Payment operations"
+      description="Batch calls atomically, send payments concurrently, and set validity windows. Choose whether payments succeed together or each has its own outcome."
+      to="/docs/guide/tempo-transaction"
+      icon="lucide:layers"
+    />
+  </div>
+  <div id="accounts-and-permissions" style={{ display: 'grid' }}>
+    <Card
+      title="Accounts and keys"
+      description="Use secp256k1, P-256, or WebAuthn signatures. Authorize access keys with spending limits and call scopes, or admin keys to manage authorization."
+      to="/docs/accounts/keys"
+      icon="lucide:key-round"
+    />
+  </div>
+  <div id="payment-reconciliation" style={{ display: 'grid' }}>
+    <Card
+      title="Payment reconciliation"
+      description="Attach payment references with memos. Attribute incoming TIP-20 deposits to customers through virtual addresses that credit one account, without wallet sweeps."
+      to="/docs/guide/payments/accept-a-payment"
+      icon="lucide:receipt-text"
+    />
+  </div>
+  <div id="tip-20-tokens-and-exchange" style={{ display: 'grid' }}>
+    <Card
+      title="TIP-20 Tokens"
+      description="Create stablecoins with minting, burning, supply caps, issuer roles, and transfer policies built in. Configure controls without writing a custom token contract."
+      to="/docs/network/tokens"
+      icon="lucide:circle-dollar-sign"
+    />
+  </div>
+  <div id="stablecoin-exchange" style={{ display: 'grid' }}>
+    <Card
+      title="Stablecoin exchange"
+      description="Swap supported stablecoins through a shared orderbook. Set slippage limits and trade against available liquidity."
+      to="/docs/guide/stablecoin-dex"
+      icon="lucide:arrow-left-right"
+    />
+  </div>
+</Cards>
+
+<span id="explore-product-guides" />
+
+Explore [Earn](/docs/earn) for vault deposits, [Routes](/docs/routes) for transfers across networks, [Zones](/docs/zones) for private balances, and [Machine payments](/docs/agents) for paid APIs.

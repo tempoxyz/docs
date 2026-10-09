@@ -20,7 +20,9 @@ T4 is active on both testnet and mainnet.
 
 Node operators needed to upgrade to the T4-compatible release (v1.7.0, released May 11, 2026 4pm CEST) before the testnet activation timestamp.
 
-## Overview
+<span id="overview" />
+
+## T4 integration changes
 
 T4 introduced the following changes:
 - [Consensus context in block headers](https://tips.sh/1031) to unlock deferred verification and reduce finalization latency
@@ -44,4 +46,4 @@ See [Developer tools](/docs/quickstart/developer-tools) for the broader SDK ecos
 
 ### Consensus context in block headers
 
-The [specification](https://tips.sh/1031) added an optional `Context` field (epoch, view, parent view, leader) as the last field of `TempoHeader`. This commits consensus metadata to the block hash so Tempo blocks implement Commonware's `CertifiableBlock` trait, enabling deferred verification (optimistic notarization with async background verification) and reduced finalization latency. Pre-T4 headers are unchanged; post-T4 headers require the field, and validators reject mismatched context.
+The [specification](https://tips.sh/1031) added an optional `Context` field (epoch, view, parent view, proposer) as the last field of `TempoHeader`. This commits consensus metadata to the block hash so Tempo blocks implement Commonware's `CertifiableBlock` trait, enabling deferred verification (optimistic notarization with async background verification) and reduced finalization latency. Pre-T4 headers are unchanged; post-T4 headers require the field, and validators reject mismatched context.

@@ -1,6 +1,6 @@
 ---
-title: "How to provide liquidity on the Tempo DEX"
-seoTitle: "Providing Liquidity on the Tempo DEX | Docs"
+title: Provide liquidity
+seoTitle: "Provide liquidity | Tempo Docs"
 description: Place limit and flip orders to provide liquidity on the Stablecoin DEX orderbook. Learn to manage orders and set prices using ticks.
 interactive: true
 ---
@@ -14,11 +14,13 @@ import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { PlaceOrder } from '../../../../components/guides/steps/exchange/PlaceOrder.tsx'
 import { QueryOrder } from '../../../../components/guides/steps/exchange/QueryOrder.tsx'
 
-# How to provide liquidity on the Tempo DEX
+<span id="how-to-provide-liquidity-on-the-tempo-dex" />
+
+# Provide liquidity
 
 Add liquidity for a token pair by placing orders on the Stablecoin DEX. You can provide liquidity on the `buy` or `sell` side of the orderbook, with `limit` or `flip` orders. To learn more about order types see the [documentation on order types](/docs/protocol/exchange/providing-liquidity#order-types).
 
-In this guide you will learn how to place buy and sell orders to provide liquidity on the Stablecoin DEX orderbook. Active makers may pay less gas when they cancel eligible orders or have eligible orders filled, then later place new eligible orders. See the [T7 network upgrade](/docs/protocol/upgrades/t7#user-attributed-dex-savings) for the feature details.
+Active makers may pay less gas when they cancel eligible orders or have eligible orders filled, then later place new eligible orders. See the [T7 network upgrade](/docs/protocol/upgrades/t7#user-attributed-dex-savings) for the feature details.
 
 ## Liquidity provider demo
 
@@ -42,7 +44,7 @@ Ensure that you have set up your client by following the [guide](/docs/sdk/types
 To place an order, you need to approve the Stablecoin DEX contract to spend the order's "spend" token.
 
 :::info
-The code samples in this guide will place orders on the `AlphaUSD` / `pathUSD` pair.
+The code samples place orders on the `AlphaUSD` / `pathUSD` pair on Moderato testnet.
 
 The "spend" token is the token that will be spent to place the order.
 - buying `AlphaUSD` spends `pathUSD`
@@ -87,7 +89,7 @@ function ApproveSpend(props: { orderType: 'buy' | 'sell' }) {
 ```
 
 ```ts [wagmi.config.ts]
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -148,7 +150,7 @@ function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
 ```
 
 ```ts [wagmi.config.ts]
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -170,21 +172,26 @@ After placing an order, you can query its details to see the current state, incl
 // @noErrors
 import { Hooks } from 'wagmi/tempo'
 
-const orderId = 123n
+function QueryOrder({ orderId }: { orderId: bigint }) {
+  const { data: order, error } = Hooks.dex.useOrder({ orderId })
 
-const { data: order, refetch } = Hooks.dex.useOrder({
-  orderId,
-})
+  if (error) return <div>{error.message}</div>
+  if (!order) return <div>Loading order…</div>
 
-console.log('Type:', order?.isBid ? 'Buy' : 'Sell')
-console.log('Amount:', order?.amount.toString())
-console.log('Remaining:', order?.remaining.toString())
-console.log('Tick:', order?.tick)
-console.log('Is flip order:', order?.isFlip)
+  return (
+    <dl>
+      <dt>Side</dt><dd>{order.isBid ? 'Buy' : 'Sell'}</dd>
+      <dt>Amount in base units</dt><dd>{order.amount.toString()}</dd>
+      <dt>Remaining in base units</dt><dd>{order.remaining.toString()}</dd>
+      <dt>Tick</dt><dd>{order.tick}</dd>
+      <dt>Flip order</dt><dd>{order.isFlip ? 'Yes' : 'No'}</dd>
+    </dl>
+  )
+}
 ```
 
 ```ts [wagmi.config.ts]
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -199,7 +206,7 @@ For more details on querying orders, see the [`Hooks.dex.useOrder`](https://wagm
 
 Cancel an order using its order ID.
 
-When you cancel an order, any remaining funds are credited to your exchange balance (not directly to your wallet). To move funds back to your wallet, you can [withdraw them to your wallet](/docs/protocol/exchange/exchange-balance#withdrawing-from-the-dex).
+When you cancel an order, remaining funds are credited to your DEX balance. [Withdraw from the DEX](/docs/protocol/exchange/exchange-balance#withdrawing-from-the-dex) to return them to your account token balance.
 
 <Demo.Container name="Place and Cancel an Order" footerVariant="source" src="tempoxyz/examples/tree/main/examples/exchange">
   <Connect stepNumber={1} />
@@ -269,7 +276,7 @@ function ManageOrder() {
 ```
 
 ```ts [wagmi.config.ts]
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -304,7 +311,7 @@ console.log('Quote Token:', metadata?.quoteToken) // returns `pathUSD` address
 
 ```ts [wagmi.config.ts] filename="wagmi.config.ts"
 // @noErrors
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 :::
 
@@ -345,6 +352,7 @@ function PlaceFlipOrder(props: { orderType: 'buy' | 'sell' }) {
           amount: parseUnits('100', 6),
           type: orderType,
           tick: 0,
+          flipTick: 0,
         }),
       ]
       sendCalls.sendCallsSync({ calls })
@@ -356,7 +364,7 @@ function PlaceFlipOrder(props: { orderType: 'buy' | 'sell' }) {
 ```
 
 ```ts [wagmi.config.ts]
-// [!include ~/snippets/wagmi.config.ts:setup]
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -369,7 +377,7 @@ Ticks represent prices relative to the quote token (usually pathUSD). The formul
 tick = (price - 1) * 100_000
 ```
 
-For example, price $1.0000 → tick = 0, price $0.9990 → tick = -10, and price $1.0010 → tick = 10.
+For example, price $1.0000 → tick = 0, price $0.9990 → tick = -100, and price $1.0010 → tick = 100.
 
 Use the `Tick` utility to convert between prices and ticks:
 
@@ -379,20 +387,20 @@ import { parseUnits } from 'viem'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-// buy order at $0.9990 (tick: -10) // [!code hl]
+// buy order at $0.9990 (tick: -100) // [!code hl]
 const buyCall = Actions.dex.place.call({ // [!code hl]
   token: alphaUsd, // [!code hl]
   amount: parseUnits('100', 6), // [!code hl]
   type: 'buy', // [!code hl]
-  tick: Tick.fromPrice('0.9990'), // -10 // [!code hl]
+  tick: Tick.fromPrice('0.9990'), // -100 // [!code hl]
 }) // [!code hl]
 
-// sell order at $1.0010 (tick: 10) // [!code hl]
+// sell order at $1.0010 (tick: 100) // [!code hl]
 const sellCall = Actions.dex.place.call({ // [!code hl]
   token: alphaUsd, // [!code hl]
   amount: parseUnits('100', 6), // [!code hl]
   type: 'sell', // [!code hl]
-  tick: Tick.fromPrice('1.0010'), // 10 // [!code hl]
+  tick: Tick.fromPrice('1.0010'), // 100 // [!code hl]
 }) // [!code hl]
 
 ```
@@ -411,7 +419,7 @@ You can batch the calls to approve spend and place the order in a single transac
     description="Learn how to execute swaps and trade stablecoins on the DEX"
     to="/docs/guide/stablecoin-dex/executing-swaps"
     icon="lucide:arrow-left-right"
-    title="Executing Swaps"
+    title="Swap stablecoins"
   />
   <Card
     description="Deep dive into the Stablecoin DEX protocol specification"
@@ -420,7 +428,7 @@ You can batch the calls to approve spend and place the order in a single transac
     title="Protocol Exchange Specification"
   />
   <Card
-    description="Manage token balances on the exchange to optimize gas costs"
+    description="Manage token balances on the DEX to optimize gas costs"
     to="/docs/protocol/exchange/exchange-balance"
     icon="lucide:wallet"
     title="Exchange Balance"

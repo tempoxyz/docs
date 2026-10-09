@@ -17,11 +17,11 @@ The Tempo Python SDK can be used to perform common operations with the chain, su
 To install the Tempo Python SDK:
 
 ```bash [pip]
-pip install pytempo
+python -m pip install pytempo==0.6.1
 ```
 
 :::tip
-The SDK requires Python 3.9 or higher and web3.py 7.0+.
+The SDK requires Python 3.10 or higher and web3.py 7.0+.
 :::
 
 ## Create a Python client
@@ -31,13 +31,15 @@ To interact with Tempo, create a web3.py client connected to a Tempo node:
 ```python [main.py]
 from web3 import Web3
 
-w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz")) # [!code hl]
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz")) # [!code hl]
 
 block_number = w3.eth.block_number
 print(f"Connected to Tempo at block {block_number}")
 ```
 
 ## Send a Tempo transaction with Python
+
+These examples use Moderato testnet (`42431`). Fund a test account with the [faucet](/docs/quickstart/faucet), set `PRIVATE_KEY` to its signing key, and replace example recipients with accounts you control. Estimate gas for your actual calls; the limits below are example caps.
 
 Build and send a transaction using the `TempoTransaction` class:
 
@@ -46,7 +48,7 @@ import os
 from web3 import Web3
 from pytempo import Call, TempoTransaction # [!code hl]
 
-w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
 private_key = os.environ["PRIVATE_KEY"]
 account = w3.eth.account.from_key(private_key)
 
@@ -81,7 +83,7 @@ from pytempo import TempoTransaction
 from pytempo.contracts import TIP20, ALPHA_USD
 
 tx = TempoTransaction.create(
-    chain_id=4217,
+    chain_id=42431,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -97,14 +99,14 @@ tx = TempoTransaction.create(
 
 ### Pay fees in a stablecoin with Python
 
-Use a TIP-20 token to pay for transaction fees instead of the native token:
+Choose a supported USD-denominated TIP-20 token for transaction fees. Tempo has no native gas token:
 
 ```python [fee_token.py]
 from pytempo import TempoTransaction, Call
 from pytempo.contracts import ALPHA_USD
 
 tx = TempoTransaction.create(
-    chain_id=4217,
+    chain_id=42431,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -127,7 +129,7 @@ from pytempo.contracts import TIP20, ALPHA_USD
 token = TIP20(ALPHA_USD)
 
 tx = TempoTransaction.create(
-    chain_id=4217,
+    chain_id=42431,
     gas_limit=300_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -149,7 +151,7 @@ Send multiple transactions concurrently using different nonce keys:
 
 ```python [parallel.py]
 tx1 = TempoTransaction.create(
-    chain_id=4217,
+    chain_id=42431,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -159,7 +161,7 @@ tx1 = TempoTransaction.create(
 )
 
 tx2 = TempoTransaction.create(
-    chain_id=4217,
+    chain_id=42431,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -168,7 +170,7 @@ tx2 = TempoTransaction.create(
     calls=(Call.create(to=recipient2, data=data2),),
 )
 
-# Sign and send both in parallel
+# Submit independent nonce sequences; each has its own result
 signed_tx1 = tx1.sign(private_key)
 signed_tx2 = tx2.sign(private_key)
 w3.eth.send_raw_transaction(signed_tx1.encode())
@@ -181,11 +183,13 @@ Have another account pay for transaction fees:
 
 ```python [fee_payer.py]
 # User creates and signs a transaction marked for fee sponsorship
+user = w3.eth.account.from_key(user_private_key)
 tx = TempoTransaction.create(
-    chain_id=4217,
+    chain_id=42431,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
+    nonce=w3.eth.get_transaction_count(user.address),
     awaiting_fee_payer=True, # [!code hl]
     calls=(Call.create(to=recipient, data=data),),
 )
@@ -205,7 +209,7 @@ import time
 now = int(time.time())
 
 tx = TempoTransaction.create(
-    chain_id=4217,
+    chain_id=42431,
     gas_limit=100_000,
     max_fee_per_gas=10_000_000_000,
     max_priority_fee_per_gas=1_000_000_000,
@@ -217,6 +221,8 @@ tx = TempoTransaction.create(
 ```
 
 ## Account Keychain in the Python SDK
+
+`expiry=None` maps to the maximum uint64 timestamp for a non-expiring key. Passing `0` expires the key immediately and is rejected by authorization. The call builders below return unsigned calls: choose one, include it in a transaction, sign, submit, and wait for its receipt.
 
 The `AccountKeychain` class provides typed helpers for Tempo's [Account Keychain precompile](/docs/protocol/transactions/AccountKeychain), enabling access key management directly from Python.
 
@@ -232,13 +238,13 @@ from pytempo import (
 from pytempo.contracts import AccountKeychain, ALPHA_USD
 from web3 import Web3
 
-w3 = Web3(Web3.HTTPProvider("https://rpc.tempo.xyz"))
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
 
 # Authorize a new access key (secp256k1, no expiry):
 call = AccountKeychain.authorize_key(
     key_id="<ACCESS_KEY_ADDRESS>",
     signature_type=SignatureType.SECP256K1,
-    restrictions=KeyRestrictions(expiry=0),
+    restrictions=KeyRestrictions(expiry=None),
 )
 tx = TempoTransaction.create(
     chain_id=w3.eth.chain_id,
@@ -254,7 +260,7 @@ call = AccountKeychain.authorize_key(
     key_id="<ACCESS_KEY_ADDRESS>",
     signature_type=SignatureType.SECP256K1,
     restrictions=KeyRestrictions(
-        expiry=0,
+        expiry=None,
         limits=[TokenLimit(token=ALPHA_USD, limit=1_000_000)],
     ),
 )
@@ -264,7 +270,7 @@ call = AccountKeychain.authorize_key(
     key_id="<ACCESS_KEY_ADDRESS>",
     signature_type=SignatureType.SECP256K1,
     restrictions=KeyRestrictions(
-        expiry=0,
+        expiry=None,
         allowed_calls=[
             CallScope.transfer(target=ALPHA_USD),
             CallScope.approve(target=ALPHA_USD),

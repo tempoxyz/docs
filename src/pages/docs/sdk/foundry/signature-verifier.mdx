@@ -23,11 +23,11 @@ The template's `Mail` contract supports two modes:
 Relayed mode uses the `SignatureVerifier` precompile to verify the sender's signature. Unlike Ethereum's `ecrecover`, the precompile:
 
 - Supports secp256k1, P256, and WebAuthn signature types
-- Reverts on invalid signatures instead of returning `address(0)`
+- Reverts on malformed or cryptographically invalid signatures; `verify` returns `false` when a valid signature belongs to a different signer
 - Maintains forward compatibility with future Tempo account types
 
 :::info[T6 keychain verification]
-On T6 networks, `SignatureVerifier` also exposes `verifyKeychain(account, digest, signature)` and `verifyKeychainAdmin(account, digest, signature)` for contracts that need to check whether a signature came from an active access key, root key, or admin key for an account. Include chain ID, contract address, and account address in the digest you ask users or keys to sign.
+On T6 networks, `verifyKeychain(account, digest, signature)` checks an active access-key signature. `verifyKeychainAdmin(account, digest, signature)` checks a root-key or admin-key signature. Both require the V2 keychain signature encoding; neither checks token budgets or call scopes. Include chain ID, contract address, and account address in the digest you ask users or keys to sign.
 :::
 
 ## Contract example
@@ -50,7 +50,7 @@ require(
 );
 ```
 
-The full `Mail` contract in the template combines this with a per-sender nonce to prevent replay:
+This excerpt from the template’s `Mail` contract combines verification with a per-sender nonce to prevent replay. The template defines the token, attachment type, and events:
 
 ```solidity
 contract Mail {

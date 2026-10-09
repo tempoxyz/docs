@@ -1,9 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, encodeAbiParameters, type Hex, parseAbiItem, parseUnits, toHex } from 'viem'
-import { Actions, tempoActions } from 'viem/tempo'
-import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
+import { encodeAbiParameters, type Hex, parseAbiItem, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -17,6 +15,7 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
+import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone-sandbox-sdk'
 import { Button, ExplorerLink, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { ousd } from '../tokens'
@@ -115,12 +114,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_A.id),
+            chain: Zone.a,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_A.id, ZONE_A.rpcUrl),
               getZoneRpcTransportConfig(ZONE_A.id, ZONE_A.rpcUrl),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
@@ -129,12 +128,12 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_B.id),
+            chain: Zone.b,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_B.id, ZONE_B.rpcUrl),
               getZoneRpcTransportConfig(ZONE_B.id, ZONE_B.rpcUrl),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
@@ -151,6 +150,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const sourceZoneAuthorization = useZoneAuthorization({
     address,
     chainId: ZONE_A.chainId,
+    zoneId: ZONE_A.id,
     queryKey: ['guide-private-zones-cross-zone-send-source-auth', address, ZONE_A.id],
     zoneClient: sourceZoneClient,
   })
@@ -158,6 +158,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   const targetZoneAuthorization = useZoneAuthorization({
     address,
     chainId: ZONE_B.chainId,
+    zoneId: ZONE_B.id,
     queryKey: ['guide-private-zones-cross-zone-send-target-auth', address, ZONE_B.id],
     zoneClient: targetZoneClient,
   })

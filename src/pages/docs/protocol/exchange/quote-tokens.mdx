@@ -62,7 +62,7 @@ TIP20 token = factory.createToken(
 ```
 
 This means:
-- Your token trades against pathUSD on the exchange.
+- Your token trades against pathUSD on the DEX.
 - Users can swap between your token and other USD stablecoins that also use pathUSD, or ones connected by a multi-hop path.
 
 ### Tree Structure
@@ -83,7 +83,7 @@ The tree structure guarantees a single path between any two USD stablecoins. Thi
 
 1. Market makers provide liquidity for USDX/pathUSD and OUSD/pathUSD pairs.
 2. A user wants to send USDX to a merchant who settles in OUSD.
-3. The exchange atomically routes the payment: USDX to pathUSD to OUSD.
+3. The DEX atomically routes the payment: USDX to pathUSD to OUSD.
 4. This happens in a single transaction with no manual swaps required.
 
 The user and merchant never hold pathUSD directly. It exists only as routing infrastructure.

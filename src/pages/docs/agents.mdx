@@ -1,0 +1,109 @@
+---
+title: Machine payments
+seoTitle: Machine Payments | Tempo Docs
+description: Pay for APIs from an application or agent, accept payments for your service, and meter usage with payment sessions.
+---
+
+import { Card, Cards } from 'vocs'
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<span id="agents" />
+<span id="choose-your-agent-integration" />
+<span id="choose-a-machine-payment-integration" />
+
+<DocsProductOverview image="machine-payments" alt="An agent pays for a service through a machine payment on Tempo.">
+
+# Machine payments
+
+Pay for an API as part of the HTTP request, or charge for your own service. The Machine Payments Protocol (MPP) lets a server request payment and a client retry with payment authorization.
+
+[Pay for an API →](#pay-for-an-api) · [Accept API payments →](#accept-api-payments)
+
+</DocsProductOverview>
+
+<span id="pay-for-services" />
+
+## Pay for an API
+
+Install `mppx` and `viem`, then [configure the payer account](/docs/guide/machine-payments/client#define-the-mpp-payer-account). For the CLI, [connect Tempo Wallet](/docs/cli/wallet#download-the-tempo-wallet-cli). Set `PAID_API_URL` in the CLI or `paidUrl` in TypeScript to the service's endpoint. The [MPP client setup](/docs/network/examples#machine-payment-clients) supplies `Mppx`, `tempo`, and a mainnet Wagmi configuration. These clients pay with real funds unless both client and service use testnet.
+
+::::code-group
+
+```ts [Viem]
+// [!include ~/snippets/network-mpp.ts:viem]
+```
+
+```bash [CLI]
+tempo request --max-spend 0.10 "$PAID_API_URL"
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-mpp.ts:wagmi]
+```
+
+::::
+
+The example calls a GET endpoint. Use the method and request body from the service's documentation for other requests. Preview payment terms with `tempo request --dry-run "$PAID_API_URL"` before paying.
+
+Choose the complete integration for your application:
+
+<Cards>
+  <Card title="Pay from your application" description="Handle payment challenges with an MPP client." to="/docs/guide/machine-payments/client" icon="lucide:code-2" />
+  <Card title="Pay from a terminal" description="Find services and make paid requests with the Tempo CLI." to="/docs/guide/machine-payments/agent" icon="lucide:terminal" />
+  <Card title="Use Mercator" description="Give an agent service discovery, quotes, and paid execution." to="/docs/guide/mercator" icon="lucide:compass" />
+</Cards>
+
+Account access is separate from an API payment. Use [access keys](/docs/accounts/agents) to give an agent defined spending permissions and an expiry; use the client guides above to make requests.
+
+<span id="accept-payments-for-an-api" />
+
+## Accept API payments
+
+Configure `mppx` with your payment token, recipient address, and server secret using the [server quickstart](/docs/guide/machine-payments/server). Then protect a route with a fixed price per request:
+
+::::code-group
+
+```ts [Next.js]
+export const GET = mppx.charge({ amount: '0.10' })(
+  () => Response.json({ data: 'Your paid resource' }),
+)
+```
+
+```ts [Hono]
+app.get('/resource',
+  mppx.charge({ amount: '0.10' }),
+  (c) => c.json({ data: 'Your paid resource' }),
+)
+```
+
+::::
+
+Each tab uses the framework-specific `mppx` instance from the server quickstart. `amount` is in the configured token's decimal units. Follow [One-time payments](/docs/guide/machine-payments/one-time-payments) for a complete service.
+
+The server returns a `402 Payment Required` challenge. The client authorizes payment and retries; the server verifies it before returning the resource and receipt. Inspect an endpoint's HTTP challenge without paying:
+
+```bash [API (HTTP)]
+curl -i "$PAID_API_URL"
+```
+
+The [`WWW-Authenticate` challenge](/docs/guide/machine-payments#mpp-payment-flow) describes the payment terms. A plain cURL request does not sign or pay the challenge. The [payment flow demo](/docs/guide/machine-payments#mpp-payment-flow) shows the complete exchange.
+
+## Payment sessions
+
+Use a session when charges accumulate during service usage. The client funds a payment channel and signs vouchers as it consumes the service, without sending an onchain transaction for every request. With the [Next.js session configuration](/docs/guide/machine-payments/pay-as-you-go), charge per resource:
+
+```ts [Next.js]
+export const GET = mppx.session({ amount: '0.01', unitType: 'photo' })(
+  () => Response.json({ url: 'https://your-service.example/photo.jpg' }),
+)
+```
+
+- [Pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go) for metered API usage.
+- [Streamed payments](/docs/guide/machine-payments/streamed-payments) for charges during a streaming response.
+
+<span id="build-with-the-machine-payments-protocol" />
+<span id="understand-the-mpp-payment-flow" />
+<span id="give-your-coding-agent-tempo-documentation" />
+<span id="build-the-integration-with-your-coding-agent" />
+
+Use [How MPP works](/docs/guide/machine-payments) for payment intents and the request lifecycle, and the [MPP documentation](https://mpp.dev) for protocol and SDK references. [Build with AI](/docs/guide/using-tempo-with-ai) connects your coding agent to Tempo documentation.

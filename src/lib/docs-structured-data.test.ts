@@ -3,8 +3,9 @@ import { docsStructuredDataHead } from './docs-structured-data'
 
 function graph(path: string, frontmatter?: { description?: string; title?: string }) {
   const head = docsStructuredDataHead(path, { frontmatter })
-  if (!head) throw new Error(`Structured data is missing for ${path}`)
-  return JSON.parse(head.script[0].innerHTML) as {
+  const json = head?.script?.[0]?.innerHTML
+  if (!json) throw new Error(`Structured data is missing for ${path}`)
+  return JSON.parse(json) as {
     '@graph': Record<string, unknown>[]
   }
 }
@@ -19,6 +20,16 @@ function node(schema: ReturnType<typeof graph>, type: string) {
 }
 
 describe('docs structured data', () => {
+  test('uses the no-slash homepage canonical in both head and structured data', () => {
+    const head = docsStructuredDataHead('/', { frontmatter: { title: 'Documentation' } })
+    expect(head).toMatchObject({ canonical: 'https://tempo.xyz/developers' })
+    expect(node(graph('/', { title: 'Documentation' }), 'TechArticle').url).toBe(head?.canonical)
+    expect(docsStructuredDataHead('/', {})).toMatchObject({
+      canonical: 'https://tempo.xyz/developers',
+    })
+    expect(docsStructuredDataHead('/get-started', {})).not.toHaveProperty('canonical')
+  })
+
   test('uses authored page metadata for TechArticle semantics', () => {
     const schema = graph('/docs/guide/payments/send-a-payment', {
       title: 'Send a Payment',
@@ -79,18 +90,12 @@ describe('docs structured data', () => {
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Tempo developers',
-        item: 'https://tempo.xyz/developers/',
+        name: 'Tempo Docs',
+        item: 'https://tempo.xyz/developers',
       },
       {
         '@type': 'ListItem',
         position: 2,
-        name: 'Tempo Docs',
-        item: 'https://tempo.xyz/developers/docs',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
         name: 'Authentication',
         item: 'https://tempo.xyz/developers/docs/api/authentication',
       },
@@ -105,16 +110,39 @@ describe('docs structured data', () => {
       frontmatter: { title: '</script><script>alert(1)</script>' },
     })
 
-    expect(head?.script[0].innerHTML).not.toContain('</script>')
-    expect(head?.script[0].innerHTML).toContain('\\u003c/script\\u003e')
+    expect(head?.script?.[0]?.innerHTML).not.toContain('</script>')
+    expect(head?.script?.[0]?.innerHTML).toContain('\\u003c/script\\u003e')
   })
 
-  test('leaves non-docs routes unchanged', () => {
-    expect(docsStructuredDataHead('/blog', {})).toBeUndefined()
+  test.each([
+    ['/', 'Documentation'],
+    ['/get-started', 'Get Started'],
+    ['/get-started/stablecoins', 'Stablecoins on Tempo'],
+  ])('includes %s with the canonical docs root breadcrumb', (path, title) => {
+    const schema = graph(path, { title })
+    expect(node(schema, 'TechArticle').url).toBe(
+      `https://tempo.xyz/developers${path === '/' ? '' : path}`,
+    )
+    expect(node(schema, 'BreadcrumbList').itemListElement).toEqual(
+      expect.arrayContaining([
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Tempo Docs',
+          item: 'https://tempo.xyz/developers',
+        },
+      ]),
+    )
+  })
+
+  test('omits the base tag on non-docs routes too', () => {
+    expect(docsStructuredDataHead('/blog', {})).toEqual({ base: false, meta: {} })
+    expect(docsStructuredDataHead('/get-started-extra', {})).toEqual({ base: false, meta: {} })
   })
 
   test('does not emit JSON-LD outside the page frontmatter context', () => {
     expect(docsStructuredDataHead('/docs/api/activities', {})).toEqual({
+      base: false,
       meta: { articleModifiedTime: false },
     })
   })

@@ -16,7 +16,7 @@ export const crossZoneBalances = [
 
 # Send tokens across zones
 
-Move tokens from one Zone to another without changing the asset. This example sends `OUSD` test tokens between **Zone A** and **Zone B**, two Zones on Tempo Testnet. The transfer settles through the public chain before Zone B credits the balance.
+Send `OUSD` test tokens from **Zone A** to **Zone B** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). The transfer settles through the public chain before Zone B credits the balance.
 
 The flow uses `swapAndDepositRouter` on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `OUSD`, then deposit that `OUSD` into `Zone B`.
 
@@ -28,8 +28,6 @@ The flow uses `swapAndDepositRouter` on the public chain in same-token mode: wit
 <a id="sending-pathusd-from-zone-a-into-zone-b" />
 
 ## Sending OUSD from Zone A into Zone B
-
-By the end of this guide you will have sent **25 OUSD** from **Zone A** into **Zone B** and confirmed the routed deposit.
 
 <Demo.Container
   name="Send tokens across zones"
@@ -50,11 +48,10 @@ It shows the core routed send submission path; use the demo above when you want 
 
 ```ts
 import { encodeAbiParameters, parseUnits } from 'viem'
-import { Actions } from 'viem/tempo'
 
 const transferAmount = parseUnits('25', 6)
 
-await zoneAClient.zone.signAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
 const callbackData = encodeAbiParameters(
   [
@@ -68,7 +65,7 @@ const callbackData = encodeAbiParameters(
   [false, ousd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, 0n],
 )
 
-const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
+const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
   account: rootClient.account,
   amount: transferAmount,
   data: callbackData,

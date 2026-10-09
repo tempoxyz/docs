@@ -5,9 +5,17 @@ export type DocsRouteContract = {
 
 export const canonicalDevelopersOrigin = 'https://tempo.xyz/developers'
 
-export function docsRouteDestination(destination: string, environment = process.env.VERCEL_ENV) {
-  if (URL.canParse(destination)) return destination
-  if (environment === 'production') return `${canonicalDevelopersOrigin}${destination}`
+// The developer site has two page surfaces: documentation and the engineering
+// blog. Keep the previous marketing entry points useful as permanent redirects.
+export const developerSurfaceRedirects = [
+  { source: '/docs', destination: '/' },
+  { source: '/build', destination: '/docs/build' },
+  { source: '/build/tip20-tokens', destination: '/docs/protocol/tip20/overview' },
+  { source: '/build/tempo-transactions', destination: '/docs/protocol/transactions' },
+  { source: '/performance', destination: '/docs/protocol/blockspace/overview' },
+] as const satisfies readonly DocsRouteContract[]
+
+export function docsRouteDestination(destination: string, _environment = process.env.VERCEL_ENV) {
   return destination
 }
 
@@ -16,8 +24,10 @@ export function docsRouteDestination(destination: string, environment = process.
 // host. Keep the mappings here so tests and deployed smoke checks share one
 // contract.
 export const proxiedLegacyDocsRoutes = [
+  { source: '/docs.md', destination: '/index.md' },
+  { source: '/assets/md/docs.md', destination: '/assets/md/index.md' },
   { source: '/blog/inside-tempo-zones', destination: '/blog/privacy-with-tempo-zones' },
-  { source: '/docs/developer-tools', destination: '/docs/ecosystem' },
+  { source: '/docs/developer-tools', destination: '/docs/partners' },
   { source: '/docs/developer-tools/fee-payer', destination: '/docs/api/fee-payer' },
   { source: '/docs/developer-tools/indexer', destination: '/docs/api/indexer-api' },
   { source: '/docs/hosted-services', destination: '/docs/api' },
@@ -25,6 +35,10 @@ export const proxiedLegacyDocsRoutes = [
   { source: '/docs/api/funding/:path*', destination: '/docs/api/routes/:path*' },
   { source: '/docs/api/routes/chains', destination: '/docs/api/conventions#chain-identifiers' },
   { source: '/docs/api/routes/providers', destination: '/docs/api/reference' },
+  {
+    source: '/docs/api/routes/quotes',
+    destination: '/docs/api/routes/transfers#quoteroutestransfer',
+  },
   {
     source: '/docs/guide/use-accounts/embed-passkeys',
     destination: 'https://accounts.tempo.xyz/docs/adapters/webauthn',
@@ -73,6 +87,10 @@ export const proxiedLegacyDocsRoutes = [
     destination: '/docs/guide/payments/configure-receive-policies',
   },
   {
+    source: '/docs/learn/tempo/receive-policies',
+    destination: '/docs/guide/payments/configure-receive-policies',
+  },
+  {
     source: '/learn/use-cases/agentic-commerce',
     destination: 'https://tempo.xyz/learn/blockchain-payments/',
   },
@@ -111,6 +129,11 @@ export const proxiedLegacyDocsRoutes = [
 ] as const satisfies readonly DocsRouteContract[]
 
 export const legacyDocsHostRoutes = [
+  { source: '/docs.md', destination: `${canonicalDevelopersOrigin}/index.md` },
+  {
+    source: '/assets/md/docs.md',
+    destination: `${canonicalDevelopersOrigin}/assets/md/index.md`,
+  },
   {
     source: '/guide/bridge-usdc-stargate',
     destination: `${canonicalDevelopersOrigin}/docs/guide/bridge-layerzero`,
@@ -127,7 +150,7 @@ export const legacyDocsHostRoutes = [
     source: '/AccountKeychain',
     destination: `${canonicalDevelopersOrigin}/docs/protocol/transactions/AccountKeychain`,
   },
-  { source: '/developer-tools', destination: `${canonicalDevelopersOrigin}/docs/ecosystem` },
+  { source: '/developer-tools', destination: `${canonicalDevelopersOrigin}/docs/partners` },
   {
     source: '/developer-tools/fee-payer',
     destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
@@ -138,13 +161,16 @@ export const legacyDocsHostRoutes = [
   },
   { source: '/hosted-services', destination: `${canonicalDevelopersOrigin}/docs/api` },
   { source: '/hosted-services/:path*', destination: `${canonicalDevelopersOrigin}/docs/api` },
-  { source: '/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners` },
-  { source: '/docs/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners` },
+  { source: '/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
+  {
+    source: '/docs/learn/partners',
+    destination: `${canonicalDevelopersOrigin}/docs/partners/join`,
+  },
   {
     source: '/docs/guide/using-tempo-with-ai/partners',
-    destination: `${canonicalDevelopersOrigin}/docs/partners`,
+    destination: `${canonicalDevelopersOrigin}/docs/partners/join`,
   },
-  { source: '/build/partners', destination: `${canonicalDevelopersOrigin}/docs/partners` },
+  { source: '/build/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
   {
     source: '/network-upgrades',
     destination: `${canonicalDevelopersOrigin}/docs/guide/node/network-upgrades`,
@@ -199,6 +225,10 @@ export const legacyDocsHostRoutes = [
     destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
   },
   {
+    source: '/docs/learn/tempo/receive-policies',
+    destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
+  },
+  {
     source: '/learn/use-cases/agentic-commerce',
     destination: 'https://tempo.xyz/learn/blockchain-payments/',
   },
@@ -234,7 +264,16 @@ export const legacyDocsHostRoutes = [
 
 export const routingSmokeCases = {
   canonical: [
-    { path: '/developers', expectedStatus: 200 },
+    {
+      path: '/developers',
+      expectedStatus: 200,
+    },
+    { path: '/developers/get-started', expectedStatus: 200 },
+    {
+      path: '/developers/docs',
+      expectedLocation: canonicalDevelopersOrigin,
+      expectedFinalStatus: 200,
+    },
     { path: '/developers/docs/quickstart/integrate-tempo', expectedStatus: 200 },
     { path: '/developers/docs/quickstart/developer-tools', expectedStatus: 200 },
     {
@@ -260,6 +299,8 @@ export const routingSmokeCases = {
     { path: '/developers/api/og', expectedNonRedirect: true },
   ],
   legacy: [
+    { path: '/', expectedLocation: canonicalDevelopersOrigin, expectedFinalStatus: 200 },
+    { path: '/docs', expectedLocation: canonicalDevelopersOrigin, expectedFinalStatus: 200 },
     {
       path: '/guide/bridge-usdc-stargate',
       expectedLocation: `${canonicalDevelopersOrigin}/docs/guide/bridge-layerzero`,

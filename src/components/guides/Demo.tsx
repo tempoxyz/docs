@@ -123,6 +123,7 @@ export function Container(
     {
       name: string
       showBadge?: boolean | undefined
+      showRestart?: boolean | undefined
     } & (
       | {
           footerVariant: undefined
@@ -139,7 +140,7 @@ export function Container(
     )
   >,
 ) {
-  const { children, name, showBadge = true } = props
+  const { children, name, showBadge = true, showRestart = true } = props
   const { address } = useAccount()
   const connections = useConnections()
   const disconnect = useDisconnect()
@@ -192,7 +193,7 @@ export function Container(
       }
       headerRight={
         <div>
-          {address && (
+          {showRestart && address && (
             <button
               type="button"
               onClick={restart}
@@ -453,7 +454,7 @@ export function Login() {
   )
 }
 
-export function Logout() {
+export function Logout({ label = 'Sign out' }: { label?: string } = {}) {
   const { address, connector } = useAccount()
   const disconnect = useDisconnect()
   const [copied, copyToClipboard] = useCopyToClipboard()
@@ -484,11 +485,11 @@ export function Logout() {
         className="font-normal text-[14px] -tracking-[2%]"
         onClick={() => {
           disconnect.disconnect({ connector })
-          trackButtonClick('Sign out', 'destructive')
+          trackButtonClick(label, 'destructive')
         }}
         type="button"
       >
-        Sign out
+        {label}
       </Button>
     </div>
   )

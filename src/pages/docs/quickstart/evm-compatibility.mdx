@@ -1,45 +1,18 @@
 ---
-title: "Tempo EVM differences"
+title: "EVM differences"
 seoTitle: "Tempo EVM Differences | Docs"
 description: Learn how Tempo differs from Ethereum. Understand wallet behavior, fee token selection, VM layer changes, and fast finality consensus.
 ---
 
-import { Cards, Card } from 'vocs'
+<span id="tempo-evm-differences" />
 
-# Tempo EVM differences
+# EVM differences
 
-Tempo is fully compatible with the Ethereum Virtual Machine (EVM), targeting the **Osaka** EVM hard fork. Developers can deploy and interact with smart contracts using the same tools, languages, and frameworks they use on Ethereum, such as Solidity, Foundry, and Hardhat. All Ethereum JSON-RPC methods work out of the box. 
+Tempo supports EVM smart contracts and familiar Ethereum tools. Review these differences when porting an application, wallet, or contract, especially native-balance checks, fee-token selection, and gas estimates.
 
-While the execution environment mirrors Ethereum's, Tempo introduces some differences optimized for payments, described below.
+The execution environment targets the **Osaka** EVM hard fork. Start with [Network details](/docs/quickstart/connection-details) for chain configuration or [Smart contracts](/docs/network/contracts) for deployment.
 
-<Cards>
-  <Card
-    description="How Tempo handles wallet compatibility and native token representation."
-    to="#wallet-differences"
-    icon="lucide:wallet"
-    title="Wallet Differences"
-  />
-  <Card
-    description="Key differences when sending transactions, including fee tokens and default preferences."
-    to="#transaction-differences"
-    icon="lucide:send"
-    title="Transaction Differences"
-  />
-  <Card
-    description="VM-level differences including balance opcodes and Solidity compatibility."
-    to="#vm-layer-differences"
-    icon="lucide:code"
-    title="VM Layer Differences"
-  />
-  <Card
-    description="How Tempo's consensus and finality differ from Ethereum's approach."
-    to="#consensus--finality"
-    icon="lucide:check-circle"
-    title="Consensus & Finality"
-  />
-</Cards>
-
-## Wallet Differences
+## Wallet differences
 
 By default, all existing functionality will work for EVM-compatible wallets, with only a few quirks. For developers of wallets, we strongly encourage you to implement support for Tempo Transactions over regular EVM transactions. See the [transaction differences](#transaction-differences) for more.
 
@@ -65,11 +38,11 @@ We endorse [this proposed ERC](https://github.com/ethereum/ERCs/pull/1220) to st
 
 Sometimes wallets will need to specify the currency symbol for the native token. On Tempo, there is no native token, but fees are denominated in USD. So, we recommend using the currency symbol "USD".
 
-## Transaction Differences
+## Transaction differences
 
 ### Dealing with the fee token selection
 
-Tempo does not have a native gas token. Instead, fees are denominated in USD and fees can be paid in an stablecoin. For Tempo Transactions, the `fee_token` field can be set to any TIP-20 token, and fees are paid in that token.
+Tempo does not have a native gas token. Instead, fees are denominated in USD and fees can be paid in supported USD-denominated TIP-20 tokens. For Tempo Transactions, the `fee_token` field selects the token. When conversion is needed, the Fee AMM must have enough liquidity for the validator's preferred token. See [Fees](/docs/network/fees) for configuration and estimates.
 
 If your transactions are not using Tempo Transactions, there is a cascading fee token selection algorithm that determines the default fee token based on the user's preferences and the contract being called.
 
@@ -81,19 +54,21 @@ As specified in the preference system above, the simplest way to specify the fee
 
 #### Consideration 2: Paying fees in the TIP-20 contract being interacted with
 
-If the user is calling a method on a TIP-20 token (e.g., `transfer`), the default fee token is that token itself. For example, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG", the default fee token would be "USDG".
+If no account preference is set, a top-level `transfer` or `transferWithMemo` call to a USD-denominated TIP-20 token uses that token for fees. Other TIP-20 methods do not automatically select their target token. For example, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG", the default fee token would be "USDG".
 
-Importantly, note that the `amount` field in this case is sent in full. So, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG" with the `amount` field set to 1000, the full amount of the token will be transferred **and** the sender's balance will be reduced by the amount spent in fees. So, the recipient will receive 1000 USDG.
+Importantly, note that the `amount` field in this case is sent in full. So, if the user is calling the `transfer` method on a TIP-20 token with a symbol of "USDG" with the `amount` field set to `1000 * 10^6` base units, the full 1,000 USDG is transferred and fees are deducted separately. A receiver's receive policy can redirect that delivery to the ReceivePolicyGuard.
 
 #### Consideration 3: The fallback in the case of a non-TIP-20 contract
 
-If the user is calling a contract that is not a TIP-20 token, the EVM transaction will default to the pathUSD token. Thus, in order to send transactions to non-TIP-20 contracts, the wallet must hold some balance of pathUSD, or set an account fee token such as [OUSD](/docs/guide/ousd) with `setUserToken` on the FeeManager so it can pay fees in OUSD instead.
+If neither an account preference nor contract-specific inference applies, the EVM transaction defaults to pathUSD. Eligible Stablecoin DEX swap calls instead infer their input token. Thus, in order to send transactions to non-TIP-20 contracts, the wallet must hold some balance of pathUSD, or set an account fee token such as [OUSD](/docs/guide/ousd) with `setUserToken` on the FeeManager so it can pay fees in OUSD instead.
 
 On the Tempo Testnet, pathUSD is available from the [faucet](/docs/quickstart/faucet).
 
 If a wallet wants to submit a non-TIP20 transaction without having to submit the above transaction, we recommend investing in using [Tempo Transactions](/docs/guide/tempo-transaction) instead.
 
-## VM Layer Differences
+<span id="vm-layer-differences" />
+
+## VM differences
 
 At the VM layer, all opcodes are supported out of the box. Due to the lack of a native token, native token balance is always returning zero balances.
 
@@ -106,7 +81,7 @@ Tempo's [state creation costs](https://github.com/tempoxyz/tempo/blob/main/tips/
 | New storage slot (SSTORE 0→non-zero) | 250,000 gas | 20,000 gas |
 | Account creation | 250,000 gas | 0 gas |
 | Contract creation per byte | 1,000 gas | 200 gas |
-| Transaction gas cap | 30M gas | 30M gas |
+| Transaction gas cap | 30M gas | 16,777,216 gas (EIP-7825) |
 
 This means transfers to new addresses cost ~300k gas, and contract deployments cost 5-10x more than on Ethereum. Update your `gas_limit` estimates accordingly.
 
@@ -121,7 +96,9 @@ This means transfers to new addresses cost ~300k gas, and contract deployments c
 We are exploring transaction level introspection for Tempo Transactions, with an ability to declare things like `tx.fee_token` and `tx.fee_payer` in Solidity.
 :::
 
-## Consensus & Finality
+<span id="consensus--finality" />
+
+## Consensus and finality
 
 Tempo uses **Simplex BFT consensus** with a permissioned validator set at launch, providing deterministic finality, unlike Ethereum's finality gadget which takes approximately 12 minutes. 
 

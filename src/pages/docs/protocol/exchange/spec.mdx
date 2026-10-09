@@ -1,23 +1,29 @@
 ---
 title: Stablecoin DEX Specification
-description: Technical specification for Tempo's enshrined DEX with price-time priority orderbook, flip orders, and multi-hop routing for stablecoin trading.
+description: "Reference for Tempo's enshrined DEX, its onchain orderbook, price-time priority, flip orders, and multi-hop routing."
 ---
+
+import { Badge } from '../../../../components/Badge'
+
+<div className="docs-specification-meta">
+  <a href="/docs/protocol"><Badge>Specification</Badge></a>
+</div>
 
 # Stablecoin DEX
 
 ## Abstract
 
-This specification defines an enshrined decentralized exchange for trading between TIP-20 stablecoins. The exchange currently only supports trading between TIP-20 stablecoins with USD as their currency. By only allowing each stablecoin to be paired against its designated "quote token" the exchange enforces that there is only one route for trading between any two tokens.
+This specification defines an enshrined decentralized exchange for trading between TIP-20 stablecoins. The DEX currently only supports trading between TIP-20 stablecoins with USD as their currency. By only allowing each stablecoin to be paired against its designated "quote token" the DEX enforces that there is only one route for trading between any two tokens.
 
-The exchange maintains price‑time priority at each discrete price tick, executes swaps immediately against the active book, and supports auto‑replenishing “flip orders” that recreate themselves on the opposite side after being fully filled.
+The DEX maintains price‑time priority at each discrete price tick, executes swaps immediately against the active book, and supports auto‑replenishing “flip orders” that recreate themselves on the opposite side after being fully filled.
 
-Users maintain internal balances per token on the exchange. Order placement escrows funds from these balances (or transfers from the user if necessary), fills credit makers internally, and withdrawals transfer tokens out.
+Users maintain internal balances per token on the DEX. Order placement locks funds from these balances (or transfers from the user if necessary), fills credit makers internally, and withdrawals transfer tokens out.
 
 ## Motivation
 
 Tempo aims to provide high‑quality execution for cross‑stablecoin payments while avoiding unnecessary chain load and minimizing mid‑block MEV surfaces.
 
-A simple, on‑chain, price‑time‑priority orderbook tailored to stable pairs encourages passive liquidity to rest on chain and allows takers to execute deterministically at the best available ticks.
+A simple, price‑time‑priority onchain orderbook tailored to stable pairs encourages passive liquidity to rest on chain and allows takers to execute deterministically at the best available ticks.
 
 Another design goal is to avoid fragmentation of liquidity across many different pairs. By enforcing that each stablecoin only trades against a single quote token, the system guarantees that there is only one path between any two tokens.
 
@@ -25,23 +31,23 @@ Another design goal is to avoid fragmentation of liquidity across many different
 
 ### Contract and scope
 
-The exchange is a singleton contract deployed at `0xdec0000000000000000000000000000000000000`. It exposes functions to create trading pairs, place and cancel orders (including flip orders), execute swaps, produce quotes, and manage internal balances.
+The DEX is a singleton contract deployed at `0xdec0000000000000000000000000000000000000`. It exposes functions to create trading pairs, place and cancel orders (including flip orders), execute swaps, produce quotes, and manage internal balances.
 
 ### Key concepts
 
 #### Internal balances
 
-The contract maintains per‑user, per‑token internal balances. Order placement escrows funds from these balances (or transfers any shortfall from the user). When an order fills, the maker is credited internally with the counter‑asset at the order’s tick price. Users can withdraw available balances at any time.
+The contract maintains per‑user, per‑token internal balances. Order placement locks funds from these balances (or transfers any shortfall from the user). When an order fills, the maker is credited internally with the counter‑asset at the order’s tick price. Users can withdraw available balances at any time.
 
 #### Flip orders
 
-A flip order behaves like a normal resting order until it is fully filled. When filled, the exchange rewrites the order in place under the same `orderId` on the opposite side at a configured `flipTick`. The `flipTick` must be greater than or equal to `tick` for bids and less than or equal to `tick` for asks. The flip emits `OrderFlipped` instead of `OrderPlaced`, and `nextOrderId` does not advance. This enables passive liquidity with flexible strategies.
+A flip order behaves like a normal resting order until it is fully filled. When filled, the DEX rewrites the order in place under the same `orderId` on the opposite side at a configured `flipTick`. The `flipTick` must be greater than or equal to `tick` for bids and less than or equal to `tick` for asks. The flip emits `OrderFlipped` instead of `OrderPlaced`, and `nextOrderId` does not advance. This enables passive liquidity with flexible strategies.
 
-When a flip order flips, it draws escrow exclusively from the maker's internal exchange balance. Unlike initial order placement, the exchange does not fall back to `transferFrom` if the internal balance is insufficient—the flip simply does not occur. This ensures that flip execution is self-contained and does not require additional token approvals or external balance checks at fill time.
+When a flip order flips, it draws funds exclusively from the maker's internal DEX balance. Unlike initial order placement, the DEX does not fall back to `transferFrom` if the internal balance is insufficient—the flip simply does not occur. This ensures that flip execution is self-contained and does not require additional token approvals or external balance checks at fill time.
 
 #### Pairs, ticks, and prices
 
-Pairs are identified deterministically from the two token addresses (the base token is any TIP‑20, and its `quoteToken()` function points to the quote token). Prices are discretized into integer ticks with a tick size of 0.1 bps: with `PRICE_SCALE = 100_000`, `price = PRICE_SCALE + tick`. Orders may only be placed at ticks divisible by `TICK_SPACING = 10` (effectively setting a 1 bp tick size). The orderbook tracks best bid (highest active bid tick) and best ask (lowest active ask tick), and uses bitmaps over tick words for efficient discovery of the next initialized tick.
+Pairs are identified deterministically from the two token addresses (the base token is any TIP‑20, and its `quoteToken()` function points to the quote token). Prices are discretized into integer ticks with a tick size of 0.1 bps: with `PRICE_SCALE = 100_000`, `price = PRICE_SCALE + tick`. Orders may only be placed at ticks divisible by `TICK_SPACING = 10` (effectively setting a 1 bp tick size). The onchain orderbook tracks best bid (highest active bid tick) and best ask (lowest active ask tick), and uses bitmaps over tick words for efficient discovery of the next initialized tick.
 
 #### Quote tokens
 
@@ -73,13 +79,14 @@ Crossed books are permitted; the implementation does not enforce that best bid �
 #### Constraints
 
 - Only USD‑denominated tokens are supported, and their quotes must also be USD
+- Orders must contain at least `MIN_ORDER_AMOUNT = 100_000_000` base units (100 tokens with six decimals)
 - Orders must specify ticks within the configured bounds (±2000)
 - Tick spacing is 10: `tick % 10 == 0` for orders and flip orders
 - Withdrawals require sufficient internal balance
 
 ### Interface
 
-Below is the complete on‑chain interface, organized by function. Behavior notes and constraints are included with each function where relevant.
+Below is the core trading interface, organized by function. The [canonical ABI](https://github.com/tempoxyz/tempo/blob/main/crates/contracts/src/precompiles/stablecoin_dex.rs) also includes order inspection, storage credits, and indexed-book migration methods. Behavior notes and constraints are included with each function where relevant.
 
 #### Constants and pricing
 
@@ -116,7 +123,9 @@ function priceToTick(uint32 price) external pure returns (int16 tick);
 
 Convert between discrete ticks and scaled prices. `priceToTick` reverts if `price` is out of bounds.
 
-#### Pairing and orderbook
+<span id="pairing-and-orderbook" />
+
+#### Pairing and onchain orderbook
 
 ```solidity
 function pairKey(address tokenA, address tokenB) external pure returns (bytes32 key);
@@ -148,7 +157,7 @@ Returns FIFO head/tail order IDs and aggregate liquidity for a tick on a side, a
 function balanceOf(address user, address token) external view returns (uint128);
 ```
 
-Returns a user’s internal balance for `token` held on the exchange.
+Returns a user’s internal balance for `token` held on the DEX.
 
 ```solidity
 function withdraw(address token, uint128 amount) external;
@@ -162,7 +171,7 @@ Transfers `amount` of `token` from the caller’s internal balance to the caller
 function place(address token, uint128 amount, bool isBid, int16 tick) external returns (uint128 orderId);
 ```
 
-Places a limit order against the pair of `token` and its quote, immediately adding it to the active book. Escrows funds: bids escrow quote at tick price; asks escrow base.
+Places a limit order against the pair of `token` and its quote, immediately adding it to the active book. Locks funds for the order: bids lock quote tokens at the tick price; asks lock base tokens.
 
 Notes:
 
@@ -179,22 +188,22 @@ Like `place`, but marks the order as a flip order. When fully filled, the same `
 Notes:
 
 - Both `tick` and `flipTick` must be within `[MIN_TICK, MAX_TICK]` and divisible by `TICK_SPACING` (10).
-- When the order flips, escrow is drawn exclusively from the maker's internal exchange balance. If the internal balance is insufficient, the flip silently fails—no `transferFrom` is attempted, even if the maker has sufficient external balance and approval.
-- The maker must be authorized by the TIP-403 transfer policies of both the base and quote tokens, both at initial placement and when the order flips. If the maker becomes unauthorized before a flip, the flip silently fails and no flipped order is inserted (although the existing order is executed).
+- When the order flips, funds are drawn exclusively from the maker's internal DEX balance. If the internal balance is insufficient, the flip fails and emits `FlipFailed`—no `transferFrom` is attempted, even if the maker has sufficient external balance and approval.
+- The maker must be authorized by the TIP-403 transfer policies of both the base and quote tokens, both at initial placement and when the order flips. If the maker becomes unauthorized before a flip, the flip emits `FlipFailed` and no flipped order is inserted (although the existing order is executed).
 
 ```solidity
 function cancel(uint128 orderId) external;
 ```
 
-Cancels an order owned by the caller. When canceled, the order is removed from the tick queue, liquidity is decremented, and remaining escrow is refunded to the order owner's exchange balance which can then be withdrawn.
+Cancels an order owned by the caller. When canceled, the order is removed from the tick queue, liquidity is decremented, and remaining locked funds are refunded to the order owner's DEX balance which can then be withdrawn.
 
 ```solidity
 function cancelStaleOrder(uint128 orderId) external;
 ```
 
-Cancels an order where the maker is forbidden by the escrowed token's [TIP-403 transfer policy](/docs/protocol/tip403/overview). Unlike `cancel`, this function can be called by anyone—not just the order maker—but only succeeds if the maker is no longer authorized to transfer the escrowed token (e.g., the maker has been blacklisted). This allows third parties to clean up stale orders from the book.
+Cancels an order if its maker is no longer authorized as a sender of the token locked for the order or as a recipient of the payout token under their [TIP-403 policies](/docs/protocol/tip403/overview). Anyone can call this function to remove stale orders.
 
-When canceled, the order is removed from the tick queue, liquidity is decremented, and remaining escrow is refunded to the order maker's exchange balance. Reverts with `OrderNotStale` if the maker is still authorized.
+When canceled, the order is removed from the tick queue, liquidity is decremented, and remaining locked funds are refunded to the order maker's DEX balance. Reverts with `OrderNotStale` if the maker is still authorized.
 
 ```solidity
 function nextOrderId() external view returns (uint128);
@@ -235,6 +244,7 @@ event PairCreated(bytes32 indexed key, address indexed base, address indexed quo
 event OrderPlaced(uint128 indexed orderId, address indexed maker, address indexed token, uint128 amount, bool isBid, int16 tick, bool isFlipOrder, int16 flipTick);
 event OrderFlipped(uint128 indexed orderId, address indexed maker, address indexed token, uint128 amount, bool isBid, int16 tick, int16 flipTick);
 event OrderCancelled(uint128 indexed orderId);
+event FlipFailed(uint128 indexed orderId, address indexed maker, bytes4 reason);
 event OrderFilled(uint128 indexed orderId, address indexed maker, address indexed taker, uint128 amountFilled, bool partialFill);
 ```
 
@@ -243,10 +253,10 @@ event OrderFilled(uint128 indexed orderId, address indexed maker, address indexe
 ```solidity
 error Unauthorized();
 ```
-- Pair creation or usage: `PAIR_EXISTS`, `PAIR_NOT_EXISTS`, `ONLY_USD_PAIRS`
-- Bounds: `TICK_OUT_OF_BOUNDS`, `FLIP_TICK_OUT_OF_BOUNDS`, `FLIP_TICK_MUST_BE_GREATER_FOR_BID`, `FLIP_TICK_MUST_BE_LESS_FOR_ASK`, "Price out of bounds"
-- Tick spacing: `TICK_NOT_MULTIPLE_OF_SPACING`, `FLIP_TICK_NOT_MULTIPLE_OF_SPACING`
-- Liquidity and limits: `INSUFFICIENT_LIQUIDITY`, `MAX_IN_EXCEEDED`, `INSUFFICIENT_OUTPUT`
-- Authorization: `UNAUTHORIZED` (cancel not by maker)
-- Stale orders: `ORDER_NOT_STALE` (cancelStaleOrder when maker is still authorized)
-- Balance: `INSUFFICIENT_BALANCE` (withdraw)
+- Pairs and tokens: `PairAlreadyExists`, `PairDoesNotExist`, `IdenticalTokens`, `InvalidToken`, `InvalidBaseToken`
+- Ticks: `TickOutOfBounds(int16)`, `InvalidTick`, `InvalidFlipTick`
+- Liquidity and limits: `InsufficientLiquidity`, `MaxInputExceeded`, `InsufficientOutput`, `BelowMinimumOrderSize(uint128)`
+- Orders and ownership: `OrderDoesNotExist`, `Unauthorized`, `OrderNotStale`
+- Balances: `InsufficientBalance`
+
+TIP-20 and TIP-403 checks can also return their respective policy or pause errors.

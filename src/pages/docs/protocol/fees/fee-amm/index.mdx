@@ -10,11 +10,9 @@ import { Cards, Card } from 'vocs'
 
 # Fee AMM overview: converting stablecoin fees
 
-The Fee AMM (Automated Market Maker) is a dedicated system for converting transaction fees between different stablecoins. It enables users to pay fees in any supported stablecoin while allowing validators to receive fees in their preferred token.
+The Fee AMM converts transaction fees between supported USD-denominated TIP-20 tokens. It lets a fee payer use a different token from the validator's preferred fee token.
 
-:::info
-**Fee AMM vs. Exchange** — these are two different systems. The Fee AMM is protocol-driven: it converts transaction-fee payments into validators' preferred tokens at a fixed price, and only the protocol (and arbitrageurs rebalancing it) swaps against it — it is not a trading venue. For user-facing stablecoin trading (swaps, orders, prices, orderbook), use the [Exchange](/docs/protocol/exchange). See [Fee AMM vs. Exchange](#fee-amm-vs-exchange) below.
-:::
+To convert the stablecoins held in an account, use the [Exchange](/docs/protocol/exchange). Fee conversion only applies to the transaction fee.
 
 ## How the Fee AMM converts stablecoin fees
 
@@ -24,11 +22,11 @@ When a user pays fees in a stablecoin that differs from the validator's preferen
 - **Validator receives**: 0.9970 of their preferred stablecoin
 - **Liquidity providers earn**: 0.003 (0.3%) as fees
 
-This conversion happens automatically at the end of each block through batched swaps, preventing MEV attacks like sandwiching.
+The protocol handles conversion as part of fee processing. See the [fee lifecycle](/docs/protocol/fees/spec-fee#fee-payment) and [Fee AMM specification](/docs/protocol/fees/spec-fee-amm) for liquidity reservation, conversion, and refunds.
 
 ## Fee AMM vs. Exchange
 
-Tempo has two stablecoin-swapping systems that are easy to confuse. They serve different purposes:
+Choose the system for the amount you need to convert:
 
 | | [Exchange (DEX)](/docs/protocol/exchange) | Fee AMM |
 |---|---|---|
@@ -37,9 +35,7 @@ Tempo has two stablecoin-swapping systems that are easy to confuse. They serve d
 | **Pricing** | Market-driven orderbook (price-time priority) | Fixed conversion price |
 | **Liquidity** | Limit and flip orders resting in the orderbook | LP deposits into per-pair fee pools |
 | **Contract** | Stablecoin DEX precompile (`0xdec0…0000`) | `FeeManager` precompile (`0xfeec…0000`) |
-| **Use it for** | Swaps, prices, orderbook depth, fills | Letting users pay fees in any stablecoin |
-
-If you want to **trade** stablecoins or read market data, use the [Exchange](/docs/protocol/exchange). If you want to **enable fee payments** in your stablecoin or provide fee-conversion liquidity, you're in the right place — continue below.
+| **Use it for** | Swaps, prices, orderbook depth, fills | Paying fees with a supported stablecoin |
 
 ## Learn more about fee conversion
 
@@ -60,6 +56,6 @@ If you want to **trade** stablecoins or read market data, use the [Exchange](/do
     description="Provide liquidity to enable fee token conversions"
     to="/docs/guide/stablecoin-dex/managing-fee-liquidity"
     icon="lucide:droplet"
-    title="Managing Fee Liquidity"
+    title="Provide fee liquidity"
   />
 </Cards>

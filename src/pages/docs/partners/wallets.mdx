@@ -1,0 +1,168 @@
+---
+title: "Wallets"
+seoTitle: "Embedded & External Wallets | Tempo Docs"
+description: Integrate embedded, custodial, and institutional wallet infrastructure into your Tempo application.
+---
+
+<span id="wallets-embedded-and-external-options" />
+
+# Wallets
+
+Choose how users connect accounts and how signing keys are managed. The providers below cover embedded wallets, custody, external wallets, and agent wallets.
+
+Start with [Accounts](/docs/accounts) for Tempo Wallet and payment workflows. If you are adding Tempo to an existing wallet, use the [wallet integration guide](/docs/quickstart/wallet-developers) alongside your provider's documentation.
+
+Jump to [embedded wallets](#embedded), [custody and institutional providers](#custodial--institutional), [self-custodial wallets](#self-custodial), or [agent wallets](#agentic).
+
+For account abstraction providers and programmable wallet frameworks, see [Smart accounts](/docs/partners/smart-accounts).
+
+## Embedded
+
+### <span className="partner-logo partner-logo--blockradar" aria-hidden="true" />Blockradar
+[Blockradar](https://blockradar.co) provides non-custodial wallet infrastructure purpose-built for fintechs running stablecoin payments. The platform focuses on real financial use cases, from merchant settlement to cross-border payouts, with tools designed for payments, compliance, treasury operations, and multi-chain liquidity. Explore the full platform in the [Blockradar Docs](https://docs.blockradar.co/).
+
+**Wallet and Payment Operations:** Through one unified API, teams can issue wallets for users, merchants, or treasury; accept fiat inflows through virtual accounts; enable gasless stablecoin transactions; apply AML checks automatically; consolidate balances through configurable sweeps; and handle cross-chain movement using swap and bridge. Fintechs can start building with the Blockradar API or [Blockradar Dashboard](https://dashboard.blockradar.co/). For advanced flows or high-volume programs, fintechs can [book a demo](https://www.blockradar.co/contact) to walk through production architectures.
+
+<span id="crossmint" />
+
+### <span className="partner-logo partner-logo--crossmint" aria-hidden="true" />Crossmint Wallets
+
+Create embedded wallets for users or server-side wallets for treasury and agent workflows with [Crossmint Wallets](https://docs.crossmint.com/wallets/overview).
+
+[Wallet documentation](https://docs.crossmint.com/wallets/overview) · [Project console](https://crossmint.com/console)
+
+<span id="dynamic" />
+
+### <span className="partner-logo partner-logo--dynamic" aria-hidden="true" />Dynamic Embedded Wallets
+
+Add authentication and embedded wallets with [Dynamic Embedded Wallets](https://www.dynamic.xyz/docs/embedded-wallets/mpc/overview).
+
+[Tempo feature support](https://www.dynamic.xyz/docs/embedded-wallets/chains/overview) · [Tempo testnet announcement](https://www.linkedin.com/posts/dynamiclabs_were-excited-to-support-builders-on-tempo-activity-7404180089984385024-oVRf)
+
+### <span className="partner-logo partner-logo--para" aria-hidden="true" />Para
+
+[Para](https://getpara.com) is a comprehensive wallet and authentication suite for fintech and crypto applications. It provides flexible login methods, secure MPC-backed wallets, fast authentication, and infrastructure for automating onchain activity. Para [supports Tempo](https://blog.getpara.com/tempo-para/) for wallet creation and payment flows.
+
+Get started by signing up through the [Para Dev Portal](https://developer.getpara.com/) and following the quickstart in the [Para docs](https://docs.getpara.com/v2/introduction/welcome).
+
+### <span className="partner-logo partner-logo--privy" aria-hidden="true" />Privy
+
+[Privy](https://www.privy.io/) builds secure key management and embedded wallets so any developer can easily build secure, scalable wallets into their app. Easily spin up self-custodial wallets for users, manage your treasury wallets and more.
+
+Privy's Tempo integration supports native transaction features such as batched calls and fee-token selection. Privy's standard EVM `sponsor: true` option is not available for Tempo Transactions; follow its [Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) for supported signing and sponsorship paths.
+
+[Create an Ethereum-type wallet](https://docs.privy.io/wallets/wallets/create/create-a-wallet#param-chain-type-1) in Privy. For Tempo mainnet, the CAIP-2 identifier is `eip155:4217`; use the [Tempo-specific transaction instructions](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) when adding batching, memos, or fee-token selection.
+
+:::tip
+Check out the [Tempo + Privy guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) and Privy's [example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) peer-to-peer payments app that uses Tempo transaction memos.
+:::
+
+### <span className="partner-logo partner-logo--turnkey" aria-hidden="true" />Turnkey
+
+[Turnkey](https://www.turnkey.com) provides programmable key management and non-custodial wallet infrastructure for applications that need granular signing policies and automated transaction flows. With Turnkey, developers can securely sign Tempo Transactions, automate wallet operations, and build custom logic around how keys are used.
+
+Turnkey also supports sponsor-style workflows, enabling gasless or subsidized transaction flows through configurable signing policies.
+
+[Create your Turnkey account](https://app.turnkey.com/dashboard) and follow the [Turnkey Embedded Wallet Kit guide](https://docs.turnkey.com/sdks/react/getting-started) to integrate embedded wallets into your Tempo app.
+
+:::tip
+Turnkey has a [`with-tempo`](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo) example in their SDK to get you started quickly.
+:::
+
+## Custodial & Institutional
+
+### <span className="partner-logo partner-logo--bridge" aria-hidden="true" />Bridge Wallets
+
+Create hosted stablecoin wallets, read balances, and transfer funds with Bridge Wallets. Connect them to Bridge Orchestration for bank funding or Bridge Cards for spending.
+
+[Wallet product](https://www.withbridge.com/product/wallets) · [Wallet documentation](https://apidocs.bridge.xyz/get-started/guides/wallets/overview) · [Tempo integration guide](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide)
+
+### <span className="partner-logo partner-logo--bitgo" aria-hidden="true" />BitGo
+
+[BitGo](https://www.bitgo.com) provides institutional-grade custody, trading, and wallet infrastructure. BitGo supports Tempo with both custodial and self-custody wallet solutions, enabling enterprises to securely store, manage, and transact with Tempo-based assets under robust security and compliance controls. BitGo is a  qualified custodian in the United States and globally [licensed and regulated](https://www.bitgo.com/company/licenses/).
+
+Get started through the [BitGo platform](https://www.bitgo.com) or explore their [developer docs](https://developers.bitgo.com/).
+
+### <span className="partner-logo partner-logo--coinbase" aria-hidden="true" />Coinbase
+
+Eligible [Coinbase Prime](https://www.coinbase.com/prime) clients can access custody support for Tempo, with availability varying by asset and contracting entity.
+
+Coinbase also supports Tempo for retail and exchange trading and transfers, including in its iOS and Android apps. For supported assets and regions, customers can select Tempo as the network when sending or receiving. Check the available networks for the specific asset in Coinbase before transferring. See [Coinbase trading and transfers](/docs/partners/exchanges#coinbase) for more context.
+
+<span id="cubist" />
+
+### <span className="partner-logo partner-logo--cubist" aria-hidden="true" />Cubist CubeSigner
+
+Use [CubeSigner](https://cubist.dev/products/cubesigner-end-user-custody) for wallet key management, authentication, and signing policies.
+
+[Payments and tokenization](https://cubist.dev/use-cases/payments-tokenization) · [Product suite](https://cubist.dev/product-suite)
+
+### <span className="partner-logo partner-logo--dfns" aria-hidden="true" />DFNS
+
+[DFNS](https://www.dfns.co) provides programmable key management and wallet-as-a-service infrastructure for Tempo. With DFNS, developers can create and manage wallets, automate signing workflows, and build custom orchestration logic, all backed by distributed MPC key generation and policy-based access controls.
+
+Create an account on the [DFNS dashboard](https://app.dfns.io) and explore the [DFNS docs](https://docs.dfns.co/) to integrate wallets into your Tempo application.
+
+<span id="fireblocks" />
+
+### <span className="partner-logo partner-logo--fireblocks" aria-hidden="true" />Fireblocks Wallets
+
+Manage custody, transfers, and approval policies with [Fireblocks Wallets](https://www.fireblocks.com/products/wallets). Its supported-assets directory lists Tempo and Moderato testnet; consult the directory for asset availability.
+
+[Supported networks and assets](https://www.fireblocks.com/supported-assets) · [Developer documentation](https://developers.fireblocks.com/)
+
+### <span className="partner-logo partner-logo--utila" aria-hidden="true" />Utila
+
+[Utila](https://utila.io) provides secure MPC wallet infrastructure and asset-management tooling for teams building with stablecoins and digital assets. Developers can use Utila to manage Tempo-based payments and treasury operations across multiple wallets and blockchains, all within a single policy-driven platform. Utila's MPC technology reduces counterparty risk, while its configurable approval engine gives teams granular control over how funds are moved.
+
+[Learn more](https://utila.io/product/payments/) about how Utila supports stablecoin operations on Tempo, and [request a demo](https://utila.io/request-a-demo/) if you're interested in secure MPC infrastructure.
+
+## Self-Custodial
+
+### <span className="partner-logo partner-logo--bitget-wallet" aria-hidden="true" />Bitget Wallet
+
+[Bitget Wallet](https://web3.bitget.com) makes crypto simple, secure, and seamless for everyone. With support for 130+ blockchains and 80 million users, Bitget Wallet offers one-click trading at low fees without cross-chain and gas complexities, real-time alpha insights, and a $300M Protection Fund. Security is backed by MPC and smart wallet technology with no single point of failure.
+
+Get started at [Bitget Wallet](https://web3.bitget.com).
+
+### <span className="partner-logo partner-logo--mt-pelerin" aria-hidden="true" />Bridge Wallet
+
+[Bridge Wallet](https://www.mtpelerin.com/bridge-wallet) is Mt Pelerin's self-custodial mobile wallet with Tempo support. Users hold their own secret phrase and can send, receive, manage, buy, swap, or cash out supported assets through the app.
+
+Download Bridge Wallet from the [Mt Pelerin website](https://www.mtpelerin.com/bridge-wallet).
+
+### <span className="partner-logo partner-logo--gem-wallet" aria-hidden="true" />Gem Wallet
+
+[Gem Wallet](https://gemwallet.com) is an open-source, self-custodial mobile wallet for iOS and Android with native Tempo support. Users can store, send, receive, and swap Tempo assets.
+
+Download Gem Wallet from the [Gem Wallet website](https://gemwallet.com) or explore its [open-source repository](https://github.com/gemwalletcom/wallet).
+
+### OKX Wallet
+
+[OKX Wallet](https://www.okx.com/web3) is a self-custodial multi-chain wallet with native Tempo support. Users can store, swap, and manage Tempo-based assets, with built-in DEX aggregation and DApp connectivity.
+
+Get started at [OKX Wallet](https://www.okx.com/web3).
+
+### <span className="partner-logo partner-logo--rabby" aria-hidden="true" />Rabby
+
+[Rabby](https://rabby.io) is an open-source, multi-chain wallet for Ethereum and all EVM chains, built by DeBank. Rabby automatically detects and switches to the correct chain when connecting to DApps, and features pre-sign transaction simulation, balance change previews, and built-in risk alerts to keep your assets safe.
+
+Get started at [Rabby](https://rabby.io).
+
+### <span className="partner-logo partner-logo--safe" aria-hidden="true" />Safe
+
+Use [Safe smart accounts](/docs/partners/smart-accounts#safe) for shared ownership and signature thresholds. That guide links to Safe's Tempo integration references.
+
+## Agentic
+
+### <span className="partner-logo partner-logo--enact" aria-hidden="true" />Enact
+
+[Enact](https://www.enact.finance/) provides programmable wallet infrastructure for teams and AI agents that need granular onchain controls. Set your policy once (spending limits, multisig thresholds, approval windows, automation rules) and let agents execute against it autonomously, with every action verifiable onchain. Enact never holds your funds; it enforces the logic you define.
+
+Get started with the [Enact CLI](https://docs.enact.finance/) or the [Enact app](https://app.enact.finance/) to create a self-custodial passkey wallet, add signers, and deploy your first onchain policy.
+
+### Sponge
+
+[Sponge](https://paysponge.com) provides financial infrastructure for AI agents, enabling them to hold, send, and swap crypto autonomously on Tempo. With Sponge, developers can give their agents wallets with configurable spending controls, allowlists, and audit logging, along with first-class support for Claude and other AI frameworks via MCP and SDK.
+
+Get started on the [Sponge platform](https://paysponge.com) and explore the [Sponge docs](https://paysponge.com/docs).

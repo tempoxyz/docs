@@ -1,48 +1,38 @@
 ---
-title: "Agent quickstart: build an AI agent that pays for APIs"
-seoTitle: "Build an AI Agent That Pays for APIs | Docs"
-description: Use the tempo CLI to discover services, preview costs, and make paid requests from a terminal or AI agent — no SDK required.
+title: "Pay with the CLI"
+seoTitle: "Pay with the Tempo CLI | Tempo Docs"
+description: Find a service, inspect its request format, preview the price, and pay for an API request with the Tempo CLI.
 ---
 
-import { Card, Cards } from 'vocs'
+<span id="agent-quickstart-build-an-ai-agent-that-pays-for-apis" />
 
-# Agent quickstart: build an AI agent that pays for APIs
+# Pay with the CLI
 
-The `tempo` CLI handles `402 Payment Required` responses the same way the client SDK does — but from a terminal, script, or AI agent, with zero integration code.
+Use `tempo request` to call a paid API from a terminal, script, or agent. The CLI handles the MPP challenge and payment retry.
 
-::::steps
+<span id="install-the-tempo-cli" />
+<span id="log-in-to-tempo-wallet" />
 
-### Install the Tempo CLI
+First [install the CLI and connect Tempo Wallet](/docs/cli/wallet#download-the-tempo-wallet-cli). Confirm the wallet's network and balance with `tempo wallet whoami`; paid requests use real funds unless the service and wallet are explicitly configured for testnet.
 
-```bash
-curl -fsSL https://tempo.xyz/install | bash
-```
+:::::steps
 
-### Log in to Tempo Wallet
+<span id="discover-mpp-services" />
 
-```bash
-tempo wallet login
-tempo wallet whoami
-```
+### Find a service
 
-`login` opens a browser flow that creates or connects a Tempo wallet. `whoami` confirms readiness and prints your address and balances.
-
-:::tip
-If your balance is zero, run `tempo wallet fund` before making requests.
-:::
-
-### Discover MPP services
+Search by task, then inspect a service's endpoint, HTTP method, and request schema:
 
 ```bash
-tempo wallet services --search ai
+tempo wallet services --search image
 tempo wallet services <SERVICE_ID>
 ```
 
-The service directory shows endpoint URLs, HTTP methods, pricing, and request schemas — everything you need to construct a valid request.
+<span id="preview-the-mpp-request-cost" />
 
-For MCP-capable agents, see [Discover MPP services](/docs/guide/machine-payments/discover-services) to connect the read-only services MCP server at `https://mpp.dev/mcp/services`.
+### Preview the request cost
 
-### Preview the MPP request cost
+The following example uses an image-generation endpoint. Check the service details for current models, schemas, and availability before running it.
 
 ```bash
 tempo request --dry-run -X POST \
@@ -50,9 +40,13 @@ tempo request --dry-run -X POST \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
 ```
 
-`--dry-run` validates the request and shows the payment cost without spending.
+`--dry-run` requests the payment terms without paying.
 
-### Make an MPP paid request
+<span id="make-an-mpp-paid-request" />
+
+### Pay for the request
+
+After reviewing the price, run the request:
 
 ```bash
 tempo request -X POST \
@@ -60,53 +54,19 @@ tempo request -X POST \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
 ```
 
-`tempo request` sends the request, intercepts the `402` challenge, signs and submits the payment, and retries with the credential — all in one command.
+Use [`--max-spend`](/docs/cli/request#tempo-request-flags) to cap payment spending for the command. Check the service response for the result or job ID.
 
-::::
+:::::
 
 ## Set up an AI agent
 
-Paste this into your agent to install Tempo's wallet and request skills:
+Follow [Use Tempo Wallet CLI with agents](/docs/wallet/use-with-agents) for skills, machine-readable output, and spending controls. If you are integrating your own agent account, start with [Give an agent access](/docs/accounts/agents).
 
-:::code-group
-```txt [Claude Code]
-Read https://tempo.xyz/SKILL.md and set up tempo
-```
-```txt [Amp]
-Read https://tempo.xyz/SKILL.md and set up tempo
-```
-```txt [Codex]
-Read https://tempo.xyz/SKILL.md and set up tempo
-```
-:::
+<span id="next-steps-for-agentic-payments" />
 
-Once installed, the agent can discover services, preview costs, and make paid requests within scoped spending limits.
+## Continue with paid requests
 
-## Next steps for agentic payments
-
-<Cards>
-  <Card
-    icon="lucide:search"
-    title="Discover MPP services"
-    description="Connect agents to the mpp.dev catalog over MCP"
-    to="/docs/guide/machine-payments/discover-services"
-  />
-  <Card
-    icon="lucide:server"
-    title="Server quickstart"
-    description="Add payment gating to your HTTP endpoints"
-    to="/docs/guide/machine-payments/server"
-  />
-  <Card
-    icon="lucide:wallet"
-    title="CLI reference"
-    description="Complete tempo wallet and tempo request command reference"
-    to="/docs/cli/wallet"
-  />
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Charge per request with on-chain settlement"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-</Cards>
+- [Find services](/docs/guide/machine-payments/discover-services) covers the catalog API and read-only discovery MCP server.
+- [Tempo Wallet CLI](/docs/cli/wallet) covers funding, access keys, and payment sessions.
+- [`tempo request`](/docs/cli/request) lists request flags.
+- [Accept payments for an API](/docs/guide/machine-payments/server) covers the service side.

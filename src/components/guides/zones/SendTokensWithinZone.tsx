@@ -1,9 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, type Hex, parseUnits } from 'viem'
-import { Actions, tempoActions } from 'viem/tempo'
-import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
+import { type Hex, parseUnits } from 'viem'
 import { useConnection, useConnectorClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -13,6 +11,7 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
+import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone-sandbox-sdk'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { ousd } from '../tokens'
@@ -76,19 +75,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_ID),
+            chain: Zone.a,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
               getZoneRpcTransportConfig(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
 
   const zoneAuthorization = useZoneAuthorization({
     address,
-    chainId: zoneModerato(ZONE_ID).id,
+    chainId: Zone.a.id,
+    zoneId: ZONE_ID,
     queryKey: ['guide-private-zones-send-auth', address, ZONE_ID],
     zoneClient,
   })
@@ -177,7 +177,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       const { receipt } = await Actions.token.transferSync(zoneClient as never, {
         account: rootWebAuthnAccount,
         amount: TRANSFER_AMOUNT,
-        chain: zoneModerato(ZONE_ID) as never,
+        chain: Zone.a as never,
         feeToken: ousd,
         to: FAKE_RECIPIENT as Hex,
         token: ousd,

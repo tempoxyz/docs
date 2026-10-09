@@ -11,9 +11,11 @@ export default defineConfig({
   workers: isCI ? 2 : undefined,
   maxFailures: isCI ? 1 : undefined,
   timeout: 180000, // 3 min default timeout for testnet transactions
-  reporter: 'html',
+  reporter: isCI ? [['list'], ['html', { open: 'never' }]] : 'html',
   use: {
     baseURL: webServerUrl,
+    actionTimeout: 15000,
+    navigationTimeout: 30000,
     ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
   },

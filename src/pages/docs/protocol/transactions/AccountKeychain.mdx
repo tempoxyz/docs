@@ -3,6 +3,12 @@ title: Account Keychain Precompile
 description: Technical specification for the Account Keychain precompile managing access keys with expiry timestamps, spending limits, and call-scope restrictions.
 ---
 
+import { Badge } from '../../../../components/Badge'
+
+<div className="docs-specification-meta">
+  <a href="/docs/protocol"><Badge>Specification</Badge></a>
+</div>
+
 # Account Keychain Precompile
 
 **Address:** `0xAAAAAAAA00000000000000000000000000000000`
@@ -11,7 +17,7 @@ description: Technical specification for the Account Keychain precompile managin
 
 The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) and admin access keys to provision secondary keys. Limited access keys can have expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
 
-`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access-key-signed transactions cannot create contracts; use a Root Key for deployment flows.
+`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access keys cannot submit transaction-level contract-creation calls (`to` omitted). Calls to permitted factory contracts can still create contracts internally.
 
 See [gas parameters](/docs/protocol/fees/spec-fee#gas-parameters) for calldata requirements and gas charges.
 
@@ -29,31 +35,31 @@ Access Keys are secondary signing keys authorized by an account's Root Key or an
 - **Spending Limits**: Per-TIP20 token limits that deplete as tokens are spent
   - Limits are one-time (`period = 0`) or recurring (`period > 0`, in seconds). Recurring limits roll over to `max` when `current_timestamp >= periodEnd`.
   - Limits can be updated by the Root Key or an active admin access key via `updateSpendingLimit()`. An update resets `remaining` and `max` to `newLimit` but preserves the configured `period` and current `periodEnd`.
-  - Spending limits only apply to TIP20 `transfer()`, `transferWithMemo()`, and `approve()` calls
-  - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls, not contract calls)
+  - Spending limits cover direct TIP-20 transfers, increases in approvals, fee payments by the account, and token pulls by approved protocol precompiles. T12 also charges `burnAt` when it burns the transaction originator's tokens.
+  - Direct token-call enforcement applies when `msg.sender == tx.origin`; protocol fee and implicit-approval paths enforce their own checks against the account.
   - Native value transfers and `transferFrom()` are NOT limited
 - **Call Scopes**: An Access Key is either unrestricted (`allowAnyCalls = true`) or restricted to an explicit allowlist of `(target, selector, recipients)` tuples. An empty allowlist with `allowAnyCalls = false` means scoped deny-all.
-- **No Contract Creation**: Access-key-signed transactions cannot perform `CREATE` or `CREATE2`, including via factory contracts. Use a Root Key for deployments.
+- **No transaction-level creation**: An access-key transaction cannot include a creation call (`TxKind::Create`). This does not prohibit `CREATE` or `CREATE2` inside a permitted factory call.
 - **Privilege Restrictions**: Limited access keys cannot authorize new keys or modify their own limits or scopes. Admin access keys can manage keys, but cannot carry spending limits, call scopes, or expiry.
 
 ### Authorization Hierarchy
 
 The protocol enforces a strict hierarchy at validation time:
 
-1. **Root Key**: The account's main key (derived from the account address)
+1. **Root Key**: The account's original signing authority; its public key determines the account address
    - Can call all precompile functions, including the key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
    - Has no spending limits or call-scope restrictions
 
 2. **Admin Access Keys**: Secondary authorized keys for account administration
    - Can call key-management mutators, including `authorizeKey`, `authorizeAdminKey`, and `revokeKey`
    - Cannot carry spending limits, call scopes, or expiry
-   - Cannot create contracts
+   - Cannot submit transaction-level creation calls
 
 3. **Limited Access Keys**: Secondary authorized keys for scoped transactions
-   - Cannot call mutable precompile functions (only view functions are allowed)
+   - Cannot call Account Keychain mutators (only its view functions are allowed)
    - Subject to per-TIP20 token spending limits
    - Subject to call-scope checks during execution
-   - Cannot create contracts
+   - Cannot submit transaction-level creation calls
    - Can have expiry timestamps
 
 ## Storage
@@ -310,7 +316,7 @@ Limited access keys cannot escalate their own privileges because:
 - Spending limits are enforced by the protocol internally calling `verify_and_update_spending()` during execution
 - Limits are per-TIP20 token and deplete as TIP20 tokens are spent
 - Recurring limits (`period > 0`) roll over to `max` when `current_timestamp >= periodEnd`. Callers can observe rollover state via `getRemainingLimitWithPeriod(...)`.
-- Spending limits only track TIP20 token transfers (via `transfer` and `transferWithMemo`) and approvals (via `approve`)
+- Limits track direct TIP-20 transfers and approval increases, account-paid fees, and token pulls by approved protocol precompiles. T12 adds same-origin `burnAt` accounting.
 - For approvals: only increases in approval amount count against the spending limit. This means approvals indirectly control `transferFrom` spending, since `transferFrom` requires a prior approval
 - Non-TIP20 asset movements (ETH, NFTs) are not subject to spending limits
 - Root keys (`keyId == address(0)`) have no spending limits - the function returns immediately
@@ -321,7 +327,7 @@ Limited access keys cannot escalate their own privileges because:
 
 - Call-scope checks run on top-level calls signed by an Access Key.
 - If a key is scoped and a call does not match the stored target, selector, and recipient rules, execution reverts with `CallNotAllowed`.
-- Access-key-signed transactions cannot create contracts in any configuration — including direct `CREATE`, factory `CREATE`, and internal `CREATE2`. Only Root-Key-signed transactions may perform contract creation.
+- Access-key-signed transactions cannot contain transaction-level creation calls. Internal `CREATE` and `CREATE2` remain possible when an allowed target invokes them; call scopes constrain top-level targets and do not sandbox a factory's internals.
 
 ### Key Expiry
 

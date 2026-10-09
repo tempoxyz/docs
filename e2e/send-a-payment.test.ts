@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { getDemoStep } from './helpers'
 
-test('send a payment', async ({ page }) => {
+test('send a payment from the quickstart', async ({ page }) => {
   test.setTimeout(120000)
 
   // Set up virtual authenticator via CDP
@@ -17,7 +17,7 @@ test('send a payment', async ({ page }) => {
     },
   })
 
-  await page.goto('/docs/guide/payments/send-a-payment')
+  await page.goto('/get-started/quickstart')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

@@ -10,19 +10,18 @@ Use the Tempo API Typed Client for endpoint autocomplete and full end-to-end typ
 
 ## Install Tempo API package
 
-Install the [`tapimo`](https://www.npmjs.com/package/tapimo) package with your package manager.
+Install [`tapimo`](https://www.npmjs.com/package/tapimo) with pnpm. Release `0.18.2` needs the following dependency override because `accounts@0.18.5` was published with unresolved workspace dependencies.
 
-:::code-group
-```bash [npm]
-npm install tapimo
+Merge this entry into `pnpm-workspace.yaml` before installing:
+
+```yaml [pnpm-workspace.yaml]
+overrides:
+  'tapimo>accounts': 0.18.4
 ```
-```bash [pnpm]
-pnpm add tapimo
+
+```bash
+pnpm add --save-exact tapimo@0.18.2
 ```
-```bash [bun]
-bun add tapimo
-```
-:::
 
 ## Create typed Tempo API client
 
@@ -32,12 +31,7 @@ Create a Tempo API client with `Client.create`.
 import { Client } from 'tapimo'
 
 const client = Client.create({
-  // API key sugar for the canonical `tempo-api-key` header.
-  apiKey: 'tempo_api_key',
-  // Override the API URL. Defaults to `Client.defaultUrl`.
-  url: 'https://api.tempo.xyz',
-  // Or pass custom headers directly.
-  headers: { authorization: 'Bearer tempo_api_key' },
+  apiKey: process.env.TEMPO_API_KEY,
 })
 ```
 
@@ -68,7 +62,7 @@ if (response.status !== 200) {
     //         ^?
   } else if (response.status === 402) {
     // Handle the payment challenge from `WWW-Authenticate`
-    const challenge = await response.text()
+    const challenge = response.headers.get('WWW-Authenticate')
     //    ^?
   } else {
     // Handle validation, auth, rate-limit, or upstream errors
@@ -79,7 +73,7 @@ if (response.status !== 200) {
   throw new Error('Request failed')
 }
 
-// Request is successfull
+// Request succeeded
 response.status // Response is narrowed to 200
 //       ^?
 // Get typed response body
@@ -107,7 +101,7 @@ const response2 = await client.v1.transactions.
 
 ## Call Tempo JSON-RPC through Typed Client
 
-The Typed Client exposes the raw JSON-RPC passthrough as a typed route under `client.rpc`. The route key includes Hono's path pattern because the chain selector is optional:
+The Typed Client exposes the raw JSON-RPC passthrough as a typed route under `client.rpc`. The route key includes Hono's path pattern. Select `mainnet`, `testnet`, or a numeric chain ID:
 
 ```ts twoslash [rpc.ts]
 // @noErrors
@@ -115,8 +109,7 @@ import { Client } from 'tapimo'
 
 const client = Client.create()
 
-const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
-  // Use `undefined` for `/rpc`, or pass `mainnet`, `testnet`, or a numeric chain id.
+const response = await client.rpc[':chain{(mainnet|testnet|[0-9]+)}'].$post({
   param: { chain: 'testnet' },
   json: {
     jsonrpc: '2.0',
@@ -127,22 +120,22 @@ const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
 })
 
 if (response.status !== 200) {
-  const error = await response.json()
-  throw new Error(error.error.message)
+  throw new Error(`RPC request failed: HTTP ${response.status}`)
 }
 
 const body = await response.json()
-if (!Array.isArray(body) && body.error)
-  throw new Error(body.error.message)
+if (body === null || Array.isArray(body))
+  throw new Error('Expected one JSON-RPC response')
+if ('error' in body) throw new Error(body.error.message)
 
-const blockNumber = Array.isArray(body) ? body[0]?.result : body.result
+const blockNumber = body.result
 ```
 
 Chain selectors map to these hosted endpoints:
 
 | `chain` value | Hosted RPC path |
 | --- | --- |
-| `undefined` | `https://api.tempo.xyz/rpc` |
+| No selector (`client.rpc.$post`) | `https://api.tempo.xyz/rpc` |
 | `'mainnet'` | `https://api.tempo.xyz/rpc/mainnet` |
 | `'testnet'` | `https://api.tempo.xyz/rpc/testnet` |
 | `'4217'` | `https://api.tempo.xyz/rpc/4217` |
@@ -157,8 +150,8 @@ import { Client } from 'tapimo'
 
 const client = Client.create()
 
-const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
-  param: { chain: undefined },
+const response = await client.rpc[':chain{(mainnet|testnet|[0-9]+)}'].$post({
+  param: { chain: 'mainnet' },
   json: [
     { jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] },
     { jsonrpc: '2.0', id: 2, method: 'eth_blockNumber', params: [] },

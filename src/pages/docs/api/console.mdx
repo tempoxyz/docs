@@ -1,17 +1,20 @@
 ---
-title: "Using the Tempo API Console"
-seoTitle: "How to Use the Tempo API Console | Docs"
-description: Use Tempo API Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.
+title: "Tempo Console"
+seoTitle: "How to Use the Tempo Console | Docs"
+description: Use Tempo Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.
 ---
 
 import { Card, Cards } from 'vocs'
 
-# Using the Tempo API Console
+<span id="using-the-tempo-api-console" />
+<span id="using-the-tempo-console" />
 
-[Tempo API Console](https://console.tempo.xyz) is the control UI for your Tempo API account. Use it to organize integrations, issue credentials, monitor API usage and sponsored transactions, configure billing, and manage access to your organization.
+# Tempo Console
+
+[Tempo Console](https://console.tempo.xyz) is the control UI for your Tempo API account. Use it to organize integrations, issue credentials, monitor API usage and sponsored transactions, configure billing, and manage access to your organization.
 
 :::info
-Access to Tempo API Console is currently invite-only. [Contact us](https://tempo.xyz/contact/) to request access.
+Access to Tempo Console is currently invite-only. [Contact us](https://tempo.xyz/contact/) to request access.
 :::
 
 ## How the console is organized
@@ -29,7 +32,9 @@ Most console pages show information across the organization. Use the project fil
 
 :::::steps
 
-### Sign in to Tempo API Console
+<span id="sign-in-to-tempo-api-console" />
+
+### Sign in to Tempo Console
 
 Open [console.tempo.xyz](https://console.tempo.xyz/?to=/:org/projects) and sign in. If you have access to more than one organization, choose the organization you want to configure from the organization menu.
 
@@ -43,7 +48,7 @@ Projects hold API keys and provide an attribution boundary for usage. Create sep
 
 Open the organization menu and select [**Switch to sandbox**](https://console.tempo.xyz/?to=/:org/projects%3Fenv%3Dsandbox). The amber banner confirms that the console is showing sandbox state.
 
-Sandbox API keys are restricted to non-mainnet chains and default to testnet. Production and sandbox credentials, usage, and billing state are separate.
+Sandbox API keys are restricted to non-mainnet chains. Pass `chainId=testnet` explicitly. Production and sandbox credentials, usage, and billing state are separate.
 
 ### Create an API key
 
@@ -66,7 +71,7 @@ curl 'https://api.tempo.xyz/v1/blocks' \
   --header 'Authorization: Bearer tempo_sandbox:sk:...'
 ```
 
-A sandbox key automatically targets testnet when the request does not specify `chainId`. See [API authentication](/docs/api/authentication) for other headers and chain-selection behavior.
+A sandbox key requires a non-mainnet selector, such as `chainId=testnet`; omitting it targets mainnet and returns `403`. See [API authentication](/docs/api/authentication) for other headers and chain-selection behavior.
 
 ### Review usage
 

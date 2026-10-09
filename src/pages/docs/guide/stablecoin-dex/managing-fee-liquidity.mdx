@@ -1,5 +1,5 @@
 ---
-title: Managing Fee Liquidity
+title: Provide fee liquidity
 description: Add and remove liquidity in the Fee AMM to enable stablecoin fee conversions. Monitor pools, check LP balances, and rebalance reserves.
 interactive: true
 ---
@@ -13,9 +13,11 @@ import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { CreateOrLoadToken } from '../../../../components/guides/steps/issuance/CreateOrLoadToken.tsx'
 import { MintFeeAmmLiquidity } from '../../../../components/guides/steps/amm/MintFeeAmmLiquidity.tsx'
 
-# Managing Fee Liquidity
+<span id="managing-fee-liquidity" />
 
-The Fee AMM converts transaction fees between stablecoins when users pay in a different token than the validator prefers. This guide shows you how to add and remove liquidity to enable fee conversions.
+# Provide fee liquidity
+
+The Fee AMM converts transaction fees between stablecoins when users pay in a different token than the validator prefers. Add liquidity to support those fee conversions, then monitor reserves and your LP balance. To convert account funds instead, use [Swap stablecoins](/docs/guide/stablecoin-dex/executing-swaps).
 
 The Fee AMM also supports [multihop FeeAMM routing](https://tips.sh/1033): one fee conversion can route through two pools when a direct pair between the user's fee token and the validator's payout token doesn't exist or has insufficient liquidity. The pool mechanics for adding and removing liquidity are the same either way, but a single conversion may reserve and consume liquidity from two pools you provide to instead of one.
 
@@ -29,6 +31,8 @@ Browse current pool reserves and route availability in the [FeeAMM explorer view
   <CheckFeeAmmPool stepNumber={5} />
   <BurnFeeAmmLiquidity stepNumber={6} last />
 </Demo.Container>
+
+The examples use AlphaUSD and BetaUSD on Moderato testnet.
 
 ## Fee liquidity management steps
 
@@ -65,16 +69,16 @@ function ManageFeeLiquidity() {
 
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
-import { tempo } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
-  chains: [tempo],
+  chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -83,7 +87,7 @@ export const config = createConfig({
 
 ### Add liquidity
 
-Add validator token to the pool to receive LP tokens representing your share. The first liquidity provider to a new pool must burn 1,000 units of liquidity. This costs approximately 0.002 USD and prevents attacks on pool reserves. Learn more in the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm).
+Add validator tokens to receive liquidity shares tracked by the Fee AMM; these are not separate ERC-20 tokens. The first liquidity provider to a new pool must burn 1,000 units of liquidity. This costs approximately 0.002 USD and prevents attacks on pool reserves. Learn more in the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm).
 
 :::code-group
 
@@ -129,16 +133,16 @@ function ManageFeeLiquidity() {
 
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
-import { tempo } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
-  chains: [tempo],
+  chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -200,16 +204,16 @@ function ManageFeeLiquidity() {
 
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
-import { tempo } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
-  chains: [tempo],
+  chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -283,16 +287,16 @@ function ManageFeeLiquidity() {
 
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
-import { tempo } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
-  chains: [tempo],
+  chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -305,60 +309,50 @@ export const config = createConfig({
 
 ### Monitor pool utilization
 
-Track fee swap activity to understand pool utilization and revenue.
+Refresh pool reserves to monitor the funds available for fee conversions. Reserve changes also reflect rebalancing and liquidity deposits or withdrawals; they do not measure your earnings.
 
 :::code-group
 
-```tsx twoslash [MonitorSwaps.tsx]
-// @noErrors
-import * as React from 'react'
+```tsx [MonitorPool.tsx]
 import { Hooks } from 'wagmi/tempo'
 import { formatUnits } from 'viem'
 
 const userToken = '0x20c0000000000000000000000000000000000002' // BetaUSD
 const validatorToken = '0x20c0000000000000000000000000000000000001' // AlphaUSD
 
-function MonitorSwaps() {
-  const [swaps, setSwaps] = React.useState<any[]>([])
+function MonitorPool() {
+  const { data: pool, error } = Hooks.amm.usePool({
+    userToken,
+    validatorToken,
+    query: { refetchInterval: 10_000 },
+  })
 
-  Hooks.amm.useWatchFeeSwap({ // [!code hl]
-    userToken, // [!code hl]
-    validatorToken, // [!code hl]
-    onLogs(logs) { // [!code hl]
-      for (const log of logs) { // [!code hl]
-        setSwaps((prev) => [...prev, { // [!code hl]
-          amountIn: formatUnits(log.args.amountIn, 6), // [!code hl]
-          amountOut: formatUnits(log.args.amountOut, 6), // [!code hl]
-          revenue: formatUnits(log.args.amountIn * 30n / 10000n, 6), // [!code hl]
-        }]) // [!code hl]
-      } // [!code hl]
-    }, // [!code hl]
-  }) // [!code hl]
+  if (error) return <div>{error.message}</div>
+  if (!pool) return <div>Loading reserves…</div>
 
   return (
-    <div>
-      {swaps.map((swap, i) => (
-        <div key={i}>
-          Swap: {swap.amountIn} → {swap.amountOut} (LP revenue: {swap.revenue})
-        </div>
-      ))}
-    </div>
+    <dl>
+      <dt>BetaUSD reserve</dt>
+      <dd>{formatUnits(pool.reserveUserToken, 6)}</dd>
+      <dt>AlphaUSD reserve</dt>
+      <dd>{formatUnits(pool.reserveValidatorToken, 6)}</dd>
+    </dl>
   )
 }
 ```
 
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
-import { tempo } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
-  chains: [tempo],
+  chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```
@@ -396,7 +390,7 @@ function RebalancePool() {
       <div>Validator token reserves: {formatUnits(pool?.reserveValidatorToken ?? 0n, 6)}</div>
       <button type="button" onClick={() => { // [!code hl]
         if (!address || !pool) return // [!code hl]
-        // Swap validator token for user token at 0.9985 rate // [!code hl]
+        // Pay approximately 0.9985 validator tokens per user token received // [!code hl]
         rebalance.mutate({ // [!code hl]
           userToken, // [!code hl]
           validatorToken, // [!code hl]
@@ -413,16 +407,16 @@ function RebalancePool() {
 
 ```ts twoslash [wagmi.config.ts]
 // @noErrors
-import { tempo } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
-  chains: [tempo],
+  chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [tempo.id]: http(),
+    [tempoModerato.id]: http(),
   },
 })
 ```

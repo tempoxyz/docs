@@ -1,13 +1,15 @@
 ---
-title: Discover MPP services
+title: "Find services"
 description: Find paid APIs your agents can call with MPP using the mpp.dev directory, public catalog API, and read-only MCP server.
 ---
 
 import { Card, Cards } from 'vocs'
 
-# Discover MPP services
+<span id="discover-mpp-services" />
 
-MPP service discovery helps agents find paid APIs before they make a request. Use it to rank services for a task, compare payment offers, inspect endpoint metadata, and build the next HTTP request.
+# Find services
+
+Find an MPP service, inspect its endpoint and request schema, then make a paid request. Use the directory for browsing, the catalog API for scripts, or MCP for an agent.
 
 Discovery is advisory. The runtime `402 Payment Required` challenge from the target service is always the authoritative source of current payment terms.
 
@@ -42,7 +44,7 @@ codex mcp add mpp-services --url https://mpp.dev/mcp/services
 ```
 
 ```bash [Amp]
-amp mcp add --transport http mpp-services https://mpp.dev/mcp/services
+amp mcp add mpp-services https://mpp.dev/mcp/services
 ```
 
 ```json [Cursor]
@@ -76,7 +78,8 @@ Use the MCP Inspector when you want to verify the server from the same environme
 npx -y @modelcontextprotocol/inspector \
   --cli \
   --transport http \
-  --server-url https://mpp.dev/mcp/services
+  --server-url https://mpp.dev/mcp/services \
+  --method tools/list
 ```
 
 You can also smoke test with plain JSON-RPC:
@@ -247,14 +250,14 @@ tool call you would make before constructing the HTTP request.
 
 Use the web directory when a human is exploring the catalog. Use the public API when you are building your own service browser, CLI, or analytics job. Use the MCP server when an agent needs tool-callable discovery inside its planning loop.
 
-For execution, call services directly with [`tempo request`](/docs/cli/request), the [MPP client quickstart](/docs/guide/machine-payments/client), or another MPP-capable client. Discovery narrows the choice; the service's runtime `402` challenge confirms the exact payment terms.
+For execution, call services directly with [`tempo request`](/docs/cli/request), the [Pay for services](/docs/guide/machine-payments/client), or another MPP-capable client. Discovery narrows the choice; the service's runtime `402` challenge confirms the exact payment terms.
 
 ## Next steps for MPP service discovery
 
 <Cards>
   <Card
     icon="lucide:bot"
-    title="Agent quickstart"
+    title="Pay with the CLI"
     description="Use the Tempo CLI to discover services, preview costs, and make paid requests"
     to="/docs/guide/machine-payments/agent"
   />

@@ -1,7 +1,7 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { type Address, pad, parseUnits, stringToHex } from 'viem'
+import { type Address, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
@@ -56,7 +56,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
       amount: parseUnits('100', metadata.decimals),
       to: recipient || address,
       token: tokenAddress,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
       feeToken: alphaUsd,
     })
   }

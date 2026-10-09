@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { fromHex, isAddress, pad, parseUnits, stringToHex } from 'viem'
+import { fromHex, isAddress, parseUnits, toHex } from 'viem'
 import { Abis } from 'viem/tempo'
 import { useConnection, useConnectionEffect, useWatchContractEvent } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
@@ -75,7 +75,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
     }
     const byteLength = new TextEncoder().encode(value).length
     if (byteLength > 32) {
-      return `${byteLength - 32} characters too long`
+      return 'Memo must fit in 32 UTF-8 bytes'
     }
     return null
   }
@@ -96,7 +96,7 @@ export function SendPaymentWithMemo(props: DemoStepProps) {
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
       token: alphaUsd,
-      memo: pad(stringToHex(memo), { size: 32 }),
+      memo: toHex(memo, { size: 32 }),
     })
   }
 

@@ -45,7 +45,7 @@ This role is administered by the `DEFAULT_ADMIN_ROLE` (same as other TIP-20 role
 /// @notice Emitted when tokens are burned from any account.
 /// @param from The address from which tokens were burned.
 /// @param amount The amount of tokens burned.
-event BurnAt(address indexed from, uint256 amount);
+event BurnAt(address indexed burner, address indexed from, uint256 indexed amount);
 ```
 
 ### New Function
@@ -64,13 +64,19 @@ function burnAt(address from, uint256 amount) external;
 2. **Protected Addresses**: Reverts with `ProtectedAddress` if `from` is:
    - `TIP_FEE_MANAGER_ADDRESS` (0xfeEC000000000000000000000000000000000000)
    - `STABLECOIN_DEX_ADDRESS` (0xDEc0000000000000000000000000000000000000)
+   - The token contract itself
+   - `TIP20ChannelReserve` (0x4D50500000000000000000000000000000000000)
+   - `ReceivePolicyGuard` (0xB10C000000000000000000000000000000000000)
+   - Any address with the Zone prefix
 3. **Balance Check**: Reverts with `InsufficientBalance` if `from` has insufficient balance
 4. **No Policy Check**: Unlike `burnBlocked`, this function does NOT check transfer policy authorization
 5. **State Changes**:
    - Decrements `balanceOf[from]` by `amount`
    - Decrements `_totalSupply` by `amount`
-   - Updates reward accounting if `from` is opted into rewards
-6. **Events**: Emits `Transfer(from, address(0), amount)` and `BurnAt(from, amount)`
+   - Does not update the retired token-reward accounting
+6. **Events**: Emits `Transfer(from, address(0), amount)` and `BurnAt(msg.sender, from, amount)`
+
+The token must be unpaused. A zero amount is valid. When `from == tx.origin`, the burn also consumes the active access key's spending limit. These rules correspond to the T12 implementation; consult the [T12 activation schedule](/docs/protocol/upgrades/t12) before using `burnAt`.
 
 #### Interface Addition
 
@@ -114,4 +120,4 @@ The test suite must verify:
 6. Successful burn from policy-authorized address (differs from `burnBlocked`, which reverts)
 7. Revert on insufficient balance
 8. Correct event emissions (`Transfer` and `BurnAt`)
-9. Correct reward accounting updates (pending rewards accrued before burn, `rewardBalance` remains claimable)
+9. Revert while paused and enforce access-key spending limits when burning from the transaction originator

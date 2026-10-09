@@ -48,23 +48,23 @@ function place(
 
 **Example: Place a bid to buy 1000 USDG at $0.9990**
 ```solidity
-// tick = (0.9990 - 1) * 100_000 = -10
+// tick = (0.9990 - 1) * 100_000 = -100
 uint128 orderId = exchange.place(
     USDG_ADDRESS,
     1000e6,      // Amount: 1000 USDG
     true,        // isBid: buying USDG
-    -10          // tick: price = $0.9990
+    -100         // tick: price = $0.9990
 );
 ```
 
 **Example: Place an ask to sell 1000 USDG at $1.0010**
 ```solidity
-// tick = (1.0010 - 1) * 100_000 = 10
+// tick = (1.0010 - 1) * 100_000 = 100
 uint128 orderId = exchange.place(
     USDG_ADDRESS,
     1000e6,      // Amount: 1000 USDG
     false,       // isBid: selling USDG
-    10           // tick: price = $1.0010
+    100          // tick: price = $1.0010
 );
 ```
 
@@ -98,8 +98,8 @@ uint128 orderId = exchange.placeFlip(
     USDG_ADDRESS,
     1000e6,      // Amount: 1000 USDG
     true,        // isBid: start as a buy order
-    -10,         // tick: buy at $0.9990
-    10           // flipTick: sell at $1.0010 after filled
+    -100,        // tick: buy at $0.9990
+    100          // flipTick: sell at $1.0010 after filled
 );
 ```
 
@@ -107,7 +107,7 @@ When this order is completely filled:
 1. You buy 1000 USDG at $0.9990
 2. The same order ID automatically rests as an ask for 1000 USDG at $1.0010 and emits `OrderFlipped`
 3. When that fills, it flips back to a bid at $0.9990
-4. This continues indefinitely, earning the spread each time
+4. The order can continue flipping while liquidity and transfer policies permit. A failed flip does not create the opposite order.
 
 :::info
 Flip orders act like a liquidity pool position, automatically providing liquidity on both sides of the market as they're filled back and forth.

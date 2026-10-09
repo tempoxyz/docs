@@ -1,7 +1,7 @@
 ---
-title: "Executing swaps on the Tempo Stablecoin DEX"
-seoTitle: "How to Execute Swaps on the DEX | Docs"
-description: Learn to execute instant stablecoin swaps on Tempo's DEX. Get price quotes, set slippage protection, and batch approvals with swaps.
+title: Swap stablecoins
+seoTitle: "Swap stablecoins | Tempo Docs"
+description: Quote a Stablecoin DEX swap, set slippage protection, and submit the transaction on Tempo.
 interactive: true
 ---
 
@@ -11,11 +11,11 @@ import { AddFunds } from '../../../../components/guides/steps/payments/AddFunds.
 import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { MakeSwaps } from '../../../../components/guides/steps/exchange/MakeSwaps.tsx'
 
-# Executing swaps on the Tempo Stablecoin DEX
+<span id="executing-swaps-on-the-tempo-stablecoin-dex" />
 
-Execute swaps between stablecoins on the exchange. Swaps execute immediately against existing orders in the orderbook, providing instant liquidity for cross-stablecoin payments.
+# Swap stablecoins
 
-By the end of this guide you will be able to execute swaps, get price quotes, and manage slippage protection.
+Swap stablecoins against existing orders in the Stablecoin DEX orderbook. Get a quote and set a slippage limit before submitting the transaction. The examples use AlphaUSD and BetaUSD on Moderato testnet.
 
 <Demo.Container name="Execute a Swap" footerVariant="source" src="tempoxyz/examples/tree/main/examples/exchange">
   <Connect stepNumber={1} />
@@ -31,6 +31,9 @@ By the end of this guide you will be able to execute swaps, get price quotes, an
 ### Set up your swap client
 
 Ensure that you have set up your client by following the [guide](/docs/sdk/typescript).
+
+<span id="stablecoin-swap-best-practices" />
+<span id="always-get-quotes-before-swapping" />
 
 ### Get a price quote
 
@@ -50,11 +53,14 @@ function Buy() {
   const amount = parseUnits('10', 6)
 
   // How much AlphaUSD do I need to spend to receive 10 BetaUSD? // [!code hl]
-  const { data: quote } = Hooks.dex.useBuyQuote({ // [!code hl]
+  const { data: quote, error } = Hooks.dex.useBuyQuote({ // [!code hl]
     tokenIn: alphaUsd, // [!code hl]
     tokenOut: betaUsd, // [!code hl]
     amountOut: amount, // [!code hl]
   }) // [!code hl]
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return <div>Quote: {formatUnits(quote, 6)}</div>
 }
@@ -72,17 +78,22 @@ function Sell() {
   const amount = parseUnits('10', 6)
 
   // How much BetaUSD will I receive for 10 AlphaUSD? // [!code hl]
-  const { data: quote } = Hooks.dex.useSellQuote({ // [!code hl]
+  const { data: quote, error } = Hooks.dex.useSellQuote({ // [!code hl]
     tokenIn: alphaUsd, // [!code hl]
     tokenOut: betaUsd, // [!code hl]
     amountIn: amount, // [!code hl]
   }) // [!code hl]
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return <div>Quote: {formatUnits(quote, 6)}</div>
 }
 ```
 
 :::
+
+<span id="set-appropriate-slippage-protection" />
 
 ### Calculate slippage tolerance
 
@@ -102,17 +113,20 @@ function Buy() {
   const amount = parseUnits('10', 6)
 
   // How much AlphaUSD do I need to spend to receive 10 BetaUSD?
-  const { data: quote } = Hooks.dex.useBuyQuote({
+  const { data: quote, error } = Hooks.dex.useBuyQuote({
     tokenIn: alphaUsd,
     tokenOut: betaUsd,
     amountOut: amount,
   })
 
   // [!code ++] Calculate 0.5% slippage tolerance 
-  const slippageTolerance = 0.005 // [!code ++]
+  const slippageBps = 50n // [!code ++]
   const maxAmountIn = quote // [!code ++]
-    ? quote * BigInt(Math.floor((1 + slippageTolerance) * 1000)) / 1000n // [!code ++]
+    ? (quote * (10_000n + slippageBps) + 9_999n) / 10_000n // [!code ++]
     : 0n // [!code ++]
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return (
     <div>
@@ -135,17 +149,20 @@ function Sell() {
   const amount = parseUnits('10', 6)
 
   // How much BetaUSD will I receive for 10 AlphaUSD?
-  const { data: quote } = Hooks.dex.useSellQuote({
+  const { data: quote, error } = Hooks.dex.useSellQuote({
     tokenIn: alphaUsd,
     tokenOut: betaUsd,
     amountIn: amount,
   })
 
   // [!code ++] Calculate 0.5% slippage tolerance
-  const slippageTolerance = 0.005 // [!code ++]
+  const slippageBps = 50n // [!code ++]
   const minAmountOut = quote // [!code ++]
-    ? quote * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / 1000n // [!code ++]
+    ? quote * (10_000n - slippageBps) / 10_000n // [!code ++]
     : 0n // [!code ++]
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return (
     <div>
@@ -178,25 +195,28 @@ function Buy() {
   const amount = parseUnits('10', 6)
 
   // How much AlphaUSD do I need to spend to receive 10 BetaUSD?
-  const { data: quote } = Hooks.dex.useBuyQuote({
+  const { data: quote, error } = Hooks.dex.useBuyQuote({
     tokenIn: alphaUsd,
     tokenOut: betaUsd,
     amountOut: amount,
   })
 
   // Calculate 0.5% slippage tolerance
-  const slippageTolerance = 0.005
+  const slippageBps = 50n
   const maxAmountIn = quote
-    ? quote * BigInt(Math.floor((1 + slippageTolerance) * 1000)) / 1000n
+    ? (quote * (10_000n + slippageBps) + 9_999n) / 10_000n
     : 0n
 
   const sendCalls = useSendCallsSync() // [!code ++]
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return (
     <div>
       <div>Quote: {formatUnits(quote, 6)}</div>
       <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div>
-      <button type="button" onClick={() => { // [!code ++]
+      <button type="button" disabled={sendCalls.isPending} onClick={() => { // [!code ++]
         const calls = [ // [!code ++]
           Actions.token.approve.call({ // [!code ++]
             amount: maxAmountIn, // Approve the max amount with slippage // [!code ++]
@@ -227,25 +247,28 @@ function Sell() {
   const amount = parseUnits('10', 6)
 
   // How much BetaUSD will I receive for 10 AlphaUSD?
-  const { data: quote } = Hooks.dex.useSellQuote({
+  const { data: quote, error } = Hooks.dex.useSellQuote({
     tokenIn: alphaUsd,
     tokenOut: betaUsd,
     amountIn: amount,
   })
 
   // Calculate 0.5% slippage tolerance
-  const slippageTolerance = 0.005
+  const slippageBps = 50n
   const minAmountOut = quote
-    ? quote * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / 1000n
+    ? quote * (10_000n - slippageBps) / 10_000n
     : 0n
 
   const sendCalls = useSendCallsSync() // [!code ++]
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return (
     <div>
       <div>Quote: {formatUnits(quote, 6)}</div>
       <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div>
-      <button type="button" onClick={() => { // [!code ++]
+      <button type="button" disabled={sendCalls.isPending} onClick={() => { // [!code ++]
         const calls = [ // [!code ++]
           Actions.token.approve.call({ // [!code ++]
             amount, // Approve the exact amount being sold // [!code ++]
@@ -284,25 +307,28 @@ function Buy() {
   const amount = parseUnits('10', 6)
 
   // How much AlphaUSD do I need to spend to receive 10 BetaUSD?
-  const { data: quote } = Hooks.dex.useBuyQuote({
+  const { data: quote, error } = Hooks.dex.useBuyQuote({
     tokenIn: alphaUsd,
     tokenOut: betaUsd,
     amountOut: amount,
   })
 
   // Calculate 0.5% slippage tolerance
-  const slippageTolerance = 0.005
+  const slippageBps = 50n
   const maxAmountIn = quote
-    ? quote * BigInt(Math.floor((1 + slippageTolerance) * 1000)) / 1000n
+    ? (quote * (10_000n + slippageBps) + 9_999n) / 10_000n
     : 0n
 
   const sendCalls = useSendCallsSync()
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return (
     <div>
       <div>Quote: {formatUnits(quote, 6)}</div>
       <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div>
-      <button type="button" onClick={() => {
+      <button type="button" disabled={sendCalls.isPending} onClick={() => {
         const calls = [
           Actions.token.approve.call({
             amount: maxAmountIn, // Approve the max amount with slippage
@@ -339,25 +365,28 @@ function Sell() {
   const amount = parseUnits('10', 6)
 
   // How much BetaUSD will I receive for 10 AlphaUSD?
-  const { data: quote } = Hooks.dex.useSellQuote({
+  const { data: quote, error } = Hooks.dex.useSellQuote({
     tokenIn: alphaUsd,
     tokenOut: betaUsd,
     amountIn: amount,
   })
 
   // Calculate 0.5% slippage tolerance
-  const slippageTolerance = 0.005
+  const slippageBps = 50n
   const minAmountOut = quote
-    ? quote * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / 1000n
+    ? quote * (10_000n - slippageBps) / 10_000n
     : 0n
 
   const sendCalls = useSendCallsSync()
+
+  if (error) return <div>{error.message}</div>
+  if (quote === undefined) return <div>Loading quote…</div>
 
   return (
     <div>
       <div>Quote: {formatUnits(quote, 6)}</div>
       <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div>
-      <button type="button" onClick={() => {
+      <button type="button" disabled={sendCalls.isPending} onClick={() => {
         const calls = [
           Actions.token.approve.call({
             amount, // Approve the exact amount being sold
@@ -415,23 +444,13 @@ function Swap() {
     return <div>Error: {error.message}</div>
   }
 
-  if (!quote) {
+  if (quote === undefined) {
     return <div>Loading quote...</div>
   }
 
   return <div>Quote: {quote.toString()}</div>
 }
 ```
-
-## Stablecoin swap best practices
-
-### Always get quotes before swapping
-
-Query the expected price before executing a swap to ensure you're getting a fair rate and to set appropriate slippage protection.
-
-### Set appropriate slippage protection
-
-Use `minAmountOut` or `maxAmountIn` to protect against unfavorable price movements between quoting and execution.
 
 ## Stablecoin swap learning resources
 
@@ -440,7 +459,7 @@ Use `minAmountOut` or `maxAmountIn` to protect against unfavorable price movemen
     description="Learn about how the Stablecoin DEX interacts with your balances"
     to="/docs/protocol/exchange/exchange-balance"
     icon="lucide:wallet"
-    title="Exchange Balance"
+    title="DEX balances"
   />
   <Card
     description="Learn about the technical details of swap execution"

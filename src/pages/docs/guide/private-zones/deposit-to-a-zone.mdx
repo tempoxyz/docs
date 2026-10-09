@@ -17,7 +17,7 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 # Deposit OUSD to a Tempo Zone on testnet
 
-Deposit tokens from your public Tempo balance into a private Zone. This example uses `OUSD` test tokens and a Zone on Tempo Testnet named **Zone A**. Submit a public-chain deposit first, then wait for the Zone to credit the net amount after fees.
+Deposit `OUSD` test tokens from public Tempo into **Zone A** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). Submit a public-chain deposit first, then wait for the Zone to credit the net amount after fees.
 
 <ZoneDiagram
   name="deposit"
@@ -29,8 +29,6 @@ The deposit is accepted through `ZonePortal` on the public chain. You need priva
 <a id="depositing-pathusd-to-zone-a" />
 
 ## Depositing OUSD to Zone A
-
-By the end of this guide you will have deposited `OUSD` into `Zone A` and confirmed the balance update.
 
 <Demo.Container
   name="Deposit to Zone A"
@@ -52,11 +50,10 @@ On this legacy testnet deployment, use the plaintext flow when revealing the rec
 
 ```ts
 import { parseUnits } from 'viem'
-import { Actions } from 'viem/tempo'
 
 const depositAmount = parseUnits('100', 6)
 
-const { receipt } = await Actions.zone.depositSync(rootClient, {
+const { receipt } = await rootClient.zone.depositSync({
   account: rootClient.account,
   amount: depositAmount,
   token: ousd,
@@ -71,11 +68,10 @@ console.log(receipt.blockNumber)
 
 ```ts
 import { parseUnits } from 'viem'
-import { Actions } from 'viem/tempo'
 
 const depositAmount = parseUnits('100', 6)
 
-const { receipt } = await Actions.zone.encryptedDepositSync(rootClient, { // [!code focus]
+const { receipt } = await rootClient.zone.encryptedDepositSync({ // [!code focus]
   account: rootClient.account,
   amount: depositAmount,
   token: ousd,

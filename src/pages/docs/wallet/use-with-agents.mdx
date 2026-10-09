@@ -5,7 +5,7 @@ description: Connect Tempo Wallet CLI to AI agents for MPP service discovery, pa
 
 # Use Tempo Wallet CLI with Agents
 
-Tempo Wallet CLI uses Tempo Mainnet for balances, funding, transfers, and MPP settlement. Agents should treat OUSD and pathUSD in Tempo Wallet as live mainnet assets, not as testnet faucet tokens, and prefer OUSD for payments.
+Connect an agent to Tempo Wallet to discover services, preview payment terms, and make paid requests. Tempo Wallet uses mainnet for live payments; check the network and balance before authorizing spending.
 
 ## Agent wallet quickstart
 
@@ -27,20 +27,20 @@ codex exec "Read https://tempo.xyz/SKILL.md and set up tempo"
 
 ## Auto-installed Tempo wallet skills
 
-When you run the setup prompt, your agent installs Tempo's built-in skills automatically. No manual skill wiring required.
+The setup configures the wallet and request skills for supported agents:
 
 - `tempo-wallet`: gives your agent wallet-aware capabilities like readiness checks, balances, service discovery, and session/funding actions.
 - `tempo-request`: gives your agent paid HTTP request capabilities with payment preview (`--dry-run`) and execution support.
 
 This works in supported skill-enabled agents including **Claude Code**, **Amp**, **Codex**, and similar environments.
 
-## Tempo Wallet is agent-ready by design
+<span id="tempo-wallet-is-agent-ready-by-design" />
 
-1. **TOON output mode (`-t` / `--toon-output`)** gives compact, machine-readable, token-efficient output so agent tooling can parse command responses reliably.
-2. **Built-in service discovery** (`tempo wallet services`) lets agents search providers, inspect endpoint details, and use verified method/path metadata instead of guessing URLs or payload shapes.
-3. **`--dry-run` payment previews** let agents validate endpoint reachability, request shape, and expected payment cost before committing funds.
-4. **`--max-spend` and scoped access keys** let you enforce budgets per request and per key.
-5. **MPP Credits support** lets agents pay eligible one-time charges from a separate credits balance after checking `tempo wallet -t whoami --credits`.
+## Set command and account spending limits
+
+Use `tempo request --max-spend` to cap the command's payment spending. Account access-key limits apply separately to the signing key; see [Give an agent access](/docs/accounts/agents) for authorization and revocation.
+
+Use `-t` for machine-readable output. Service discovery returns endpoint metadata; `--dry-run` reads the current payment terms without paying. Neither replaces the service's result or error handling.
 
 ## Tempo Wallet agent pattern
 
@@ -63,4 +63,4 @@ tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
 
 ## Troubleshoot agent wallet flows
 
-If agent runs fail, continue with [Troubleshooting](/docs/cli/wallet).
+Check [wallet authentication](/docs/cli/wallet#authenticate-with-tempo-wallet-cli), [funding](/docs/cli/wallet#add-wallet-funds), and the [request flags](/docs/cli/request#tempo-request-flags).

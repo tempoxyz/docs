@@ -30,10 +30,7 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
   })
 
   // Calculate 0.5% slippage tolerance
-  const slippageTolerance = 0.005
-  const maxAmountIn = quote
-    ? (quote * BigInt(Math.floor((1 + slippageTolerance) * 1000))) / 1000n
-    : 0n
+  const maxAmountIn = quote ? (quote * 1005n + 999n) / 1000n : 0n
 
   const sendCalls = useSendCallsSync({
     mutation: {
@@ -69,7 +66,7 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
         <h3 className="font-semibold text-sm">Buy 10 AlphaUSD with BetaUSD</h3>
         <Button
           variant={sendCalls.isSuccess ? 'default' : 'accent'}
-          disabled={!address}
+          disabled={!address || !quote || sendCalls.isPending}
           onClick={() => {
             sendCalls.sendCallsSync({
               calls,

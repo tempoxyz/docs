@@ -1,0 +1,12 @@
+/* Match the GitHub light / dark-dimmed shell palette used by Vocs. */
+.tempo-agent-command-syntax [data-token="command"] {
+  color: light-dark(#6f42c1, #f69d50);
+}
+
+.tempo-agent-command-syntax [data-token="option"] {
+  color: light-dark(#005cc5, #6cb6ff);
+}
+
+.tempo-agent-command-syntax [data-token="argument"] {
+  color: light-dark(#032f62, #96d0ff);
+}

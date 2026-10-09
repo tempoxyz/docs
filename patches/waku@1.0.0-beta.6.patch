@@ -1,0 +1,20 @@
+diff --git a/dist/router/client.js b/dist/router/client.js
+index d5edcaa9c1881a316fb60bea64288de07bf8e99f..35608483c1d3559c07801f151b7484c151ac8a00 100644
+--- a/dist/router/client.js
++++ b/dist/router/client.js
+@@ -684,12 +684,9 @@ const scrollToRoute = (route, behavior, scrollTopForMissingHash)=>{
+             });
+             return;
+         }
+-        const scrollMarginTop = Number.parseFloat(window.getComputedStyle(element).scrollMarginTop) || 0;
+-        window.scrollTo({
+-            left: 0,
+-            top: element.getBoundingClientRect().top + window.scrollY - scrollMarginTop,
+-            behavior
+-        });
++        // Native anchor alignment includes both the heading's scroll margin and
++        // the scroll container's padding (used by sticky documentation headers).
++        element.scrollIntoView({ block: 'start', behavior });
+         return;
+     }
+     window.scrollTo({

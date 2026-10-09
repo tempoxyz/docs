@@ -1,128 +1,72 @@
 ---
-title: "Make agentic payments with the Machine Payments Protocol"
-seoTitle: "Agentic Payments with MPP | Tempo Docs"
-description: Make agentic payments using the Machine Payments Protocol (MPP) on Tempo — charge for APIs, MCP tools, and digital content with TIP-20 stablecoins.
+title: "How MPP works"
+seoTitle: "How the Machine Payments Protocol Works | Tempo Docs"
+description: Follow an MPP request from payment challenge through authorization, verification, and response.
 ---
 
-import { Card, Cards } from 'vocs'
 import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 import { TerminalDemo } from '../../../../components/TerminalDemo'
 
-# Make agentic payments with the Machine Payments Protocol
+<span id="make-agentic-payments-with-the-machine-payments-protocol" />
 
-Make agentic payments using the [Machine Payments Protocol](https://mpp.dev) (MPP). MPP adds inline payments to any HTTP endpoint — agents, apps, or humans pay as part of their request, and the server verifies payment before returning the response.
+# How MPP works
 
-## Try an agentic payment
+The [Machine Payments Protocol](https://mpp.dev/protocol) (MPP) lets a service request payment as part of an HTTP request. An application or agent handles the payment challenge and retries the request with payment authorization.
 
-See the full payment flow in action. The terminal creates an ephemeral wallet, funds it with testnet USDG, and makes a paid request to fetch a photo.
+## MPP payment flow
+
+<MermaidDiagram chart={`sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: Request resource
+    Server-->>Client: 402 Payment Required + Challenge
+    Note over Client: Authorize payment
+    Client->>Server: Retry request + Credential
+    Note over Server: Verify payment
+    Server-->>Client: Resource + Receipt
+`} />
+
+- **Challenge:** the server describes the payment terms in `WWW-Authenticate: Payment`.
+- **Credential:** the client supplies the payment proof in `Authorization: Payment` when it retries.
+- **Receipt:** the server acknowledges payment with `Payment-Receipt`.
+
+The payment method defines the proof and settlement rules. On Tempo, a credential can carry a signed transaction, a transaction reference, or a payment-channel voucher, depending on the intent.
+
+<span id="why-tempo-for-agentic-payments" />
+
+## MPP payment intents on Tempo
+
+These guides cover two payment patterns:
+
+| Pattern | Use it for | Guide |
+| --- | --- | --- |
+| One-time payment (`charge`) | A fixed price for a request or resource. | [Accept one-time payments](/docs/guide/machine-payments/one-time-payments) |
+| Payment session (`session`) | Metered usage, including streamed responses, using a funded channel and signed vouchers. | [Accept pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go) |
+
+See the [MPP intent reference](https://mpp.dev/protocol#payment-intents) for other patterns and their supported payment methods.
+
+<span id="try-an-agentic-payment" />
+
+<span id="try-a-test-payment" />
+
+## See the payment flow
+
+This simulation illustrates the challenge, payment, and retry sequence for a paid photo request. The account, funds, and transaction are simulated.
 
 <div style={{ height: 480 }}>
   <TerminalDemo />
 </div>
 
-## MPP payment flow
+<span id="agentic-payment-use-cases" />
+<span id="get-started-with-mpp-on-tempo" />
+<span id="mpp-sdks-and-tools" />
 
-A client requests a paid resource, the server responds with `402` and a `Challenge` describing the price. The client pays, retries with a `Credential` transaction, and the server returns the resource with a `Receipt`.
+## Implement paid requests
 
-<MermaidDiagram chart={`sequenceDiagram
-    participant Client
-    participant Server
-    Client->>Server: (1) GET /resource
-    Server-->>Client: (2) 402 Payment Required + Challenge
-    Note over Client: (3) Client fulfills payment
-    Client->>Server: (4) GET /resource + Credential
-    Note over Server: (5) Server verifies payment
-    Server-->>Client: (6) 200 OK + Receipt
-`} />
+Use [Pay for services](/docs/guide/machine-payments/client) for an application, [Pay with the CLI](/docs/guide/machine-payments/agent) for terminal requests, or [Accept payments for an API](/docs/guide/machine-payments/server) for a service. The [Machine Payments overview](/docs/agents) helps you choose an integration.
 
-1. **Request** — Any HTTP method (`GET`, `POST`, etc.)
-2. **Challenge** — `402` with `WWW-Authenticate: Payment` header describing amount, currency, and recipient
-3. **Pay** — Client signs a transaction or fulfills payment off-chain
-4. **Retry** — Client re-sends with `Authorization: Payment` header containing the Credential
-5. **Deliver** — Server verifies, returns `200` with `Payment-Receipt` header
-
-## Why Tempo for agentic payments
-
-Tempo's transaction model is designed for agentic payments using MPP:
-
-- **~500ms finality** — Deterministic confirmation fast enough for synchronous request/response flows
-- **Sub-cent fees** — Low enough for micropayments and per-request billing
-- **Lower repeated channel lifecycle costs** — T7 adds payer-scoped storage credits for MPP payment channels. The credited reopen path, `open_new_channel_with_storage_credit`, is 60,225 gas in the channel-reserve gas snapshot.
-- **Fee sponsorship** — Servers can cover gas on behalf of clients so they only need stablecoins
-- **2D and expiring nonces** — Parallel nonce lanes prevent payment transactions from blocking other account activity
-- **High throughput** — Supports the on-chain settlement volume that payment channels generate at scale
-
-## MPP payment intents on Tempo
-
-Two [intents](https://mpp.dev/protocol#payment-intents) are available on Tempo:
-
-| | **Charge** | **Session** |
-|---|---|---|
-| **Pattern** | One-time payment per request | Continuous pay-as-you-go |
-| **Latency** | ~500ms (on-chain confirmation) | Near-zero (off-chain vouchers) |
-| **Best for** | Single API calls, content access, one-off purchases | LLM APIs, metered services, usage-based billing |
-| **On-chain cost** | Per request | Amortized across many requests |
-
-## Agentic payment use cases
-
-- **Paid APIs** — Charge per request without API keys, billing accounts, or signup flows.
-- **MCP tools** — Monetize tool calls served through the Model Context Protocol. Agents pay per call without OAuth or account setup.
-- **Digital content** — Charge per access for articles, data feeds, or media without subscription paywalls.
-
-## Get started with MPP on Tempo
-
-<Cards>
-  <Card
-    icon="lucide:user"
-    title="Client quickstart"
-    description="Handle payment-gated resources automatically"
-    to="/docs/guide/machine-payments/client"
-  />
-  <Card
-    icon="lucide:bot"
-    title="Agent quickstart"
-    description="Discover services and make paid requests from a terminal or AI agent"
-    to="/docs/guide/machine-payments/agent"
-  />
-  <Card
-    icon="lucide:search"
-    title="Discover MPP services"
-    description="Find paid APIs through the mpp.dev directory, catalog API, and MCP server"
-    to="/docs/guide/machine-payments/discover-services"
-  />
-  <Card
-    icon="lucide:server"
-    title="Server quickstart"
-    description="Add payment gating to your HTTP endpoints"
-    to="/docs/guide/machine-payments/server"
-  />
-  <Card
-    icon="lucide:credit-card"
-    title="Accept one-time payments"
-    description="Charge per request with on-chain settlement"
-    to="/docs/guide/machine-payments/one-time-payments"
-  />
-  <Card
-    icon="lucide:repeat"
-    title="Accept pay-as-you-go payments"
-    description="Session-based billing with off-chain vouchers"
-    to="/docs/guide/machine-payments/pay-as-you-go"
-  />
-</Cards>
-
-## MPP SDKs and tools
-
-| Tool | Package | Install |
-|-----|---------|---------|
-| CLI | [`tempo request`](/docs/cli/request) | `curl -fsSL https://tempo.xyz/install \| bash` |
-| TypeScript | [`mppx`](https://github.com/wevm/mppx) | `npm install mppx viem` |
-| Python | [`pympp`](https://github.com/tempoxyz/pympp) | `pip install pympp` |
-| Rust | [`mpp-rs`](https://github.com/tempoxyz/mpp-rs) | `cargo add mpp` |
-
-See the [full SDK documentation](https://mpp.dev/sdk) for API reference and advanced usage.
+Payment authorization is separate from account access. Use [Give an agent access](/docs/accounts/agents) to control which account an agent can spend from.
 
 ## Learn more about MPP
 
-- [MPP documentation](https://mpp.dev) — Full protocol docs, SDK reference, and guides
-- [IETF specs](https://paymentauth.org/) — Normative protocol specification
-- [Protocol overview](https://mpp.dev/protocol) — Challenges, Credentials, Receipts, and transports
+Use the [MPP documentation](https://mpp.dev) for SDKs, transport details, and payment methods, and the [protocol specification](https://paymentauth.org/) for normative behavior.

@@ -6,7 +6,7 @@ description: "How Tempo Transactions achieve EIP-4337 goals without bundlers, pa
 
 # Comparing Tempo Transactions and EIP-4337
 
-EIP-4337 introduced account abstraction to Ethereum through a system of bundlers, paymasters, and an EntryPoint contract. Tempo Transactions achieve the same goals through protocol-native features that require no additional infrastructure.
+[EIP-4337](https://eips.ethereum.org/EIPS/eip-4337) uses smart accounts, an EntryPoint, and bundlers; paymasters are optional. Tempo Transactions implement common account features natively. They support fixed protocol signature schemes rather than arbitrary user-defined validation logic.
 
 ## EIP-4337 Design Goals
 
@@ -19,29 +19,29 @@ EIP-4337 enables several key capabilities for Ethereum accounts:
 
 ## How Tempo Achieves These Goals
 
-Tempo Transactions provide these capabilities at the protocol level.
+Tempo Transactions natively support sponsorship, batching, and supported alternative signatures. Custom validation remains a smart-contract design decision.
 
 ### Fee Sponsorship
 
-EIP-4337 requires deploying a Paymaster contract, funding it with ETH, and running or paying for bundler infrastructure. The Paymaster validates sponsorship requests and the bundler aggregates UserOperations.
+On Ethereum, an EIP-4337 paymaster sponsors operations using its EntryPoint ETH deposit. Applications may use existing paymaster and bundler services.
 
-Tempo Transactions include a `fee_payer_signature` field directly in the transaction. A sponsor signs the transaction to agree to pay fees. The protocol validates both signatures and deducts fees from the sponsor. No contracts or infrastructure are required. See the [fee sponsorship guide](/docs/guide/payments/sponsor-user-fees) for implementation details.
+Tempo Transactions include a `fee_payer_signature` field directly in the transaction. A sponsor signs the transaction to agree to pay fees. The protocol validates both signatures and deducts fees from the sponsor. No paymaster contract or bundler is required; the sponsor still needs a signer and a submission path. See the [fee sponsorship guide](/docs/guide/payments/sponsor-user-fees) for implementation details.
 
 ### Batched Operations
 
-EIP-4337 bundles multiple UserOperations through an external bundler service. Each UserOperation can contain one call.
+A bundler includes UserOperations in an EntryPoint transaction. One UserOperation can execute an atomic batch when the account supports it.
 
 Tempo Transactions include a native `calls` array. Multiple contract calls execute atomically in a single transaction. The protocol handles execution directly without external services.
 
 ### Alternative Signatures
 
-EIP-4337 requires deploying a custom validation contract for each signature scheme. The contract must implement signature verification logic.
+EIP-4337 accounts implement signature validation in contract code, which may be shared across accounts.
 
 Tempo Transactions natively support secp256k1, P256, and WebAuthn signatures. The protocol verifies these signatures directly, so passkey authentication works without custom contracts.
 
 ### Gas Token Flexibility
 
-EIP-4337 Paymasters can accept alternative tokens but must convert them to ETH internally.
+Ethereum paymasters may charge other tokens, but settlement with EntryPoint uses ETH. Conversion need not happen inside the paymaster or during each operation.
 
 Tempo Transactions pay fees directly in any USD stablecoin that has liquidity on the Fee AMM. No conversion infrastructure is needed. See the [stablecoin fees guide](/docs/guide/payments/pay-fees-in-any-stablecoin) for implementation details.
 
@@ -49,14 +49,14 @@ Tempo Transactions pay fees directly in any USD stablecoin that has liquidity on
 
 | Aspect | EIP-4337 | Tempo Transactions |
 |--------|----------|-------------------|
-| Contracts to deploy | EntryPoint, Paymaster, Account | None required |
-| Infrastructure to run | Bundler service | None required |
-| Fee payment | ETH via Paymaster | Any USD stablecoin |
+| Contracts used | EntryPoint and smart account; optional paymaster | None required for native features |
+| Submission | Bundler (self-hosted or provided) | Standard RPC; sponsor signer if sponsored |
+| Fee payment | ETH deposit on Ethereum; optional token charging by a paymaster | Eligible USD TIP-20 token |
 | Signature verification | Custom validation contract | Protocol-native |
 
 ## When to Use EIP-4337 on Tempo
 
-Tempo has the ERC-4337 EntryPoint contract deployed for projects that require compatibility with existing 4337 tooling. Consider using native Tempo Transactions for lower gas costs and simpler integration.
+For an existing EIP-4337 integration, verify your provider's Tempo-compatible EntryPoint, account implementation, bundler, and fee handling. Prefer native Tempo Transactions when their built-in features meet your requirements.
 
 ## Start with Tempo Transactions
 

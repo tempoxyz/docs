@@ -18,11 +18,11 @@ The Tempo Go SDK can be used to perform common operations with the chain, such a
 To install the Tempo Go SDK:
 
 ```bash [go]
-go get github.com/tempoxyz/tempo-go@v0.3.0
+go get github.com/tempoxyz/tempo-go@v0.5.0
 ```
 
 :::tip
-The SDK requires Go 1.21 or higher.
+The SDK requires Go 1.25.9 or higher.
 :::
 
 ## Create a Go RPC client
@@ -40,7 +40,7 @@ import (
 )
 
 func main() {
-    c := client.New("https://rpc.tempo.xyz") 
+    c := client.New("https://rpc.moderato.tempo.xyz")
 
     ctx := context.Background()
     blockNum, _ := c.GetBlockNumber(ctx)
@@ -51,7 +51,7 @@ func main() {
 For authenticated RPC endpoints:
 
 ```go [main.go]
-c := client.New("https://rpc.tempo.xyz",
+c := client.New("https://rpc.moderato.tempo.xyz",
     client.WithAuth("username", "password"),
 )
 ```
@@ -81,6 +81,8 @@ func main() {
 
 ## Send a Tempo transaction with Go
 
+These examples use Moderato testnet (`42431`). Fund a test account with the [faucet](/docs/quickstart/faucet) and use its private key. The displayed Anvil key is public and must not hold real funds. Estimate gas for your actual calls; the limits below are example caps.
+
 Build and send a transaction using the builder pattern:
 
 ```go [main.go]
@@ -98,7 +100,7 @@ import (
 )
 
 func main() {
-    c := client.New("https://rpc.tempo.xyz")
+    c := client.New("https://rpc.moderato.tempo.xyz")
     s, _ := signer.NewSigner("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
 
     ctx := context.Background()
@@ -107,10 +109,10 @@ func main() {
     recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 
     // [!code hl:10]
-    tx := transaction.NewBuilder(big.NewInt(4217)). // Tempo mainnet
+    tx := transaction.NewBuilder(big.NewInt(42431)). // Moderato testnet
         SetNonce(nonce).
         SetGas(100000).
-        SetMaxFeePerGas(big.NewInt(20000000000)). // 20 gwei base fee
+        SetMaxFeePerGas(big.NewInt(20000000000)). // Example maximum fee per gas
         SetMaxPriorityFeePerGas(big.NewInt(1000000000)).
         AddCall(recipient, big.NewInt(0), []byte{}).
         Build()
@@ -145,7 +147,10 @@ fmt.Printf("Block: %d, Chain: %d, Nonce: %d\n", blockNum, chainID, nonce)
 Send a TIP-20 token transfer using go-ethereum's ABI encoding:
 
 ```go [transfer.go]
-import "github.com/ethereum/go-ethereum/accounts/abi"
+import (
+    "strings"
+    "github.com/ethereum/go-ethereum/accounts/abi"
+)
 
 erc20ABI, _ := abi.JSON(strings.NewReader(`[{"name":"transfer","type":"function","inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}]}]`))
 
@@ -154,7 +159,7 @@ amount := big.NewInt(100_000_000) // 100 tokens (6 decimals)
 
 transferData, _ := erc20ABI.Pack("transfer", recipient, amount)
 
-tx := transaction.NewBuilder(big.NewInt(4217)).
+tx := transaction.NewBuilder(big.NewInt(42431)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -177,7 +182,7 @@ copy(memo[:], "INV-12345")
 
 memoData, _ := tip20ABI.Pack("transferWithMemo", recipient, amount, memo)
 
-tx := transaction.NewBuilder(big.NewInt(4217)).
+tx := transaction.NewBuilder(big.NewInt(42431)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -191,7 +196,7 @@ tx := transaction.NewBuilder(big.NewInt(4217)).
 Execute multiple operations atomically in a single transaction:
 
 ```go [batch.go]
-tx := transaction.NewBuilder(big.NewInt(4217)).
+tx := transaction.NewBuilder(big.NewInt(42431)).
     SetNonce(nonce).
     SetGas(200000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -209,7 +214,7 @@ transaction.SignTransaction(tx, s)
 Send multiple transactions concurrently using different nonce keys:
 
 ```go [parallel.go]
-tx1 := transaction.NewBuilder(big.NewInt(4217)).
+tx1 := transaction.NewBuilder(big.NewInt(42431)).
     SetNonceKey(big.NewInt(1)). // Sequence A // [!code hl]
     SetNonce(0).
     SetGas(100000).
@@ -218,7 +223,7 @@ tx1 := transaction.NewBuilder(big.NewInt(4217)).
     AddCall(recipient1, big.NewInt(0), data1).
     Build()
 
-tx2 := transaction.NewBuilder(big.NewInt(4217)).
+tx2 := transaction.NewBuilder(big.NewInt(42431)).
     SetNonceKey(big.NewInt(2)). // Sequence B (parallel) // [!code hl]
     SetNonce(0).
     SetGas(100000).
@@ -230,9 +235,19 @@ tx2 := transaction.NewBuilder(big.NewInt(4217)).
 transaction.SignTransaction(tx1, s)
 transaction.SignTransaction(tx2, s)
 
-// Send both in parallel
-go func() { c.SendRawTransaction(ctx, serialize(tx1)) }()
-go func() { c.SendRawTransaction(ctx, serialize(tx2)) }()
+// Submit both and wait for each submission result.
+results := make(chan error, 2)
+for _, tx := range []*transaction.Tx{tx1, tx2} {
+    raw, err := transaction.Serialize(tx, nil)
+    if err != nil { panic(err) }
+    go func(raw string) {
+        _, err := c.SendRawTransaction(ctx, raw)
+        results <- err
+    }(raw)
+}
+for range 2 {
+    if err := <-results; err != nil { panic(err) }
+}
 ```
 
 ### Fee sponsorship with Go
@@ -240,7 +255,7 @@ go func() { c.SendRawTransaction(ctx, serialize(tx2)) }()
 Have another account pay for transaction fees:
 
 ```go [feepayer.go]
-tx := transaction.NewBuilder(big.NewInt(4217)).
+tx := transaction.NewBuilder(big.NewInt(42431)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -260,7 +275,7 @@ Set a time window during which the transaction is valid:
 ```go [validity.go]
 now := time.Now()
 
-tx := transaction.NewBuilder(big.NewInt(4217)).
+tx := transaction.NewBuilder(big.NewInt(42431)).
     SetNonce(nonce).
     SetGas(100000).
     SetMaxFeePerGas(big.NewInt(10000000000)).
@@ -273,7 +288,7 @@ tx := transaction.NewBuilder(big.NewInt(4217)).
 
 ### Batch RPC requests with Go
 
-Send multiple RPC calls efficiently in a single HTTP request:
+Send multiple RPC calls efficiently in a single HTTP request. `eth_getBalance` returns a compatibility value on Tempo, not the account’s spendable stablecoins; read TIP-20 `balanceOf` for token balances:
 
 ```go [batch_rpc.go]
 batch := client.NewBatchRequest()
@@ -288,6 +303,8 @@ for _, resp := range responses {
 ```
 
 ## Account Keychain in the Go SDK
+
+For a non-expiring key, pass `^uint64(0)` (the maximum uint64 timestamp) to `NewKeyRestrictions`; `0` is already expired. Keychain helpers return unsigned calls: choose one, include it in a transaction, sign, submit, and wait for its receipt.
 
 The `keychain` package provides typed helpers for Tempo's [Account Keychain precompile](/docs/protocol/transactions/AccountKeychain), enabling access key management and signing directly from Go.
 
@@ -311,7 +328,7 @@ import (
 )
 
 func main() {
-	c := client.New("https://rpc.tempo.xyz")
+	c := client.New("https://rpc.moderato.tempo.xyz")
 	s, _ := signer.NewSigner("0xYOUR_PRIVATE_KEY")
 
 	ctx := context.Background()
@@ -320,10 +337,10 @@ func main() {
 	accessKeyAddr := common.HexToAddress("<ACCESS_KEY_ADDRESS>")
 
 	// Authorize a new access key (secp256k1, no expiry):
-	restrictions := keychain.NewKeyRestrictions(0)
+	restrictions := keychain.NewKeyRestrictions(^uint64(0))
 	call, _ := keychain.AuthorizeKey(accessKeyAddr, keychain.SignatureTypeSecp256k1, restrictions)
 
-	tx := transaction.NewBuilder(big.NewInt(4217)).
+	tx := transaction.NewBuilder(big.NewInt(42431)).
 		SetNonce(nonce).
 		SetGas(200000).
 		SetMaxFeePerGas(big.NewInt(20000000000)).
@@ -333,7 +350,7 @@ func main() {
 
 	// Authorize with a spending limit:
 	token := common.HexToAddress("<TOKEN_ADDRESS>")
-	restrictions = keychain.NewKeyRestrictions(0).
+	restrictions = keychain.NewKeyRestrictions(^uint64(0)).
 		WithLimits([]keychain.TokenLimit{{Token: token, Amount: big.NewInt(1_000_000)}})
 	call, _ = keychain.AuthorizeKey(accessKeyAddr, keychain.SignatureTypeSecp256k1, restrictions)
 
@@ -342,7 +359,7 @@ func main() {
 		Transfer(nil).
 		Approve(nil).
 		Build()
-	restrictions = keychain.NewKeyRestrictions(0).
+	restrictions = keychain.NewKeyRestrictions(^uint64(0)).
 		WithAllowedCalls([]keychain.CallScope{scope})
 	call, _ = keychain.AuthorizeKey(accessKeyAddr, keychain.SignatureTypeSecp256k1, restrictions)
 
@@ -383,7 +400,7 @@ Use `keychain.SignWithAccessKey` to sign a transaction as an access key holder:
 accessKeySigner, _ := signer.NewSigner("<ACCESS_KEY_PRIVATE_KEY>")
 rootAccount := common.HexToAddress("<ROOT_ACCOUNT_ADDRESS>")
 
-tx := transaction.NewBuilder(big.NewInt(4217)).
+tx := transaction.NewBuilder(big.NewInt(42431)).
 	SetNonce(nonce).
 	SetGas(100000).
 	SetMaxFeePerGas(big.NewInt(20000000000)).
@@ -404,8 +421,14 @@ calldata := keychain.EncodeGetRemainingLimitCalldata(
 	common.HexToAddress("<ACCESS_KEY_ADDRESS>"),
 	common.HexToAddress("<TOKEN_ADDRESS>"),
 )
-result, _ := c.Call(ctx, keychain.GetKeychainAddress().Hex(), calldata)
-remaining := keychain.ParseRemainingLimitResult(result)
+response, err := c.SendRequest(ctx, "eth_call", map[string]string{
+    "to": keychain.GetKeychainAddress().Hex(), "data": calldata,
+}, "latest")
+if err != nil { panic(err) }
+if err := response.CheckError(); err != nil { panic(err) }
+result, ok := response.Result.(string)
+if !ok { panic("Expected a hex RPC result") }
+remaining := keychain.ParseRemainingLimitResult(common.FromHex(result))
 fmt.Printf("Remaining: %s\n", remaining.String())
 ```
 

@@ -1,0 +1,75 @@
+---
+title: Smart contracts
+seoTitle: Deploy Smart Contracts | Tempo Docs
+description: Deploy a Solidity contract to Tempo testnet with Foundry, verify its source, and review EVM differences.
+---
+
+# Smart contracts
+
+Deploy Solidity contracts with Foundry and verify their source in the Tempo Explorer. This walkthrough uses the Tempo starter project and Moderato testnet.
+
+## Deploy a contract
+
+Install or update [Foundry](/docs/sdk/foundry#get-started-with-foundry) before starting. Tempo support is included in upstream Foundry.
+
+:::::steps
+
+### Create a project
+
+The Tempo template includes the `Mail` contract and its deployment script.
+
+```bash [CLI]
+forge init -n tempo my-project
+cd my-project
+forge build
+forge test
+```
+
+### Fund the deployer
+
+Use a test account you control. Request test stablecoins for its address with the [faucet](/docs/quickstart/faucet), or with `cast`:
+
+```bash [CLI]
+export TEMPO_RPC_URL=https://rpc.moderato.tempo.xyz
+export TEMPO_DEPLOYER_ADDRESS=0xYOUR_TEST_ACCOUNT_ADDRESS
+cast rpc tempo_fundAddress "$TEMPO_DEPLOYER_ADDRESS" --rpc-url "$TEMPO_RPC_URL"
+```
+
+Replace `0xYOUR_TEST_ACCOUNT_ADDRESS` with the deployer's address. Use a root key for deployment; access keys cannot create contracts.
+
+### Deploy on testnet
+
+The constructor takes the AlphaUSD address used in the testnet example. `--interactive` prompts for the deployer's key.
+
+```bash [CLI]
+forge create src/Mail.sol:Mail \
+  --rpc-url "$TEMPO_RPC_URL" \
+  --tempo.fee-token 0x20c0000000000000000000000000000000000001 \
+  --interactive \
+  --broadcast \
+  --constructor-args 0x20c0000000000000000000000000000000000001
+```
+
+Save the deployed contract address and transaction hash from the command output.
+
+:::::
+
+## Verify a contract
+
+Use the same project and compiler settings to publish the source. Replace `0xYOUR_DEPLOYED_CONTRACT` with the address returned by the deployment:
+
+```bash [CLI]
+forge verify-contract \
+  --rpc-url "$TEMPO_RPC_URL" \
+  --verifier-url https://contracts.tempo.xyz \
+  0xYOUR_DEPLOYED_CONTRACT \
+  src/Mail.sol:Mail
+```
+
+You can also add `--verify --verifier-url https://contracts.tempo.xyz` to the deployment command. See [Contract verification](/docs/quickstart/verify-contracts) for constructor arguments, proxies, Hardhat, and verification failures.
+
+## EVM differences
+
+There is no native gas token: use [TIP-20 token balances](/docs/network/tokens) and stablecoin fees. Review [EVM differences](/docs/quickstart/evm-compatibility) for native-balance behavior and state-creation gas costs before porting a contract. Estimate deployment gas against the target network.
+
+Use [system contract addresses](/docs/quickstart/predeployed-contracts) when integrating Tempo primitives, and [`tempo-std`](/docs/sdk/foundry) for Solidity interfaces. For local testing, run [Anvil in Tempo mode](/docs/sdk/foundry#local-tempo-development-with-anvil).

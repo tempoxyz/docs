@@ -2,8 +2,8 @@
 import { useQuery } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Address } from 'viem'
-import { isAddress, pad, parseUnits, stringToHex } from 'viem'
-import { Actions } from 'viem/tempo'
+import { isAddress, parseUnits, toHex } from 'viem'
+import { createClient, custom } from 'viem/tempo'
 import { useConnection, useConnectionEffect, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { TokenSelector } from '../../../TokenSelector'
@@ -15,6 +15,11 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
   const publicClient = usePublicClient()
+  const client = React.useMemo(
+    () =>
+      publicClient && createClient({ chain: publicClient.chain, transport: custom(publicClient) }),
+    [publicClient],
+  )
   const [recipient, setRecipient] = React.useState<string>(FAKE_RECIPIENT)
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
@@ -38,16 +43,17 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   })
   // Resolve the current validator's fee token rather than assuming a test token.
   const feeLiquidity = useQuery({
-    queryKey: ['fee-demo-liquidity', publicClient?.chain.id, feeToken],
-    enabled: Boolean(publicClient),
+    queryKey: ['fee-demo-liquidity', client?.chain.id, feeToken],
+    enabled: Boolean(client),
     queryFn: async () => {
-      if (!publicClient) throw new Error('public client not ready')
-      const block = await publicClient.getBlock()
-      const validatorToken = await Actions.fee.getValidatorToken(publicClient, {
+      if (!client) throw new Error('public client not ready')
+      const block = await client.getBlock()
+      const validatorToken = await client.fee.getValidatorToken({
         validator: block.miner,
       })
+      if (!validatorToken) return false
       if (feeToken.toLowerCase() === validatorToken.address.toLowerCase()) return true
-      const pool = await Actions.amm.getPool(publicClient, {
+      const pool = await client.amm.getPool({
         userToken: feeToken,
         validatorToken: validatorToken.address,
       })
@@ -81,7 +87,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
       token: alphaUsd,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
       feeToken,
     })
   }

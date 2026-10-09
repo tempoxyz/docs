@@ -1,0 +1,37 @@
+---
+title: "Use a wallet provider"
+seoTitle: "Use Wallet Providers with Tempo | Tempo Docs"
+description: Choose a wallet provider for backend signing or customer wallets, distinguish provider policies from onchain permissions, and integrate Privy or Turnkey.
+---
+
+# Use a wallet provider
+
+Use a wallet provider to manage signing keys for your backend or customer wallets. Decide who can request a signature and which approvals each payment needs before choosing an SDK.
+
+## Choose the controls your application needs
+
+Keep these responsibilities clear in your integration:
+
+- **Your application** authenticates customers, maps their records to account addresses, and decides when to request a payment.
+- **Your wallet provider** manages signing keys and enforces its configured policies before signing.
+- **Tempo** validates transaction signatures and enforces the authorized access key's onchain restrictions.
+
+A provider policy applies only to requests that the provider signs. A [limited access key](/docs/accounts/access-keys) lets another signer act on the account, so configure its expiry, budget, and allowed calls when authorizing it.
+
+Check the provider's recovery and key-export options for your account model. For passkeys or delegated signing, confirm that its Tempo integration exposes the authorization methods you need.
+
+## Build with Privy
+
+Privy's [Tempo integration](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) exposes Tempo transaction signing from embedded wallets. Its Tempo transaction API supports batched calls, fee-token selection, sponsorship, and validity windows.
+
+Start with the [Privy Tempo example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) for wallet creation, authentication, and payments in a browser application.
+
+Use the connected wallet address to [read balances](/docs/accounts/balances). Keep Privy and your RPC client on the same network.
+
+## Build with Turnkey
+
+Turnkey's [Tempo integration](https://docs.turnkey.com/features/networks/tempo) covers address derivation, transaction construction, and signing policies. It uses `ADDRESS_TYPE_ETHEREUM` for Tempo addresses and exposes Tempo transaction fields to its policy engine through the `tempo.tx` namespace.
+
+Start with Turnkey's [Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo) for transaction construction and broadcast. It includes single calls, batches, and fee sponsorship. For embedded wallet UI, use the [Embedded Wallet Kit](https://docs.turnkey.com/sdks/react/getting-started).
+
+Browse [wallet partners](/docs/partners/wallets) for other integrations.

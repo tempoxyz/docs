@@ -31,7 +31,7 @@ Example output:
   "onchain_address": "0x1234567890abcdef1234567890abcdef12345678",
   "public_key": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
   "inbound_address": "203.0.113.10:9000",
-  "outbound_address": "203.0.113.10:9001",
+  "outbound_address": "203.0.113.10",
   "fee_recipient": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
   "index": 5,
   "active": true,
@@ -108,21 +108,21 @@ Monitor these metrics to track your validator's state:
 ```bash
 # Is your validator registered with consensus peers?
 # This should be >0 in at most 3 hours after your validator's addition.
-curl -s localhost:8002/metrics | grep consensus_engine_peer_manager_peers
+curl -s localhost:8001/metrics | grep consensus_engine_peer_manager_peers
 
 # How many times YOUR node has been a dealer (distributing shares)
 # This metric should be >0 over 6 hours.
-curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_dealer
+curl -s localhost:8001/metrics | grep consensus_engine_dkg_manager_how_often_dealer
 
 # How many times YOUR node has been a player (receiving shares)
 # This metric should be >0 over 6 hours.
-curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_how_often_player
+curl -s localhost:8001/metrics | grep consensus_engine_dkg_manager_how_often_player
 
 # Successful ceremonies (should increase every ~3 hours)
-curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_successes_total
+curl -s localhost:8001/metrics | grep consensus_engine_dkg_manager_ceremony_successes_total
 
 # Failed ceremonies (should stay at 0 or increase rarely)
-curl -s localhost:8002/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
+curl -s localhost:8001/metrics | grep consensus_engine_dkg_manager_ceremony_failures_total
 ```
 
 If `how_often_dealer` or `how_often_player` is increasing, your node is actively participating in DKG ceremonies. After your validator has been added to the network, you should alert on these metrics, as they indicate that your validator is actively participating in the network.

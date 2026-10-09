@@ -1,5 +1,19 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import remarkParse from 'remark-parse'
+import { unified } from 'unified'
+import { slug } from '../../node_modules/vocs/dist/internal/openapi/anchors.js'
+import {
+  type Ir,
+  type IrOperation,
+  parse,
+} from '../../node_modules/vocs/dist/internal/openapi/parser.js'
+import { operationWithQuery } from '../../node_modules/vocs/dist/internal/openapi/query-presets.js'
+import { groupPath } from '../../node_modules/vocs/dist/internal/openapi/route.js'
+import { codeSamples } from '../../node_modules/vocs/dist/internal/openapi/sample.js'
+import { tempoAgentSetupCommands } from './ai-install-commands'
+import { docsLinkCards } from './docs-link-cards'
+import { loadTempoOpenApi } from './tempo-openapi'
 
 type MarkdownAttribute = {
   name?: string
@@ -40,16 +54,41 @@ type MarkdownNode = {
   value?: string
 }
 
+type MarkdownContext = {
+  getSnippet: (fileName: string) => string | undefined
+  openApi?: Ir
+}
+
+type MarkdownOptions = { loadOpenApi?: () => Promise<Ir> }
+
+const openApiSpecs = new Map<string, Promise<Ir>>()
+const markdownParser = unified().use(remarkParse)
 const openApiSpecUrl = 'https://api.tempo.xyz/openapi.json'
-const presentationOnlyElements = new Set(['meta', 'script', 'style', 'title'])
+const presentationOnlyElements = new Set([
+  'meta',
+  'script',
+  'style',
+  'title',
+  'DocsHomeProductIcon',
+])
 const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
 const interactiveDescriptions: Record<string, string> = {
+  EarnDepositDemo:
+    'In the interactive web page, create a testnet passkey account, get test pathUSD from the faucet, choose a deposit amount (1 pathUSD by default), approve it for the verified vault, and confirm a deposit. Inspect the resulting shares and receipt, then withdraw the test position. Every transaction requires your confirmation and uses Moderato testnet.',
+  EarnWithdrawDemo:
+    'In the interactive web page, restore the passkey test account from the deposit demo and redeem its full position in the verified Moderato pathUSD vault. Confirm the withdrawal and inspect the receipt. If the account has no shares, make a test deposit first.',
+  EarnVaultDemo:
+    'In the interactive web page, inspect the automatically loaded verified Earn vault directory, starting with the testnet demo vault when available, or select another network and vault to inspect its asset, access rules, deposit status, withdrawal capabilities, and available liquidity. The demo makes read-only requests to Tempo API and starts on Moderato testnet. See the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) for the request and response fields.',
+  PasskeyAccountDemo:
+    'In the interactive web page, create a passkey account or reconnect an existing passkey, inspect and copy its address, and disconnect. Creating the account does not move or fund stablecoins.',
+  AdminKeyDemo:
+    'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',
   TerminalDemo:
-    'The interactive terminal creates a test wallet, funds it, and makes a paid request.',
+    'The interactive terminal simulates the challenge, payment, and retry sequence for a paid request.',
   TidxQuery: 'Use the interactive web page to run SQL against the public Tempo indexer.',
   TokenListDemo: 'The interactive web page displays the current Tempo token list.',
   ValidatorTopologyDiagram:
@@ -90,6 +129,8 @@ const demoStepLabels: Record<string, string> = {
   PlaceOrder: 'Place order',
   QueryOrder: 'Query order',
   RevokeTokenRoles: 'Revoke token roles',
+  ReceivePolicyDemo:
+    'Create a temporary Moderato account, accept AlphaUSD, hold BetaUSD, and recover the blocked payment.',
   SendParallelPayments: 'Send parallel payments',
   SendPayment: 'Send payment',
   SendPaymentWithMemo: 'Send payment with memo',
@@ -98,7 +139,7 @@ const demoStepLabels: Record<string, string> = {
   SendTokensWithinZone: 'Send tokens within zone',
   SetFeeToken: 'Set fee token',
   SetSupplyCap: 'Set supply cap',
-  SignInWithTempo: 'Sign in with tempo',
+  SignInWithTempo: 'Connect Tempo Wallet',
   SwapAcrossZones: 'Swap across zones',
   VirtualAddressesFastDemo: 'Virtual addresses fast demo',
   VirtualAddressesLiveDemo: 'Virtual addresses live demo',
@@ -109,23 +150,58 @@ const demoStepLabels: Record<string, string> = {
  * Replaces visual MDX components with useful plain Markdown in Vocs' generated `.md` files and
  * `llms-full.txt`. The rendered website keeps the original interactive components.
  */
-export function plainMarkdownComponents() {
+export function plainMarkdownComponents(options: MarkdownOptions = {}) {
   const getSnippet = snippetSourceGetter()
-  return (tree: MarkdownNode) => {
-    rewriteChildren(tree, 1, getSnippet)
+  return async (tree: MarkdownNode) => {
+    const openApi = containsOpenApi(tree)
+      ? await (options.loadOpenApi ?? loadMarkdownOpenApi)()
+      : undefined
+    // Keep specification metadata inside its page when full exports split at H1s.
+    // The rendered website retains the authored badge above the title.
+    const children = tree.children ?? []
+    const heading = children.findIndex((node) => node.type === 'heading' && node.depth === 1)
+    const metadata = children.findIndex(
+      (node) =>
+        node.name === 'div' &&
+        stringAttribute(node, 'className')?.split(/\s+/).includes('docs-specification-meta'),
+    )
+    if (metadata >= 0 && metadata < heading) {
+      const [badge] = children.splice(metadata, 1)
+      children.splice(heading, 0, badge)
+    }
+    rewriteChildren(tree, 1, { getSnippet, openApi })
   }
+}
+
+function containsOpenApi(node: MarkdownNode): boolean {
+  return (
+    node.name === 'OpenApi.Endpoints' ||
+    node.name === 'OpenApi.Playground' ||
+    (node.children ?? []).some(containsOpenApi)
+  )
+}
+
+function loadMarkdownOpenApi() {
+  const source = process.env.OPENAPI_SPEC_URL ?? openApiSpecUrl
+  let spec = openApiSpecs.get(source)
+  if (!spec) {
+    // Use the same parser, normalized schema, routes, and samples as the web reference.
+    spec = parse({ path: '/docs/api', spec: () => loadTempoOpenApi(source) })
+    openApiSpecs.set(source, spec)
+  }
+  return spec
 }
 
 function rewriteChildren(
   parent: MarkdownNode,
   initialHeadingDepth: number,
-  getSnippet: (fileName: string) => string | undefined,
+  context: MarkdownContext,
 ) {
   if (!parent.children) return
 
   let headingDepth = initialHeadingDepth
   for (let index = 0; index < parent.children.length; ) {
-    const replacement = rewriteNode(parent.children[index], headingDepth, getSnippet)
+    const replacement = rewriteNode(parent.children[index], headingDepth, context)
     parent.children.splice(index, 1, ...replacement)
 
     for (const node of replacement)
@@ -138,7 +214,7 @@ function rewriteChildren(
 function rewriteNode(
   node: MarkdownNode,
   headingDepth: number,
-  getSnippet: (fileName: string) => string | undefined,
+  context: MarkdownContext,
 ): MarkdownNode[] {
   if (node.type === 'mdxjsEsm') return []
   if (node.type === 'html' && node.value?.trim() === '<!-- changelog unavailable -->')
@@ -150,16 +226,64 @@ function rewriteNode(
     ]
 
   if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') {
-    if (node.type === 'code' && node.value) node.value = inlineCodeSnippets(node.value, getSnippet)
-    rewriteChildren(node, headingDepth, getSnippet)
+    if (node.type === 'code' && node.value)
+      node.value = inlineCodeSnippets(node.value, context.getSnippet)
+    rewriteChildren(node, headingDepth, context)
     return [node]
   }
 
   if (node.name && presentationOnlyElements.has(node.name)) return []
-  if (node.name === 'Cards') return renderCards(node, headingDepth, getSnippet)
+  if (node.name === 'Cards') return renderCards(node, headingDepth, context)
+  if (node.name === 'DocsSetupCards' || node.name === 'DocsLinkCards') {
+    const collection =
+      node.name === 'DocsSetupCards' ? 'setup' : requiredStringAttribute(node, 'collection')
+    if (!(collection in docsLinkCards))
+      throw new Error(`Unknown link card collection: ${collection}`)
+    return docsLinkCards[collection as keyof typeof docsLinkCards].flatMap(
+      ({ title, description, links }) => [
+        { type: 'heading', depth: Math.min(headingDepth + 1, 6), children: [text(title)] },
+        paragraph([text(description)]),
+        ...links.map(([label, href]) => paragraph([link(label, href)])),
+      ],
+    )
+  }
+  if (node.name === 'DocsHomeAgent')
+    return [
+      { type: 'heading', depth: 2, children: [text('Build with your agent')] },
+      paragraph([text('Connect your coding agent to Tempo documentation.')]),
+      paragraph([text('Choose your coding agent and run its setup commands in your terminal.')]),
+      { type: 'heading', depth: 3, children: [text('Codex')] },
+      paragraph([
+        text('Requires the '),
+        link('Codex CLI', 'https://learn.chatgpt.com/docs/codex/cli'),
+        text('.'),
+      ]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.codex },
+      { type: 'heading', depth: 3, children: [text('Claude Code')] },
+      paragraph([
+        text('Requires '),
+        link('Claude Code', 'https://code.claude.com/docs/en/quickstart'),
+        text('.'),
+      ]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.claude },
+      { type: 'heading', depth: 3, children: [text('Amp')] },
+      paragraph([
+        text('Connect Tempo’s MCP server with the '),
+        link('Amp CLI', 'https://ampcode.com/docs/cli#install'),
+        text('.'),
+      ]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.amp },
+      { type: 'heading', depth: 3, children: [text('Skills')] },
+      paragraph([text('Add the Tempo docs skill to a skills-compatible agent.')]),
+      { type: 'code', lang: 'bash', value: tempoAgentSetupCommands.skills },
+      { type: 'heading', depth: 3, children: [text('MCP')] },
+      paragraph([text('Add this URL as an HTTP MCP server in your agent’s settings.')]),
+      { type: 'code', lang: 'text', value: tempoAgentSetupCommands.mcp },
+      paragraph([link('All setup options', '/docs/guide/using-tempo-with-ai')]),
+    ]
   if (node.name === 'Card') return [paragraph(cardContent(node))]
-  if (node.name === 'Tabs') return renderTabs(node, headingDepth, getSnippet)
-  if (node.name === 'Tab') return renderTab(node, headingDepth, getSnippet)
+  if (node.name === 'Tabs') return renderTabs(node, headingDepth, context)
+  if (node.name === 'Tab') return renderTab(node, headingDepth, context)
   if (node.name === 'Demo.Container') return renderDemo(node)
   if (node.name === 'MermaidDiagram' || node.name === 'StaticMermaidDiagram')
     return renderMermaid(node)
@@ -168,27 +292,57 @@ function rewriteNode(
     const caption = optionalStaticStringAttribute(node, 'caption')
     return [paragraph([text(alt)]), ...(caption ? [paragraph([text(caption)])] : [])]
   }
+  if (node.name === 'DocsProductOverview') {
+    const alt = requiredStringAttribute(node, 'alt')
+    rewriteChildren(node, headingDepth, context)
+    return [...(node.children ?? []), paragraph([text(alt)])]
+  }
   if (node.name === 'Badge') return renderBadge(node)
-  if (node.name === 'Callout') return renderCallout(node, headingDepth, getSnippet)
+  if (node.name === 'Callout') return renderCallout(node, headingDepth, context)
   if (node.name === 'DocsLinkButton') return renderLinkButton(node)
   if (node.name === 'OpenApi.Endpoints' || node.name === 'OpenApi.Playground')
-    return renderOpenApi(node)
+    return renderOpenApi(node, headingDepth, context.openApi)
   if (node.name && interactiveDescriptions[node.name])
-    return [paragraph([text(interactiveDescriptions[node.name])])]
+    return markdownNodes(interactiveDescriptions[node.name])
 
-  if (isLayoutElement(node)) {
-    rewriteChildren(node, headingDepth, getSnippet)
-    return node.children ?? []
+  if (node.name && /^[a-z]/.test(node.name)) {
+    if (stringAttribute(node, 'aria-hidden') === 'true') return []
+    node.attributes = node.attributes?.filter(
+      (attribute) => attribute.name !== 'className' && attribute.name !== 'style',
+    )
+    if (node.name === 'a' && stringAttribute(node, 'href') !== undefined)
+      return renderHtmlLink(node, headingDepth, context)
+    if (node.name === 'strong' || node.name === 'em' || node.name === 'p') {
+      rewriteChildren(node, headingDepth, context)
+      const type = node.name === 'p' ? 'paragraph' : node.name === 'em' ? 'emphasis' : 'strong'
+      return [{ type, children: node.children ?? [] }]
+    }
   }
 
-  rewriteChildren(node, headingDepth, getSnippet)
+  if (isLayoutElement(node)) {
+    const id = optionalStaticStringAttribute(node, 'id')
+    rewriteChildren(node, headingDepth, context)
+    const anchor: MarkdownNode[] = id
+      ? [
+          {
+            type: node.type,
+            name: 'span',
+            attributes: [{ type: 'mdxJsxAttribute', name: 'id', value: id }],
+            children: [],
+          },
+        ]
+      : []
+    return [...anchor, ...(node.children ?? [])]
+  }
+
+  rewriteChildren(node, headingDepth, context)
   return [node]
 }
 
 function renderCards(
   node: MarkdownNode,
   headingDepth: number,
-  getSnippet: (fileName: string) => string | undefined,
+  context: MarkdownContext,
 ): MarkdownNode[] {
   const output: MarkdownNode[] = []
   let items: MarkdownNode[] = []
@@ -215,7 +369,7 @@ function renderCards(
     }
 
     flushCards()
-    output.push(...rewriteNode(child, headingDepth, getSnippet))
+    output.push(...rewriteNode(child, headingDepth, context))
   }
   flushCards()
   return output
@@ -232,12 +386,12 @@ function cardContent(node: MarkdownNode): MarkdownNode[] {
 function renderTabs(
   node: MarkdownNode,
   headingDepth: number,
-  getSnippet: (fileName: string) => string | undefined,
+  context: MarkdownContext,
 ): MarkdownNode[] {
   const output: MarkdownNode[] = []
   for (const child of node.children ?? []) {
-    if (child.name === 'Tab') output.push(...renderTab(child, headingDepth, getSnippet))
-    else output.push(...rewriteNode(child, headingDepth, getSnippet))
+    if (child.name === 'Tab') output.push(...renderTab(child, headingDepth, context))
+    else output.push(...rewriteNode(child, headingDepth, context))
   }
   return output
 }
@@ -245,11 +399,11 @@ function renderTabs(
 function renderTab(
   node: MarkdownNode,
   headingDepth: number,
-  getSnippet: (fileName: string) => string | undefined,
+  context: MarkdownContext,
 ): MarkdownNode[] {
   const depth = Math.min(Math.max(headingDepth + 1, 2), 6)
   const content: MarkdownNode = { type: 'root', children: [...(node.children ?? [])] }
-  rewriteChildren(content, depth, getSnippet)
+  rewriteChildren(content, depth, context)
   return [heading(depth, requiredStringAttribute(node, 'title')), ...(content.children ?? [])]
 }
 
@@ -316,10 +470,10 @@ function renderBadge(node: MarkdownNode): MarkdownNode[] {
 function renderCallout(
   node: MarkdownNode,
   headingDepth: number,
-  getSnippet: (fileName: string) => string | undefined,
+  context: MarkdownContext,
 ): MarkdownNode[] {
   const content: MarkdownNode = { type: 'root', children: [...(node.children ?? [])] }
-  rewriteChildren(content, headingDepth, getSnippet)
+  rewriteChildren(content, headingDepth, context)
   return [
     {
       type: 'blockquote',
@@ -336,30 +490,196 @@ function renderLinkButton(node: MarkdownNode): MarkdownNode[] {
   return node.type === 'mdxJsxTextElement' ? [content] : [paragraph([content])]
 }
 
-function renderOpenApi(node: MarkdownNode): MarkdownNode[] {
+function renderOpenApi(
+  node: MarkdownNode,
+  headingDepth: number,
+  ir: Ir | undefined,
+): MarkdownNode[] {
+  if (!ir) throw new TypeError('OpenAPI data is required for Markdown output.')
+  const mount = ir.path.replace(/\/$/, '')
   if (node.name === 'OpenApi.Playground') {
-    const operation = requiredStringAttribute(node, 'operationId')
+    const operationId = requiredStringAttribute(node, 'operationId')
+    const spec = optionalStaticStringAttribute(node, 'spec')
+    if (spec && spec !== ir.path)
+      throw new TypeError(`Unknown OpenAPI spec for Markdown output: ${spec}`)
+    const id = slug(operationId)
+    const group = ir.groups.find((group) =>
+      group.operations.some((operation) => operation.id === operationId || operation.id === id),
+    )
+    const operation = group?.operations.find(
+      (operation) => operation.id === operationId || operation.id === id,
+    )
+    if (!group || !operation)
+      throw new TypeError(`Unknown OpenAPI operation for Markdown output: ${operationId}`)
+    const href = `${mount}/${groupPath(group)}#${operation.id}`
+    const query = optionalStaticStringAttribute(node, 'query')
+    const { sampleOperation, authentication } = apiAuthentication(
+      initialRequest(operationWithQuery(operation, query), query),
+      ir,
+    )
+    const samples = codeSamples(sampleOperation, ir.servers[0]?.url, {
+      hideQueryParams: booleanAttribute(node, 'hideQueryParams'),
+    })
     return [
+      paragraph([inlineCode(`${operation.method} ${operation.path}`)]),
+      ...(operation.summary ? [paragraph([text(operation.summary)])] : []),
+      ...(operation.deprecated ? [paragraph([strong('Deprecated')])] : []),
       paragraph([
-        text('Interactive API example for '),
-        inlineCode(operation),
-        text('. See the '),
-        link('Tempo OpenAPI specification', openApiSpecUrl),
-        text(' for the request and response schema.'),
+        link('API reference', href),
+        text(
+          ' — request parameters, authentication, and response schema. The examples below use editable sample values.',
+        ),
+      ]),
+      ...authentication,
+      ...samples.flatMap((sample): MarkdownNode[] => [
+        paragraph([strong(sample.label)]),
+        { type: 'code', lang: sample.lang, value: sample.code },
       ]),
     ]
   }
 
-  requiredStringAttribute(node, 'path')
+  const mountPath = requiredStringAttribute(node, 'path')
+  if (mountPath.replace(/\/$/, '') !== mount)
+    throw new TypeError(`Unknown OpenAPI path for Markdown output: ${mountPath}`)
   const resource = optionalStaticStringAttribute(node, 'resource')
-  return [
-    paragraph([
-      text(resource === 'rpc' ? 'Tempo JSON-RPC endpoints' : 'Tempo REST API endpoints'),
-      text(' are defined in the '),
-      link('Tempo OpenAPI specification', openApiSpecUrl),
-      text('.'),
-    ]),
-  ]
+  const groups = resource
+    ? ir.groups.filter(
+        (group) => group.id === resource || group.name.toLowerCase() === resource.toLowerCase(),
+      )
+    : ir.groups
+  if (groups.length === 0)
+    throw new TypeError(`Unknown OpenAPI resource for Markdown output: ${resource}`)
+  return groups.flatMap((group): MarkdownNode[] => [
+    heading(Math.min(headingDepth + 1, 6), group.name),
+    {
+      type: 'list',
+      ordered: false,
+      spread: false,
+      children: group.operations.map((operation) => ({
+        type: 'listItem',
+        spread: false,
+        children: [
+          paragraph([
+            {
+              type: 'link',
+              url: `${mount}/${groupPath(group)}#${operation.id}`,
+              children: [inlineCode(`${operation.method} ${operation.path}`)],
+            },
+            ...(operation.summary ? [text(` — ${operation.summary}`)] : []),
+          ]),
+        ],
+      })),
+    },
+  ])
+}
+
+function initialRequest(operation: IrOperation, query?: string): IrOperation {
+  // Initial examples should not combine cursors/pages, historical ranges, or unrelated filters.
+  // Keep required inputs and network selectors; the reference documents the optional controls.
+  const networkSelectors = new Set(['chainId', 'sourceChain', 'destinationChain'])
+  const presets = new URLSearchParams(query)
+  return {
+    ...operation,
+    parameters: operation.parameters.filter(
+      (parameter) =>
+        parameter.in !== 'query' ||
+        parameter.required ||
+        networkSelectors.has(parameter.name) ||
+        presets.has(parameter.name),
+    ),
+  }
+}
+
+function apiAuthentication(operation: IrOperation, ir: Ir) {
+  const required =
+    operation.security?.length &&
+    !operation.security.some((requirement) => Object.keys(requirement).length === 0)
+  if (!required) return { sampleOperation: operation, authentication: [] }
+
+  // The web sample generator handles parameter headers, but not OpenAPI security schemes.
+  // Add the canonical API-key header when it is a complete authentication alternative.
+  const key = operation.security?.flatMap((requirement) => {
+    if (Object.keys(requirement).length !== 1) return []
+    const scheme = ir.securitySchemes[Object.keys(requirement)[0]]
+    return scheme?.type === 'apiKey' && scheme.in === 'header' && scheme.name === 'tempo-api-key'
+      ? [scheme]
+      : []
+  })[0]
+  if (!key)
+    return {
+      sampleOperation: operation,
+      authentication: [
+        paragraph([
+          text(
+            'Authentication is required. Add the credentials described in the API reference before running this request.',
+          ),
+        ]),
+      ],
+    }
+  return {
+    sampleOperation: {
+      ...operation,
+      parameters: [
+        ...operation.parameters.filter(
+          (parameter) => parameter.in !== 'header' || parameter.name !== key.name,
+        ),
+        {
+          name: String(key.name),
+          in: 'header' as const,
+          required: true,
+          schema: { type: 'string', example: 'YOUR_API_KEY' },
+        },
+      ],
+    },
+    authentication: [
+      paragraph([
+        text('Requires a '),
+        link('Tempo API key', '/docs/api/console/api-keys'),
+        text('. Replace '),
+        inlineCode('YOUR_API_KEY'),
+        text(' before running this request.'),
+      ]),
+    ],
+  }
+}
+
+function booleanAttribute(node: MarkdownNode, name: string) {
+  const attribute = node.attributes?.find((attribute) => attribute.name === name)
+  if (!attribute) return false
+  if (attribute.value === null) return true
+  if (typeof attribute.value === 'object' && attribute.value?.value === 'true') return true
+  if (typeof attribute.value === 'object' && attribute.value?.value === 'false') return false
+  throw new TypeError(
+    `${node.name} requires a static boolean ${name} attribute for Markdown output.`,
+  )
+}
+
+function markdownNodes(source: string): MarkdownNode[] {
+  return markdownParser.parse(source).children as MarkdownNode[]
+}
+
+function renderHtmlLink(
+  node: MarkdownNode,
+  headingDepth: number,
+  context: MarkdownContext,
+): MarkdownNode[] {
+  const href = requiredStringAttribute(node, 'href')
+  const [title, ...description] = node.children ?? []
+  // Homepage guide cards use a bold title followed by a description inside the same link.
+  if (title?.name === 'strong' && description.some((child) => child.name === 'span')) {
+    rewriteChildren(title, headingDepth, context)
+    const content: MarkdownNode = { type: 'root', children: description }
+    rewriteChildren(content, headingDepth, context)
+    return [
+      paragraph([
+        link(plainText(title.children ?? []), href),
+        text(` — ${plainText(content.children ?? [])}`),
+      ]),
+    ]
+  }
+  rewriteChildren(node, headingDepth, context)
+  const content: MarkdownNode = { type: 'link', url: href, children: node.children ?? [] }
+  return node.type === 'mdxJsxTextElement' ? [content] : [paragraph([content])]
 }
 
 function stringAttribute(node: MarkdownNode, name: string) {
@@ -506,9 +826,7 @@ function isComponent(node: MarkdownNode) {
 function isLayoutElement(node: MarkdownNode) {
   if (node.name !== 'div' && node.name !== 'span') return false
   return (node.attributes ?? []).every(
-    (attribute) =>
-      attribute.type === 'mdxJsxAttribute' &&
-      (attribute.name === 'className' || attribute.name === 'style'),
+    (attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'id',
   )
 }
 

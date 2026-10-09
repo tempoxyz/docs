@@ -1,0 +1,52 @@
+---
+title: Choose an account model
+seoTitle: Choose an Account Model | Tempo Docs
+description: Decide where customer funds live, who signs payments, and which records your application maintains.
+---
+
+# Choose an account model
+
+Decide whether each customer needs a separate onchain balance or whether deposits should collect in a shared account. Then choose who can authorize payments from those accounts.
+
+<span id="integration-walkthrough" />
+<span id="associate-the-address-with-your-business-records" />
+
+## Where should funds live?
+
+| Your product needs | Account model | Build it |
+| --- | --- | --- |
+| Customers hold and spend their own stablecoin balances | Use a separate account for each customer. Read balances and activity at that account's address. | [Create an account](/docs/accounts/create) or [connect the customer's wallet](/docs/accounts/integrate) |
+| Customers deposit into your business, and you need to identify who paid | Give each customer a virtual deposit address that forwards payments to a shared account. Track customer credits in your application's ledger. | [Customer deposit addresses](/docs/guide/payments/virtual-addresses) |
+| Your business pays employees, suppliers, or other recipients | Fund a company account and send payments from it. Track each payout against your business records. | [Fund an account](/docs/guide/getting-funds), then [send payments](/docs/guide/payments/send-a-payment) |
+
+A virtual deposit address identifies incoming payments; it does **not** hold a separate balance or give the customer signing authority over the shared account. For example, if two customers deposit 100 and 50 tokens, the shared account receives 150. Your ledger records which customer receives each credit.
+
+You can combine these models: a product might give customers separate accounts while using a company account for payouts.
+
+<span id="create-the-account-and-connect-its-signer" />
+<span id="authorize-and-send-a-payment" />
+
+## Who approves payments?
+
+Separate accounts do not determine who controls signing. Choose signing based on how your product approves spending:
+
+- **The customer approves each payment:** connect an existing wallet, or use an [embedded wallet provider](/docs/accounts/providers) or [passkey account](/docs/accounts/create#create-a-passkey-account) within your app.
+- **Your backend approves payments:** use your signing infrastructure or a [wallet provider](/docs/accounts/providers). Keep signing credentials on the server.
+- **A service acts within a budget:** authorize an [access key](/docs/accounts/agents) with a spending limit, expiry, and allowed calls.
+
+A customer logging into your application does not itself authorize an onchain payment. Your integration must also obtain the wallet signature or use a key already authorized for that operation.
+
+<span id="fund-and-inspect-the-account" />
+<span id="confirm-the-transfer-and-update-your-records" />
+
+## What does your application record?
+
+Keep the customer or business identifier alongside the network, account address, and provider wallet identifier if you use one. These records connect your users to the accounts your integration reads and signs for.
+
+Use [balances and activity](/docs/accounts/balances) to show onchain funds. For a shared account, show each customer's ledger balance rather than the account's total balance.
+
+For deposits, [verify the actual transfer](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) before crediting a customer. Record the network, transaction hash, and log index to avoid processing the same transfer twice. For payouts, associate your payment record with its transaction and confirm the outcome before marking it paid.
+
+<span id="extend-the-account-integration" />
+
+Once you have chosen the model, use [Client setup](/docs/accounts/examples) for the shared SDK configuration. The funding, sending, and receiving guides cover each operation separately.

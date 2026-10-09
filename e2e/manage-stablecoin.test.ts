@@ -56,7 +56,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   })
 
   // Step 4: Grant issuer role
-  const grantStep = getDemoStep(page, 'Grant issuer role on ManageTestUSD.')
+  const grantStep = getDemoStep(page, /Grant issuer role on /)
   const grantEnterDetails = grantStep.getByRole('button', { name: 'Enter details' })
   await expect(grantEnterDetails).toBeVisible()
   await grantEnterDetails.click()
@@ -70,7 +70,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   })
 
   // Step 5: Revoke issuer role
-  const revokeStep = getDemoStep(page, 'Revoke issuer role on ManageTestUSD.')
+  const revokeStep = getDemoStep(page, /Revoke issuer role on /)
   const revokeEnterDetails = revokeStep.getByRole('button', { name: 'Enter details' })
   await expect(revokeEnterDetails).toBeVisible()
   await revokeEnterDetails.click()

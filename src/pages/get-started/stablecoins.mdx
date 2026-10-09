@@ -1,0 +1,65 @@
+---
+title: Stablecoins on Tempo
+seoTitle: Stablecoins and TIP-20 Tokens | Tempo Docs
+description: Understand TIP-20 Tokens, identify stablecoins by network and contract address, and work with token amounts, fees, and payment references.
+---
+
+# Stablecoins on Tempo
+
+Tempo’s native stablecoins use the TIP-20 token standard. An account can hold balances in multiple tokens, and your application uses the same interface to read balances and send payments for each one.
+
+## Identify the stablecoin
+
+Identify each asset by **its network and contract address**. Keep both alongside amounts in your application and payment records; use the name and symbol for display.
+
+Use the [token list](/docs/quickstart/tokenlist) for addresses and display metadata. The [Assets directory](/docs/partners/stablecoins) introduces stablecoin issuers, and the [OUSD guide](/docs/guide/ousd) covers OUSD addresses and funding paths.
+
+For development, use [Moderato testnet](/docs/quickstart/connection-details) and [faucet tokens](/docs/quickstart/faucet). The token list provides separate addresses for testnet and mainnet assets.
+
+## Understand TIP-20 Tokens
+
+TIP-20 extends ERC-20 with payment features built into Tempo. If you already work with ERC-20 tokens, the core operations are familiar:
+
+| Operation | Use |
+| --- | --- |
+| Read an account’s balance | `balanceOf` |
+| Send tokens from an account | `transfer` |
+| Allow another address to spend tokens | `approve` |
+| Spend an approved allowance | `transferFrom` |
+
+TIP-20 also provides transfer memos, stablecoin fee payment, and policies that control token movement.
+
+## Work with token amounts
+
+TIP-20 tokens use **6 decimal places**. A balance of `1000000` base units represents `1` token; `12500000` represents `12.5` tokens.
+
+Use integer base units when preparing transactions and convert them for display. With the TypeScript SDK, use Viem’s `parseUnits` and `formatUnits`:
+
+```ts
+import { formatUnits, parseUnits } from 'viem'
+
+const amount = parseUnits('12.5', 6) // 12500000n
+const displayAmount = formatUnits(amount, 6) // '12.5'
+```
+
+## Add references to payments
+
+A TIP-20 transfer can include a **32-byte memo**. Use it to identify an invoice, order, or other record when reconciling payments. The memo appears in transfer events alongside the payment details.
+
+See [Payment references](/docs/guide/payments/transfer-memos) for encoding memos and reading them from transfer events.
+
+## Pay fees in stablecoins
+
+Tempo has no native gas token. Transaction fees use supported USD-denominated TIP-20 tokens with sufficient fee liquidity. The payment token and fee token can differ, and your application can [sponsor fees](/docs/guide/payments/sponsor-user-fees) for its users.
+
+See [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) for client configuration and [transaction fees](/docs/protocol/fees) for eligibility and conversion rules.
+
+<span id="verify-that-the-recipient-receives-funds" />
+
+## Token and account policies
+
+A token’s transfer policy controls which addresses can send and receive it. Account owners can also choose which tokens and senders they accept. See [Control incoming payments](/docs/guide/payments/configure-receive-policies) to configure a receive policy and handle blocked payments.
+
+[Send your first payment →](/docs/guide/payments/send-a-payment)
+
+For contract interfaces and exact token behavior, read the [TIP-20 Specification](/docs/protocol/tip20/spec).

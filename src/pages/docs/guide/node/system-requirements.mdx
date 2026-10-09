@@ -36,13 +36,7 @@ If you want to separate them, use `--datadir` for execution data and `--consensu
 
 ## Cloud provider recommendations
 
-These dedicated servers meet or exceed the recommended specs for both RPC and validator nodes:
-
-| Provider | Server | CPU | RAM | Storage |
-|----------|--------|-----|-----|---------|
-| OVH | Advance-4 | Intel Xeon-E 2386G (6c/12t) | 32 GB | 2× 512 GB NVMe |
-| Hetzner | AX42 | AMD Ryzen 5 3600 (6c/12t) | 64 GB | 2× 512 GB NVMe |
-| AWS | `c6id.8xlarge` | 32 vCPUs | 64 GB | 1.9 TB NVMe |
+Choose a dedicated server or cloud instance that meets the CPU, RAM, and local NVMe requirements above for your node type. Check the current provider specifications and usable disk capacity before provisioning; RAID mirroring reduces usable capacity.
 
 :::warning
 Cloud instances with network-attached storage (e.g., AWS EBS) do not provide sufficient I/O performance. Use dedicated servers or instances with local NVMe storage.

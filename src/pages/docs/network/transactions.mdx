@@ -1,0 +1,92 @@
+---
+title: Transactions
+seoTitle: Build and Send Transactions | Tempo Docs
+description: Build a Tempo transaction, sign and submit it, and check its receipt with an SDK or JSON-RPC.
+---
+
+# Transactions
+
+Build a transaction from contract calls, sign it with your account, and submit it to Tempo. These examples transfer one AlphaUSD on Moderato testnet.
+
+Start with [Network example setup](/docs/network/examples) for CLI variables, the Viem client, a connected Wagmi wallet, and the Python helper. Each tab continues in the same script.
+
+<span id="build-a-transaction" />
+<span id="sign-and-submit" />
+
+:::::steps
+
+### Send a transaction
+
+Use the token helper to build, sign, and submit a transfer. The amount is in base units: `1_000_000` is one AlphaUSD. Viem and the CLI sign locally; Wagmi asks the connected wallet to sign.
+
+::::code-group
+```ts [Viem]
+// [!include ~/snippets/network-transfer.ts:send]
+```
+
+```bash [CLI]
+TX_HASH=$(cast erc20 transfer "$TOKEN" "$TEMPO_RECIPIENT" 1000000 \
+  --rpc-url "$RPC_URL" --tempo.fee-token "$TOKEN" --interactive --async)
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:send]
+```
+
+```python [Python]
+from network_config import ALPHA_USD, TIP20, account, make_transaction, recipient, w3
+
+call = TIP20(ALPHA_USD).transfer(to=recipient, amount=1_000_000)
+tx = make_transaction((call,))
+signed = tx.sign(account.key.hex())
+tx_hash = w3.eth.send_raw_transaction(signed.encode())
+```
+::::
+
+For separate signing and broadcasting, follow the [complete transaction example](/docs/network/examples#typescript-setup). Submit its serialized bytes with [`eth_sendRawTransaction`](/docs/protocol/rpc#eth_sendrawtransaction). To submit several calls atomically, use [batch transactions](/docs/guide/tempo-transaction#batch-calls); for separate outcomes, use [independent nonces](/docs/guide/payments/send-parallel-transactions).
+
+### Check the receipt
+
+Wait for inclusion and check execution status. The RPC method returns `null` until a receipt is available; poll again while it is `null`. A receipt status of `0x1` means success.
+
+::::code-group
+```ts [Viem]
+// [!include ~/snippets/network-transfer.ts:receipt]
+```
+
+```bash [CLI]
+cast receipt "$TX_HASH" --rpc-url "$RPC_URL"
+```
+
+```ts [Wagmi]
+// [!include ~/snippets/network-wagmi.ts:receipt]
+```
+
+```python [Python]
+receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+if receipt["status"] != 1:
+    raise RuntimeError("Transaction reverted")
+print(tx_hash.hex())
+```
+
+```bash [API (RPC)]
+curl "$RPC_URL" -H 'Content-Type: application/json' \
+  --data "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_getTransactionReceipt\",\"params\":[\"$TX_HASH\"]}"
+```
+::::
+
+Before recording a payment as delivered, [verify transfer events](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) against the expected token, amount, and recipient. Receive policies can redirect a transfer even when the transaction succeeds.
+
+:::::
+
+## Add transaction controls
+
+| Your application needs to | Use |
+| --- | --- |
+| Choose who pays and which token pays | [Fees](/docs/network/fees) |
+| Delegate signing with limits | [Keys and permissions](/docs/accounts/keys) |
+| Bound when a transaction can execute | [Validity windows](/docs/guide/tempo-transaction#validity-windows) |
+| Submit separate transactions concurrently | [Concurrent transactions](/docs/guide/tempo-transaction#concurrent-transactions) |
+| Inspect encoding and signature rules | [Transaction specification](/docs/protocol/transactions/spec-tempo-transaction) |
+
+Use the [complete runnable example](/docs/network/examples#typescript-setup), [wallet payment demo](/docs/guide/payments/send-a-payment#send-payment-demo), or [other language recipes](/docs/guide/tempo-transaction) for a full integration.

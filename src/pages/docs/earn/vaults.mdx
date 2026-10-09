@@ -1,0 +1,54 @@
+---
+title: "Vaults"
+seoTitle: "Earn vaults | Tempo Docs"
+description: "Select an Earn vault by asset, strategy, access rules, and supported deposit and withdrawal operations."
+interactive: true
+---
+
+import { EarnVaultDemo } from '../../../components/guides/EarnVaultDemo'
+
+<span id="choose-a-vault" />
+
+# Vaults
+
+Choose a vault that accepts the stablecoin your customers hold and supports the access and withdrawal requirements of your product.
+
+<span id="available-vaults" />
+
+## Find a vault
+
+Start with the [verified vault directory](/docs/api/earn#getverifiedearnvaults). Check each vault's accepted asset, strategy, access restrictions, fees, and withdrawal capabilities. The directory's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
+
+<span id="inspect-the-selected-vault" />
+
+### Inspect a vault
+
+The demo loads verified vaults from Moderato testnet and selects the deposit demo’s pathUSD vault when available. Choose another vault or network to inspect its current configuration. All values come from live Tempo API responses.
+
+<EarnVaultDemo />
+
+Save the selected vault's `id` (its contract address) and network together. The directory uses public read access; the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) includes request fields, code samples, and authenticated access.
+
+<span id="where-yield-comes-from" />
+
+## How vaults generate returns
+
+An engine is the contract that connects an Earn vault to its underlying strategy.
+
+| Source | How it connects to Earn |
+| --- | --- |
+| **Lending** | An engine deposits into an underlying lending vault. |
+| **Managed strategies** | An engine connects to a provider-managed vault that allocates funds across its strategy. |
+| **Tokenized assets** | An engine accesses an asset, such as tokenized treasuries or private credit, through a supported liquidity pool. |
+
+## Eligibility and risk
+
+Before enabling a deposit, check the accepted asset, the account's eligibility, `state.depositsPaused`, and the operations listed in `capabilities`. Use the deployed vault’s supported operations through [Viem’s Earn actions](/docs/earn/integrate). The Earn read API does not submit deposits or withdrawals.
+
+## Liquidity and fees
+
+Check withdrawal support before the first deposit. `capabilities.redeem` and `capabilities.asyncRedeem` distinguish immediate and queued redemption support. `instantLiquidity` describes vault-wide liquidity, not a user-specific quote; `null` means a reliable value is unavailable.
+
+Read the provider's deposit, management, and withdrawal fees before presenting a rate. An observed APY describes a measurement window; it is not a promised return.
+
+Continue with [Deposit](/docs/earn/integrate). See [Withdraw](/docs/earn/withdraw) for the exit flow your application needs to support.

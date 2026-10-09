@@ -57,7 +57,7 @@ test('mint stablecoins', async ({ page }) => {
   })
 
   // Step 4: Grant issuer role - click "Enter details" then "Grant"
-  const grantStep = getDemoStep(page, 'Grant issuer role on MintTestUSD.')
+  const grantStep = getDemoStep(page, /Grant issuer role on /)
   const grantEnterDetails = grantStep.getByRole('button', { name: 'Enter details' })
   await expect(grantEnterDetails).toBeVisible()
   await grantEnterDetails.click()

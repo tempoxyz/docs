@@ -1,71 +1,59 @@
 ---
-title: "Tempo developer tools and SDKs"
-seoTitle: "Tempo Tools & SDKs | Tempo Docs"
-description: Find Tempo SDKs, CLI commands, API docs, wallet docs, RPC references, and indexer tools for building, testing, and operating production integrations.
+title: APIs & SDKs
+seoTitle: Tempo APIs and SDKs | Tempo Docs
+description: Find Tempo API references, SDKs, CLI commands, authentication, and local development tools.
 ---
 
-import { Cards, Card } from 'vocs'
+import { DocsLinkCards } from '../../components/DocsLinkCards'
 
-# Tempo developer tools and SDKs
+<span id="apis-and-sdks" />
+<span id="tempo-developer-tools-and-sdks" />
 
-Use this section when you need the implementation surface for Tempo: libraries, command-line tools, APIs, wallet integration, RPC references, and query access to network data.
+<span id="tools" />
 
-If you are integrating a product, start with the TypeScript SDKs and Tempo API. If you are operating infrastructure or debugging low-level behavior, start with the CLI and RPC reference.
+# APIs & SDKs
 
-## Build with SDKs
+Use Tempo APIs to read data and integrate hosted services, SDKs to build and sign transactions, and the CLI to work from your terminal.
 
-<Cards>
-  <Card
-    title="Tempo SDKs"
-    description="Use TypeScript, Go, Foundry, Python, and Rust tooling for Tempo applications."
-    to="/docs/sdk"
-    icon="lucide:package"
-  />
-  <Card
-    title="Tempo CLI"
-    description="Manage wallets, make requests, download binaries, and run node-related commands."
-    to="/docs/cli"
-    icon="lucide:terminal"
-  />
-  <Card
-    title="Tempo API"
-    description="Use JSON-RPC, fee sponsorship, and indexed data through the Tempo API."
-    to="/docs/api"
-    icon="lucide:cloud"
-  />
-  <Card
-    title="Tempo Wallet"
-    description="Integrate the Tempo Wallet, recipes, references, and agent-oriented wallet flows."
-    to="/docs/wallet"
-    icon="lucide:wallet"
-  />
-</Cards>
+## APIs
 
-## Operate and Inspect
+<DocsLinkCards collection="apis" />
 
-<Cards>
-  <Card
-    title="JSON-RPC API"
-    description="Browse Tempo RPC methods, request shapes, and protocol-level API behavior."
-    to="/docs/protocol/rpc"
-    icon="lucide:braces"
-  />
-  <Card
-    title="Indexer API"
-    description="Query Tempo blocks, transactions, logs, token balances, and decoded events through SQL."
-    to="/docs/api/indexer-api"
-    icon="lucide:database"
-  />
-  <Card
-    title="Fee Payer API"
-    description="Sponsor Tempo transaction fees through the hosted Relay API."
-    to="/docs/api/fee-payer"
-    icon="lucide:badge-dollar-sign"
-  />
-  <Card
-    title="Use Tempo with AI"
-    description="Install MCP, plugins, and docs context so coding agents can work with Tempo accurately."
-    to="/docs/guide/using-tempo-with-ai"
-    icon="lucide:bot"
-  />
-</Cards>
+API keys authenticate API requests; account signing keys authorize transactions.
+
+<span id="build-with-sdks" />
+
+## SDKs
+
+| Language or environment | Start here |
+| --- | --- |
+| TypeScript and React | [Viem and Wagmi](/docs/sdk/typescript) |
+| Rust | [tempo-alloy](/docs/sdk/rust) |
+| Go | [tempo-go](/docs/sdk/go) |
+| Python | [pytempo](/docs/sdk/python) |
+| Solidity | [Foundry](/docs/sdk/foundry) |
+| Hosted API calls | [Tempo API typed client](/docs/api/typed-client) |
+
+Use [Build with AI](/docs/guide/using-tempo-with-ai) to give your coding agent Tempo documentation. For local tests, use [Prool](/docs/sdk/typescript/prool) or [Anvil](/docs/sdk/foundry#local-tempo-development-with-anvil).
+
+## CLI
+
+The [Tempo CLI](/docs/cli) supports wallet operations, paid HTTP requests, and node operations. Choose the command for your task:
+
+- [Wallet CLI](/docs/cli/wallet): fund an account, read balances, and manage access.
+- [`tempo request`](/docs/cli/request): make HTTP requests with MPP payments.
+- [`tempo node`](/docs/cli/node): run and sync a node.
+
+For contract deployment and debugging, use [Foundry's `forge` and `cast`](/docs/sdk/foundry).
+
+Use [Tempo Console](https://console.tempo.xyz/) to manage API access or [Tempo Wallet](https://wallet.tempo.xyz/) to connect an account. [MPP](https://mpp.dev/) documents the payment protocol; [Mercator](https://mercator.sh/) helps agents find paid services.
+
+<span id="operate-and-inspect" />
+<span id="inspect-network-data-and-transactions" />
+
+## Find infrastructure
+
+Use [Partners](/docs/partners) to find wallet providers, RPC services, explorers, indexers, and other integrations. [Network details](/docs/quickstart/connection-details) lists Tempo’s RPC endpoints and chain IDs.
+
+<span id="explorers" />
+<span id="partners" />

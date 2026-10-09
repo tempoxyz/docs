@@ -49,14 +49,22 @@ for (const route of publicRoutes) {
 
 test('keeps one route title through docs and OpenAPI client navigation', async ({ page }) => {
   await page.goto('/docs/quickstart/integrate-tempo', { waitUntil: 'networkidle' })
-  await expectSingleTitle(page, 'How to Integrate Tempo | Tempo Docs')
+  await expectSingleTitle(page, 'Integrate Tempo with Apps, Wallets, and Services | Tempo Docs')
 
   await page
-    .getByRole('navigation', { name: 'Documentation sections' })
-    .getByRole('link', { name: 'Tempo API', exact: true })
+    .getByRole('navigation', { name: 'Documentation sections', exact: true })
+    .getByRole('link', { name: 'Tempo EVM', exact: true })
+    .click()
+  await page.waitForURL(/\/docs\/development\/?$/)
+  await expectSingleTitle(page, 'Tempo EVM | Tempo Docs')
+
+  await page.getByRole('button', { name: 'APIs & SDKs', exact: true }).click()
+  await page
+    .getByRole('navigation', { name: 'APIs & SDKs', exact: true })
+    .getByRole('link', { name: 'API reference', exact: true })
     .click()
   await page.waitForURL(/\/docs\/api\/?$/)
-  await expectSingleTitle(page, 'Start with the Tempo API | Tempo Docs')
+  await expectSingleTitle(page, 'Tempo API reference | Tempo Docs')
 
   await page.locator('a[href="/docs/api/transactions"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transactions\/?$/)
@@ -64,7 +72,7 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
 
   await page.locator('a[href="/docs/api/transfers"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transfers\/?$/)
-  await expectSingleTitle(page, 'Stablecoin Transfers API | Tempo Docs')
+  await expectSingleTitle(page, 'Read Token Transfers with the Tempo API | Tempo Docs')
 })
 
 test('gives missing pages one noindex title and one H1', async ({ page }) => {

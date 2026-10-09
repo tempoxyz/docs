@@ -1,9 +1,11 @@
 import { Tabs, Tab } from 'vocs'
 import PublicTestnetSponsorTip from './public-testnet-sponsor-tip.mdx'
 
+The Viem and Wagmi examples below use Moderato testnet. Fund the test account before submitting transactions.
+
 ### Configurable Fee Tokens
 
-A fee token is a permissionless [TIP-20 token](/docs/protocol/tip20/overview) that can be used to pay fees on Tempo. 
+A fee token is a USD-denominated [TIP-20 token](/docs/protocol/tip20/overview) supported for fee payment. When conversion is needed, the Fee AMM must have sufficient liquidity for the validator's preferred token. See the [fee-token rules](/docs/protocol/fees/spec-fee#fee-token-preferences).
 
 When a TIP-20 token is passed as the `fee_token` parameter in a transaction, 
 Tempo's [Fee AMM](/docs/protocol/fees/spec-fee-amm) automatically facilitates conversion between the 
@@ -30,7 +32,7 @@ user's preferred fee token and the validator's preferred token.
     ```
 
     ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -58,7 +60,7 @@ user's preferred fee token and the validator's preferred token.
 
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
-    // [!include ~/snippets/wagmi.config.ts:setup]
+    // [!include ~/snippets/wagmi.moderato.config.ts:setup]
     ```
 
     :::
@@ -256,9 +258,9 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     ```tsx twoslash [example.ts]
     // @noErrors
     import { client } from './viem.config'
-    import { privateKeyToAccount } from 'viem/accounts'
+    import { Account } from 'viem/tempo'
 
-    const feePayer = privateKeyToAccount('0x...')
+    const feePayer = Account.fromSecp256k1('0x...')
 
     const receipt = await client.sendTransactionSync({
       data: '0xdeadbeef',
@@ -268,7 +270,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     ```
 
     ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -282,9 +284,9 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
     ```tsx twoslash [example.ts]
     // @noErrors
     import { useSendTransactionSync } from 'wagmi'
-    import { privateKeyToAccount } from 'viem/accounts'
+    import { Account } from 'viem/tempo'
 
-    export const feePayer = privateKeyToAccount('0x...')
+    export const feePayer = Account.fromSecp256k1('0x...')
 
     const { sendTransactionSync } = useSendTransactionSync()
 
@@ -297,7 +299,7 @@ over the transaction with a special "fee payer envelope" to commit to paying fee
 
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
-    // [!include ~/snippets/wagmi.config.ts:setup]
+    // [!include ~/snippets/wagmi.moderato.config.ts:setup]
     ```
 
     :::
@@ -593,7 +595,7 @@ parameter.
     ```
 
     ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -630,7 +632,7 @@ parameter.
 
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
-    // [!include ~/snippets/wagmi.config.ts:setup]
+    // [!include ~/snippets/wagmi.moderato.config.ts:setup]
     ```
 
     :::
@@ -892,7 +894,7 @@ transactions thereafter can be signed by the access key.
     ```
 
     ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -1299,7 +1301,7 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
     ```
 
     ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -1332,7 +1334,7 @@ In **Viem** and **Wagmi**, expiring nonces are handled automatically.
 
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
-    // [!include ~/snippets/wagmi.config.ts:setup]
+    // [!include ~/snippets/wagmi.moderato.config.ts:setup]
     ```
 
     :::
@@ -1578,7 +1580,7 @@ Set `nonceKey` to `maxUint256` and `validBefore` to a Unix timestamp in seconds 
     ```
 
     ```tsx twoslash [viem.config.ts] filename="viem.config.ts"
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -1606,7 +1608,7 @@ Set `nonceKey` to `maxUint256` and `validBefore` to a Unix timestamp in seconds 
 
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
-    // [!include ~/snippets/wagmi.config.ts:setup]
+    // [!include ~/snippets/wagmi.moderato.config.ts:setup]
     ```
 
     :::
@@ -1835,7 +1837,7 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
     ```
 
     ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -1871,7 +1873,7 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
 
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
-    // [!include ~/snippets/wagmi.config.ts:setup]
+    // [!include ~/snippets/wagmi.moderato.config.ts:setup]
     ```
 
     :::
@@ -2087,11 +2089,11 @@ For cases requiring ordered sequences within a key, Tempo's **2D nonce system** 
 **Reuse nonce keys instead of generating random ones.** Creating a new nonce key incurs a state creation cost that increases with the number of active keys (see [State creation costs](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1000.md)). For most applications, using a small set of sequential nonce keys (e.g., `1n`, `2n`, `3n`) is sufficient and much more cost-effective than generating random nonce keys for each transaction.
 :::
 
-### Scheduled Transactions
+<span id="scheduled-transactions" />
 
-Scheduled transactions allow you to sign a transaction in advance and specify a time window for when it can be 
-executed onchain. By setting `validAfter` and `validBefore` timestamps, you define the earliest and latest times 
-the transaction can be included in a block. 
+### Validity windows
+
+Set `validAfter` and `validBefore` to bound when a signed transaction may be included in a block. Your application must still submit it; a validity window does not schedule a job or guarantee inclusion.
 
 <div className="-mt-2" />
 
@@ -2107,13 +2109,13 @@ the transaction can be included in a block.
     const signature = await client.signTransaction({
       data: '0xdeadbeef0000000000000000000000000000000001',
       to: '0xcafebabecafebabecafebabecafebabecafebabe',
-      validAfter: Math.floor(Number(new Date('2026-01-01')) / 1000), // [!code hl]
-      validBefore: Math.floor(Number(new Date('2026-01-02')) / 1000), // [!code hl]
+      validAfter: Math.floor(Date.now() / 1000), // [!code hl]
+      validBefore: Math.floor(Date.now() / 1000) + 3600, // [!code hl]
     })
     ```
 
     ```tsx twoslash [viem.config.ts]
-    // [!include ~/snippets/viem.config.ts:setup]
+    // [!include ~/snippets/viem.moderato.config.ts:setup]
     ```
 
     :::
@@ -2132,14 +2134,14 @@ the transaction can be included in a block.
     const signature = await signTransaction(config, {
       data: '0xdeadbeef0000000000000000000000000000000001',
       to: '0xcafebabecafebabecafebabecafebabecafebabe',
-      validAfter: Math.floor(Number(new Date('2026-01-01')) / 1000), // [!code hl]
-      validBefore: Math.floor(Number(new Date('2026-01-02')) / 1000), // [!code hl]
+      validAfter: Math.floor(Date.now() / 1000), // [!code hl]
+      validBefore: Math.floor(Date.now() / 1000) + 3600, // [!code hl]
     })
     ```
 
     ```tsx twoslash [wagmi.config.ts]
     // @noErrors
-    // [!include ~/snippets/wagmi.config.ts:setup]
+    // [!include ~/snippets/wagmi.moderato.config.ts:setup]
     ```
 
     :::

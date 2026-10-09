@@ -27,14 +27,14 @@ Tempo runs multiple chains. Select one per request with the `chainId` query para
 | Chain | Alias | Chain id |
 | --- | --- | --- |
 | Mainnet | `mainnet` | `4217` |
-| Testnet | `testnet` | `42431` |
+| Moderato testnet | `testnet` | `42431` |
 
 ```bash
 curl 'https://api.tempo.xyz/v1/blocks?chainId=testnet' \
   --header 'Authorization: Bearer tempo:sk:...'
 ```
 
-`chainId` defaults to `mainnet` when omitted. A sandbox API key steers an omitted `chainId` to `testnet` — see [Authentication](/docs/api/authentication) for how key environments interact with chain selection.
+`chainId` defaults to `mainnet` when omitted. Sandbox keys must explicitly select a non-mainnet chain, such as `chainId=testnet`. See [Authentication](/docs/api/authentication).
 
 ## Resource identifiers
 
@@ -52,7 +52,7 @@ Treat identifiers as opaque strings. Always compare them in lowercase, since the
 
 ## Token amount formats
 
-Token amounts are returned as **decimal strings in the token's smallest unit**, never as numbers. This preserves full precision for large values that exceed the range of a JSON number.
+Raw token amounts use **decimal strings in base units** to preserve precision. Some fields, such as a transfer's `sourceAmount`, return an amount object with `baseUnits`, `decimals`, and `formatted` instead. Check the endpoint's response schema.
 
 ```json
 {
@@ -95,8 +95,8 @@ tempo-request-id: 0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9
 
 ## API error conventions
 
-Errors use a single, consistent envelope with a conventional HTTP status code and a stable, machine-readable `error.code` you branch on. See [Errors](/docs/api/errors) for the envelope and the full code catalog.
+REST API errors normally use a JSON envelope with an HTTP status and a machine-readable `error.code`. MPP challenges, JSON-RPC errors, and edge-level failures can use different formats. See [Errors](/docs/api/errors) for the envelope and the full code catalog.
 
 ## API rate-limit conventions
 
-Every response carries standard `RateLimit-*` headers, and requests that exceed quota receive `429 Too Many Requests` with a `Retry-After` header. See [Rate Limits](/docs/api/rate-limits) for the full model and best practices.
+Responses that consume quota report it in `RateLimit-*` headers; cached responses may omit them. Over-quota requests receive `429 Too Many Requests`, or an MPP `402` challenge when eligible. See [Rate Limits](/docs/api/rate-limits) for the full model and best practices.

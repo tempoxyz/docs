@@ -1,90 +1,233 @@
 ---
-title: "Tempo protocol: specifications and reference"
+title: "Specifications"
 seoTitle: "Tempo Protocol Specifications | Docs"
 description: Read Tempo protocol references for tokens, policies, fees, transactions, blockspace, exchange, zones, network upgrades, TIP specs, and implementation details.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Tempo protocol: specifications and reference
+# Specifications
 
-Use this section when you need the technical reference for Tempo itself. These pages are written for implementers, auditors, wallet teams, infrastructure operators, and anyone building against protocol-level behavior rather than a single product workflow.
+Read the specifications for Tempo's tokens, accounts, transactions, fees, blocks, and exchange. Each link below opens the full specification.
 
-If you are building an app, start with the guides in **Build on Tempo** and come here when you need exact semantics, ABI details, or protocol rationale.
+<span id="core-primitives" />
 
-For private execution internals, start with Tempo Zones and the [zone accounts specification](/docs/protocol/zones/accounts), which defines private balance, allowance, and account-scoped access rules.
-
-## Core Primitives
+## Core specifications
 
 <Cards>
   <Card
     title="TIP-20 Tokens"
-    description="Stablecoin-native token behavior, metadata, fees, memos, policies, and liquidity routing."
-    to="/docs/protocol/tip20/overview"
+    description="Token interfaces, memos, roles, metadata, and policy checks."
+    to="/docs/protocol/tip20/spec"
     icon="lucide:coins"
   />
   <Card
-    title="Tempo Policies (TIP-403)"
-    description="TIP-403 policy checks, receive policies, access controls, and registry behavior."
-    to="/docs/protocol/tip403/overview"
+    title="Transfer policies"
+    description="TIP-403 policy registry, authorization checks, and receive policies."
+    to="/docs/protocol/tip403/spec"
     icon="lucide:shield-check"
   />
   <Card
-    title="Transaction Fees"
-    description="Stablecoin fee payment, fee accounting, and the fee AMM used for conversion."
-    to="/docs/protocol/fees"
-    icon="lucide:badge-dollar-sign"
+    title="Account Keychain"
+    description="Signing keys, permissions, expiry, and spending limits."
+    to="/docs/protocol/transactions/AccountKeychain"
+    icon="lucide:key-round"
   />
   <Card
     title="Tempo Transactions"
-    description="Tempo transaction type, batching, scheduling, fee sponsorship, and account keychains."
-    to="/docs/protocol/transactions"
+    description="Transaction encoding, signatures, batching, and validation."
+    to="/docs/protocol/transactions/spec-tempo-transaction"
     icon="lucide:layers"
+  />
+  <Card
+    title="Transaction fees"
+    description="Fee calculation, token selection, sponsorship, and settlement."
+    to="/docs/protocol/fees/spec-fee"
+    icon="lucide:badge-dollar-sign"
+  />
+  <Card
+    title="Fee AMM"
+    description="Fee-token conversion, liquidity accounting, and rebalancing."
+    to="/docs/protocol/fees/spec-fee-amm"
+    icon="lucide:repeat"
   />
 </Cards>
 
-## Network Systems
+<span id="network-systems" />
+
+## Blocks and exchange
 
 <Cards>
   <Card
-    title="Blockspace"
-    description="Consensus, finality, block format, payment lanes, and throughput-oriented protocol design."
+    title="Block structure"
+    description="Header fields, transaction ordering, and system transactions."
     to="/docs/protocol/blockspace/overview"
+    icon="lucide:blocks"
+  />
+  <Card
+    title="Payment lanes"
+    description="Payment classification and block gas constraints."
+    to="/docs/protocol/blockspace/payment-lane-specification"
     icon="lucide:layout-dashboard"
   />
   <Card
     title="Stablecoin DEX"
-    description="Enshrined stablecoin exchange, quote tokens, swaps, liquidity, and exchange balances."
-    to="/docs/protocol/exchange"
+    description="Order books, swaps, liquidity, and exchange interfaces."
+    to="/docs/protocol/exchange/spec"
     icon="lucide:arrow-left-right"
   />
-  <Card
-    title="Zones"
-    description="Private zone architecture, accounts, bridging, RPC, execution, gas, and proving."
-    to="/docs/protocol/zones"
-    icon="lucide:scan"
-  />
-  <Card
-    title="Network Upgrades"
-    description="Track upgrade specifications, migration notes, and release-level protocol changes."
-    to="/docs/protocol/upgrades/t8"
-    icon="lucide:arrow-up-circle"
-  />
 </Cards>
 
-## Specifications and Source
+## How protocol changes happen
 
-<Cards>
-  <Card
-    title="TIPs"
-    description="Browse Tempo Improvement Proposals for standards, process changes, and protocol history."
-    to="https://tips.sh/"
-    icon="lucide:file-text"
-  />
-  <Card
-    title="GitHub Repository"
-    description="Read the Tempo source implementation and follow protocol development in the open."
-    to="https://github.com/tempoxyz/tempo"
-    icon="lucide:github"
-  />
-</Cards>
+Tempo Improvement Proposals (TIPs) describe protocol changes. A proposal does not establish that a feature is active. Check the [network upgrade timeline](/docs/protocol/upgrades) for testnet and mainnet activation, or read the [upgrade process](/docs/guide/node/upgrade-cadence) for operator guidance.
+
+<span id="specifications-and-source" />
+
+## Tempo Improvement Proposals
+
+TIPs are grouped below by the network upgrade that includes them, newest first. **Approval alone does not mean a change is live.** Use each upgrade's activation record to check availability on your network.
+
+**Network status as of October 9, 2026:** mainnet is on [T11](/docs/protocol/upgrades/t11); Moderato testnet is on [T12](/docs/protocol/upgrades/t12). T12 mainnet activation is scheduled for **October 13, 2026 at 14:00 UTC**.
+
+This index reconciles the [canonical TIP sources](https://github.com/tempoxyz/tempo/tree/main/tips) with the [network upgrade records](/docs/guide/node/network-upgrades). Proposal status fields can lag activation; the upgrade records determine the network status shown here. Meta TIPs collect additional fixes included in an upgrade.
+
+{/* Reviewed 2026-10-09 against tempoxyz/tempo feb5dff7dac707d594cc326f0dd5d242180323bf and docs upgrade records. Update this grouping and network status when an upgrade ships. Exclude withdrawn/cancelled proposals even when protocolVersion names an upgrade. */}
+
+### T12
+
+**Testnet: active. Mainnet: scheduled for October 13, 2026 at 14:00 UTC.** [T12 activation and integration notes](/docs/protocol/upgrades/t12).
+
+- [TIP-1006: Burn At for TIP-20 Tokens](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1006.md)
+- [TIP-1088: Unify quote/swap fill logic](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1088.md)
+- [TIP-1095: Policy-Aware Channel Reserve Transfers](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md)
+- [TIP-1106: Expiring Nonce Discriminators](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1106.md)
+- [TIP-1116: T12 Hardfork Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1116.md)
+
+### T11
+
+**Active on mainnet and testnet.** [T11 upgrade details](/docs/protocol/upgrades/t11).
+
+- [TIP-1093: Extend Expiring Nonce Window to Five Minutes](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1093.md)
+- [TIP-1100: Increase Precompile Input Gas Cost](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1100.md)
+- [TIP-1105: T11 Pricing Hardening Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1105.md)
+
+### T10
+
+**Active on mainnet and testnet.** [T10 upgrade details](/docs/protocol/upgrades/t10).
+
+- [TIP-1091: Enshrined ZoneFactory](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1091.md)
+
+### T9
+
+**Active on mainnet and testnet.** [T9 upgrade details](/docs/protocol/upgrades/t9).
+
+- [TIP-1092: TIP-20 Policy IDs in TIP-403](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1092.md)
+
+### T8
+
+**Active on mainnet and testnet.** [T8 upgrade details](/docs/protocol/upgrades/t8).
+
+- [TIP-1042: FeeAMM TIP-403 Policy Exemptions](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1042.md)
+- [TIP-1062: Versioned DEX order storage](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1062.md)
+- [TIP-1070: Current Committee State](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1070.md)
+- [TIP-1075: Deprecate TIP-20 Rewards](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1075.md) — final shutdown, following T7.
+- [TIP-1087: V2 DEX order storage with book indexes](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1087.md)
+
+### T7
+
+**Active on mainnet and testnet.** [T7 upgrade details](/docs/protocol/upgrades/t7).
+
+- [TIP-1060: Storage Credits](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1060.md)
+- [TIP-1064: StablecoinDEX Order Storage Credits](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1064.md)
+- [TIP-1066: TIP-20 Channel Storage Credits](/docs/protocol/upgrades/t7#technical-references)
+- [TIP-1067: Dynamic Base Fee](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1067.md)
+- [TIP-1075: Deprecate TIP-20 Rewards](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1075.md) — initial deprecation; shutdown completes in T8.
+
+TIP-1066 is referenced by the T7 upgrade record but has no standalone file in the canonical TIP directory; its link opens that upgrade reference.
+
+### T6
+
+**Active on mainnet and testnet.** [T6 upgrade details](/docs/protocol/upgrades/t6).
+
+- [TIP-1028: Address-Level Receive Policies](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1028.md)
+- [TIP-1049: Admin Access Keys](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1049.md)
+
+### T5
+
+**Active on mainnet and testnet.** [T5 upgrade details](/docs/protocol/upgrades/t5).
+
+- [TIP-1026: Token Logo URI](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1026.md)
+- [TIP-1030: Allow same-tick flip orders](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1030.md)
+- [TIP-1033: Two-Hop FeeAMM Routing](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1033.md)
+- [TIP-1034: TIP-20 Channel Reserve Precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1034.md)
+- [TIP-1035: Implicit Approval List](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1035.md)
+- [TIP-1045: Payment Transaction Classification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1045.md)
+- [TIP-1053: Witnesses in Key Authorizations](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1053.md)
+- [TIP-1056: Keep the same order ID when flip orders flip](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1056.md)
+- [TIP-1057: T5 Hardfork Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1057.md)
+
+### T4
+
+**Active on mainnet and testnet.** [T4 upgrade details](/docs/protocol/upgrades/t4).
+
+- [TIP-1031: Embed consensus context in the block Header](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1031.md)
+- [TIP-1046: T4 Hardfork Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1046.md)
+
+### T3
+
+**Active on mainnet and testnet.** [T3 upgrade details](/docs/protocol/upgrades/t3).
+
+- [TIP-1011: Enhanced Access Key Permissions](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md)
+- [TIP-1020: Signature Verification Precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md)
+- [TIP-1022: Virtual Addresses for TIP-20 Deposit Forwarding](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md)
+- [TIP-1038: T3 Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1038.md)
+
+### T2
+
+**Active on mainnet and testnet.** [T2 upgrade details](/docs/protocol/upgrades/t2).
+
+- [TIP-1004: Permit for TIP-20](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1004.md)
+- [TIP-1015: Compound Transfer Policies](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1015.md)
+- [TIP-1017: Validator Config V2 precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1017.md)
+- [TIP-1036: T2 Meta TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1036.md)
+
+### T1
+
+**Active on mainnet and testnet.**
+
+- [TIP-1000: State Creation Cost Increase](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1000.md)
+- [TIP-1009: Expiring Nonces](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1009.md)
+- [TIP-1010: Mainnet Gas Parameters](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md)
+
+### T0 — launch
+
+**Active on mainnet and testnet.**
+
+- [TIP-0001: Tempo Transaction](https://github.com/tempoxyz/tempo/blob/main/tips/tip-0001.md)
+
+### Proposals outside activated upgrades
+
+These proposals are not included in the activated-upgrade groups above. A target upgrade in a draft is not a confirmed activation. See the linked proposal for its current status.
+
+| Proposal | Status at review | Target upgrade |
+| --- | --- | --- |
+| [TIP-1001: Place-only mode for next quote token](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1001.md) | Draft | Not assigned |
+| [TIP-1002: Prevent crossed orders and allow same-tick flip orders](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1002.md) | Draft | Not assigned |
+| [TIP-1003: Client order IDs](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1003.md) | Draft | Not assigned |
+| [TIP-1005: Fix ask swap rounding loss](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1005.md) | Draft | Not assigned |
+| [TIP-1007: Fee Token Introspection](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1007.md) | Backlog | Not assigned |
+| [TIP-1016: Exempt Storage Creation from Gas Limits](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1016.md) | Backlog | Not assigned |
+| [TIP-1047: Revert code creation and set code at addresses with TIP-20 prefix](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1047.md) | Draft | Not assigned |
+| [TIP-1059: Discounted Pure Payment Transfers](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1059.md) | Withdrawn | None (withdrawn or cancelled) |
+| [TIP-1065: Repurpose TIP-20 Balance slots into User State](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1065.md) | Withdrawn | None (withdrawn or cancelled) |
+| [TIP-1096: Multi-block Tempo Imports for Zones](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1096.md) | Draft | T13 |
+| [TIP-1098: Nitro-Backed Zone Batch Verification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1098.md) | Draft | T13 |
+| [TIP-1099: RLP-Encoded Account Keychain Mutations](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1099.md) | Cancelled | None (withdrawn or cancelled) |
+| [TIP-1119: Explicit block system calls](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1119.md) | Draft | T13 |
+| [TIP-1122: Backward compatible SWAPN, DUPN, EXCHANGE](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1122.md) | Draft | Not assigned |
+| [TIP-1124: Increase Calldata Floor Cost](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1124.md) | Draft | Not assigned |
+
+[TIP-0000: TIP Process](https://github.com/tempoxyz/tempo/blob/main/tips/tip-0000.md) defines the proposal lifecycle and is not a network upgrade. Browse [all proposals](https://tips.sh/) for ongoing work.
+
+For Zone behavior and interfaces, see the [Zones protocol reference](/docs/protocol/zones).

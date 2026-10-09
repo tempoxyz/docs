@@ -16,7 +16,7 @@ This page follows Zones source at [`ac49071f`](https://github.com/tempoxyz/zones
 
 The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. At the reviewed commit, its approved enclave measurements are unset, so it rejects proofs. Check the network's active hardfork, verifier implementation, and approved measurements before relying on execution-proof enforcement.
 
-The current sequencer can wait for a Nitro-attested batch before submitting it. This node-side requirement is separate from onchain enforcement. Forced exits remain unfinished.
+The sequencer implementation can be configured to wait for a Nitro-attested batch before submitting it. This node-side requirement is separate from onchain enforcement. Forced exits remain unfinished; withdrawal settlement depends on the operator continuing to process and submit batches.
 
 ## Batch submission
 

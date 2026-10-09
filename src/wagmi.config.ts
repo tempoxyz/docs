@@ -1,8 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoWallet, webAuthn } from '@wagmi/core/tempo'
-import { Expiry } from 'accounts'
 import * as React from 'react'
-import { parseUnits } from 'viem'
 import { tempo, tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 import { withRelay } from 'viem/tempo'
 import {
@@ -14,7 +12,7 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
-import { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd } from './components/guides/tokens'
+import { demoWalletAuthorization } from './lib/demo-wallet-authorization'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 
 const feeToken = '0x20c0000000000000000000000000000000000001' as const
@@ -45,34 +43,22 @@ export const webAuthnRpId = rpId
 
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false } = options
+  const wallet = tempoWallet({
+    accessKey: { authorize: demoWalletAuthorization },
+    feePayer: {
+      precedence: 'user-first',
+      url: 'https://sponsor.moderato.tempo.xyz',
+    },
+  })
   return createConfig({
     batch: {
       multicall: false,
     },
     chains: [chain, tempo],
-    connectors: [
-      ...(import.meta.env.VITE_E2E === 'true'
-        ? [webAuthn()]
-        : [
-            tempoWallet({
-              authorizeAccessKey: () => ({
-                expiry: Expiry.days(1),
-                limits: [
-                  { token: ousd, limit: parseUnits('500', 6) },
-                  { token: pathUsd, limit: parseUnits('500', 6) },
-                  { token: alphaUsd, limit: parseUnits('500', 6) },
-                  { token: betaUsd, limit: parseUnits('500', 6) },
-                  { token: thetaUsd, limit: parseUnits('500', 6) },
-                ],
-              }),
-              feePayer: {
-                precedence: 'user-first',
-                url: 'https://sponsor.moderato.tempo.xyz',
-              },
-            }),
-            webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) }),
-          ]),
-    ],
+    connectors:
+      import.meta.env.VITE_E2E === 'true'
+        ? [webAuthn(), wallet]
+        : [wallet, webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) })],
     multiInjectedProviderDiscovery,
     storage: createStorage<Record<string, unknown>>({
       storage: typeof window !== 'undefined' ? localStorage : undefined,

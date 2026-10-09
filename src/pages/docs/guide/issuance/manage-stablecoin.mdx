@@ -21,15 +21,15 @@ import { Cards, Card } from 'vocs'
 
 # Managing your TIP-20 stablecoin
 
-Configure your stablecoin's permissions, supply limits, and compliance policies after deployment. This guide covers granting roles to manage token operations, setting supply caps, configuring transfer policies, and controlling token transfers through pause/unpause functionality.
+Assign token-management roles, set a supply cap, and configure transfer policies. The walkthrough uses a token created on Moderato testnet.
 
 TIP-20 tokens use a role-based access control system that allows you to delegate different administrative functions to different addresses. For detailed information about the role system, see the [TIP-20 specification](/docs/protocol/tip20/spec#tip-20-roles).
 
 ## Stablecoin management steps
 
-In this guide, we'll walk through how to assign and check the **`issuer`** role, but the process is identical for other roles like `pause`, `unpause`, `burnBlocked`, and `defaultAdmin`.
+The first example assigns and checks the `issuer` role. Use the same role-management methods for `pause`, `unpause`, `burnBlocked`, and `defaultAdmin`.
 
-::::steps
+:::::steps
 
 ### Set up stablecoin management
 
@@ -85,17 +85,7 @@ export function GrantRoles() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -150,11 +140,11 @@ export function GrantRoles() {
         {grant.isPending ? 'Granting...' : 'Grant Issuer Role'}
       </button>
 
-      {hasIssuerRole !== undefined && ( // [!code ++]
-        <div> {/* [!code ++] */}
-        Treasury {hasIssuerRole ? 'has' : 'does not have'} the issuer role // [!code ++]
-        </div> {/* [!code ++] */}
-        )} // [!code ++]
+      {hasIssuerRole !== undefined && (
+        <div>
+          Treasury {hasIssuerRole ? 'has' : 'does not have'} the issuer role
+        </div>
+      )}
     </div>
   )
 }
@@ -162,17 +152,7 @@ export function GrantRoles() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -273,28 +253,18 @@ export function RevokeRoles() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
 
-::::
+:::::
 
 ## Stablecoin management recipes
 
 ### Set the stablecoin logo
 
-Set or update the token's on-chain [`logoURI`](/docs/protocol/tip20/spec#logo-uri) so wallets and explorers can read the icon directly from the token contract via `logoURI()`. This requires the **`DEFAULT_ADMIN_ROLE`** and is done by calling `setLogoURI(string newLogoURI)` on the token. For the recommended format, use a square, rasterized PNG or WebP (max 256 bytes; `https`, `http`, `ipfs`, or `data` scheme).
+Set or update the token's on-chain [`logoURI`](/docs/protocol/tip20/spec#logo-uri) so wallets and explorers can read the icon directly from the token contract via `logoURI()`. This requires the **`DEFAULT_ADMIN_ROLE`** and is done by calling `setLogoURI(string newLogoURI)` on the token. For the recommended format, use a square, rasterized PNG or WebP. The URI string, not the image, is limited to 256 bytes and must use the `https`, `http`, `ipfs`, or `data` scheme.
 
 ### Set the stablecoin supply cap
 
@@ -346,17 +316,7 @@ export function SetSupplyCap() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -455,17 +415,7 @@ export function LinkTokenPolicy() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -533,17 +483,7 @@ export function PauseUnpauseTransfers() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::
@@ -552,7 +492,7 @@ export const config = createConfig({
 
 The Burn Blocked role allows your team to burn tokens from blocked or frozen addresses. This is useful for regulatory compliance when you need to remove tokens from addresses that violate terms of service or legal requirements.
 
-<Demo.Container name="Create and Link Transfer Policy" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
+<Demo.Container name="Burn Blocked Tokens" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Connect stepNumber={1} />
   <AddFunds stepNumber={2} />
   <CreateOrLoadToken stepNumber={3} />
@@ -605,17 +545,7 @@ export function BurnBlocked() {
 
 ```tsx twoslash [config.ts] filename="config.ts"
 // @noErrors
-import { createConfig, http } from 'wagmi'
-import { tempo } from 'viem/chains'
-import { tempoWallet } from 'wagmi/connectors'
-
-export const config = createConfig({
-  chains: [tempo],
-  connectors: [tempoWallet()],
-  transports: {
-    [tempo.id]: http(),
-  },
-})
+// [!include ~/snippets/wagmi.moderato.config.ts:setup]
 ```
 
 :::

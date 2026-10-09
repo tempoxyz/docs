@@ -85,13 +85,13 @@ Below are some of the key benefits and features of TIP-20 tokens:
   />
 </Cards>
 
-### Pay Fees in Any Stablecoin
+<span id="pay-fees-in-any-stablecoin" />
 
-Any USD-denominated TIP-20 token can be used to pay transaction fees on Tempo.
+### Pay fees with a supported stablecoin
 
-The [Fee AMM](/docs/protocol/fees/spec-fee-amm) automatically converts your token to the validator's preferred fee token, eliminating the need for users to hold a separate gas token. This feature works natively: no additional infrastructure or integration required.
+Use a USD-denominated TIP-20 token for fees. If it differs from the validator's preferred token, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) needs enough liquidity to convert the fee. Your account does not need a separate native gas token.
 
-Full specification of this feature can be found in the [Payment Lanes Specification](/docs/protocol/blockspace/payment-lane-specification).
+See [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) for SDK configuration and the [fee specification](/docs/protocol/fees/spec-fee) for selection and conversion rules.
 
 ### Get Predictable Payment Fees
 
@@ -162,7 +162,7 @@ The currency code is **immutable** — it cannot be changed after token creation
 
 TIP-20 tokens can serve as quote tokens in Tempo's decentralized exchange (DEX). When creating trading pairs on the [Stablecoin DEX](/docs/protocol/exchange), TIP-20 tokens function as the quote currency against which other tokens are priced and traded.
 
-This enables efficient stablecoin-to-stablecoin trading and provides optimized routing for liquidity. For example, a USDG TIP-20 token can be paired with other stablecoins, allowing traders to swap between different USD-denominated tokens with minimal slippage through concentrated liquidity pools.
+This enables efficient stablecoin-to-stablecoin trading and provides optimized routing for liquidity. For example, a USDG TIP-20 token can be paired with other stablecoins, allowing traders to swap between different USD-denominated tokens through resting orders on the DEX orderbook, subject to available liquidity and the caller's slippage limits.
 
 By using TIP-20 tokens as quote tokens, the DEX benefits from the same payment-optimized features like deterministic addresses, currency identifiers, and compliance policies, ensuring secure and efficient exchange operations.
 

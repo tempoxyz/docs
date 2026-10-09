@@ -1,0 +1,121 @@
+---
+title: "Balances and activity"
+seoTitle: "Private balances and activity | Tempo Docs"
+description: "Read token balances and filtered activity through an authenticated Zone RPC connection."
+---
+
+<span id="private-balances-and-activity" />
+
+# Balances and activity
+
+Read Zone balances and activity through the [account-scoped, redacted RPC connection](/docs/zones/connect). The calls below apply to that interface; if you use a hosted provider, use its documented read API and account-scoping rules.
+
+<span id="read-a-token-balance" />
+
+## Read balances
+
+Use the Zone token's `balanceOf` through `eth_call`. The RPC executes the call as the authenticated account, and execution-level privacy restricts which balances can be read. Do not substitute `eth_getBalance` for a token balance query.
+
+Reuse the authenticated `zone` client and [Wagmi `zoneConfig`](/docs/zones/examples) from [Connect](/docs/zones/connect#check-the-connection). Set `ZONE_ACCOUNT` to the authenticated account, `ZONE_TOKEN` to the enabled token, and `ZONE_TOKEN_DECIMALS` to its configured precision.
+
+::::code-group
+
+```ts [Viem]
+const account = process.env.ZONE_ACCOUNT as `0x${string}`
+const token = process.env.ZONE_TOKEN as `0x${string}`
+const decimals = Number(process.env.ZONE_TOKEN_DECIMALS)
+const balance = await zone.token.getBalance({ account, token, decimals })
+console.log(balance.formatted)
+```
+
+```ts [Wagmi]
+import { Actions } from '@wagmi/core/tempo'
+const balance = await Actions.token.getBalance(zoneConfig, { account, token, decimals })
+console.log(balance.formatted)
+```
+
+```python [Python]
+account, token = os.environ["ZONE_ACCOUNT"], os.environ["ZONE_TOKEN"]
+data = "0x70a08231" + account[2:].rjust(64, "0")
+response = zone.post(zone_rpc_url, json={
+    "jsonrpc": "2.0", "id": 1, "method": "eth_call",
+    "params": [{"to": token, "data": data}, "latest"],
+})
+response.raise_for_status()
+print(int(response.json()["result"], 16))
+```
+
+```bash [CLI]
+cast erc20 balance "$ZONE_TOKEN" "$ZONE_ACCOUNT" \
+  --rpc-url "$ZONE_RPC_URL" \
+  --rpc-headers "X-Authorization-Token: $ZONE_AUTH_TOKEN"
+```
+
+::::
+
+Viem and Wagmi return a formatted decimal string. Python and Cast return integer base units; format them with `ZONE_TOKEN_DECIMALS`. The Python example encodes `balanceOf(address)` with selector `0x70a08231` and the account as a 32-byte word. Check raw JSON-RPC responses for `error` before reading `result`.
+
+An empty, zero, or `null` response about another account does not establish that it has no balance or activity. Some restricted reads return silent values to avoid exposing another account's data. See [method access control](/docs/protocol/zones/rpc#method-access-control).
+
+<span id="read-account-activity" />
+
+## Read activity
+
+Use account-scoped `eth_getLogs` filters or log subscriptions for supported token events. Filters must identify the authenticated account in the appropriate indexed topic; broad filters are rejected. Query incoming and outgoing transfers separately, as described in [event filtering](/docs/protocol/zones/rpc#event-filtering).
+
+Continue with the same `zone`, `account`, and `token`. Set `ZONE_FROM_BLOCK` to the first Zone block you need to reconcile. These examples read incoming transfers:
+
+::::code-group
+
+```ts [Viem]
+import { parseAbiItem } from 'viem'
+const incoming = await zone.getLogs({
+  address: token,
+  event: parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 amount)'),
+  args: { to: account },
+  fromBlock: BigInt(process.env.ZONE_FROM_BLOCK!),
+  toBlock: 'latest',
+})
+```
+
+```ts [Wagmi]
+import { getPublicClient } from '@wagmi/core'
+import { Abis } from 'viem/tempo'
+const incoming = await getPublicClient(zoneConfig)!.getContractEvents({
+  address: token, abi: Abis.tip20, eventName: 'Transfer',
+  args: { to: account },
+  fromBlock: BigInt(process.env.ZONE_FROM_BLOCK!),
+  toBlock: 'latest',
+})
+```
+
+```python [Python]
+transfer = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+query = {"address": token, "topics": [transfer, None, "0x" + account[2:].rjust(64, "0")],
+         "fromBlock": hex(int(os.environ["ZONE_FROM_BLOCK"])), "toBlock": "latest"}
+response = zone.post(zone_rpc_url, json={
+    "jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [query]
+})
+response.raise_for_status()
+print(response.json())
+```
+
+```bash [CLI]
+cast logs 'Transfer(address indexed from, address indexed to, uint256 amount)' \
+  '' "$ZONE_ACCOUNT" --address "$ZONE_TOKEN" \
+  --from-block "$ZONE_FROM_BLOCK" --to-block latest \
+  --rpc-url "$ZONE_RPC_URL" \
+  --rpc-headers "X-Authorization-Token: $ZONE_AUTH_TOKEN"
+```
+
+::::
+
+For outgoing transfers, use `args: { from: account }` in Viem and Wagmi, swap the Cast arguments to `"$ZONE_ACCOUNT" ''`, or put the account in `topics[1]` instead of `topics[2]` in Python. Query incoming and outgoing separately, deduplicate shared events, and save the last processed block. Use bounded ranges for repeated history reads.
+
+Transaction and receipt reads are scoped to the sender. To verify an incoming deposit, use the recipient's permitted token events and balance reads rather than relying on access to the sender's receipt.
+
+## Preserve the privacy boundary
+
+Keep cached responses and history tied to the authenticated customer and account in your application. Do not place private activity in shared logs or a public explorer link. Public deposit and withdrawal records remain visible on Tempo.
+
+When displaying funds returning to Tempo, follow [Withdraw](/docs/zones/withdraw). A submitted Zone transaction and a completed public delivery are different stages.

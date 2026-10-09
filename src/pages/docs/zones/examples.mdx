@@ -1,0 +1,45 @@
+---
+title: Zone example setup
+seoTitle: Authenticated Zone Client Setup | Tempo Docs
+description: Configure the Wagmi core client used in authenticated Zone RPC examples.
+---
+
+# Zone example setup
+
+Configure the authenticated client used in the Zone guides. These examples run on your backend; browser applications should call your account-scoped backend instead of receiving shared operator credentials.
+
+## Configure Wagmi for a Zone
+
+Install `@wagmi/core` and `viem` with `pnpm add @wagmi/core viem`. Get the Zone's chain ID, RPC URL, and signed authorization token from [Connect](/docs/zones/connect). Set `ZONE_CHAIN_ID`, `ZONE_PARENT_CHAIN_ID`, `ZONE_RPC_URL`, and `ZONE_AUTH_TOKEN` in your environment. The parent chain ID is the public Tempo network that hosts the portal (`4217` for mainnet or `42431` for Moderato).
+
+Save this as `zone.config.ts` in an ESM project. It configures reads against the operator-provided Zone, without adding a wallet connector or signing account.
+
+```ts [zone.config.ts]
+import { createConfig, http } from '@wagmi/core'
+import { Zone } from 'viem/tempo'
+
+const rpcUrl = process.env.ZONE_RPC_URL!
+export const zoneChain = Zone.from({
+  sourceId: Number(process.env.ZONE_PARENT_CHAIN_ID),
+  id: Number(process.env.ZONE_CHAIN_ID),
+  name: 'Tempo Zone',
+  rpcUrls: { default: { http: [rpcUrl] } },
+})
+
+export const zoneConfig = createConfig({
+  chains: [zoneChain],
+  transports: {
+    [zoneChain.id]: http(rpcUrl, {
+      fetchOptions: {
+        headers: { 'X-Authorization-Token': process.env.ZONE_AUTH_TOKEN! },
+      },
+    }),
+  },
+})
+```
+
+Import `zoneConfig` into each example. Set `account` to the authenticated address, `token` to the enabled token address, and `decimals` to the token's configured precision. The RPC scopes every read to the account represented by the authorization token.
+
+For React applications, use your backend's authenticated, account-scoped RPC proxy as the browser transport and configure its chain in your [Wagmi provider](/docs/accounts/examples#wagmi-client). The server must authenticate the current user and select that user's Zone token on every request. Do not use one shared account token for all customers.
+
+Continue with [Balances and activity](/docs/zones/balances).

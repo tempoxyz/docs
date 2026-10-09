@@ -1,20 +1,77 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
+import { type Config, getPublicClient } from '@wagmi/core'
 import * as React from 'react'
-import { parseUnits } from 'viem'
+import { type Hash, parseEventLogs, parseUnits } from 'viem'
+import { Abis } from 'viem/tempo'
 import { useConfig, useConnection, useConnectionEffect, useTransaction } from 'wagmi'
 import { Actions, Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, FAKE_RECIPIENT_2, Step } from '../../Demo'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
-type TransferState = {
-  status: 'idle' | 'pending' | 'success' | 'error'
-  hash?: string
+export type TransferState = {
+  status: 'idle' | 'pending' | 'submitted' | 'success' | 'error' | 'unconfirmed'
+  hash?: Hash
   error?: string
 }
 
 type FirstArgument<T> = T extends (arg: infer Arg, ...args: never[]) => unknown ? Arg : never
+
+type TransferParameters = {
+  account: `0x${string}`
+  amount: bigint
+  to: `0x${string}`
+  token: typeof alphaUsd
+  nonceKey: bigint
+  nonce: number
+}
+
+export async function submitParallelPayment(
+  config: Config,
+  parameters: TransferParameters,
+  onStateChange: (state: TransferState) => void,
+): Promise<boolean> {
+  onStateChange({ status: 'pending' })
+  const chainId = config.state.chainId
+  let hash: Hash | undefined
+  try {
+    hash = await Actions.token.transfer(config as FirstArgument<typeof Actions.token.transfer>, {
+      ...parameters,
+      chainId,
+    })
+    onStateChange({ status: 'submitted', hash })
+    const publicClient = getPublicClient(config, { chainId })
+    if (!publicClient) throw new Error('No client for the submitted transaction network')
+    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+    if (receipt.status !== 'success') {
+      onStateChange({ status: 'error', hash, error: 'Transaction reverted' })
+      return false
+    }
+    const transfers = parseEventLogs({
+      abi: Abis.tip20,
+      eventName: 'Transfer',
+      logs: receipt.logs.filter((log) => log.address.toLowerCase() === parameters.token),
+      strict: true,
+    })
+    const delivered = transfers.some(
+      ({ args }) =>
+        args.from.toLowerCase() === parameters.account.toLowerCase() &&
+        args.to.toLowerCase() === parameters.to.toLowerCase() &&
+        args.amount === parameters.amount,
+    )
+    if (!delivered) throw new Error('The receipt does not confirm the expected payment')
+    onStateChange({ status: 'success', hash: receipt.transactionHash })
+    return true
+  } catch (error) {
+    onStateChange({
+      status: hash ? 'unconfirmed' : 'error',
+      hash,
+      error: error instanceof Error ? error.message : 'Payment could not be confirmed',
+    })
+    return false
+  }
+}
 
 function TransferResult({ label, state }: { label: string; state: TransferState }) {
   const { data: transaction } = useTransaction({
@@ -31,12 +88,25 @@ function TransferResult({ label, state }: { label: string; state: TransferState 
       <div className="flex items-center gap-2">
         <span className="mt-1 text-[13px] text-gray9">{label}:</span>
         {state.status === 'pending' && (
-          <span className="mt-1 text-[13px] text-gray9">Sending...</span>
+          <span className="mt-1 text-[13px] text-gray9">Waiting for wallet...</span>
+        )}
+        {state.status === 'submitted' && (
+          <span className="mt-1 text-[13px] text-gray9">Submitted; confirming...</span>
         )}
         {state.status === 'error' && (
-          <span className="mt-1 text-[13px] text-red-500">Transfer failed, please try again</span>
+          <span className="mt-1 text-[13px] text-red-500">
+            {state.hash ? 'Transaction reverted' : 'Transfer not submitted'}
+          </span>
         )}
-        {state.status === 'success' && state.hash && <ExplorerLink hash={state.hash} />}
+        {state.status === 'unconfirmed' && (
+          <span className="mt-1 text-[13px] text-gray9">
+            Payment not verified. Check the transaction before retrying.
+          </span>
+        )}
+        {state.status === 'success' && (
+          <span className="mt-1 text-[13px] text-gray9">Confirmed</span>
+        )}
+        {state.hash && <ExplorerLink hash={state.hash} />}
       </div>
 
       {state.status === 'success' && (
@@ -47,7 +117,7 @@ function TransferResult({ label, state }: { label: string; state: TransferState 
               <span>Nonce: {transaction.nonce}</span>
             </>
           ) : (
-            <span className="animate-pulse">Confirming on chain...</span>
+            <span className="animate-pulse">Loading nonce details...</span>
           )}
         </div>
       )}
@@ -82,28 +152,14 @@ export function SendParallelPayments(props: DemoStepProps) {
     },
   })
 
-  const sendTransfer = (
-    params: {
-      amount: bigint
-      to: `0x${string}`
-      token: typeof alphaUsd
-      nonceKey: bigint
-      nonce: number
-    },
+  const sendTransfer = async (
+    params: TransferParameters,
     setTransfer: React.Dispatch<React.SetStateAction<TransferState>>,
   ) => {
-    setTransfer({ status: 'pending' })
-    const actionConfig = config as FirstArgument<typeof Actions.token.transfer>
-    Actions.token
-      .transfer(actionConfig, params)
-      .then((hash) => {
-        setTransfer({ status: 'success', hash })
-        queryClient.refetchQueries({ queryKey: ['getBalance'] })
-        balanceRefetch()
-      })
-      .catch((error) => {
-        setTransfer({ status: 'error', error: error.message || 'Failed' })
-      })
+    if (await submitParallelPayment(config, params, setTransfer)) {
+      queryClient.refetchQueries({ queryKey: ['getBalance'] })
+      balanceRefetch()
+    }
   }
 
   const handleSendParallel = async () => {
@@ -118,6 +174,7 @@ export function SendParallelPayments(props: DemoStepProps) {
     // Send both transfers without blocking
     sendTransfer(
       {
+        account: address,
         amount: parseUnits('50', 6),
         to: FAKE_RECIPIENT,
         token: alphaUsd,
@@ -129,6 +186,7 @@ export function SendParallelPayments(props: DemoStepProps) {
 
     sendTransfer(
       {
+        account: address,
         amount: parseUnits('50', 6),
         to: FAKE_RECIPIENT_2,
         token: alphaUsd,
@@ -140,7 +198,12 @@ export function SendParallelPayments(props: DemoStepProps) {
   }
 
   const bothSucceeded = transfer1.status === 'success' && transfer2.status === 'success'
-  const isSending = transfer1.status === 'pending' || transfer2.status === 'pending'
+  const isSending = [transfer1, transfer2].some(
+    (transfer) => transfer.status === 'pending' || transfer.status === 'submitted',
+  )
+  const needsInspection = [transfer1, transfer2].some(
+    (transfer) => transfer.status === 'unconfirmed',
+  )
   const hasStarted = transfer1.status !== 'idle' || transfer2.status !== 'idle'
 
   return (
@@ -225,13 +288,15 @@ export function SendParallelPayments(props: DemoStepProps) {
                       : 'default'
                   }
                   disabled={
-                    !(address && balance && balance.amount >= parseUnits('100', 6)) || isSending
+                    !(address && balance && balance.amount >= parseUnits('100', 6)) ||
+                    isSending ||
+                    needsInspection
                   }
                   onClick={handleSendParallel}
                   type="button"
                   className="font-normal text-[14px] -tracking-[2%]"
                 >
-                  {isSending ? 'Sending both...' : 'Send both payments'}
+                  {isSending ? 'Confirming payments...' : 'Send both payments'}
                 </Button>
               </div>
             </div>

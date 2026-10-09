@@ -6,27 +6,27 @@ description: How the Tempo API rate limits requests, the headers it returns, and
 
 # Tempo API rate limits and quota structure
 
-The Tempo API enforces rate limits to ensure fair usage and system stability. Limits are counted in **fixed one-minute windows**, and every response reports your current quota in `RateLimit-*` headers.
+The Tempo API enforces rate limits to ensure fair usage and system stability. Limits use fixed windows configured per endpoint and key. Responses that consume quota report it in `RateLimit-*` headers; cached responses can omit these headers.
 
 ## Tempo API quota structure
 
 Each request consumes from one quota bucket, chosen by how the request is authenticated:
 
-| Caller | Bucket | Default limit |
-| --- | --- | --- |
-| API key | Per key, per [scope](/docs/api/authentication) | 100 requests / minute |
-| Anonymous | Per client IP | 20 requests / minute |
+| Caller | Quota bucket |
+| --- | --- |
+| API key | Per key, per [scope](/docs/api/console/api-keys) |
+| Anonymous | Per client IP |
 
 - **API key requests** are counted per key *and* per scope. Each endpoint draws from the bucket for the scope it requires (such as `data:read`), so traffic to one scope does not exhaust another.
 - **Anonymous requests** — endpoints that allow access without a key — are counted per client IP at a lower limit.
 
 :::info
-Default limits are a starting point and may be raised for a given key. The authoritative limit for any request is always the value in its `RateLimit-Limit` response header — read the headers rather than hardcoding a number.
+Limits depend on the endpoint, key configuration, and billing state. Sandbox projects without active billing use the public quota ceiling. The authoritative limit for any request is always the value in its `RateLimit-Limit` response header — read the headers rather than hardcoding a number.
 :::
 
 ## Rate-limit response headers
 
-Every rate-limited response carries your current quota:
+A response that consumes quota includes headers such as:
 
 ```http
 RateLimit-Limit: 100
@@ -44,7 +44,7 @@ RateLimit-Scope: data:read
 
 ## Exceeding Tempo API rate limits
 
-When you exceed the limit, the API responds with `429 Too Many Requests` and a `Retry-After` header giving the number of seconds to wait before retrying:
+A rejected over-quota request normally returns `429 Too Many Requests` with a `Retry-After` header. Edge-level rate limits can return a different body; check the status before parsing JSON:
 
 ```http
 HTTP/1.1 429 Too Many Requests
@@ -73,19 +73,19 @@ Read `RateLimit-Remaining` and `RateLimit-Reset` to pace your requests, and paus
 
 ### Retry rate-limited requests with backoff
 
-When you receive a `429`, wait for the duration in `Retry-After`, then retry with exponential backoff and jitter for repeated failures:
+When you receive a `429`, honor `Retry-After` and use backoff with jitter. This helper makes at most five attempts and returns the last response if the server asks it to wait longer than a minute:
 
 ```typescript
-async function withRetry<T>(fn: () => Promise<Response>): Promise<Response> {
-  let attempt = 0
-  while (true) {
+async function withRetry(fn: () => Promise<Response>): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
     const response = await fn()
-    if (response.status !== 429) return response
-
-    const retryAfter = Number(response.headers.get('Retry-After') ?? 1)
-    const backoff = Math.min(retryAfter, 2 ** attempt) * 1000
-    await new Promise((resolve) => setTimeout(resolve, backoff))
-    attempt++
+    if (response.status !== 429 || attempt === 4) return response
+    const header = response.headers.get('Retry-After') ?? '0'
+    const delay = /^\d+$/.test(header)
+      ? Number(header) * 1000 : Date.parse(header) - Date.now()
+    const wait = Math.max(Number.isFinite(delay) ? delay : 0, 2 ** attempt * 1000)
+    if (wait > 60_000) return response
+    await new Promise((resolve) => setTimeout(resolve, wait + Math.random() * 250))
   }
 }
 ```

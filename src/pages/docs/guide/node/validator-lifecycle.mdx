@@ -43,7 +43,7 @@ For `tempo consensus` commands, use `--dry-run` to print the target and calldata
 
 ### Rotate validator identity
 
-The ed25519 key can be changed while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) first.
+The ed25519 key can be changed while keeping your validator index stable. This is useful for key rotation or recovery without leaving and re-joining the committee. [Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) first. These Bash/Zsh commands assume an encrypted key; `<ENCRYPTION_KEY_CMD>` must retrieve its encryption secret from your secret manager. Omit `--secret` only for an unencrypted key.
 
 :::danger[Do not shut down the old validator]
 Unlike Ethereum, you must **keep your old validator running** after rotation. The rotated-out validator is still a dealer in the committee for at least one more epoch. Shutting it down early will degrade network liveness. See the [exit timeline](#exit-timeline) for the full epoch-by-epoch breakdown.
@@ -68,6 +68,7 @@ tempo consensus rotate-validator \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --secret <(<ENCRYPTION_KEY_CMD>) \
   --rpc-url https://rpc.tempo.xyz
 ```
 ```bash [Testnet]
@@ -77,6 +78,7 @@ tempo consensus rotate-validator \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
+  --secret <(<ENCRYPTION_KEY_CMD>) \
   --rpc-url https://rpc.testnet.tempo.xyz
 ```
 ::::
