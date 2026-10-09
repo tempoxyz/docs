@@ -33,7 +33,7 @@ curl -s localhost:8001/metrics \
 
 Increasing counters confirm your node is signing and attempting to broadcast votes.
 
-The same outbound metric counts certificates under `message="Notarization"`, `"Finalization"`, and `"Nullification"`. A node observing an epoch without a signing share can broadcast certificates built from other validators' votes, so keep the individual-vote filter above. An epoch engine exists in both signer and observer modes.
+The same outbound metric counts certificates under `message="Notarization"`, `"Finalization"`, and `"Nullification"`. A node observing an epoch without a signing share can broadcast certificates built from other validators' votes, so keep the individual-vote filter above.
 
 ## Execution states
 
