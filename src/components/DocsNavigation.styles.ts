@@ -102,7 +102,7 @@ export const docsHeaderSearch = style({
   borderStyle: 'solid',
   borderColor: 'transparent !custom',
   borderRadius: tokens.radius.md,
-  backgroundColor: inherited.color.colorSurfaceBlock,
+  backgroundColor: inherited.color.surfaceInput,
 
   color: inherited.color.colorMixInSrgbColorForeground65Transparent,
   paddingInline: tokens.spacing['3_5'],
@@ -136,7 +136,7 @@ export const docsHeaderMobileSearch = style({
   borderStyle: 'solid',
   borderColor: 'transparent !custom',
   borderRadius: tokens.radius.md,
-  backgroundColor: inherited.color.colorSurfaceBlock,
+  backgroundColor: inherited.color.surfaceInput,
 
   color: inherited.color.colorMixInSrgbColorForeground65Transparent,
   paddingInline: tokens.spacing['3_5'],
