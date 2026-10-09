@@ -94,11 +94,33 @@ export const tempoDocsHome = style({
     '& .tempo-docs-home-products': {
       marginTop: tokens.spacing['12'],
     },
+    '& .tempo-docs-home-product-tiers': {
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0, 1fr)',
+      columnGap: tokens.spacing['5'],
+      rowGap: tokens.spacing['9'],
+      marginTop: tokens.spacing['7'],
+    },
+    '& .tempo-docs-home-product-tier': {
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0,
+    },
+    '& .tempo-docs-home-product-tier-label': {
+      marginTop: tokens.spacing['0'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['4'],
+      marginInlineStart: tokens.spacing['0'],
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.normal,
+    },
     '& .tempo-docs-home-product-grid': {
       display: 'grid',
+      flexGrow: 1,
       gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
       gap: tokens.spacing['5'],
-      marginTop: tokens.spacing['7'],
     },
     '& .tempo-docs-home-product-group': {
       minWidth: 0,
@@ -230,6 +252,25 @@ export const tempoDocsHome = style({
       },
     },
   },
+  '@media (width >= 1100px)': {
+    selectors: {
+      '& .tempo-docs-home-product-tiers': {
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+      },
+      '& .tempo-docs-home-product-tier:first-child': {
+        gridColumn: '1 / -1',
+      },
+      '& .tempo-docs-home-product-tier:nth-child(2)': {
+        gridColumn: 'span 2',
+      },
+      '& .tempo-docs-home-product-tier:nth-child(2) .tempo-docs-home-product-grid': {
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+      },
+      '& .tempo-docs-home-product-tier:nth-child(3) .tempo-docs-home-product-grid': {
+        gridTemplateColumns: 'minmax(0, 1fr)',
+      },
+    },
+  },
   '@media (width < 1100px)': {
     selectors: {
       '& .tempo-docs-home-product-grid': {
@@ -258,10 +299,13 @@ export const tempoDocsHome = style({
   },
   '@media (width < 700px)': {
     selectors: {
+      '& .tempo-docs-home-product-tiers': {
+        rowGap: tokens.spacing['8'],
+        marginTop: tokens.spacing['6'],
+      },
       '& .tempo-docs-home-product-grid': {
         gridTemplateColumns: 'minmax(0, 1fr)',
         gap: tokens.spacing['4'],
-        marginTop: tokens.spacing['6'],
       },
       '& .tempo-docs-home-product-group p[data-v]': {
         minHeight: 0,
