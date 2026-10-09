@@ -2,7 +2,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { custom, type Hex, parseAbi, parseUnits } from 'viem'
-import { Actions, createClient, Zone, http as zoneHttp } from 'viem/tempo'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -13,6 +12,7 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
+import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone-sandbox-sdk'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { ousd } from '../tokens'
@@ -114,6 +114,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: DepositMode }) {
   const zoneAuthorization = useZoneAuthorization({
     address,
     chainId: Zone.a.id,
+    zoneId: ZONE_ID,
     queryKey: ['guide-private-zones-auth', address, ZONE_ID],
     zoneClient,
   })

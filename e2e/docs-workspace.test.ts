@@ -129,6 +129,10 @@ test('seven sections expose product tasks and expandable developer chapters', as
     )
     await expect(utilities.locator('[aria-current]')).toHaveCount(0)
     await expect(page.locator('#related-documentation')).toHaveCount(0)
+    if (section.label === 'Accounts') {
+      for (const label of ['Account setup', 'Send payments', 'Receive payments'])
+        await developerDisclosure(sidebar, label, false).click()
+    }
     for (const href of section.links)
       await expect(sidebar.locator(`a[href="${href}"]`), `${section.label}: ${href}`).toBeVisible()
   }
@@ -264,15 +268,15 @@ test('Get started recommends a test payment and offers build paths and tool link
   await page.goto('/get-started')
   const article = page.locator('article[data-v-content]')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Build on Tempo')
-  const quickstart = article.getByRole('link', { name: 'Send a test payment →', exact: true })
+  const quickstart = article.getByRole('link', { name: 'interactive quickstart', exact: true })
   await expect(quickstart).toHaveCount(1)
-  await expect(quickstart).toHaveAccessibleName('Send a test payment →')
+  await expect(quickstart).toHaveAccessibleName('interactive quickstart')
   await expect(quickstart).toBeVisible()
   for (const [label, href] of [
-    ['Add accounts and payments', '/docs/accounts'],
-    ['Deploy a contract', '/docs/network/contracts'],
-    ['Create a TIP-20 token', '/docs/guide/issuance/create-a-stablecoin'],
-    ['Pay for or charge for APIs', '/docs/agents'],
+    ['Build stablecoin accounts', '/docs/accounts'],
+    ['Transfer across networks', '/docs/routes'],
+    ['Earn on stablecoins', '/docs/earn'],
+    ['Charge for APIs', '/docs/guide/machine-payments/server'],
   ]) {
     const choice = article.getByRole('link', { name: new RegExp(`^${label}`) })
     await expect(choice).toHaveCount(1)
@@ -367,7 +371,13 @@ test('Tools is a keyboard-accessible utility with SDKs and external services', a
   await toolsLink.focus()
   await page.keyboard.press('Enter')
   const dropdown = page.getByRole('navigation', { name: 'APIs & SDKs', exact: true })
-  await expect(dropdown.getByRole('link')).toHaveText(['Overview', 'API reference', 'SDKs', 'CLI'])
+  await expect(dropdown.getByRole('link')).toHaveText([
+    'Overview',
+    'API reference',
+    'SDKs',
+    'CLI',
+    'Explorer',
+  ])
   await page.keyboard.press('Escape')
   await expect(dropdown).toBeHidden()
   await expect(toolsLink).toBeFocused()
@@ -387,15 +397,15 @@ test('Tools is a keyboard-accessible utility with SDKs and external services', a
     'CLI',
     'Find infrastructure',
   ])
-  for (const [, href] of externalTools) {
-    const link = article.locator(`a[href="${href}"]`)
+  for (const [label, href] of externalTools) {
+    const link = article.getByRole('link', { name: label, exact: true })
     await expect(link).toHaveAttribute('href', href)
     await expect(link).toHaveAttribute('target', '_blank')
     await expect(link).toHaveAttribute('rel', /noopener/)
     await expect(link).toHaveAttribute('rel', /noreferrer/)
   }
   await article.locator('a[href="/docs/partners"]').click()
-  await expect(page).toHaveURL(/\/docs\/ecosystem\/?$/)
+  await expect(page).toHaveURL(/\/docs\/partners\/?$/)
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Partners')
 })
 
@@ -700,7 +710,11 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   await page.goto('/docs/accounts')
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-  await expect(drawer.getByText('Integration guides', { exact: true })).toBeVisible()
+  for (const label of ['Account setup', 'Send payments', 'Receive payments']) {
+    const disclosure = developerDisclosure(drawer, label, true)
+    await expect(disclosure.locator('..')).toHaveJSProperty('open', false)
+    await disclosure.click()
+  }
   for (const href of [
     '/docs/accounts/integration',
     '/docs/guide/payments/send-a-payment/browser',
@@ -712,12 +726,7 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   await expect(
     drawer.locator('a[href="/docs/guide/payments/send-a-payment/examples"]'),
   ).toHaveCount(0)
-  for (const label of ['Payment controls']) {
-    const disclosure = drawer.locator('summary').filter({ hasText: new RegExp(`^${label}$`) })
-    await expect(disclosure.locator('..')).toHaveJSProperty('open', false)
-  }
-  const integrationGuides = drawer.getByText('Integration guides', { exact: true }).locator('..')
-  const clientSetup = integrationGuides.getByRole('link', { name: 'Client setup', exact: true })
+  const clientSetup = drawer.getByRole('link', { name: 'Client setup', exact: true })
   await expect(clientSetup).toBeVisible()
   await expect(clientSetup).toHaveAttribute('href', '/docs/accounts/examples')
   await clientSetup.click()
@@ -877,7 +886,7 @@ test('blog search reaches working docs search and appearance persists between su
 function developerDisclosure(sidebar: Locator, label: string, mobile: boolean) {
   return mobile
     ? sidebar.locator('summary:visible').filter({ hasText: new RegExp(`^${label}$`) })
-    : sidebar.getByRole('button', { name: label, exact: true })
+    : sidebar.getByRole('button', { name: new RegExp(`^(?:Toggle )?${label}(?: section)?$`) })
 }
 
 async function expectOnlyActiveLeaf(sidebar: Locator, path: string) {
@@ -953,7 +962,7 @@ for (const mobile of [false, true]) {
       path: '/docs/network/tokens',
       group: 'TIP-20 Tokens',
       sibling: '/docs/guide/issuance/manage-stablecoin',
-      unrelated: '/docs/quickstart/tokenlist',
+      unrelated: '/docs/accounts/access-keys',
     },
     {
       name: 'token management',
@@ -961,14 +970,14 @@ for (const mobile of [false, true]) {
       path: '/docs/guide/issuance/manage-stablecoin',
       group: 'TIP-20 Tokens',
       sibling: '/docs/guide/issuance/mint-stablecoins',
-      unrelated: '/docs/quickstart/tokenlist',
+      unrelated: '/docs/accounts/access-keys',
     },
     {
       name: 'wallet integration',
       section: 'Tempo EVM',
       path: '/docs/quickstart/wallet-developers',
       group: 'Accounts and keys',
-      sibling: '/docs/quickstart/tokenlist',
+      sibling: '/docs/accounts/access-keys',
       unrelated: '/docs/guide/issuance/manage-stablecoin',
     },
     {
@@ -995,7 +1004,7 @@ for (const mobile of [false, true]) {
       path: '/docs/protocol/tip20/spec',
       group: 'TIP-20 Tokens',
       sibling: '/docs/network/tokens',
-      unrelated: '/docs/quickstart/tokenlist',
+      unrelated: '/docs/accounts/access-keys',
       guide: '/docs/network/tokens',
     },
     {
@@ -1011,7 +1020,7 @@ for (const mobile of [false, true]) {
       name: 'receive policy reference',
       section: 'Accounts',
       path: '/docs/protocol/tip403/receive-policies',
-      group: 'Payment controls',
+      group: 'Receive payments',
       sibling: '/docs/guide/payments/configure-receive-policies',
       unrelated: '/docs/accounts/access-keys',
       guide: '/docs/guide/payments/configure-receive-policies',
@@ -1128,13 +1137,13 @@ test('the developer guide catalog opens Browser payments in its Accounts home', 
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
   const browserPayments = article.locator('a[href="/docs/guide/payments/send-a-payment/browser"]')
   await expect(browserPayments).toHaveCount(1)
-  await expect(browserPayments).toContainText('Accounts')
+  await expect(browserPayments).toHaveText('Browser payments')
   await browserPayments.click()
   await expect(page).toHaveURL(/\/docs\/guide\/payments\/send-a-payment\/browser\/?$/)
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Browser payments')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-  await expect(sidebar.getByText('Integration guides', { exact: true })).toBeVisible()
+  await expect(sidebar.getByRole('link', { name: 'Send payments', exact: true })).toBeVisible()
   const active = sidebar.locator('a[data-active], a[aria-current="page"]')
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', '/docs/guide/payments/send-a-payment/browser')

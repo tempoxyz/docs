@@ -58,7 +58,7 @@ import { encodeAbiParameters, parseUnits } from 'viem'
 
 const swapAmount = parseUnits('25', 6)
 
-await zoneAClient.zone.signAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
 const quotedBetaOut = await rootClient.dex.getSellQuote({
   amountIn: swapAmount,

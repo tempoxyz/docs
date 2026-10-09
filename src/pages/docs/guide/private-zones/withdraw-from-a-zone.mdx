@@ -55,7 +55,7 @@ import { parseUnits } from 'viem'
 
 const withdrawalAmount = parseUnits('100', 6)
 
-await zoneAClient.zone.signAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
 const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
   account: rootClient.account,
@@ -77,7 +77,7 @@ import { parseUnits } from 'viem'
 const withdrawalAmount = parseUnits('100', 6)
 const revealTo = '0x031dc147467e8f106eb22850fef549dc74b8f6634aeac554ebdd4ab896b67cdf68' // [!code focus]
 
-await zoneAClient.zone.signAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
 const { receipt } = await zoneAClient.zone.requestVerifiableWithdrawalSync({ // [!code focus]
   account: rootClient.account,

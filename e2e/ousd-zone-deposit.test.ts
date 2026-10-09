@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { ZoneRpcAuthentication } from 'ox/tempo'
 import { POST } from '../src/pages/_api/api/zone-rpc'
 import { getDemoStep } from './helpers'
 
@@ -18,10 +19,13 @@ test('deposit OUSD into Zone A with a passkey', async ({ page }) => {
   // The static preview does not serve API routes; run the actual relay handler.
   await page.route('**/api/zone-rpc?zone=6', async (route) => {
     const request = route.request()
+    const headers = await request.allHeaders()
+    const token = headers['x-authorization-token'] as `0x${string}`
+    expect(ZoneRpcAuthentication.deserialize(token).zoneId).toBe(6)
     const response = await POST(
       new Request(request.url(), {
         method: request.method(),
-        headers: await request.allHeaders(),
+        headers,
         body: request.postData(),
       }),
     )

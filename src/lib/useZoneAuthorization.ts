@@ -12,7 +12,7 @@ export type ZoneAuthClientLike = {
       account: Hex
       expiresAt: bigint
     }>
-    signAuthorizationToken: () => Promise<{
+    signAuthorizationToken: (parameters: { zoneId: number }) => Promise<{
       authentication: {
         expiresAt: number
         zoneId: number
@@ -25,10 +25,11 @@ export type ZoneAuthClientLike = {
 export function useZoneAuthorization(parameters: {
   address: Hex | undefined
   chainId: number
+  zoneId: number
   queryKey: readonly unknown[]
   zoneClient: ZoneAuthClientLike | undefined
 }) {
-  const { address, chainId, queryKey, zoneClient } = parameters
+  const { address, chainId, zoneId, queryKey, zoneClient } = parameters
 
   const statusQuery = useQuery({
     enabled: Boolean(address && zoneClient),
@@ -49,7 +50,8 @@ export function useZoneAuthorization(parameters: {
     mutationFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
 
-      return zoneClient.zone.signAuthorizationToken()
+      // Legacy sandbox chain IDs do not follow the current SDK derivation.
+      return zoneClient.zone.signAuthorizationToken({ zoneId })
     },
     onSuccess: async () => {
       await statusQuery.refetch()

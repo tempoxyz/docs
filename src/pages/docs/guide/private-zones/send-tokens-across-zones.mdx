@@ -51,7 +51,7 @@ import { encodeAbiParameters, parseUnits } from 'viem'
 
 const transferAmount = parseUnits('25', 6)
 
-await zoneAClient.zone.signAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
 const callbackData = encodeAbiParameters(
   [
