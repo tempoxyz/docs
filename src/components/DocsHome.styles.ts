@@ -5,7 +5,7 @@ import { vars as tokens } from '../styles/theme'
 export const tempoDocsHome = style({
   '--home-muted': 'var(--vocs-text-color-secondary)',
   '--home-ink': 'var(--vocs-text-color-primary)',
-  '--home-panel': 'var(--surface-block)',
+  '--home-panel': 'var(--surface-panel)',
   '--home-line': 'var(--vocs-border-color-primary)',
 
   color: inherited.color.homeInk,
@@ -104,6 +104,9 @@ export const tempoDocsHome = style({
       minWidth: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       padding: 'var(--tempo-card-padding) !custom',
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: inherited.color.homeLine,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
       backgroundColor: inherited.color.homePanel,
@@ -293,6 +296,9 @@ export const tempoAgentStart = style({
   '--home-muted': 'color-mix(in srgb, var(--home-ink) 68%, transparent)',
   minWidth: 0,
   padding: tokens.spacing['7'],
+  borderWidth: tokens.borderWidth.hairline,
+  borderStyle: 'solid',
+  borderColor: inherited.color.homeLine,
 
   borderRadius: tokens.radius.xl,
   backgroundColor: inherited.color.homePanel,
