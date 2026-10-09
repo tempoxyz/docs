@@ -1,0 +1,138 @@
+---
+title: "Withdraw"
+seoTitle: "Withdraw from Earn | Tempo Docs"
+description: "Request an Earn withdrawal, distinguish immediate and queued redemption, and confirm funds reach the account."
+interactive: true
+---
+
+import { OpenApi } from 'vocs'
+import { EarnWithdrawDemo } from '../../../components/guides/EarnDepositDemo'
+
+<span id="withdraw-funds" />
+
+# Withdraw
+
+Redeem vault shares to return stablecoins to the account. Use the immediate redemption flow below only when the vault supports it. Check queued withdrawal requirements separately.
+
+## Try a withdrawal
+
+Redeem the shares from your [test deposit](/docs/earn/integrate#try-a-deposit). The demo restores your passkey test account in this browser, selects its full position in the same pathUSD vault on Moderato, and returns the test funds to that account.
+
+<EarnWithdrawDemo />
+
+<span id="check-liquidity-and-withdrawal-support" />
+
+## Check available funds
+
+A vault uses available cash or liquidity from its underlying venue for redemptions. An immediate redemption can fail when liquidity is unavailable. Vaults with async redemption support use a separate request-and-claim flow; a failed immediate redemption does not automatically enter that queue.
+
+Keep three amounts distinct in your app:
+
+| Amount | What to show |
+| --- | --- |
+| **Position value** | The current asset value of the account's shares. |
+| **Available to withdraw** | The amount available through the vault's supported withdrawal path and a current quote. |
+| **Pending withdrawal** | An exit requested but not yet delivered to the destination account. |
+
+Read `capabilities.redeem` and `capabilities.asyncRedeem` to distinguish immediate and queued redemption support. The vault's `instantLiquidity` reports liquidity across the vault, not a user-specific withdrawal quote; `null` means a reliable value is unavailable. Recheck the withdrawal path when the user submits a request.
+
+Read the selected vault before enabling withdrawal. The API example starts with the same testnet vault. Keep `chainId` set to `testnet` and include `capabilities`, or change both the vault and network for your integration.
+
+<OpenApi.Playground operationId="getEarnVault" anchors={false} />
+
+Inspect `capabilities.redeem`, `capabilities.asyncRedeem`, and `instantLiquidity`. This reads vault-wide support; get a quote for the account’s share amount before signing. A quoted value does not reserve liquidity.
+
+<span id="request-and-confirm-a-withdrawal" />
+
+## Request a withdrawal
+
+:::::steps
+
+### Get current withdrawal terms
+
+Set `shareAmount` (CLI: `SHARE_AMOUNT`) to the shares to redeem in base units. Use your tool’s [testnet setup](/docs/earn/example), then read the current asset output, including vault fees. Wagmi’s `Abis` and `EarnShares` come from `viem/tempo`.
+
+::::code-group
+
+```ts [Viem]
+const assetAmount = await client.earn.getRedeemQuote({
+  vault,
+  shareAmount,
+})
+```
+
+```bash [CLI (Cast)]
+ASSET_QUOTE=$(cast call "$VAULT" 'previewRedeem(uint256)(uint256)' \
+  "$SHARE_AMOUNT" --rpc-url "$TEMPO_RPC_URL" --json | \
+  python3 -c 'import json,sys; print(json.load(sys.stdin)[0])')
+MIN_ASSETS=$(minimum_output "$ASSET_QUOTE")
+```
+
+```tsx [Wagmi]
+const quote = useReadContract({
+  abi: Abis.earnVault, address: vault,
+  functionName: 'previewRedeem', args: [shareAmount],
+})
+const assetAmountMin = quote.data
+  ? EarnShares.minimumOutput(quote.data, 50)
+  : undefined
+```
+
+::::
+
+Show the asset, quoted output, network fee, recipient, and withdrawal timing before the account signs. Refresh stale quotes; Wagmi exposes `quote.refetch()`.
+
+### Submit the withdrawal
+
+Approve the vault to spend the share token, then redeem the selected shares. Earn’s `redeem(uint256,address,uint256)` takes the share amount, recipient, and minimum asset output; it differs from the ERC-4626 signature. Viem and Wagmi batch these calls; Cast sends and confirms them separately. Each version sends assets to the signing account and accepts at most 0.5% less than the displayed quote. Keep the submit button disabled until a positive quote is available.
+
+::::code-group
+
+```ts [Viem]
+const { receipt } = await client.earn.redeemSync({
+  vault,
+  shareAmount,
+  assetAmount,
+  slippageBps: 50,
+})
+```
+
+```bash [CLI (Cast)]
+cast erc20 approve "$SHARE_TOKEN" "$VAULT" "$SHARE_AMOUNT" \
+  --rpc-url "$TEMPO_RPC_URL" \
+  --account "$KEYSTORE" --tempo.fee-token "$ASSET_TOKEN"
+cast send "$VAULT" 'redeem(uint256,address,uint256)' \
+  "$SHARE_AMOUNT" "$ACCOUNT" "$MIN_ASSETS" \
+  --rpc-url "$TEMPO_RPC_URL" --account "$KEYSTORE" \
+  --tempo.fee-token "$ASSET_TOKEN"
+```
+
+```tsx [Wagmi]
+const redemption = useSendCallsSync()
+const submitWithdrawal = async () => {
+  if (!assetAmountMin) return
+  const calls = Actions.earn.redeem.calls({
+    vault, shareToken, shareAmount,
+    recipient: address, assetAmountMin,
+  })
+  return redemption.mutateAsync({ calls, forceAtomic: true })
+}
+```
+
+::::
+
+For queued withdrawals, [contact Tempo](https://tempo.xyz/contact) for the selected vault’s request-and-claim integration. The examples on this page cover immediate redemption. Save the request identifier and keep pending funds separate from available stablecoins. The Earn read API does not submit either withdrawal path.
+
+<span id="confirm-destination-receipt" />
+
+### Track its status
+
+Track the transaction and any later settlement. Keep the withdrawal pending until the destination receives funds, then refresh the position and stablecoin balance. Use the [transaction and transfer model](/docs/api/transactions-and-transfers) to distinguish execution from delivery.
+
+:::::
+
+## Pay with withdrawn funds
+
+Once the withdrawn stablecoins reach the account, you can [send a payment](/docs/guide/payments/send-a-payment).
+
+For private balances, use a vault that supports [Zone routing](/docs/zones) and check its route configuration. Public and private positions have different accounting and tracking requirements; see the [integration guide](/docs/earn/integrate#track-private-earn-activity).

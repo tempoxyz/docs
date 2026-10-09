@@ -11,11 +11,13 @@ import { Cards, Card } from 'vocs'
 
 Tempo is EVM-compatible, so standard transactions work out of the box. However, Tempo has [no native gas token](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), which means wallet behaviors like balance display and gas quoting need adjustment.
 
-To deliver the best experience for your users, integrate [Tempo Transactions](/docs/guide/tempo-transaction) — a protocol-native [EIP-2718](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2718.md) transaction type (type byte `0x76`) that provides fee token selection, fee sponsorship, call batching, concurrent nonces, passkey signing, and scheduled execution — without requiring a bundler, paymaster, or third-party vendor.
+To deliver the best experience for your users, integrate [Tempo Transactions](/docs/guide/tempo-transaction) — a protocol-native [EIP-2718](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2718.md) transaction type (type byte `0x76`) that provides fee token selection, fee sponsorship, call batching, concurrent nonces, passkey signing, and transaction validity windows — without requiring a bundler, paymaster, or third-party vendor.
 
-[SDKs](/docs/guide/tempo-transaction#integration-guides) are available for TypeScript, Rust, Go, Python, and Foundry. Integration typically takes less than an hour.
+[SDKs](/docs/guide/tempo-transaction#integration-guides) are available for TypeScript, Rust, Go, Python, and Foundry.
 
 ## Wallet integration steps
+
+The examples below use Moderato testnet and its test stablecoins. Use a funded test account; configure mainnet separately with tokens supported there.
 
 ::::steps
 
@@ -28,18 +30,17 @@ Replace your wallet's transaction construction with Tempo Transactions. The mini
 ```ts twoslash [example.ts]
 // @noErrors
 import { client } from './viem.config'
-import { parseUnits } from 'viem'
 
 // Sends a Tempo Transaction (type 0x76)
 const { receipt } = await client.token.transferSync({
-  amount: parseUnits('100', 6),
+  amount: { formatted: '100' },
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   token: '0x20c0000000000000000000000000000000000001',
 })
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"
-// [!include ~/snippets/viem.config.ts:setup]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
 ```
 
 :::
@@ -70,14 +71,17 @@ const userFeeToken = await client.fee.getUserToken({
   account: '0x...'
 })
 
-const balance = await client.token.getBalance({
-  account: '0x...',
-  token: userFeeToken.address
-})
+// A missing preference does not mean the account has no spendable stablecoins.
+const balance = userFeeToken
+  ? await client.token.getBalance({
+      account: '0x...',
+      token: userFeeToken.address,
+    })
+  : null
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"
-// [!include ~/snippets/viem.config.ts:setup]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
 ```
 
 :::
@@ -107,10 +111,9 @@ To set the fee token on a per-transaction basis, pass the `feeToken` parameter w
 ```ts twoslash [example.ts]
 // @noErrors
 import { client } from './viem.config'
-import { parseUnits } from 'viem'
 
 const { receipt } = await client.token.transferSync({
-  amount: parseUnits('100', 6),
+  amount: { formatted: '100' },
   feeToken: '0x20c0000000000000000000000000000000000002', // [!code hl]
   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
   token: '0x20c0000000000000000000000000000000000001',
@@ -118,7 +121,7 @@ const { receipt } = await client.token.transferSync({
 ```
 
 ```ts twoslash [viem.config.ts] filename="viem.config.ts"
-// [!include ~/snippets/viem.config.ts:setup]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
 ```
 
 :::
@@ -153,11 +156,12 @@ If you've integrated a third-party account abstraction provider for batching, sp
 Retrieve the user's configured fee token preference:
 
 ```ts
-import { getUserToken } from 'viem/tempo'
+import { client } from './viem.config'
 
 const feeToken = await client.fee.getUserToken({
-  account: userAddress
+  account: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
 })
+// null means this account has not configured a fee token preference.
 ```
 
 See [`getUserToken`](https://viem.sh/tempo/actions/fee.getUserToken) for full documentation.
@@ -167,11 +171,11 @@ See [`getUserToken`](https://viem.sh/tempo/actions/fee.getUserToken) for full do
 Check a user's balance for a specific token:
 
 ```ts
-import { getBalance } from 'viem/tempo'
+import { client } from './viem.config'
 
 const balance = await client.token.getBalance({
-  account: userAddress,
-  token: tokenAddress
+  account: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
+  token: '0x20c0000000000000000000000000000000000001',
 })
 // ^? { amount: bigint; decimals: number; formatted: string }
 ```
@@ -183,7 +187,7 @@ See [`getBalance`](https://viem.sh/tempo/actions/token.getBalance) for full docu
 Set the user's default fee token preference. This will be used for all transactions unless a different fee token is specified at the transaction level.
 
 ```ts
-import { setUserToken } from 'viem/tempo'
+import { client } from './viem.config'
 
 await client.fee.setUserTokenSync({
   token: '0x20c0000000000000000000000000000000000001',
@@ -224,7 +228,7 @@ Before launching Tempo support, ensure your wallet:
   <Card
     description="Sponsor user fees to enable feeless transaction experiences in your application"
     icon="lucide:shield-check"
-    title="Sponsor User Fees"
+    title="Sponsor fees"
     to="/docs/guide/payments/sponsor-user-fees"
   />
   <Card
@@ -236,7 +240,7 @@ Before launching Tempo support, ensure your wallet:
   <Card
     description="Pay fees in any supported stablecoin"
     icon="lucide:wallet"
-    title="Pay Fees in Any Stablecoin"
+    title="Choose a fee token"
     to="/docs/guide/payments/pay-fees-in-any-stablecoin"
   />
 </Cards>

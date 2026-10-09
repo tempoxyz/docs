@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import * as ui from './features.recipes'
 
 export type FeatureItemData = {
   label: string
@@ -40,10 +41,9 @@ export const features: Feature[] = [
     title: 'Tempo Transactions',
     description: (
       <>
-        Tempo Transactions let apps <span className="text-foreground">batch</span>,{' '}
-        <span className="text-foreground">sponsor</span>,{' '}
-        <span className="text-foreground">schedule</span>, and{' '}
-        <span className="text-foreground">parallelize</span> payments through a native transaction
+        Tempo Transactions let apps <span {...ui.featuresText()}>batch</span>,{' '}
+        <span {...ui.featuresText()}>sponsor</span>, <span {...ui.featuresText()}>schedule</span>,
+        and <span {...ui.featuresText()}>parallelize</span> payments through a native transaction
         type.
       </>
     ),
@@ -182,11 +182,9 @@ export const features: Feature[] = [
     description: (
       <>
         TIP-20 gives stablecoins the primitives needed for payments:{' '}
-        <span className="text-foreground">fees</span>,{' '}
-        <span className="text-foreground">memos</span>,{' '}
-        <span className="text-foreground">lanes</span>,{' '}
-        <span className="text-foreground">policies</span>, and{' '}
-        <span className="text-foreground">issuer controls</span>.
+        <span {...ui.featuresText()}>fees</span>, <span {...ui.featuresText()}>memos</span>,{' '}
+        <span {...ui.featuresText()}>lanes</span>, <span {...ui.featuresText()}>policies</span>, and{' '}
+        <span {...ui.featuresText()}>issuer controls</span>.
       </>
     ),
     items: [

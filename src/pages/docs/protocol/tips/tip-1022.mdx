@@ -188,8 +188,8 @@ interface IAddressRegistry {
 
     // ──────────────────── Errors ────────────────────
 
-    /// @notice The computed masterId is already registered to a different address.
-    error MasterIdCollision();
+    /// @notice The computed masterId is already registered (including to the same address).
+    error MasterIdCollision(address master);
 
     /// @notice The caller/new master address is invalid for virtual forwarding.
     error InvalidMasterAddress();
@@ -209,7 +209,7 @@ interface IAddressRegistry {
     ///      Reverts with ProofOfWorkFailed if the first 4 bytes are not zero.
     ///      Reverts with InvalidMasterAddress if msg.sender is not a valid master address.
     ///      Reverts with MasterIdCollision if the derived masterId is already taken
-    ///      by a different address. On collision, the caller can retry with a different salt.
+    ///      (including by the same address). On collision, retry with a different salt.
     ///      The same address MAY register multiple masterIds using different salts.
     /// @param salt Caller-chosen salt for masterId derivation. Must satisfy 32-bit PoW.
     /// @return masterId The derived master identifier.

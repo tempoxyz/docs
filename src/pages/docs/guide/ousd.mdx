@@ -4,15 +4,20 @@ seoTitle: "OUSD (Open USD) on Tempo | Tempo Docs"
 description: Use Open USD (OUSD), the recommended stablecoin on Tempo, for balances, payments, and settlement, and move over from USDC.e or pathUSD.
 ---
 
+import { DocsProductOverview } from '../../../components/DocsProductOverview'
+
+<DocsProductOverview image="ousd" alt="Open USD (OUSD) logo">
+
 # OUSD on Tempo
 
-Open USD (OUSD) is a USD stablecoin operated by [Open Standard](https://joinopenstandard.com), an independent company whose founding partners include Coinbase, Mastercard, Shopify, Stripe, and Visa. OUSD is issued natively on Tempo as a [TIP-20](/docs/protocol/tip20/spec) token and is the recommended stablecoin for holding balances, accepting payments, and settling on Tempo.
+Open USD (OUSD) is a USD stablecoin operated by [Open Standard](https://joinopenstandard.com), an independent company whose founding partners include Coinbase, Mastercard, Shopify, Stripe, and Visa. OUSD is issued natively on Tempo as a [TIP-20 token](/get-started/stablecoins) and is the recommended stablecoin for holding balances, accepting payments, and settling on Tempo.
+
+</DocsProductOverview>
 
 ## Why OUSD
 
-- **No fees to mint or redeem.** OUSD mints and redeems 1:1 with no fees and no volume limits, 24/7.
+- **Mint and redeem at par.** Open Standard describes fee-free 1:1 minting and redemption. Access, supported regions, and any partner charges depend on the integration partner; check its terms before integrating.
 - **Regulated reserves.** Reserves are maintained at major financial institutions in compliance with US regulatory requirements.
-- **Neutral governance.** Open Standard operates OUSD with a network of partners across payments, fintech, and crypto, with no single entity controlling its roadmap or fees.
 - **Native on Tempo.** OUSD is issued directly on Tempo, so it does not depend on a bridge.
 
 ## Contract
@@ -32,8 +37,8 @@ OUSD is also listed in the [Tempo token list](/docs/quickstart/tokenlist).
 ## Get OUSD
 
 - **Mint or redeem through an integration partner.** OUSD integration partners mint and redeem OUSD 1:1 with USD. See [joinopenstandard.com](https://joinopenstandard.com) to get started.
-- **Swap on the Stablecoin DEX.** OUSD trades against pathUSD on the [Stablecoin DEX](/docs/guide/stablecoin-dex), so you can swap into OUSD from any USD stablecoin on Tempo.
-- **Bridge, then swap.** If you bridge USDC to Tempo, it arrives as USDC.e. Swap it to OUSD on the Stablecoin DEX. See [Getting funds on Tempo](/docs/guide/getting-funds).
+- **Swap on the Stablecoin DEX.** Quote a swap into OUSD on the [Stablecoin DEX](/docs/guide/stablecoin-dex). A route requires available liquidity and compatible transfer policies for the tokens involved.
+- **Bridge, then swap.** If you bridge USDC to Tempo, it arrives as USDC.e. Swap it to OUSD on the Stablecoin DEX. See [Fund an account](/docs/guide/getting-funds).
 
 ## How OUSD, pathUSD, and USDC.e fit together
 
@@ -49,7 +54,7 @@ pathUSD and USDC.e remain fully supported. Existing integrations that use them k
 
 ### Balances
 
-Swap USDC.e or pathUSD to OUSD on the [Stablecoin DEX](/docs/guide/stablecoin-dex). The exchange routes USD stablecoins through pathUSD, so a swap from USDC.e to OUSD happens in a single transaction.
+Swap USDC.e or pathUSD to OUSD on the [Stablecoin DEX](/docs/guide/stablecoin-dex). The DEX routes USD stablecoins through pathUSD, so a swap from USDC.e to OUSD happens in a single transaction.
 
 ### Fees
 
@@ -57,7 +62,7 @@ Set OUSD as your fee token so your transactions do not fall back to pathUSD. You
 
 ### Accepting payments
 
-Keep accepting USDC.e and pathUSD while your customers move over. Senders can pay in any USD stablecoin and the Stablecoin DEX can route the payment to OUSD. See [Pay fees in any stablecoin](/docs/guide/payments/pay-fees-in-any-stablecoin).
+If your application accepts USDC.e or pathUSD and settles in OUSD, use a [Stablecoin DEX swap](/docs/guide/stablecoin-dex/executing-swaps) to convert the received funds. Quote the swap and verify its output amount. Choosing OUSD as the fee token pays transaction fees in OUSD; it does not convert the payment amount.
 
 ### Token selectors and allowlists
 
@@ -69,4 +74,4 @@ USDC bridged through LayerZero (Stargate) still arrives as USDC.e. See [Bridge v
 
 ## Testnet
 
-OUSD is also deployed on Tempo Testnet (Moderato, chain ID `42431`) at the same address. Testnet OUSD is a test token and has no relationship to OUSD on Tempo Mainnet. The [faucet](/docs/quickstart/faucet) provides 1,000,000 testnet OUSD per request.
+OUSD is also deployed on Tempo Testnet (Moderato, chain ID `42431`) at the same address. Testnet OUSD is a test token and has no relationship to OUSD on Tempo Mainnet. Use the [faucet](/docs/quickstart/faucet) to request test tokens, then check the funded balance.

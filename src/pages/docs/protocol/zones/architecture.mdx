@@ -30,7 +30,7 @@ Withdrawals can also call a Tempo contract through `ZoneMessenger`, enabling a D
 
 The operator groups Zone blocks into batches and submits their commitments to the portal. A batch records the Zone's progress, processed deposits, and withdrawal queue. The portal checks continuity with the previous batch, verifies signatures from the configured sequencer quorum, and calls its configured verifier. Accepting the batch makes its withdrawals available for processing on Tempo. Bridge activity and settlement commitments are public; the private ledger is not published.
 
-Sequencer certificates authenticate batch commitments but do not independently prove correct execution. A configured settlement prover supplies a Nitro attestation before submission. Onchain enforcement depends on the active runtime: the Solidity reference is a stub, while Tempo's T13 native verifier checks attestations and requires approved enclave measurements. See [proving and settlement](/docs/protocol/zones/proving#implementation-status) for the reviewed source status and deployment checks.
+Sequencer certificates authenticate batch commitments but do not independently prove correct execution. Enforcement depends on the deployed verifier and its configuration. See [proving and settlement](/docs/protocol/zones/proving#implementation-status) for the reviewed implementations and deployment checks.
 
 ## Contract architecture
 

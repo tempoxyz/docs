@@ -1,87 +1,30 @@
 ---
-title: "Build on Tempo"
-seoTitle: "Build on Tempo: Choose Your Path | Docs"
-description: Choose Tempo build guides for stablecoin payments, issuance, exchange, private zones, agentic payments, fee sponsorship, and production workflows for launch.
+title: "Stablecoins"
+seoTitle: "Build with Stablecoins on Tempo | Tempo Docs"
+description: Learn about Tempo stablecoins and find guides for accounts, payments, and exchange.
 ---
 
-import { Cards, Card } from 'vocs'
+<span id="build-on-tempo" />
 
-# Build on Tempo
+# Stablecoins
 
-Use this section when you are designing payment experiences or payment infrastructure on Tempo. The guides here focus on what your product needs to do: move stablecoins, issue assets, exchange liquidity, isolate activity in private zones, or let agents pay for services.
+Start with the [quickstart](/get-started/quickstart) to send a test payment. Use [Accounts](/docs/accounts) to build payment flows, or [Tempo EVM](/docs/development) for interactive walkthroughs and chain integration.
 
-Start with **Make Payments** if you are not sure where to begin. It covers the core transfer flow and introduces the payment primitives used throughout the rest of the docs.
+<span id="core-build-paths" />
 
-Use the [Tempo API](/docs/api) when your application backend needs indexed payment activity, webhooks, asset route or exchange quotes, fee sponsorship, or integration management.
+## Build with stablecoins
 
-Use [Agentic Payments](/docs/guide/machine-payments) when agents, APIs, or services need to pay per request. Use [Private Zones](/docs/guide/private-zones) when your product needs isolated execution, private transfers, or zone bridging flows.
+- [Accounts](/docs/accounts) covers sending, receiving, and reconciling payments.
+- [Routes](/docs/routes) covers moving funds between Tempo and other networks.
+- [Stablecoin exchange](/docs/guide/stablecoin-dex) covers swaps and liquidity on Tempo.
+- [Issue stablecoins](/docs/guide/issuance) covers token creation, supply, and permissions for issuers.
 
-## Core Build Paths
+<span id="production-essentials" />
 
-<Cards>
-  <Card
-    title="Make Payments"
-    description="Send and receive stablecoin payments, attach memos, sponsor fees, and handle parallel transactions."
-    to="/docs/guide/payments"
-    icon="lucide:send"
-  />
-  <Card
-    title="Issue Stablecoins"
-    description="Create, mint, and manage stablecoins using TIP-20 tokens."
-    to="/docs/guide/issuance"
-    icon="lucide:coins"
-  />
-  <Card
-    title="Exchange Stablecoins"
-    description="Use Tempo's enshrined stablecoin exchange for swaps and fee-liquidity workflows."
-    to="/docs/guide/stablecoin-dex"
-    icon="lucide:arrow-left-right"
-  />
-  <Card
-    title="Agentic Payments"
-    description="Accept one-time, pay-as-you-go, and streamed payments through the Machine Payments Protocol."
-    to="/docs/guide/machine-payments"
-    icon="lucide:bot"
-  />
-  <Card
-    title="Private Zones"
-    description="Connect to zones, deposit funds, send tokens privately, bridge, swap, and withdraw."
-    to="/docs/guide/private-zones"
-    icon="lucide:lock-keyhole"
-  />
-</Cards>
+## Add payment controls
 
-## Production Essentials
+Use [Send payments](/docs/guide/payments/send-a-payment) to choose fee sponsorship, a fee token, batch payments, or receive policies. For reconciliation, choose [payment references](/docs/guide/payments/transfer-memos) or [customer deposit addresses](/docs/guide/payments/virtual-addresses).
 
-<Cards>
-  <Card
-    title="Get Funds"
-    description="Fund wallets and test payment flows before moving to production integrations."
-    to="/docs/guide/getting-funds"
-    icon="lucide:wallet"
-  />
-  <Card
-    title="Use Tempo Transactions"
-    description="Batch calls, sponsor fees, schedule execution, and build richer payment flows."
-    to="/docs/guide/tempo-transaction"
-    icon="lucide:layers"
-  />
-  <Card
-    title="Pay Fees in Any Stablecoin"
-    description="Use Tempo's fee system to pay transaction fees with supported stablecoins."
-    to="/docs/guide/payments/pay-fees-in-any-stablecoin"
-    icon="lucide:badge-dollar-sign"
-  />
-  <Card
-    title="Sponsor User Fees"
-    description="Let your app or service pay transaction fees on behalf of users."
-    to="/docs/guide/payments/sponsor-user-fees"
-    icon="lucide:heart-handshake"
-  />
-  <Card
-    title="Configure Receive Policies"
-    description="Control which tokens and senders an account can receive for TIP-20 transfers."
-    to="/docs/guide/payments/configure-receive-policies"
-    icon="lucide:shield-check"
-  />
-</Cards>
+## Connect and fund your application
+
+Follow [Fund an account](/docs/guide/getting-funds) for funding options. Use [APIs & SDKs](/docs/tools) for clients and references, or [Partners](/docs/partners) for integration partners.

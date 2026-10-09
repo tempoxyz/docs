@@ -1,6 +1,7 @@
 'use client'
 
 import { Container } from './Container'
+import * as ui from './T7BenchmarkVisual.recipes'
 
 const numberFormat = new Intl.NumberFormat('en-US')
 
@@ -15,15 +16,17 @@ function BaseFeeRow(props: {
   tone: 'before' | 'after'
 }) {
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-baseline justify-between gap-3 text-sm">
-        <span className="text-gray11">{props.label}</span>
-        <strong className="text-gray12">{props.value}</strong>
+    <div {...ui.baseFeeRowLayout()}>
+      <div {...ui.baseFeeRowLayout2()}>
+        <span {...ui.baseFeeRowText()}>{props.label}</span>
+        <strong {...ui.strong()}>{props.value}</strong>
       </div>
-      <div className="h-2.5 overflow-hidden rounded bg-gray3" aria-hidden="true">
+      <div {...ui.baseFeeRowLayout3()} aria-hidden="true">
         <div
-          className={`h-full rounded ${props.tone === 'before' ? 'bg-gray7' : 'bg-accent'}`}
-          style={{ width: `${Math.max(props.width, 3)}%` }}
+          {...ui.baseFeeRowLayoutAppearance({
+            value0: `${Math.max(props.width, 3)}%`,
+            className: ` ${ui.baseFeeRowLayout4().className} ${props.tone === 'before' ? ui.baseFeeRowLayout5().className : ui.baseFeeRowLayout6().className}`,
+          })}
         />
       </div>
     </div>
@@ -32,13 +35,17 @@ function BaseFeeRow(props: {
 
 function GasSnapshotRow(props: { label: string; value: number }) {
   return (
-    <div className="space-y-1.5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="font-medium text-gray12 text-sm">{props.label}</span>
-        <strong className="text-gray12 text-sm tabular-nums">{formatGas(props.value)}</strong>
+    <div {...ui.baseFeeRowLayout()}>
+      <div {...ui.gasSnapshotRowLayout()}>
+        <span {...ui.gasSnapshotRowText()}>{props.label}</span>
+        <strong {...ui.strong2()}>{formatGas(props.value)}</strong>
       </div>
-      <div className="h-2.5 overflow-hidden rounded bg-gray3" aria-hidden="true">
-        <div className="h-full rounded bg-accent" style={{ width: '18%' }} />
+      <div {...ui.baseFeeRowLayout3()} aria-hidden="true">
+        <div
+          {...ui.gasSnapshotRowLayoutAppearance({
+            className: ui.gasSnapshotRowLayout2().className,
+          })}
+        />
       </div>
     </div>
   )
@@ -47,30 +54,28 @@ function GasSnapshotRow(props: { label: string; value: number }) {
 export function T7BenchmarkVisual() {
   return (
     <Container
-      headerLeft={
-        <h4 className="font-normal text-[14px] text-gray12 leading-none">Fee impact at a glance</h4>
-      }
+      headerLeft={<h4 {...ui.t7BenchmarkVisualHeading()}>Fee impact at a glance</h4>}
       footer={
         <span>
           Bars are normalized within each comparison. Exact benchmark numbers are listed below.
         </span>
       }
     >
-      <div className="grid gap-5 lg:grid-cols-2">
-        <section className="space-y-3">
+      <div {...ui.t7BenchmarkVisualLayout()}>
+        <section {...ui.t7BenchmarkVisualSection()}>
           <div>
-            <h5 className="m-0 font-medium text-[14px] text-gray12">Base fee</h5>
-            <p className="m-0 mt-1 text-gray11 text-sm">Example cost for a 50,000 gas transfer.</p>
+            <h5 {...ui.t7BenchmarkVisualH5()}>Base fee</h5>
+            <p {...ui.t7BenchmarkVisualDescription()}>Example cost for a 50,000 gas transfer.</p>
           </div>
           <BaseFeeRow label="Today fixed fee" value="$0.0010" width={100} tone="before" />
           <BaseFeeRow label="New fee cap" value="$0.0006" width={60} tone="after" />
           <BaseFeeRow label="Quiet-period floor" value="$0.00003" width={3} tone="after" />
         </section>
 
-        <section className="space-y-3">
+        <section {...ui.t7BenchmarkVisualSection()}>
           <div>
-            <h5 className="m-0 font-medium text-[14px] text-gray12">Payment channels</h5>
-            <p className="m-0 mt-1 text-gray11 text-sm">
+            <h5 {...ui.t7BenchmarkVisualH5()}>Payment channels</h5>
+            <p {...ui.t7BenchmarkVisualDescription()}>
               Credited reopen path for payer-scoped channel savings.
             </p>
           </div>

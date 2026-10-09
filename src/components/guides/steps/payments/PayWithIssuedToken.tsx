@@ -1,12 +1,15 @@
 'use client'
+
 import * as React from 'react'
-import { isAddress, pad, parseUnits, stringToHex } from 'viem'
+import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './PayWithIssuedToken.recipes'
 
 // Current validator token on testnet
 const validatorToken = alphaUsd
@@ -67,7 +70,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
       token: alphaUsd,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
       feeToken,
     })
   }
@@ -93,7 +96,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -104,7 +107,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -114,31 +117,35 @@ export function PayWithIssuedToken(props: DemoStepProps) {
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'your token'}.`}
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             {/* Token info display */}
-            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
-                  <span className="text-gray12">balance: {alphaBalance?.formatted ?? '0'}</span>
+            <div {...ui.payWithIssuedTokenLayout3()}>
+              <div {...ui.payWithIssuedTokenLayout4()}>
+                <div {...ui.payWithIssuedTokenLayout5()}>
+                  <span {...ui.payWithIssuedTokenText()}>Payment Token: AlphaUSD</span>
+                  <span {...ui.payWithIssuedTokenText2()}>
+                    balance: {alphaBalance?.formatted ?? '0'}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">
+                <div {...ui.payWithIssuedTokenLayout5()}>
+                  <span {...ui.payWithIssuedTokenText()}>
                     {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
                   </span>
-                  <span className="text-gray12">balance: {feeTokenBalance?.formatted ?? '0'}</span>
+                  <span {...ui.payWithIssuedTokenText2()}>
+                    balance: {feeTokenBalance?.formatted ?? '0'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -148,12 +155,12 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -168,7 +175,7 @@ export function PayWithIssuedToken(props: DemoStepProps) {
                 disabled={!active}
                 onClick={handleTransfer}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

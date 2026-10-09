@@ -1,9 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, type Hex, parseUnits } from 'viem'
-import { Actions, tempoActions } from 'viem/tempo'
-import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
+import { type Hex, parseUnits } from 'viem'
 import { useConnection, useConnectorClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -13,9 +11,11 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
+import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone-sandbox-sdk'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { ousd } from '../tokens'
+import * as ui from './SendTokensWithinZone.recipes'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const ZONE_LABEL = 'Zone A'
@@ -76,19 +76,20 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_ID),
+            chain: Zone.a,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
               getZoneRpcTransportConfig(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
 
   const zoneAuthorization = useZoneAuthorization({
     address,
-    chainId: zoneModerato(ZONE_ID).id,
+    chainId: Zone.a.id,
+    zoneId: ZONE_ID,
     queryKey: ['guide-private-zones-send-auth', address, ZONE_ID],
     zoneClient,
   })
@@ -177,7 +178,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
       const { receipt } = await Actions.token.transferSync(zoneClient as never, {
         account: rootWebAuthnAccount,
         amount: TRANSFER_AMOUNT,
-        chain: zoneModerato(ZONE_ID) as never,
+        chain: Zone.a as never,
         feeToken: ousd,
         to: FAKE_RECIPIENT as Hex,
         token: ousd,
@@ -239,7 +240,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     zoneAuthorization.isChecking || zoneAuthorization.authorizeMutation.isPending
   const stepTwoAction = zoneAuthorization.isAuthorized ? undefined : (
     <Button
-      className="font-normal text-[14px] -tracking-[2%]"
+      className={ui.connectedZoneFlowButton().className}
       disabled={authIsPreparing || !zoneClient}
       onClick={() => zoneAuthorization.authorizeMutation.mutate()}
       type="button"
@@ -269,7 +270,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (zoneBalanceQuery.isPending) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled
         type="button"
         variant="default"
@@ -280,7 +281,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (!hasEnoughZoneBalance && !hasRootBalance) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={fundMutation.isPending || !zoneAuthorization.isAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
@@ -292,7 +293,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (!hasEnoughZoneBalance) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={topUpMutation.isPending || !zoneAuthorization.isAuthorized}
         onClick={() => topUpMutation.mutate()}
         type="button"
@@ -309,7 +310,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else {
     stepFourAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={transferMutation.isPending || transferMutation.isSuccess}
         onClick={() => transferMutation.mutate()}
         type="button"
@@ -420,9 +421,9 @@ function DisconnectedZoneFlow() {
 
 function StepBody(props: React.PropsWithChildren) {
   return (
-    <div className="mx-6 pb-4">
-      <div className="mt-3 border-gray4 border-s-2 ps-5">
-        <div className="flex flex-col gap-2 py-0.5">{props.children}</div>
+    <div {...ui.stepBodyLayout()}>
+      <div {...ui.stepBodyLayout2()}>
+        <div {...ui.stepBodyLayout3()}>{props.children}</div>
       </div>
     </div>
   )
@@ -432,9 +433,9 @@ function DetailLine(props: { label: string; value: string; dataTestId?: string |
   const { dataTestId, label, value } = props
 
   return (
-    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] -tracking-[1%]">
-      <span className="text-gray9">{label}</span>
-      <span className="break-all font-mono text-[12px] text-gray12" data-testid={dataTestId}>
+    <div {...ui.detailLineLayout()}>
+      <span {...ui.detailLineText()}>{label}</span>
+      <span {...ui.detailLineText2()} data-testid={dataTestId}>
         {value}
       </span>
     </div>

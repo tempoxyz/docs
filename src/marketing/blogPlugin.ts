@@ -193,7 +193,7 @@ async function loadRenderedPosts(): Promise<SearchablePost[]> {
 }
 
 export function blogPostsPlugin(): Plugin {
-  let cache: RenderedPost[] | null = null
+  let cache: SearchablePost[] | null = null
 
   async function getPosts() {
     if (!cache) cache = await loadRenderedPosts()

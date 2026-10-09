@@ -33,6 +33,13 @@ pnpm build          # Build for production
 pnpm preview        # Preview the production build
 ```
 
+## OG image review
+
+Run `pnpm og:goldens:check` to verify social cards against the checked-in images.
+Open `test-results/og-goldens/index.html` for the expected and actual image gallery;
+CI uploads the same gallery as `og-image-goldens`. See the
+[fixture guide](./src/lib/og-goldens/README.md) before approving a visual change.
+
 ## Routing and redirects
 
 The canonical public documentation URL is [`https://tempo.xyz/developers`](https://tempo.xyz/developers). This repository serves the docs application, while the Tempo web application proxies that public mount to this deployment.

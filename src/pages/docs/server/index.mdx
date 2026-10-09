@@ -15,18 +15,18 @@ Server utilities are distributed through the Tempo API library, [`tapimo`](https
 
 ## Connect a handler to your server
 
-Create a handler once, then expose it through your server framework:
+Use the [relay server dependency versions](/docs/server/relay-handler#create-a-relay-handler), create a handler once, then expose it through your server framework:
 
 ```ts twoslash
 // @noErrors
 import { createServer } from 'node:http'
-import { Handler } from 'tapimo'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'tapimo/server'
+import { Account } from 'viem/tempo'
 
 const handler = Handler.relay({
   apiKey: process.env.TEMPO_API_KEY,
   feePayer: {
-    account: privateKeyToAccount('0x...'),
+    account: Account.fromSecp256k1('0x...'),
   },
 })
 

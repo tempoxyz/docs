@@ -1,52 +1,60 @@
 'use client'
-import { useConnect, useConnection, useDisconnect } from 'wagmi'
+
+import { useConnect, useConnection, useConnections, useSwitchConnection } from 'wagmi'
 import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
 import { useTempoWalletConnector } from '../../../../wagmi.config'
 import { Button, Logout, Step, TempoMarkBoxed, useHydrated } from '../../Demo'
+import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
+import * as ui from './SignInWithTempo.recipes'
 
 export function SignInWithTempo(props: DemoStepProps) {
   const { stepNumber = 1 } = props
-  const { address } = useConnection()
+  const { address, connector: activeConnector } = useConnection()
+  const connections = useConnections()
   const connect = useConnect()
-  const disconnect = useDisconnect()
+  const switchConnection = useSwitchConnection()
   const hydrated = useHydrated()
   const connector = useTempoWalletConnector()
+  const connected = Boolean(address && activeConnector?.id === 'xyz.tempo')
 
   return (
     <Step
-      active={!address}
-      completed={Boolean(address)}
+      active={!connected}
+      completed={connected}
       actions={
-        address ? (
-          <Logout />
+        connected ? (
+          <Logout label="Disconnect" />
         ) : !hydrated || !connector ? (
           <Button disabled variant="default">
             Loading account
           </Button>
-        ) : connect.isPending ? (
+        ) : connect.isPending || switchConnection.isPending ? (
           <Button disabled variant="default">
-            <LucidePictureInPicture2 className="mt-px" />
+            <LucidePictureInPicture2 className={ui.lucidePictureInPicture2().className} />
             Check prompt
           </Button>
         ) : (
           <Button
             variant="accent"
-            className="font-normal text-[14px] -tracking-[2%]"
-            onClick={async () => {
-              await disconnect.disconnectAsync().catch(() => {})
-              connect.connect({ connector })
+            className={form.actionButton().className}
+            onClick={() => {
+              connect.reset()
+              switchConnection.reset()
+              const existing = connections.find((item) => item.connector.id === 'xyz.tempo')
+              if (existing) switchConnection.mutate({ connector: existing.connector })
+              else connect.connect({ connector })
             }}
             type="button"
           >
-            <TempoMarkBoxed className="size-[14px]" />
-            Sign in with Tempo
+            <TempoMarkBoxed className={ui.tempoMarkBoxed().className} />
+            Connect Tempo Wallet
           </Button>
         )
       }
-      error={connect.error}
+      error={connect.error || switchConnection.error}
       number={stepNumber}
-      title="Sign in with Tempo Wallet."
+      title="Connect Tempo Wallet."
     />
   )
 }

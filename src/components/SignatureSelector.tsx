@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import { getAllSignatures, type SignatureInfo } from './lib/IndexSupplySignatures'
+import * as ui from './SignatureSelector.recipes'
 
 type SignatureSelectorProps = {
   value: string[]
@@ -102,12 +103,12 @@ export function SignatureSelector(props: SignatureSelectorProps) {
   }, [filter])
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <div className="space-y-2">
-        <label htmlFor="signature-search" className="block text-[13px] text-gray11">
+    <div {...ui.signatureSelectorLayout()} ref={dropdownRef}>
+      <div {...ui.signatureSelectorLayout2()}>
+        <label htmlFor="signature-search" {...ui.label()}>
           Filter by Signatures (optional)
         </label>
-        <div className="relative">
+        <div {...ui.signatureSelectorLayout()}>
           <input
             id="signature-search"
             type="text"
@@ -115,15 +116,11 @@ export function SignatureSelector(props: SignatureSelectorProps) {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => !disabled && setIsOpen(true)}
             placeholder={placeholderText}
-            className="min-h-10 w-full rounded-lg border border-gray4 px-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
+            {...ui.signatureSelectorInput()}
             disabled={disabled}
           />
           {value.length > 0 && !disabled && (
-            <button
-              type="button"
-              onClick={clearAll}
-              className="absolute top-1/2 right-2 -translate-y-1/2 text-[11px] text-gray9 hover:text-gray12"
-            >
+            <button type="button" onClick={clearAll} {...ui.signatureSelectorButton()}>
               Clear ({value.length})
             </button>
           )}
@@ -131,36 +128,34 @@ export function SignatureSelector(props: SignatureSelectorProps) {
       </div>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 max-h-[400px] w-full overflow-y-auto rounded-lg border border-gray4 bg-gray1 shadow-lg">
+        <div {...ui.signatureSelectorLayout3()}>
           {Object.keys(groupedSignatures).length === 0 ? (
-            <div className="px-3 py-4 text-center text-[13px] text-gray9">No signatures found</div>
+            <div {...ui.signatureSelectorLayout4()}>No signatures found</div>
           ) : (
             Object.entries(groupedSignatures).map(([contract, signatures]) => (
-              <div key={contract} className="border-gray4 border-b last:border-b-0">
-                <div className="sticky top-0 z-10 bg-gray2 px-3 py-1 font-medium text-[11px] text-gray10 uppercase tracking-wide">
-                  {contract}
-                </div>
-                <div className="py-0.5">
+              <div key={contract} {...ui.signatureSelectorLayout5()}>
+                <div {...ui.signatureSelectorLayout6()}>{contract}</div>
+                <div {...ui.signatureSelectorLayout7()}>
                   {signatures.map((sig) => (
                     <button
                       key={sig.signature}
                       type="button"
                       onClick={() => toggleSignature(sig.signature)}
-                      className="flex w-full items-center gap-1.5 px-3 py-1.5 text-left hover:bg-gray3"
+                      {...ui.signatureSelectorButton2()}
                     >
                       <input
                         type="checkbox"
                         checked={value.includes(sig.signature)}
                         onChange={() => {}}
-                        className="shrink-0"
+                        {...ui.signatureSelectorInput2()}
                       />
-                      <span className="shrink-0 font-mono text-[11px] text-gray12">{sig.name}</span>
-                      <span className="min-w-0 truncate font-mono text-[11px] text-gray9">
-                        {sig.signature}
-                      </span>
+                      <span {...ui.signatureSelectorText()}>{sig.name}</span>
+                      <span {...ui.signatureSelectorText2()}>{sig.signature}</span>
                       <span
-                        className={`ml-auto flex min-h-6 shrink-0 items-center justify-center rounded px-1.5 text-center font-medium text-[12px] leading-4 ${
-                          sig.type === 'event' ? 'bg-blue3 text-blue9' : 'bg-purple3 text-purple9'
+                        className={` ${ui.signatureSelectorText3().className} ${
+                          sig.type === 'event'
+                            ? ui.signatureSelectorText4().className
+                            : ui.functionTag().className
                         }`}
                       >
                         {sig.type}
@@ -175,29 +170,23 @@ export function SignatureSelector(props: SignatureSelectorProps) {
       )}
 
       {!isOpen && (
-        <div className="mt-2 space-y-2">
+        <div {...ui.signatureSelectorLayout8()}>
           {value.length === 0 ? (
-            <div className="space-y-2 rounded border border-gray4 bg-gray2 p-3">
-              <div className="text-[12px] text-gray11 leading-relaxed">
+            <div {...ui.signatureSelectorLayout9()}>
+              <div {...ui.signatureSelectorLayout10()}>
                 No signatures selected. You can query from these base tables:
               </div>
-              <div className="flex flex-wrap gap-2">
-                <code className="rounded bg-gray3 px-2 py-1 font-mono text-[11px] text-gray11">
-                  blocks
-                </code>
-                <code className="rounded bg-gray3 px-2 py-1 font-mono text-[11px] text-gray11">
-                  txs
-                </code>
-                <code className="rounded bg-gray3 px-2 py-1 font-mono text-[11px] text-gray11">
-                  logs
-                </code>
+              <div {...ui.signatureSelectorLayout11()}>
+                <code {...ui.code()}>blocks</code>
+                <code {...ui.code()}>txs</code>
+                <code {...ui.code()}>logs</code>
               </div>
-              <div className="text-[11px] text-gray10">
+              <div {...ui.signatureSelectorLayout12()}>
                 <a
                   href="https://www.indexsupply.net/docs#evm-data"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent hover:underline"
+                  {...ui.signatureSelectorLink()}
                 >
                   View documentation →
                 </a>
@@ -205,28 +194,25 @@ export function SignatureSelector(props: SignatureSelectorProps) {
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap gap-1">
+              <div {...ui.signatureSelectorLayout13()}>
                 {value.map((sig) => {
                   const sigInfo = allSignatures.find((s) => s.signature === sig)
                   const isEvent = sigInfo?.type === 'event'
                   return (
-                    <div
-                      key={sig}
-                      className="inline-flex items-center gap-1.5 rounded border border-gray4 bg-gray3 px-2 py-1 font-mono text-[11px]"
-                    >
+                    <div key={sig} {...ui.signatureSelectorLayout14()}>
                       <span
-                        className={`size-2 shrink-0 rounded-full ${
-                          isEvent ? 'bg-blue9' : 'bg-purple9'
+                        className={` ${ui.signatureSelectorText5().className} ${
+                          isEvent
+                            ? ui.signatureSelectorText6().className
+                            : ui.functionIndicator().className
                         }`}
                       />
-                      <span className="max-w-[300px] truncate text-gray11">
-                        {sigInfo?.name || sig}
-                      </span>
+                      <span {...ui.signatureSelectorText7()}>{sigInfo?.name || sig}</span>
                       {!disabled && (
                         <button
                           type="button"
                           onClick={() => toggleSignature(sig)}
-                          className="text-gray9 leading-none hover:text-gray12"
+                          {...ui.signatureSelectorButton3()}
                         >
                           ×
                         </button>
@@ -239,27 +225,22 @@ export function SignatureSelector(props: SignatureSelectorProps) {
               {!disabled && (
                 <>
                   {hasMixedTypes && (
-                    <div className="rounded border border-yellow6 bg-yellow3 px-3 py-2 text-[12px] text-yellow11 leading-normal">
+                    <div {...ui.signatureSelectorLayout15()}>
                       ⚠️ All signatures must be the same type (all events or all functions)
                     </div>
                   )}
 
                   {!hasMixedTypes && (
-                    <div className="space-y-2 rounded border border-blue4 bg-blue2 p-3">
-                      <div className="font-medium text-[11px] text-blue11">
-                        Table names for your query:
-                      </div>
-                      <div className="flex flex-wrap gap-2">
+                    <div {...ui.signatureSelectorLayout16()}>
+                      <div {...ui.signatureSelectorLayout17()}>Table names for your query:</div>
+                      <div {...ui.signatureSelectorLayout11()}>
                         {selectedSignatureInfos.map((sig) => (
-                          <code
-                            key={sig.signature}
-                            className="rounded bg-blue3 px-2 py-1 font-mono text-[11px] text-blue11"
-                          >
+                          <code key={sig.signature} {...ui.code2()}>
                             {getTableName(sig.name)}
                           </code>
                         ))}
                       </div>
-                      <div className="text-[11px] text-blue9 leading-relaxed">
+                      <div {...ui.signatureSelectorLayout18()}>
                         Each signature creates a virtual table. Use these names in your SQL query.
                         {value.length > 1 && ' You can JOIN these tables together.'}
                       </div>

@@ -37,11 +37,13 @@ async function checkCase(origin: string, testCase: SmokeCase) {
   }
 
   const location = response.headers.get('location')
-  if (location !== testCase.expectedLocation) {
+  const destination = location ? new URL(location, source).toString() : undefined
+  const expectedDestination = new URL(testCase.expectedLocation, source).toString()
+  if (destination !== expectedDestination) {
     throw new Error(`${source} redirected to ${location}; expected ${testCase.expectedLocation}`)
   }
 
-  const finalResponse = await request(new URL(location, source).toString())
+  const finalResponse = await request(destination)
   if (finalResponse.status !== testCase.expectedFinalStatus) {
     throw new Error(
       `${source} reached ${location} with ${finalResponse.status}; expected ${testCase.expectedFinalStatus}`,

@@ -8,57 +8,76 @@ type DocsStructuredDataContext = {
   frontmatter?: DocsFrontmatter
 }
 
+type DocsHeadTags = {
+  base: false
+  canonical?: string
+  meta: {
+    ogType?: 'article'
+    ogImage?: string
+    articleModifiedTime?: false
+  }
+  script?: { type: 'application/ld+json'; innerHTML: string }[]
+}
+
 /**
  * Builds the docs JSON-LD head entry from Vocs' page context.
  *
  * Vocs serializes this callback for the client, so every runtime dependency must
  * remain inside the function body.
  */
-export function docsStructuredDataHead(path: string, { frontmatter }: DocsStructuredDataContext) {
+export function docsStructuredDataHead(
+  path: string,
+  { frontmatter }: DocsStructuredDataContext,
+): DocsHeadTags | undefined {
   const pagePath = path.startsWith('/') ? path : `/${path}`
   // Keep article type in the native head owner: sibling overrides can race
   // with Vocs' default website tag during streamed prerendering.
   if (pagePath.startsWith('/blog/')) {
     return {
+      base: false,
       meta: {
         ogType: 'article' as const,
         ...(frontmatter?.ogImage ? { ogImage: frontmatter.ogImage } : {}),
       },
     }
   }
-  if (pagePath !== '/docs' && !pagePath.startsWith('/docs/')) return undefined
-
-  const title = frontmatter?.title?.trim()
-  if (!title) return { meta: { articleModifiedTime: false as const } }
+  if (
+    pagePath !== '/' &&
+    pagePath !== '/get-started' &&
+    !pagePath.startsWith('/get-started/') &&
+    !pagePath.startsWith('/docs/')
+  ) {
+    return { base: false, meta: {} }
+  }
 
   const developersUrl = 'https://tempo.xyz/developers'
-  const docsUrl = `${developersUrl}/docs`
+  // The public mount has no trailing slash. Match its redirect policy and the
+  // URLs used by the docs graph instead of Vocs' default baseUrl + "/".
+  const canonical = pagePath === '/' ? { canonical: developersUrl } : {}
+  const title = frontmatter?.title?.trim()
+  if (!title) return { base: false, ...canonical, meta: { articleModifiedTime: false as const } }
+
+  const docsUrl = developersUrl
   const organizationId = 'https://tempo.xyz/#organization'
   const websiteId = 'https://tempo.xyz/#website'
   const entityDescription =
     'Tempo is a payments-first Layer 1 blockchain built for stablecoin payments, global payouts, agentic payments, and enterprise settlement.'
-  const url = `${developersUrl}${pagePath}`
+  const url = `${developersUrl}${pagePath === '/' ? '' : pagePath}`
   const description = frontmatter?.description?.trim()
   const breadcrumbId = `${url}#breadcrumb`
   const breadcrumbs = [
     {
       '@type': 'ListItem',
       position: 1,
-      name: 'Tempo developers',
-      item: `${developersUrl}/`,
-    },
-    {
-      '@type': 'ListItem',
-      position: 2,
       name: 'Tempo Docs',
       item: docsUrl,
     },
   ]
 
-  if (pagePath !== '/docs') {
+  if (pagePath !== '/') {
     breadcrumbs.push({
       '@type': 'ListItem',
-      position: 3,
+      position: 2,
       name: title,
       item: url,
     })
@@ -132,6 +151,8 @@ export function docsStructuredDataHead(path: string, { frontmatter }: DocsStruct
     .replace(/&/g, '\\u0026')
 
   return {
+    base: false,
+    ...canonical,
     meta: { articleModifiedTime: false as const },
     script: [{ type: 'application/ld+json', innerHTML }],
   }

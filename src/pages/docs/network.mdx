@@ -1,0 +1,26 @@
+---
+title: Network
+seoTitle: Tempo Network | Tempo Docs
+description: Connect to Tempo mainnet or testnet, check EVM differences, and find RPC and node resources.
+---
+
+import { DocsLinkCards } from '../../components/DocsLinkCards'
+
+<span id="tempo-network" />
+
+# Network
+
+Connect to Tempo mainnet or Moderato testnet, check EVM differences, and choose RPC infrastructure for your application. For task guides and interactive walkthroughs, browse [Developer guides](/docs/development).
+
+<span id="how-tempo-works" />
+
+## Connect to Tempo
+
+<DocsLinkCards collection="network" />
+
+## How Tempo differs from Ethereum
+
+- **Fees use stablecoins.** There is no native gas token. Choose a supported USD-denominated TIP-20 token or [sponsor the fee](/docs/network/fees).
+- **Transactions support payment workflows.** Use [atomic batches, access keys, and independent nonces](/docs/guide/tempo-transaction) through Tempo SDKs.
+- **Tokens have payment features.** [TIP-20 Tokens](/docs/network/tokens) support transfer memos, issuance roles, and transfer policies.
+- **Execution has some differences.** Review [EVM differences](/docs/quickstart/evm-compatibility) before porting a wallet or contract, especially native-balance checks and gas estimates.

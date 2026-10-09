@@ -1,9 +1,12 @@
 'use client'
+
 import * as React from 'react'
-import { isAddress, pad, parseUnits, stringToHex } from 'viem'
+import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { cx as composeStyles } from 'zyzz'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -38,7 +41,7 @@ export function SendPayment(props: DemoStepProps) {
   const validateMemo = (value: string): string | null => {
     const byteLength = new TextEncoder().encode(value).length
     if (byteLength > 32) {
-      return `${byteLength - 32} characters too long`
+      return 'Memo must fit in 32 UTF-8 bytes'
     }
     return null
   }
@@ -55,7 +58,7 @@ export function SendPayment(props: DemoStepProps) {
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
       token: alphaUsd,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
     })
   }
 
@@ -70,7 +73,7 @@ export function SendPayment(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -87,7 +90,7 @@ export function SendPayment(props: DemoStepProps) {
             disabled={!(address && balance && balance.amount > 0n)}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -97,15 +100,15 @@ export function SendPayment(props: DemoStepProps) {
       title="Send 100 AlphaUSD to a recipient."
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   id="recipient"
                   type="text"
@@ -115,12 +118,16 @@ export function SendPayment(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className={`h-[34px] rounded-[50px] border px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white ${memoError ? 'border-red-500' : 'border-gray4'}`}
+                  {...composeStyles(
+                    form.validatedInput(),
+                    !!memoError && form.invalidBorder(),
+                    !memoError && form.defaultBorder(),
+                  )}
                   data-1p-ignore
                   id="memo"
                   type="text"
@@ -141,12 +148,12 @@ export function SendPayment(props: DemoStepProps) {
                 }
                 onClick={handleTransfer}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>
             </div>
-            {memoError && <span className="mt-1 text-[11px] text-red-500">{memoError}</span>}
+            {memoError && <span {...form.errorText()}>{memoError}</span>}
             {sendPayment.isSuccess && sendPayment.data && (
               <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
             )}

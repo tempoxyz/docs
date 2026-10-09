@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { getDemoStep } from './helpers'
+import { expectDemoSuccess, getDemoStep } from './helpers'
 
 test('send a payment with OUSD fees', async ({ page }) => {
   const client = await page.context().newCDPSession(page)
@@ -21,9 +21,7 @@ test('send a payment with OUSD fees', async ({ page }) => {
       timeout: 30_000,
     })
     await page.getByRole('button', { name: 'Add funds', exact: true }).first().click()
-    await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-      timeout: 90_000,
-    })
+    await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
     const payment = getDemoStep(page, /Send 100 AlphaUSD and pay fees in/)
     const details = payment.getByRole('button', { name: 'Enter details' })
@@ -33,9 +31,7 @@ test('send a payment with OUSD fees', async ({ page }) => {
       '0x20c0000000000000000000006a37da5c996874be',
     )
     await payment.getByRole('button', { name: 'Send', exact: true }).click()
-    await expect(payment.getByRole('link', { name: 'View receipt' })).toBeVisible({
-      timeout: 90_000,
-    })
+    await expectDemoSuccess(page, payment.getByRole('link', { name: 'View receipt' }))
   } finally {
     await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId }).catch(() => {})
   }

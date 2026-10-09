@@ -1,0 +1,112 @@
+---
+title: "Balances and activity"
+seoTitle: "Read Tempo Account Balances and Activity | Tempo Docs"
+description: Read TIP-20 token balances, format amounts, and use account activity to explain changes in stablecoin holdings.
+---
+
+import { OpenApi } from 'vocs'
+
+# Balances and activity
+
+Read stablecoin balances from their token contracts and use account activity to show deposits, payments, and other changes.
+
+<span id="read-a-stablecoin-balance" />
+
+## Read balances
+
+Read indexed token balances with the Tempo API. Enter the account address, choose Moderato (`chainId=42431`), and click **Try**. The tool also provides request examples for your application.
+
+<OpenApi.Playground operationId="getAddressBalances" query="chainId=42431" anchors={false} />
+
+For a direct read, use the [CLI, Viem, and Wagmi setup](/docs/accounts/examples#choose-your-tools). Set `TEMPO_ACCOUNT_ADDRESS` (CLI), `account` (Viem/Wagmi), or `account_address` (Python) to the address to inspect. Call Wagmi hooks inside a React component:
+
+::::code-group
+
+```ts [Viem]
+const token = '0x20c0000000000000000000000000000000000001'
+const balance = await client.token.getBalance({ account, token })
+console.log(balance.formatted)
+```
+
+```bash [CLI]
+cast erc20 balance "$ALPHA_USD" "$TEMPO_ACCOUNT_ADDRESS" --rpc-url "$TEMPO_RPC_URL"
+```
+
+```tsx [Wagmi]
+import { Hooks } from 'wagmi/tempo'
+const token = '0x20c0000000000000000000000000000000000001'
+const { data: balance, isPending, error } = Hooks.token.useGetBalance({ account, token })
+```
+
+```python [Python]
+from web3 import Web3
+from pytempo.contracts import TIP20
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+token = Web3.to_checksum_address("0x20c0000000000000000000000000000000000001")
+balance = TIP20(token).balance_of(w3, account=account_address)
+print(balance)
+```
+
+::::
+
+`balance.amount` contains integer base units; `balance.formatted` is the decimal string for display. Python and Cast return integer base units. Identify each token by its network and contract address.
+
+<span id="query-balances-across-tokens" />
+
+### Balances across tokens
+
+The balance API above returns tokens held by the address. It does not require a wallet connection or an account signing key.
+
+<span id="explain-changes-in-a-balance" />
+
+## List payments
+
+Use [account activity](/docs/api/activities) for indexed history and [transfers](/docs/api/transfers) for individual token movements. One transaction can produce several transfers.
+
+Enter the same address and network below. Set `type` to `transfer` to list payments rather than other account activity:
+
+<OpenApi.Playground operationId="getAddressActivities" query="chainId=42431&type=transfer" anchors={false} />
+
+Follow the [API pagination](/docs/api/pagination) fields for older activity. To query chain logs instead, use the [complete onchain examples](/docs/accounts/examples#onchain-balances-and-history).
+
+Keep the token, amount, sender, recipient, and transaction hash together in your application records. Link activity to the [transaction](/docs/api/transactions) when a user needs its status or execution details.
+
+For payment confirmation and reconciliation, follow [Receive payments](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments).
+
+<span id="show-balances-that-users-can-spend" />
+
+### Available funds
+
+Use TIP-20 balances for spendable stablecoins. Tempo's `eth_getBalance` response is a [compatibility value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), not a spendable stablecoin balance. Show [Earn positions](/docs/earn) and [Zone balances](/docs/zones) separately.
+
+## Watch for changes
+
+Subscribe to incoming transfers with the [configured tools](/docs/accounts/examples#choose-your-tools). Wagmi cleans up its subscription when the component unmounts; stop Cast with Ctrl+C. `account` is the receiving address and `token` is its token contract:
+
+::::code-group
+
+```ts [Viem]
+const unwatch = client.token.watchTransfer({
+  token, args: { to: account },
+  onTransfer: (transfer, log) => console.log(transfer, log.transactionHash),
+})
+// Call unwatch() when the view closes.
+```
+
+```bash [CLI]
+cast logs 'Transfer(address indexed from,address indexed to,uint256 value)' \
+  '' "$TEMPO_ACCOUNT_ADDRESS" --address "$ALPHA_USD" \
+  --subscribe --rpc-url wss://rpc.moderato.tempo.xyz
+```
+
+```tsx [Wagmi]
+import { Hooks } from 'wagmi/tempo'
+Hooks.token.useWatchTransfer({
+  token, args: { to: account },
+  onTransfer: (transfer, log) => console.log(transfer, log.transactionHash),
+})
+```
+
+::::
+
+For a backend in Python or another language, use [webhooks](/docs/api/webhooks) and verify the callback signature, or poll the activity API above. Read historical activity after reconnecting so an interrupted subscription cannot hide a payment. A notification updates your view; [payment verification](/docs/guide/payments/accept-a-payment#verify-stablecoin-payments) determines which record to credit.

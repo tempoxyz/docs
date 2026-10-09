@@ -16,7 +16,7 @@ You need at least one project before creating a key.
 
 ### Choose the environment
 
-Open the organization menu in [Tempo API Console](https://console.tempo.xyz/?to=/:org/api-keys) and switch to [**Sandbox**](https://console.tempo.xyz/?to=/:org/api-keys%3Fenv%3Dsandbox) or [**Production**](https://console.tempo.xyz/?to=/:org/api-keys). Check for the amber sandbox banner before continuing.
+Open the organization menu in [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys) and switch to [**Sandbox**](https://console.tempo.xyz/?to=/:org/api-keys%3Fenv%3Dsandbox) or [**Production**](https://console.tempo.xyz/?to=/:org/api-keys). Check for the amber sandbox banner before continuing.
 
 ### Open the new-key form
 
@@ -95,7 +95,7 @@ See the [Tempo API reference](/docs/api/reference) for complete request and resp
 
 ## Rotate an API key
 
-Tempo API Console does not reveal an existing token again. Rotate a credential by overlapping the old and new keys:
+Tempo Console does not reveal an existing token again. Rotate a credential by overlapping the old and new keys:
 
 :::::steps
 
@@ -124,7 +124,7 @@ Return to [**API Keys**](https://console.tempo.xyz/?to=/:org/api-keys), open the
 | The key cannot be found in the console | Confirm that the selected environment and project filter match the key. |
 | The API rejects the credential | Check that the full token was copied, has not been revoked, and is sent in a supported header. |
 | A scoped endpoint denies access | Open the key's project and confirm that the key was created with the required scope. Create a replacement to change scopes. |
-| A sandbox key appears to use public access on mainnet | Sandbox keys cannot authenticate mainnet requests. Remove the mainnet selector or use a production key. |
+| A sandbox key returns `403 api_key_forbidden` | Select `chainId=testnet`, or use a production key for mainnet. An omitted `chainId` targets mainnet. |
 | The plaintext token was lost | Create a replacement key. Existing tokens cannot be revealed again. |
 
 For complete credential and chain-selection behavior, see [API authentication](/docs/api/authentication).

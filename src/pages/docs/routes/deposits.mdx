@@ -1,0 +1,65 @@
+---
+title: Accept deposits
+seoTitle: Accept Deposits | Tempo Docs
+description: Create a route-specific deposit address and track each incoming deposit through delivery to Tempo.
+---
+
+import { OpenApi } from 'vocs'
+
+# Accept deposits
+
+Give customers a reusable address to fund from an external wallet. Each address accepts a specific network and token and routes funds to your chosen Tempo recipient.
+
+For payments already on Tempo, use [Receive payments](/docs/guide/payments/accept-a-payment). [Virtual addresses](/docs/guide/payments/virtual-addresses) attribute those payments to a shared Tempo balance; they are different from Routes deposit addresses.
+
+## Set up Routes API access
+
+Create a key with `routes:read` and `routes:write` using [API setup](/docs/routes/api-setup). Choose a route with deposit-address support from [Supported routes](/docs/routes/networks). Use the request builders below to try each operation and copy its generated code.
+
+The [complete cURL example](/docs/routes/examples/deposits) defines every input. Keep your API key on the backend; show only the returned funding instructions to customers.
+
+<span id="create-and-monitor-a-deposit-address" />
+
+## Accept a deposit
+
+:::::steps
+
+### Quote the deposit
+
+<OpenApi.Playground operationId="quoteRoutesDepositAddress" anchors={false} />
+
+Review the net destination amount, route deductions, and any separately listed fees before the sender authorizes funding. Check `quote.expiresAt` when returned and refresh expired terms. A quote prices the supplied amount; it does not establish receipt of funds. See [Quotes and fees](/docs/routes/quotes).
+
+<span id="create-a-reusable-address" />
+
+### Create a deposit address
+
+Set a unique `idempotency-key` for the address creation and reuse it for retries with unchanged inputs.
+
+<OpenApi.Playground operationId="createRoutesDepositAddress" anchors={false} />
+
+Save the returned `id` and `address` with your customer record. A newly created address includes quote terms; an existing address may not. Obtain a fresh quote before showing funding instructions when terms are absent or stale.
+
+<span id="show-the-funding-instructions" />
+
+### Show funding instructions
+
+Display the returned network, token, and deposit address together. Check that its status is `active` before inviting deposits. Do not present it as an address for arbitrary assets or networks.
+
+<span id="track-each-deposit" />
+
+### Track deposits
+
+Set `depositAddress` to the returned source-chain address, not its `rda_…` object ID.
+
+<OpenApi.Playground operationId="listRoutesDeposits" anchors={false} />
+
+The response lists deposits in `data`. Follow `nextCursor` for subsequent pages. Read each deposit with `GET /v1/routes/deposits/{id}` and reconcile its delivered amount and destination transaction references separately.
+
+:::::
+
+## Reconcile delivery and refunds
+
+Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits. An active address can receive funds; a completed deposit confirms delivery to Tempo. Follow [Track delivery](/docs/routes/delivery) before crediting a balance or treating a refund as complete.
+
+See the [Deposit addresses API reference](/docs/api/routes/deposit-addresses) for the full lifecycle.

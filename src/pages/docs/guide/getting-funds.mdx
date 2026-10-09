@@ -1,21 +1,32 @@
 ---
-title: "Getting funds on Tempo: wallet, faucet & bridge"
-seoTitle: "Get Funds on Tempo: 3 Ways to Start | Docs"
-description: Bridge assets to Tempo, add funds in Tempo Wallet, or use the faucet on testnet.
+title: "Fund an account"
+seoTitle: "Fund a Tempo account | Tempo Docs"
+description: Get testnet stablecoins, use the Tempo Wallet fiat onramp, or add wallet funding and cross-network deposits to your app.
 interactive: true
 ---
 
+import { DocsLinkCards } from '../../../components/DocsLinkCards'
 import * as Demo from '../../../components/guides/Demo.tsx'
 import { DepositToTempoWallet } from '../../../components/guides/steps/wallet/DepositToTempoWallet.tsx'
 import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo.tsx'
 
-# Getting funds on Tempo: wallet, faucet & bridge
+<span id="getting-funds-on-tempo-wallet-faucet--bridge" />
 
-Tempo Wallet uses Tempo Mainnet. Funds added through Tempo Wallet or a mainnet bridge are production assets. OUSD, the recommended stablecoin on Tempo, and pathUSD in Tempo Wallet are live mainnet assets. For development on the separate Moderato testnet, use the faucet described below.
+# Fund an account
 
-## Tempo Wallet
+Choose a funding path for the network and integration you are building. Tempo Wallet uses mainnet and real funds; the Moderato faucet supplies separate test tokens.
 
-[Tempo Wallet](https://wallet.tempo.xyz) is Tempo's web-based passkey wallet. You can onramp with fiat or bridge from other chains using the flow below.
+## Choose a funding path
+
+<DocsLinkCards collection="funding" />
+
+<span id="tempo-wallet" />
+
+## Add money with Tempo Wallet
+
+[Tempo Wallet](https://wallet.tempo.xyz) includes a fiat onramp and funding from other chains. Connect below, select **Add funds**, and choose a funding method in the wallet. The wallet shows the available methods, amount, and any fees before you confirm.
+
+This demo opens the funding flow for **Tempo Mainnet**, using real funds. For test tokens, use the [Moderato faucet](/docs/quickstart/faucet).
 
 <Demo.Container name="Add Funds" showBadge={false}>
   <SignInWithTempo stepNumber={1} />
@@ -24,14 +35,7 @@ Tempo Wallet uses Tempo Mainnet. Funds added through Tempo Wallet or a mainnet b
 
 ### With the CLI
 
-Install the [Tempo CLI](/docs/cli/wallet) and log in to your wallet:
-
-```bash
-curl -fsSL https://tempo.xyz/install | bash
-tempo wallet login
-```
-
-Then fund your wallet:
+After [setting up Tempo Wallet in the CLI](/docs/cli/wallet), run:
 
 ```bash
 tempo wallet fund
@@ -53,22 +57,91 @@ codex exec "Read https://tempo.xyz/SKILL.md and fund my Tempo Wallet"
 ```
 :::
 
+## Open funding with the Accounts SDK
+
+Use the Accounts SDK to open Tempo Wallet's funding interface from an **Add funds** button. The wallet handles the funding flow; your application connects the account and requests `wallet_deposit`.
+
+:::::steps
+
+### Install the Accounts SDK
+
+```bash
+pnpm add --save-exact accounts@0.18.4 viem
+```
+
+### Add a funding button
+
+This React example connects Tempo Wallet and opens funding for the selected account on mainnet:
+
+```tsx [AddFundsButton.tsx]
+import { Provider } from 'accounts'
+import { useState } from 'react'
+import { numberToHex } from 'viem'
+import { tempo } from 'viem/chains'
+
+const provider = Provider.create({ chains: [tempo] })
+
+export function AddFundsButton() {
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string>()
+
+  async function addFunds() {
+    setPending(true)
+    setError(undefined)
+    try {
+      const [address] = await provider.request({ method: 'eth_requestAccounts' })
+      if (!address) throw new Error('Connect a Tempo Wallet account first.')
+      await provider.request({
+        method: 'wallet_deposit',
+        params: [{ address, chainId: numberToHex(tempo.id) }],
+      })
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not open funding.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <div>
+      <button type="button" disabled={pending} onClick={addFunds}>
+        {pending ? 'Check Tempo Wallet…' : 'Add funds'}
+      </button>
+      {error && <p role="alert">{error}</p>}
+    </div>
+  )
+}
+```
+
+Omit `intent` to let the user choose a funding method. To prefer Apple Pay where available, add `intent: 'applePay'` to the parameter object. `intent: 'crypto'` prefers funding with crypto. These are preferences, not guarantees that a method is available to every user.
+
+You can also prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol or contract address. The user reviews and confirms the funding request in the wallet.
+
+### Confirm funds have arrived
+
+A resolved `wallet_deposit` request does not prove the account was funded. Fiat funding can complete asynchronously, and the response's `receipts` field may be absent. Refresh [balances and activity](/docs/accounts/balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
+
+:::::
+
 ## Get OUSD
 
-OUSD is the recommended stablecoin on Tempo. Mint it 1:1 with no fees through an OUSD integration partner, or swap into it on the [Stablecoin DEX](/docs/guide/stablecoin-dex) from any USD stablecoin already on Tempo. See [OUSD on Tempo](/docs/guide/ousd).
+See [OUSD on Tempo](/docs/guide/ousd) for minting, redemption, and swap options. Check the token contract address and network when adding an asset to your application.
 
-## Bridge
+## Add funding to your application
 
-Use one of these supported bridges to move assets to Tempo:
+Use [Tempo Routes](/docs/routes) to quote a cross-network transfer or create a deposit address for customers who send funds independently. Track destination delivery before crediting the payment in your application.
 
-When you bridge USDC with LayerZero (Stargate), it appears on Tempo as USDC.e. Swap USDC.e to [OUSD](/docs/guide/ousd) on the Stablecoin DEX if you want to hold the recommended stablecoin. Stargate does not charge its transfer fee on the direct route between Ethereum and Tempo, but other routes can vary, so check the quote before sending.
+<span id="bridge" />
 
-- **[LayerZero (Stargate)](/docs/guide/bridge-layerzero)**: Bridge USDC to and from Tempo via Stargate. See the [full bridging guide](/docs/guide/bridge-layerzero) for contract addresses, code examples, and EndpointDollar details.
-- **[Chainlink CCIP](https://docs.chain.link/ccip/directory/mainnet/chain/tempo-mainnet)**: Transfer supported tokens to and from Tempo. Check the CCIP Directory for current tokens, lanes, fees, and contract configuration.
-- **[Squid](https://app.squidrouter.com/)**: Swap and bridge assets to Tempo in one flow.
-- **[Relay](https://relay.link/)**: Bridge assets to Tempo with low fees.
-- **[Across](https://app.across.to/)**: Bridge assets to Tempo quickly with competitive fees.
-- **[Bungee](/docs/guide/bridge-bungee)**: Swap and bridge assets to and from Tempo using Bungee Deposit. See the [full Bungee guide](/docs/guide/bridge-bungee) for quote, transaction, and status examples.
+## Bridge integrations
+
+If you integrate a bridge directly, follow its quote, submission, and delivery flow:
+
+- [LayerZero (Stargate)](/docs/guide/bridge-layerzero)
+- [Bungee](/docs/guide/bridge-bungee)
+- [Relay](/docs/guide/bridge-relay)
+
+See [bridge providers](/docs/partners/bridges) for the directory. Check the output asset as well as the network: USDC sent through Stargate arrives on Tempo as USDC.e.
 
 ## Testnet funds
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import * as ui from './MermaidDiagram.recipes'
 
 // ---------------------------------------------------------------------------
 // Layout constants
@@ -778,14 +779,7 @@ export interface AnimationHandle {
 }
 
 export function showAllItems(svg: SVGSVGElement) {
-  svg.style.opacity = '1'
-  for (const el of svg.querySelectorAll<SVGElement>(
-    '[data-step],[data-step-arrow],[data-step-label],[data-step-note]',
-  )) {
-    el.style.transition = 'none'
-    el.style.opacity = '1'
-    el.style.strokeDashoffset = '0'
-  }
+  svg.dataset.animation = 'complete'
 }
 
 export function animate(
@@ -835,22 +829,23 @@ export function animate(
     },
   }
 
-  if (!timeline.length) {
-    svg.style.opacity = '1'
+  if (!timeline.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    showAllItems(svg)
     onComplete()
     return handle
   }
 
-  svg.style.opacity = '1'
   for (const item of timeline) {
     if (item.draw) {
       const len = lineLen(item.draw)
-      item.draw.style.strokeDasharray = `${len}`
-      item.draw.style.strokeDashoffset = `${len}`
-      item.draw.style.opacity = '0'
+      item.draw.style.setProperty('--diagram-line-length', String(len))
+      item.draw.dataset.stepState = 'pending'
     }
-    if (item.arrow) item.arrow.style.opacity = '0'
-    for (const el of item.fade) el.style.opacity = '0'
+    if (item.arrow) item.arrow.dataset.stepState = 'pending'
+    for (const el of item.fade) {
+      el.dataset.stepState = 'pending'
+      el.dataset.stepFade = item.draw ? 'label' : 'note'
+    }
   }
 
   const obs = new IntersectionObserver(
@@ -872,20 +867,16 @@ export function animate(
           setTimeout(() => {
             if (skipped) return
             if (drawEl) {
-              drawEl.style.transition = 'opacity 0.3s ease, stroke-dashoffset 1.2s ease-out'
-              drawEl.style.opacity = '1'
-              drawEl.style.strokeDashoffset = '0'
+              drawEl.dataset.stepState = 'shown'
             }
             for (const el of item.fade) {
-              el.style.transition = drawEl ? 'opacity 0.6s ease' : 'opacity 0.8s ease'
-              el.style.opacity = '1'
+              el.dataset.stepState = 'shown'
             }
             if (arrowEl) {
               timers.push(
                 setTimeout(() => {
                   if (skipped) return
-                  arrowEl.style.transition = 'opacity 0.3s ease'
-                  arrowEl.style.opacity = '1'
+                  arrowEl.dataset.stepState = 'shown'
                 }, 1000),
               )
             }
@@ -950,10 +941,6 @@ export function MermaidDiagram({ chart }: { chart: string }) {
       el.innerHTML = render(lo, th)
       const svg = el.querySelector('svg')
       if (!svg) return
-      svg.style.maxWidth = '100%'
-      svg.style.height = 'auto'
-      svg.style.display = 'block'
-      svg.style.margin = '0 auto'
       animRef.current = animate(
         svg,
         () => setPhase('done'),
@@ -980,52 +967,19 @@ export function MermaidDiagram({ chart }: { chart: string }) {
 
   const th = isDark ? THEMES.dark : THEMES.light
 
-  const btnStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 28,
-    height: 28,
-    borderRadius: '50%',
-    border: `1px solid ${th.actorStroke}`,
-    background: th.actorFill,
-    color: th.textMuted,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    padding: 0,
-    opacity: 0.7,
-    transition: 'opacity 0.2s',
-  }
-
   return (
-    <div
-      ref={wrapperRef}
-      className="mermaid-diagram"
-      style={{
-        margin: '2rem 0',
-        padding: '1.5rem 1rem',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        overflowX: 'auto',
-        minHeight: '100px',
-        position: 'relative',
-      }}
-    >
-      <div ref={svgRef} />
+    <div ref={wrapperRef} {...ui.mermaidDiagramLayoutAppearance({ className: 'mermaid-diagram' })}>
+      <div ref={svgRef} {...ui.diagramCanvas()} />
       {phase === 'playing' && (
         <button
           type="button"
           onClick={() => animRef.current?.skipToEnd()}
           aria-label="Skip to end"
-          style={btnStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0.7'
-          }}
+          {...ui.playbackControl({
+            border: th.actorStroke,
+            background: th.actorFill,
+            foreground: th.textMuted,
+          })}
         >
           <svg
             width="14"
@@ -1050,13 +1004,11 @@ export function MermaidDiagram({ chart }: { chart: string }) {
             requestAnimationFrame(renderDiagram)
           }}
           aria-label="Replay animation"
-          style={btnStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0.7'
-          }}
+          {...ui.playbackControl({
+            border: th.actorStroke,
+            background: th.actorFill,
+            foreground: th.textMuted,
+          })}
         >
           <svg
             width="14"

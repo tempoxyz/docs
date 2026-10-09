@@ -9,6 +9,23 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Do not make protocol, API, chain, fee, or token claims without checking repo source docs first.
 - Prefer small, scoped docs changes that preserve existing URLs, anchors, and sidebar organization.
 
+## Audience
+
+- Write for CTOs and staff software engineers integrating stablecoins into payment, payroll, remittance, or financial products.
+- Start with their integration decisions and workflows, then explain the signing methods, APIs, and protocol mechanics needed to implement them.
+- Use product plans to understand intent and positioning. Verify availability separately; do not describe planned capabilities as live features.
+
+## Documentation IA and agent exports
+
+- `src/lib/docs-sections.ts` owns the section labels, landing routes, and route ownership; `vocs.config.ts` owns the sidebar within each section.
+- Primary sections: Get Started (`/get-started`), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), and Machine Payments (`/docs/agents`).
+- Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
+- APIs & SDKs (`/docs/tools`) contains the API reference, SDKs, CLI, and wallet/server libraries. Partners (`/docs/partners`) contains third-party integrations.
+- Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
+- `SKILL.md` is the docs site's published skill. The installable plugin's skill lives in `tempoxyz/plugins`; update it separately when routing changes.
+- `src/lib/ai-docs.ts` and the Vite build hook generate `llms.txt`, `llms-full.txt`, Markdown section context, and the published skill from source. Never edit `dist` or `.vercel` copies by hand.
+- After changing navigation or exported components, build and run `pnpm check:markdown` to check content and IA coverage. Keep Markdown exports useful without interactive UI.
+
 ## Source of Truth
 
 Use repo-local sources first:
@@ -36,6 +53,15 @@ Use `pnpm`.
 - `pnpm preview` - preview the production build
 
 Before finishing docs-only changes, run at least `pnpm check:types` when practical. Run `pnpm build` for config, component, routing, sidebar, or MDX structure changes. Run targeted tests for changed interactive components.
+
+## Site styling rules
+
+- Import `style`/`variants` from `src/styles/recipes.ts` for layout recipes, `theme.ts` for semantic components, or `scoped.ts` for existing unlayered selectors. Do not import unrestricted helpers from `zyzz` or create component-local configs.
+- Use the shared `vars` exported by `theme.ts`, or configured token names. `contract.ts` owns spacing, typography, radius, border, and stacking scales; `palette.ts` owns colors. Add a token only for a reusable design decision.
+- `inherited.ts` is the reviewed bridge to existing Vocs, blog, terminal, and artwork CSS scopes. Its expressions must resolve on the styled element; do not hoist local CSS variables into root tokens.
+- An intentional one-off uses ` !custom` and a declaration-local `// design-exception: <specific reason>` comment. Native CSS keywords need no explanation. Prefer normalizing incidental values to the scale over adding exceptions.
+- Global styles and keyframes use explicit token references. Use token-based border/background longhands, logical properties, and explicit transition properties. Style interactive state through existing ARIA/data attributes or native `:checked`/`:disabled` selectors. Reserve DOM style writes for scroll locking, theme application, and named CSS-variable bindings for runtime measurements.
+- `pnpm check` runs Biome plus the architecture policy and Zyzz Oxlint rules. `pnpm check:types` checks token/variant contracts, including negative fixtures. `pnpm build` also enforces the compiler contract. Keep all three passing; do not suppress errors or weaken helper mappings to make a new value fit.
 
 ## Project Structure
 
@@ -66,7 +92,9 @@ Before finishing docs-only changes, run at least `pnpm check:types` when practic
 4. Preserve old deep links with explicit anchors when renaming headings:
 
    ```mdx
-   ## Tempo API pagination modes {#modes}
+   <span id="modes" />
+
+   ## Tempo API pagination modes
    ```
 
 5. Verify with `pnpm check:types` and `pnpm build` when navigation, imports, MDX syntax, or components changed.
@@ -148,6 +176,13 @@ Each step should be actionable and concrete. Keep long conceptual background out
 - Use "stablecoins" for Tempo payment assets unless discussing broader cryptocurrency categories.
 
 ## Protocol Concept Naming
+
+- Match task names across the sidebar, page title, cards, and incoming links. Preserve existing URLs and anchors when changing a visible label.
+- Distinguish an account and its signing authority from the wallet software or provider that manages signing. API keys and account access keys grant different kinds of access.
+- Identify who acts: the application, backend service, customer, wallet provider, or agent. Distinguish application authentication, provider signing policies, and onchain permissions.
+- Use "transaction" for execution, "transfer" for token movement, and "payment" for the application's business operation. A batch contains atomic calls; concurrently submitted transactions have separate outcomes.
+- Keep account balance, DEX balance, vault shares, position value, earnings, and available withdrawal amount distinct. Use "base units" for integer token amounts.
+- Keep shared explanations in one primary guide with short, relevant reminders beside examples. Product plans inform positioning, not deployment claims.
 
 - Use literal concept names in user-facing docs.
 - Use `TIP-20 Tokens` for sidebar labels, page titles, headings, and first-introduction contexts.

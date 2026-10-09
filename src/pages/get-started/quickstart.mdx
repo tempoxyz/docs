@@ -1,0 +1,188 @@
+---
+title: Quickstart
+seoTitle: Send Your First Tempo Payment | Tempo Docs
+description: Create a test account, fund it with AlphaUSD, and verify a stablecoin payment on Moderato testnet.
+interactive: true
+---
+
+import * as Demo from '../../components/guides/Demo'
+import { Connect } from '../../components/guides/steps/auth/Connect'
+import { AddFunds } from '../../components/guides/steps/payments/AddFunds'
+import { SendPayment } from '../../components/guides/steps/payments/SendPayment'
+
+# Quickstart
+
+Create an account, get test stablecoins, and send your first payment on Moderato testnet. Try it in your browser, then build it with CLI, Viem, or Wagmi.
+
+## Try a payment
+
+Connect Tempo Wallet or create an account when prompted. Add test funds, enter a recipient you control, and send 100 AlphaUSD. The demo links to the transaction receipt when the payment completes.
+
+<Demo.Container name="Your first payment" footerVariant="source" src="tempoxyz/examples/tree/main/examples/payments">
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendPayment stepNumber={3} last />
+</Demo.Container>
+
+<span id="run-it-in-typescript" />
+
+## Build the payment
+
+Choose the [CLI, Viem, and Wagmi setup](/docs/accounts/examples#choose-your-tools). It defines the Moderato network, AlphaUSD, signer, and recipient. The [complete first-payment script](/docs/accounts/examples#first-payment-script) runs the Viem path end to end. Wagmi hooks belong inside a React component; call the named handlers from buttons and show their pending and error states.
+
+:::::steps
+
+### Create an account
+
+CLI and Viem create a local key; Wagmi opens Tempo Wallet to create or select an account. For local signing, keep the key in your signing environment and set `TEMPO_PRIVATE_KEY` and `TEMPO_ACCOUNT_ADDRESS` in the [client setup](/docs/accounts/examples#choose-your-tools). Account creation does not call a hosted API.
+
+::::code-group
+
+```ts [Viem]
+import { generatePrivateKey } from 'viem/accounts'
+import { Account } from 'viem/tempo'
+
+const privateKey = generatePrivateKey()
+const account = Account.fromSecp256k1(privateKey)
+console.log(account.address)
+```
+
+```bash [CLI]
+cast wallet new
+```
+
+```tsx [Wagmi]
+import { useConnect, useConnectors } from 'wagmi'
+const { mutate: connect } = useConnect()
+const connector = useConnectors().find((item) => item.id === 'xyz.tempo')
+const connectWallet = () => connector && connect({ connector })
+```
+
+```python [Python]
+from eth_account import Account
+
+account = Account.create()
+print(account.address)
+```
+
+::::
+
+### Get test funds
+
+Fund this account on Moderato. Use the account created or connected above; Python uses `w3` from the linked setup.
+
+::::code-group
+
+```ts [Viem]
+await client.faucet.fundSync({ account })
+```
+
+```bash [CLI]
+cast rpc tempo_fundAddress "$TEMPO_ACCOUNT_ADDRESS" --rpc-url "$TEMPO_RPC_URL"
+```
+
+```tsx [Wagmi]
+import { useConnection } from 'wagmi'
+import { Hooks } from 'wagmi/tempo'
+const { address } = useConnection()
+const { mutate: fund } = Hooks.faucet.useFundSync()
+const getTestFunds = () => address && fund({ account: address })
+```
+
+```python [Python]
+result = w3.provider.make_request("tempo_fundAddress", [account.address])
+if "error" in result:
+    raise RuntimeError(result["error"])
+print(result["result"])
+```
+
+```bash [cURL (RPC)]
+curl --fail-with-body https://rpc.moderato.tempo.xyz \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","id":1,"method":"tempo_fundAddress","params":["'"$TEMPO_ACCOUNT_ADDRESS"'"]}'
+```
+
+::::
+
+### Send a payment
+
+Send one AlphaUSD. Every example uses `1_000_000` base units for this six-decimal token. Viem and Wagmi wait for a receipt. Python builds and signs the same transfer with the [typed SDK](/docs/accounts/examples#python-client).
+
+::::code-group
+
+```ts [Viem]
+const { receipt } = await client.token.transferSync({
+  token: alphaUsd, to: recipient, amount: 1_000_000n,
+})
+```
+
+```bash [CLI]
+cast erc20 transfer "$ALPHA_USD" "$TEMPO_RECIPIENT" 1000000 \
+  --tempo.fee-token "$ALPHA_USD" \
+  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
+```
+
+```tsx [Wagmi]
+import { Hooks } from 'wagmi/tempo'
+const { mutate: transfer, data, isPending, error } = Hooks.token.useTransferSync()
+const sendPayment = () => transfer({
+  token: alphaUsd, to: recipient, amount: 1_000_000n,
+})
+```
+
+```python [Python]
+tx = TempoTransaction.create(
+    **transaction_options(),
+    calls=(TIP20(alpha_usd).transfer(to=recipient, amount=1_000_000),),
+)
+signed_tx = tx.sign(private_key)
+tx_hash = w3.eth.send_raw_transaction(signed_tx.encode())
+```
+
+::::
+
+HTTP cannot sign for an account. To submit transaction bytes signed by your application, use the [cURL RPC example](/docs/guide/payments/send-a-payment#send-a-payment).
+
+### Check the receipt
+
+Check execution status, then verify the transfer's token, recipient, and amount before recording delivery. The [complete script](/docs/accounts/examples#first-payment-script) includes that verification. Use the returned transaction hash as `PAYMENT_TX_HASH` (CLI) or `paymentHash` (Wagmi). The Wagmi transfer also exposes it as `data?.receipt.transactionHash`.
+
+::::code-group
+
+```ts [Viem]
+if (receipt.status !== 'success') throw new Error('Transaction failed')
+console.log(receipt.transactionHash)
+```
+
+```bash [CLI]
+cast receipt "$PAYMENT_TX_HASH" --rpc-url "$TEMPO_RPC_URL"
+```
+
+```tsx [Wagmi]
+import { useWaitForTransactionReceipt } from 'wagmi'
+const { data: receipt, isPending, error } = useWaitForTransactionReceipt({
+  hash: paymentHash,
+})
+const succeeded = receipt?.status === 'success'
+```
+
+```python [Python]
+receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+if receipt["status"] != 1:
+    raise RuntimeError("Transaction failed")
+print(receipt["transactionHash"].hex())
+```
+
+```bash [cURL (RPC)]
+curl --fail-with-body https://rpc.moderato.tempo.xyz \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionReceipt","params":["'"$PAYMENT_TX_HASH"'"]}'
+```
+
+::::
+
+The RPC receipt is `null` until the transaction is included; poll until a receipt is available.
+
+:::::
+
+Add [payment references and batches](/docs/guide/payments/send-a-payment), or [connect confirmed transfers to customer records](/docs/guide/payments/accept-a-payment).

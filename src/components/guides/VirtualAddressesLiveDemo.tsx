@@ -23,6 +23,7 @@ import { Hooks } from 'wagmi/tempo'
 import { useWebAuthnConnector } from '../../wagmi.config'
 import { Button, ExplorerAccountLink, ExplorerLink, Logout, Step, StringFormatter } from './Demo'
 import { alphaUsd, ousd, pathUsd } from './tokens'
+import * as ui from './VirtualAddressesLiveDemo.recipes'
 
 const TEST_MNEMONIC = 'test test test test test test test test test test test junk'
 const DEMO_SENDER_KEY =
@@ -105,10 +106,10 @@ function PasskeyLogin() {
       Check prompt
     </Button>
   ) : (
-    <div className="flex gap-1">
+    <div {...ui.passkeyLoginLayout()}>
       <Button
         variant="accent"
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.passkeyLoginButton().className}
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
           connect.connect({
@@ -122,7 +123,7 @@ function PasskeyLogin() {
       </Button>
       <Button
         variant="default"
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.passkeyLoginButton().className}
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
           connect.connect({
@@ -497,7 +498,7 @@ export function VirtualAddressesLiveDemo() {
     </Button>
   ) : registration ? null : (
     <Button
-      className="font-normal text-[14px] -tracking-[2%]"
+      className={ui.passkeyLoginButton().className}
       disabled={!address || registerMutation.isPending}
       onClick={() => registerMutation.mutate()}
       type="button"
@@ -516,7 +517,7 @@ export function VirtualAddressesLiveDemo() {
   const tokenSymbol = isModerato ? 'OUSD' : 'pathUSD'
 
   return (
-    <div className="space-y-4">
+    <div {...ui.virtualAddressesLiveDemoLayout()}>
       <Step
         active={!address}
         actions={address ? <Logout /> : <PasskeyLogin />}
@@ -525,10 +526,10 @@ export function VirtualAddressesLiveDemo() {
         title="Sign in with a passkey and create a Tempo address."
       >
         {address && (
-          <div className="mx-6 border-gray4 border-s-2 ps-5 pb-4">
-            <div className="mt-2 flex flex-col gap-1 text-[13px] text-gray9 -tracking-[1%]">
-              <span className="text-primary">Connected passkey account</span>
-              <code className="break-all font-mono text-[12px] text-primary">{address}</code>
+          <div {...ui.virtualAddressesLiveDemoLayout2()}>
+            <div {...ui.virtualAddressesLiveDemoLayout3()}>
+              <span {...ui.virtualAddressesLiveDemoText()}>Connected passkey account</span>
+              <code {...ui.code()}>{address}</code>
               <span>
                 The demo auto-funds the passkey account, uses `VirtualMaster.mineSaltAsync` to mine
                 a valid salt with parallel workers when available, and sends the deposit from a
@@ -547,79 +548,67 @@ export function VirtualAddressesLiveDemo() {
         number={2}
         title="Register a master id for that passkey address."
       >
-        <div className="mx-6 border-gray4 border-s-2 ps-5 pb-4">
+        <div {...ui.virtualAddressesLiveDemoLayout2()}>
           {!isSupported ? (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesLiveDemoLayout4()}>
               Run docs against Tempo testnet or localnet to use this live preview.
             </div>
           ) : !address ? (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesLiveDemoLayout4()}>
               Sign in first, then the demo will fund the account if needed, mine the required salt
               with `VirtualMaster.mineSaltAsync`, and prompt the passkey for registration.
             </div>
           ) : registration ? (
-            <div className="mt-2 grid gap-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesLiveDemoLayout5()}>
               <div>
-                <span className="text-primary">masterId:</span>{' '}
-                <code className="font-mono text-primary">{registration.masterId}</code>
+                <span {...ui.virtualAddressesLiveDemoText()}>masterId:</span>{' '}
+                <code {...ui.code2()}>{registration.masterId}</code>
               </div>
               <div>
-                <span className="text-primary">salt:</span>{' '}
-                <code className="break-all font-mono text-[12px] text-primary">
-                  {registration.salt}
-                </code>
+                <span {...ui.virtualAddressesLiveDemoText()}>salt:</span>{' '}
+                <code {...ui.code()}>{registration.salt}</code>
               </div>
               <div>
-                <span className="text-primary">virtual address:</span>{' '}
-                <code className="break-all font-mono text-[12px] text-primary">
-                  {registration.virtualAddress}
-                </code>
+                <span {...ui.virtualAddressesLiveDemoText()}>virtual address:</span>{' '}
+                <code {...ui.code()}>{registration.virtualAddress}</code>
               </div>
               <div>
-                <span className="text-primary">registration tx:</span>{' '}
-                <code className="break-all font-mono text-[12px] text-primary">
-                  {registration.txHash}
-                </code>
+                <span {...ui.virtualAddressesLiveDemoText()}>registration tx:</span>{' '}
+                <code {...ui.code()}>{registration.txHash}</code>
               </div>
             </div>
           ) : minerState.status === 'mining' ? (
-            <div className="mt-2 grid grid-cols-2 gap-2 text-[13px] text-gray9 -tracking-[1%] max-sm:grid-cols-1">
+            <div {...ui.virtualAddressesLiveDemoLayout6()}>
               <div>
-                <span className="text-primary">hashes tried:</span>{' '}
-                <code className="font-mono text-primary">
-                  {formatCount(minerState.totalAttempts)}
-                </code>
+                <span {...ui.virtualAddressesLiveDemoText()}>hashes tried:</span>{' '}
+                <code {...ui.code2()}>{formatCount(minerState.totalAttempts)}</code>
               </div>
               <div>
-                <span className="text-primary">hash rate:</span>{' '}
-                <code className="font-mono text-primary">
-                  {formatCount(minerState.hashesPerSecond)}/s
-                </code>
+                <span {...ui.virtualAddressesLiveDemoText()}>hash rate:</span>{' '}
+                <code {...ui.code2()}>{formatCount(minerState.hashesPerSecond)}/s</code>
               </div>
-              <div className="col-span-full">
+              <div {...ui.virtualAddressesLiveDemoLayout7()}>
                 `VirtualMaster.mineSaltAsync` is searching for the 32-bit proof-of-work required by
                 creating a virtual address, using parallel workers when the browser supports them.
               </div>
             </div>
           ) : minerState.status === 'found' ? (
-            <div className="mt-2 grid gap-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesLiveDemoLayout5()}>
               <div>
-                <span className="text-primary">masterId:</span>{' '}
-                <code className="font-mono text-primary">{minerState.masterId}</code>
+                <span {...ui.virtualAddressesLiveDemoText()}>masterId:</span>{' '}
+                <code {...ui.code2()}>{minerState.masterId}</code>
               </div>
               <div>
-                <span className="text-primary">salt found:</span>{' '}
-                <code className="break-all font-mono text-[12px] text-primary">
-                  {minerState.salt}
-                </code>
+                <span {...ui.virtualAddressesLiveDemoText()}>salt found:</span>{' '}
+                <code {...ui.code()}>{minerState.salt}</code>
               </div>
               <div>Waiting for the registration transaction to be confirmed.</div>
             </div>
           ) : (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
-              Click <span className="text-primary">Register master id</span> to fund the passkey for
-              fees, mine a valid salt, and submit{' '}
-              <code className="font-mono text-primary">registerVirtualMaster</code>.
+            <div {...ui.virtualAddressesLiveDemoLayout4()}>
+              Click <span {...ui.virtualAddressesLiveDemoText()}>Register master id</span> to fund
+              the passkey for fees, mine a valid salt, and submit{' '}
+              <code {...ui.code2()}>registerVirtualMaster</code>.
             </div>
           )}
         </div>
@@ -629,7 +618,7 @@ export function VirtualAddressesLiveDemo() {
         active={Boolean(registration) && !sendResult}
         actions={
           <Button
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.passkeyLoginButton().className}
             disabled={!registration || !isSupported || sendMutation.isPending}
             onClick={() => sendMutation.mutate()}
             type="button"
@@ -647,31 +636,29 @@ export function VirtualAddressesLiveDemo() {
         number={3}
         title="Send from another address to the virtual address and watch it land in the registered wallet."
       >
-        <div className="mx-6 border-gray4 border-s-2 ps-5 pb-4">
+        <div {...ui.virtualAddressesLiveDemoLayout2()}>
           {registration ? (
-            <div className="mt-2 space-y-3 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesLiveDemoLayout8()}>
               <div>
-                <span className="text-primary">demo sender:</span>{' '}
-                <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="font-mono text-[12px] text-primary">{demoSender.address}</span>
+                <span {...ui.virtualAddressesLiveDemoText()}>demo sender:</span>{' '}
+                <span {...ui.virtualAddressesLiveDemoText2()}>
+                  <span {...ui.virtualAddressesLiveDemoText3()}>{demoSender.address}</span>
                   {hasExplorerLink && <ExplorerAccountLink address={demoSender.address} inline />}
                 </span>
               </div>
               <div>
-                <span className="text-primary">virtual address:</span>{' '}
-                <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="break-all font-mono text-[12px] text-primary">
-                    {registration.virtualAddress}
-                  </span>
+                <span {...ui.virtualAddressesLiveDemoText()}>virtual address:</span>{' '}
+                <span {...ui.virtualAddressesLiveDemoText2()}>
+                  <span {...ui.code()}>{registration.virtualAddress}</span>
                   {hasExplorerLink && (
                     <ExplorerAccountLink address={registration.virtualAddress} inline />
                   )}
                 </span>
               </div>
               <div>
-                <span className="text-primary">registered wallet:</span>{' '}
-                <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="break-all font-mono text-[12px] text-primary">{address}</span>
+                <span {...ui.virtualAddressesLiveDemoText()}>registered wallet:</span>{' '}
+                <span {...ui.virtualAddressesLiveDemoText2()}>
+                  <span {...ui.code()}>{address}</span>
                   {hasExplorerLink && address && <ExplorerAccountLink address={address} inline />}
                 </span>
               </div>
@@ -679,39 +666,39 @@ export function VirtualAddressesLiveDemo() {
               {sendResult ? (
                 <>
                   <div>
-                    <span className="text-primary">transfer tx:</span>{' '}
-                    <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <span className="break-all font-mono text-[12px] text-primary">
-                        {sendResult.txHash}
-                      </span>
+                    <span {...ui.virtualAddressesLiveDemoText()}>transfer tx:</span>{' '}
+                    <span {...ui.virtualAddressesLiveDemoText2()}>
+                      <span {...ui.code()}>{sendResult.txHash}</span>
                       {hasExplorerLink && <ExplorerLink hash={sendResult.txHash} inline />}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+                  <div {...ui.virtualAddressesLiveDemoLayout9()}>
                     <div>
-                      <span className="text-primary">master balance:</span>{' '}
-                      <code className="font-mono text-primary">
+                      <span {...ui.virtualAddressesLiveDemoText()}>master balance:</span>{' '}
+                      <code {...ui.code2()}>
                         {sendResult.before.master} → {sendResult.after.master}
                       </code>
                     </div>
                     <div>
-                      <span className="text-primary">virtual balance:</span>{' '}
-                      <code className="font-mono text-primary">
+                      <span {...ui.virtualAddressesLiveDemoText()}>virtual balance:</span>{' '}
+                      <code {...ui.code2()}>
                         {sendResult.before.virtual} → {sendResult.after.virtual}
                       </code>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-primary">Transfer events in this receipt</span>
+                  <div {...ui.virtualAddressesLiveDemoLayout10()}>
+                    <span {...ui.virtualAddressesLiveDemoText()}>
+                      Transfer events in this receipt
+                    </span>
                     <div>
-                      Treat the <span className="font-mono text-primary">sender → virtual</span> and{' '}
-                      <span className="font-mono text-primary">virtual → master</span> pair as one
-                      logical deposit to the registered wallet. Other transfer logs in the receipt,
-                      like fees, are separate.
+                      Treat the <span {...ui.code2()}>sender → virtual</span> and{' '}
+                      <span {...ui.code2()}>virtual → master</span> pair as one logical deposit to
+                      the registered wallet. Other transfer logs in the receipt, like fees, are
+                      separate.
                     </div>
                     {sendResult.events.map((event, index) => (
                       <div key={`${event.from}-${event.to}-${index}`}>
-                        <code className="break-all font-mono text-[12px] text-primary">
+                        <code {...ui.code()}>
                           {StringFormatter.truncate(event.from, { start: 8, end: 6 })} →{' '}
                           {StringFormatter.truncate(event.to, { start: 8, end: 6 })} ({event.amount}{' '}
                           {tokenSymbol})
@@ -730,7 +717,7 @@ export function VirtualAddressesLiveDemo() {
               )}
             </div>
           ) : (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesLiveDemoLayout4()}>
               Finish registration first. This step needs a master id and derived virtual address.
             </div>
           )}

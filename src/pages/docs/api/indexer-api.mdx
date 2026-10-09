@@ -39,7 +39,7 @@ See the [indexer query reference](/docs/api/indexer) for the complete request an
 - **PostgreSQL** handles low-latency point lookups and recent data. It is also the source for live streaming.
 - **ClickHouse** handles full-history analytics, large scans, and pre-computed tables for tokens, holders, transfers, and DEX data.
 
-When tiered retention is enabled, PostgreSQL keeps a recent hot window and ClickHouse holds the full archive. Direct `tidx` queries use the tiered route by default, while `engine=clickhouse` selects native ClickHouse for analytical queries. Omit `engine` to let the Tempo API choose, or set `engine=clickhouse` for analytical queries.
+When tiered retention is enabled, PostgreSQL keeps a recent hot window and ClickHouse holds the full archive. Omit `engine` to let the API route the query, or set `engine=clickhouse` for full-history analytical reads.
 
 The sync engine runs a realtime loop that follows the chain head and a backfill loop that fills historical gaps, prioritizing recent gaps so new data becomes queryable quickly.
 
@@ -82,7 +82,7 @@ With `engine=clickhouse`, the indexer also exposes pre-computed tables for commo
 - **Contracts**: `contract_creations`.
 
 :::info
-The typed REST endpoints for tokens, balances, activity, and exchanges are the stable interface for common reads. Query the analytics tables directly when you need custom SQL that the REST endpoints do not cover.
+The typed REST endpoints for tokens, balances, activity, and exchanges are the recommended interface for common reads. Query the analytics tables directly when you need custom SQL that the REST endpoints do not cover.
 :::
 
 ## Indexer API decoded events

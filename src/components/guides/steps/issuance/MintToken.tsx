@@ -1,11 +1,13 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { type Address, pad, parseUnits, stringToHex } from 'viem'
+import { type Address, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -56,7 +58,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
       amount: parseUnits('100', metadata.decimals),
       to: recipient || address,
       token: tokenAddress,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
       feeToken: alphaUsd,
     })
   }
@@ -75,7 +77,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -92,7 +94,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
             disabled={Boolean(!tokenAddress || !hasRole || hasSufficientBalance)}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -102,15 +104,15 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
       title={`Mint 100 ${metadata ? metadata.name : 'tokens'} to ${recipient ? 'recipient' : 'yourself'}.`}
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -121,12 +123,12 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -141,7 +143,7 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
                 disabled={!address}
                 onClick={handleMint}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={form.actionButton().className}
               >
                 {mint.isPending ? 'Minting...' : 'Mint'}
               </Button>

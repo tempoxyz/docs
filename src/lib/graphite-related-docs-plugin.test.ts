@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import {
   docsPageRouteFromFile,
   isCompleteManifestRefresh,
+  openApiDocsRoutes,
   overlayLocalDocsMetadata,
 } from '../../scripts/graphite-related-docs-plugin'
 import type { RelatedDocsManifest } from './graphite-related-docs'
@@ -24,17 +25,19 @@ it('refreshes cached recommendation copy from local frontmatter without changing
           description: 'Outdated guarantees.',
           type: 'related',
         },
-        { href: '/docs/external-only', title: 'Keep upstream fallback', type: 'random' },
+        { href: '/docs/removed', title: 'Retired documentation', type: 'random' },
+        { href: '/docs/api/routes/transfers', title: 'Transfers', type: 'related' },
+        { href: '/docs/api/routes/quotes', title: 'Retired quotes', type: 'related' },
       ],
     }
-    const first = await overlayLocalDocsMetadata(root, manifest)
+    const first = await overlayLocalDocsMetadata(root, manifest, ['/docs/api/routes/transfers'])
     expect(first['/docs/protocol/zones']).toEqual([
       {
         ...manifest['/docs/protocol/zones'][0],
         title: 'Current proving',
         description: 'Current limits.',
       },
-      manifest['/docs/protocol/zones'][1],
+      manifest['/docs/protocol/zones'][2],
     ])
 
     await fs.writeFile(file, "---\ntitle: 'Updated proving'\n---\n")
@@ -47,6 +50,34 @@ it('refreshes cached recommendation copy from local frontmatter without changing
   } finally {
     await fs.rm(root, { recursive: true, force: true })
   }
+})
+
+it('discovers generated API routes from the configured spec instead of stale production links', async () => {
+  const routes = await openApiDocsRoutes({
+    rootDir: process.cwd(),
+    openapi: [
+      {
+        path: '/docs/api',
+        spec: {
+          openapi: '3.1.0',
+          info: { title: 'Tempo API', version: '1' },
+          tags: [{ name: 'Routes transfers', 'x-pagePath': 'routes/transfers' }],
+          paths: {
+            '/v1/routes/transfers/quote': {
+              get: {
+                operationId: 'quoteTransfer',
+                tags: ['Routes transfers'],
+                responses: { '200': { description: 'Quote' } },
+              },
+            },
+          },
+        },
+      },
+    ],
+  })
+  expect(routes).toContain('/docs/api')
+  expect(routes).toContain('/docs/api/routes/transfers')
+  expect(routes).not.toContain('/docs/api/routes/quotes')
 })
 
 describe('docsPageRouteFromFile', () => {

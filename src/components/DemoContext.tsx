@@ -1,12 +1,13 @@
 'use client'
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react'
-import type { Address, PrivateKeyAccount, TransactionReceipt } from 'viem'
+import type { Address, PrivateKeyAccount } from 'viem'
+import type { Transaction } from 'viem/tempo'
 import { useConnectionEffect } from 'wagmi'
 
 // Define your allowed keys and their types here
 export interface DemoData {
   tokenAddress: Address
-  tokenReceipt: TransactionReceipt
+  tokenReceipt: Transaction.TransactionReceipt
   sponsorAccount: PrivateKeyAccount
   transferId: string
   policyId: bigint

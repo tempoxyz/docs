@@ -1,100 +1,62 @@
 ---
-title: "Run a Tempo node: validator, RPC, and standby"
-seoTitle: "Run a Tempo Node: Validator, RPC & Standby | Docs"
-description: Run Tempo node infrastructure for RPC access, validator operations, system requirements, installation, monitoring, security, upgrades, and release operations.
+title: Run a node
+seoTitle: Run a Tempo Node | Tempo Docs
+description: Choose a Tempo node type, run RPC infrastructure, and maintain it through monitoring and network upgrades.
 ---
 
-import { Cards, Card } from 'vocs'
+<span id="run-a-tempo-node-validator-rpc-and-standby" />
 
-# Run a Tempo node: validator, RPC, and standby
+# Run a node
 
-Run Tempo infrastructure when you need direct network access, dedicated RPC capacity, validator operations, or lower-level visibility into network behavior.
+Run Tempo infrastructure when you need your own RPC access or participate in validator operations. Most applications can start with the [public RPC endpoints](/docs/quickstart/connection-details).
 
-Most teams should start with [running RPC and standby nodes](/docs/guide/node/rpc). Validator operation requires coordination with the Tempo team and includes a separate [validator failover](/docs/guide/node/validator-failover) path for backup infrastructure.
+## Choose a node type
 
-## RPC Node Path
+| Node | Use it for | Start here |
+| --- | --- | --- |
+| RPC node | Read network state and serve JSON-RPC without participating in consensus. | [RPC setup](/docs/guide/node/rpc) |
+| Validator | Participate in coordinated network operations. Onboarding requires coordination with the Tempo team. | [Validator responsibilities](/docs/guide/node/validator) |
+| Standby node | Maintain infrastructure for validator failover. | [Failover](/docs/guide/node/validator-failover) |
 
-<Cards>
-  <Card
-    title="System Requirements"
-    description="Hardware, operating system, and runtime requirements for Tempo node software."
-    to="/docs/guide/node/system-requirements"
-    icon="lucide:hard-drive"
-  />
-  <Card
-    title="Installation"
-    description="Download, install, and prepare the Tempo node binary for supported platforms."
-    to="/docs/guide/node/installation"
-    icon="lucide:download"
-  />
-  <Card
-    title="Run RPC and Standby Nodes"
-    description="Configure and run nodes that serve JSON-RPC traffic or stay ready for validator failover."
-    to="/docs/guide/node/rpc"
-    icon="lucide:server"
-  />
-  <Card
-    title="Consensus, DKG, and Network Identity"
-    description="Understand how nodes verify finalizations and what to do when the network identity rotates."
-    to="/docs/guide/node/consensus-and-dkg"
-    icon="lucide:key-round"
-  />
-  <Card
-    title="Node Security"
-    description="Harden node operations, network exposure, key handling, and runtime configuration."
-    to="/docs/guide/node/security"
-    icon="lucide:shield"
-  />
-</Cards>
+A following RPC node verifies consensus finalization certificates and executes transactions locally. Its upstream must serve certified consensus data. Read [consensus and network identity](/docs/guide/node/consensus-and-dkg) for the trust model and key-rotation behavior.
 
-## Validator Operations
+<span id="rpc-node-path" />
 
-<Cards>
-  <Card
-    title="Validator Overview"
-    description="Understand validator responsibilities and the operational path before onboarding."
-    to="/docs/guide/node/validator"
-    icon="lucide:badge-check"
-  />
-  <Card
-    title="Validator Onboarding"
-    description="Set up validator software and prepare to participate in coordinated network operations."
-    to="/docs/guide/node/validator-setup"
-    icon="lucide:clipboard-check"
-  />
-  <Card
-    title="Monitoring"
-    description="Monitor validator health, status, failover, and lifecycle operations."
-    to="/docs/guide/node/validator-monitoring"
-    icon="lucide:activity"
-  />
-  <Card
-    title="Troubleshooting"
-    description="Debug validator issues, common failure modes, and operational questions."
-    to="/docs/guide/node/validator-troubleshooting"
-    icon="lucide:wrench"
-  />
-</Cards>
+## Run an RPC node
 
-## Releases
+Check the [system requirements](/docs/guide/node/system-requirements), then [install the Tempo binary](/docs/guide/node/installation). Download a mainnet snapshot and start the node:
 
-<Cards>
-  <Card
-    title="Upgrade Cadence"
-    description="Understand how Tempo node upgrades are planned, communicated, and rolled out."
-    to="/docs/guide/node/upgrade-cadence"
-    icon="lucide:calendar-clock"
-  />
-  <Card
-    title="Network Upgrades"
-    description="Track upgrade instructions, release notes, and node operator actions."
-    to="/docs/guide/node/network-upgrades"
-    icon="lucide:arrow-up-circle"
-  />
-  <Card
-    title="Changelog"
-    description="Review recent changes relevant to node operators and protocol users."
-    to="/docs/changelog"
-    icon="lucide:list-tree"
-  />
-</Cards>
+```bash [CLI]
+tempo download --chain mainnet --archive
+
+tempo node \
+  --follow \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
+
+Once the node serves RPC, read its sync status. `eth_syncing` returns `false` when it is no longer syncing, or an object with progress fields while syncing.
+
+::::code-group
+
+```bash [API (RPC)]
+curl http://localhost:8545 -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_syncing","params":[]}'
+```
+
+```bash [CLI]
+cast rpc eth_syncing --rpc-url http://localhost:8545
+```
+
+::::
+
+The [RPC setup guide](/docs/guide/node/rpc) covers persistent services and health checks. Review [node security](/docs/guide/node/security) before exposing endpoints.
+
+<span id="validator-operations" />
+<span id="releases" />
+
+## Monitor and upgrade
+
+Use [monitoring](/docs/guide/node/validator-monitoring) to track node health and [troubleshooting](/docs/guide/node/validator-troubleshooting) to diagnose failures. For validators, follow [onboarding](/docs/guide/node/validator-setup), [topology](/docs/guide/node/validator-topology), and [key management](/docs/guide/node/validator-keys).
+
+Track [network upgrades](/docs/guide/node/network-upgrades) for required operator actions and the [upgrade cadence](/docs/guide/node/upgrade-cadence) for rollout guidance. The [changelog](/docs/changelog) records software releases; [protocol upgrades](/docs/protocol/upgrades) describe changes to network rules.

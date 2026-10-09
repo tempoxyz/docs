@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { Hex } from 'viem'
-import { Storage as ZoneStorage } from 'viem/tempo'
+import { Store as ZoneStore } from 'viem/tempo'
 
 const zoneAuthorizationInfoTimeoutMs = 5_000
 
@@ -12,7 +12,7 @@ export type ZoneAuthClientLike = {
       account: Hex
       expiresAt: bigint
     }>
-    signAuthorizationToken: () => Promise<{
+    signAuthorizationToken: (parameters: { zoneId: number }) => Promise<{
       authentication: {
         expiresAt: number
         zoneId: number
@@ -25,10 +25,11 @@ export type ZoneAuthClientLike = {
 export function useZoneAuthorization(parameters: {
   address: Hex | undefined
   chainId: number
+  zoneId: number
   queryKey: readonly unknown[]
   zoneClient: ZoneAuthClientLike | undefined
 }) {
-  const { address, chainId, queryKey, zoneClient } = parameters
+  const { address, chainId, zoneId, queryKey, zoneClient } = parameters
 
   const statusQuery = useQuery({
     enabled: Boolean(address && zoneClient),
@@ -49,7 +50,8 @@ export function useZoneAuthorization(parameters: {
     mutationFn: async () => {
       if (!zoneClient) throw new Error('zone client not ready')
 
-      return zoneClient.zone.signAuthorizationToken()
+      // Legacy sandbox chain IDs do not follow the current SDK derivation.
+      return zoneClient.zone.signAuthorizationToken({ zoneId })
     },
     onSuccess: async () => {
       await statusQuery.refetch()
@@ -69,18 +71,18 @@ export async function getZoneAuthorizationStatus(parameters: {
   address: Hex
   chainId: number
   zoneClient: ZoneAuthClientLike
-  storage?: ReturnType<typeof ZoneStorage.defaultStorage>
+  storage?: ReturnType<typeof ZoneStore.defaultStore>
 }) {
-  const { address, chainId, zoneClient, storage = ZoneStorage.defaultStorage() } = parameters
+  const { address, chainId, zoneClient, storage = ZoneStore.defaultStore() } = parameters
   const lowerAddress = address.toLowerCase()
-  const accountStorageKey = `auth:${lowerAddress}:${chainId}`
-  const chainStorageKey = `auth:token:${chainId}`
-  const accountToken = await storage.getItem(accountStorageKey)
-  const chainToken = await storage.getItem(chainStorageKey)
+  const accountStoreKey = `auth:${lowerAddress}:${chainId}`
+  const chainStoreKey = `auth:token:${chainId}`
+  const accountToken = await storage.getItem(accountStoreKey)
+  const chainToken = await storage.getItem(chainStoreKey)
 
   // A fresh account has no token to validate; authorization starts with a local signature.
   if (!accountToken && !chainToken) return null
-  if (accountToken) await storage.setItem(chainStorageKey, accountToken)
+  if (accountToken) await storage.setItem(chainStoreKey, accountToken)
 
   try {
     const info = await withTimeout(
@@ -91,12 +93,12 @@ export async function getZoneAuthorizationStatus(parameters: {
     const matchesAccount = info.account.toLowerCase() === lowerAddress
 
     if (!matchesAccount || expired) {
-      await storage.removeItem(chainStorageKey)
-      if (accountToken) await storage.removeItem(accountStorageKey)
+      await storage.removeItem(chainStoreKey)
+      if (accountToken) await storage.removeItem(accountStoreKey)
       return null
     }
 
-    if (!accountToken && chainToken) await storage.setItem(accountStorageKey, chainToken)
+    if (!accountToken && chainToken) await storage.setItem(accountStoreKey, chainToken)
     return info
   } catch (error) {
     if (!isZoneAuthorizationError(error)) {
@@ -107,8 +109,8 @@ export async function getZoneAuthorizationStatus(parameters: {
       throw error
     }
 
-    await storage.removeItem(chainStorageKey)
-    if (accountToken) await storage.removeItem(accountStorageKey)
+    await storage.removeItem(chainStoreKey)
+    if (accountToken) await storage.removeItem(accountStoreKey)
     return null
   }
 }

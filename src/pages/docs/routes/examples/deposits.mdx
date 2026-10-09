@@ -1,0 +1,101 @@
+---
+title: "Deposit address example"
+seoTitle: "Routes deposit address example | Tempo Docs"
+description: Create a route-specific deposit address and track each incoming deposit through delivery to Tempo.
+---
+
+# Deposit address example
+
+Give customers a reusable address to fund from an external wallet. Each address accepts a specific network and token and routes funds to your chosen Tempo recipient.
+
+For payments that already originate on Tempo, use [Receive payments](/docs/guide/payments/accept-a-payment). [Virtual addresses](/docs/guide/payments/virtual-addresses) attribute those payments to a shared Tempo balance; they are different from Routes deposit addresses.
+
+## Set up Routes API access
+
+After confirming [beta access](/docs/routes), create a project and API key in [Tempo Console](/docs/api/console). Use `routes:read` for quotes and status and `routes:write` to create deposit addresses. Authenticated directory reads require `data:read`.
+
+Use `curl` and `jq` from your backend or terminal. Set `TEMPO_API_KEY` and choose a route with deposit-address support from [Supported routes](/docs/routes/networks). Set these values from that route:
+
+| Variable | Value |
+| --- | --- |
+| `SOURCE_CHAIN`, `SOURCE_TOKEN` | Accepted source network and token. |
+| `DESTINATION_TOKEN` | Token the recipient receives on Tempo. |
+| `ROUTE_RECIPIENT` | Recipient account on Tempo. |
+| `ROUTE_REFUND_ADDRESS` | Account on the source network that receives refunds. |
+| `ROUTE_AMOUNT` | Source amount in base units to use for the quote. |
+
+Keep your API key on the backend. The returned deposit address and funding instructions can be shown to the customer.
+
+<span id="create-and-monitor-a-deposit-address" />
+
+## Accept a deposit
+
+:::::steps
+
+### Quote the deposit
+
+```bash
+curl --get 'https://api.tempo.xyz/v1/routes/deposit-addresses/quote' \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --data-urlencode "sourceChain=${SOURCE_CHAIN}" \
+  --data-urlencode "sourceToken=${SOURCE_TOKEN}" \
+  --data-urlencode "destinationToken=${DESTINATION_TOKEN}" \
+  --data-urlencode "recipient=${ROUTE_RECIPIENT}" \
+  --data-urlencode "refundAddress=${ROUTE_REFUND_ADDRESS}" \
+  --data-urlencode "amount=${ROUTE_AMOUNT}"
+```
+
+Review the expected destination amount and fees before creating the address. A quote prices the supplied amount; it does not establish that funds have been received.
+
+<span id="create-a-reusable-address" />
+
+### Create a deposit address
+
+Set `ROUTE_REQUEST_KEY` to a unique identifier for this request. Reuse it for retries with unchanged inputs.
+
+```bash
+jq -n \
+  --arg sourceChain "$SOURCE_CHAIN" \
+  --arg sourceToken "$SOURCE_TOKEN" \
+  --arg destinationToken "$DESTINATION_TOKEN" \
+  --arg recipient "$ROUTE_RECIPIENT" \
+  --arg refundAddress "$ROUTE_REFUND_ADDRESS" \
+  --arg amount "$ROUTE_AMOUNT" \
+  '$ARGS.named' > deposit-address-request.json
+
+curl --fail-with-body 'https://api.tempo.xyz/v1/routes/deposit-addresses' \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --header "idempotency-key: ${ROUTE_REQUEST_KEY}" \
+  --header 'Content-Type: application/json' \
+  --data @deposit-address-request.json
+```
+
+Save the returned address and `id` with your customer record. A newly created address includes quote terms; an existing address may not. Obtain a fresh quote before showing funding instructions when terms are absent or stale.
+
+<span id="show-the-funding-instructions" />
+
+### Show funding instructions
+
+Display the returned source network, token, and deposit address together. Confirm its status is `active` before inviting deposits. The address belongs to this route; do not present it as an address for arbitrary assets or networks.
+
+<span id="track-each-deposit" />
+
+### Track deposits
+
+Set `ROUTE_DEPOSIT_ADDRESS` to the returned source-chain address, not the `rda_…` object ID:
+
+```bash
+curl --get 'https://api.tempo.xyz/v1/routes/deposits' \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --data-urlencode "depositAddress=${ROUTE_DEPOSIT_ADDRESS}"
+```
+
+Read `GET /v1/routes/deposits/{id}` for each deposit. An active address can receive funds; only a completed deposit establishes delivery to Tempo. Reconcile every deposit separately using its delivered amount and destination transaction references.
+
+:::::
+
+## Reconcile delivery and refunds
+
+Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits. Follow [Track delivery](/docs/routes/delivery) before crediting a balance or treating a refund as complete.
+
+See the [Deposit addresses API reference](/docs/api/routes/deposit-addresses) for request fields, pagination, and the full lifecycle.

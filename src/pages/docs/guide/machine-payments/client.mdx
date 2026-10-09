@@ -1,14 +1,16 @@
 ---
-title: "Client quickstart: build an MPP client"
-seoTitle: "Build an MPP Client | Tempo Docs"
+title: "Pay for services"
+seoTitle: "Pay for services | Tempo Docs"
 description: Set up an MPP client on Tempo. Polyfill fetch to automatically pay for 402 responses with TIP-20 stablecoins.
 ---
 
 import { Card, Cards } from 'vocs'
 
-# Client quickstart: build an MPP client
+<span id="client-quickstart-build-an-mpp-client" />
 
-Polyfill `fetch` to handle `402` responses. Your existing code works unchanged — payments happen in the background.
+# Pay for services
+
+Use an MPP client to pay for an API request from your application. The client handles the payment challenge and retries with a credential using the account you configure.
 
 ::::steps
 
@@ -29,9 +31,9 @@ bun add mppx viem
 ### Define the MPP payer account
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 
-const account = privateKeyToAccount('0xabc…123')
+const account = Account.fromSecp256k1('0x...')
 ```
 
 :::tip
@@ -43,10 +45,10 @@ With Tempo, you can also use passkey or WebCrypto signing.
 Call `Mppx.create` at startup. This polyfills `fetch` to automatically handle `402` payment challenges.
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 import { Mppx, tempo } from 'mppx/client'
 
-const account = privateKeyToAccount('0xabc…123')
+const account = Account.fromSecp256k1('0x...')
 
 Mppx.create({
   methods: [tempo({ account })],
@@ -117,7 +119,7 @@ export const config = createConfig({
 Pass accounts on individual requests instead of at setup:
 
 ```ts
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 import { Mppx, tempo } from 'mppx/client'
 
 const mppx = Mppx.create({
@@ -127,7 +129,7 @@ const mppx = Mppx.create({
 
 const response = await mppx.fetch('https://api.example.com/resource', {
   context: {
-    account: privateKeyToAccount('0xabc…123'),
+    account: Account.fromSecp256k1('0x...'),
   }
 })
 ```
@@ -142,7 +144,7 @@ Use `Mppx.create` for full control over the payment flow:
 
 ```ts
 import { Mppx, tempo } from 'mppx/client'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 
 const mppx = Mppx.create({
   polyfill: false,
@@ -153,7 +155,7 @@ const response = await fetch('https://api.example.com/resource')
 
 if (response.status === 402) {
   const credential = await mppx.createCredential(response, {
-    account: privateKeyToAccount('0x...'),
+    account: Account.fromSecp256k1('0x...'),
   })
 
   const paidResponse = await fetch('https://api.example.com/resource', {
@@ -184,7 +186,7 @@ console.log(receipt.reference)
 <Cards>
   <Card
     icon="lucide:server"
-    title="Server quickstart"
+    title="Accept payments for an API"
     description="Add payment gating to your HTTP endpoints"
     to="/docs/guide/machine-payments/server"
   />

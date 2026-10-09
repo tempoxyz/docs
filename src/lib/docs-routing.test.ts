@@ -1,9 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import vocsConfig from '../../vocs.config'
 import {
   canonicalDevelopersOrigin,
+  developerSurfaceRedirects,
   docsRouteDestination,
   legacyDocsHostRoutes,
   proxiedLegacyDocsRoutes,
@@ -69,18 +70,118 @@ function findHostRedirectIndex(source: string, host: string) {
 
 function developersProxyDestination(destination: string) {
   if (URL.canParse(destination)) return destination
-  return `/developers${destination}`
+  return `/developers${destination === '/' ? '' : destination}`
 }
 
 describe('docs routing redirects', () => {
-  it('keeps proxied route destinations inside the public mount in production', () => {
-    expect(docsRouteDestination('/docs/api', 'production')).toBe(
-      `${canonicalDevelopersOrigin}/docs/api`,
-    )
+  describe('developer site entry points', () => {
+    it.each(developerSurfaceRedirects)('redirects $source to $destination in both mounts', ({
+      source,
+      destination,
+    }) => {
+      expect(vocsRedirects).toContainEqual(
+        expect.objectContaining({
+          source,
+          destination: docsRouteDestination(destination),
+          status: 301,
+        }),
+      )
+      expect(findRedirect(`/developers${source}`)).toMatchObject({
+        destination: developersProxyDestination(destination),
+        permanent: true,
+      })
+    })
+
+    it('serves the docs landing and getting-started page without a redirect', () => {
+      expect(vocsRedirects.some(({ source }) => source === '/' || source === '/get-started')).toBe(
+        false,
+      )
+      expect(findRedirect('/developers')).toBeUndefined()
+      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/index.mdx'))).toBe(true)
+      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/get-started.mdx'))).toBe(true)
+    })
+
+    it('removes marketing pages from the file-based route tree', () => {
+      for (const page of [
+        'index.tsx',
+        'build/index.tsx',
+        'build/tip20-tokens.tsx',
+        'build/tempo-transactions.tsx',
+        'performance.tsx',
+      ]) {
+        expect(fs.existsSync(path.join(process.cwd(), 'src/pages', page))).toBe(false)
+      }
+    })
+  })
+
+  it('keeps Vercel redirects root-relative in production and preview', () => {
+    expect(docsRouteDestination('/', 'production')).toBe('/')
+    expect(docsRouteDestination('/', 'preview')).toBe('/')
+    expect(docsRouteDestination('/docs/api', 'production')).toBe('/docs/api')
     expect(docsRouteDestination('/docs/api', 'preview')).toBe('/docs/api')
     expect(docsRouteDestination('https://tempo.xyz/learn/stablecoin-payroll/', 'production')).toBe(
       'https://tempo.xyz/learn/stablecoin-payroll/',
     )
+  })
+
+  it('keeps retired documentation redirects on the deployment host', async () => {
+    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.resetModules()
+    try {
+      const { default: productionConfig } = await import('../../vocs.config')
+      const productionRedirects = productionConfig.redirects as Array<
+        VocsRedirect & { status: number }
+      >
+      expect(productionRedirects).toHaveLength(vocsRedirects.length)
+      for (const redirect of productionRedirects) {
+        expect(redirect.status, redirect.source).toBe(301)
+        if (!URL.canParse(redirect.destination)) {
+          expect(redirect.destination).toMatch(/^\//)
+          expect(redirect.destination).not.toMatch(/^\/developers(?:\/|$)/)
+        }
+      }
+      expect(productionRedirects).toContainEqual({
+        source: '/docs/guide',
+        destination: '/docs/quickstart/integrate-tempo',
+        status: 301,
+      })
+      expect(productionRedirects).toContainEqual({
+        source: '/docs/protocol/tip20-rewards',
+        destination: '/docs/protocol/upgrades/t7#deprecate-tip-20-rewards',
+        status: 301,
+      })
+    } finally {
+      vi.unstubAllEnvs()
+      vi.resetModules()
+    }
+  })
+
+  it.each(vocsRedirects)('mirrors every retired URL at the public mount: $source', ({
+    source,
+    destination,
+  }) => {
+    const target = destination.startsWith(canonicalDevelopersOrigin)
+      ? destination.slice(canonicalDevelopersOrigin.length) || '/'
+      : destination
+    expect(findRedirect(`/developers${source}`)).toMatchObject({
+      destination: developersProxyDestination(target),
+      permanent: true,
+    })
+  })
+
+  it('keeps the developer tools compatibility page and its provider anchors reachable', () => {
+    expect(findRedirect('/developers/docs/quickstart/developer-tools')).toBeUndefined()
+  })
+
+  it('redirects old asset directories directly to Stablecoins', () => {
+    for (const prefix of ['', '/developers']) {
+      for (const source of ['/docs/ecosystem/assets', '/docs/partners/assets']) {
+        expect(findRedirect(`${prefix}${source}`)).toMatchObject({
+          destination: `${prefix}/docs/partners/stablecoins`,
+          permanent: true,
+        })
+      }
+    }
   })
 
   it('normalizes trailing slashes before static route handling', () => {
@@ -157,6 +258,8 @@ describe('docs routing redirects', () => {
     it.each([
       ['/', 'https://tempo.xyz/developers'],
       ['/developers', 'https://tempo.xyz/developers'],
+      ['/docs', 'https://tempo.xyz/developers'],
+      ['/developers/docs', 'https://tempo.xyz/developers'],
       ['/developers/:path*', 'https://tempo.xyz/developers/:path*'],
       ['/:path*', 'https://tempo.xyz/developers/:path*'],
     ])('redirects %s to %s', (source, destination) => {
@@ -215,6 +318,12 @@ describe('docs routing redirects', () => {
     ['/tools', '/docs/tools'],
     ['/tools/:path*', '/docs/tools/:path*'],
     ['/partners', '/docs/partners'],
+    ['/docs/ecosystem', '/docs/partners'],
+    ['/docs/ecosystem/node-infrastructure', '/docs/partners/rpc-and-nodes'],
+    [
+      '/developers/docs/ecosystem/smart-contract-libraries',
+      '/developers/docs/partners/smart-accounts',
+    ],
     ['/api', '/docs/api'],
     ['/api/authentication', '/docs/api/authentication'],
     ['/api/conventions', '/docs/api/conventions'],
@@ -229,8 +338,7 @@ describe('docs routing redirects', () => {
     ['/api/transactions-and-transfers', '/docs/api/transactions-and-transfers'],
     ['/api/transfers', '/docs/api/transfers'],
     ['/api/versioning-policy', '/docs/api/versioning-policy'],
-    ['/developers/docs/quickstart/developer-tools', '/developers/docs/ecosystem'],
-    ['/developers/docs/developer-tools', '/developers/docs/ecosystem'],
+    ['/developers/docs/developer-tools', '/developers/docs/partners'],
     ['/developers/docs/developer-tools/fee-payer', '/developers/docs/api/fee-payer'],
     ['/developers/docs/developer-tools/indexer', '/developers/docs/api/indexer-api'],
     ['/developers/docs/hosted-services', '/developers/docs/api'],

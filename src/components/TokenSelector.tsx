@@ -1,6 +1,7 @@
 'use client'
 import type { Address } from 'viem'
 import { Hooks } from 'wagmi/tempo'
+import * as ui from './TokenSelector.recipes'
 
 type TokenSelectorProps = {
   tokens: Address[]
@@ -29,7 +30,7 @@ export function TokenSelector(props: TokenSelectorProps) {
       name={name}
       value={value}
       onChange={(e) => onChange(e.target.value as Address)}
-      className="min-h-10 rounded-md border border-[var(--line-strong)] bg-[var(--surface-input)] px-3 font-normal text-[14px] text-[var(--foreground)] focus-visible:outline-2 focus-visible:outline-[var(--accent-blue)] focus-visible:outline-offset-2"
+      {...ui.select()}
     >
       {tokens.map((token) => (
         <TokenOption key={token} token={token} />

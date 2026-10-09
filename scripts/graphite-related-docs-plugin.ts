@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { Plugin } from 'vite'
+import { type Config, OpenApi, resolveConfig } from 'vocs/config'
 import {
   canonicalDocsUrl,
   GRAPHITE_RELATED_DOCS_ENDPOINT,
@@ -38,6 +39,7 @@ type FetchResult = {
 
 const manifestPromises = new Map<string, Promise<RelatedDocsManifest>>()
 const requestPromises = new Map<string, Promise<FetchResult>>()
+const generatedRoutePromises = new Map<string, Promise<string[]>>()
 
 export function graphiteRelatedDocsPlugin(): Plugin {
   let rootDirectory = process.cwd()
@@ -62,6 +64,7 @@ export function graphiteRelatedDocsPlugin(): Plugin {
       const manifest = await overlayLocalDocsMetadata(
         rootDirectory,
         await promise.catch(() => ({})),
+        await generatedDocsRoutes(rootDirectory),
       )
       return `export default ${JSON.stringify(manifest)}`
     },
@@ -72,6 +75,7 @@ export function graphiteRelatedDocsPlugin(): Plugin {
 export async function overlayLocalDocsMetadata(
   rootDirectory: string,
   manifest: RelatedDocsManifest,
+  generatedRoutes: readonly string[] = [],
 ): Promise<RelatedDocsManifest> {
   const metadata = new Map<string, { title?: string; description?: string }>()
   const files = await filesWithin(path.join(rootDirectory, 'src/pages/docs'))
@@ -90,15 +94,40 @@ export async function overlayLocalDocsMetadata(
       })
     }),
   )
+  const availableRoutes = new Set([...metadata.keys(), ...generatedRoutes])
   return Object.fromEntries(
     Object.entries(manifest).map(([route, links]) => [
       route,
-      links.map((link) => ({
-        ...link,
-        ...metadata.get(normalizeDocsRoutePath(new URL(link.href, TEMPO_ORIGIN).pathname)),
-      })),
+      links
+        .filter((link) =>
+          availableRoutes.has(normalizeDocsRoutePath(new URL(link.href, TEMPO_ORIGIN).pathname)),
+        )
+        .map((link) => ({
+          ...link,
+          ...metadata.get(normalizeDocsRoutePath(new URL(link.href, TEMPO_ORIGIN).pathname)),
+        })),
     ]),
   )
+}
+
+/** Use the same parser and route resolver as Vocs for live OpenAPI categories. */
+export async function openApiDocsRoutes(config: Pick<Config, 'openapi' | 'rootDir'>) {
+  const specs = await Promise.all(
+    (config.openapi ?? []).map((entry) => OpenApi.parse(entry, { rootDir: config.rootDir })),
+  )
+  return specs.flatMap((spec) => [
+    spec.path,
+    ...spec.groups.map((group) => `${spec.path.replace(/\/$/, '')}/${OpenApi.groupPath(group)}`),
+  ])
+}
+
+function generatedDocsRoutes(rootDirectory: string) {
+  let routes = generatedRoutePromises.get(rootDirectory)
+  if (!routes) {
+    routes = resolveConfig({ rootDir: rootDirectory }).then(openApiDocsRoutes)
+    generatedRoutePromises.set(rootDirectory, routes)
+  }
+  return routes
 }
 
 function inlineFrontmatterString(frontmatter: string, key: string): string | undefined {

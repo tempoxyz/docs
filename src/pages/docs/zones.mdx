@@ -1,0 +1,58 @@
+---
+title: "Tempo Zones"
+seoTitle: "Tempo Zones | Tempo Docs"
+description: Connect to a private stablecoin ledger, deposit from Tempo, read account activity, and track withdrawals.
+---
+
+import { Cards, Card } from 'vocs'
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+
+<span id="connect-public-and-private-balances" />
+
+<DocsProductOverview image="zones" alt="A public deposit enters a private Zone account through a controlled boundary; the Zone operator can view its ledger.">
+
+# Tempo Zones
+
+Keep stablecoin balances and account activity in a private ledger connected to Tempo. Deposit funds from Tempo, read private balances, and withdraw to the public network.
+
+[Read the privacy model →](/docs/zones/privacy)
+
+</DocsProductOverview>
+
+:::warning
+Zones is in limited preview. [Contact Tempo](https://tempo.xyz/contact) to discuss access and the deployment your application needs.
+:::
+
+<span id="understand-the-privacy-boundary" />
+
+## How Zones work
+
+Each Zone has its own network and a portal on Tempo that holds its backing assets. Account-scoped access lets your application read private balances and activity. The operator can read the ledger; deposit and withdrawal amounts remain public. Read [Privacy](/docs/zones/privacy) before choosing a deployment.
+
+<span id="check-the-capabilities-of-your-deployment" />
+
+## Supported features
+
+The current permissioned runtime supports funding through the inbox and outbox. General TIP-20 transfers and user contract deployment are disabled. Confirm the operator's supported assets, signing tools, read access, and funding rules before integrating.
+
+Execution-proof enforcement depends on the deployed verifier and network configuration. Review [proving and settlement](/docs/protocol/zones/proving) with the operator; forced exits are not a generally available recovery path.
+
+<span id="integrate-a-zone" />
+<span id="confirm-the-deployment-details" />
+<span id="authenticate-private-account-access" />
+<span id="deposit-from-tempo" />
+<span id="read-the-private-balance" />
+<span id="withdraw-to-tempo" />
+
+## Start building
+
+<Cards>
+  <Card title="Connect" description="Configure and authenticate access to your Zone." to="/docs/zones/connect" icon="lucide:plug" />
+  <Card title="Deposit" description="Fund a private account through the portal on Tempo." to="/docs/zones/deposit" icon="lucide:arrow-down-left" />
+  <Card title="Balances and activity" description="Read the account's balances and filtered history." to="/docs/zones/balances" icon="lucide:list" />
+  <Card title="Withdraw" description="Return funds to Tempo and track delivery." to="/docs/zones/withdraw" icon="lucide:arrow-up-right" />
+</Cards>
+
+<span id="try-the-testnet-sandbox" />
+
+The [testnet sandbox](/docs/guide/private-zones) has interactive examples for an earlier deployment, including direct transfers. Its interfaces and capabilities differ from the current preview. Use those examples only with the named sandbox deployment.

@@ -1,0 +1,56 @@
+---
+title: "Track delivery"
+seoTitle: "Track delivery | Tempo Docs"
+description: "Distinguish source submission, destination delivery, and refunds when reconciling Routes payments."
+---
+
+import { OpenApi } from 'vocs'
+
+# Track delivery
+
+A successful source-chain transaction starts a route; it does not establish that the destination received funds. Keep the Routes object ID with your payment record and follow its status through delivery or refund.
+
+<span id="read-the-transfer-or-deposit" />
+
+## Check status
+
+For a transfer your application authorizes, use `GET /v1/routes/transfers/{id}`. Register the submitted source transaction hashes as described in [Make a transfer](/docs/routes/transfers).
+
+For a deposit-address flow, list deposits with `GET /v1/routes/deposits`, filtering by `depositAddress`, then read each deposit with `GET /v1/routes/deposits/{id}`. The address being `active` says it can receive deposits; it does not describe a particular deposit's progress.
+
+Use the API key from [API setup](/docs/routes/api-setup) and enter the transfer `id` returned when you created it.
+
+<OpenApi.Playground operationId="getRoutesTransfer" anchors={false} />
+
+<span id="keep-delivery-and-refund-states-distinct" />
+
+<span id="handle-failures" />
+
+## Delivery states
+
+| State | Applies to | Application behavior |
+| --- | --- | --- |
+| `awaiting-source` | Transfers | Source funding has not been registered. |
+| `detected`, `bridging`, `settling` | Deposits | Funds are moving through delivery. Keep the deposit pending. |
+| `processing` | Transfers | Keep the payment pending. |
+| `completed` | Both | Reconcile the delivered amount and destination transaction references. |
+| `action-required` | Both | Inspect `statusReason` and the endpoint's instructions. |
+| `expired` | Transfers | Inspect source funding before starting a replacement. |
+| `refunding` | Both | Keep the refund pending. |
+| `refunded` | Both | Reconcile the refund amount and transaction references. |
+
+Use the full [transfer](/docs/api/routes/transfers) or [deposit](/docs/api/routes/deposit-addresses) reference for the lifecycle and response fields. Do not automatically send the payment again when it is pending or being refunded.
+
+## Track refunds
+
+Keep `refunding` separate from `refunded`. Reconcile the returned refund amount and transaction references before updating the customer's balance. A refund and a successful delivery are different outcomes for the original payment.
+
+<span id="retry-a-create-request-safely" />
+
+### Retry a create request
+
+Reuse the same `idempotency-key` for the same create request. Changing the input while keeping the key conflicts. If a response is lost, follow the endpoint's retry behavior before creating a replacement; a missing response does not prove that creation failed.
+
+## Use funds after delivery
+
+After the destination account receives stablecoins, it can [send a payment](/docs/guide/payments/send-a-payment), [deposit into Earn](/docs/earn/integrate), or [deposit into a Zone](/docs/zones/deposit). Each is a separate operation. Direct Routes transfers into a vault or Zone are not implemented; their endpoints return HTTP `501`.

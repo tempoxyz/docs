@@ -5,7 +5,7 @@ description: Monitor validator health with metrics, Grafana dashboards, and log 
 
 # Monitoring a validator
 
-This guide covers how to monitor your Tempo validator's health, diagnose issues, and manage logs.
+Monitor your Tempo validator's health, diagnose issues, and manage logs. These examples assume execution metrics are enabled with `--metrics 9000`. Consensus metrics listen on `127.0.0.1:8001` by default; use `--consensus.metrics-address` to change that address.
 
 ## Consensus states
 
@@ -26,7 +26,7 @@ To confirm your validator has started voting, check its outbound notarize and fi
 
 ```bash
 # Individual votes sent by your node
-curl -s localhost:8002/metrics \
+curl -s localhost:8001/metrics \
   | grep '^consensus_engine_epoch_manager_simplex_voter_outbound_messages_total{' \
   | grep -E 'message="(Notarize|Finalize)"'
 ```
@@ -43,7 +43,7 @@ Your node is syncing historical blocks.
 
 ```bash
 # Check sync stage
-curl -s localhost:6060/metrics | grep reth_sync_checkpoint
+curl -s localhost:9000/metrics | grep reth_sync_checkpoint
 ```
 
 If `reth_sync_checkpoint` shows stages other than `Finish`, you're still syncing.
@@ -54,7 +54,7 @@ Your node is fully synced and processing new blocks in real-time.
 
 ```bash
 # Processed height should match or be close to finalized height
-curl -s localhost:8002/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
+curl -s localhost:8001/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
 ```
 
 Both values should be nearly equal and increasing together.
@@ -102,7 +102,7 @@ The dashboard uses these template variables:
 | `loki_ds` | Loki datasource (for log-based panels) |
 | `network_name` | Filter by network/validator job name |
 
-Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8002/metrics`).
+Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8001/metrics`).
 
 ## Log management
 

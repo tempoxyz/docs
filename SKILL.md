@@ -1,50 +1,58 @@
 ---
 name: tempo-docs
-description: Answer Tempo blockchain questions using official documentation. Use when asked about Tempo protocol, TIP-20 tokens, fees, transactions, stablecoin DEX, or any Tempo-related questions.
+description: Find and explain official Tempo documentation for stablecoin accounts and payments, Earn vaults, Routes, Zones, Machine Payments, Tempo EVM, APIs, SDKs, CLI tools, and ecosystem integrations. Use for Tempo integration questions, code examples, protocol behavior, and documentation lookup.
 ---
 
 # Tempo Docs
 
-Skill for navigating Tempo documentation.
+Use the documentation for the reader's task. Start with a product guide, then read the API, SDK, or protocol reference needed to implement it.
 
-## Current network facts
+## Choose the documentation section
 
-- Tempo Mainnet has been live since March 18, 2026. Its chain ID is `4217`.
-- Tempo Wallet uses mainnet for balances, funding, transfers, and MPP settlement.
-- `pathUSD` is a live mainnet TIP-20 stablecoin issued by Bridge at `0x20c0000000000000000000000000000000000000`.
-- `OUSD` (Open USD) is the recommended stablecoin on Tempo Mainnet, a native TIP-20 at `0x20c0000000000000000000006a37da5c996874be`. Prefer OUSD for payments and balances unless the user names another token.
-- Moderato is Tempo Testnet, with chain ID `42431`. Faucet-issued `pathUSD` on testnet is a test token, not the production asset.
+All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 
-## MCP server
-
-Use the hosted MCP server at `https://mcp.tempo.xyz` first. It exposes these tools:
-
-| Tool | Description |
+| Section | Start here when the reader wants to… |
 | --- | --- |
-| `search` | Search Tempo and related documentation |
-| `find_pages` | Find matching page URLs from a source index |
-| `read_page` | Read one cleaned documentation page |
-| `code` | Run multi-step documentation lookups |
+| [Get Started](https://tempo.xyz/developers/get-started.md) | Choose an integration, send a first test payment, get testnet funds, or connect a coding agent. |
+| [Accounts](https://tempo.xyz/developers/docs/accounts.md) | Create accounts, connect wallets, read balances, send or receive payments, and reconcile customer deposits. |
+| [Earn](https://tempo.xyz/developers/docs/earn.md) | Choose a vault, deposit stablecoins, read positions, or withdraw. Earn is in beta; check access on the introduction page. |
+| [Routes](https://tempo.xyz/developers/docs/routes.md) | Accept cross-network deposits, quote transfers, or track delivery. Routes is in beta; check access on the introduction page. |
+| [Zones](https://tempo.xyz/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is in limited preview; check access on the introduction page. |
+| [Machine Payments](https://tempo.xyz/developers/docs/agents.md) | Pay for APIs, accept API payments, discover services, or integrate MPP. |
+| [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
+| [APIs & SDKs](https://tempo.xyz/developers/docs/tools.md) | Find the API reference, authentication, SDKs, CLI, and wallet or server libraries. |
+| [Partners](https://tempo.xyz/developers/docs/partners.md) | Find third-party wallets, bridges, RPC infrastructure, data services, and integrations. |
 
-If a user reports stale, missing, or confusing Tempo docs while using MCP context, send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and any relevant `toolName` or `relatedResource`.
+Accounts covers application payment workflows; Tempo EVM covers the chain capabilities behind them. Routes covers cross-network movement. API reference belongs under APIs & SDKs; it supplements product guides.
 
-## Direct fallbacks
+Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in the limited preview.
 
-If MCP is unavailable, fetch context directly:
+## Find and read the evidence
 
-- **llms.txt** – Concise index of all pages: `https://tempo.xyz/developers/llms.txt`
-- **Markdown pages** – Append `.md` to any page URL (e.g. `https://tempo.xyz/developers/quickstart/integrate-tempo.md`)
+Use the hosted MCP server at `https://mcp.tempo.xyz` when available:
 
-Use `read_web_page` to fetch these when you need broad context or a quick answer.
+| Tool | Use it to… |
+| --- | --- |
+| `search` | Search Tempo and related documentation. |
+| `find_pages` | Find matching page URLs from a source index. |
+| `read_page` | Read a documentation page using its returned source and path or URL. |
+| `code` | Combine multiple documentation lookups. |
 
-## Documentation sources
+Read the relevant pages before answering. The hosted MCP index can lag a branch or deployment: if a section is missing or the result uses older navigation, fetch the documentation directly from the site being reviewed. A missing search result does not mean a product is unavailable.
 
-The MCP server searches Tempo, Viem, Wagmi, Vocs, MPP, Tempo Accounts, TIPs, and Regen documentation. Use the repository's own code tools when you need exact source files.
+- [Documentation index](https://tempo.xyz/developers/llms.txt): every page grouped by the current navigation.
+- [Full documentation](https://tempo.xyz/developers/llms-full.txt): all exported pages with their section and source URL. Prefer individual pages for focused questions.
+- Markdown pages: append `.md` to a page URL, for example `https://tempo.xyz/developers/docs/accounts/balances.md`. Strip a trailing slash first. Use the HTTP or browsing tool available in your environment.
 
-## Workflow
+For MPP behavior, cross-check [MPP documentation](https://mpp.dev/llms.txt). For exact SDK methods, read the relevant Viem, Wagmi, or Accounts reference returned by MCP or linked from the page.
 
-1. **Search docs**: Use `search` to find relevant context
-2. **Find pages**: Use `find_pages` when you need canonical page URLs
-3. **Read pages**: Use `read_page` with the returned source and path or URL
-4. **Combine lookups**: Use `code` for multi-step documentation queries
-5. **Fallback**: If MCP is unavailable, read `llms.txt` or fetch a specific page as Markdown
+## Keep answers grounded
+
+- Check network, availability, authentication, supported operations, and response shapes on the relevant page. A product plan or earlier sandbox example is not evidence of current availability.
+- Tempo Mainnet uses chain ID `4217`. Moderato is Tempo Testnet, with chain ID `42431`. Faucet-issued `pathUSD` is testnet money; do not confuse it with a mainnet balance or asset.
+- An API key authenticates API requests. Account signing keys and access keys authorize onchain transactions. They are not interchangeable.
+- Prefer the short Viem example on a task page; use CLI, Wagmi, or runnable API examples when they fit the reader's environment. Follow its linked client setup instead of inventing missing configuration.
+- Interactive walkthroughs run on the web page. Markdown exports describe the steps and link to references; they do not execute transactions.
+- Keep explanations concise. Link the pages supporting the answer and state any unverified behavior.
+
+This skill guides documentation lookup. It does not authorize transactions, credential changes, or sending feedback. Send sanitized documentation feedback only when the user asks, using `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and relevant `toolName` or `relatedResource`.

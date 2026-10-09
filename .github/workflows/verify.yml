@@ -3,27 +3,67 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions: {}
+
+env:
+  NODE_USE_SYSTEM_CA: 1
 
 concurrency:
   group: verify-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  verify:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.target == 'e2e' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    container: ${{ matrix.container }}
+    # Vocs compiles five environments; the enforced Zyzz contract takes ~4–6
+    # minutes per environment on CI. Keep cheap checks on the existing budget.
+    timeout-minutes: ${{ matrix.target == 'check' && 15 || 35 }}
     permissions:
       contents: read
       id-token: write
+    # Report cheap failures early and cancel sibling builds/tests on failure.
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - target: check
+            name: Check
+            shard: 0
+            container: ''
+          - target: production
+            name: Sitemap
+            shard: 0
+            container: ''
+          - target: e2e
+            name: E2E Tests (1/3)
+            shard: 1
+            container:
+              image: mcr.microsoft.com/playwright:v1.61.1-noble
+              options: --user 1001
+          - target: e2e
+            name: E2E Tests (2/3)
+            shard: 2
+            container:
+              image: mcr.microsoft.com/playwright:v1.61.1-noble
+              options: --user 1001
+          - target: e2e
+            name: E2E Tests (3/3)
+            shard: 3
+            container:
+              image: mcr.microsoft.com/playwright:v1.61.1-noble
+              options: --user 1001
 
     steps:
       - name: Secure runner
         uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+        with:
+          # Container jobs cannot be hardened in-place and lack the GitHub CLI.
+          disable-enforcement: ${{ matrix.target == 'e2e' }}
 
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -36,87 +76,79 @@ jobs:
           run_install: false
           version: 10.28.1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      # pnpm installs the exact Node runtime pinned in devEngines and the lockfile.
+      # Reuse it instead of downloading a second copy through setup-node.
+      - name: Locate pnpm store
+        id: pnpm-store
+        run: |
+          echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+          echo "arch=$(node -p process.arch)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache dependencies and Node runtime
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
-          node-version: 24.12.0
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: node-cache-${{ runner.os }}-${{ steps.pnpm-store.outputs.arch }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Fetch OpenAPI specification
         run: |
-          node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
-          echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
+          pnpm install --frozen-lockfile
+          pnpm exec node --version
+          echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
 
+      # Fail cheap source checks before testing or building.
       - name: Check
+        if: matrix.target == 'check'
         run: pnpm run check
 
       - name: Check types
+        if: matrix.target == 'check'
         run: pnpm run check:types
 
       - name: Check internal anchors
+        if: matrix.target == 'check'
         run: pnpm run check:anchors
 
+      - name: Check OG image goldens
+        if: matrix.target == 'check'
+        run: pnpm og:goldens:check
+
+      - name: Upload OG image review gallery
+        if: ${{ !cancelled() && matrix.target == 'check' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: og-image-goldens
+          path: test-results/og-goldens/
+          if-no-files-found: error
+          retention-days: 15
+
       - name: Test
-        run: pnpm run test
-
-      - name: Build
-        run: pnpm run build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_OPTIONS: --max-old-space-size=4096
-          VERCEL: "1"
-          VERCEL_ENV: production
-
-      - name: Check generated public links
-        run: node scripts/check-generated-public-links.mjs
-
-      - name: Audit generated Markdown
-        run: pnpm run check:markdown
-
-  sitemap:
-    name: Sitemap
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-
-      - name: Clone repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-        with:
-          run_install: false
-          version: 10.28.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24.12.0
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        if: matrix.target == 'check'
+        run: pnpm run test --bail=1
 
       - name: Fetch OpenAPI specification
+        if: matrix.target == 'production'
         run: |
           node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
           echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
 
-      - name: Build Vercel output
-        run: pnpm run build
+      # Vocs keys snippets by content; also invalidate when their type environment changes.
+      # Graphite checks its own 24-hour TTL and route coverage before using cached links.
+      - name: Cache documentation build inputs
+        if: matrix.target != 'check'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            node_modules/.cache/vocs/twoslash
+            node_modules/.cache/graphite-related-docs.json
+          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.target }}-${{ matrix.shard }}
+          restore-keys: |
+            docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
+
+      # The Check sibling validates types once; builds preserve the normal site pipeline.
+      - name: Build
+        if: matrix.target == 'production'
+        run: node scripts/guard-vocs-config.mjs && pnpm run build:site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=4096
@@ -124,12 +156,47 @@ jobs:
           VERCEL_ENV: production
 
       - name: Check sitemap coverage
+        if: matrix.target == 'production'
         run: node --experimental-strip-types scripts/check-vercel-sitemap.ts
 
+      - name: Check generated public links
+        if: matrix.target == 'production'
+        run: node scripts/check-generated-public-links.mjs
+
+      - name: Audit generated Markdown
+        if: matrix.target == 'production'
+        run: pnpm run check:markdown
+
+      - name: Build app for E2E
+        if: matrix.target == 'e2e'
+        run: node scripts/guard-vocs-config.mjs && pnpm run build:site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=4096
+          VITE_E2E: "true"
+          VITE_USE_HTTP: "true"
+
+      - name: Run Playwright tests
+        if: matrix.target == 'e2e'
+        run: |
+          pnpm exec playwright test --list --reporter=./scripts/playwright-shard-reporter.ts > "$RUNNER_TEMP/e2e-tests.txt"
+          test -s "$RUNNER_TEMP/e2e-tests.txt"
+          pnpm run test:e2e --workers=4 --test-list "$RUNNER_TEMP/e2e-tests.txt"
+        env:
+          E2E_SHARD: ${{ matrix.shard }}
+          E2E_SHARDS: 3
+
+      - name: Upload test results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ !cancelled() && matrix.target == 'e2e' }}
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 15
   ci-gate:
     name: CI Gate
     if: always()
-    needs: [check, e2e, sitemap]
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -139,70 +206,7 @@ jobs:
 
       - name: Verify required jobs
         run: |
-          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
-            echo "One or more required jobs failed or were cancelled"
+          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" == "true" ]]; then
+            echo "One or more required jobs failed, were cancelled, or were skipped"
             exit 1
           fi
-
-  e2e:
-    name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})
-    runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --user 1001
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-        with:
-          # The Playwright container does not include the GitHub CLI required
-          # by the Aegis installer. Container jobs cannot be hardened in-place.
-          disable-enforcement: true
-
-      - name: Clone repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-        with:
-          run_install: false
-          version: 10.28.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24.12.0
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build app for E2E
-        run: pnpm run build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_OPTIONS: --max-old-space-size=4096
-          VITE_E2E: "true"
-          VITE_USE_HTTP: "true"
-
-      - name: Run Playwright tests
-        run: pnpm run test:e2e --shard=${{ matrix.shard }}/3
-
-      - name: Upload test results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report-${{ matrix.shard }}
-          path: playwright-report/
-          retention-days: 15

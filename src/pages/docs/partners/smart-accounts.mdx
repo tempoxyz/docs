@@ -1,0 +1,33 @@
+---
+title: "Smart accounts"
+seoTitle: "Smart Account Providers for Tempo | Tempo Docs"
+description: Build with account abstraction and programmable smart contract wallets on Tempo.
+---
+
+import { partnerLogo, partnerLogoPimlico, partnerLogoSafe, partnerLogoZerodev } from '../../../components/PartnerLogos.styles'
+
+<span id="smart-contract-libraries" />
+
+# Smart accounts
+
+Choose a provider for account abstraction or programmable smart wallets. Use these integrations when your application needs the provider's account model or existing wallet infrastructure.
+
+Review [Tempo Transactions](/docs/guide/tempo-transaction) for native batching, fee sponsorship, and access keys. The [wallet integration guide](/docs/quickstart/wallet-developers) explains Tempo-specific transaction and balance handling.
+
+## <span className={`partner-logo partner-logo--pimlico ${partnerLogo().className + ' ' + partnerLogoPimlico().className}`} aria-hidden="true" />Pimlico
+
+[Pimlico](https://www.pimlico.io) provides ERC-4337 bundlers and paymasters. Confirm Tempo network availability and the required EntryPoint and fee handling with Pimlico before integrating. Generic EVM paymaster examples do not establish compatibility with Tempo’s stablecoin fee model.
+
+Get started on the [Pimlico dashboard](https://dashboard.pimlico.io/) and explore the [Pimlico docs](https://docs.pimlico.io/).
+
+<span id="safe-coming-soon" />
+
+## <span className={`partner-logo partner-logo--safe ${partnerLogo().className + ' ' + partnerLogoSafe().className}`} aria-hidden="true" />Safe
+
+[Safe](https://safe.global) provides smart contract accounts with multiple owners and signature thresholds. Its transaction service documents support for [Tempo](https://docs.safe.global/core-api/transaction-service-reference/tempo) and [Moderato testnet](https://docs.safe.global/core-api/transaction-service-reference/tempo-moderato). Use Safe's documentation to check the contracts and modules required by your integration.
+
+## <span className={`partner-logo partner-logo--zerodev ${partnerLogo().className + ' ' + partnerLogoZerodev().className}`} aria-hidden="true" />ZeroDev
+
+[ZeroDev](https://zerodev.app) lists Tempo in its [supported chains](https://docs.zerodev.app/api-and-toolings/faqs/chains). Its smart account platform provides account creation, signing, and sponsorship tools. Confirm which account implementations, transaction formats, and sponsorship paths its Tempo integration supports before reusing an ERC-4337 or EIP-7702 example.
+
+Create a project in the [ZeroDev dashboard](https://dashboard.zerodev.app) and follow the [SDK quickstart](https://docs.zerodev.app/sdk/getting-started/quickstart) to integrate smart accounts into your Tempo application.

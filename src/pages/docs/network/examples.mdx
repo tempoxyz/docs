@@ -1,0 +1,128 @@
+---
+title: Network examples
+seoTitle: Network Example Setup | Tempo Docs
+description: Configure CLI, Viem, Wagmi, Python, and JSON-RPC examples for Tempo's main network guides.
+---
+
+# Network examples
+
+Set up the clients used in the Network guides. These examples use a funded test account on Moderato and AlphaUSD for transaction fees. Keep private keys on your server.
+
+For Viem and Python, set `TEMPO_PRIVATE_KEY` to the account's private key. Set `TEMPO_RECIPIENT` to another test address you control for the CLI and server examples. Use the [faucet](/docs/quickstart/faucet) to fund the sender. The examples use 1,000,000 base units for one AlphaUSD.
+
+<span id="typescript-setup" />
+
+## Viem setup
+
+Use an ESM project (`"type": "module"` in `package.json`). Install `viem` and a TypeScript runner with `pnpm add viem` and `pnpm add -D tsx`. Save this file as `network.config.ts` beside the example you run:
+
+```ts [network.config.ts]
+// [!include ~/snippets/network.config.ts:setup]
+```
+
+The complete transaction example below builds one call, fills transaction fields, signs, submits, and checks the receipt. Run it with `pnpm exec tsx transaction.ts`.
+
+```ts [transaction.ts]
+// [!include ~/snippets/network-transactions.ts]
+```
+
+For fee examples, import `formatUnits` from `viem`. For Exchange examples, import `Addresses` from `viem/tempo`. Import `client`, `alphaUsd`, `betaUsd`, and `recipient` from `./network.config` as needed.
+
+### Sponsored transactions
+
+Import `createClient`, `http`, and `withRelay` from `viem/tempo`, then configure a client that uses the public testnet sponsor:
+
+```ts
+// [!include ~/snippets/network-fees.ts:sponsor-config]
+```
+
+The [fee examples](/docs/network/fees#sponsor-fees) use this `sponsored` client. The sender still needs the tokens it transfers.
+
+## Wagmi setup
+
+Use Wagmi actions inside a browser application with a connected Tempo wallet. Install `wagmi`, `viem`, and `@tanstack/react-query`. Save the configuration below as `network.wagmi.config.ts`; it selects Moderato and requests testnet sponsorship when an action passes `feePayer: true`.
+
+```ts [network.wagmi.config.ts]
+// [!include ~/snippets/network.wagmi.config.ts:setup]
+```
+
+Follow [Connect a wallet](/docs/accounts/integrate) for the providers and connect button. Pass this `config` to your `WagmiProvider`. Get `accountAddress` from the connected wallet and `recipient` from your validated form. Run write actions in an event handler after the user reviews them.
+
+The main snippets use these imports as needed:
+
+```ts
+import { formatUnits } from 'viem'
+import { Actions as ViemActions, Addresses } from 'viem/tempo'
+import { estimateGas, getGasPrice } from 'wagmi/actions'
+import { waitForTransactionReceipt } from 'wagmi/actions'
+import { Actions } from 'wagmi/tempo'
+import { alphaUsd, betaUsd, config } from './network.wagmi.config'
+```
+
+`Actions` uses the connected signer; `ViemActions.token.transfer.call` only encodes the call. The [wallet payment demo](/docs/guide/payments/send-a-payment#send-payment-demo) shows React hooks for pending state and confirmation.
+
+### Machine payment clients
+
+Machine payments use `Mppx` and `tempo` from `mppx/client`; install `mppx` with `viem`. The Viem tab uses the payer `account` from the [MPP client guide](/docs/guide/machine-payments/client#define-the-mpp-payer-account). The Wagmi tab imports `getConnectorClient` from `wagmi/actions` and uses a connected wallet with this separate mainnet configuration:
+
+```ts
+// [!include ~/snippets/network-mpp.ts:wallet-config]
+```
+
+Use `mppConfig` for that app's `WagmiProvider` and connect flow. Mainnet service payments require mainnet funds. For a testnet service, select Moderato instead; keep the wallet and service on the same network. Pass the service's URL as `paidUrl` when calling the [machine payment example](/docs/agents#pay-for-an-api).
+
+## CLI setup
+
+Install the latest [Foundry](/docs/sdk/foundry#get-started-with-foundry) with Tempo support. The snippets use `cast` for contract calls and transactions; `--interactive` prompts for the test account's signing key. The Exchange quote command also uses `jq` to read the JSON result.
+
+Set the account and recipient addresses to test accounts you control, then configure the shared values:
+
+```bash
+export RPC_URL=https://rpc.moderato.tempo.xyz
+export SENDER="$TEMPO_SENDER_ADDRESS"
+export TOKEN=0x20c0000000000000000000000000000000000001
+export BETA_TOKEN=0x20c0000000000000000000000000000000000002
+export FACTORY=0x20fc000000000000000000000000000000000000
+export DEX=0xdec0000000000000000000000000000000000000
+```
+
+Fund `SENDER` with the [faucet](/docs/quickstart/faucet). `TOKEN` is AlphaUSD for these examples; token issuance saves its new address separately as `DEMO_TOKEN`. The [Foundry Tempo guide](https://www.getfoundry.sh/guides/tempo) documents current CLI options, including fee tokens and remote sponsorship.
+
+## Python setup
+
+Install `pytempo` with `pip install pytempo`. Save these blocks, in order, as `network_config.py` beside your script. The examples use pytempo 0.6.1 and web3.py 7.
+
+```python [network_config.py]
+// [!include ~/snippets/network_config.py:setup]
+```
+
+`make_transaction` fills the chain ID, nonce, fee token, and gas limit for a list of calls. It estimates the complete batch, adds a 20% gas buffer, and sets a maximum gas price at twice the current suggestion. Review those choices for your application. `submit` signs, broadcasts, and checks execution status.
+
+```python [network_config.py]
+// [!include ~/snippets/network_config.py:transaction]
+```
+
+For token creation and Exchange examples, add the contract bindings below. The factory ABI uses the six-argument [`createToken` overload](/docs/protocol/tip20/spec#tip20factory); Exchange uses the ABI supplied by pytempo.
+
+```python [network_config.py]
+// [!include ~/snippets/network_config.py:contracts]
+```
+
+Use the main guide's imports, or import the shared names you need from `network_config`. The [Python SDK](/docs/sdk/python) covers custom transactions, fee sponsorship, and access keys.
+
+## HTTP requests
+
+JSON-RPC reads use the same endpoint as SDKs. Set `RPC_URL=https://rpc.moderato.tempo.xyz`. Requests below do not use an API key.
+
+For gas estimation, set `TEMPO_SENDER_ADDRESS` to the funded account address, then set `SENDER` and `CALL_DATA` below. You can generate the calldata with [Cast](/docs/sdk/foundry):
+
+```bash
+export RPC_URL=https://rpc.moderato.tempo.xyz
+export SENDER="$TEMPO_SENDER_ADDRESS"
+export TOKEN=0x20c0000000000000000000000000000000000001
+export CALL_DATA=$(cast calldata 'transfer(address,uint256)' "$TEMPO_RECIPIENT" 1000000)
+```
+
+For transaction submission, set `SIGNED_TX` to the hex-encoded signed transaction from the TypeScript or Python signing step. For receipt lookup, set `TX_HASH` to the returned transaction hash. JSON-RPC broadcasts signed transactions; the signing key stays in your application or wallet.
+
+The [JSON-RPC reference](/docs/protocol/rpc) documents method behavior. The [hosted API](/docs/api) is a separate interface for indexed data and services.

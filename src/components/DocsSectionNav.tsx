@@ -1,183 +1,271 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useRouter } from 'waku'
+import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
+import BracesIcon from '~icons/lucide/braces'
+import ChevronDownIcon from '~icons/lucide/chevron-down'
+import CodeIcon from '~icons/lucide/code-xml'
+import CompassIcon from '~icons/lucide/compass'
+import ScanSearchIcon from '~icons/lucide/scan-search'
+import TerminalIcon from '~icons/lucide/terminal'
+import {
+  type DocsSection,
+  docsSections,
+  docsUtilitySections,
+  getActiveDocsSection,
+} from '../lib/docs-sections'
+import { docsSectionNav as sectionSurface } from '../styles/surfaces.styles'
+import { docsProductIcons } from './DocsHomeProductIcon'
+import {
+  docsApiMenuItem,
+  docsApiMenuMobile,
+  docsReferenceMenu,
+  docsReferencePanel,
+  docsReferenceTrigger,
+  docsResourceLinkLabel,
+  docsResourceLinks,
+  docsResourceLinkText,
+  docsResourceLogo,
+  docsSectionIcon,
+  docsSectionNav,
+  docsSectionNavScroll,
+  docsSectionUtilities,
+  docsSectionUtilityLink,
+} from './DocsNavigation.styles'
+import { MercatorLogo, MppLogo, TempoMark } from './ToolLogos'
 
-type SectionNavItem = {
-  id: 'overview' | 'build' | 'integrate' | 'protocol' | 'tools' | 'api' | 'node'
-  label: string
-  href: string
-  matches: string[]
+export { docsSections, docsUtilitySections, getActiveDocsSection }
+
+const sectionIcons: Partial<Record<DocsSection['id'], typeof CompassIcon>> = {
+  overview: CompassIcon,
+  accounts: docsProductIcons.accounts,
+  earn: docsProductIcons.earn,
+  routes: docsProductIcons.routes,
+  zones: docsProductIcons.zones,
+  'machine-payments': docsProductIcons.agents,
+  developers: docsProductIcons.network,
 }
 
-const sectionNavItems: SectionNavItem[] = [
-  {
-    id: 'overview',
-    label: 'Get Started',
-    href: '/docs',
-    matches: ['/docs', '/docs/guide/using-tempo-with-ai', '/docs/partners'],
-  },
-  {
-    id: 'build',
-    label: 'Build on Tempo',
-    href: '/docs/build',
-    matches: [
-      '/docs/build',
-      '/docs/guide/getting-funds',
-      '/docs/guide/payments',
-      '/docs/guide/issuance',
-      '/docs/guide/stablecoin-dex',
-      '/docs/guide/private-zones',
-      '/docs/guide/machine-payments',
-    ],
-  },
-  {
-    id: 'integrate',
-    label: 'Integrate Tempo',
-    href: '/docs/quickstart/integrate-tempo',
-    matches: [
-      '/docs/ecosystem',
-      '/docs/guide/bridge-bungee',
-      '/docs/guide/bridge-layerzero',
-      '/docs/guide/bridge-relay',
-      '/docs/guide/tempo-transaction',
-      '/docs/quickstart',
-    ],
-  },
-  {
-    id: 'tools',
-    label: 'Tools & SDKs',
-    href: '/docs/tools',
-    matches: [
-      '/docs/cli',
-      '/docs/developer-tools',
-      '/docs/protocol/rpc',
-      '/docs/sdk',
-      '/docs/server',
-      '/docs/tools',
-      '/docs/wallet',
-    ],
-  },
-  {
-    id: 'api',
-    label: 'Tempo API',
-    href: '/docs/api',
-    matches: ['/docs/api'],
-  },
-  {
-    id: 'protocol',
-    label: 'Tempo Protocol',
-    href: '/docs/protocol',
-    matches: ['/docs/protocol'],
-  },
-  {
-    id: 'node',
-    label: 'Run a Tempo Node',
-    href: '/docs/guide/node',
-    matches: ['/docs/changelog', '/docs/guide/node'],
-  },
+export const docsExternalTools = [
+  { label: 'MPP', href: 'https://mpp.dev/', logo: MppLogo },
+  { label: 'Mercator', href: 'https://mercator.sh/', logo: MercatorLogo },
+  { label: 'Tempo Console', href: 'https://console.tempo.xyz/', logo: TempoMark },
+  { label: 'Tempo Wallet', href: 'https://wallet.tempo.xyz/', logo: TempoMark },
 ]
 
-function pathMatches(pathname: string, prefix: string) {
-  return pathname === prefix || pathname.startsWith(`${prefix}/`)
+export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <nav
+      aria-label="External tools"
+      className={`docs-resource-links ${docsResourceLinks().className}`}
+    >
+      {docsExternalTools.map((tool) => (
+        <a
+          key={tool.href}
+          href={tool.href}
+          aria-label={tool.label}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onNavigate}
+        >
+          <span className={`docs-resource-link-label ${docsResourceLinkLabel().className}`}>
+            <tool.logo
+              className={`docs-resource-logo ${docsResourceLogo().className}`}
+              aria-hidden="true"
+              focusable="false"
+            />
+            <span className={`docs-resource-link-text ${docsResourceLinkText().className}`}>
+              {tool.label}
+            </span>
+            <ArrowUpRightIcon aria-hidden="true" width="14" height="14" />
+          </span>
+        </a>
+      ))}
+    </nav>
+  )
 }
 
-function isActive(pathname: string, item: SectionNavItem) {
-  if (item.id === 'overview') return item.matches.includes(pathname)
-  if (item.id === 'tools' && pathMatches(pathname, '/docs/protocol/rpc')) return true
-  if (item.id === 'protocol' && pathMatches(pathname, '/docs/protocol/rpc')) return false
-  return item.matches.some((prefix) => pathMatches(pathname, prefix))
+export function DocsApiDropdown({
+  active,
+  mobile = false,
+  onNavigate,
+}: {
+  active: boolean
+  mobile?: boolean
+  onNavigate?: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const panelId = useId()
+  const { path } = useRouter()
+
+  useEffect(() => {
+    setOpen(false)
+  }, [path])
+  useEffect(() => {
+    if (!open) return
+    const dismiss = (event: PointerEvent) => {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', dismiss)
+    return () => document.removeEventListener('pointerdown', dismiss)
+  }, [open])
+
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: This groups a navigation disclosure, not form controls.
+    <div
+      ref={ref}
+      role="group"
+      className={
+        mobile
+          ? `docs-reference-menu docs-api-menu-mobile ${docsReferenceMenu().className} ${docsApiMenuMobile().className}`
+          : `docs-reference-menu ${docsReferenceMenu().className}`
+      }
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && open) {
+          event.preventDefault()
+          event.stopPropagation()
+          setOpen(false)
+          buttonRef.current?.focus()
+        }
+      }}
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        className={`docs-reference-trigger ${docsReferenceTrigger().className}`}
+        aria-expanded={open}
+        aria-controls={panelId}
+        aria-current={active ? 'page' : undefined}
+        onClick={() => setOpen(!open)}
+      >
+        APIs & SDKs <ChevronDownIcon aria-hidden="true" width="14" height="14" />
+      </button>
+      <nav
+        id={panelId}
+        aria-label="APIs & SDKs"
+        hidden={!open}
+        className={`docs-reference-panel docs-resource-links ${docsReferencePanel().className} ${docsResourceLinks().className}`}
+      >
+        {[
+          { label: 'Overview', href: '/docs/tools', icon: CompassIcon },
+          { label: 'API reference', href: '/docs/api', icon: BracesIcon },
+          { label: 'SDKs', href: '/docs/tools#sdks', icon: CodeIcon },
+          { label: 'CLI', href: '/docs/cli', icon: TerminalIcon },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            to={item.href}
+            onClick={() => {
+              setOpen(false)
+              onNavigate?.()
+            }}
+          >
+            <span className={`docs-api-menu-item ${docsApiMenuItem().className}`}>
+              <item.icon aria-hidden="true" width="18" height="18" />
+              {item.label}
+            </span>
+          </Link>
+        ))}
+        <a
+          href="https://explore.tempo.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => {
+            setOpen(false)
+            onNavigate?.()
+          }}
+        >
+          <span className={`docs-api-menu-item ${docsApiMenuItem().className}`}>
+            <ScanSearchIcon aria-hidden="true" width="18" height="18" />
+            Explorer
+            <ArrowUpRightIcon aria-hidden="true" width="14" height="14" />
+          </span>
+        </a>
+      </nav>
+    </div>
+  )
 }
 
 export default function DocsSectionNav() {
   const { path } = useRouter()
-  const pathname = path ?? '/'
   const navRef = useRef<HTMLElement | null>(null)
   const activeLinkRef = useRef<HTMLAnchorElement | null>(null)
-  const activeLabel = sectionNavItems.find((item) => isActive(pathname, item))?.label ?? null
+  const activeSection = getActiveDocsSection(path ?? '/')
+  const activeLabel = activeSection?.label ?? null
 
   useEffect(() => {
-    if (!activeLabel) return
+    if (!activeLabel || !docsSections.some((section) => section.id === activeSection?.id)) return
     const nav = navRef.current
     const activeLink = activeLinkRef.current
     if (!nav || !activeLink) return
-
     const centeredLeft = activeLink.offsetLeft - nav.clientWidth / 2 + activeLink.offsetWidth / 2
     nav.scrollTo({ left: Math.max(0, centeredLeft), behavior: 'instant' })
-  }, [activeLabel])
+  }, [activeLabel, activeSection?.id])
 
   return (
-    <>
-      <style>{`
-        @media (width >= 1024px) {
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) {
-            display: grid !important;
-            grid-template-columns: minmax(0, 1fr) minmax(300px, 460px) minmax(0, 1fr) !important;
-            align-items: center !important;
-            gap: 12px !important;
-            padding-inline: 20px !important;
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > ul {
-            display: none !important;
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > a[aria-label='Tempo home'] {
-            min-width: 0;
-          }
-
-          body:has(.docs-section-nav) nav:has(> a[aria-label='Tempo home']) > div {
-            grid-column: 3;
-            justify-self: end;
-            gap: 20px !important;
-          }
-
-        }
-
-        @media (width >= 1080px) {
-          .docs-section-nav {
-            right: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) !important;
-            left: max(0px, calc((100% - var(--tempo-docs-shell-width)) * 0.5)) !important;
-          }
-
-          [data-layout][data-v-sidebar] > [data-v-gutter-left] {
-            padding-top: var(--vocs-spacing-topNav) !important;
-          }
-        }
-      `}</style>
-      <div className="docs-section-nav border-line border-x border-b bg-surface-shell">
-        <nav
-          ref={navRef}
-          aria-label="Documentation sections"
-          className="flex h-[var(--tempo-docs-section-nav-height)] items-stretch overflow-x-auto px-4 [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden"
-        >
-          <ul className="flex min-w-max items-stretch gap-8">
-            {sectionNavItems.map((item) => {
-              const active = isActive(pathname, item)
-              return (
-                <li key={item.id}>
-                  <Link
-                    ref={(element) => {
-                      if (active) activeLinkRef.current = element
-                    }}
-                    to={item.href}
-                    unstable_prefetchOnEnter
-                    unstable_prefetchOnView
-                    aria-current={active ? 'page' : undefined}
-                    className={`flex h-full items-center border-b-2 pt-0.5 font-normal font-sans text-[14px] tracking-[0] transition-colors ${
-                      active
-                        ? 'border-foreground text-foreground'
-                        : 'border-transparent text-foreground/50 hover:text-foreground'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
+    <div
+      className={`docs-section-nav  ${docsSectionNav().className} ${sectionSurface().className}`}
+    >
+      <nav
+        ref={navRef}
+        aria-label="Documentation sections"
+        className={`docs-section-nav-scroll ${docsSectionNavScroll().className}`}
+      >
+        <ul>
+          {docsSections.map((item) => {
+            const Icon = sectionIcons[item.id]
+            return (
+              <li key={item.id}>
+                <Link
+                  ref={(element) => {
+                    if (activeSection?.id === item.id) activeLinkRef.current = element
+                  }}
+                  to={item.href}
+                  unstable_prefetchOnEnter
+                  unstable_prefetchOnView
+                  aria-current={activeSection?.id === item.id ? 'page' : undefined}
+                >
+                  {Icon && (
+                    <Icon
+                      className={`docs-section-icon ${docsSectionIcon().className}`}
+                      aria-hidden="true"
+                      focusable="false"
+                      width="16"
+                      height="16"
+                      strokeWidth="1.75"
+                    />
+                  )}
+                  {item.label}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+      <div className={`docs-section-utilities ${docsSectionUtilities().className}`}>
+        {docsUtilitySections.map((section) =>
+          section.id === 'tools' ? (
+            <DocsApiDropdown key={section.id} active={activeSection?.id === section.id} />
+          ) : (
+            <Link
+              key={section.id}
+              to={section.href}
+              className={`docs-section-utility-link ${docsSectionUtilityLink().className}`}
+              aria-current={activeSection?.id === section.id ? 'page' : undefined}
+              unstable_prefetchOnEnter
+              unstable_prefetchOnView
+            >
+              {section.label}
+            </Link>
+          ),
+        )}
       </div>
-    </>
+    </div>
   )
 }

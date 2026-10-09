@@ -1,59 +1,98 @@
 ---
-title: "How to connect to the Tempo network"
-seoTitle: "Connect to Tempo via Browser Wallet | Docs"
-description: Connect to live Tempo Mainnet or the separate Moderato testnet using browser wallets, CLI tools, or direct RPC endpoints.
+title: Network details
+seoTitle: Tempo Network Details | Tempo Docs
+description: Connect to Tempo mainnet or Moderato testnet with RPC endpoints, chain IDs, explorers, and browser wallets.
 mipd: true
 interactive: true
 ---
 
-import * as Demo from '../../../components/guides/Demo.tsx'
 import { ConnectWallet } from '../../../components/ConnectWallet.tsx'
 
-# How to connect to the Tempo network
+<span id="how-to-connect-to-the-tempo-network" />
 
-You can connect with Tempo like you would with any other EVM chain.
+# Network details
 
-Tempo Mainnet has been live since March 18, 2026. Use mainnet, chain ID `4217`, for Tempo Wallet, production assets such as OUSD and pathUSD, and live payment flows. Moderato, chain ID `42431`, is the separate public testnet for development.
+Use Tempo Mainnet for production and Moderato testnet for development. Both support EVM tools and SDKs; each has its own RPC endpoint, chain ID, assets, and transaction history.
 
-## Connect using a Browser Wallet
+<span id="direct-connection-details" />
 
-Click on your browser wallet below to automatically connect it to the Tempo network.
+## Mainnet
+
+| Property | Value |
+| --- | --- |
+| Network | Tempo Mainnet |
+| Chain ID | `4217` |
+| Currency symbol | `USD` |
+| HTTP RPC | `https://rpc.tempo.xyz` |
+| WebSocket RPC | `wss://rpc.tempo.xyz` |
+| Explorer | [Tempo Explorer](https://explore.tempo.xyz) |
+
+Use [Fund an account](/docs/guide/getting-funds) for supported funding paths.
+
+<span id="tempo-testnet" />
+
+## Testnet
+
+| Property | Value |
+| --- | --- |
+| Network | Tempo Testnet (Moderato) |
+| Chain ID | `42431` |
+| Currency symbol | `USD` |
+| HTTP RPC | `https://rpc.moderato.tempo.xyz` |
+| WebSocket RPC | `wss://rpc.moderato.tempo.xyz` |
+| Explorer | [Testnet Explorer](https://explore.testnet.tempo.xyz) |
+
+Use the [faucet](/docs/quickstart/faucet) to get test stablecoins. Testnet funds are separate from mainnet funds.
+
+<span id="connect-via-cli" />
+
+## RPC endpoints and explorers
+
+Read the current block number to check the connection. These examples use Moderato; use `https://rpc.tempo.xyz` (or omit `testnet: true` in Viem) for mainnet. Use the [Network example setup](/docs/network/examples) for the SDK dependencies and Wagmi `config`.
+
+::::code-group
+
+```ts [Viem]
+import { createClient } from 'viem/tempo'
+
+const client = createClient({ testnet: true })
+console.log(await client.getBlockNumber())
+```
+
+```bash [CLI]
+cast block-number --rpc-url https://rpc.moderato.tempo.xyz
+```
+
+```ts [Wagmi]
+import { getBlockNumber } from 'wagmi/actions'
+
+console.log(await getBlockNumber(config))
+```
+
+```python [Python]
+from web3 import Web3
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+print(w3.eth.block_number)
+```
+
+```bash [API (RPC)]
+curl https://rpc.moderato.tempo.xyz -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}'
+```
+
+::::
+
+Use the matching explorer to inspect transactions. For application integration, choose an [SDK](/docs/sdk) or read the [JSON-RPC reference](/docs/protocol/rpc). Use the [Tempo API](/docs/api) for indexed data and hosted services.
+
+<span id="connect-using-a-browser-wallet" />
+
+## Connect a browser wallet
+
+Select your browser wallet to connect it to mainnet.
 
 <ConnectWallet network="mainnet" />
 
-:::warning
-Note that on some wallets, you might see an unusually high "balance". This is because, historically, blockchain wallets have always assumed that a blockchain has a "native gas token". On Tempo, there is no native gas token, and so the value shown is a placeholder. See [EVM Differences](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) for more information on this quirk.
+:::info[Native balances]
+Tempo has no native gas token. A wallet may display a placeholder native balance. Read [TIP-20 balances](/docs/accounts/balances) for account funds and review [native-balance handling](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) when integrating a wallet.
 :::
-
-## Connect via CLI
-
-To connect via CLI, we recommend using [`cast`](https://getfoundry.sh/cast/overview/), which is a command-line tool for interacting with Ethereum networks. To install cast, you can read more in the [Foundry SDK docs](/docs/sdk/foundry#get-started-with-foundry).
-
-```bash /dev/null/monitor.sh#L1-11
-# Check block height (should be steadily increasing)
-cast block-number --rpc-url https://rpc.tempo.xyz
-```
-
-## Direct Connection Details
-
-### Mainnet
-
-| **Property** | **Value** |
-|-------------------|-------|
-| **Network Name** | Tempo Mainnet |
-| **Currency** | `USD` |
-| **Chain ID** | `4217` |
-| **HTTP URL** | `https://rpc.tempo.xyz` |
-| **WebSocket URL** | `wss://rpc.tempo.xyz` |
-| **Block Explorer** | [`https://explore.tempo.xyz`](https://explore.tempo.xyz) |
-
-### Tempo Testnet
-
-| **Property** | **Value** |
-|-------------------|-------|
-| **Network Name** | Tempo Testnet (Moderato) |
-| **Currency** | `USD` |
-| **Chain ID** | `42431` |
-| **HTTP URL** | `https://rpc.moderato.tempo.xyz` |
-| **WebSocket URL** | `wss://rpc.moderato.tempo.xyz` |
-| **Block Explorer** | [`https://explore.testnet.tempo.xyz`](https://explore.testnet.tempo.xyz) |

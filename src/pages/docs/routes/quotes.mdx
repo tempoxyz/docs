@@ -1,0 +1,51 @@
+---
+title: "Quotes and fees"
+seoTitle: "Quotes and fees | Tempo Docs"
+description: "Read source and destination amounts, quote expiry, and fees before authorizing a Routes transfer."
+---
+
+import { OpenApi, Tab, Tabs } from 'vocs'
+
+# Quotes and fees
+
+Quote the exact payment before requesting a signature or showing deposit instructions. The supported route directory identifies possible paths; the quote gives terms for the selected amount and recipient.
+
+## Get a quote
+
+Choose a flow, click **Try**, and enter the source asset, destination asset, amount, and recipient where required. Use an API key with access to Routes. Review the returned amounts before creating the transfer or deposit address.
+
+<Tabs>
+  <Tab title="Transfer">
+    <OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
+  </Tab>
+  <Tab title="Deposit address">
+    <OpenApi.Playground operationId="quoteRoutesDepositAddress" anchors={false} />
+  </Tab>
+</Tabs>
+
+## Choose which amount to fix
+
+For a transfer, choose which side determines the quote:
+
+| Your application specifies | Amount mode | `amount` uses |
+| --- | --- | --- |
+| How much to send | `exactSource` | Source token base units |
+| How much the recipient should receive | `exactDestination` | Destination token base units |
+
+Review the returned amounts and minimum destination amount before continuing.
+
+For a deposit address, quote the source chain, source token, destination token, and amount. Check the [endpoint reference](/docs/api/routes/deposit-addresses) for the supported parameters.
+
+## Show the payment terms
+
+Present the source asset and amount, destination asset and amount, minimum destination amount where returned, and fees. Keep the network visible for both assets; a token symbol alone does not identify the route.
+
+`destinationAmount` includes route deductions. The `fees` array lists separately charged fees, so an empty array does not establish a fee-free route.
+
+A quote does not create or reserve a transfer. Review the terms returned when you create the transfer as well, before asking the source account's signer to sign its action.
+
+## Refresh expired quotes
+
+For transfers, read `quote.expiresAt`. If the quote expires before submission, obtain fresh terms rather than signing an expired action. Show changed terms to the user before continuing.
+
+Continue with [Make a transfer](/docs/routes/transfers) or [Accept deposits](/docs/routes/deposits).

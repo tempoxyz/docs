@@ -1,9 +1,9 @@
 'use client'
 import { Hooks } from 'wagmi/tempo'
-import { cx } from '../../../../../cva.config'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import type { DemoStepProps } from '../types'
+import * as ui from './CreateOrLoadToken.recipes'
 import { CreateToken } from './CreateToken'
 
 export function CreateOrLoadToken(props: DemoStepProps) {
@@ -38,15 +38,11 @@ export function CreateOrLoadToken(props: DemoStepProps) {
       title={`Using token ${metadata.name}`}
     >
       {tokenReceipt && (
-        <div className="ml-6 flex flex-col gap-3 py-4">
-          <div
-            className={cx(
-              'flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug -tracking-[2%]',
-            )}
-          >
+        <div {...ui.createOrLoadTokenLayout()}>
+          <div {...ui.createOrLoadTokenLayout2()}>
             <div>
               Token{' '}
-              <span className="font-medium text-primary">
+              <span {...ui.createOrLoadTokenText()}>
                 {' '}
                 {metadata.name} ({metadata.symbol}){' '}
               </span>{' '}

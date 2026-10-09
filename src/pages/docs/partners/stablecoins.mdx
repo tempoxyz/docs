@@ -1,0 +1,74 @@
+---
+title: "Stablecoins"
+seoTitle: "Stablecoins and Issuers on Tempo | Tempo Docs"
+description: Find stablecoin assets and issuers on Tempo, then connect token metadata, funding, and payments to your application.
+---
+
+import { partnerLogo, partnerLogoOpenUsdOusd, partnerLogoAllunity } from '../../../components/PartnerLogos.styles'
+
+import { Cards, Card } from 'vocs'
+
+# Stablecoins
+
+Choose a stablecoin for the currencies and payment flows your application supports. Start with OUSD for USD balances and payments, or choose an asset that matches your funding source and settlement currency. For tokenized Treasuries and other yield-bearing assets, see [RWAs](/docs/partners/rwas).
+
+## <span className={`partner-logo partner-logo--open-usd-ousd ${partnerLogo().className + ' ' + partnerLogoOpenUsdOusd().className}`} aria-hidden="true" />Open USD (OUSD)
+
+[Open Standard](https://joinopenstandard.com) operates OUSD, a USD stablecoin issued natively on Tempo. OUSD is the recommended stablecoin for holding balances, accepting payments, and settlement on Tempo.
+
+Use the [OUSD integration guide](/docs/guide/ousd) for its contract address, token properties, and funding paths.
+
+## <span className={`partner-logo partner-logo--allunity ${partnerLogo().className + ' ' + partnerLogoAllunity().className}`} aria-hidden="true" />AllUnity
+
+[AllUnity](https://allunity.com) issues stablecoins including EURAU, SEKAU, and CHFAU on Tempo. Follow the issuer's integration requirements for access to its assets and services.
+
+| Asset | Currency |
+| --- | --- |
+| EURAU | Euro |
+| SEKAU | Swedish krona |
+| CHFAU | Swiss franc |
+
+Visit [AllUnity](https://allunity.com) for issuer information and integration requirements.
+
+## Bridged stablecoins
+
+| Asset | Funding path |
+| --- | --- |
+| USDC.e | Bridge USDC through Stargate. USDC.e is the bridged representation on Tempo, distinct from native USDC. |
+| EURC.e | Bridge EURC through Stargate. |
+| USDT0 | Use the token's LayerZero OFT integration. |
+
+Follow [Bridge with LayerZero](/docs/guide/bridge-layerzero) for supported contracts and transfer examples. For other routes, see [bridge providers](/docs/partners/bridges).
+
+## pathUSD
+
+pathUSD is the root quote token for Tempo's [stablecoin exchange](/docs/guide/stablecoin-dex) and the protocol's fallback fee token. It remains supported alongside OUSD. See [how OUSD, pathUSD, and USDC.e fit together](/docs/guide/ousd#how-ousd-pathusd-and-usdce-fit-together) when choosing the asset your application holds and settles in.
+
+## Browse mainnet assets
+
+Find contract addresses and token metadata in the [Tempo mainnet token registry](https://tokenlist.tempo.xyz/list/4217). The registry also includes other assets; a listing does not mean an asset can pay transaction fees.
+
+Identify an asset by its network and contract address, rather than its symbol alone. Use the [token list API](/docs/quickstart/tokenlist) for addresses, decimals, and icons in your application.
+
+## Develop on testnet
+
+Use [Moderato testnet](/docs/quickstart/connection-details) and the [faucet](/docs/quickstart/faucet) for test payments. Load testnet metadata separately with the token list API's testnet chain ID, `42431`; mainnet uses `4217`. Testnet tokens are separate from mainnet assets.
+
+## Integrate a stablecoin
+
+<Cards>
+  <Card
+    title="Token metadata"
+    description="Use the Tempo token list to populate asset selectors and identify token contracts."
+    to="/docs/quickstart/tokenlist"
+    icon="lucide:list"
+  />
+  <Card
+    title="Fund an account"
+    description="Choose a funding path for balances and payments on Tempo."
+    to="/docs/guide/getting-funds"
+    icon="lucide:arrow-down-to-line"
+  />
+</Cards>
+
+For providers that help you issue a stablecoin or connect fiat funding and payouts, see [Payments & ramps](/docs/partners/payments-and-ramps).

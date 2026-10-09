@@ -1,0 +1,127 @@
+---
+title: "Access keys"
+seoTitle: "Authorize and Revoke Tempo Access Keys | Tempo Docs"
+description: Delegate account signing with an expiry, per-token spending limits, and allowed calls, then inspect or revoke the access key.
+---
+
+# Access keys
+
+Give a backend service, customer session, or agent permission to sign transactions from an existing account. Set an expiry, token budget, and allowed calls for the task it performs.
+
+The access key acts on the same account and balances. It is a transaction signer, separate from the API credentials your application uses to call the Tempo API.
+
+## Choose the authority to delegate
+
+Use a limited access key for payment tasks. It can have an expiry, per-token spending limits, and allowed calls, but cannot manage keys. See [Keys and permissions](/docs/accounts/keys#delegate-only-the-authority-a-task-needs) for the authority model, or [Manage admin keys](/docs/accounts/admin-keys) to delegate key management.
+
+## Authorize a limited key
+
+This example uses a funded secp256k1 root account on Moderato testnet. It authorizes a P-256 key for one hour, permits transfers of test AlphaUSD to one recipient, and sets a total budget of 10 AlphaUSD.
+
+Install Viem with `pnpm add viem`. Set `TEMPO_ROOT_PRIVATE_KEY` in your local environment to the funded test account's key and `TEMPO_RECIPIENT` to your test recipient. Run the code in a server or local script.
+
+:::::steps
+
+### Connect the account's root signer
+
+```ts [access-keys.ts]
+import { getAddress, parseUnits } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { Account, createClient, P256 } from 'viem/tempo'
+
+const privateKey = process.env.TEMPO_ROOT_PRIVATE_KEY
+if (!privateKey || !/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
+  throw new Error('Set TEMPO_ROOT_PRIVATE_KEY to a test account private key')
+}
+const recipientAddress = process.env.TEMPO_RECIPIENT
+if (!recipientAddress) throw new Error('Set TEMPO_RECIPIENT')
+
+const root = Account.fromSecp256k1(privateKey as `0x${string}`)
+const recipient = getAddress(recipientAddress)
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const client = createClient({
+  account: root,
+  chain: tempoModerato,
+  feeToken: alphaUsd,
+})
+```
+
+The root account pays for the authorization transaction. Use the [faucet](/docs/quickstart/faucet) if it needs test funds.
+
+### Authorize the key's budget and calls
+
+Append this to the same file:
+
+```ts [access-keys.ts]
+const accessKey = Account.fromP256(P256.randomPrivateKey(), {
+  access: root,
+})
+
+const authorization = await client.accessKey.authorizeSync({
+  accessKey,
+  expiry: Math.floor(Date.now() / 1000) + 3600,
+  limits: [{ token: alphaUsd, limit: parseUnits('10', 6), period: 0 }],
+  scopes: [{
+    address: alphaUsd,
+    selector: 'transfer(address,uint256)',
+    recipients: [recipient],
+  }],
+})
+
+console.log(authorization.receipt.transactionHash)
+```
+
+`authorizeSync` waits for the authorization receipt. After it succeeds, the key can sign the allowed transactions for `root.address`. The `access: root` option binds the signer to that account; authorization onchain grants it permission.
+
+To use the key after a restart, retain it in secure storage. Generate a distinct key for each application or device.
+
+### Read the remaining permission
+
+```ts [access-keys.ts]
+const metadata = await client.accessKey.getMetadata({ accessKey })
+const budget = await client.accessKey.getRemainingLimit({
+  accessKey,
+  token: alphaUsd,
+})
+
+console.log({
+  expiry: metadata.expiry,
+  revoked: metadata.isRevoked,
+  remaining: budget.remaining,
+})
+```
+
+The remaining amount is in the token's base units. A recurring limit also returns `periodEnd`; this example uses `period: 0`, so its budget does not renew.
+
+### Revoke access when the task ends
+
+```ts [access-keys.ts]
+await client.accessKey.revokeSync({ accessKey })
+
+const revoked = await client.accessKey.getMetadata({ accessKey })
+console.log(revoked.isRevoked) // true
+```
+
+Revocation must be signed by the root or an active admin key. A revoked key cannot be authorized again for the same account. Create a new key for a new grant.
+
+:::::
+
+## Set limits that match the task
+
+Use all three controls together:
+
+- **Expiry:** an absolute Unix timestamp in seconds. A recurring budget does not extend the key's expiry.
+- **Token budget:** `period: 0` is a one-time allowance. A positive `period` sets the renewal interval in seconds.
+- **Call scopes:** limit the target contracts, function selectors, and recipients the key may use.
+
+Spending limits cover direct TIP-20 `transfer`, `transferWithMemo`, and `approve` calls. `transferFrom` and token movements initiated by another contract fall outside these checks, so pair budgets with call scopes.
+
+Access-key-signed transactions cannot contain a top-level contract-creation call. A call to a factory can create contracts internally when the key's call scopes permit that factory call.
+
+The example permits `transfer(address,uint256)`. Add a scope for each additional function your integration needs.
+
+## Change an existing budget
+
+The root or an active admin key can call `client.accessKey.updateLimit` with `accessKey`, `token`, and `limit`. Wait for its transaction receipt before showing the new budget as active. Updating a limit sets both its maximum and remaining amount to the new limit; it preserves the configured period and current period end.
+
+For scope changes and exact enforcement rules, see the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain).

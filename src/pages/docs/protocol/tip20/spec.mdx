@@ -3,6 +3,14 @@ title: TIP-20 Tokens Specification
 description: Technical specification for TIP-20 tokens, the optimized token standard extending ERC-20 with memos and policy integration.
 ---
 
+import { docsSpecificationMeta } from '../../../../styles/surfaces.styles'
+
+import { Badge } from '../../../../components/Badge'
+
+<div className={`docs-specification-meta ${docsSpecificationMeta().className}`}>
+  <a href="/docs/protocol"><Badge>Specification</Badge></a>
+</div>
+
 # TIP-20 Tokens Specification
 
 ## Abstract
@@ -222,6 +230,8 @@ interface ITIP20 {
     /// @param role The role whose admin is being changed
     /// @param adminRole The new admin role
     function setRoleAdmin(bytes32 role, bytes32 adminRole) external;
+    function hasRole(address account, bytes32 role) external view returns (bool);
+    function getRoleAdmin(bytes32 role) external view returns (bytes32);
     
     // =========================================================================
     //                     EIP-2612 Permit
@@ -253,29 +263,6 @@ interface ITIP20 {
     /// @notice Returns the EIP-712 domain separator for this token
     /// @return The domain separator hash (computed dynamically using block.chainid)
     function DOMAIN_SEPARATOR() external view returns (bytes32);
-
-    // =========================================================================
-    //                            System Functions
-    // =========================================================================
-    
-    /// @notice System-level transfer function (restricted to precompiles)
-    /// @param from The sender address
-    /// @param to The recipient address
-    /// @param amount The amount to transfer
-    /// @return True if successful
-    function systemTransferFrom(address from, address to, uint256 amount) external returns (bool);
-    
-    /// @notice Pre-transaction fee transfer (restricted to precompiles)
-    /// @param from The account to charge fees from
-    /// @param amount The fee amount
-    function transferFeePreTx(address from, uint256 amount) external;
-    
-    /// @notice Post-transaction fee handling (restricted to precompiles)
-    /// @param to The account to refund
-    /// @param refund The refund amount
-    /// @param actualUsed The actual fee used
-    function transferFeePostTx(address to, uint256 refund, uint256 actualUsed) external;
-
 
     // =========================================================================
     //                                Events
@@ -443,13 +430,9 @@ When interacting with precompiles, **always use the provided ABI** rather than r
 Memo functions `transferWithMemo`, `transferFromWithMemo`, `mintWithMemo`, and `burnWithMemo` behave like their ERC-20 equivalents but additionally emit memo data in dedicated events. The memo is always a fixed 32-byte field. Callers should pack shorter strings or identifiers directly into this field, and use hashes or external references when the underlying payload exceeds 32 bytes.
 
 ## TIP-403 Transfer Policies
-All operations that move tokens: `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, `burn`, `mintWithMemo`, and `burnWithMemo` — enforce the token’s configured TIP-403 transfer policy.
+Transfers and memo transfers require the source to pass `isAuthorizedSender` and the resolved destination to pass `isAuthorizedRecipient`. Minting checks `isAuthorizedMintRecipient` for the resolved destination, in addition to issuer-role, pause, and supply-cap checks. A failed policy check reverts with `PolicyForbids`.
 
-Internally, this is implemented via a `transferAuthorized` modifier that:
-- Calls `TIP403_REGISTRY.isAuthorized(transferPolicyId, from)` for the sender.
-- Calls `TIP403_REGISTRY.isAuthorized(transferPolicyId, to)` for the recipient.
-
-Both checks must return `true`, otherwise the call reverts with `PolicyForbids`.
+`burn` and `burnWithMemo` burn the issuer's own balance without a TIP-403 policy check. `burnBlocked` requires the source to fail the sender-policy check. T12 adds privileged `burnAt`, which ignores transfer-policy authorization but retains its role, pause, balance, and protected-address checks; see [T12](/docs/protocol/upgrades/t12).
 
 ## Invalid Recipient Protection
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
@@ -499,7 +482,7 @@ Roles are assigned and managed through `grantRole`, `revokeRole`, `renounceRole`
 
 
 ## System Functions
-System level functions `systemTransferFrom`, `transferFeePreTx`, and `transferFeePostTx` are only callable by other Tempo protocol precompiles. These entrypoints power transaction fee collection, refunds, and internal accounting within the Fee AMM and Stablecoin DEX. They must not be callable by general contracts or users.
+`system_transfer_from`, `transfer_fee_pre_tx`, and `transfer_fee_post_tx` are internal implementation hooks used by protocol execution and approved precompiles. They are not functions in the TIP-20 public ABI. They support fee collection, refunds, and token movement for the Fee AMM and Stablecoin DEX.
 
 `transferFeePreTx` respects the token's pause state and will revert if the token is paused. However, `transferFeePostTx` is intentionally allowed to execute even when the token is paused. This ensures that a transaction which pauses the token can still complete successfully and receive its fee refund. Apart from this specific refund transfer, no other token transfers can occur after a pause event.
 
@@ -518,13 +501,13 @@ The enshrined `TIP20ChannelReserve` precompile at [`0x4D505000000000000000000000
 
 
 ## TIP20Factory
-The `TIP20Factory` contract is the canonical entrypoint for creating new TIP-20 tokens on Tempo. The factory derives deterministic deployment addresses using a caller-provided salt, combined with the caller's address, under a fixed 12-byte TIP-20 prefix. This ensures that every TIP-20 token exists at a predictable, collision-free address. The `TIP20Factory` precompile is deployed at `0x20Fc000000000000000000000000000000000000`.
+The `TIP20Factory` contract is the canonical entrypoint for creating new TIP-20 tokens on Tempo. The factory derives deterministic deployment addresses using a caller-provided salt, combined with the caller's address, under a fixed 12-byte TIP-20 prefix. The resulting address is predictable; if it is already occupied, creation reverts rather than overwriting the existing token. The `TIP20Factory` precompile is deployed at `0x20Fc000000000000000000000000000000000000`.
 
 Newly created TIP-20 addresses are deployed to a deterministic address derived from `TIP20_PREFIX || lowerBytes`, where:
-- `TIP20_PREFIX` is the 12-byte prefix `20C000000000000000000000`
+- `TIP20_PREFIX` is the 12-byte prefix `20C00000000000000000000000`
 - `lowerBytes` is the highest 64 bits of `keccak256(msg.sender, salt)`
 
-The first 1000 addresses (where `lowerBytes < 1000`) are reserved for protocol use and cannot be deployed to via the factory.
+The first 1024 addresses (where `lowerBytes < 1024`) are reserved for protocol use and cannot be deployed to via the factory.
 
 When creating a token, the factory performs several checks to guarantee consistency across the TIP-20 ecosystem:
 

@@ -1,10 +1,13 @@
 'use client'
+
 import * as React from 'react'
 import { useConnections, useWatchAsset } from 'wagmi'
 import { isBrowserWalletConnectorId } from '../../../lib/wallets'
 import { Button, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, betaUsd, ousd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './AddTokensToWallet.recipes'
 
 type Token = {
   address: `0x${string}`
@@ -94,9 +97,9 @@ export function AddTokensToWallet(props: DemoStepProps) {
       title="Add tokens to your wallet token list."
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex flex-wrap gap-2">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...ui.addTokensToWalletLayout3()}>
               {TOKENS.map((token) => (
                 <AddTokenButton
                   key={token.address}

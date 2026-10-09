@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
-import { getZoneTransportConfig, stripRpcBasicAuth, ZONE_A } from '../src/lib/private-zones'
+import { ZoneRpcAuthentication } from 'ox/tempo'
+import { POST } from '../src/pages/_api/api/zone-rpc'
 import { getDemoStep } from './helpers'
 
 test('deposit OUSD into Zone A with a passkey', async ({ page }) => {
@@ -15,18 +16,24 @@ test('deposit OUSD into Zone A with a passkey', async ({ page }) => {
     },
   })
 
-  // The E2E connector routes private RPC requests through this same-origin URL.
-  await page.route('**/__e2e_zone_rpc/6', async (route) => {
-    const url = stripRpcBasicAuth(ZONE_A.rpcUrl)
+  // The static preview does not serve API routes; run the actual relay handler.
+  await page.route('**/api/zone-rpc?zone=6', async (route) => {
     const request = route.request()
-    const init = await getZoneTransportConfig(ZONE_A.rpcUrl)?.onFetchRequest?.(new Request(url), {
-      headers: await request.allHeaders(),
+    const headers = await request.allHeaders()
+    const token = headers['x-authorization-token'] as `0x${string}`
+    expect(ZoneRpcAuthentication.deserialize(token).zoneId).toBe(6)
+    const response = await POST(
+      new Request(request.url(), {
+        method: request.method(),
+        headers,
+        body: request.postData(),
+      }),
+    )
+    await route.fulfill({
+      status: response.status,
+      headers: Object.fromEntries(response.headers),
+      body: await response.text(),
     })
-    const headers = new Headers(init?.headers)
-    headers.delete('host')
-    headers.delete('origin')
-    const response = await route.fetch({ url, headers: Object.fromEntries(headers) })
-    await route.fulfill({ response })
   })
 
   try {

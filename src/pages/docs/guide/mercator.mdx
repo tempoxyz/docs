@@ -1,0 +1,63 @@
+---
+title: "Mercator"
+seoTitle: "Connect Your Agent to Mercator | Tempo Docs"
+description: Give your agent access to web research, data enrichment, and other paid services through Mercator. Discover tools, check prices, and run tasks within a budget.
+---
+
+# Mercator
+
+[Mercator](https://mercator.sh/docs) connects AI agents to paid tools and services through one interface. Your agent can search the web, research companies, enrich records, or call a model without you integrating each provider separately. Connect it to your agent through the Model Context Protocol (MCP), or build an integration with its REST API.
+
+Give your agent a task and a budget. For example, ask it to research three competitors and turn the findings into a sourced brief. The agent uses Mercator to find services, get a price for the selected tool calls, and pay for and run them as one job. You can retrieve the results later, even if the agent disconnects.
+
+Mercator coordinates discovery, payment, and execution across independently operated services. It uses the [Machine Payments Protocol](/docs/guide/machine-payments) (MPP) for payments on Tempo and also supports providers using x402. Discovery and quotes are free; paid execution stays within your authorized wallet limits and any additional budget you give the agent.
+
+## Connect Mercator to your agent
+
+For an installed coding agent, follow these steps. For web apps or managed environments, use [Mercator's agent setup guide](https://mercator.sh/setup).
+
+:::::steps
+
+### Install Mercator
+
+Run the installer on the computer where your agent runs, then select the clients you want to connect:
+
+```bash
+curl -fsSL https://mercator.sh/install.sh | sh
+```
+
+If you already use the Tempo plugin marketplace, you can [install `mercator@tempo` directly](/docs/guide/using-tempo-with-ai#install-the-mercator-plugin).
+
+### Authorize your agent
+
+Load the installed configuration and complete authorization in your agent. Choose the wallet access and spending limits for that connection. Follow the [client-specific setup instructions](https://mercator.sh/setup#agent-setup) if Mercator's tools are not available.
+
+### Verify the connection
+
+Ask your agent:
+
+```text
+Search Mercator for web research services and check my Mercator connection status. Do not run a paid job.
+```
+
+The agent checks `search_services` and `get_connection_status`. These calls are free. Complete any authorization or funding steps before starting paid work.
+
+:::::
+
+## Run a quoted workflow
+
+Describe the result you need and how much the agent may spend. For example:
+
+```text
+Use Mercator to find Apple's latest 10-Q filing. Return the filing date, an official source link, and a short summary. Show me the quote before running a paid job.
+```
+
+Discovery and quotes are free. Paid jobs use the wallet and spending limits approved during authorization. You can manage access and funding in [Mercator Account](https://mercator.sh/account).
+
+If a job is still running, keep its job ID and ask your agent to resume checking it. See [Mercator's job guide](https://mercator.sh/docs#run-your-first-job) for the complete flow.
+
+## Integrate or publish a Mercator service
+
+Use the [Mercator documentation](https://mercator.sh/docs) for MCP tools, REST endpoints, quotes, and job status. If you operate a paid API, follow the [service-owner guide](https://mercator.sh/docs#mercator-for-service-owners) to make it discoverable.
+
+To add MPP payments to your service first, use the [Accept payments for an API](/docs/guide/machine-payments/server).

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { docsSections } from './docs-sections'
 import { OG_IMAGE_VERSION, ogLandingPaths, ogSectionMap, ogSubsectionMap } from './og-sections'
 
 // vocs.config.ts's `ogImageUrl` is serialized to source and re-evaluated at
@@ -61,6 +62,14 @@ describe('vocs.config ogImageUrl stays in sync with src/lib/og-sections', () => 
   it.each(Object.entries(ogSectionMap))('maps section %s -> %s', (segment, label) => {
     const url = ogImageUrl(`/${segment}/some-page`)
     expect(param(url, 'section')).toBe(label)
+  })
+
+  it.each(docsSections)('uses the current $label product name on its social card', (section) => {
+    expect(param(ogImageUrl(section.href), 'section')).toBe(section.label.toUpperCase())
+  })
+
+  it('uses Machine Payments for the retained agents URL', () => {
+    expect(param(ogImageUrl('/docs/agents'), 'section')).toBe('MACHINE PAYMENTS')
   })
 
   it.each(Object.entries(ogSubsectionMap))('maps subsection %s -> %s', (segment, label) => {

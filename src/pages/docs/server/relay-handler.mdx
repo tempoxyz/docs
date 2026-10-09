@@ -11,10 +11,16 @@ Use `Handler.relay` to proxy RPC requests through your backend. The handler can 
 
 ## Create a relay handler
 
+Apply the [Tempo API dependency override](/docs/api/typed-client#install-tempo-api-package), then install `tapimo@0.18.2` with `viem@2.56.9` in the relay server. This release of the handler depends on Viem exports removed in `2.57`; application clients can use the current Viem release independently.
+
+```bash
+pnpm add --save-exact tapimo@0.18.2 viem@2.56.9
+```
+
 Create the handler with an optional [Tempo API key](/docs/api/authentication), then expose either its Fetch API or Node.js listener entrypoint:
 
 ```ts
-import { Handler } from 'tapimo'
+import { Handler } from 'tapimo/server'
 
 const handler = Handler.relay({
   apiKey: process.env.TEMPO_API_KEY,
@@ -30,7 +36,7 @@ The built-in client defaults to mainnet when a request does not specify a chain.
 ```ts twoslash
 // @noErrors
 import { createServer } from 'node:http'
-import { Handler } from 'tapimo'
+import { Handler } from 'tapimo/server'
 
 const handler = Handler.relay({ apiKey: process.env.TEMPO_API_KEY })
 // ---cut---
@@ -98,16 +104,16 @@ The configured fee payer also handles approved `eth_signRawTransaction`, `eth_se
 ```ts twoslash [server.ts]
 // @noErrors
 import { createServer } from 'node:http'
-import { Handler } from 'tapimo'
+import { Handler } from 'tapimo/server'
 import { isAddressEqual } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 
 const blockedAddress = '0x000000000000000000000000000000000000dead'
 // ---cut---
 const handler = Handler.relay({
   apiKey: process.env.TEMPO_API_KEY,
   feePayer: {
-    account: privateKeyToAccount('0x...'),
+    account: Account.fromSecp256k1('0x...'),
     name: 'My App',
     url: 'https://myapp.com',
     // Optional sponsorship policy.
@@ -137,6 +143,9 @@ const result = await provider.request({
   }],
 })
 
+if (!('capabilities' in result))
+  throw new Error('The relay did not return Tempo capabilities')
+
 result.capabilities.sponsored
 // true
 
@@ -165,7 +174,7 @@ Enable this behavior with [`autoSwap`](#autoswap) or [`features: 'all'`](#featur
 :::code-group
 
 ```ts [server.ts]
-import { Handler } from 'tapimo'
+import { Handler } from 'tapimo/server'
 
 const handler = Handler.relay({
   apiKey: process.env.TEMPO_API_KEY,
@@ -218,7 +227,7 @@ For self-paid requests with fee-token resolution enabled, the relay selects a to
 Set `features: 'all'` to enable fee-token resolution with the Tempo API verified-token list for mainnet and testnet. Passing `resolveTokens` also enables fee-token resolution and replaces these candidates. Self-paid fills also consider TIP-20 call targets.
 
 ```ts
-import { Handler } from 'tapimo'
+import { Handler } from 'tapimo/server'
 
 const handler = Handler.relay({
   apiKey: process.env.TEMPO_API_KEY,
@@ -291,6 +300,9 @@ const result = await provider.request({
   }],
 })
 
+if (!('capabilities' in result))
+  throw new Error('The relay did not return Tempo capabilities')
+
 result.capabilities.requireFunds
 // {
 //   amount: '0x3938700',
@@ -308,7 +320,7 @@ result.capabilities.requireFunds
 By default, the relay enables only the features you configure directly. Use `features: 'all'` to enable fee-token resolution, automatic swaps, balance simulation, and fee estimates together. This does not enable sponsorship; configure [`feePayer`](#feepayer) separately.
 
 ```ts
-import { Handler } from 'tapimo'
+import { Handler } from 'tapimo/server'
 
 const handler = Handler.relay({
   apiKey: process.env.TEMPO_API_KEY,
@@ -342,24 +354,9 @@ const handler = Handler.relay({
 - **Type:** `(chainId?: number) => Client`
 - **Optional**
 
-Overrides the built-in Viem clients for Tempo mainnet and testnet. With `apiKey`, the built-in clients use the Tempo API; without one, they use each chain's default Viem transport. Provide `getClient` for custom transports or additional chains. The relay calls it without an argument for the default client and with the request's resolved chain ID when available.
+Overrides the built-in Viem clients for Tempo mainnet and testnet. With `apiKey`, the built-in clients use the Tempo API; without one, they use each chain's default Viem transport. Provide `getClient` for custom transports or additional chains. The relay calls it without an argument for the default client and with the request's resolved chain ID when available. For hosted Tempo RPC, use the built-in clients and set [`apiKey`](#apikey).
 
-```ts twoslash
-import { Handler } from 'tapimo'
-import { createClient, http } from 'viem'
-import { tempoMainnet, tempoTestnet } from 'viem/tempo/chains'
 
-const mainnetClient = createClient({ chain: tempoMainnet, transport: http() })
-const testnetClient = createClient({ chain: tempoTestnet, transport: http() })
-
-const getClient = (chainId: number = tempoMainnet.id) => { // [!code focus]
-  if (chainId === tempoMainnet.id) return mainnetClient // [!code focus]
-  if (chainId === tempoTestnet.id) return testnetClient // [!code focus]
-  throw new Error(`Unsupported chain: ${chainId}`) // [!code focus]
-} // [!code focus]
-
-const handler = Handler.relay({ getClient })
-```
 
 When you provide `getClient`, `apiKey` does not change the custom clients' transports. It still authenticates the built-in verified-token resolver unless you also provide `resolveTokens`.
 
@@ -412,13 +409,13 @@ const handler = Handler.relay({
 Configures transaction sponsorship. When present, the relay can sign the filled transaction's `feePayerSignature`.
 
 ```ts
-import { Handler } from 'tapimo'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Handler } from 'tapimo/server'
+import { Account } from 'viem/tempo'
 
 const handler = Handler.relay({
   feePayer: { // [!code focus]
-    account: privateKeyToAccount('0x...'), // [!code focus]
-    feeToken: '0x20c0000000000000000000000000000000000001', // [!code focus]
+    account: Account.fromSecp256k1('0x...'), // [!code focus]
+    feeToken: '0x20c000000000000000000000b9537d11c60e8b50', // [!code focus]
     name: 'My App', // [!code focus]
     url: 'https://myapp.com', // [!code focus]
   }, // [!code focus]
@@ -480,15 +477,15 @@ A sponsor URL returned in response metadata.
 Approves or rejects sponsorship for a Tempo transaction. Return `false` or a named refusal reason to reject sponsorship. Named reasons are `billing_past_due`, `billing_required`, `fee_token_unsupported`, `spend_limit_exceeded`, and `tx_fee_limit_exceeded`. When omitted, the configured fee payer sponsors every eligible request.
 
 ```ts
-import { Handler } from 'tapimo'
+import { Handler } from 'tapimo/server'
 import { isAddressEqual } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 
 const allowedSender = '0x000000000000000000000000000000000000dead'
 
 const handler = Handler.relay({
   feePayer: {
-    account: privateKeyToAccount('0x...'),
+    account: Account.fromSecp256k1('0x...'),
     validate: (request) => // [!code focus]
       request.from !== undefined && isAddressEqual(request.from, allowedSender), // [!code focus]
   },
@@ -502,15 +499,9 @@ const handler = Handler.relay({
 - **Type:** `Multisig.Options`
 - **Optional**
 
-Collects native multisig approvals and broadcasts after the configured threshold is reached. Provide an enumerable state store; use a shared store with atomic compare-and-swap in production.
+Reserved for native multisig support in configurable accounts, which is not live. This package option is documented for reference and is not part of the current production integration path.
 
-```ts
-import { Handler, Store } from 'tapimo'
-
-const handler = Handler.relay({
-  multisig: { store: Store.memory() }, // [!code focus]
-})
-```
+For current account authorization, see [Accounts](/docs/accounts).
 
 <span id="cache" />
 
@@ -522,7 +513,7 @@ const handler = Handler.relay({
 Caches TIP-20 metadata and account fee-token preferences. When omitted, the relay reads this data upstream on every fill.
 
 ```ts
-import { Handler, Store } from 'tapimo'
+import { Handler, Store } from 'tapimo/server'
 
 const handler = Handler.relay({
   cache: Store.memory(), // [!code focus]

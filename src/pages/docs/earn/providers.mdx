@@ -1,0 +1,27 @@
+---
+title: "Connect a strategy"
+seoTitle: "Connect a strategy | Tempo Docs"
+description: Define an Earn engine's asset, valuation, access rules, and deposit and redemption behavior with Tempo.
+---
+
+# Connect a strategy
+
+<span id="connect-a-yield-source" />
+
+An engine connects an Earn vault to its underlying yield strategy. If you operate a lending market, managed strategy, or liquidity pool, work with Tempo to confirm the engine interface and deployment before integrating it.
+
+## Define the vault
+
+Specify the accepted stablecoin, strategy, share valuation, fees, and account eligibility. Keep those terms consistent with the vault information your application's customers see. The [vault directory](/docs/earn/vaults) exposes the asset, engine, access rules, and supported capabilities.
+
+## Define deposits and withdrawals
+
+Document the contract interface and approvals required to deposit, and how the vault issues shares. Define whether redemptions are immediate or queued, the liquidity available to serve them, and how applications track completion.
+
+Applications use [Viem’s Earn actions](/docs/earn/integrate) for supported vault operations and the [Earn API](/docs/api/earn) for discovery, positions, share prices, and earnings. Document any engine-specific restrictions or queued withdrawal requirements alongside those interfaces.
+
+## Confirm the integration
+
+[Contact Tempo](https://tempo.xyz/contact) to confirm the engine interface, deployment, and supported operations. Include any intended Zone integration so its routing, access, and tracking requirements can be checked separately.
+
+See [How Earn works](/docs/earn/how-it-works) for the shared vault model and [Deposit](/docs/earn/integrate) for the application flow.

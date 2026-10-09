@@ -1,80 +1,31 @@
 ---
-title: "Stablecoin payments: integration guide"
-seoTitle: "Stablecoin Payments Integration | Docs"
-description: Send and receive stablecoin payments on Tempo. Integrate payments with flexible fee options, sponsorship capabilities, and parallel transactions.
+title: Integrate stablecoin payments
+seoTitle: Integrate Stablecoin Payments | Tempo Docs
+description: Find the guides for sending, receiving, and reconciling stablecoin payments in your application.
 ---
 
-import { Cards, Card } from 'vocs'
+# Integrate stablecoin payments
 
-# Stablecoin payments: integration guide
+Send stablecoins, collect deposits, and confirm payments in your application. If you are still deciding where funds should live and who signs, start with [Choose an account model](/docs/accounts/integration).
 
-Send and receive payments using stablecoins on Tempo. Start with core payment flows, then add reconciliation, receive controls, fee preferences, sponsorship, and higher-throughput transaction patterns.
+<span id="core-payment-flows" />
+<span id="build-the-payment-flow" />
 
-Use the [Tempo API](/docs/api) in your application backend to monitor account and transaction activity, deliver webhook updates, and sponsor transaction fees.
+## Send and receive payments
 
-Use [receive policies](/docs/guide/payments/configure-receive-policies) when an account needs to filter inbound TIP-20 transfers or mints by token and sender.
+| Task | Guide |
+| --- | --- |
+| Fund an account | [Choose a funding path](/docs/guide/getting-funds). |
+| Send stablecoins | [Send payments](/docs/guide/payments/send-a-payment), including references and batches. |
+| Collect and reconcile payments | [Receive payments](/docs/guide/payments/accept-a-payment), verify delivery, and record each payment once. |
+| Identify customer deposits | [Customer deposit addresses](/docs/guide/payments/virtual-addresses) attribute payments into a shared account. |
+| Move funds between networks | [Routes](/docs/routes) connects Tempo with other networks. |
 
-## Core Payment Flows
+<span id="payment-controls" />
+<span id="add-payment-controls" />
 
-<Cards>
-  <Card
-    description="Send stablecoin payments between accounts with optional memos for reconciliation."
-    to="/docs/guide/payments/send-a-payment"
-    icon="lucide:send"
-    title="Send a Payment"
-  />
+## Configure payment behavior
 
-  <Card
-    description="Accept payments from users and integrate payment flows into your application."
-    to="/docs/guide/payments/accept-a-payment"
-    icon="lucide:handshake"
-    title="Accept a Payment"
-  />
-
-  <Card
-    description="Attach 32-byte references to TIP-20 transfers for payment reconciliation."
-    to="/docs/guide/payments/transfer-memos"
-    icon="lucide:file-text"
-    title="Attach a Transfer Memo"
-  />
-
-  <Card
-    description="Generate one TIP-20 deposit address per customer without sweep transactions."
-    to="/docs/guide/payments/virtual-addresses"
-    icon="lucide:route"
-    title="Use Virtual Addresses"
-  />
-</Cards>
-
-## Payment Controls
-
-<Cards>
-  <Card
-    description="Filter inbound TIP-20 transfers and mints by token and sender, then handle blocked receipts."
-    to="/docs/guide/payments/configure-receive-policies"
-    icon="lucide:shield-check"
-    title="Configure Receive Policies"
-  />
-
-  <Card
-    description="Configure users to pay transaction fees in any supported stablecoin."
-    to="/docs/guide/payments/pay-fees-in-any-stablecoin"
-    icon="lucide:circle-dollar-sign"
-    title="Pay Fees in Any Stablecoin"
-  />
-
-  <Card
-    description="Sponsor transaction fees for your users to enable gasless transactions."
-    to="/docs/guide/payments/sponsor-user-fees"
-    icon="lucide:heart-handshake"
-    title="Sponsor User Fees"
-  />
-
-  <Card
-    description="Submit multiple transactions in parallel using nonce keys."
-    to="/docs/guide/payments/send-parallel-transactions"
-    icon="lucide:git-branch"
-    title="Send Parallel Transactions"
-  />
-
-</Cards>
+- [Sponsor fees](/docs/guide/payments/sponsor-user-fees) or [choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin).
+- [Send independent payments in parallel](/docs/guide/payments/send-parallel-transactions) when each payment needs its own receipt.
+- [Configure receive policies](/docs/guide/payments/configure-receive-policies) to choose which tokens and senders an account accepts.

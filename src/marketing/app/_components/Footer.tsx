@@ -5,6 +5,7 @@ import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
 import EdgeMarkers from './EdgeMarkers'
+import * as ui from './Footer.recipes'
 import Reveal from './Reveal'
 import TempoLogo from './TempoLogo'
 import ThemeToggle from './ThemeToggle'
@@ -15,8 +16,7 @@ type FooterLink = {
 }
 type FooterColumn = { header: string; links: FooterLink[] }
 
-const footerLinkClassName =
-  'font-sans text-[14px] tracking-[0] text-foreground/50 transition-colors hover:text-foreground'
+const footerLinkClassName = ui.footerStateState().className
 
 const CONTACT_URL = 'https://tempo.xyz/contact'
 const GITHUB_URL = 'https://github.com/tempoxyz'
@@ -100,43 +100,38 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative border-line border-y">
+    <footer {...ui.footerFooter()}>
       <EdgeMarkers wideOnly />
       <Reveal>
-        <div className="grid gap-12 px-5 py-12 lg:grid-cols-[minmax(220px,1fr)_2fr] lg:gap-16 lg:px-8 lg:py-16">
-          <div className="flex max-w-[320px] flex-col gap-4">
-            <Link href="/" aria-label="Tempo home" className="flex items-center gap-2">
-              <TempoLogo className="h-[18px] w-[80px] text-foreground" />
+        <div {...ui.footerLayout()}>
+          <div {...ui.footerLayout2()}>
+            <Link href="/" aria-label="Tempo home" className={ui.link().className}>
+              <TempoLogo className={ui.tempoLogo().className} />
             </Link>
-            <p className="font-sans text-[15px] text-foreground/55 leading-[1.6] tracking-[0]">
+            <p {...ui.footerDescription()}>
               Stablecoin payments infrastructure for developers, apps, and agents building on Tempo.
             </p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-[14px] text-foreground/50 tracking-[0]">
-              <Link href="/" className="transition-colors hover:text-foreground">
+            <div {...ui.footerLayout3()}>
+              <Link href="/" className={ui.link2().className}>
                 © {new Date().getFullYear()} Tempo
               </Link>
-              <a
-                href="https://tempo.xyz"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-foreground"
-              >
+              <a href="https://tempo.xyz" target="_blank" rel="noopener noreferrer" {...ui.link2()}>
                 tempo.xyz
               </a>
             </div>
-            <div className="mt-6 flex items-center gap-6 lg:mt-auto lg:pt-12">
-              <nav className="flex h-9 items-center" aria-label="Social links">
+            <div {...ui.footerLayout4()}>
+              <nav {...ui.nav()} aria-label="Social links">
                 {socialLinks.map(({ label, href, Icon }, index) => (
-                  <div key={label} className="flex items-center">
-                    {index !== 0 && <span className="mx-2 h-4 w-px bg-line" aria-hidden />}
+                  <div key={label} {...ui.footerLayout5()}>
+                    {index !== 0 && <span {...ui.footerText()} aria-hidden="true" />}
                     <a
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={label}
-                      className="flex size-9 items-center justify-center text-foreground/45 transition-colors hover:text-foreground"
+                      {...ui.footerLink()}
                     >
-                      <Icon className="size-[19px]" />
+                      <Icon className={ui.icon().className} />
                     </a>
                   </div>
                 ))}
@@ -145,11 +140,11 @@ export default function Footer() {
             </div>
           </div>
 
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-3">
+          <nav aria-label="Footer" {...ui.nav2()}>
             {columns.map((col) => (
-              <div key={col.header} className="flex flex-col gap-4">
-                <p className="font-sans text-[14px] text-foreground tracking-[0]">{col.header}</p>
-                <ul className="flex flex-col gap-3">
+              <div key={col.header} {...ui.footerLayout6()}>
+                <p {...ui.footerDescription2()}>{col.header}</p>
+                <ul {...ui.footerList()}>
                   {col.links.map((link) => (
                     <li key={link.label}>
                       <FooterLinkItem link={link} />

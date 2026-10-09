@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { parseUnits } from 'viem'
@@ -8,8 +9,10 @@ import LucideCheck from '~icons/lucide/check'
 import LucideCircle from '~icons/lucide/circle'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './MintFeeAmmLiquidity.recipes'
 
 export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: boolean }) {
   const { stepNumber, last = false, waitForBalance = true } = props
@@ -115,7 +118,7 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
           disabled={!active || mintFeeLiquidity.isPending}
           onClick={handleMintAll}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={form.actionButton().className}
         >
           {mintFeeLiquidity.isPending
             ? 'Adding...'
@@ -131,31 +134,31 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
       title={`Add fee liquidity for ${metadata ? metadata.name : 'your token'}.`}
     >
       {someMinted && (
-        <div className="mx-6 flex flex-col gap-2 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 space-y-1">
-              <div className="flex items-center gap-2 text-[13px]">
+        <div {...ui.mintFeeAmmLiquidityLayout()}>
+          <div {...form.stepRail()}>
+            <div {...ui.mintFeeAmmLiquidityLayout3()}>
+              <div {...ui.mintFeeAmmLiquidityLayout4()}>
                 {pathUsdMinted ? (
-                  <LucideCheck className="size-4 text-green9" />
+                  <LucideCheck className={ui.lucideCheck().className} />
                 ) : (
-                  <LucideCircle className="size-4 text-gray9" />
+                  <LucideCircle className={ui.lucideCircle().className} />
                 )}
-                <span className="w-20 font-mono">pathUSD</span>
+                <span {...ui.mintFeeAmmLiquidityText()}>pathUSD</span>
                 {pathUsdTxHash && (
-                  <span className="-mt-1">
+                  <span {...ui.mintFeeAmmLiquidityText2()}>
                     <ExplorerLink hash={pathUsdTxHash} />
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-[13px]">
+              <div {...ui.mintFeeAmmLiquidityLayout4()}>
                 {alphaUsdMinted ? (
-                  <LucideCheck className="size-4 text-green9" />
+                  <LucideCheck className={ui.lucideCheck().className} />
                 ) : (
-                  <LucideCircle className="size-4 text-gray9" />
+                  <LucideCircle className={ui.lucideCircle().className} />
                 )}
-                <span className="w-20 font-mono">AlphaUSD</span>
+                <span {...ui.mintFeeAmmLiquidityText()}>AlphaUSD</span>
                 {alphaUsdTxHash && (
-                  <span className="-mt-1">
+                  <span {...ui.mintFeeAmmLiquidityText2()}>
                     <ExplorerLink hash={alphaUsdTxHash} />
                   </span>
                 )}

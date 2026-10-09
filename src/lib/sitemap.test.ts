@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { finalizeSitemap } from './sitemap'
+import { finalizeSitemap, sitemapCoverage } from './sitemap'
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -21,7 +21,71 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
   </url>
 </urlset>`
 
+describe('sitemapCoverage', () => {
+  it('validates the new docs home without requiring a /docs index entry', () => {
+    const current = sitemap.replace(
+      '</urlset>',
+      '<url><loc>https://tempo.xyz/developers/</loc></url></urlset>',
+    )
+    expect(sitemapCoverage(current, ['/', '/blog', '/docs/api']).missing).toEqual([])
+  })
+
+  it('detects missing nested getting-started and blog routes', () => {
+    expect(sitemapCoverage(sitemap, ['/get-started/stablecoins', '/blog/t6']).missing).toEqual([
+      'https://tempo.xyz/developers/get-started/stablecoins',
+      'https://tempo.xyz/developers/blog/t6',
+    ])
+  })
+
+  it('uses the API index if no blog index is available', () => {
+    const apiOnly = '<urlset><url><loc>https://example.com/docs/api</loc></url></urlset>'
+    expect(sitemapCoverage(apiOnly, ['/docs/api']).missing).toEqual([])
+  })
+
+  it('rejects a sitemap without a recognizable content index', () => {
+    expect(() => sitemapCoverage('<urlset />', ['/'])).toThrow(
+      'Could not resolve the site base URL',
+    )
+  })
+})
+
 describe('finalizeSitemap', () => {
+  it('excludes redirected marketing surfaces while preserving docs and blog URLs', () => {
+    const previousSite = sitemap.replace(
+      '</urlset>',
+      `${[
+        '',
+        '/get-started',
+        '/get-started/stablecoins',
+        '/get-started-extra',
+        '/docs',
+        '/build',
+        '/build/tip20-tokens',
+        '/build/tempo-transactions',
+        '/performance',
+      ]
+        .map((route) => `<url><loc>https://tempo.xyz/developers${route}</loc></url>`)
+        .join('\n')}</urlset>`,
+    )
+    const result = finalizeSitemap(previousSite, [{ slug: 't6' }])
+
+    const locations = [...result.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+    expect(locations).toContain('https://tempo.xyz/developers/blog/t6')
+    expect(locations).toContain('https://tempo.xyz/developers/docs/api')
+    expect(locations).toContain('https://tempo.xyz/developers')
+    expect(locations).toContain('https://tempo.xyz/developers/get-started')
+    expect(locations).toContain('https://tempo.xyz/developers/get-started/stablecoins')
+    expect(locations).not.toContain('https://tempo.xyz/developers/get-started-extra')
+    expect(locations).not.toContain('https://tempo.xyz/developers/docs')
+    expect(
+      locations.every((location) =>
+        /^https:\/\/tempo\.xyz\/developers(?:\/?$|\/get-started(?:\/|$)|\/(?:docs\/|blog(?:\/|$)))/.test(
+          location,
+        ),
+      ),
+    ).toBe(true)
+  })
+
   it('replaces the blog template with canonical post URLs and removes other templates', () => {
     const result = finalizeSitemap(sitemap, [
       { slug: 't7-network-upgrade' },

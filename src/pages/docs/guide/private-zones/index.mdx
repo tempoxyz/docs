@@ -1,15 +1,21 @@
 ---
-title: "Build with Tempo Zones"
-seoTitle: "Build with Tempo Zones | Docs"
-description: Connect an application to a Tempo Zone, authorize private account access, and try testnet guides for deposits, private transfers, swaps, and withdrawals.
+title: "Tempo Zones testnet sandbox"
+seoTitle: "Tempo Zones testnet sandbox | Tempo Docs"
+description: Try deposits, private transfers, swaps, and withdrawals on the earlier Zone A and Zone B testnet deployments.
 ---
 
 import { Card, Cards } from 'vocs'
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Build with Tempo Zones
+<span id="build-with-tempo-zones" />
 
-Tempo Zones give applications a private account ledger connected to Tempo. You use a Zone’s RPC to read private balances and submit transactions, and the public Tempo chain to move funds into and out of the Zone.
+# Tempo Zones testnet sandbox
+
+Try deposits, transfers, swaps, and withdrawals with test funds on Zone A and Zone B.
+
+:::info
+These demos use an earlier Zone deployment with plaintext deposits and direct transfers. The current preview uses encrypted deposits and restricts transfers. Use the named sandbox for these demos; follow [Tempo Zones](/docs/zones) for your integration.
+:::
 
 A deposit locks tokens on Tempo and credits a private balance in the Zone. A withdrawal moves funds back to a Tempo address. These operations settle in stages, so the guides show both the transaction being accepted and the balance arriving at its destination.
 
@@ -18,7 +24,9 @@ A deposit locks tokens on Tempo and credits a private balance in the Zone. A wit
   alt="The public Tempo portal holds backing assets while a Zone operator runs the private account ledger. Deposits, withdrawals, and signed settlement commitments connect the two chains."
 />
 
-## Connect your application
+<span id="connect-your-application" />
+
+## Connect to the sandbox
 
 Your application uses a public Tempo client alongside a client for the Zone. The Zone client authenticates as your Tempo account so it can access that account’s private data.
 
@@ -38,13 +46,13 @@ Each demo walks you through signing in with a passkey, getting testnet funds, an
   <Card
     description="Set up a Zone client, authorize your account, and make your first RPC request."
     icon="lucide:plug"
-    title="Connect to a zone"
+    title="Connect to a Zone"
     to="/docs/guide/private-zones/connect-to-a-zone"
   />
   <Card
     description="Move testnet funds from Tempo into a private balance and wait for the deposit to arrive."
     icon="lucide:shield-ellipsis"
-    title="Deposit to a zone"
+    title="Deposit to a Zone"
     to="/docs/guide/private-zones/deposit-to-a-zone"
   />
   <Card
@@ -68,7 +76,7 @@ Each demo walks you through signing in with a passkey, getting testnet funds, an
   <Card
     description="Withdraw stablecoins from a zone back to your public balance."
     icon="lucide:arrow-up-right"
-    title="Withdraw from a zone"
+    title="Withdraw from a Zone"
     to="/docs/guide/private-zones/withdraw-from-a-zone"
   />
 </Cards>
@@ -77,6 +85,6 @@ Each demo walks you through signing in with a passkey, getting testnet funds, an
 
 ## About the testnet sandbox
 
-These demos use an earlier testnet deployment with `viem` 2.54.6. Its interfaces and chain IDs differ from the current Zone protocol. The sandbox also supports plaintext deposits and direct in-Zone transfers; the current permissioned runtime uses encrypted deposits and does not yet enable those transfers.
+These demos use an earlier testnet deployment through the legacy Zone A and Zone B interfaces in `viem/tempo`. Its interfaces and chain IDs differ from the current Zone protocol. The sandbox also supports plaintext deposits and direct in-Zone transfers; the current permissioned runtime uses encrypted deposits and does not yet enable those transfers.
 
 Use the guide’s connection details for this sandbox. For another Zone, get the endpoint, access credentials, and supported SDK version from its operator. The [protocol reference](/docs/protocol/zones) describes the current implementation; the [connection guide](/docs/guide/private-zones/connect-to-a-zone) explains direct RPC access and how the demos connect through the docs server.

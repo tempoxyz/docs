@@ -1,0 +1,212 @@
+---
+title: "Earn testnet example"
+seoTitle: "Earn testnet example | Tempo Docs"
+description: "Run a complete pathUSD deposit, position read, and redemption against a verified Earn vault on Moderato."
+---
+
+# Earn testnet example
+
+Use CLI, Viem, or Wagmi to deposit 1 pathUSD into a verified Moderato vault, read the position, and redeem the shares. For the short [Deposit](/docs/earn/integrate) and [Withdraw](/docs/earn/withdraw) snippets, start with your tool’s setup below. All examples use testnet assets and a six-decimal pathUSD vault.
+
+## Set up the CLI
+
+Install the [current upstream Foundry release](/docs/sdk/foundry) with Tempo support, plus Python 3 for exact integer calculations. The write commands use `--tempo.fee-token` to pay fees in pathUSD.
+
+Create a dedicated test keystore. Cast prompts for its password when signing; never use this test account for production funds.
+
+```bash
+cast wallet new ~/.foundry/keystores tempo-earn-test
+```
+
+Set the variables used in [Deposit](/docs/earn/integrate) and [Withdraw](/docs/earn/withdraw):
+
+```bash
+set -euo pipefail
+KEYSTORE=tempo-earn-test
+TEMPO_RPC_URL=https://rpc.moderato.tempo.xyz
+VAULT=0x20147491b5701dea880263241c335caca9be326d
+ASSET_TOKEN=0x20c0000000000000000000000000000000000000
+SHARE_TOKEN=0x20c0000000000000000000006ac30cbdea0747fa
+ASSET_AMOUNT=1000000
+ACCOUNT=$(cast wallet address --account "$KEYSTORE")
+```
+
+Confirm the chain is `42431`, the asset and share token match those above, and deposits are not paused:
+
+```bash
+cast chain-id --rpc-url "$TEMPO_RPC_URL"
+cast call "$VAULT" 'asset()(address)' --rpc-url "$TEMPO_RPC_URL"
+cast call "$VAULT" 'earnShare()(address)' --rpc-url "$TEMPO_RPC_URL"
+cast call "$VAULT" 'depositsPaused()(bool)' --rpc-url "$TEMPO_RPC_URL"
+```
+
+Request test funds. Wait for the returned faucet transactions to confirm before approving or depositing:
+
+```bash
+cast rpc tempo_fundAddress "$ACCOUNT" --rpc-url "$TEMPO_RPC_URL"
+```
+
+The quote snippets use this helper to set a positive minimum output 0.5% below the quote, without floating-point arithmetic:
+
+```bash
+minimum_output() {
+  python3 - "$1" <<'PYTHON'
+import sys
+amount = int(sys.argv[1])
+if amount <= 0:
+    raise ValueError("The quote must be positive")
+print(max(1, amount * 9950 // 10000))
+PYTHON
+}
+```
+
+After depositing, read the shares held by this account. The withdrawal example redeems this full balance; set a smaller positive `SHARE_AMOUNT` for a partial withdrawal.
+
+```bash
+SHARE_AMOUNT=$(cast erc20 balance "$SHARE_TOKEN" "$ACCOUNT" \
+  --rpc-url "$TEMPO_RPC_URL")
+```
+
+## Run the Viem example
+
+Install Viem 2.57.4 or later and a TypeScript runner in your example project:
+
+```bash
+pnpm add viem
+pnpm add -D tsx
+```
+
+Save the following as `earn.ts`. The vault accepts six-decimal pathUSD on Moderato (`42431`). The script checks its deployed asset and engine, approves only the deposit amount, and simulates before signing with a 0.5% output bound. The deposit and redemption actions each include their required approval.
+
+```ts [earn.ts]
+import { generatePrivateKey } from 'viem/accounts'
+import { tempoModerato } from 'viem/chains'
+import { Account, Actions, createClient, EarnShares } from 'viem/tempo'
+
+const vault = '0x20147491b5701dea880263241c335caca9be326d'
+const assetToken = '0x20c0000000000000000000000000000000000000'
+const engine = '0x49c4600ba4f39c11006cb2269c371e8a19f26a26'
+const assetAmount = 1_000_000n
+const account = Account.fromSecp256k1(generatePrivateKey())
+const client = createClient({ account, chain: tempoModerato, feeToken: assetToken })
+
+const state = await client.earn.getVault({ vault })
+if (
+  state.assetToken.toLowerCase() !== assetToken ||
+  state.engine.address.toLowerCase() !== engine ||
+  state.depositsPaused || !state.isSynced
+) throw new Error('The test vault is unavailable or its configuration changed.')
+
+await client.faucet.fundSync({ account, timeout: 60_000 })
+await client.token.approveSync({ token: assetToken, spender: vault, amount: assetAmount })
+
+const { result: quotedShares } = await Actions.earn.deposit.simulate(client, {
+  vault,
+  assetAmount,
+  shareAmountMin: 1n,
+})
+const shareAmountMin = EarnShares.minimumOutput(quotedShares, 50)
+const deposit = await client.earn.depositSync({ vault, assetAmount, shareAmountMin })
+if (deposit.receipt.status !== 'success') throw new Error('Deposit failed.')
+console.log('Deposit:', deposit.receipt.transactionHash)
+
+const position = await client.earn.getPosition({ vault })
+console.log('Shares:', position.shareBalance, 'Value:', position.value)
+
+const shareAmount = deposit.shareAmount
+const withdrawal = await client.earn.redeemSync({
+  vault,
+  shareAmount,
+  slippageBps: 50,
+})
+if (withdrawal.receipt.status !== 'success') throw new Error('Withdrawal failed.')
+console.log('Withdrawal:', withdrawal.receipt.transactionHash)
+```
+
+Run the script:
+
+```bash
+pnpm exec tsx earn.ts
+```
+
+A successful run prints the deposit and withdrawal transaction hashes. The generated key stays in process memory and is discarded when the script exits. Use only faucet funds with this example.
+
+## Set up Wagmi
+
+Use the [Wagmi setup](/docs/sdk/typescript#wagmi-sdk-for-tempo) with a Tempo Wallet connector and `tempoModerato` in the chain config. Wrap your React app with `WagmiProvider` and `QueryClientProvider`, then connect and [fund](/docs/quickstart/faucet) a test account.
+
+The main guide's Wagmi snippets run inside a connected React component. Import the real Wagmi contract hooks and Viem Earn call builders:
+
+```tsx [Earn.tsx]
+import { useState } from 'react'
+import type { Address } from 'viem'
+import { Abis, Actions, EarnShares } from 'viem/tempo'
+import { useReadContract, useSendCallsSync, useSimulateContract } from 'wagmi'
+import { Hooks } from 'wagmi/tempo'
+
+const vault = '0x20147491b5701dea880263241c335caca9be326d'
+const assetToken = '0x20c0000000000000000000000000000000000000'
+const shareToken = '0x20c0000000000000000000006ac30cbdea0747fa'
+const assetAmount = 1_000_000n
+```
+
+Pass the connected `address` and the shares to redeem into this hook. Mount its component only on Moderato, and remount it when the account changes (for example, with `key={address}`). This resets account-specific approval and quote state.
+
+```tsx [Earn.tsx]
+export function useEarn(address: Address, shareAmount: bigint) {
+  const [approved, setApproved] = useState(false)
+  const approval = Hooks.token.useApproveSync({
+    mutation: { onSuccess: () => setApproved(true) },
+  })
+  const depositQuote = useSimulateContract({
+    abi: Abis.earnVault, address: vault, account: address,
+    functionName: 'deposit', args: [assetAmount, address, 1n],
+    query: { enabled: approved },
+  })
+  const redemptionQuote = useReadContract({
+    abi: Abis.earnVault, address: vault,
+    functionName: 'previewRedeem', args: [shareAmount],
+    query: { enabled: shareAmount > 0n },
+  })
+  const deposit = useSendCallsSync()
+  const redemption = useSendCallsSync()
+
+  const approve = () => approval.mutateAsync({
+    token: assetToken, spender: vault, amount: assetAmount,
+  })
+  const submitDeposit = () => {
+    if (!depositQuote.data || Date.now() - depositQuote.dataUpdatedAt > 60_000)
+      throw new Error('Refresh the deposit quote before signing.')
+    const calls = Actions.earn.deposit.calls({
+      vault, assetToken, assetAmount, recipient: address,
+      shareAmountMin: EarnShares.minimumOutput(depositQuote.data.result, 50),
+    })
+    return deposit.mutateAsync({ calls, forceAtomic: true })
+  }
+  const submitWithdrawal = () => {
+    if (!redemptionQuote.data || Date.now() - redemptionQuote.dataUpdatedAt > 60_000)
+      throw new Error('Refresh the withdrawal quote before signing.')
+    const calls = Actions.earn.redeem.calls({
+      vault, shareToken, shareAmount, recipient: address,
+      assetAmountMin: EarnShares.minimumOutput(redemptionQuote.data, 50),
+    })
+    return redemption.mutateAsync({ calls, forceAtomic: true })
+  }
+  return {
+    approve, submitDeposit, submitWithdrawal,
+    approval, depositQuote, redemptionQuote, deposit, redemption,
+  }
+}
+```
+
+Call the returned actions from buttons, catch and display their errors, and disable submission while a mutation is pending or its quote is unavailable. Show the quoted output before requesting a signature. Each quote exposes `refetch()` for a refresh button; refresh the account's share and stablecoin balances after a successful transaction.
+
+Wagmi's batched action requires a wallet that supports `wallet_sendCalls`, such as Tempo Wallet. The call builders supply the asset or share-token approval and the vault operation together.
+
+## Use your application's signer
+
+Replace the generated test account with your application's [signer](/docs/accounts/keys), and select a vault on the same network. Check its accepted asset, eligibility, capabilities, fees, and withdrawal behavior before enabling writes.
+
+Keep the customer's confirmation between the displayed quote and submission. Refresh a stale quote and apply a positive minimum output. A successful quote does not reserve liquidity, and queued withdrawals need the vault's supported request-and-claim flow.
+
+For hosted API reads with generated request code, use [Balances and earnings](/docs/earn/balances). The Earn API does not sign deposits or withdrawals.

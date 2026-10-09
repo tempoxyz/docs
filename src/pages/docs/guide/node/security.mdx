@@ -4,6 +4,8 @@ seoTitle: "Tempo Node Security | Tempo Docs"
 description: Security best practices for Tempo node operators, covering key management, network configuration, release verification, and data integrity.
 ---
 
+import { required } from './security.recipes'
+
 # Node security: best practices for operators
 
 This page covers security best practices for Tempo node operators. Following these recommendations helps protect your validator from impersonation, unauthorized access, and operational mistakes.
@@ -26,10 +28,10 @@ See [Managing validator keys](/docs/guide/node/validator-keys) for the full key 
 Deploy validators using the [validator network topology](/docs/guide/node/validator-topology). Isolate the validator, allow direct consensus traffic only with other validators, and route execution P2P through internal follower RPC nodes.
 :::
 
-Tempo's networking layer includes built-in protections, making a cloud firewall or NAT gateway unnecessary in most setups. The node:
+Tempo's networking protections complement the firewall and isolation rules in the validator topology. The node:
 
 - Only accepts consensus connections from validators that can prove their identity
-- Only accepts connections from trusted IP addresses (active validators on-chain)
+- Restricts consensus connections to trusted validator IP addresses registered onchain
 - Rate-limits connections and messages in both consensus and execution layers
 
 ### Recommendations
@@ -55,4 +57,4 @@ An unsynchronized clock can cause your node to reject valid blocks or produce bl
 
 - Subscribe to [Tempo GitHub releases](https://github.com/tempoxyz/tempo/releases) for security patches and upgrade announcements.
 - Review the [Upgrade Cadence](/docs/guide/node/upgrade-cadence) to understand notification timelines.
-- Apply <span style={{color: 'var(--vocs-color_red)'}}>Required</span> upgrades before the activation block — failing to do so will fork your node off the network.
+- Apply <span className={required().className}>Required</span> upgrades before the activation block — failing to do so will fork your node off the network.

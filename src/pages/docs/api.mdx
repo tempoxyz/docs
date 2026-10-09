@@ -1,145 +1,76 @@
 ---
-title: "Tempo API"
-seoTitle: "Start with the Tempo API | Tempo Docs"
-description: Build stablecoin payment apps with the official Tempo blockchain API for account activity, webhooks, asset routes, exchange quotes, fee sponsorship, and indexed SQL.
+title: "API reference"
+seoTitle: "Tempo API reference | Tempo Docs"
+description: Read balances, track payments, configure webhooks, and integrate Tempo products through the Tempo API.
 ---
 
 import { Cards, Card, OpenApi } from 'vocs'
 
-# Tempo API
+<span id="tempo-api" />
 
-The Tempo API is the official Tempo blockchain API for stablecoin payment applications. Use it to read account and transaction activity, manage webhooks and integrations, quote asset routes and exchanges, sponsor fees, run indexed SQL, and call Tempo over JSON-RPC.
+# API reference
+
+Use the Tempo API to read balances and activity, track payments, and integrate Earn, Routes, and Zones. Start with a public request, then choose the access method your application needs.
 
 :::warning
-The Tempo API is under active development. Endpoints are not yet stable and may change without notice.
+The Tempo API is under active development. Endpoints may change. Check the [versioning policy](/docs/api/versioning-policy) before integrating.
 :::
 
-## Start with the Tempo API
+<span id="start-with-the-tempo-api" />
 
-Every endpoint is served over HTTPS from `https://api.tempo.xyz` under the `/v1` prefix. Most read endpoints are public, so you can make your first request without any credentials:
+## Make a request
+
+The API uses `https://api.tempo.xyz/v1`. Most read endpoints support public access:
 
 ```bash
 curl 'https://api.tempo.xyz/v1/blocks'
 ```
 
-## Choose a Tempo API surface
+<span id="try-a-tempo-api-request" />
 
-The same base URL and credentials give you access to four surfaces:
-
-<Cards>
-  <Card
-    title="REST API"
-    description="Read indexed blocks, transactions, tokens, balances, transfers, receipts, and account activity."
-    to="/docs/api/reference"
-    icon="lucide:braces"
-  />
-  <Card
-    title="JSON-RPC API"
-    description="Call standard Ethereum methods and Tempo-specific namespaces for node-level chain access."
-    to="/docs/api/json-rpc"
-    icon="lucide:radio-tower"
-  />
-  <Card
-    title="Fee Payer API"
-    description="Fill, sponsor, and broadcast Tempo Transactions through a hosted relay."
-    to="/docs/api/fee-payer"
-    icon="lucide:badge-dollar-sign"
-  />
-  <Card
-    title="Indexer API"
-    description="Run read-only SQL queries against Tempo's indexed blockchain data."
-    to="/docs/api/indexer-api"
-    icon="lucide:database"
-  />
-</Cards>
-
-## Choose Tempo API access
-
-There are three ways to authenticate, depending on the throughput you need:
-
-| Method | How | Limit |
-| --- | --- | --- |
-| Public | No credentials | 20 requests / minute per IP |
-| [MPP](/docs/api/authentication#mpp-paying-per-request) | `Authorization: Payment <credential>` | Pay per request, no key required |
-| [API key](/docs/api/authentication) | `Authorization: Bearer tempo:sk:...` | Higher, dedicated quota per key |
-
-Public access lets you try the API and serve low-volume reads, and [MPP](/docs/api/authentication#mpp-paying-per-request) lets you pay per request without a key. For higher, dedicated quotas, use an API key.
-
-:::info
-Create production and sandbox API keys in [Tempo API Console](https://console.tempo.xyz/?to=/:org/api-keys). Follow the [console quickstart](/docs/api/console) to set up a project and make your first authenticated request.
-:::
-
-## Common Tempo API workflows
-
-- **Track and reconcile a stablecoin payment.** Look up the [transaction and receipt](/docs/api/transactions), then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to confirm the token movement. Use [webhooks](/docs/api/webhooks) when your backend needs signed event callbacks.
-- **Monitor an account.** Read [balances](/docs/api/balances) and [activity](/docs/api/activities) to build payment history, treasury, or account views.
-- **Route and exchange stablecoins.** [Quote and create a transfer](/docs/api/routes/transfers) across supported chains, or [create a reusable deposit address](/docs/api/routes/deposit-addresses). Use [exchange quotes](/docs/api/exchange) to prepare unsigned approval and swap calls for you to sign and submit.
-- **Sponsor transaction fees.** Use the [Fee Payer API](/docs/api/fee-payer) to apply sponsorship policy and fill, sponsor, and broadcast user transactions.
-- **Query custom payment data.** Use the [Indexer API](/docs/api/indexer-api) for read-only SQL across indexed blocks, transactions, receipts, logs, transfers, and exchange data.
-- **Prepare a production integration.** Create projects and keys in [Tempo API Console](/docs/api/console), then review [authentication](/docs/api/authentication), [rate limits](/docs/api/rate-limits), and [errors](/docs/api/errors).
-
-## Try a Tempo API request
-
-Check out an endpoint below and click "Try" to run it directly against the API. For example, fetch the token balances for an address:
+Try reading an address's token balances below. The playground shows the request and response next to the controls.
 
 <OpenApi.Playground operationId="getAddressBalances" hideQueryParams />
 
-<span id="tempo-rest-api-endpoints" />
+<span id="choose-tempo-api-access" />
 
-## Tempo REST API reference
+## API access
 
-Browse the [complete Tempo API reference](/docs/api/reference) to find every API group and endpoint.
+| Access | Use it for |
+| --- | --- |
+| Public | Trying the API and low-volume reads without credentials. |
+| [API key](/docs/api/authentication) | Application requests with a dedicated quota. |
+| [MPP](/docs/api/authentication#mpp-paying-per-request) | Paying per request without an API key. |
 
+Create projects and API keys in [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys). The [console guide](/docs/api/console) covers environments, keys, billing, and team access. Keep API keys on your backend; they authenticate API requests and do not sign account transactions.
 
-## Next API integration steps
+<span id="choose-a-tempo-api-surface" />
+<span id="common-tempo-api-workflows" />
+
+## Choose an API
 
 <Cards>
-  <Card
-    title="Tempo API Console"
-    description="Create projects and API keys, monitor usage, configure billing, and manage access."
-    to="/docs/api/console"
-    icon="lucide:panel-left"
-  />
-  <Card
-    title="Authentication"
-    description="Use production and sandbox API keys, or pay per request with MPP."
-    to="/docs/api/authentication"
-    icon="lucide:key-round"
-  />
-  <Card
-    title="Conventions"
-    description="Shared formatting for identifiers, amounts, timestamps, errors, and rate limits."
-    to="/docs/api/conventions"
-    icon="lucide:ruler"
-  />
-  <Card
-    title="Pagination"
-    description="Page through list endpoints with cursors, page numbers, and optional total counts."
-    to="/docs/api/pagination"
-    icon="lucide:list-ordered"
-  />
-  <Card
-    title="Rate Limits"
-    description="Per-minute quotas, RateLimit-* headers, and retry best practices."
-    to="/docs/api/rate-limits"
-    icon="lucide:gauge"
-  />
-  <Card
-    title="Errors"
-    description="HTTP status codes, the error envelope, and the full error code catalog."
-    to="/docs/api/errors"
-    icon="lucide:triangle-alert"
-  />
-  <Card
-    title="Tempo API FAQ"
-    description="Answers about API surfaces, credentials, payment monitoring, asset routes, and exchange quotes."
-    to="/docs/api/faq"
-    icon="lucide:circle-help"
-  />
-  <Card
-    title="Versioning Policy"
-    description="Understand compatible changes, breaking changes, deprecations, and sunsets."
-    to="/docs/api/versioning-policy"
-    icon="lucide:git-branch"
-  />
+  <Card title="REST API" description="Read balances, transfers, activity, and product data." to="/docs/api/reference" icon="lucide:braces" />
+  <Card title="JSON-RPC" description="Read chain state and submit signed transactions." to="/docs/api/json-rpc" icon="lucide:radio-tower" />
+  <Card title="Fee payer" description="Sponsor and broadcast transactions through a hosted relay." to="/docs/api/fee-payer" icon="lucide:badge-dollar-sign" />
+  <Card title="Indexer" description="Query indexed blockchain data with SQL." to="/docs/api/indexer-api" icon="lucide:database" />
 </Cards>
+
+For a complete product workflow, follow [Accounts](/docs/accounts), [Earn](/docs/earn), [Routes](/docs/routes), or [Zones](/docs/zones). Their guides explain which calls to make and how to handle the results.
+
+## Webhooks
+
+Use [webhooks](/docs/api/webhooks) for event callbacks to your backend. For payment reconciliation, use the [transaction and receipt](/docs/api/transactions) together with [account activity](/docs/api/activities). See [Transactions and transfers](/docs/api/transactions-and-transfers) for the difference between execution and token movement.
+
+<span id="next-api-integration-steps" />
+
+## Limits and errors
+
+Check [rate limits](/docs/api/rate-limits), handle the documented [error responses](/docs/api/errors), and use [pagination](/docs/api/pagination) to read complete result sets. [Conventions](/docs/api/conventions) defines identifiers, amounts, and timestamps across endpoints.
+
+<span id="tempo-rest-api-endpoints" />
+<span id="tempo-rest-api-reference" />
+
+## Find an endpoint
+
+Browse the [endpoint reference](/docs/api/reference), or use the [typed TypeScript client](/docs/api/typed-client). The [API FAQ](/docs/api/faq) covers access, monitoring, routing, and exchange questions.

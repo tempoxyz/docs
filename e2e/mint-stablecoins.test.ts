@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { getDemoStep } from './helpers'
+import { expectDemoSuccess, getDemoStep } from './helpers'
 
 test('mint stablecoins', async ({ page }) => {
   test.setTimeout(180000)
@@ -33,9 +33,7 @@ test('mint stablecoins', async ({ page }) => {
   await expect(addFundsButton).toBeVisible()
   await addFundsButton.click()
 
-  await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
   // Step 3: Create a token (fill form and deploy)
   // Use label-based selectors to ensure we're filling the right inputs in the demo form
@@ -52,12 +50,10 @@ test('mint stablecoins', async ({ page }) => {
   await deployButton.click()
 
   // Wait for token to be created (View receipt appears)
-  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).first())
 
   // Step 4: Grant issuer role - click "Enter details" then "Grant"
-  const grantStep = getDemoStep(page, 'Grant issuer role on MintTestUSD.')
+  const grantStep = getDemoStep(page, /Grant issuer role on /)
   const grantEnterDetails = grantStep.getByRole('button', { name: 'Enter details' })
   await expect(grantEnterDetails).toBeVisible()
   await grantEnterDetails.click()
@@ -67,9 +63,7 @@ test('mint stablecoins', async ({ page }) => {
   await grantButton.click()
 
   // Wait for grant receipt
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(1)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(1))
 
   // Step 5: Mint tokens - click "Enter details" then "Mint"
   const mintStep = getDemoStep(page, 'Mint 100 MintTestUSD to yourself.')
@@ -82,9 +76,7 @@ test('mint stablecoins', async ({ page }) => {
   await mintButton.click()
 
   // Wait for mint receipt
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(2)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(2))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

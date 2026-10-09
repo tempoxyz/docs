@@ -2,6 +2,323 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/developers/docs/api/routes/quotes",
+      "destination": "/developers/docs/api/routes/transfers#quoteroutestransfer",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/assets",
+      "destination": "/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/assets",
+      "destination": "/developers/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/documentation/protocol/:path*",
+      "destination": "/developers/docs/protocol/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/stablecoin-exchange/:path*",
+      "destination": "/developers/docs/guide/stablecoin-dex/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/ai-support",
+      "destination": "/developers/docs/guide/using-tempo-with-ai",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/building-with-ai",
+      "destination": "/developers/docs/guide/using-tempo-with-ai",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide",
+      "destination": "/developers/docs/quickstart/integrate-tempo",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/quickstart",
+      "destination": "/developers/docs/quickstart/integrate-tempo",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/blockspace",
+      "destination": "/developers/docs/protocol/blockspace/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip20",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip20-rewards",
+      "destination": "/developers/docs/protocol/upgrades/t7#deprecate-tip-20-rewards",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip20-rewards/:path*",
+      "destination": "/developers/docs/protocol/upgrades/t7#deprecate-tip-20-rewards",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/issuance/distribute-rewards",
+      "destination": "/developers/docs/protocol/upgrades/t7#deprecate-tip-20-rewards",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip403",
+      "destination": "/developers/docs/protocol/tip403/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/learn/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/using-tempo-with-ai/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/sdk/typescript/prool",
+      "destination": "/developers/docs/sdk/typescript/prool/setup",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/cli/reference",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/quickstart/tip20",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/exchange/pathUSD",
+      "destination": "/developers/docs/protocol/exchange/quote-tokens#pathusd",
+      "permanent": true
+    },
+    {
+      "source": "/developers/wallet",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/wallet/reference",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/wallet/:path*",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/cli/reference",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/cli/wallet",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/cli/:path*",
+      "destination": "/developers/docs/cli/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developers/sdk/typescript/prool",
+      "destination": "/developers/docs/sdk/typescript/prool/setup",
+      "permanent": true
+    },
+    {
+      "source": "/developers/guide/use-accounts/fee-sponsorship",
+      "destination": "/developers/docs/guide/payments/sponsor-user-fees",
+      "permanent": true
+    },
+    {
+      "source": "/developers/quickstart/tip20",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/protocol/exchange/pathUSD",
+      "destination": "/developers/docs/protocol/exchange/quote-tokens#pathusd",
+      "permanent": true
+    },
+    {
+      "source": "/developers/protocol/zones/overview",
+      "destination": "/developers/docs/protocol/zones",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/assets",
+      "destination": "/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/assets",
+      "destination": "/developers/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/wallets",
+      "destination": "/docs/partners/wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/wallets",
+      "destination": "/developers/docs/partners/wallets",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/smart-contract-libraries",
+      "destination": "/docs/partners/smart-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/smart-contract-libraries",
+      "destination": "/developers/docs/partners/smart-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/exchanges",
+      "destination": "/docs/partners/exchanges",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/exchanges",
+      "destination": "/developers/docs/partners/exchanges",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/bridges",
+      "destination": "/docs/partners/bridges",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/bridges",
+      "destination": "/developers/docs/partners/bridges",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/orchestration",
+      "destination": "/docs/partners/payments-and-ramps",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/orchestration",
+      "destination": "/developers/docs/partners/payments-and-ramps",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/node-infrastructure",
+      "destination": "/docs/partners/rpc-and-nodes",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/node-infrastructure",
+      "destination": "/developers/docs/partners/rpc-and-nodes",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/data-analytics",
+      "destination": "/docs/partners/data-and-oracles",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/data-analytics",
+      "destination": "/developers/docs/partners/data-and-oracles",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/block-explorers",
+      "destination": "/docs/partners/explorers-and-debugging",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/block-explorers",
+      "destination": "/developers/docs/partners/explorers-and-debugging",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/security-compliance",
+      "destination": "/docs/partners/security-and-compliance",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/security-compliance",
+      "destination": "/developers/docs/partners/security-and-compliance",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/developer-tools",
+      "destination": "/docs/partners/developer-tools",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/developer-tools",
+      "destination": "/developers/docs/partners/developer-tools",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem",
+      "destination": "/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem",
+      "destination": "/developers/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/machine-payments/use-cases/:path*",
+      "destination": "/developers/docs/guide/machine-payments",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs.md",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/assets/md/index.md",
+      "permanent": true
+    },
+    {
+      "source": "/docs.md",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/index.md",
+      "permanent": true
+    },
+    {
       "source": "/developers/blog/inside-tempo-zones",
       "destination": "/developers/blog/privacy-with-tempo-zones",
       "permanent": true
@@ -34,6 +351,28 @@
     },
     {
       "source": "/developers",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/docs",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs",
       "has": [
         {
           "type": "host",
@@ -106,7 +445,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/ecosystem",
+      "destination": "https://tempo.xyz/developers/docs/partners",
       "permanent": true
     },
     {
@@ -139,7 +478,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -150,7 +489,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -161,7 +500,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -172,7 +511,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -352,6 +691,17 @@
       "permanent": true
     },
     {
+      "source": "/docs/learn/tempo/receive-policies",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "permanent": true
+    },
+    {
       "source": "/learn/use-cases/agentic-commerce",
       "has": [
         {
@@ -515,6 +865,31 @@
       ],
       "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
       "permanent": false
+    },
+    {
+      "source": "/developers/docs",
+      "destination": "/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build",
+      "destination": "/developers/docs/build",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/tip20-tokens",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/tempo-transactions",
+      "destination": "/developers/docs/protocol/transactions",
+      "permanent": true
+    },
+    {
+      "source": "/developers/performance",
+      "destination": "/developers/docs/protocol/blockspace/overview",
+      "permanent": true
     },
     {
       "source": "/accounts",
@@ -683,12 +1058,12 @@
     },
     {
       "source": "/wallet",
-      "destination": "/docs/wallet",
+      "destination": "/docs/cli/wallet",
       "permanent": true
     },
     {
       "source": "/wallet/:path*",
-      "destination": "/docs/wallet/:path*",
+      "destination": "/docs/cli/wallet",
       "permanent": true
     },
     {
@@ -703,7 +1078,7 @@
     },
     {
       "source": "/ecosystem",
-      "destination": "/docs/ecosystem",
+      "destination": "/docs/partners",
       "permanent": true
     },
     {
@@ -712,13 +1087,8 @@
       "permanent": true
     },
     {
-      "source": "/developers/docs/quickstart/developer-tools",
-      "destination": "/developers/docs/ecosystem",
-      "permanent": true
-    },
-    {
       "source": "/developers/docs/developer-tools",
-      "destination": "/developers/docs/ecosystem",
+      "destination": "/developers/docs/partners",
       "permanent": true
     },
     {
@@ -827,6 +1197,11 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/learn/tempo/receive-policies",
+      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "permanent": true
+    },
+    {
       "source": "/developers/learn/use-cases/agentic-commerce",
       "destination": "https://tempo.xyz/learn/blockchain-payments/",
       "permanent": true
@@ -868,7 +1243,7 @@
     },
     {
       "source": "/developer-tools",
-      "destination": "/docs/ecosystem",
+      "destination": "/docs/partners",
       "permanent": true
     },
     {
@@ -908,22 +1283,32 @@
     },
     {
       "source": "/learn/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
       "permanent": true
     },
     {
       "source": "/docs/learn/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
       "permanent": true
     },
     {
       "source": "/docs/guide/using-tempo-with-ai/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
       "permanent": true
     },
     {
       "source": "/build/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs.md",
+      "destination": "/developers/index.md",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs.md",
+      "destination": "/developers/assets/md/index.md",
       "permanent": true
     }
   ],

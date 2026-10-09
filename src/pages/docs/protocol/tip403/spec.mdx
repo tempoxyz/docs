@@ -3,11 +3,19 @@ title: Tempo Policy Registry (TIP-403) Specification
 description: Technical specification for the Tempo Policy Registry (TIP-403), enabling whitelist and blacklist access control for TIP-20 tokens on Tempo.
 ---
 
+import { docsSpecificationMeta } from '../../../../styles/surfaces.styles'
+
+import { Badge } from '../../../../components/Badge'
+
+<div className={`docs-specification-meta ${docsSpecificationMeta().className}`}>
+  <a href="/docs/protocol"><Badge>Specification</Badge></a>
+</div>
+
 # Tempo Policy Registry (TIP-403) Specification
 
 ## Abstract
 
-The Tempo Policy Registry (TIP-403) allows TIP-20 tokens to inherit access control and compliance policies. The registry supports two types of policies (whitelist and blacklist) and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
+The Tempo Policy Registry (TIP-403) allows TIP-20 tokens to inherit access control and compliance policies. The registry supports simple whitelist and blacklist policies, plus compound policies that select different rules for senders, recipients, and mint recipients and includes special built-in policies for common use cases. Policies can be shared across multiple tokens, enabling consistent compliance enforcement.
 
 ## Motivation
 
@@ -19,7 +27,7 @@ TIP-403 addresses this by providing a centralized registry that tokens can refer
 
 ## Specification
 
-The TIP-403 registry stores policies that TIP-20 tokens check against on any token transfer. Policies are associated with a unique `policyId`, can either be a blacklist or a whitelist policy, and contain a list of addresses. This list of addresses can be updated by the policy `admin`.
+The TIP-403 registry stores policies that TIP-20 tokens check against on any token transfer. Policies are associated with a unique `policyId`, can be simple or compound. A simple whitelist or blacklist has an address set that its `admin` can update. A compound policy references three simple or built-in policies.
 
 The TIP403Registry is deployed at address `0x403c000000000000000000000000000000000000`.
 
@@ -33,10 +41,11 @@ The `policyIdCounter` starts at `2` and increments with each new policy creation
 
 ### Policy Types
 
-TIP-403 supports two policy types:
+TIP-403 supports three policy types:
 
 * **Whitelist Policies:** Only addresses in the whitelist can transfer tokens. All other addresses are blocked
 * **Blacklist Policies:** Addresses in the blacklist are blocked from transferring tokens. All other addresses can transfer
+* **Compound Policies:** Separate sub-policies authorize senders, transfer recipients, and mint recipients. `createCompoundPolicy(senderPolicyId, recipientPolicyId, mintRecipientPolicyId)` creates immutable references; admins can still update the underlying simple policies.
 
 ### Storage and State
 
@@ -48,7 +57,7 @@ The registry maintains the following state:
 
 ### Interface Definition
 
-The complete TIP403Registry interface is defined below:
+The excerpt below covers simple-policy management. For compound policies, role-specific authorization, and receive policies, use the [full canonical ABI](https://github.com/tempoxyz/tempo/blob/main/crates/contracts/src/precompiles/tip403_registry.rs).
 
 ```solidity
 interface ITIP403Registry {
@@ -58,7 +67,8 @@ interface ITIP403Registry {
 
     enum PolicyType {
         WHITELIST,
-        BLACKLIST
+        BLACKLIST,
+        COMPOUND
     }
 
     struct PolicyData {
@@ -226,7 +236,7 @@ interface ITIP403Registry {
 
 ### Usage with TIP-20 Tokens
 
-TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. On any token transfer, they perform a TIP-403 policy check by calling `isAuthorized()` for both sender and recipient addresses. The policy to use for the token can only be set by the admin of the token.
+TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. Transfers check `isAuthorizedSender()` for the source and `isAuthorizedRecipient()` for the resolved destination. Mints check `isAuthorizedMintRecipient()` for the resolved destination. The policy to use for the token can only be set by the admin of the token.
 
 **Default Policy:** New tokens start with `transferPolicyId = 1` (always-allow policy).
 
@@ -253,7 +263,7 @@ token.changeTransferPolicyId(policyId);
 
 ### Authorization Logic
 
-The `isAuthorized()` function implements the following logic:
+For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
 
 ```solidity
 if (policyId < 2) {
