@@ -13,28 +13,52 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  verify:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
     timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
-    # Report cheap failures early and cancel sibling builds without a serial setup stage.
+    # Report cheap failures early and cancel sibling builds/tests on failure.
     strategy:
       fail-fast: true
       matrix:
         include:
           - target: check
             name: Check
+            shard: 0
+            container: ''
           - target: production
             name: Sitemap
+            shard: 0
+            container: ''
           - target: e2e
-            name: Build E2E app
+            name: E2E Tests (1/3)
+            shard: 1
+            container:
+              image: mcr.microsoft.com/playwright:v1.61.1-noble
+              options: --user 1001
+          - target: e2e
+            name: E2E Tests (2/3)
+            shard: 2
+            container:
+              image: mcr.microsoft.com/playwright:v1.61.1-noble
+              options: --user 1001
+          - target: e2e
+            name: E2E Tests (3/3)
+            shard: 3
+            container:
+              image: mcr.microsoft.com/playwright:v1.61.1-noble
+              options: --user 1001
 
     steps:
       - name: Secure runner
         uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+        with:
+          # Container jobs cannot be hardened in-place and lack the GitHub CLI.
+          disable-enforcement: ${{ matrix.target == 'e2e' }}
 
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -89,7 +113,7 @@ jobs:
           path: |
             node_modules/.cache/vocs/twoslash
             node_modules/.cache/graphite-related-docs.json
-          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.target }}
+          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.target }}-${{ matrix.shard }}
           restore-keys: |
             docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
 
@@ -123,81 +147,13 @@ jobs:
           VITE_E2E: "true"
           VITE_USE_HTTP: "true"
 
-      # A tar preserves modes and includes hidden files in the build output.
-      - name: Package E2E app
-        if: matrix.target == 'e2e'
-        run: tar -cf "$RUNNER_TEMP/e2e-app.tar" dist
-
-      - name: Upload E2E app
-        if: matrix.target == 'e2e'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: e2e-app
-          path: ${{ runner.temp }}/e2e-app.tar
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
-
-  e2e:
-    name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})
-    needs: build
-    runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --user 1001
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
-    strategy:
-      fail-fast: true
-      matrix:
-        shard: [1, 2, 3]
-
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-        with:
-          # The Playwright container does not include the GitHub CLI required
-          # by the Aegis installer. Container jobs cannot be hardened in-place.
-          disable-enforcement: true
-
-      - name: Clone repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-        with:
-          run_install: false
-          version: 10.28.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24.12.0
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download E2E app
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: e2e-app
-          path: ${{ runner.temp }}
-
-      - name: Unpack E2E app
-        run: tar -xf "$RUNNER_TEMP/e2e-app.tar"
-
       - name: Run Playwright tests
+        if: matrix.target == 'e2e'
         run: pnpm run test:e2e --shard=${{ matrix.shard }}/3
 
       - name: Upload test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.target == 'e2e' }}
         with:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
@@ -205,7 +161,7 @@ jobs:
   ci-gate:
     name: CI Gate
     if: always()
-    needs: [build, e2e]
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       id-token: write
