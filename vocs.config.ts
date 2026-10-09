@@ -44,6 +44,7 @@ const changelog = Changelog.from({
           .replace(/<details\b[^>]*>/gi, '')
           .replace(/<\/details>/gi, '')
           .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n')
+          .replace(/\]\(https:\/\/tempo\.xyz\/developers\//g, '](/')
 
         return {
           ...release,
