@@ -8,7 +8,7 @@ export function getDemoStep(page: Page, title: string | RegExp): Locator {
 // immediately instead of burning the entire success timeout before a retry.
 export async function expectDemoSuccess(page: Page, success: Locator, timeout = 90_000) {
   const errors = page
-    .locator('[data-active][data-completed] .bg-destructiveTint')
+    .locator('[data-active][data-completed] > div.bg-destructiveTint')
     .filter({ visible: true })
   await expect(success.or(errors).first()).toBeVisible({ timeout })
   expect(await errors.allTextContents(), 'Demo reported a terminal error').toEqual([])

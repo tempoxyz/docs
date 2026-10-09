@@ -31,3 +31,10 @@ test('ignores hidden error content when the demo succeeds', async ({ page }) => 
   )
   await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }))
 })
+
+test('does not mistake destructive action buttons for errors', async ({ page }) => {
+  await page.setContent(
+    '<div data-active data-completed><header><button class="bg-destructiveTint">Sign out</button></header><button>Add more funds</button></div>',
+  )
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }))
+})
