@@ -46,19 +46,66 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Fail cheap source checks before fetching schemas, testing, or building.
+      - name: Guard Vocs configuration
+        run: node scripts/guard-vocs-config.mjs
+
+      - name: Check
+        run: pnpm run check
+
+      - name: Check types
+        run: pnpm run check:types
+
+      - name: Check internal anchors
+        run: pnpm run check:anchors
+
       - name: Fetch OpenAPI specification
         run: |
           node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
           echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
 
-      - name: Check
-        run: pnpm run check
-
-      - name: Check internal anchors
-        run: pnpm run check:anchors
-
       - name: Test
         run: pnpm run test
+
+  # Keep the required Sitemap status and validate all generated production output.
+  sitemap:
+    name: Sitemap
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+
+      - name: Clone repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+        with:
+          run_install: false
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24.12.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch OpenAPI specification
+        run: |
+          node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
+          echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
 
       - name: Build
         run: pnpm run build
@@ -76,23 +123,6 @@ jobs:
 
       - name: Audit generated Markdown
         run: pnpm run check:markdown
-
-  # Preserve the required status name; coverage is validated on Check's build above.
-  sitemap:
-    name: Sitemap
-    needs: check
-    if: always()
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
-
-      - name: Verify sitemap validation succeeded
-        env:
-          CHECK_RESULT: ${{ needs.check.result }}
-        run: test "$CHECK_RESULT" = success
 
   ci-gate:
     name: CI Gate
@@ -114,6 +144,7 @@ jobs:
 
   e2e-build:
     name: Build E2E app
+    needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -178,7 +209,7 @@ jobs:
       contents: read
       id-token: write
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         shard: [1, 2, 3]
 
