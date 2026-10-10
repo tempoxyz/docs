@@ -400,6 +400,7 @@ export const docsHeaderMobileAgents = style({
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingBlock: tokens.spacing['2'],
+      color: tokens.color.foreground,
       fontSize: tokens.fontSize.sm,
       listStyle: 'none',
       cursor: 'pointer',
