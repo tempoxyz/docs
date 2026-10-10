@@ -150,6 +150,11 @@ export const tempoMcpExplorerText = style({
   display: 'block',
   color: tokens.color.gray11,
 })
+// AI1: TDS Platform NativeSelect spacing. Text sits 16px in; the select keeps
+// 24px clear of a 16x16 chevron placed 16px from its inline end. The fields
+// share this recipe, so the inputs take the same 16px inset and stay aligned.
+// The chevron is TDS ChevronDown in content primary, drawn as a background so
+// the explorer's markup is unchanged.
 export const select = style({
   width: '100%',
   borderRadius: tokens.radius.md,
@@ -157,9 +162,27 @@ export const select = style({
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray6,
   backgroundColor: tokens.color.gray1,
-  paddingInline: tokens.spacing['3'],
+  paddingInline: tokens.spacing['4'],
   paddingBlock: tokens.spacing['2'],
   color: tokens.color.gray12,
+  selectors: {
+    '&:is(select)': {
+      appearance: 'none',
+      paddingInlineEnd: tokens.spacing['10'],
+      backgroundImage:
+        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23000' d='M11.9804 6.1464C12.1757 5.9514 12.4923 5.95122 12.6875 6.1464C12.8823 6.3416 12.8823 6.65827 12.6875 6.85343L8.82516 10.7157C8.36974 11.1709 7.63132 11.1707 7.17574 10.7157L3.31344 6.85343C3.11818 6.65816 3.11818 6.34166 3.31344 6.1464C3.50871 5.95124 3.82524 5.95117 4.02047 6.1464L7.88277 10.0087C7.94782 10.0731 8.05324 10.0734 8.11813 10.0087L11.9804 6.1464Z'/%3E%3C/svg%3E\")",
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'right 16px center',
+      backgroundSize: '16px 16px',
+    },
+    ':root[data-vocs-theme="dark"] &:is(select)': {
+      backgroundImage:
+        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M11.9804 6.1464C12.1757 5.9514 12.4923 5.95122 12.6875 6.1464C12.8823 6.3416 12.8823 6.65827 12.6875 6.85343L8.82516 10.7157C8.36974 11.1709 7.63132 11.1707 7.17574 10.7157L3.31344 6.85343C3.11818 6.65816 3.11818 6.34166 3.31344 6.1464C3.50871 5.95124 3.82524 5.95117 4.02047 6.1464L7.88277 10.0087C7.94782 10.0731 8.05324 10.0734 8.11813 10.0087L11.9804 6.1464Z'/%3E%3C/svg%3E\")",
+    },
+    ':dir(rtl) &:is(select)': {
+      backgroundPosition: 'left 16px center',
+    },
+  },
 })
 export const tempoMcpExplorerLayout2 = style({
   display: 'flex',
@@ -248,7 +271,7 @@ export const tempoMcpExplorerInput = style({
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray6,
   backgroundColor: tokens.color.gray1,
-  paddingInline: tokens.spacing['3'],
+  paddingInline: tokens.spacing['4'],
   paddingBlock: tokens.spacing['2'],
   fontFamily: tokens.fontFamily.code,
   color: tokens.color.gray12,
