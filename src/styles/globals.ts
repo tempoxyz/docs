@@ -247,83 +247,7 @@ global({
   },
 })
 
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout]': {
-      '--tempo-callout-accent': 'var(--vocs-text-color-muted)',
-      backgroundColor: inherited.color.colorMixInSrgbTempoCalloutAccent10VocsBackgroundColorSurface,
-
-      borderColor: inherited.color.colorMixInSrgbTempoCalloutAccent28Transparent,
-
-      color: inherited.color.vocsTextColorPrimary,
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="info"]': {
-      '--tempo-callout-accent': 'var(--info)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="tip"]': {
-      '--tempo-callout-accent': 'var(--vocs-color-iris)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="warning"]': {
-      '--tempo-callout-accent': 'var(--warning)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="danger"]': {
-      '--tempo-callout-accent': 'var(--negative)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="success"]': {
-      '--tempo-callout-accent': 'var(--positive)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout] p[data-v], aside[data-v][data-v-callout] li[data-v], aside[data-v][data-v-callout] a[data-v], aside[data-v][data-v-callout] code[data-v]':
-      {
-        color: inherited.color.vocsTextColorPrimary,
-      },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout] li::marker': {
-      color: inherited.color.vocsTextColorPrimary,
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
-      color: inherited.color.tempoCalloutAccent,
-    },
-  },
-})
+// G11 callouts: see the TDS Callout and Alert treatment at the end of this file.
 
 global({
   '@layer utilities': {
@@ -1300,14 +1224,6 @@ global({
 
 global({
   '@layer utilities': {
-    'article[data-v-content] aside[data-v-callout]': {
-      borderRadius: tokens.radius.md,
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
     '[data-v-outline-indicator]': {
       backgroundColor: tokens.color.foreground,
     },
@@ -1519,6 +1435,88 @@ global({
         marginInline: tokens.spacing['0'],
         '--corner-radius': tokens.radius.lg,
         borderRadius: tokens.radius.lg,
+      },
+    },
+  },
+})
+
+// G11: callouts follow TDS Platform. Notes and info use Callout (subtle fill, no
+// icon); tip, warning, danger and success use Alert (tone fill, an 8px tone
+// square in place of the icon). Neither has a border, and text stays primary.
+global({
+  '@layer utilities': {
+    'aside[data-v][data-v-callout]': {
+      marginInline: tokens.spacing['0'],
+      paddingBlock: tokens.spacing['6'],
+      paddingInline: tokens.spacing['8'],
+      borderWidth: tokens.borderWidth.none,
+      '--corner-radius': tokens.radius.xl,
+      borderRadius: tokens.radius.xl,
+      backgroundColor: tokens.color.containerSubtle,
+      color: inherited.color.vocsTextColorPrimary,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.control,
+    },
+    'aside[data-v][data-v-callout] :is(p, li, a, code)[data-v], aside[data-v][data-v-callout] li::marker':
+      {
+        color: inherited.color.vocsTextColorPrimary,
+      },
+    'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
+      display: 'none',
+    },
+    'aside[data-v][data-v-callout][data-v-content] > :not(:is([data-v-callout-icon], [data-v-code-container]))':
+      {
+        paddingInlineStart: tokens.spacing['0'],
+      },
+    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"])':
+      {
+        padding: tokens.spacing['4'],
+        '--corner-radius': tokens.radius.lg,
+        borderRadius: tokens.radius.lg,
+      },
+    'aside[data-v][data-v-callout][data-v-context="tip"]': {
+      '--tempo-alert-tone': 'var(--info)',
+      backgroundColor: tokens.color.infoContainer,
+    },
+    'aside[data-v][data-v-callout][data-v-context="warning"]': {
+      '--tempo-alert-tone': 'var(--warning)',
+      backgroundColor: tokens.color.warningContainer,
+    },
+    'aside[data-v][data-v-callout][data-v-context="danger"]': {
+      '--tempo-alert-tone': 'var(--negative)',
+      backgroundColor: tokens.color.negativeContainer,
+    },
+    'aside[data-v][data-v-callout][data-v-context="success"]': {
+      '--tempo-alert-tone': 'var(--positive)',
+      backgroundColor: tokens.color.positiveContainer,
+    },
+    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"]) > [data-v-callout-icon]':
+      {
+        display: 'block',
+        width: '16px',
+        height: '16px',
+        // design-exception: Centres the 16px indicator box on the 20px first line.
+        marginTop: '2px !custom',
+        padding: tokens.spacing['1'],
+        // design-exception: TDS Alert indicator corner; the visible 8px square keeps a 2px radius.
+        borderRadius: '6px !custom',
+        // design-exception: The tone is set per context above from the status tokens.
+        backgroundColor: 'var(--tempo-alert-tone) !custom',
+        backgroundClip: 'content-box',
+      },
+    'aside[data-v][data-v-callout] > [data-v-callout-icon] > svg': {
+      display: 'none',
+    },
+    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"])[data-v-content] > :not(:is([data-v-callout-icon], [data-v-code-container]))':
+      {
+        paddingInlineStart: tokens.spacing['7'],
+      },
+  },
+  '@media (width < 768px)': {
+    '@layer utilities': {
+      'aside[data-v][data-v-callout]': {
+        paddingBlock: tokens.spacing['5'],
+        paddingInline: tokens.spacing['5'],
       },
     },
   },
