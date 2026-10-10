@@ -656,7 +656,13 @@ export function SidebarNodes({
                 depth === 0 ? ui.sidebarNodesLayout().className : ui.sidebarNodesLayout2().className
               }
             >
-              <p {...ui.sidebarNodesDescription()}>{node.text}</p>
+              <p
+                {...(depth === 0 && nodes.length === 1
+                  ? ui.sidebarNodesTitle()
+                  : ui.sidebarNodesDescription())}
+              >
+                {node.text}
+              </p>
               <div
                 className={
                   depth > 0

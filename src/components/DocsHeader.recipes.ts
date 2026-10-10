@@ -266,36 +266,34 @@ export const anchor2 = style({
   minHeight: tokens.spacing['8'],
   alignItems: 'center',
   gap: tokens.spacing['2'],
+  // SB3 in the drawer: the desktop sidebar's smoothed radius and hover motion.
   borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
   paddingInline: tokens.spacing['2'],
 
   paddingBlock: tokens.spacing['1'],
   fontFamily: tokens.fontFamily.book,
   fontSize: tokens.fontSize.sm,
   letterSpacing: tokens.letterSpacing.normal,
-  transitionProperty:
-    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  transitionDuration: 'var(--tempo-exit)',
+  selectors: {
+    '&:hover': { transitionDuration: 'var(--tempo-enter)' },
+  },
 })
+// SB1 in the drawer: the current page does not change on hover.
 export const anchor3 = style({
   fontWeight: tokens.fontWeight.medium,
+  color: tokens.color.foreground,
+})
+// SB2 in the drawer: entries use the primary color.
+export const anchor4 = style({
   color: tokens.color.foreground,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
         backgroundColor: inherited.color.colorMixInOklabForeground4Transparent,
-      },
-    },
-  },
-})
-export const anchor4 = style({
-  color: inherited.color.colorMixInOklabForeground70Transparent,
-  selectors: {
-    '&:hover': {
-      '@media (hover: hover)': {
-        backgroundColor: inherited.color.colorMixInOklabForeground4Transparent,
-        color: tokens.color.foreground,
       },
     },
   },
@@ -318,6 +316,7 @@ export const sidebarDisclosureSummary = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
   paddingInline: tokens.spacing['2'],
 
   paddingBlock: tokens.spacing['1'],
@@ -325,16 +324,15 @@ export const sidebarDisclosureSummary = style({
   fontSize: tokens.fontSize.sm,
   letterSpacing: tokens.letterSpacing.normal,
 
-  color: inherited.color.colorMixInOklabForeground65Transparent,
-  transitionProperty:
-    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
+  color: tokens.color.foreground,
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  transitionDuration: 'var(--tempo-exit)',
   selectors: {
     '&:hover': {
+      transitionDuration: 'var(--tempo-enter)',
       '@media (hover: hover)': {
         backgroundColor: inherited.color.colorMixInOklabForeground4Transparent,
-        color: tokens.color.foreground,
       },
     },
     '&::-webkit-details-marker': {
@@ -364,7 +362,22 @@ export const sidebarNodesLayout = style({
 export const sidebarNodesLayout2 = style({
   marginTop: tokens.spacing['3'],
 })
+// SB2 in the drawer: group labels take the entry type in the tertiary color.
 export const sidebarNodesDescription = style({
+  // design-exception: Derive this layout value from the existing responsive CSS variables.
+  marginInline: 'calc(var(--spacing) * -2) !custom',
+  paddingInline: tokens.spacing['2'],
+  paddingBlock: tokens.spacing['1'],
+  fontFamily: tokens.fontFamily.book,
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.normal,
+  fontWeight: tokens.fontWeight.normal,
+  letterSpacing: tokens.letterSpacing.normal,
+
+  color: tokens.color.tertiary,
+})
+// SB2 in the drawer: a single-section sidebar's header is the title, set like "On this page".
+export const sidebarNodesTitle = style({
   // design-exception: Derive this layout value from the existing responsive CSS variables.
   marginInline: 'calc(var(--spacing) * -2) !custom',
   paddingInline: tokens.spacing['2'],
@@ -372,10 +385,10 @@ export const sidebarNodesDescription = style({
   fontFamily: tokens.fontFamily.book,
   fontSize: tokens.fontSize.compact,
   lineHeight: tokens.lineHeight.compact,
-  fontWeight: tokens.fontWeight.normal,
+  fontWeight: tokens.fontWeight.medium,
   letterSpacing: tokens.letterSpacing.normal,
 
-  color: inherited.color.colorMixInOklabForeground60Transparent,
+  color: tokens.color.muted,
 })
 export const sidebarNodesLayout3 = style({
   marginInlineStart: tokens.spacing['2'],
