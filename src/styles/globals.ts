@@ -1240,12 +1240,14 @@ global({
 
 global({
   '@layer utilities': {
-    'body:has(.docs-section-nav) :is(a, button, input, summary):focus-visible': {
-      outlineWidth: tokens.borderWidth.emphasis,
-      outlineStyle: 'solid',
-      outlineColor: tokens.color.foreground,
-      outlineOffset: '3px',
-    },
+    // Segmented-control radios and tabs keep their own TDS rings (inset for segments).
+    'body:has(.docs-section-nav) :is(a, button, input, summary):not([role="radio"], [role="tab"]):focus-visible':
+      {
+        outlineWidth: tokens.borderWidth.emphasis,
+        outlineStyle: 'solid',
+        outlineColor: tokens.color.foreground,
+        outlineOffset: '3px',
+      },
   },
 })
 
