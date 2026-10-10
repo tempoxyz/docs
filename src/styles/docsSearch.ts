@@ -39,3 +39,32 @@ global({
       },
   },
 })
+
+// S3: the dialog grows and shrinks to fit its results. SearchDialogMotion.tsx binds
+// the measured content height to --tempo-search-height; height transitions to it
+// (capped by Vocs' 70vh). The results list stops stretching so its scroll height is
+// its content, and the key hints ride the bottom edge. Reduced motion: instant.
+global({
+  '@layer utilities': {
+    '[data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"])': {
+      height: 'var(--tempo-search-height, auto)',
+      interpolateSize: 'allow-keywords',
+      transitionProperty: 'opacity, scale, height',
+      transitionDuration: 'var(--tempo-exit), var(--tempo-exit), 240ms',
+      transitionTimingFunction: 'var(--tempo-ease)',
+    },
+    '[data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"]) > div:has(> #search-results), [data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"]) > div[class~="vocs:overflow-y-auto"]':
+      {
+        flex: '0 1 auto',
+        minHeight: 0,
+      },
+    '[data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"]) > div:last-child': {
+      marginBlockStart: 'auto',
+    },
+    '@media (prefers-reduced-motion: reduce)': {
+      '[data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"])': {
+        transitionProperty: 'opacity',
+      },
+    },
+  },
+})
