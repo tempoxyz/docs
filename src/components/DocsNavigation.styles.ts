@@ -371,6 +371,21 @@ export const docsHeaderMobileResources = style({
   borderTopWidth: tokens.borderWidth.hairline,
   borderTopStyle: 'solid',
   borderTopColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
+  selectors: {
+    '& > .docs-resource-links': {
+      gap: tokens.spacing['0'],
+    },
+    '& > .docs-resource-links a': {
+      paddingBlock: tokens.spacing['2'],
+      paddingInline: tokens.spacing['0'],
+    },
+    '& > .docs-resource-links a:hover': {
+      backgroundColor: 'transparent !custom',
+    },
+    '& > .docs-resource-links svg:last-child': {
+      opacity: 0.4,
+    },
+  },
 })
 
 export const docsHeaderMobileAgents = style({
@@ -381,29 +396,48 @@ export const docsHeaderMobileAgents = style({
   borderTopColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
   selectors: {
     '& summary': {
-      cursor: 'pointer',
-      marginBottom: tokens.spacing['4'],
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingBlock: tokens.spacing['2'],
+      color: tokens.color.foreground,
       fontSize: tokens.fontSize.sm,
+      listStyle: 'none',
+      cursor: 'pointer',
+    },
+    '& summary::-webkit-details-marker': {
+      display: 'none',
+    },
+    '& summary svg': {
+      opacity: 0.4,
+      transition: 'rotate 150ms',
+    },
+    '&[open] summary': {
+      marginBottom: tokens.spacing['4'],
+    },
+    '&[open] summary svg': {
+      rotate: '180deg',
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    selectors: {
+      '& summary svg': {
+        transition: 'none',
+      },
     },
   },
 })
 
 export const docsHeaderMobileUtilityLink = style({
-  display: 'block',
-  width: 'fit-content',
-  marginTop: tokens.spacing['4'],
+  display: 'flex',
+  justifyContent: 'space-between',
   paddingBlock: tokens.spacing['2'],
   color: tokens.color.foreground,
   fontSize: tokens.fontSize.sm,
   textDecoration: 'none',
   selectors: {
-    '&:first-child': {
-      marginTop: 0,
-      marginBottom: tokens.spacing['5'],
-    },
-    '&:is(:hover, [aria-current="page"])': {
-      textDecoration: 'underline',
-      textUnderlineOffset: '4px',
+    '& span': {
+      opacity: 0.4,
     },
   },
 })
@@ -426,6 +460,9 @@ export const docsSectionNavScroll = style({
   overflowX: 'auto',
   paddingInline: tokens.spacing['5'],
   scrollbarWidth: 'none',
+  // design-exception: Fade the scroll edges so clipped section tabs read as scrollable instead of cut off.
+  maskImage:
+    'linear-gradient(to right, transparent, black 16px, black calc(100% - 24px), transparent) !custom',
   selectors: {
     '&::-webkit-scrollbar': {
       display: 'none',
@@ -484,6 +521,7 @@ export const docsSectionUtilities = style({
   alignItems: 'center',
   flexShrink: 0,
   gap: tokens.spacing['6'],
+  marginInlineStart: tokens.spacing['3'],
   marginInlineEnd: tokens.spacing['5'],
   '@media (width < 800px)': {
     display: 'none',
@@ -655,17 +693,53 @@ export const docsHeaderMobileTheme = style({
 export const docsApiMenuMobile = style({
   selectors: {
     '& .docs-reference-trigger': {
+      justifyContent: 'space-between',
+      width: '100%',
       height: 'auto',
 
-      paddingBlock: tokens.spacing['3'],
+      paddingBlock: tokens.spacing['2'],
       paddingInline: tokens.spacing['0'],
-      fontSize: tokens.fontSize.body,
+      color: tokens.color.foreground,
+      fontSize: tokens.fontSize.sm,
+    },
+    '& .docs-reference-trigger[aria-current="page"]::after': {
+      display: 'none',
+    },
+    '& .docs-reference-trigger svg': {
+      opacity: 0.4,
+      transition: 'rotate 150ms',
+    },
+    '& .docs-reference-trigger[aria-expanded="true"] svg': {
+      rotate: '180deg',
     },
     '& .docs-reference-panel': {
       position: 'static',
       width: '100%',
+      padding: tokens.spacing['0'],
+      border: 0,
+      backgroundColor: 'transparent !custom',
       boxShadow: 'none',
+      gap: tokens.spacing['0'],
       marginBottom: tokens.spacing['2'],
+    },
+    '& .docs-reference-panel a': {
+      paddingBlock: tokens.spacing['2'],
+      paddingInlineStart: tokens.spacing['4'],
+      paddingInlineEnd: tokens.spacing['0'],
+    },
+    '& .docs-reference-panel a:hover': {
+      backgroundColor: 'transparent !custom',
+    },
+    '& .docs-api-menu-item > svg:last-child:not(:first-child)': {
+      marginInlineStart: 'auto !custom',
+      opacity: 0.4,
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    selectors: {
+      '& .docs-reference-trigger svg': {
+        transition: 'none',
+      },
     },
   },
 })

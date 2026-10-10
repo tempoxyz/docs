@@ -588,6 +588,16 @@ export const blogProse = style({
       color: inherited.color.proseCaption,
     },
   },
+  '@media (width < 640px)': {
+    selectors: {
+      // Wide comparison tables scroll inside the article instead of widening the page.
+      '& table': {
+        display: 'block',
+        maxWidth: '100%',
+        overflowX: 'auto',
+      },
+    },
+  },
 })
 
 export const docsZoneDiagram = style({

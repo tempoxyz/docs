@@ -2,6 +2,20 @@ import { global } from 'zyzz/web'
 import { inherited } from '../styles/inherited'
 import { vars as tokens } from '../styles/theme'
 
+// Vocs boxes the Previous/Next pagination links below its sm breakpoint. Keep them plain links
+// at every width; this layer follows vocs_utilities so it outranks the max-sm utilities.
+global({
+  '@layer utilities': {
+    '@media (width < 640px)': {
+      '[data-v-pagination] > a': {
+        padding: 0,
+        border: 0,
+        borderRadius: 0,
+      },
+    },
+  },
+})
+
 // Document/Vocs integration selectors cannot be attached to owned elements.
 // Vocs pagination links share the card markup, so they are excluded explicitly.
 global({
@@ -25,12 +39,10 @@ global({
       minWidth: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       padding: 'var(--tempo-card-padding) !custom',
-      borderWidth: tokens.borderWidth.hairline,
-      borderStyle: 'solid',
-      borderColor: tokens.color.line,
+      border: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
-      backgroundColor: inherited.color.surfacePanel,
+      backgroundColor: tokens.color.panel,
 
       color: inherited.color.vocsTextColorPrimary,
       textDecoration: 'none',

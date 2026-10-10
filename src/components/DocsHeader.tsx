@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRouter, Link as WakuLink } from 'waku'
 import { cx as composeStyles } from 'zyzz'
+import ChevronDownIcon from '~icons/lucide/chevron-down'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 
@@ -984,13 +985,17 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
                   aria-current={activeSection?.id === section.id ? 'page' : undefined}
                 >
                   {section.label}
+                  <span aria-hidden="true">↗</span>
                 </WakuLink>
               ),
             )}
             <DocsResourceLinks onNavigate={close} />
           </div>
           <details className={`docs-header-mobile-agents ${docsHeaderMobileAgents().className}`}>
-            <summary>Agent setup</summary>
+            <summary>
+              Agent setup
+              <ChevronDownIcon aria-hidden="true" width="14" height="14" />
+            </summary>
             <AgentsPanel variant="mobile" onNavigate={close} />
           </details>
           <ThemeSelect surface={surface} />

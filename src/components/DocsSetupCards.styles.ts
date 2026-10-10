@@ -17,12 +17,9 @@ export const docsSetupCard = style({
   flexDirection: 'column',
   minWidth: 0,
   padding: tokens.spacing['6'],
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: tokens.color.line,
 
   borderRadius: tokens.radius.xl,
-  backgroundColor: inherited.color.surfacePanel,
+  backgroundColor: tokens.color.panel,
   color: tokens.color.foreground,
   selectors: {
     '& h3': {
