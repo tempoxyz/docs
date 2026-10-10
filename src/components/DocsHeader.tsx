@@ -48,6 +48,7 @@ import {
   docsUtilitySections,
   getActiveDocsSection,
 } from './DocsSectionNav'
+import { HeadingAnchorFeedback } from './HeadingAnchorFeedback'
 import { SmoothCorners } from './SmoothCorners'
 
 const DOCS_BASE_PATH = '/docs'
@@ -837,6 +838,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
     <header className={`docs-site-header ${docsSiteHeader().className}`}>
       {/* The header is the one chrome shared by docs and blog pages. */}
       <SmoothCorners />
+      <HeadingAnchorFeedback />
       <nav
         className={`docs-header-nav ${docsHeaderNav().className}`}
         aria-label="Developer navigation"
