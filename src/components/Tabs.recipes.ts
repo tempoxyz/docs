@@ -36,10 +36,12 @@ export const tab = style({
       color: inherited.color.textColorInvert,
       transitionDuration: 'var(--tempo-enter)',
     },
+    // The ring sits outside the pill, so it takes the page's primary color: the
+    // selected tab's own (inverted) color would vanish against the page.
     '&:focus-visible': {
       outlineWidth: tokens.borderWidth.emphasis,
       outlineStyle: 'solid',
-      outlineColor: 'currentColor !custom',
+      outlineColor: inherited.color.vocsTextColorPrimary,
       outlineOffset: '2px',
     },
   },

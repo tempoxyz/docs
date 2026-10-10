@@ -34,6 +34,11 @@ export const tempoBlog = style({
       outline: '2px solid currentColor !custom',
       outlineOffset: '5px',
     },
+    // TDS Tab ring: page ink at 2px, so the inverted selected tab keeps a visible ring.
+    '& [role="tab"]:focus-visible': {
+      outlineColor: inherited.color.blogInk,
+      outlineOffset: '2px',
+    },
   },
 })
 
@@ -252,62 +257,16 @@ export const tempoBlogExplorerHeading = style({
   },
 })
 
+// BL4: the category filters are TDS Tabs (components/Tabs.tsx); this only resets
+// the fieldset that holds them.
 export const tempoBlogFilters = style({
-  display: 'flex',
-  flexWrap: 'wrap',
-  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-  gap: '8px 24px !custom',
   minWidth: 0,
-
+  margin: 0,
   paddingTop: tokens.spacing['0'],
   paddingInlineEnd: tokens.spacing['0'],
-  paddingBottom: tokens.spacing['6'],
+  paddingBottom: tokens.spacing['8'],
   paddingInlineStart: tokens.spacing['0'],
   border: 0,
-  selectors: {
-    '& button': {
-      minHeight: '36px',
-      border: 0,
-      borderBottomWidth: tokens.borderWidth.hairline,
-      borderBottomStyle: 'solid',
-      borderBottomColor: 'transparent !custom',
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      padding: '7px 0 !custom',
-
-      color: inherited.color.blogMuted,
-      backgroundColor: 'transparent !custom',
-      font: 'inherit',
-      fontSize: tokens.fontSize.compact,
-      whiteSpace: 'nowrap',
-      cursor: 'pointer',
-      transition: 'color 150ms',
-    },
-    '& button:hover': {
-      color: inherited.color.blogInk,
-    },
-    '& button[aria-pressed="true"]': {
-      borderBottomColor: inherited.color.blogInk,
-
-      color: inherited.color.blogInk,
-    },
-  },
-  '@media (width < 600px)': {
-    // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-    gap: '4px 20px !custom',
-    selectors: {
-      '& button': {
-        minHeight: '44px',
-        paddingInline: 0,
-      },
-    },
-  },
-  '@media (prefers-reduced-motion: reduce)': {
-    selectors: {
-      '& button': {
-        transition: 'none',
-      },
-    },
-  },
 })
 
 // BL3: the tempo.xyz Home Use cases grid. Up to three columns; cards have no
