@@ -6,6 +6,7 @@ import './links'
 import './headingAnchors'
 import './copyFeedback'
 import './docsGetStarted'
+import './docsSteps'
 import '../components/DocsCards.styles'
 import { fontFace, global, layers } from 'zyzz/web'
 
