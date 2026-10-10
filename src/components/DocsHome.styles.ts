@@ -326,13 +326,9 @@ export const tempoDocsHomeProductIcon = style({
   color: inherited.color.homeInk,
 })
 
+// Build with your agent sits on the page (no tile); its terminal takes the panel fill.
 export const tempoAgentStart = style({
-  '--home-muted': 'color-mix(in srgb, var(--home-ink) 68%, transparent)',
   minWidth: 0,
-  padding: tokens.spacing['7'],
-
-  borderRadius: tokens.radius.xl,
-  backgroundColor: inherited.color.homePanel,
   selectors: {
     '& h2': {
       margin: 0,
@@ -372,7 +368,8 @@ export const tempoAgentStart = style({
       marginTop: tokens.spacing['3'],
       overflow: 'hidden',
       borderRadius: tokens.radius.xl,
-      backgroundColor: inherited.color.vocsBackgroundColorPrimary,
+      '--corner-radius': tokens.radius.xl,
+      backgroundColor: inherited.color.homePanel,
     },
     '& .tempo-agent-start-destination': {
       display: 'inline-flex',
@@ -436,9 +433,13 @@ export const tempoAgentStart = style({
       fontSize: tokens.fontSize.compact,
       lineHeight: tokens.lineHeight.normal,
       cursor: 'pointer',
+      transitionProperty: 'color, background-color, border-color, opacity, transform',
+      transitionDuration: 'var(--tempo-exit)',
+      transitionTimingFunction: 'var(--tempo-ease)',
     },
     '& .tempo-agent-start-copy:hover': {
       color: inherited.color.homeInk,
+      transitionDuration: 'var(--tempo-enter)',
     },
     '& .tempo-agent-start-copy svg': {
       width: '14px',
@@ -500,7 +501,6 @@ export const tempoAgentStart = style({
     },
   },
   '@media (width < 520px)': {
-    padding: tokens.spacing['5'],
     selectors: {
       '& .tempo-agent-start-toolbar': {
         flexWrap: 'wrap',
