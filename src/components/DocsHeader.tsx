@@ -25,6 +25,7 @@ import {
   docsHeaderDestinations,
   docsHeaderIconButton,
   docsHeaderLogo,
+  docsHeaderMenuButton,
   docsHeaderMobileActions,
   docsHeaderMobileAgents,
   docsHeaderMobileBody,
@@ -38,7 +39,6 @@ import {
   docsHeaderMobileUtilityLink,
   docsHeaderMobileWebsite,
   docsHeaderNav,
-  docsHeaderSearch,
   docsHeaderWordmark,
   docsSiteHeader,
 } from './DocsNavigation.styles'
@@ -50,6 +50,7 @@ import {
   getActiveDocsSection,
 } from './DocsSectionNav'
 import { HeadingAnchorFeedback } from './HeadingAnchorFeedback'
+import { iconButton } from './IconButton.recipes'
 import { SmoothCorners } from './SmoothCorners'
 
 const DOCS_BASE_PATH = '/docs'
@@ -845,22 +846,8 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
         aria-label="Developer navigation"
       >
         {brand}
-        <button
-          type="button"
-          onClick={openSearch}
-          aria-label="Search documentation"
-          aria-keyshortcuts="Meta+K Control+K"
-          className={`docs-header-search ${docsHeaderSearch().className}`}
-          disabled={!mounted}
-        >
-          <span {...ui.docsHeaderText()}>
-            <SearchIcon />
-            <span {...ui.docsHeaderText2()}>Search docs</span>
-          </span>
-          <kbd>⌘ K</kbd>
-        </button>
+        {destinations}
         <div className={`docs-header-actions ${docsHeaderActions().className}`}>
-          {destinations}
           <div
             ref={agentMenuRef}
             className={`docs-header-agent-menu ${docsHeaderAgentMenu().className}`}
@@ -886,18 +873,16 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
               </div>
             ) : null}
           </div>
-        </div>
-        <div className={`docs-header-mobile-actions ${docsHeaderMobileActions().className}`}>
-          {destinations}
           <button
             type="button"
             onClick={openSearch}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
+            title="Search documentation (⌘K)"
             disabled={!mounted}
-            className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
+            className={`docs-header-search ${iconButton().className}`}
           >
-            <SearchIcon className={ui.searchIcon().className} />
+            <SearchIcon />
           </button>
           <button
             type="button"
@@ -906,7 +891,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
             disabled={!mounted}
             aria-expanded={open}
             aria-controls="docs-mobile-navigation"
-            className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
+            className={`docs-header-icon-button ${docsHeaderIconButton().className} ${docsHeaderMenuButton().className}`}
           >
             <MenuIcon />
           </button>

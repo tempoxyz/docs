@@ -32,16 +32,18 @@ export const docsHeaderNav = style({
   position: 'relative',
   zIndex: tokens.zIndex.header,
   display: 'grid',
-  gridTemplateColumns: 'minmax(0, 1fr) auto',
+  gridTemplateColumns: 'minmax(0, 1fr) auto auto',
   alignItems: 'center',
-  gap: tokens.spacing['5'],
+  gap: tokens.spacing['2'],
   height: 'var(--tempo-docs-primary-nav-height)',
   paddingInline: tokens.spacing['5'],
   '@media (width < 380px)': {
     paddingInline: tokens.spacing['3_5'],
   },
+  // tempo.xyz layout: logo, centered destinations, actions on the inline end.
   '@media (width >= 1080px)': {
-    gridTemplateColumns: 'minmax(80px, 1fr) minmax(240px, 420px) minmax(max-content, 1fr)',
+    gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)',
+    gap: tokens.spacing['5'],
     paddingInline: tokens.spacing['7'],
   },
 })
@@ -65,10 +67,17 @@ export const docsHeaderLogo = style({
 })
 
 export const docsHeaderWordmark = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  minHeight: '40px',
+  paddingInline: tokens.spacing['2'],
   color: inherited.color.colorMixInSrgbColorForeground60Transparent,
   fontSize: tokens.fontSize.sm,
   fontWeight: tokens.fontWeight.medium,
   textDecoration: 'none',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
     '&[aria-current="page"]': {
       color: tokens.color.foreground,
@@ -78,52 +87,23 @@ export const docsHeaderWordmark = style({
     },
     '&:hover': {
       color: tokens.color.foreground,
+      transitionDuration: 'var(--tempo-enter)',
     },
   },
   '@media (width < 380px)': {
+    paddingInline: tokens.spacing['1_5'],
     fontSize: tokens.fontSize.compact,
+  },
+  '@media (width >= 1080px)': {
+    paddingInline: tokens.spacing['3'],
   },
 })
 
 export const docsHeaderDestinations = style({
   display: 'flex',
   alignItems: 'center',
-  gap: tokens.spacing['5'],
+  gap: tokens.spacing['1'],
   whiteSpace: 'nowrap',
-})
-
-export const docsHeaderSearch = style({
-  display: 'none',
-  minWidth: 0,
-  height: '39px',
-  alignItems: 'center',
-  gap: tokens.spacing['2_5'],
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: 'transparent !custom',
-  borderRadius: tokens.radius.md,
-  backgroundColor: inherited.color.surfaceInput,
-
-  color: inherited.color.colorMixInSrgbColorForeground65Transparent,
-  paddingInline: tokens.spacing['3_5'],
-  fontSize: tokens.fontSize.sm,
-  cursor: 'pointer',
-  transition: 'border-color 150ms, color 150ms',
-  justifyContent: 'space-between',
-  selectors: {
-    '&:hover': {
-      // design-exception: Component artwork uses this optical mix; keep its existing contrast.
-      borderColor: 'color-mix(in srgb, currentColor 25%, transparent) !custom',
-      color: tokens.color.foreground,
-    },
-    '& kbd': {
-      fontSize: tokens.fontSize.xs,
-      fontFamily: 'inherit !custom',
-    },
-  },
-  '@media (width >= 1080px)': {
-    display: 'flex',
-  },
 })
 
 export const docsHeaderMobileSearch = style({
@@ -136,18 +116,22 @@ export const docsHeaderMobileSearch = style({
   borderStyle: 'solid',
   borderColor: 'transparent !custom',
   borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
   backgroundColor: inherited.color.surfaceInput,
 
   color: inherited.color.colorMixInSrgbColorForeground65Transparent,
   paddingInline: tokens.spacing['3_5'],
   fontSize: tokens.fontSize.sm,
   cursor: 'pointer',
-  transition: 'border-color 150ms, color 150ms',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
     '&:hover': {
       // design-exception: Component artwork uses this optical mix; keep its existing contrast.
       borderColor: 'color-mix(in srgb, currentColor 25%, transparent) !custom',
       color: tokens.color.foreground,
+      transitionDuration: 'var(--tempo-enter)',
     },
   },
   width: '100%',
@@ -155,12 +139,12 @@ export const docsHeaderMobileSearch = style({
 })
 
 export const docsHeaderActions = style({
-  display: 'none',
+  display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
-  gap: tokens.spacing['4'],
+  gap: tokens.spacing['1'],
   '@media (width >= 1080px)': {
-    display: 'flex',
+    gap: tokens.spacing['2'],
   },
 })
 
@@ -184,29 +168,47 @@ export const docsHeaderWebsite = style({
 
 export const docsHeaderAgentMenu = style({
   position: 'relative',
+  display: 'none',
+  '@media (width >= 1080px)': {
+    display: 'block',
+  },
 })
 
+// TDS Platform Button, secondary, small scale, with the G8 radius.
 export const docsHeaderAgentTrigger = style({
   display: 'flex',
-  height: '36px',
+  height: '32px',
   alignItems: 'center',
-  gap: tokens.spacing['2'],
+  gap: tokens.spacing['1_5'],
   border: 0,
-
-  borderRadius: tokens.radius.xl,
-  paddingInline: tokens.spacing['4'],
-
-  color: inherited.color.colorSurfaceShell,
-  backgroundColor: tokens.color.foreground,
+  // G8: header controls were 12px; smoothed lg reads a little rounder.
+  borderRadius: tokens.radius.lg,
+  '--corner-radius': tokens.radius.lg,
+  paddingInlineStart: tokens.spacing['4'],
+  paddingInlineEnd: tokens.spacing['3'],
+  color: inherited.color.vocsTextColorPrimary,
+  backgroundColor: tokens.color.container,
   fontSize: tokens.fontSize.sm,
   whiteSpace: 'nowrap',
   cursor: 'pointer',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
-    '&:hover': {
-      backgroundColor: inherited.color.colorMixInSrgbColorForeground85ColorSurfaceShell,
-    },
     '&[aria-expanded="true"]': {
-      backgroundColor: inherited.color.colorMixInSrgbColorForeground85ColorSurfaceShell,
+      backgroundColor: tokens.color.containerStrong,
+      transitionDuration: 'var(--tempo-enter)',
+    },
+    '&:disabled': {
+      cursor: 'default',
+    },
+  },
+  '@media (hover: hover)': {
+    selectors: {
+      '&:hover': {
+        backgroundColor: tokens.color.containerStrong,
+        transitionDuration: 'var(--tempo-enter)',
+      },
     },
   },
 })
@@ -214,11 +216,12 @@ export const docsHeaderAgentTrigger = style({
 export const docsHeaderAgentPanel = style({
   position: 'absolute',
   insetInlineEnd: 0,
-  top: 'calc(100% + 12px)',
+  top: 'calc(100% + 16px)',
   borderWidth: tokens.borderWidth.hairline,
   borderStyle: 'solid',
   borderColor: inherited.color.colorMixInSrgbCurrentColor12Transparent,
   borderRadius: tokens.radius.lg,
+  '--corner-radius': tokens.radius.lg,
   backgroundColor: inherited.color.colorSurfacePage,
   // design-exception: Preserve this surface's layered artwork or focus treatment.
   boxShadow: '0 8px 24px #0000000d !custom',
@@ -231,7 +234,7 @@ export const docsHeaderMobileActions = style({
   gap: tokens.spacing['0_5'],
   selectors: {
     '& .docs-header-destinations': {
-      marginInlineEnd: tokens.spacing['4'],
+      marginInlineEnd: tokens.spacing['2'],
     },
   },
   '@media (width >= 1080px)': {
@@ -242,15 +245,27 @@ export const docsHeaderMobileActions = style({
 export const docsHeaderIconButton = style({
   display: 'grid',
   width: '36px',
-  height: '40px',
+  height: '36px',
   placeItems: 'center',
+  // G8: header controls were 12px; smoothed lg reads a little rounder.
   borderRadius: tokens.radius.lg,
+  '--corner-radius': tokens.radius.lg,
   color: 'inherit !custom',
   cursor: 'pointer',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
     '&:hover': {
       backgroundColor: inherited.color.colorMixInSrgbCurrentColor5Transparent,
+      transitionDuration: 'var(--tempo-enter)',
     },
+  },
+})
+
+export const docsHeaderMenuButton = style({
+  '@media (width >= 1080px)': {
+    display: 'none',
   },
 })
 

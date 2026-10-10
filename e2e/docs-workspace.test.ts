@@ -475,10 +475,15 @@ for (const path of ['/', '/blog']) {
           return box
         }),
       )
-      for (const box of boxes.slice(0, 2)) {
-        expect(box.x).toBeGreaterThan(width / 2)
-        expect(box.x + box.width).toBeLessThanOrEqual(width)
-      }
+      // Docs and Blog sit centered in the bar; Agent setup, then search, at the inline end.
+      const [docsBox, blogBox, searchBox, agentsBox] = boxes
+      const navBox = await navigation.boundingBox()
+      if (!navBox) throw new Error('Header has no visible bounds')
+      const destinationsCenter = (docsBox.x + blogBox.x + blogBox.width) / 2
+      expect(Math.abs(destinationsCenter - (navBox.x + navBox.width / 2))).toBeLessThanOrEqual(2)
+      expect(agentsBox.x).toBeGreaterThan(blogBox.x + blogBox.width)
+      expect(searchBox.x).toBeGreaterThan(agentsBox.x + agentsBox.width)
+      expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(width)
       for (const [index, a] of boxes.entries()) {
         for (const b of boxes.slice(index + 1)) {
           expect(a.x + a.width <= b.x || b.x + b.width <= a.x).toBe(true)

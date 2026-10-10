@@ -396,21 +396,6 @@ export const tempoLogo = style({
   height: '18px',
   width: '80px',
 })
-export const docsHeaderText = style({
-  display: 'flex',
-  minWidth: '0',
-  alignItems: 'center',
-  gap: tokens.spacing['2_5'],
-})
-export const docsHeaderText2 = style({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-})
-export const searchIcon = style({
-  width: '18px',
-  height: '18px',
-})
 export const arrowUpRight3 = style({
   width: tokens.spacing['4'],
   height: tokens.spacing['4'],
