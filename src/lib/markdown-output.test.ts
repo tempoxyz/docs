@@ -368,11 +368,11 @@ No validator P2P or RPC port should be directly accessible from the internet.
 
 Send stablecoins with a test wallet.
 
-<HomeGuideButton href="/get-started/quickstart">Send your first payment</HomeGuideButton>
+<HomeGuideButton href="/get-started/quickstart" guide="Send your first payment" />
 
 </div>
 
-<p className="tempo-docs-home-guides-more"><ChevronLink href="/get-started">Find your starting point</ChevronLink></p>
+<ChevronLink href="/get-started" className="tempo-docs-home-guides-more">Find your starting point</ChevronLink>
 
 - <HomeColorLink href="/docs/sdk/typescript">TypeScript</HomeColorLink>
 `)

@@ -22,27 +22,32 @@ const homeAgentSetups = [
     label: 'Codex',
     command:
       'codex plugin marketplace add tempoxyz/plugins --ref main\ncodex plugin add docs@tempo',
-    instruction: /^Install Codex CLI/,
+    instruction: null,
+    install: /^Install Codex CLI/,
   },
   {
     label: 'Claude Code',
     command: 'claude plugin marketplace add tempoxyz/plugins\nclaude plugin install docs@tempo',
-    instruction: /^Install Claude Code/,
+    instruction: null,
+    install: /^Install Claude Code/,
   },
   {
     label: 'Amp',
     command: 'amp mcp add tempo https://mcp.tempo.xyz',
     instruction: /MCP/,
+    install: /^Install Amp/,
   },
   {
     label: 'Skills',
     command: 'npx skills add tempoxyz/plugins --skill docs',
     instruction: /skill/i,
+    install: null,
   },
   {
     label: 'MCP',
     command: 'https://mcp.tempo.xyz',
     instruction: /HTTP MCP server/i,
+    install: null,
   },
 ] as const
 
@@ -556,7 +561,7 @@ test('agent-first entry page offers setup and payment guides', async ({
   await expect(
     setup.getByRole('link', { name: 'All setup options', exact: false }),
   ).toHaveAttribute('href', '/docs/guide/using-tempo-with-ai')
-  for (const { label, command, instruction } of homeAgentSetups) {
+  for (const { label, command, instruction, install } of homeAgentSetups) {
     const multipleCommands = command.includes('\n')
     const commandSuccess =
       label === 'MCP'
@@ -566,9 +571,15 @@ test('agent-first entry page offers setup and payment guides', async ({
           : 'Command copied. Paste it into your terminal and run it.'
     await setup.getByRole('radio', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
-    await expect(
-      setup.locator('.tempo-agent-start-install .tempo-agent-start-instruction'),
-    ).toContainText(instruction)
+    const instructionText = setup.locator(
+      '.tempo-agent-start-install .tempo-agent-start-instruction',
+    )
+    if (instruction) await expect(instructionText).toContainText(instruction)
+    else await expect(instructionText).toHaveCount(0)
+    // The install link sits on the Connect Tempo docs heading row.
+    const installLink = setup.locator('.tempo-agent-start-heading .tempo-agent-start-prerequisite')
+    if (install) await expect(installLink).toContainText(install)
+    else await expect(installLink).toHaveCount(0)
     await setup
       .getByRole('button', {
         name:

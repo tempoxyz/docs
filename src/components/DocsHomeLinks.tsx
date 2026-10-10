@@ -17,11 +17,16 @@ export function HomeColorLink({ href, children }: { href: string; children: Reac
   )
 }
 
-/** A secondary (gray) button that opens a guide from the home 3-up. */
-export function HomeGuideButton({ href, children }: { href: string; children: ReactNode }) {
+/** A secondary (gray) "Get started" button under a guide in the home 3-up. The
+ * guide's name is the column heading, so the accessible name carries it too. */
+export function HomeGuideButton({ href, guide }: { href: string; guide: string }) {
   return (
-    <Link to={href} {...button({ variant: 'default', className: 'tempo-docs-home-guide-button' })}>
-      {children}
+    <Link
+      to={href}
+      aria-label={`Get started: ${guide}`}
+      {...button({ variant: 'default', className: 'tempo-docs-home-guide-button' })}
+    >
+      Get started
     </Link>
   )
 }

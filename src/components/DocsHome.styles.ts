@@ -72,6 +72,29 @@ export const tempoDocsHome = style({
       borderTopStyle: 'solid',
       borderTopColor: tokens.color.hairline,
     },
+    // Start with a guide: the heading row carries Find your starting point at the inline end.
+    '& .tempo-docs-home-section-head': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      columnGap: tokens.spacing['4'],
+      rowGap: tokens.spacing['2'],
+    },
+    // Each guide's name heads its column; the button below reads "Get started".
+    '& .tempo-docs-home-guide h3[data-v]': {
+      margin: 0,
+      padding: 0,
+
+      color: inherited.color.homeInk,
+      fontSize: tokens.fontSize.lead,
+      fontWeight: tokens.fontWeight.medium,
+      letterSpacing: tokens.letterSpacing.tight,
+      lineHeight: tokens.lineHeight.snug,
+    },
+    '& .tempo-docs-home-guide .heading-anchor': {
+      display: 'none',
+    },
     '& .tempo-docs-home-guide p[data-v]': {
       margin: 0,
 
@@ -86,15 +109,9 @@ export const tempoDocsHome = style({
     },
     // Same style as All setup options.
     '& .tempo-docs-home-guides-more': {
-      marginTop: tokens.spacing['6'],
-      marginInlineEnd: tokens.spacing['0'],
-      marginBottom: tokens.spacing['0'],
-      marginInlineStart: tokens.spacing['0'],
+      color: inherited.color.homeInk,
       fontSize: tokens.fontSize.compact,
       lineHeight: tokens.lineHeight.relaxed,
-    },
-    '& .tempo-docs-home-guides-more > a': {
-      color: inherited.color.homeInk,
       textDecoration: 'none',
     },
     '& .tempo-docs-home-products': {
@@ -311,6 +328,29 @@ export const tempoAgentStart = style({
       justifyContent: 'space-between',
       gap: tokens.spacing['4'],
     },
+    // The agent block is an outlined tile, like the setup tiles on Accounts: page
+    // fill and a hairline (G4), the card radius and padding.
+    '& .tempo-agent-start-panel': {
+      marginTop: tokens.spacing['7'],
+      // design-exception: Shares the Vocs card padding variable with the setup tiles.
+      padding: 'var(--tempo-card-padding) !custom',
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.hairline,
+      // design-exception: Shares the card radius variable with the setup tiles.
+      borderRadius: 'var(--tempo-card-radius) !custom',
+      '--corner-radius': 'var(--tempo-card-radius)',
+      backgroundColor: tokens.color.card,
+    },
+    // Connect Tempo docs, with the agent's install link at the inline end.
+    '& .tempo-agent-start-heading': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      columnGap: tokens.spacing['4'],
+      rowGap: tokens.spacing['1'],
+    },
     '& .tempo-agent-start-label': {
       margin: 0,
 
@@ -323,7 +363,7 @@ export const tempoAgentStart = style({
     // The setup chooser spans the full width; on narrow screens it scrolls sideways
     // (SegmentedControl sets overflow-x: auto) and never wraps.
     '& .tempo-agent-start-agents': {
-      marginTop: tokens.spacing['7'],
+      marginTop: tokens.spacing['0'],
       marginInlineEnd: tokens.spacing['0'],
       marginBottom: tokens.spacing['5'],
       marginInlineStart: tokens.spacing['0'],
@@ -416,6 +456,8 @@ export const tempoAgentStart = style({
     // The install link can stand alone (Codex, Claude Code), so it carries no leading margin.
     '& .tempo-agent-start-prerequisite': {
       color: inherited.color.homeInk,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
       textDecoration: 'underline',
 
       textDecorationColor: inherited.color.colorMixInSrgbHomeInk35Transparent,
@@ -437,7 +479,7 @@ export const tempoAgentStart = style({
       textDecoration: 'none',
     },
     // Standalone links get at least a 24px hit area.
-    '& :is(.tempo-docs-home-guides-more, .tempo-agent-start-footer) > a, & .tempo-agent-start-prerequisite, & .tempo-docs-home-product-group :is(h3[data-v], li[data-v]) > a:not(.heading-anchor), & .tempo-docs-home-reference-grid li a':
+    '& .tempo-docs-home-guides-more, & .tempo-agent-start-footer > a, & .tempo-agent-start-prerequisite, & .tempo-docs-home-product-group :is(h3[data-v], li[data-v]) > a:not(.heading-anchor), & .tempo-docs-home-reference-grid li a':
       {
         display: 'inline-block',
         minHeight: '24px',
