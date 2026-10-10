@@ -38,11 +38,11 @@ export const tempoDocsHome = style({
       fontSize: tokens.fontSize.body,
       lineHeight: tokens.lineHeight.relaxed,
     },
+    // Build with your agent, then Start with a guide, stacked a section apart.
     '& .tempo-docs-home-start': {
       display: 'grid',
-      gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr)',
-      alignItems: 'start',
-      gap: tokens.spacing['12'],
+      gridTemplateColumns: 'minmax(0, 1fr)',
+      rowGap: tokens.spacing.section,
     },
     '& h2[data-v]': {
       margin: 0,
@@ -54,42 +54,48 @@ export const tempoDocsHome = style({
       letterSpacing: tokens.letterSpacing.heading,
       lineHeight: tokens.lineHeight.compact,
     },
-    '& .tempo-docs-home-guides': {
-      paddingTop: tokens.spacing['7'],
+    // Start with a guide: a 3-up of hairline-topped columns, each a description
+    // and a secondary button named for the guide. Buttons align at the column end.
+    '& .tempo-docs-home-guide-grid': {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+      gap: tokens.spacing['5'],
+      marginTop: tokens.spacing['7'],
     },
-    '& .tempo-docs-home-guides h2[data-v]': {
-      marginBottom: tokens.spacing['7'],
-      fontSize: tokens.fontSize.subheading,
-    },
-    '& .tempo-docs-home-guides > a': {
-      display: 'block',
-      marginBottom: tokens.spacing['7'],
-      textDecoration: 'none',
-    },
-    '& .tempo-docs-home-guides strong': {
+    '& .tempo-docs-home-guide': {
       display: 'flex',
-      justifyContent: 'space-between',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
       gap: tokens.spacing['4'],
-
-      color: inherited.color.homeInk,
-      fontSize: tokens.fontSize.bodySmall,
-      fontWeight: tokens.fontWeight.medium,
-      lineHeight: tokens.lineHeight.normal,
+      paddingTop: tokens.spacing['4'],
+      borderTopWidth: tokens.borderWidth.hairline,
+      borderTopStyle: 'solid',
+      borderTopColor: tokens.color.hairline,
     },
-    '& .tempo-docs-home-guides strong + span': {
-      display: 'block',
-      marginTop: tokens.spacing['1_5'],
+    '& .tempo-docs-home-guide p[data-v]': {
+      margin: 0,
 
       color: inherited.color.homeMuted,
       fontSize: tokens.fontSize.sm,
       lineHeight: tokens.lineHeight.relaxed,
+      textWrap: 'pretty',
     },
-    '& .tempo-docs-home-guides > p[data-v]': {
-      marginTop: tokens.spacing['8'],
+    '& .tempo-docs-home-guide-button': {
+      // design-exception: Pushes the button to the column end so the 3-up buttons align.
+      marginTop: 'auto !custom',
+    },
+    // Same style as All setup options.
+    '& .tempo-docs-home-guides-more': {
+      marginTop: tokens.spacing['6'],
       marginInlineEnd: tokens.spacing['0'],
       marginBottom: tokens.spacing['0'],
       marginInlineStart: tokens.spacing['0'],
-      fontSize: tokens.fontSize.sm,
+      fontSize: tokens.fontSize.compact,
+      lineHeight: tokens.lineHeight.relaxed,
+    },
+    '& .tempo-docs-home-guides-more > a': {
+      color: inherited.color.homeInk,
+      textDecoration: 'none',
     },
     '& .tempo-docs-home-products': {
       marginTop: tokens.spacing['12'],
@@ -235,46 +241,27 @@ export const tempoDocsHome = style({
       textDecoration: 'underline',
       textUnderlineOffset: '4px',
     },
-    '& .tempo-docs-home-guides strong > span': {
-      transition: 'translate 150ms',
-    },
-    '& .tempo-docs-home-guides > a:hover strong > span': {
-      translate: '4px 0',
-    },
-    '& .tempo-docs-home-guides > a:hover strong + span': {
-      color: inherited.color.homeInk,
-    },
-  },
-  '@media (prefers-reduced-motion: reduce)': {
-    selectors: {
-      '& .tempo-docs-home-guides strong > span': {
-        transition: 'none',
-      },
-    },
   },
   '@media (width < 1100px)': {
     selectors: {
       '& .tempo-docs-home-product-grid': {
         gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
       },
-      '& .tempo-docs-home-start': {
-        gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
-        gap: tokens.spacing['8'],
-      },
     },
   },
   '@media (width < 800px)': {
     selectors: {
-      '& .tempo-docs-home-start': {
-        gridTemplateColumns: 'minmax(0, 1fr)',
-        gap: tokens.spacing['9'],
-      },
-      '& .tempo-docs-home-guides': {
-        padding: 0,
-      },
       '& .tempo-docs-home-reference-grid': {
         gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
         gap: tokens.spacing['8'],
+      },
+    },
+  },
+  '@media (width < 768px)': {
+    selectors: {
+      '& .tempo-docs-home-guide-grid': {
+        gridTemplateColumns: 'minmax(0, 1fr)',
+        gap: tokens.spacing['7'],
       },
     },
   },
@@ -330,11 +317,12 @@ export const tempoDocsHomeProductIcon = style({
 export const tempoAgentStart = style({
   minWidth: 0,
   selectors: {
+    // One section heading style on Home (Start with a guide, Products, Tools & references).
     '& h2': {
       margin: 0,
-      fontSize: tokens.fontSize.titleSmall,
+      fontSize: tokens.fontSize.title,
       fontWeight: tokens.fontWeight.medium,
-      letterSpacing: tokens.letterSpacing.compact,
+      letterSpacing: tokens.letterSpacing.heading,
       lineHeight: tokens.lineHeight.compact,
     },
     '& .tempo-agent-start-toolbar': {
@@ -480,10 +468,6 @@ export const tempoAgentStart = style({
     },
     '& .tempo-agent-start-feedback:empty': {
       margin: 0,
-    },
-    '& .tempo-agent-start-footer > a:hover': {
-      textDecoration: 'underline',
-      textUnderlineOffset: '4px',
     },
   },
   '@media (width < 1100px)': {

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'waku'
 import CheckIcon from '~icons/lucide/check'
 import CopyIcon from '~icons/lucide/copy'
 import PlugIcon from '~icons/lucide/plug'
@@ -9,6 +8,7 @@ import TerminalIcon from '~icons/lucide/terminal'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
+import { ChevronLink } from './ChevronLink'
 import { CopyIconSwap } from './CopyIconSwap'
 import { tempoAgentStart, tempoAgentStartCommand } from './DocsHome.styles'
 import { SegmentedControl } from './SegmentedControl'
@@ -195,9 +195,7 @@ export function DocsHomeAgent() {
       </div>
 
       <div className="tempo-agent-start-footer">
-        <Link to="/docs/guide/using-tempo-with-ai">
-          All setup options <span aria-hidden="true">→</span>
-        </Link>
+        <ChevronLink href="/docs/guide/using-tempo-with-ai">All setup options</ChevronLink>
       </div>
     </div>
   )

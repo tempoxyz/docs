@@ -9,6 +9,7 @@ import { ChevronLink } from '../components/ChevronLink'
 import { tempoDocsHome } from '../components/DocsHome.styles'
 
 import { DocsHomeAgent } from '../components/DocsHomeAgent'
+import { HomeGuideButton } from '../components/DocsHomeLinks'
 import { DocsHomeProductIcon } from '../components/DocsHomeProductIcon'
 
 <div className={`tempo-docs-home ${tempoDocsHome().className}`}>
@@ -34,11 +35,31 @@ Build financial products with Tempo's APIs, SDKs, and protocol.
 
 ## Start with a guide
 
-<a href="/get-started/quickstart"><strong>Send your first payment <span aria-hidden="true">→</span></strong><span>Send stablecoins with a test wallet.</span></a>
-<a href="/docs/accounts/create"><strong>Create an account <span aria-hidden="true">→</span></strong><span>Choose passkeys, signing keys, or a wallet provider.</span></a>
-<a href="/docs/guide/machine-payments/agent"><strong>Pay for an API <span aria-hidden="true">→</span></strong><span>Find a service and make a paid request with the CLI.</span></a>
+<div className="tempo-docs-home-guide-grid">
+<div className="tempo-docs-home-guide">
 
-<p><a href="/get-started">Find your starting point →</a></p>
+Send stablecoins with a test wallet.
+
+<HomeGuideButton href="/get-started/quickstart">Send your first payment</HomeGuideButton>
+
+</div>
+<div className="tempo-docs-home-guide">
+
+Choose passkeys, signing keys, or a wallet provider.
+
+<HomeGuideButton href="/docs/accounts/create">Create an account</HomeGuideButton>
+
+</div>
+<div className="tempo-docs-home-guide">
+
+Find a service and make a paid request with the CLI.
+
+<HomeGuideButton href="/docs/guide/machine-payments/agent">Pay for an API</HomeGuideButton>
+
+</div>
+</div>
+
+<p className="tempo-docs-home-guides-more"><ChevronLink href="/get-started">Find your starting point</ChevronLink></p>
 
 </div>
 </div>

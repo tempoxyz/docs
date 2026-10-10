@@ -307,7 +307,12 @@ function rewriteNode(
   }
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, context)
-  if (node.name === 'DocsLinkButton' || node.name === 'ChevronLink') return renderLinkButton(node)
+  if (
+    node.name === 'DocsLinkButton' ||
+    node.name === 'ChevronLink' ||
+    node.name === 'HomeGuideButton'
+  )
+    return renderLinkButton(node)
   if (node.name === 'OpenApi.Endpoints' || node.name === 'OpenApi.Playground')
     return renderOpenApi(node, headingDepth, context.openApi)
   if (node.name && interactiveDescriptions[node.name])
@@ -672,19 +677,6 @@ function renderHtmlLink(
   context: MarkdownContext,
 ): MarkdownNode[] {
   const href = requiredStringAttribute(node, 'href')
-  const [title, ...description] = node.children ?? []
-  // Homepage guide cards use a bold title followed by a description inside the same link.
-  if (title?.name === 'strong' && description.some((child) => child.name === 'span')) {
-    rewriteChildren(title, headingDepth, context)
-    const content: MarkdownNode = { type: 'root', children: description }
-    rewriteChildren(content, headingDepth, context)
-    return [
-      paragraph([
-        link(plainText(title.children ?? []), href),
-        text(` — ${plainText(content.children ?? [])}`),
-      ]),
-    ]
-  }
   rewriteChildren(node, headingDepth, context)
   const content: MarkdownNode = { type: 'link', url: href, children: node.children ?? [] }
   return node.type === 'mdxJsxTextElement' ? [content] : [paragraph([content])]
