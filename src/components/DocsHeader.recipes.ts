@@ -362,7 +362,7 @@ export const sidebarNodesLayout = style({
 export const sidebarNodesLayout2 = style({
   marginTop: tokens.spacing['3'],
 })
-// SB2 in the drawer: group labels take the entry type in the tertiary color.
+// SB2 in the drawer: group labels take the entry type in the secondary color.
 export const sidebarNodesDescription = style({
   // design-exception: Derive this layout value from the existing responsive CSS variables.
   marginInline: 'calc(var(--spacing) * -2) !custom',
@@ -374,7 +374,7 @@ export const sidebarNodesDescription = style({
   fontWeight: tokens.fontWeight.normal,
   letterSpacing: tokens.letterSpacing.normal,
 
-  color: tokens.color.tertiary,
+  color: tokens.color.muted,
 })
 // SB2 in the drawer: a single-section sidebar's header is the title, set like "On this page".
 export const sidebarNodesTitle = style({

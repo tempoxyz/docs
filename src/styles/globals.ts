@@ -451,7 +451,7 @@ global({
 // SB2: a single-section sidebar's header is its title, set like the right rail's
 // "On this page" label in the secondary color. In multi-section sidebars every
 // header is a group label (for example Accounts, Payments, Fees): entry type and
-// spacing in the tertiary color. Collapsible headers are interactive, so they
+// spacing in the secondary color. Collapsible headers are interactive, so they
 // keep the entry (primary) color. Entries use the primary color.
 global({
   '@layer utilities': {
@@ -484,7 +484,7 @@ global({
         paddingInline: tokens.spacing['2'],
         backgroundColor: 'transparent !custom',
 
-        color: tokens.color.tertiary,
+        color: tokens.color.muted,
         fontSize: tokens.fontSize.sm,
         fontWeight: tokens.fontWeight.normal,
 
