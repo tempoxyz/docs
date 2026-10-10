@@ -436,6 +436,12 @@ export const tempoAgentStart = style({
       color: inherited.color.homeInk,
       textDecoration: 'none',
     },
+    // Standalone links get at least a 24px hit area.
+    '& :is(.tempo-docs-home-guides-more, .tempo-agent-start-footer) > a, & .tempo-agent-start-prerequisite, & .tempo-docs-home-product-group :is(h3[data-v], li[data-v]) > a:not(.heading-anchor), & .tempo-docs-home-reference-grid li a':
+      {
+        display: 'inline-block',
+        minHeight: '24px',
+      },
     '& .tempo-agent-start-feedback': {
       marginTop: tokens.spacing['2_5'],
       marginInlineEnd: tokens.spacing['0'],
