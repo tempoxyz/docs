@@ -373,11 +373,14 @@ Send stablecoins with a test wallet.
 </div>
 
 <p className="tempo-docs-home-guides-more"><ChevronLink href="/get-started">Find your starting point</ChevronLink></p>
+
+- <HomeColorLink href="/docs/sdk/typescript">TypeScript</HomeColorLink>
 `)
     expect(output).toContain('Send stablecoins with a test wallet.')
     expect(output).toContain('[Send your first payment](/get-started/quickstart)')
     expect(output).toContain('[Find your starting point](/get-started)')
-    expect(output).not.toMatch(/<(?:a|p|div|HomeGuideButton|ChevronLink)\b/)
+    expect(output).toContain('[TypeScript](/docs/sdk/typescript)')
+    expect(output).not.toMatch(/<(?:a|p|div|HomeGuideButton|HomeColorLink|ChevronLink)\b/)
   })
 
   test('preserves anchor-only links used by legacy Zone guides', async () => {

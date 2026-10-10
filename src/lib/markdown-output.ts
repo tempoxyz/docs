@@ -310,6 +310,7 @@ function rewriteNode(
   if (
     node.name === 'DocsLinkButton' ||
     node.name === 'ChevronLink' ||
+    node.name === 'HomeColorLink' ||
     node.name === 'HomeGuideButton'
   )
     return renderLinkButton(node)

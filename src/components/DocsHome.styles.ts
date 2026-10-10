@@ -169,11 +169,6 @@ export const tempoDocsHome = style({
     '& li[data-v] + li[data-v]': {
       marginTop: tokens.spacing['2_5'],
     },
-    '& li[data-v] a[data-v]': {
-      color: inherited.color.homeInk,
-      fontWeight: tokens.fontWeight.normal,
-      textDecoration: 'none',
-    },
     // Product sub-links are chevron links: no underline at rest or on hover.
     '& .tempo-docs-home-product-group li[data-v] a': {
       color: inherited.color.homeInk,
@@ -240,10 +235,6 @@ export const tempoDocsHome = style({
       outlineStyle: 'solid',
       outlineColor: 'currentColor !custom',
       outlineOffset: '-2px',
-    },
-    '& :is(li, p)[data-v] a[data-v]:hover': {
-      textDecoration: 'underline',
-      textUnderlineOffset: '4px',
     },
   },
   '@media (width < 1100px)': {
