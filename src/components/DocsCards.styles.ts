@@ -2,6 +2,20 @@ import { global } from 'zyzz/web'
 import { inherited } from '../styles/inherited'
 import { vars as tokens } from '../styles/theme'
 
+// Vocs boxes the Previous/Next pagination links below its sm breakpoint. Keep them plain links
+// at every width; this layer follows vocs_utilities so it outranks the max-sm utilities.
+global({
+  '@layer utilities': {
+    '@media (width < 640px)': {
+      '[data-v-pagination] > a': {
+        padding: 0,
+        border: 0,
+        borderRadius: 0,
+      },
+    },
+  },
+})
+
 // Document/Vocs integration selectors cannot be attached to owned elements.
 // Vocs pagination links share the card markup, so they are excluded explicitly.
 global({
