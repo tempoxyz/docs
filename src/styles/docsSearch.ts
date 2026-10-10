@@ -20,7 +20,8 @@ global({
 // 16px Pilat). The dialog is portalled to <body>, outside that layout, so the same
 // expression is repeated here.
 // It takes the smoothed panel radius. G4: the light dialog matches the page and
-// keeps a hairline; the dark one is lifted to #141414 and drops it.
+// keeps a hairline; the dark one is lifted to neutral 088 (above the #141414
+// panels it covers) and drops it.
 global({
   '@layer utilities': {
     '[data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"])': {
@@ -34,6 +35,8 @@ global({
     ':root:not(:where([data-theme="light"], [data-vocs-theme="light"])) [data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"])':
       {
         borderColor: 'transparent',
+        // design-exception: TDS neutral 088, one step above the #141414 panels it opens over, so its edge reads without a border.
+        backgroundColor: '#1f1f1f !custom',
         // design-exception: TDS shadow.primary in dark (shade 032).
         boxShadow: '0 16px 48px rgb(0 0 0 / 0.32) !custom',
       },
@@ -66,5 +69,23 @@ global({
         transitionProperty: 'opacity',
       },
     },
+  },
+})
+
+// S4: a lighter scrim, TDS Platform scrim.regular (shade 016), with no blur, so
+// less weight sits behind the panel. Vocs used black at 60% plus a backdrop blur.
+global({
+  '@layer utilities': {
+    '[data-base-ui-portal]:has(> [role="dialog"] input[role="combobox"]) > [role="presentation"][class]':
+      {
+        backgroundColor: tokens.color.scrim,
+        backdropFilter: 'none',
+      },
+    // On the black dark page scrim.regular barely shows; dark uses TDS scrim.strong.
+    ':root:not(:where([data-theme="light"], [data-vocs-theme="light"])) [data-base-ui-portal]:has(> [role="dialog"] input[role="combobox"]) > [role="presentation"][class]':
+      {
+        // design-exception: TDS Platform scrim.strong (shade 032) for the black dark page.
+        backgroundColor: 'rgb(0 0 0 / 0.32) !custom',
+      },
   },
 })
