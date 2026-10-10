@@ -147,6 +147,7 @@ export const tempoDocsHome = style({
       color: inherited.color.homeMuted,
       fontSize: tokens.fontSize.sm,
       lineHeight: tokens.lineHeight.relaxed,
+      textWrap: 'balance',
     },
     '& ul[data-v]': {
       margin: 0,
