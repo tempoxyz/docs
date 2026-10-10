@@ -307,7 +307,7 @@ function rewriteNode(
   }
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, context)
-  if (node.name === 'DocsLinkButton') return renderLinkButton(node)
+  if (node.name === 'DocsLinkButton' || node.name === 'ChevronLink') return renderLinkButton(node)
   if (node.name === 'OpenApi.Endpoints' || node.name === 'OpenApi.Playground')
     return renderOpenApi(node, headingDepth, context.openApi)
   if (node.name && interactiveDescriptions[node.name])
@@ -493,7 +493,7 @@ function renderCallout(
 function renderLinkButton(node: MarkdownNode): MarkdownNode[] {
   const destination = requiredStringAttribute(node, 'href')
   const label = plainText(node.children ?? [])
-  if (!label) throw new TypeError('DocsLinkButton requires text content for Markdown output.')
+  if (!label) throw new TypeError(`${node.name} requires text content for Markdown output.`)
   const content = link(label, destination)
   return node.type === 'mdxJsxTextElement' ? [content] : [paragraph([content])]
 }

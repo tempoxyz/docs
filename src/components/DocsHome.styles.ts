@@ -132,6 +132,10 @@ export const tempoDocsHome = style({
       fontWeight: 'inherit !custom',
       textDecoration: 'none',
     },
+    // Tile titles are chevron links; the heading keeps its level but not the copy-link anchor.
+    '& .tempo-docs-home-product-group .heading-anchor': {
+      display: 'none',
+    },
     '& .tempo-docs-home-product-group p[data-v]': {
       minHeight: '3.2em',
 
@@ -213,10 +217,6 @@ export const tempoDocsHome = style({
       outlineOffset: '4px',
     },
     '& :is(li, p)[data-v] a[data-v]:hover': {
-      textDecoration: 'underline',
-      textUnderlineOffset: '4px',
-    },
-    '& .tempo-docs-home-product-group h3[data-v] > a:not(.heading-anchor):hover': {
       textDecoration: 'underline',
       textUnderlineOffset: '4px',
     },
