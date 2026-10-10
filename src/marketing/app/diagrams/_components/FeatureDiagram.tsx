@@ -1,6 +1,8 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: Feature diagrams are labelled by surrounding page content and exported visually.
-// biome-ignore-all lint/suspicious/noArrayIndexKey: Static SVG diagram geometry uses positional keys for repeated primitives.
-
+import {
+  diagramFlow,
+  featureDiagramHideSmallCaptions,
+  featureDiagramMark,
+} from '../../../../styles/surfaces.styles'
 import { PALETTE } from '../../_components/palette'
 import {
   type BatchSpec,
@@ -28,6 +30,7 @@ import {
   type StorageCreditCycleItem,
   type StorageCreditCycleSpec,
 } from '../_lib/featureDiagram'
+import * as ui from './FeatureDiagram.recipes'
 
 const markPath =
   'M5.03996 14.8395H1.03534L4.74694 3.36361H0L1.03534 0H14.2604L13.225 3.36361H8.73202L5.03996 14.8395Z'
@@ -94,7 +97,7 @@ function Mark({ cx = 260, cy = 160 }: { cx?: number; cy?: number }) {
         stroke="var(--line-strong)"
       />
       <g
-        className="feature-diagram-mark"
+        className={`feature-diagram-mark ${featureDiagramMark().className}`}
         transform={`translate(${cx - 5.7} ${cy - 5.8}) scale(0.78)`}
         filter="url(#feature-diagram-glow)"
       >
@@ -135,7 +138,7 @@ function Label({
       letterSpacing={`${tracking}em`}
       textAnchor={anchor}
       data-small-caption={size <= 8.5 ? '' : undefined}
-      style={{ fontFamily: MONO }}
+      {...ui.labelTextAppearance({ value0: MONO })}
     >
       {children}
     </text>
@@ -156,7 +159,7 @@ function Cross({ cx, cy }: { cx: number; cy: number }) {
 function Flow({ d, accent, faded = false }: { d: string; accent: number; faded?: boolean }) {
   return (
     <path
-      className="diagram-flow"
+      className={`diagram-flow ${diagramFlow().className}`}
       d={d}
       stroke={color(accent)}
       strokeWidth="2"
@@ -1273,7 +1276,7 @@ function FeeResponseShape({ spec }: { spec: FeeResponseSpec }) {
       </Label>
 
       <path
-        className="diagram-flow"
+        className={`diagram-flow ${diagramFlow().className}`}
         d={feePath}
         stroke={color(spec.accent)}
         strokeWidth="2.5"
@@ -1441,7 +1444,7 @@ function StorageCreditCycleShape({ spec }: { spec: StorageCreditCycleSpec }) {
       </Label>
 
       <path
-        className="diagram-flow"
+        className={`diagram-flow ${diagramFlow().className}`}
         d={`M${SC_CYCLE_CLEAR_X + SC_CYCLE_BOX_W / 2} ${SC_CYCLE_BOX_Y + SC_CYCLE_BOX_H}V${SC_CYCLE_CREDIT_Y}`}
         stroke={color(2)}
         strokeWidth="2"
@@ -1479,7 +1482,7 @@ function StorageCreditCycleShape({ spec }: { spec: StorageCreditCycleSpec }) {
         {spec.credit.detail}
       </Label>
       <path
-        className="diagram-flow"
+        className={`diagram-flow ${diagramFlow().className}`}
         d={`M${SC_CYCLE_CREDIT_X + SC_CYCLE_CREDIT_W} ${SC_CYCLE_CREDIT_Y + SC_CYCLE_CREDIT_H / 2}C352 ${SC_CYCLE_CREDIT_Y + SC_CYCLE_CREDIT_H / 2} 348 ${boxMidY} ${SC_CYCLE_REUSE_X} ${boxMidY}`}
         stroke={color(2)}
         strokeWidth="2"
@@ -1655,14 +1658,14 @@ function StorageCreditAttributionShape({ spec }: { spec: StorageCreditAttributio
       </Label>
 
       <path
-        className="diagram-flow"
+        className={`diagram-flow ${diagramFlow().className}`}
         d={`M${SC_ATTR_LEFT_X + SC_ATTR_CARD_W} ${ownerMidY}H${SC_ATTR_LEDGER_X}`}
         stroke={color(2)}
         strokeWidth="2"
         fill="none"
       />
       <path
-        className="diagram-flow"
+        className={`diagram-flow ${diagramFlow().className}`}
         d={`M${ledgerRight} ${ownerMidY}H${SC_ATTR_RIGHT_X}`}
         stroke={color(2)}
         strokeWidth="2"
@@ -2375,17 +2378,19 @@ export default function FeatureDiagram({
 }) {
   return (
     <div
-      className={`relative flex h-full items-center justify-center overflow-hidden bg-surface-shell ${
-        compact ? 'p-3' : (containerClassName ?? 'p-6 lg:min-h-[520px] lg:p-10')
+      className={` ${ui.featureDiagramLayout().className} ${
+        compact
+          ? ui.featureDiagramLayout2().className
+          : (containerClassName ?? ui.featureDiagramLayoutState().className)
       }`}
     >
       <svg
-        aria-hidden
+        aria-hidden="true"
         viewBox="0 0 520 320"
         className={
           compact
-            ? 'block h-auto w-full'
-            : `block h-auto w-full max-w-[560px] lg:h-full lg:min-h-[260px] ${hideSmallCaptions ? 'feature-diagram-hide-small-captions' : ''}`
+            ? ui.featureDiagramIcon().className
+            : ` ${ui.featureDiagramIcon2().className} ${hideSmallCaptions ? `feature-diagram-hide-small-captions ${featureDiagramHideSmallCaptions().className}` : ''}`
         }
         preserveAspectRatio="xMidYMid meet"
       >

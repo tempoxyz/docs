@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { expectDemoSuccess } from './helpers'
 
 test('providing liquidity - place and query order', async ({ page }) => {
   test.setTimeout(180000)
@@ -32,9 +33,7 @@ test('providing liquidity - place and query order', async ({ page }) => {
   await expect(addFundsButton).toBeVisible()
   await addFundsButton.click()
 
-  await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
   // Step 3: Place order
   const placeOrderButton = page.getByRole('button', { name: 'Place order' }).first()
@@ -42,9 +41,7 @@ test('providing liquidity - place and query order', async ({ page }) => {
   await placeOrderButton.click()
 
   // Wait for order to be placed - should see View receipt
-  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).first())
 
   // Step 4: Query order - button should become enabled after placing
   const queryButton = page.getByRole('button', { name: 'Query' }).first()

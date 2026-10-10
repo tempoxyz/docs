@@ -1,10 +1,12 @@
 'use client'
+
 import { useMutation } from '@tanstack/react-query'
 import { numberToHex } from 'viem'
 import { tempo } from 'viem/chains'
 import { useConnection } from 'wagmi'
 import { useTempoWalletConnector } from '../../../../wagmi.config'
 import { Button, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
 
 export function DepositToTempoWallet(props: DemoStepProps) {
@@ -36,7 +38,7 @@ export function DepositToTempoWallet(props: DemoStepProps) {
         <Button
           disabled={!isTempoWallet || deposit.isPending}
           variant={isTempoWallet ? 'accent' : 'default'}
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={form.actionButton().className}
           onClick={() => deposit.mutate()}
           type="button"
         >

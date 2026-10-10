@@ -6,6 +6,7 @@ import { useWebAuthnConnector } from '../../wagmi.config'
 import { Container } from '../Container'
 import { adminKeyDemoEnvironment as passkeyEnvironment } from './admin-key-demo'
 import { Button, useCopyToClipboard } from './Demo'
+import * as ui from './PasskeyAccountDemo.recipes'
 
 export function PasskeyAccountDemo() {
   const connector = useWebAuthnConnector()
@@ -68,26 +69,23 @@ export function PasskeyAccountDemo() {
   return (
     <div data-testid="passkey-account-demo">
       <Container
-        headerLeft={<span className="text-[14px] text-gray12">Passkey account</span>}
+        headerLeft={<span {...ui.passkeyAccountDemoText()}>Passkey account</span>}
         footer="Creating a passkey does not fund the account. Add funds when you are ready to try a payment."
       >
-        <div className="space-y-4">
+        <div {...ui.passkeyAccountDemoLayout()}>
           {!ready ? (
             <Button type="button" disabled>
               Loading account
             </Button>
           ) : address ? (
-            <div className="space-y-3">
-              <p className="text-[14px] text-gray10" role="status">
+            <div {...ui.passkeyAccountDemoLayout2()}>
+              <p {...ui.passkeyAccountDemoDescription()} role="status">
                 Passkey account connected
               </p>
-              <code
-                className="block break-all font-mono text-[14px] text-gray12"
-                data-testid="passkey-account-address"
-              >
+              <code {...ui.code()} data-testid="passkey-account-address">
                 {address}
               </code>
-              <div className="flex flex-wrap gap-2">
+              <div {...ui.passkeyAccountDemoLayout3()}>
                 <Button
                   type="button"
                   disabled={Boolean(pending)}
@@ -106,24 +104,21 @@ export function PasskeyAccountDemo() {
                   {pending === 'disconnect' ? 'Disconnecting…' : 'Disconnect passkey account'}
                 </Button>
               </div>
-              <p className="text-[13px] text-gray10">
+              <p {...ui.passkeyAccountDemoDescription2()}>
                 Disconnecting leaves the passkey on your device so you can use the account again.
               </p>
             </div>
           ) : environment ? (
-            <div className="space-y-3">
-              <p className="text-[14px] text-gray10">{environment.message}</p>
+            <div {...ui.passkeyAccountDemoLayout2()}>
+              <p {...ui.passkeyAccountDemoDescription()}>{environment.message}</p>
               {environment.localhostUrl && (
-                <a
-                  className="inline-flex rounded-lg bg-black px-4 py-3 text-[14px] text-white dark:bg-white dark:text-black"
-                  href={environment.localhostUrl}
-                >
+                <a {...ui.passkeyAccountDemoLink()} href={environment.localhostUrl}>
                   Open on localhost
                 </a>
               )}
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div {...ui.passkeyAccountDemoLayout3()}>
               <Button
                 type="button"
                 variant="accent"
@@ -142,7 +137,7 @@ export function PasskeyAccountDemo() {
             </div>
           )}
           {error && (
-            <p className="text-[13px] text-destructive" role="alert">
+            <p {...ui.passkeyAccountDemoDescription3()} role="alert">
               {error}
             </p>
           )}

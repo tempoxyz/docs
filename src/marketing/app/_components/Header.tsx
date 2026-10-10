@@ -1,17 +1,17 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: Header SVGs are decorative icons paired with labels or button text.
-// biome-ignore-all lint/a11y/noStaticElementInteractions: The dropdown surface tracks hover/focus while child controls keep semantic roles.
-
 'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
 import { AmpLogo, ClaudeLogo, CodexLogo } from '../../../components/AgentLogos'
 import { tempoAgentSetupCommands } from '../../../lib/ai-install-commands'
+import { navActiveSquare } from '../../../styles/surfaces.styles'
 import { developersPath } from '../_lib/developersPaths'
 import { featurePath } from '../_lib/featurePaths'
 import { TEMPO_SDK_DOCS_URL } from '../_lib/links'
 import ArrowUpRight from './ArrowUpRight'
+import * as ui from './Header.recipes'
 import MegaMenu, { type MegaLink, type MegaMenuData } from './MegaMenu'
 import {
   ApiIcon,
@@ -162,8 +162,8 @@ function ActiveSquare({ activeKey }: { activeKey: string }) {
     <svg
       key={activeKey}
       viewBox="0 0 11 11"
-      aria-hidden
-      className="nav-active-square size-[11px] shrink-0 text-foreground/70"
+      aria-hidden="true"
+      {...ui.activeSquareIcon({ className: `nav-active-square ${navActiveSquare().className}` })}
     >
       {[0, 4, 8].flatMap((y) =>
         [0, 4, 8].map((x) => (
@@ -189,7 +189,7 @@ function megaLinks(data: MegaMenuData): MegaLink[] {
 
 function MenuIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path d="M3 7h14M3 13h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
@@ -206,8 +206,8 @@ function SearchIcon({ className }: { className?: string }) {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
-      className={`shrink-0 ${className ?? ''}`}
+      aria-hidden="true"
+      className={` ${ui.searchIconIcon().className} ${className ?? ''}`}
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m21 21-4.3-4.3" />
@@ -217,7 +217,7 @@ function SearchIcon({ className }: { className?: string }) {
 
 function CloseIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path
         d="M5 5l10 10M15 5L5 15"
         stroke="currentColor"
@@ -239,8 +239,8 @@ function GearIcon() {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden
-      className="shrink-0"
+      aria-hidden="true"
+      {...ui.gearIconIcon()}
     >
       <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
       <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2.1 2.1 0 1 1-2.97 2.97l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2.1 2.1 0 1 1-4.2 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06a2.1 2.1 0 1 1-2.97-2.97l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2.1 2.1 0 1 1 0-4.2h.09A1.7 1.7 0 0 0 4.6 8.74a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2.1 2.1 0 1 1 2.97-2.97l.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 10.14 2.7V2.6a2.1 2.1 0 1 1 4.2 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06a2.1 2.1 0 1 1 2.97 2.97l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03h.09a2.1 2.1 0 1 1 0 4.2h-.09A1.7 1.7 0 0 0 19.4 15Z" />
@@ -255,8 +255,8 @@ function Chevron({ open }: { open: boolean }) {
       height="16"
       viewBox="0 0 16 16"
       fill="none"
-      aria-hidden
-      className={`shrink-0 text-foreground/50 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      aria-hidden="true"
+      {...composeStyles(ui.chevronIcon(), !!open && ui.chevronIcon2())}
     >
       <path
         d="M4 6l4 4 4-4"
@@ -274,17 +274,17 @@ function Chevron({ open }: { open: boolean }) {
 const agentCommands = [
   {
     label: 'Claude',
-    logo: <ClaudeLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    logo: <ClaudeLogo aria-hidden="true" className={ui.claudeLogo().className} />,
     command: tempoAgentSetupCommands.claude,
   },
   {
     label: 'Codex',
-    logo: <CodexLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    logo: <CodexLogo aria-hidden="true" className={ui.claudeLogo().className} />,
     command: tempoAgentSetupCommands.codex,
   },
   {
     label: 'Amp',
-    logo: <AmpLogo aria-hidden="true" className="size-3.5 shrink-0" />,
+    logo: <AmpLogo aria-hidden="true" className={ui.claudeLogo().className} />,
     command: tempoAgentSetupCommands.amp,
   },
   {
@@ -296,7 +296,7 @@ const agentCommands = [
 
 function CopyIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <rect
         x="5.25"
         y="5.25"
@@ -318,7 +318,7 @@ function CopyIcon() {
 
 function CheckIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path
         d="M3 8.5L6.5 12L13 4"
         stroke="currentColor"
@@ -340,7 +340,7 @@ function CommandTabs({
   onSelect: (index: number) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div {...ui.commandTabsLayout()}>
       {commands.map((item, index) => {
         const active = index === activeIndex
         return (
@@ -348,11 +348,11 @@ function CommandTabs({
             key={item.label}
             type="button"
             onClick={() => onSelect(index)}
-            className={`inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1.5 font-sans text-[12px] tracking-[0] transition-colors ${
-              active
-                ? 'bg-foreground/[0.06] text-foreground'
-                : 'text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/70'
-            }`}
+            {...composeStyles(
+              ui.commandTabsButton(),
+              !!active && ui.commandTabsButton2(),
+              !active && ui.commandTabsButton3(),
+            )}
           >
             {item.logo}
             <span>{item.label}</span>
@@ -381,18 +381,20 @@ function CommandSnippet({
       type="button"
       onClick={() => onCopy(command)}
       aria-label={copyLabel}
-      className="group/copy flex min-h-[48px] w-full items-start gap-3 rounded-[4px] bg-foreground/[0.035] px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.06]"
+      {...ui.commandSnippetButton({ className: 'group/copy' })}
     >
-      <code className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] gap-2 whitespace-pre-wrap break-words font-mono text-[12px] text-foreground leading-[1.55]">
-        <span aria-hidden="true" className="select-none text-foreground/35">
+      <code {...ui.code()}>
+        <span aria-hidden="true" {...ui.commandSnippetText()}>
           $
         </span>
-        <span className="min-w-0">{children ?? command}</span>
+        <span {...ui.commandSnippetText2()}>{children ?? command}</span>
       </code>
       <span
-        className={`mt-1 shrink-0 transition-colors ${
-          copied ? 'text-foreground' : 'text-foreground/35 group-hover/copy:text-foreground/70'
-        }`}
+        {...composeStyles(
+          ui.commandSnippetText3(),
+          !!copied && ui.commandSnippetText4(),
+          !copied && ui.commandSnippetText5(),
+        )}
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
       </span>
@@ -418,28 +420,22 @@ function AgentCommandSection({
   const external = isExternal(href)
 
   return (
-    <div className="group/item rounded-[4px] px-3 py-2.5 transition-colors hover:bg-foreground/[0.04]">
-      <div className="flex items-start gap-3">
-        <span className="grid size-[34px] shrink-0 place-items-center bg-surface-input text-foreground">
-          {icon}
-        </span>
+    <div {...ui.agentCommandSectionLayout({ className: 'group/item' })}>
+      <div {...ui.agentCommandSectionLayout2()}>
+        <span {...ui.agentCommandSectionText()}>{icon}</span>
         <a
           href={href}
           target={external ? '_blank' : undefined}
           rel={external ? 'noopener noreferrer' : undefined}
           onClick={onClick}
-          className="relative flex min-w-0 flex-col gap-0.5 pr-5"
+          {...ui.agentCommandSectionLink()}
         >
-          {external ? (
-            <ArrowUpRight className="absolute top-0.5 right-0 size-3 text-foreground/35 transition-colors group-hover/item:text-foreground/60" />
-          ) : null}
-          <span className="font-sans text-[14px] text-foreground tracking-[0]">{label}</span>
-          <span className="font-sans text-[13px] text-foreground/45 leading-[1.4] tracking-[0]">
-            {desc}
-          </span>
+          {external ? <ArrowUpRight className={ui.arrowUpRight().className} /> : null}
+          <span {...ui.agentCommandSectionText2()}>{label}</span>
+          <span {...ui.agentCommandSectionText3()}>{desc}</span>
         </a>
       </div>
-      {children ? <div className="mt-3 ml-[52px] space-y-3">{children}</div> : null}
+      {children ? <div {...ui.agentCommandSectionLayout3()}>{children}</div> : null}
     </div>
   )
 }
@@ -467,14 +463,10 @@ function AgentsPanel({
   }
 
   return (
-    <div className={desktop ? 'w-[520px] p-3' : 'pb-4'}>
-      {desktop ? (
-        <p className="px-3 pt-2 pb-1.5 font-sans text-[13px] text-foreground/35 tracking-[0]">
-          Use Tempo with AI
-        </p>
-      ) : null}
+    <div className={desktop ? ui.agentsPanelLayout().className : ui.agentsPanelLayout2().className}>
+      {desktop ? <p {...ui.agentsPanelDescription()}>Use Tempo with AI</p> : null}
 
-      <div className="space-y-1">
+      <div {...ui.agentsPanelLayout3()}>
         <AgentCommandSection
           href={TEMPO_PLUGIN_URL}
           label="Tempo for your agent"
@@ -608,26 +600,26 @@ export default function Header() {
   }
 
   return (
-    <header ref={headerRef} className="relative z-20 border-line border-b">
-      <nav ref={navRef} className="relative flex items-center justify-between px-5 py-4">
+    <header ref={headerRef} {...ui.headerHeader()}>
+      <nav ref={navRef} {...ui.nav()}>
         <Link
           href="/"
           onClick={close}
           aria-label="Tempo home"
-          className="group flex items-center gap-3"
+          className={ui.link({ className: 'group' }).className}
         >
-          <TempoLogo className="h-[18px] w-[80px] text-foreground" />
+          <TempoLogo className={ui.tempoLogo().className} />
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden items-center gap-16 lg:absolute lg:top-1/2 lg:left-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2">
+        <ul {...ui.headerList()}>
           {menu.map((item) => {
             const external = isExternal(item.href)
             const active = isActiveMenuItem(pathname, item)
             const triggerContent = (
               <>
                 {active ? (
-                  <span className="absolute top-1/2 -left-[17px] -translate-y-1/2">
+                  <span {...ui.headerText()}>
                     <ActiveSquare activeKey={pathname} />
                   </span>
                 ) : null}
@@ -638,10 +630,11 @@ export default function Header() {
                     height="12"
                     viewBox="0 0 16 16"
                     fill="none"
-                    aria-hidden
-                    className={`shrink-0 text-foreground/40 transition-transform duration-200 ease-out ${
-                      activeMenu === item.label ? 'rotate-180' : ''
-                    }`}
+                    aria-hidden="true"
+                    {...composeStyles(
+                      ui.headerIcon(),
+                      !!(activeMenu === item.label) && ui.chevronIcon2(),
+                    )}
                   >
                     <path
                       d="M4 6l4 4 4-4"
@@ -672,7 +665,7 @@ export default function Header() {
                     aria-expanded={activeMenu === item.label}
                     onFocus={() => openMenu(item.label)}
                     onBlur={scheduleClose}
-                    className="relative flex items-center gap-1.5 font-sans text-[14px] text-foreground tracking-[0] transition-opacity hover:opacity-70"
+                    {...ui.headerButton()}
                   >
                     {triggerContent}
                   </button>
@@ -681,7 +674,7 @@ export default function Header() {
                     href={item.href}
                     target={external ? '_blank' : undefined}
                     rel={external ? 'noopener noreferrer' : undefined}
-                    className="relative flex items-center gap-1.5 font-sans text-[14px] text-foreground tracking-[0] transition-opacity hover:opacity-70"
+                    {...ui.headerButton()}
                   >
                     {triggerContent}
                   </a>
@@ -691,14 +684,14 @@ export default function Header() {
           })}
         </ul>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div {...ui.headerLayout()}>
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
             title="Search documentation (⌘K)"
-            className="grid size-9 place-items-center rounded-[4px] border border-line text-foreground/60 transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+            {...ui.headerButton2()}
           >
             <SearchIcon />
           </button>
@@ -714,7 +707,7 @@ export default function Header() {
             onMouseLeave={scheduleClose}
             onFocus={() => openMenu('For agents')}
             onBlur={scheduleClose}
-            className="flex h-9 items-center gap-2 rounded-[4px] border border-line px-4 font-sans text-[14px] text-foreground tracking-[0] transition-colors hover:bg-foreground/[0.04]"
+            {...ui.headerButton3()}
           >
             <GearIcon />
             For agents
@@ -723,10 +716,11 @@ export default function Header() {
               height="12"
               viewBox="0 0 16 16"
               fill="none"
-              aria-hidden
-              className={`shrink-0 text-foreground/40 transition-transform duration-200 ease-out ${
-                activeMenu === 'For agents' ? 'rotate-180' : ''
-              }`}
+              aria-hidden="true"
+              {...composeStyles(
+                ui.headerIcon(),
+                !!(activeMenu === 'For agents') && ui.chevronIcon2(),
+              )}
             >
               <path
                 d="M4 6l4 4 4-4"
@@ -740,7 +734,7 @@ export default function Header() {
         </div>
 
         {/* Mobile actions */}
-        <div className="flex items-center gap-1 lg:hidden">
+        <div {...ui.headerLayout2()}>
           <button
             type="button"
             onClick={() => {
@@ -749,16 +743,16 @@ export default function Header() {
             }}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
-            className="grid size-8 place-items-center text-foreground"
+            {...ui.headerButton4()}
           >
-            <SearchIcon className="size-[18px]" />
+            <SearchIcon className={ui.searchIcon().className} />
           </button>
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
-            className="grid size-8 place-items-center text-foreground"
+            {...ui.headerButton4()}
           >
             {open ? <CloseIcon /> : <MenuIcon />}
           </button>
@@ -767,37 +761,37 @@ export default function Header() {
 
       {/* Desktop dropdowns: one shared surface that slides & resizes between
           panels while their content crossfades. */}
-      <div className="pointer-events-none absolute top-full left-0 z-50 hidden w-full lg:block">
+      <div {...ui.headerLayout3()}>
         <div
           className={[
-            'transition duration-200 ease-out will-change-[opacity,transform,filter] motion-reduce:transition-none',
-            activeMenu
-              ? 'translate-y-0 opacity-100 [filter:blur(0px)]'
-              : '-translate-y-2 opacity-0 [filter:blur(8px)]',
+            ui.headerLayoutState().className,
+            activeMenu ? ui.headerLayoutState2().className : ui.headerLayoutState3().className,
           ].join(' ')}
         >
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: Delegates hover/focus containment to the interactive menu links. */}
           <div
             onMouseEnter={cancelClose}
             onMouseLeave={scheduleClose}
             onFocus={cancelClose}
             onBlur={scheduleClose}
-            style={{ transform: `translateX(${geom?.x ?? 0}px)` }}
-            className={[
-              'w-max pt-3',
-              activeMenu ? 'pointer-events-auto' : '',
-              morphing
-                ? 'transition-transform duration-200 ease-out motion-reduce:transition-none'
-                : '',
-            ].join(' ')}
+            {...ui.headerLayoutAppearance({
+              value0: `translateX(${geom?.x ?? 0}px)`,
+              className: [
+                ui.headerLayoutState4().className,
+                activeMenu ? ui.headerLayoutState5().className : '',
+                morphing ? ui.headerLayoutState6().className : '',
+              ].join(' '),
+            })}
           >
             <div
-              style={{ width: geom?.w, height: geom?.h }}
-              className={[
-                'relative overflow-hidden rounded-md border border-line bg-surface-page shadow-2xl',
-                morphing
-                  ? 'transition-[width,height] duration-200 ease-out motion-reduce:transition-none'
-                  : '',
-              ].join(' ')}
+              {...ui.headerLayoutAppearance2({
+                value0: geom ? `${geom.w}px` : 'auto',
+                value1: geom ? `${geom.h}px` : 'auto',
+                className: [
+                  ui.headerLayoutState7().className,
+                  morphing ? ui.headerLayoutState8().className : '',
+                ].join(' '),
+              })}
             >
               {dropdowns.map(({ key, panel }) => (
                 <div
@@ -806,9 +800,11 @@ export default function Header() {
                     if (el) panelRefs.current.set(key, el)
                     else panelRefs.current.delete(key)
                   }}
-                  className={`absolute top-0 left-0 w-max transition-opacity duration-150 ease-out motion-reduce:transition-none ${
-                    activeMenu === key ? 'opacity-100' : 'pointer-events-none opacity-0'
-                  }`}
+                  {...composeStyles(
+                    ui.headerLayout4(),
+                    !!(activeMenu === key) && ui.headerLayout5(),
+                    !(activeMenu === key) && ui.headerLayout6(),
+                  )}
                 >
                   {panel}
                 </div>
@@ -822,45 +818,47 @@ export default function Header() {
           bottom of the viewport so page content never bleeds through beneath
           the menu list (which looked broken on taller/wider screens). */}
       <div
-        style={{ top: navH }}
-        className={`fixed inset-x-0 bottom-0 z-40 overflow-y-auto bg-background transition duration-200 ease-out lg:hidden ${
-          open
-            ? 'pointer-events-auto translate-y-0 opacity-100'
-            : 'pointer-events-none -translate-y-2 opacity-0'
-        }`}
+        {...ui.headerLayoutAppearance3({
+          value0: `${navH}px`,
+          className: ` ${ui.headerLayout7().className} ${
+            open ? ui.headerLayout8().className : ui.headerLayout9().className
+          }`,
+        })}
       >
-        <div className="flex flex-col px-5 pb-5">
+        <div {...ui.headerLayout10()}>
           {menu.map((item) => {
             const external = isExternal(item.href)
             const active = isActiveMenuItem(pathname, item)
             return item.mega ? (
-              <div key={item.label} className="border-line border-t">
+              <div key={item.label} {...ui.headerLayout11()}>
                 <button
                   type="button"
                   onClick={() => setExpanded((e) => (e === item.label ? null : item.label))}
                   aria-expanded={expanded === item.label}
-                  className="flex w-full items-center justify-between py-4 font-sans text-[16px] text-foreground tracking-[0]"
+                  {...ui.headerButton5()}
                 >
-                  <span className="flex items-center gap-2">
+                  <span {...ui.headerText2()}>
                     {active ? <ActiveSquare activeKey={pathname} /> : null}
                     {item.label}
                   </span>
                   <Chevron open={expanded === item.label} />
                 </button>
                 <div
-                  className={`grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out ${
-                    expanded === item.label ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                  }`}
+                  {...composeStyles(
+                    ui.headerLayout12(),
+                    !!(expanded === item.label) && ui.headerLayout13(),
+                    !(expanded === item.label) && ui.headerLayout14(),
+                  )}
                 >
-                  <div className="min-h-0 overflow-hidden">
-                    <div className="flex flex-col gap-3 pb-4 pl-3">
+                  <div {...ui.headerLayout15()}>
+                    <div {...ui.headerLayout16()}>
                       {megaLinks(item.mega).map((sub) =>
                         !isExternal(sub.href) ? (
                           <Link
                             key={sub.label}
                             href={sub.href}
                             onClick={close}
-                            className="font-sans text-[15px] text-foreground/50 tracking-[0] transition-colors hover:text-foreground"
+                            className={ui.link2().className}
                           >
                             {sub.label}
                           </Link>
@@ -871,10 +869,10 @@ export default function Header() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={close}
-                            className="flex items-start gap-1.5 font-sans text-[15px] text-foreground/50 tracking-[0] transition-colors hover:text-foreground"
+                            {...ui.headerLink()}
                           >
                             {sub.label}
-                            <ArrowUpRight className="mt-0.5 size-3" />
+                            <ArrowUpRight className={ui.arrowUpRight2().className} />
                           </a>
                         ),
                       )}
@@ -889,29 +887,31 @@ export default function Header() {
                 target={external ? '_blank' : undefined}
                 rel={external ? 'noopener noreferrer' : undefined}
                 onClick={close}
-                className="flex items-center gap-1.5 border-line border-t py-4 font-sans text-[16px] text-foreground tracking-[0]"
+                {...ui.headerLink2()}
               >
                 {active ? <ActiveSquare activeKey={pathname} /> : null}
                 {item.label}
               </a>
             )
           })}
-          <div className="border-line border-t">
+          <div {...ui.headerLayout11()}>
             <button
               type="button"
               onClick={() => setExpanded((e) => (e === 'For agents' ? null : 'For agents'))}
               aria-expanded={expanded === 'For agents'}
-              className="flex w-full items-center justify-between py-4 font-sans text-[16px] text-foreground tracking-[0]"
+              {...ui.headerButton5()}
             >
               For agents
               <Chevron open={expanded === 'For agents'} />
             </button>
             <div
-              className={`grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out ${
-                expanded === 'For agents' ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-              }`}
+              {...composeStyles(
+                ui.headerLayout12(),
+                !!(expanded === 'For agents') && ui.headerLayout13(),
+                !(expanded === 'For agents') && ui.headerLayout14(),
+              )}
             >
-              <div className="min-h-0 overflow-hidden">
+              <div {...ui.headerLayout15()}>
                 <AgentsPanel variant="mobile" onNavigate={close} />
               </div>
             </div>

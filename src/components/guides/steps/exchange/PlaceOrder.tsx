@@ -1,4 +1,5 @@
 'use client'
+
 import * as React from 'react'
 import { type Log, parseUnits } from 'viem'
 import { Actions, Addresses } from 'viem/tempo'
@@ -6,6 +7,7 @@ import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, pathUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -78,7 +80,7 @@ export function PlaceOrder(props: DemoStepProps) {
             })
           }}
           type="button"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={form.actionButton().className}
         >
           {sendCalls.isPending ? 'Placing Order...' : 'Place Order'}
         </Button>
@@ -87,8 +89,8 @@ export function PlaceOrder(props: DemoStepProps) {
       title="Approve spend and place buy order for 100 AlphaUSD"
     >
       {sendCalls.isSuccess && sendCalls.data && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             <ExplorerLink hash={sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`} />
           </div>
         </div>

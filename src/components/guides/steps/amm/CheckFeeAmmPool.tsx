@@ -1,12 +1,15 @@
 'use client'
+
 import * as React from 'react'
 import { formatUnits } from 'viem'
 import { useConnection } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './CheckFeeAmmPool.recipes'
 
 const validatorToken = alphaUsd
 
@@ -47,26 +50,26 @@ export function CheckFeeAmmPool(props: DemoStepProps) {
       title={`View Fee AMM pool for ${metadata ? metadata.name : 'your token'}.`}
     >
       {active && pool && lpBalance && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Your LP Balance</span>
-                  <span className="text-gray12">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...ui.checkFeeAmmPoolLayout3()}>
+              <div {...ui.checkFeeAmmPoolLayout4()}>
+                <div {...ui.checkFeeAmmPoolLayout5()}>
+                  <span {...ui.checkFeeAmmPoolText()}>Your LP Balance</span>
+                  <span {...ui.checkFeeAmmPoolText2()}>
                     {formatUnits(lpBalance, validatorMetadata?.decimals || 6)} LP tokens
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Validator Token Reserves</span>
-                  <span className="text-gray12">
+                <div {...ui.checkFeeAmmPoolLayout5()}>
+                  <span {...ui.checkFeeAmmPoolText()}>Validator Token Reserves</span>
+                  <span {...ui.checkFeeAmmPoolText2()}>
                     {formatUnits(pool.reserveValidatorToken, validatorMetadata?.decimals || 6)}{' '}
                     AlphaUSD
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">User Token Reserves</span>
-                  <span className="text-gray12">
+                <div {...ui.checkFeeAmmPoolLayout5()}>
+                  <span {...ui.checkFeeAmmPoolText()}>User Token Reserves</span>
+                  <span {...ui.checkFeeAmmPoolText2()}>
                     {formatUnits(pool.reserveUserToken, metadata?.decimals || 6)}{' '}
                     {metadata?.symbol || ''}
                   </span>

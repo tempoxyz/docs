@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { normalizeProxiedRscFetch } from '../pages/_layout'
-import { normalizeRscFetchUrl } from './rsc-route-normalization'
+import { normalizeProxiedRscFetch, normalizeRscFetchUrl } from './rsc-route-normalization'
 
 const currentHref = 'https://docs.tempo.xyz/docs/guide/payments/send-a-payment'
 const origin = 'https://docs.tempo.xyz'

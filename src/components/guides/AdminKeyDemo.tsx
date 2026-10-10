@@ -5,6 +5,7 @@ import type { Hex } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { Account, P256, WebAuthnP256 } from 'viem/tempo'
 import { Container } from '../Container'
+import * as ui from './AdminKeyDemo.recipes'
 import {
   type AdminKeyDemoSession,
   type AdminKeyDemoStatus,
@@ -172,11 +173,11 @@ export function AdminKeyDemo() {
 
   return (
     <Container
-      headerLeft={<span className="font-medium text-[14px]">Try admin keys</span>}
-      headerRight={<span className="text-[13px] text-gray10">Moderato testnet</span>}
+      headerLeft={<span {...ui.adminKeyDemoText()}>Try admin keys</span>}
+      headerRight={<span {...ui.adminKeyDemoText2()}>Moderato testnet</span>}
       footer="Uses a separate test account. The generated admin key is discarded; its public ID stays in this browser so you can revoke it."
     >
-      <div className="space-y-5" data-testid="admin-key-demo" aria-busy={pending !== null}>
+      <div {...ui.adminKeyDemoLayout()} data-testid="admin-key-demo" aria-busy={pending !== null}>
         <Step
           number={1}
           title="Create and fund a test account"
@@ -188,10 +189,7 @@ export function AdminKeyDemo() {
                 {pending === 'fund' ? 'Getting test funds…' : 'Get test funds'}
               </Button>
             ) : environment?.localhostUrl ? (
-              <a
-                href={environment.localhostUrl}
-                className="rounded-lg bg-black px-4 py-3 text-[14px] text-white dark:bg-white dark:text-black"
-              >
+              <a href={environment.localhostUrl} {...ui.adminKeyDemoLink()}>
                 Open on localhost
               </a>
             ) : (
@@ -206,9 +204,9 @@ export function AdminKeyDemo() {
             )
           }
         >
-          <div className="mt-2 text-[13px] text-gray10">
+          <div {...ui.adminKeyDemoLayout2()}>
             {client ? (
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <div {...ui.adminKeyDemoLayout3()}>
                 <a
                   href={`${tempoModerato.blockExplorers.default.url}/address/${client.account.address}`}
                   target="_blank"
@@ -246,14 +244,14 @@ export function AdminKeyDemo() {
             </Button>
           }
         >
-          <p className="mt-2 text-[13px] text-gray10">
+          <p {...ui.adminKeyDemoLayout2()}>
             Your passkey signs the key authorization and the transaction. Admin keys can manage all
             other keys on the account.
           </p>
           {session?.key && (
-            <div className="mt-2 space-y-1 text-[13px]">
-              <div className="break-all font-mono">{session.key.address}</div>
-              <div className="flex flex-wrap items-center gap-3" role="status">
+            <div {...ui.adminKeyDemoLayout4()}>
+              <div {...ui.adminKeyDemoLayout5()}>{session.key.address}</div>
+              <div {...ui.adminKeyDemoLayout6()} role="status">
                 <code>isAdmin: {status === null ? 'checking…' : String(status === 'active')}</code>
                 {status === 'revoked' && <span>Revoked</span>}
                 {session.key.authorizationHash && (
@@ -282,14 +280,14 @@ export function AdminKeyDemo() {
           }
         >
           {session?.key?.revocationHash && (
-            <div className="mt-2 text-[13px]">
+            <div {...ui.adminKeyDemoLayout7()}>
               <ReceiptLink hash={session.key.revocationHash}>Revocation receipt</ReceiptLink>
             </div>
           )}
         </Step>
 
         {error && (
-          <p role="alert" className="text-[13px] text-destructive">
+          <p role="alert" {...ui.adminKeyDemoDescription()}>
             {error}
           </p>
         )}
@@ -297,7 +295,7 @@ export function AdminKeyDemo() {
           <button
             type="button"
             disabled={disabled}
-            className="text-[13px] text-gray10 underline underline-offset-4 disabled:opacity-50"
+            {...ui.adminKeyDemoButton()}
             onClick={() => run('refresh', refresh)}
           >
             {pending === 'refresh' ? 'Refreshing…' : 'Refresh status'}

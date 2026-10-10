@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { docsSections, getActiveDocsSection } from '../lib/docs-sections'
-import { normalizeDocsPath, resolveSidebarItems } from './DocsHeader'
+import { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
 const sidebar = {
   '/get-started': [{ text: 'Get Started' }],

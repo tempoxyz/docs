@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { THEMES } from './MermaidDiagram'
+import * as ui from './StaticMermaidDiagram.recipes'
 
 const FONT_FAMILY =
   'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
@@ -77,13 +78,6 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
         const { svg } = await mermaid.render(id, chart.trim())
         if (cancelled || !el) return
         el.innerHTML = svg
-        const svgEl = el.querySelector('svg')
-        if (svgEl) {
-          svgEl.style.maxWidth = '100%'
-          svgEl.style.height = 'auto'
-          svgEl.style.display = 'block'
-          svgEl.style.margin = '0 auto'
-        }
       } catch (err) {
         console.error('StaticMermaidDiagram:', err)
       }
@@ -96,18 +90,8 @@ export function StaticMermaidDiagram({ chart }: { chart: string }) {
   }, [chart, isDark])
 
   return (
-    <div
-      className="mermaid-diagram"
-      style={{
-        margin: '1.5rem 0',
-        padding: '1rem 0.5rem',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        overflowX: 'auto',
-        position: 'relative',
-      }}
-    >
-      <div ref={containerRef} style={{ maxWidth: '540px', margin: '0 auto' }} />
+    <div {...ui.staticMermaidDiagramLayoutAppearance({ className: 'mermaid-diagram' })}>
+      <div ref={containerRef} {...ui.staticMermaidDiagramLayoutAppearance2()} />
     </div>
   )
 }

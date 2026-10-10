@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test'
 
+// Viewport cases share the preview server's WASM image renderer.
+// Keep them sequential while other test files can use both workers.
+test.describe.configure({ mode: 'default' })
+
 test('filters posts with the keyboard and preserves author credits when opening an article', async ({
   page,
 }) => {

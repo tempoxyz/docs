@@ -5,8 +5,9 @@ import { Instance } from 'prool'
 import Icons from 'unplugin-icons/vite'
 import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
-import { vocs } from 'vocs/vite'
+import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
+import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
 import { markdownRoute, renderAiFull, renderAiIndex, renderAiPage } from './src/lib/ai-docs'
 import { aiDocsDevMiddleware } from './src/lib/ai-docs-dev'
 import { resolveBaseUrl } from './src/lib/base-url'
@@ -22,14 +23,34 @@ export default defineConfig(({ mode }) => {
 
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
   return {
+    // Gzip-size reporting compresses every output just for the build log.
+    build: { reportCompressedSize: !process.env.CI },
     define: {
       'import.meta.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV ?? ''),
     },
     plugins: [
+      // Example regions are not complete modules. Keep server tooling out of
+      // the client discovery graph; Vocs owns the persisted color scheme.
+      zyzz({
+        exclude: [
+          'src/snippets',
+          'src/test',
+          'src/pages/_api',
+          'src/marketing/blogPlugin.ts',
+          'scripts',
+          'e2e',
+          'search-benchmark',
+          'playwright.config.ts',
+          'playwright.zones.config.ts',
+          'playwright.production.config.ts',
+          'vocs.config.ts',
+        ],
+        script: false,
+      }),
       blogPostsPlugin(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),
-      vocs(),
+      vocsWithZyzz(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
       ...(useHttp ? [] : [mkcert()]),

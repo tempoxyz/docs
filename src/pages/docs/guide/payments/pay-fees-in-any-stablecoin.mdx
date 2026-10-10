@@ -6,6 +6,8 @@ showOutline: 1
 interactive: true
 ---
 
+import * as ui from './pay-fees-in-any-stablecoin.recipes'
+
 import * as Demo from '../../../../components/guides/Demo.tsx'
 import { AddFunds } from '../../../../components/guides/steps/payments/AddFunds.tsx'
 import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
@@ -37,10 +39,10 @@ Select a supported fee token and send a payment with it in this demo.
 
 Pass `feeToken` when submitting a payment. Use the [Viem client](/docs/guide/payments/send-a-payment#send-from-your-backend) for backend signing or the [Wagmi configuration](/docs/guide/payments/send-a-payment#add-a-payment-action-in-the-browser) for a browser wallet. These examples use AlphaUSD and BetaUSD on Moderato; replace the example recipient with an account you control. Set `RPC_URL` or `TEMPO_RPC_URL` to `https://rpc.moderato.tempo.xyz` for the other language examples.
 
-<Tabs stateKey="library" className="-mt-2">
+<Tabs stateKey="library" className={ui.tabs().className}>
 <Tab title="Viem">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```tsx twoslash
 // @noErrors
@@ -62,7 +64,7 @@ const { receipt } = await client.token.transferSync({
 
   <Tab title="Wagmi">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```tsx twoslash
 // @noErrors
@@ -149,7 +151,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 <Tab title="Python">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```python
 from pytempo import TempoTransaction
@@ -175,7 +177,7 @@ tx = TempoTransaction.create(
 
 <Tab title="Go">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```go
 alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
@@ -195,7 +197,7 @@ tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdModerato)).
 
 <Tab title="Cast">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```bash
 $ cast send \
@@ -212,7 +214,7 @@ $ cast send \
 
 <Tab title="Solidity">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 :::info
 The fee token for a given transaction cannot be set from Solidity — it is a transaction-level parameter handled by the signing SDK. However, you can configure a **default** fee token for an account using [`setUserToken`](#set-a-default-user-fee-token), which will apply to all future transactions unless explicitly overridden at submission.
@@ -494,10 +496,10 @@ const { receipt } = await client.token.transferSync({
 
 You can also set a persistent default fee token for an account, so users don't need to specify `feeToken` on every transaction. Learn more about fee token preferences [here](/docs/protocol/fees/spec-fee#fee-token-preferences).
 
-<Tabs stateKey="library" className="-mt-2">
+<Tabs stateKey="library" className={ui.tabs().className}>
 <Tab title="Wagmi">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```tsx twoslash
 // @noErrors
@@ -507,7 +509,7 @@ You can also set a persistent default fee token for an account, so users don't n
 </Tab>
 <Tab title="Viem">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```ts twoslash
 // @noErrors
@@ -518,7 +520,7 @@ You can also set a persistent default fee token for an account, so users don't n
 
 <Tab title="Rust">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 :::code-group
 
@@ -562,7 +564,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 <Tab title="Python">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 :::code-group
 
@@ -600,7 +602,7 @@ account = Account.from_key("0x...")
 
 <Tab title="Go">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 :::code-group
 
@@ -658,7 +660,7 @@ func main() {
 
 <Tab title="Cast">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```bash
 $ cast send \
@@ -673,7 +675,7 @@ $ cast send \
 
 <Tab title="Solidity">
 
-<div className="h-6" />
+<div className={ui.div().className} />
 
 ```solidity
 import {StdPrecompiles} from "tempo-std/StdPrecompiles.sol";

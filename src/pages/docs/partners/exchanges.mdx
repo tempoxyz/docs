@@ -4,23 +4,25 @@ seoTitle: "Stablecoin Exchanges for Tempo | Tempo Docs"
 description: Connect exchange liquidity and move supported stablecoins between exchange accounts and Tempo.
 ---
 
+import { partnerLogo, partnerLogoCoinbase, partnerLogoUniswap, partnerLogo0x } from '../../../components/PartnerLogos.styles'
+
 # Exchanges
 
 Choose an exchange or liquidity integration for trading and stablecoin transfers on Tempo. For cross-chain transfers, see the [Bridges directory](/docs/partners/bridges) or [Tempo Routes](/docs/routes).
 
-## <span className="partner-logo partner-logo--coinbase" aria-hidden="true" />Coinbase
+## <span className={`partner-logo partner-logo--coinbase ${partnerLogo().className + ' ' + partnerLogoCoinbase().className}`} aria-hidden="true" />Coinbase
 
 [Coinbase](https://www.coinbase.com/) supports Tempo across custody, trading, and transfers, including in its iOS and Android apps.
 
 Retail and exchange customers can use Coinbase's existing stablecoin markets, then select Tempo as the network when sending or receiving. Eligible Coinbase Prime clients can also access custody support, with availability varying by asset and contracting entity.
 
-## <span className="partner-logo partner-logo--uniswap" aria-hidden="true" />Uniswap
+## <span className={`partner-logo partner-logo--uniswap ${partnerLogo().className + ' ' + partnerLogoUniswap().className}`} aria-hidden="true" />Uniswap
 
 [Uniswap](https://hub.uniswap.org/) provides decentralized exchange infrastructure and a trading API for applications that need onchain liquidity.
 
 To get started, create an account and start building on the [Uniswap API platform](https://developers.uniswap.org/dashboard/welcome).
 
-## <span className="partner-logo partner-logo--0x" aria-hidden="true" />0x
+## <span className={`partner-logo partner-logo--0x ${partnerLogo().className + ' ' + partnerLogo0x().className}`} aria-hidden="true" />0x
 
 [0x](https://0x.org) provides DEX aggregation and order routing across exchanges on Tempo. Use its Swap API to integrate liquidity into your application.
 

@@ -13,6 +13,7 @@ import { tempoModerato } from 'viem/chains'
 import { Abis, Account, Actions, Addresses, createClient } from 'viem/tempo'
 import { Button, ExplorerAccountLink, ExplorerLink, Step, useHydrated } from '../../Demo'
 import { alphaUsd, betaUsd } from '../../tokens'
+import * as ui from './ReceivePolicyDemo.recipes'
 
 const amount = 1_000_000n
 const newClient = () =>
@@ -202,8 +203,8 @@ export function ReceivePolicyDemo() {
         : label
 
   return (
-    <div className="space-y-5" data-testid="receive-policy-demo">
-      <p className="text-[13px] text-gray9">
+    <div {...ui.receivePolicyDemoLayout()} data-testid="receive-policy-demo">
+      <p {...ui.receivePolicyDemoDescription()}>
         Moderato testnet · temporary account · 1 token per payment. Both payments go to this
         account; AlphaUSD stays available, while BetaUSD moves into the guard until recovered.
         Reloading discards this test account's signing key.
@@ -249,7 +250,7 @@ export function ReceivePolicyDemo() {
           </Button>
         }
       >
-        <p className="mt-2 text-[13px] text-gray9">
+        <p {...ui.receivePolicyDemoDescription2()}>
           Any sender may pay. The receiving account controls recovery.
         </p>
         {hashes.configure && <ExplorerLink hash={hashes.configure} />}
@@ -260,7 +261,7 @@ export function ReceivePolicyDemo() {
         active={configured && !(allowed && blockedReceipt)}
         completed={allowed && !!blockedReceipt}
       >
-        <div className="mt-3 flex flex-wrap gap-4">
+        <div {...ui.receivePolicyDemoLayout2()}>
           <div>
             <Button
               type="button"
@@ -271,7 +272,7 @@ export function ReceivePolicyDemo() {
               {actionLabel('allowed', 'Send 1 AlphaUSD')}
             </Button>
             {allowed && (
-              <p role="status" className="mt-2 text-[13px]">
+              <p role="status" {...ui.receivePolicyDemoDescription3()}>
                 AlphaUSD delivered to the test account.
               </p>
             )}
@@ -287,7 +288,7 @@ export function ReceivePolicyDemo() {
               {actionLabel('blocked', 'Send 1 BetaUSD')}
             </Button>
             {blockedReceipt && (
-              <p role="status" className="mt-2 text-[13px]">
+              <p role="status" {...ui.receivePolicyDemoDescription3()}>
                 Transaction succeeded. 1 BetaUSD held by ReceivePolicyGuard
                 {claimed ? ' — now recovered' : ''}.
               </p>
@@ -296,7 +297,7 @@ export function ReceivePolicyDemo() {
           </div>
         </div>
         {(error?.task === 'allowed' || error?.task === 'blocked') && (
-          <p role="alert" className="mt-2 text-[13px] text-destructive">
+          <p role="alert" {...ui.receivePolicyDemoDescription4()}>
             {error.message}
           </p>
         )}
@@ -319,25 +320,25 @@ export function ReceivePolicyDemo() {
         }
       >
         {claimed && (
-          <p role="status" className="mt-2 text-[13px]">
+          <p role="status" {...ui.receivePolicyDemoDescription3()}>
             1 BetaUSD returned to the test account. The blocked receipt is consumed.
           </p>
         )}
         {hashes.claim && <ExplorerLink hash={hashes.claim} />}
         {blockedReceipt && (
-          <details className="mt-2 text-[13px]">
+          <details {...ui.receivePolicyDemoDescription3()}>
             <summary>Blocked receipt</summary>
-            <code className="block break-all">{blockedReceipt}</code>
+            <code {...ui.code()}>{blockedReceipt}</code>
           </details>
         )}
       </Step>
       {balanceError && (
-        <p role="status" className="text-[13px] text-gray9">
+        <p role="status" {...ui.receivePolicyDemoDescription()}>
           Balance refresh unavailable. Use the transaction links to check the result.
         </p>
       )}
       {balances && (
-        <p className="text-[13px] text-gray9" aria-live="polite">
+        <p {...ui.receivePolicyDemoDescription()} aria-live="polite">
           Available: {formatUnits(balances.alpha, 6)} AlphaUSD · {formatUnits(balances.beta, 6)}{' '}
           BetaUSD
         </p>

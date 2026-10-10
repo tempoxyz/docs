@@ -4,19 +4,21 @@ seoTitle: "Real-World Assets on Tempo | Tempo Docs"
 description: Find tokenized Treasuries and yield-bearing assets on Tempo, with issuer information and mainnet contract addresses.
 ---
 
+import { partnerLogo, partnerLogoOndo, partnerLogoFigure, partnerLogoHastra } from '../../../components/PartnerLogos.styles'
+
 # RWAs
 
 Find real-world assets (RWAs), including tokenized Treasuries and yield-bearing assets, on Tempo. For stablecoins used for balances and payments, see [Stablecoins](/docs/partners/stablecoins).
 
-## <span className="partner-logo partner-logo--ondo" aria-hidden="true" />Ondo
+## <span className={`partner-logo partner-logo--ondo ${partnerLogo().className + ' ' + partnerLogoOndo().className}`} aria-hidden="true" />Ondo
 
 [Ondo's USDY](https://ondo.finance/blog/usdy-is-live-on-tempo) brings tokenized U.S. Treasury exposure to Tempo. Use [Ondo's product documentation](https://ondo.finance/usdy) for access, minting, redemption, and integration requirements.
 
-## <span className="partner-logo partner-logo--figure" aria-hidden="true" />Figure
+## <span className={`partner-logo partner-logo--figure ${partnerLogo().className + ' ' + partnerLogoFigure().className}`} aria-hidden="true" />Figure
 
 [Figure's YLDS](https://www.figuremarkets.com/c/ylds/) is a yield-bearing asset. Use Figure's product information for account requirements and purchase and redemption flows.
 
-## <span className="partner-logo partner-logo--hastra" aria-hidden="true" />Hastra
+## <span className={`partner-logo partner-logo--hastra ${partnerLogo().className + ' ' + partnerLogoHastra().className}`} aria-hidden="true" />Hastra
 
 [Hastra](https://help.hastra.io/about-us/understanding-wylds-and-prime%3A-hastra%27s-ecosystem) offers wYLDS, a receipt token backed by YLDS, and PRIME, its staked position token. Follow Hastra's documentation for how each token accrues and realizes yield.
 

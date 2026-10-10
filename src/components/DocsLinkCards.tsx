@@ -7,7 +7,7 @@ import NetworkIcon from '~icons/lucide/network'
 import ServerIcon from '~icons/lucide/server'
 import WalletIcon from '~icons/lucide/wallet'
 import { docsLinkCards } from '../lib/docs-link-cards'
-import './DocsSetupCards.css'
+import { docsSetupCard, docsSetupGrid, docsSetupLinks } from './DocsSetupCards.styles'
 
 const icons = {
   network: NetworkIcon,
@@ -21,17 +21,17 @@ const icons = {
 
 export function DocsLinkCards({ collection }: { collection: keyof typeof docsLinkCards }) {
   return (
-    <div className="docs-setup-grid">
+    <div className={`docs-setup-grid ${docsSetupGrid().className}`}>
       {docsLinkCards[collection].map(({ title, description, icon, links }) => {
         const Icon = icons[icon]
         return (
-          <section className="docs-setup-card" key={title}>
+          <section className={`docs-setup-card ${docsSetupCard().className}`} key={title}>
             <h3>
               <Icon aria-hidden="true" focusable="false" width="20" height="20" />
               {title}
             </h3>
             <p>{description}</p>
-            <div className="docs-setup-links">
+            <div className={`docs-setup-links ${docsSetupLinks().className}`}>
               {links.map(([label, href]) => (
                 <a key={href} href={href}>
                   {label}

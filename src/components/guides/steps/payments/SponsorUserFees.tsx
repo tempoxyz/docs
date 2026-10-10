@@ -1,11 +1,14 @@
 'use client'
+
 import * as React from 'react'
 import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './SponsorUserFees.recipes'
 
 export function SendRelayerSponsoredPayment(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -60,7 +63,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -71,7 +74,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -81,28 +84,30 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
       title="Send 100 AlphaUSD with fees sponsored by the testnet fee payer."
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
-                  <span className="text-gray12">balance: {userBalance?.formatted ?? '0'}</span>
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...ui.sendRelayerSponsoredPaymentLayout3()}>
+              <div {...ui.sendRelayerSponsoredPaymentLayout4()}>
+                <div {...ui.sendRelayerSponsoredPaymentLayout5()}>
+                  <span {...ui.sendRelayerSponsoredPaymentText()}>Payment Token: AlphaUSD</span>
+                  <span {...ui.sendRelayerSponsoredPaymentText2()}>
+                    balance: {userBalance?.formatted ?? '0'}
+                  </span>
                 </div>
               </div>
-              <div className="mt-2 border-gray4 border-t pt-2 text-[12px] text-gray9">
+              <div {...ui.sendRelayerSponsoredPaymentLayout6()}>
                 The testnet fee payer at https://sponsor.moderato.tempo.xyz will pay the transaction
                 fees.
               </div>
             </div>
 
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -112,12 +117,12 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -132,7 +137,7 @@ export function SendRelayerSponsoredPayment(props: DemoStepProps) {
                 disabled={!(active && isValidRecipient)}
                 onClick={handleTransfer}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

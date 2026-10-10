@@ -1,28 +1,54 @@
-const variants = {
-  red: 'bg-red3 text-red11',
-  amber: 'bg-amber3 text-amber11',
-  green: 'bg-green3 text-green11',
-  blue: 'bg-accentTint text-accent',
-  violet: 'bg-violet3 text-violet11',
-  gray: 'bg-gray3 text-gray11',
-} as const
-
-type BadgeVariant = keyof typeof variants
+import type { Props } from 'zyzz'
+import { inherited } from '../styles/inherited'
+import { vars as tokens, variants } from '../styles/theme'
 
 export function Badge({
   variant = 'gray',
   children,
-}: {
-  variant?: BadgeVariant
+}: Props.Variants<typeof badge> & {
   children: React.ReactNode
 }) {
-  return (
-    <span
-      className={`inline-flex min-h-6 items-center justify-center rounded-md px-2 text-center font-medium text-[12px] leading-4 ${variants[variant]}`}
-    >
-      {children}
-    </span>
-  )
+  return <span {...badge({ variant })}>{children}</span>
 }
+
+const badge = variants({
+  base: {
+    display: 'inline-flex',
+    minHeight: '24px',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.md,
+    paddingInline: tokens.spacing['2'],
+    textAlign: 'center',
+    fontWeight: tokens.fontWeight.medium,
+    fontSize: tokens.fontSize.xs,
+
+    lineHeight: tokens.lineHeight.caption,
+  },
+  defaultVariants: { variant: 'gray' },
+  variants: {
+    variant: {
+      red: { backgroundColor: tokens.color.red3, color: tokens.color.red11 },
+      amber: {
+        backgroundColor: tokens.color.amber3,
+        color: tokens.color.amber11,
+      },
+      green: {
+        backgroundColor: tokens.color.green3,
+        color: tokens.color.green11,
+      },
+      blue: {
+        backgroundColor: inherited.color.backgroundColorAccentTint,
+
+        color: inherited.color.textColorAccent,
+      },
+      violet: {
+        backgroundColor: tokens.color.violet3,
+        color: tokens.color.violet11,
+      },
+      gray: { backgroundColor: tokens.color.gray3, color: tokens.color.gray11 },
+    },
+  },
+})
 
 export default Badge

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { useActiveSidebarAnchor, useConfig } from 'vocs'
 import { useRouter } from 'waku'
 import { resolveSidebarItems, SidebarNodes, usePathname } from './DocsHeader'
+import * as ui from './DocsSidebarDrawer.recipes'
 
 function collectSidebarLinks(nodes: ReturnType<typeof resolveSidebarItems>): string[] {
   return nodes.flatMap((node) => [
@@ -53,8 +54,7 @@ export default function DocsSidebarDrawer() {
       }
       span = document.createElement('span')
       span.dataset.docsSidebarToggle = ''
-      if (row) span.style.marginRight = '0.5rem'
-      else span.dataset.docsSidebarFallback = ''
+      if (!row) span.dataset.docsSidebarFallback = ''
       target.prepend(span)
       setHost(span)
     }
@@ -177,9 +177,9 @@ export default function DocsSidebarDrawer() {
           aria-expanded={open}
           aria-controls={dialogId}
           aria-haspopup="dialog"
-          className="flex min-h-9 items-center gap-1.5 rounded-md font-sans text-foreground/70 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 min-[1080px]:hidden"
+          {...ui.docsSidebarDrawerButton()}
         >
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
             <title>Docs navigation</title>
             <path
               d="M3 5h14M3 10h14M3 15h14"
@@ -197,20 +197,11 @@ export default function DocsSidebarDrawer() {
   return (
     <>
       {toggle}
-      <div
-        className={`fixed inset-0 z-[70] min-[1080px]:hidden ${open ? '' : 'pointer-events-none'}`}
-        aria-hidden={!open}
-        inert={!open}
-      >
+      <div {...ui.docsSidebarDrawerLayout()} aria-hidden={!open} inert={!open}>
         {/* Backdrop */}
         {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismiss. */}
         {/* biome-ignore lint/a11y/useKeyWithClickEvents: Escape handled globally. */}
-        <div
-          onClick={() => setOpen(false)}
-          className={`absolute inset-0 bg-black/40 transition-opacity duration-200 motion-reduce:transition-none ${
-            open ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+        <div onClick={() => setOpen(false)} {...ui.docsSidebarDrawerLayout3()} />
         {/* Panel */}
         <div
           ref={panelRef}
@@ -219,21 +210,19 @@ export default function DocsSidebarDrawer() {
           aria-modal={open ? true : undefined}
           aria-labelledby={titleId}
           tabIndex={-1}
-          className={`absolute top-0 left-0 flex h-full w-[82%] max-w-[320px] flex-col border-line border-r bg-background transition-transform duration-200 ease-out motion-reduce:transition-none ${
-            open ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          {...ui.docsSidebarDrawerLayout6()}
         >
-          <div className="flex items-center justify-between border-line border-b px-5 py-4">
-            <span id={titleId} className="font-sans text-[15px] text-foreground tracking-[0]">
+          <div {...ui.docsSidebarDrawerLayout9()}>
+            <span id={titleId} {...ui.docsSidebarDrawerText()}>
               Documentation
             </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close docs navigation"
-              className="grid size-10 place-items-center rounded-lg text-foreground/70 transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
+              {...ui.docsSidebarDrawerButton2()}
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <title>Close</title>
                 <path
                   d="M5 5l10 10M15 5L5 15"
@@ -244,7 +233,7 @@ export default function DocsSidebarDrawer() {
               </svg>
             </button>
           </div>
-          <div className="flex flex-1 flex-col overflow-y-auto px-5 py-3">
+          <div {...ui.docsSidebarDrawerLayout10()}>
             <SidebarNodes
               nodes={items}
               pathname={pathname}

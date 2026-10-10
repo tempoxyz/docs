@@ -4,6 +4,8 @@ seoTitle: "Tempo Node Security | Tempo Docs"
 description: Security best practices for Tempo node operators, covering key management, network configuration, release verification, and data integrity.
 ---
 
+import { required } from './security.recipes'
+
 # Node security: best practices for operators
 
 This page covers security best practices for Tempo node operators. Following these recommendations helps protect your validator from impersonation, unauthorized access, and operational mistakes.
@@ -55,4 +57,4 @@ An unsynchronized clock can cause your node to reject valid blocks or produce bl
 
 - Subscribe to [Tempo GitHub releases](https://github.com/tempoxyz/tempo/releases) for security patches and upgrade announcements.
 - Review the [Upgrade Cadence](/docs/guide/node/upgrade-cadence) to understand notification timelines.
-- Apply <span style={{color: 'var(--vocs-color_red)'}}>Required</span> upgrades before the activation block — failing to do so will fork your node off the network.
+- Apply <span className={required().className}>Required</span> upgrades before the activation block — failing to do so will fork your node off the network.

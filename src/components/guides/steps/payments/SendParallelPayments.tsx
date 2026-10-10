@@ -1,4 +1,5 @@
 'use client'
+
 import { useQueryClient } from '@tanstack/react-query'
 import { type Config, getPublicClient } from '@wagmi/core'
 import * as React from 'react'
@@ -7,8 +8,10 @@ import { Abis } from 'viem/tempo'
 import { useConfig, useConnection, useConnectionEffect, useTransaction } from 'wagmi'
 import { Actions, Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink, FAKE_RECIPIENT, FAKE_RECIPIENT_2, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './SendParallelPayments.recipes'
 
 export type TransferState = {
   status: 'idle' | 'pending' | 'submitted' | 'success' | 'error' | 'unconfirmed'
@@ -84,40 +87,38 @@ function TransferResult({ label, state }: { label: string; state: TransferState 
   if (state.status === 'idle') return null
 
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center gap-2">
-        <span className="mt-1 text-[13px] text-gray9">{label}:</span>
+    <div {...ui.transferResultLayout()}>
+      <div {...ui.transferResultLayout2()}>
+        <span {...ui.transferResultText()}>{label}:</span>
         {state.status === 'pending' && (
-          <span className="mt-1 text-[13px] text-gray9">Waiting for wallet...</span>
+          <span {...ui.transferResultText()}>Waiting for wallet...</span>
         )}
         {state.status === 'submitted' && (
-          <span className="mt-1 text-[13px] text-gray9">Submitted; confirming...</span>
+          <span {...ui.transferResultText()}>Submitted; confirming...</span>
         )}
         {state.status === 'error' && (
-          <span className="mt-1 text-[13px] text-red-500">
+          <span {...ui.transferResultText2()}>
             {state.hash ? 'Transaction reverted' : 'Transfer not submitted'}
           </span>
         )}
         {state.status === 'unconfirmed' && (
-          <span className="mt-1 text-[13px] text-gray9">
+          <span {...ui.transferResultText()}>
             Payment not verified. Check the transaction before retrying.
           </span>
         )}
-        {state.status === 'success' && (
-          <span className="mt-1 text-[13px] text-gray9">Confirmed</span>
-        )}
+        {state.status === 'success' && <span {...ui.transferResultText()}>Confirmed</span>}
         {state.hash && <ExplorerLink hash={state.hash} />}
       </div>
 
       {state.status === 'success' && (
-        <div className="flex flex-wrap gap-x-3 gap-y-1 pl-2 text-[10px] text-gray9">
+        <div {...ui.transferResultLayout3()}>
           {transaction ? (
             <>
               <span>Nonce Key: {transaction.nonceKey}</span>
               <span>Nonce: {transaction.nonce}</span>
             </>
           ) : (
-            <span className="animate-pulse">Loading nonce details...</span>
+            <span {...ui.transferResultText3()}>Loading nonce details...</span>
           )}
         </div>
       )}
@@ -218,7 +219,7 @@ export function SendParallelPayments(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -235,7 +236,7 @@ export function SendParallelPayments(props: DemoStepProps) {
             disabled={!(address && balance && balance.amount >= parseUnits('100', 6))}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -245,16 +246,16 @@ export function SendParallelPayments(props: DemoStepProps) {
       title="Send 50 AlphaUSD to two recipients in parallel."
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex gap-3">
-              <div className="flex flex-1 flex-col gap-2">
-                <div className="flex flex-col">
-                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient1">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...ui.sendParallelPaymentsLayout3()}>
+              <div {...ui.sendParallelPaymentsLayout4()}>
+                <div {...ui.transferResultLayout()}>
+                  <label {...form.label()} htmlFor="recipient1">
                     Recipient 1
                   </label>
                   <input
-                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
+                    {...ui.sendParallelPaymentsInput()}
                     data-1p-ignore
                     type="text"
                     id="recipient1"
@@ -264,12 +265,12 @@ export function SendParallelPayments(props: DemoStepProps) {
                     placeholder="0x..."
                   />
                 </div>
-                <div className="flex flex-col">
-                  <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient2">
+                <div {...ui.transferResultLayout()}>
+                  <label {...form.label()} htmlFor="recipient2">
                     Recipient 2
                   </label>
                   <input
-                    className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white"
+                    {...ui.sendParallelPaymentsInput()}
                     data-1p-ignore
                     type="text"
                     id="recipient2"
@@ -280,7 +281,7 @@ export function SendParallelPayments(props: DemoStepProps) {
                   />
                 </div>
               </div>
-              <div className="flex items-start">
+              <div {...ui.sendParallelPaymentsLayout5()}>
                 <Button
                   variant={
                     address && balance && balance.amount >= parseUnits('100', 6)
@@ -294,14 +295,14 @@ export function SendParallelPayments(props: DemoStepProps) {
                   }
                   onClick={handleSendParallel}
                   type="button"
-                  className="font-normal text-[14px] -tracking-[2%]"
+                  className={form.actionButton().className}
                 >
                   {isSending ? 'Confirming payments...' : 'Send both payments'}
                 </Button>
               </div>
             </div>
             {hasStarted && (
-              <div className="mt-2 flex flex-col gap-1">
+              <div {...ui.sendParallelPaymentsLayout6()}>
                 <TransferResult label="Payment 1" state={transfer1} />
                 <TransferResult label="Payment 2" state={transfer2} />
               </div>

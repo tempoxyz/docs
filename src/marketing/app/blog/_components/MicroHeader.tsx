@@ -1,7 +1,15 @@
 'use client'
 
 import { useEffect, useId, useState } from 'react'
-import './MicroHeader.css'
+import * as ui from './MicroHeader.recipes'
+import {
+  blogMicroHeader,
+  blogMicroPostTitle,
+  blogMicroProgress,
+  blogMicroReadtime,
+  blogMicroSection,
+  blogMicroTop,
+} from './MicroHeader.styles'
 
 type Section = { id: string; title: string }
 
@@ -79,10 +87,14 @@ export default function MicroHeader({ title }: { title: string }) {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
 
   return (
-    <nav className="blog-micro-header" aria-label="Article navigation" hidden={!visible}>
+    <nav
+      className={`blog-micro-header ${blogMicroHeader().className}`}
+      aria-label="Article navigation"
+      hidden={!visible}
+    >
       {sections.length > 0 ? (
-        <div className="blog-micro-section">
-          <label htmlFor={selectId} className="sr-only">
+        <div className={`blog-micro-section ${blogMicroSection().className}`}>
+          <label htmlFor={selectId} {...ui.label()}>
             Jump to article section
           </label>
           <select
@@ -109,21 +121,21 @@ export default function MicroHeader({ title }: { title: string }) {
           </select>
         </div>
       ) : (
-        <span className="blog-micro-post-title">{title}</span>
+        <span className={`blog-micro-post-title ${blogMicroPostTitle().className}`}>{title}</span>
       )}
-      <span className="blog-micro-readtime">
+      <span className={`blog-micro-readtime ${blogMicroReadtime().className}`}>
         {progress >= 1 ? 'Read' : `${Math.max(1, Math.ceil(minutes * (1 - progress)))} min left`}
       </span>
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: scrollBehavior() })}
         aria-label="Back to top"
-        className="blog-micro-top"
+        className={`blog-micro-top ${blogMicroTop().className}`}
       >
         ↑
       </button>
       <progress
-        className="blog-micro-progress"
+        className={`blog-micro-progress ${blogMicroProgress().className}`}
         value={progress}
         max={1}
         aria-label="Article reading progress"

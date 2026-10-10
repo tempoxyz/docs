@@ -1,4 +1,5 @@
 'use client'
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Chain, Client, Transport } from 'viem'
@@ -9,6 +10,7 @@ import { useBlockNumber, useClient, useConnections } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { isFundableWalletConnector } from '../../../lib/wallets'
 import { Button, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
 
@@ -36,7 +38,6 @@ export function AddFundsToWallet(props: DemoStepProps) {
       refetchInterval: 1_500,
     },
   })
-  // biome-ignore lint/correctness/useExhaustiveDependencies: _
   React.useEffect(() => {
     balanceRefetch()
   }, [blockNumber])
@@ -77,7 +78,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
         <Button
           disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
           variant="default"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={form.actionButton().className}
           onClick={() => fundAccount.mutate()}
           type="button"
         >
@@ -88,7 +89,7 @@ export function AddFundsToWallet(props: DemoStepProps) {
       <Button
         disabled={!hasNonWebAuthnWallet || fundAccount.isPending}
         variant={hasNonWebAuthnWallet ? 'accent' : 'default'}
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={form.actionButton().className}
         type="button"
         onClick={() => fundAccount.mutate()}
       >

@@ -4,6 +4,8 @@ seoTitle: "Data and Analytics Providers for Tempo | Tempo Docs"
 description: Query blockchain data on Tempo with indexers, analytics platforms, oracles, and monitoring tools.
 ---
 
+import { partnerLogo, partnerLogoAllium, partnerLogoArtemis, partnerLogoChainlink, partnerLogoCodex, partnerLogoCoingecko, partnerLogoDune, partnerLogoGoldsky, partnerLogoRange, partnerLogoRedstone, partnerLogoSonarx, partnerLogoSqd, partnerLogoZerion } from '../../../components/PartnerLogos.styles'
+
 <span id="data-and-analytics-providers" />
 
 # Data
@@ -12,7 +14,7 @@ Choose an indexer, analytics platform, or oracle for the data your application n
 
 For Tempo's hosted interfaces, start with the [Tempo API](/docs/api) for payment activity or the [Indexer API](/docs/api/indexer-api) for SQL queries. Use [explorers and debugging tools](/docs/partners/explorers-and-debugging) to inspect individual transactions.
 
-## <span className="partner-logo partner-logo--allium" aria-hidden="true" />Allium
+## <span className={`partner-logo partner-logo--allium ${partnerLogo().className + ' ' + partnerLogoAllium().className}`} aria-hidden="true" />Allium
 
 [Allium](https://www.allium.so) is an enterprise blockchain data platform that delivers real-time, analytics-ready datasets through a unified schema across chains. Developers can fetch wallet, token, and price data in milliseconds without managing infrastructure, decoding raw data, or inferring transactions—making it easy to focus on building Tempo applications.
 
@@ -22,7 +24,7 @@ Get access to Tempo data through the [Allium App](https://app.allium.so/join), e
 Allium has a [ready-to-use recipe](https://github.com/Allium-Science/allium-recipes/tree/main/tempo) for querying Tempo data with SQL.
 :::
 
-## <span className="partner-logo partner-logo--artemis" aria-hidden="true" />Artemis
+## <span className={`partner-logo partner-logo--artemis ${partnerLogo().className + ' ' + partnerLogoArtemis().className}`} aria-hidden="true" />Artemis
 
 [Artemis](https://about.artemis.ai/) provides a unified analytics terminal for monitoring onchain activity across stablecoins, assets, and networks. Developers use Artemis to analyze flows, liquidity, token performance, and ecosystem-level trends through a clean, queryable interface.
 
@@ -30,7 +32,7 @@ Artemis has a dedicated analytics page for [Tempo Testnet](https://app.artemisan
 
 Artemis also maintains a cross-chain stablecoin dashboard covering major USD-pegged assets across numerous networks. Check the [Stablecoins dashboard](https://app.artemisanalytics.com/stablecoins) for the assets and networks it currently covers.
 
-## <span className="partner-logo partner-logo--chainlink" aria-hidden="true" />Chainlink
+## <span className={`partner-logo partner-logo--chainlink ${partnerLogo().className + ' ' + partnerLogoChainlink().className}`} aria-hidden="true" />Chainlink
 
 [Chainlink](https://chain.link) is the industry-standard oracle platform powering the majority of DeFi and bringing capital markets onchain. The Chainlink stack provides the data, interoperability, and security needed for tokenized assets, stablecoins, payments, lending, and other advanced onchain use cases.
 
@@ -53,25 +55,25 @@ Chronicle supports Tempo through:
 
 Developers can learn more about Chronicle's data feeds on [Chronicle Docs](https://docs.chroniclelabs.org/).
 
-## <span className="partner-logo partner-logo--codex" aria-hidden="true" />Codex
+## <span className={`partner-logo partner-logo--codex ${partnerLogo().className + ' ' + partnerLogoCodex().className}`} aria-hidden="true" />Codex
 
 [Codex](https://www.codex.io) provides a GraphQL API for token prices, holders, trading pairs, and onchain activity, including Tempo data.
 
 Use the [Codex documentation](https://docs.codex.io), [API explorer](https://docs.codex.io/explore), or [TypeScript SDK](https://github.com/Codex-Data/sdk).
 
-## <span className="partner-logo partner-logo--coingecko" aria-hidden="true" />CoinGecko
+## <span className={`partner-logo partner-logo--coingecko ${partnerLogo().className + ' ' + partnerLogoCoingecko().className}`} aria-hidden="true" />CoinGecko
 
 [CoinGecko](https://www.coingecko.com) provides comprehensive cryptocurrency market data, including prices, trading volume, market capitalization, and token metadata. Developers can use the CoinGecko API to access Tempo token data for building dashboards, portfolio trackers, and analytics tools.
 
 Get started with the [CoinGecko API](https://docs.coingecko.com/reference/introduction).
 
-## <span className="partner-logo partner-logo--dune" aria-hidden="true" />Dune
+## <span className={`partner-logo partner-logo--dune ${partnerLogo().className + ' ' + partnerLogoDune().className}`} aria-hidden="true" />Dune
 
 [Dune](https://dune.com) provides SQL-based blockchain analytics, dashboards, and query APIs. Check its [data catalog](https://docs.dune.com/data-catalog/overview) for the networks and datasets available to your integration.
 
 Dune [retired the Sim API on August 1, 2026](https://dune.com/blog/sunsetting-sim). Do not start a new integration with `sim.dune.com` or its former real-time wallet APIs. For Tempo payment activity, use the [Tempo API](/docs/api) or choose another provider in this directory.
 
-## <span className="partner-logo partner-logo--goldsky" aria-hidden="true" />Goldsky
+## <span className={`partner-logo partner-logo--goldsky ${partnerLogo().className + ' ' + partnerLogoGoldsky().className}`} aria-hidden="true" />Goldsky
 
 [Goldsky](https://goldsky.com/chains/tempo) supports Tempo mainnet and Moderato testnet with subgraph indexing and data pipelines:
 
@@ -80,7 +82,7 @@ Dune [retired the Sim API on August 1, 2026](https://dune.com/blog/sunsetting-si
 
 Start indexing Tempo [here](https://goldsky.com/chains/tempo).
 
-## <span className="partner-logo partner-logo--range" aria-hidden="true" />Range
+## <span className={`partner-logo partner-logo--range ${partnerLogo().className + ' ' + partnerLogoRange().className}`} aria-hidden="true" />Range
 
 [Range](https://www.range.org) powers the Stablecoin Explorer, which provides a unified view of major stablecoins across 100+ chains. Tempo is fully supported, allowing developers and users to trace stablecoin flows in a way traditional explorers cannot.
 
@@ -91,13 +93,13 @@ Range stands out through:
 
 Explore Tempo activity in the [Stablecoin Explorer](https://explorer.money/transactions?dn=tempo-testnet&sc=INTRACHAIN&sn=tempo-testnet).
 
-## <span className="partner-logo partner-logo--redstone" aria-hidden="true" />RedStone
+## <span className={`partner-logo partner-logo--redstone ${partnerLogo().className + ' ' + partnerLogoRedstone().className}`} aria-hidden="true" />RedStone
 
 [RedStone](https://redstone.finance) delivers modular oracle infrastructure with a Push and Pull model for onchain price feeds. RedStone's architecture minimizes gas costs by delivering data on-demand, making it well-suited for DeFi applications, lending protocols, FX and stablecoin systems on Tempo.
 
 Explore the available Push data feeds [here](https://app.redstone.finance/push-feeds?networks=tempo&testnets=true) and integration guides in the [RedStone docs](https://docs.redstone.finance/).
 
-## <span className="partner-logo partner-logo--sonarx" aria-hidden="true" />SonarX
+## <span className={`partner-logo partner-logo--sonarx ${partnerLogo().className + ' ' + partnerLogoSonarx().className}`} aria-hidden="true" />SonarX
 
 [SonarX](https://www.sonarx.com) is an institutional-grade blockchain data infrastructure platform trusted by leading financial institutions, custodians, and Web3 teams. SonarX delivers structured, historical, and real-time on-chain data backed by a proprietary Data Quality Framework and SOC 2-certified controls.
 
@@ -105,13 +107,13 @@ SonarX provides full Tempo coverage from genesis, including a Full Historical St
 
 Request a data trial on the [SonarX platform](https://www.sonarx.com/trial) and explore the [SonarX docs](https://docs.sonarx.com/).
 
-## <span className="partner-logo partner-logo--sqd" aria-hidden="true" />SQD
+## <span className={`partner-logo partner-logo--sqd ${partnerLogo().className + ' ' + partnerLogoSqd().className}`} aria-hidden="true" />SQD
 
 [SQD](https://sqd.ai) is a decentralized query engine and high-performance indexing toolkit for extracting and transforming on-chain data. With the Squid SDK, developers can build custom indexers for Tempo that are up to 100x faster than direct RPC indexing, with data served through the SQD Network's decentralized data layer.
 
 Get started with the [SQD docs](https://docs.sqd.ai/) and deploy indexers via [SQD Cloud](https://app.subsquid.io/).
 
-## <span className="partner-logo partner-logo--zerion" aria-hidden="true" />Zerion
+## <span className={`partner-logo partner-logo--zerion ${partnerLogo().className + ' ' + partnerLogoZerion().className}`} aria-hidden="true" />Zerion
 
 [Zerion](https://zerion.io/api) provides an enterprise-grade wallet data API that delivers portfolio balances, transaction history, DeFi positions, PnL tracking, and real-time webhooks — including Tempo — through a single unified interface. Developers can add comprehensive blockchain data to their applications without running any indexing infrastructure.
 

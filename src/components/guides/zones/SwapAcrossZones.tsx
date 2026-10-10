@@ -21,6 +21,7 @@ import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone
 import { Button, ExplorerLink, Logout, ReceiptHash, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { betaUsd, ousd } from '../tokens'
+import * as ui from './SwapAcrossZones.recipes'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
 
 const SWAP_AMOUNT = parseUnits('25', 6)
@@ -505,7 +506,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
     authorizeZonesMutation.isPending
   const stepTwoAction = zonesAuthorized ? undefined : (
     <Button
-      className="font-normal text-[14px] -tracking-[2%]"
+      className={ui.connectedZoneFlowButton().className}
       disabled={sourceAuthIsPreparing || !sourceZoneClient}
       onClick={() => authorizeZonesMutation.mutate()}
       type="button"
@@ -547,7 +548,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (sourceZoneBalanceQuery.isPending || swapPrereqsQuery.isPending) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled
         type="button"
         variant="default"
@@ -558,7 +559,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (!hasEnoughSourceZoneBalance && !hasRootBalance) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={fundMutation.isPending || !zonesAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
@@ -570,7 +571,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (!hasEnoughSourceZoneBalance) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={topUpMutation.isPending || !zonesAuthorized}
         onClick={() => topUpMutation.mutate()}
         type="button"
@@ -587,7 +588,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (swapPrereqsQuery.isError) {
     stepFourAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         onClick={() => swapPrereqsQuery.refetch()}
         type="button"
         variant="default"
@@ -598,7 +599,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else {
     stepFourAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={swapMutation.isPending || swapMutation.isSuccess}
         onClick={() => swapMutation.mutate()}
         type="button"
@@ -619,7 +620,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (targetZoneBalanceQuery.isError) {
     stepSixAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         onClick={() => targetZoneBalanceQuery.refetch()}
         type="button"
         variant="default"
@@ -630,7 +631,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (!targetZoneAuthorization.isAuthorized) {
     stepSixAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={targetZoneAuthorization.authorizeMutation.isPending}
         onClick={() => targetZoneAuthorization.authorizeMutation.mutate()}
         type="button"
@@ -644,7 +645,7 @@ function ConnectedZoneFlow(props: { address: Hex }) {
   } else if (targetZoneBalanceQuery.isPending || !targetBalanceReady) {
     stepSixAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled
         type="button"
         variant="default"
@@ -804,9 +805,9 @@ function applyOnePercentSlippageBuffer(value: bigint) {
 
 function StepBody(props: React.PropsWithChildren) {
   return (
-    <div className="mx-6 pb-4">
-      <div className="mt-3 border-gray4 border-s-2 ps-5">
-        <div className="flex flex-col gap-2 py-0.5">{props.children}</div>
+    <div {...ui.stepBodyLayout()}>
+      <div {...ui.stepBodyLayout2()}>
+        <div {...ui.stepBodyLayout3()}>{props.children}</div>
       </div>
     </div>
   )
@@ -816,9 +817,9 @@ function DetailLine(props: { label: string; value: string; dataTestId?: string |
   const { dataTestId, label, value } = props
 
   return (
-    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] -tracking-[1%]">
-      <span className="text-gray9">{label}</span>
-      <span className="break-all font-mono text-[12px] text-gray12" data-testid={dataTestId}>
+    <div {...ui.detailLineLayout()}>
+      <span {...ui.detailLineText()}>{label}</span>
+      <span {...ui.detailLineText2()} data-testid={dataTestId}>
         {value}
       </span>
     </div>

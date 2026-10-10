@@ -5,6 +5,7 @@ import NetworkIcon from '~icons/lucide/network'
 import SendIcon from '~icons/lucide/send'
 import TrendingUpIcon from '~icons/lucide/trending-up'
 import WalletIcon from '~icons/lucide/wallet'
+import { tempoDocsHomeProductIcon } from './DocsHome.styles'
 
 export const docsProductIcons = {
   accounts: WalletIcon,
@@ -20,7 +21,7 @@ export function DocsHomeProductIcon({ product }: { product: keyof typeof docsPro
   const Icon = docsProductIcons[product]
   return (
     <Icon
-      className="tempo-docs-home-product-icon"
+      className={`tempo-docs-home-product-icon ${tempoDocsHomeProductIcon().className}`}
       aria-hidden="true"
       focusable="false"
       width="20"

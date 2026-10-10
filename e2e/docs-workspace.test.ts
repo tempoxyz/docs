@@ -273,8 +273,8 @@ test('Get started recommends a test payment and offers build paths and tool link
   await expect(quickstart).toHaveAccessibleName('interactive quickstart')
   await expect(quickstart).toBeVisible()
   for (const [label, href] of [
-    ['Build stablecoin accounts', '/docs/accounts'],
-    ['Transfer across networks', '/docs/routes'],
+    ['Embed stablecoins in your app', '/docs/accounts'],
+    ['Route stablecoins across chains', '/docs/routes'],
     ['Earn on stablecoins', '/docs/earn'],
     ['Charge for APIs', '/docs/guide/machine-payments/server'],
   ]) {
@@ -750,6 +750,7 @@ test('sandbox routes reveal their guides within the Zones sidebar', async ({ pag
     drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]'),
   ).toBeVisible()
   await drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]').click()
+  await expect(page).toHaveURL(/\/docs\/guide\/private-zones\/deposit-to-a-zone\/?$/)
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
   await expect(
     drawer.locator('a[href="/docs/guide/private-zones/withdraw-from-a-zone"]'),

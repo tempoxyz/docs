@@ -4,19 +4,21 @@ seoTitle: "Stablecoins and Issuers on Tempo | Tempo Docs"
 description: Find stablecoin assets and issuers on Tempo, then connect token metadata, funding, and payments to your application.
 ---
 
+import { partnerLogo, partnerLogoOpenUsdOusd, partnerLogoAllunity } from '../../../components/PartnerLogos.styles'
+
 import { Cards, Card } from 'vocs'
 
 # Stablecoins
 
 Choose a stablecoin for the currencies and payment flows your application supports. Start with OUSD for USD balances and payments, or choose an asset that matches your funding source and settlement currency. For tokenized Treasuries and other yield-bearing assets, see [RWAs](/docs/partners/rwas).
 
-## <span className="partner-logo partner-logo--open-usd-ousd" aria-hidden="true" />Open USD (OUSD)
+## <span className={`partner-logo partner-logo--open-usd-ousd ${partnerLogo().className + ' ' + partnerLogoOpenUsdOusd().className}`} aria-hidden="true" />Open USD (OUSD)
 
 [Open Standard](https://joinopenstandard.com) operates OUSD, a USD stablecoin issued natively on Tempo. OUSD is the recommended stablecoin for holding balances, accepting payments, and settlement on Tempo.
 
 Use the [OUSD integration guide](/docs/guide/ousd) for its contract address, token properties, and funding paths.
 
-## <span className="partner-logo partner-logo--allunity" aria-hidden="true" />AllUnity
+## <span className={`partner-logo partner-logo--allunity ${partnerLogo().className + ' ' + partnerLogoAllunity().className}`} aria-hidden="true" />AllUnity
 
 [AllUnity](https://allunity.com) issues stablecoins including EURAU, SEKAU, and CHFAU on Tempo. Follow the issuer's integration requirements for access to its assets and services.
 

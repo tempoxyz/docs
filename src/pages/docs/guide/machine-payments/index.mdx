@@ -4,6 +4,8 @@ seoTitle: "How the Machine Payments Protocol Works | Tempo Docs"
 description: Follow an MPP request from payment challenge through authorization, verification, and response.
 ---
 
+import { demoFrame } from './index.recipes'
+
 import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 import { TerminalDemo } from '../../../../components/TerminalDemo'
 
@@ -53,7 +55,7 @@ See the [MPP intent reference](https://mpp.dev/protocol#payment-intents) for oth
 
 This simulation illustrates the challenge, payment, and retry sequence for a paid photo request. The account, funds, and transaction are simulated.
 
-<div style={{ height: 480 }}>
+<div className={demoFrame().className}>
   <TerminalDemo />
 </div>
 

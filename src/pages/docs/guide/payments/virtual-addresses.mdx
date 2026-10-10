@@ -5,6 +5,8 @@ description: Give each customer a virtual deposit address, receive TIP-20 paymen
 interactive: true
 ---
 
+import * as ui from './virtual-addresses.recipes'
+
 import { Card, Cards, Tab, Tabs } from 'vocs'
 import * as Demo from '../../../../components/guides/Demo.tsx'
 import { VirtualAddressesFastDemo } from '../../../../components/guides/VirtualAddressesFastDemo.tsx'
@@ -58,11 +60,11 @@ The Moderato demos use OUSD. Localnet and devnet demos use pathUSD.
 <Tabs stateKey="virtual-address-demo-mode">
   <Tab title="Fast demo">
 
-<div className="h-4" />
+<div className={ui.div().className} />
 
 Use a docs-managed master with a pre-mined valid salt so you can skip the wait and jump straight to the forwarding flow.
 
-<div className="h-6" />
+<div className={ui.div2().className} />
 
 <Demo.Container name="Virtual addresses" footerVariant={undefined}>
   <VirtualAddressesFastDemo />
@@ -71,17 +73,17 @@ Use a docs-managed master with a pre-mined valid salt so you can skip the wait a
   </Tab>
   <Tab title="Real registration">
 
-<div className="h-4" />
+<div className={ui.div().className} />
 
 Use `VirtualMaster.mineSaltAsync` to register a master id for the passkey account you create in the demo.
 
-<div className="h-4" />
+<div className={ui.div().className} />
 
 :::info
 Mining a virtual-address salt can take 30+ seconds depending on your browser, hardware, and available worker parallelism.
 :::
 
-<div className="h-6" />
+<div className={ui.div2().className} />
 
 <Demo.Container name="Virtual addresses" footerVariant={undefined}>
   <VirtualAddressesLiveDemo />

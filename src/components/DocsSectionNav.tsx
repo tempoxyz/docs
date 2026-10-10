@@ -9,14 +9,30 @@ import CodeIcon from '~icons/lucide/code-xml'
 import CompassIcon from '~icons/lucide/compass'
 import ScanSearchIcon from '~icons/lucide/scan-search'
 import TerminalIcon from '~icons/lucide/terminal'
-
 import {
   type DocsSection,
   docsSections,
   docsUtilitySections,
   getActiveDocsSection,
 } from '../lib/docs-sections'
+import { docsSectionNav as sectionSurface } from '../styles/surfaces.styles'
 import { docsProductIcons } from './DocsHomeProductIcon'
+import {
+  docsApiMenuItem,
+  docsApiMenuMobile,
+  docsReferenceMenu,
+  docsReferencePanel,
+  docsReferenceTrigger,
+  docsResourceLinkLabel,
+  docsResourceLinks,
+  docsResourceLinkText,
+  docsResourceLogo,
+  docsSectionIcon,
+  docsSectionNav,
+  docsSectionNavScroll,
+  docsSectionUtilities,
+  docsSectionUtilityLink,
+} from './DocsNavigation.styles'
 import { MercatorLogo, MppLogo, TempoMark } from './ToolLogos'
 
 export { docsSections, docsUtilitySections, getActiveDocsSection }
@@ -40,7 +56,10 @@ export const docsExternalTools = [
 
 export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <nav aria-label="External tools" className="docs-resource-links">
+    <nav
+      aria-label="External tools"
+      className={`docs-resource-links ${docsResourceLinks().className}`}
+    >
       {docsExternalTools.map((tool) => (
         <a
           key={tool.href}
@@ -50,9 +69,15 @@ export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
           rel="noopener noreferrer"
           onClick={onNavigate}
         >
-          <span className="docs-resource-link-label">
-            <tool.logo className="docs-resource-logo" aria-hidden="true" focusable="false" />
-            <span className="docs-resource-link-text">{tool.label}</span>
+          <span className={`docs-resource-link-label ${docsResourceLinkLabel().className}`}>
+            <tool.logo
+              className={`docs-resource-logo ${docsResourceLogo().className}`}
+              aria-hidden="true"
+              focusable="false"
+            />
+            <span className={`docs-resource-link-text ${docsResourceLinkText().className}`}>
+              {tool.label}
+            </span>
             <ArrowUpRightIcon aria-hidden="true" width="14" height="14" />
           </span>
         </a>
@@ -93,7 +118,11 @@ export function DocsApiDropdown({
     <div
       ref={ref}
       role="group"
-      className={mobile ? 'docs-reference-menu docs-api-menu-mobile' : 'docs-reference-menu'}
+      className={
+        mobile
+          ? `docs-reference-menu docs-api-menu-mobile ${docsReferenceMenu().className} ${docsApiMenuMobile().className}`
+          : `docs-reference-menu ${docsReferenceMenu().className}`
+      }
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
       }}
@@ -109,7 +138,7 @@ export function DocsApiDropdown({
       <button
         ref={buttonRef}
         type="button"
-        className="docs-reference-trigger"
+        className={`docs-reference-trigger ${docsReferenceTrigger().className}`}
         aria-expanded={open}
         aria-controls={panelId}
         aria-current={active ? 'page' : undefined}
@@ -121,7 +150,7 @@ export function DocsApiDropdown({
         id={panelId}
         aria-label="APIs & SDKs"
         hidden={!open}
-        className="docs-reference-panel docs-resource-links"
+        className={`docs-reference-panel docs-resource-links ${docsReferencePanel().className} ${docsResourceLinks().className}`}
       >
         {[
           { label: 'Overview', href: '/docs/tools', icon: CompassIcon },
@@ -137,7 +166,7 @@ export function DocsApiDropdown({
               onNavigate?.()
             }}
           >
-            <span className="docs-api-menu-item">
+            <span className={`docs-api-menu-item ${docsApiMenuItem().className}`}>
               <item.icon aria-hidden="true" width="18" height="18" />
               {item.label}
             </span>
@@ -152,7 +181,7 @@ export function DocsApiDropdown({
             onNavigate?.()
           }}
         >
-          <span className="docs-api-menu-item">
+          <span className={`docs-api-menu-item ${docsApiMenuItem().className}`}>
             <ScanSearchIcon aria-hidden="true" width="18" height="18" />
             Explorer
             <ArrowUpRightIcon aria-hidden="true" width="14" height="14" />
@@ -180,8 +209,14 @@ export default function DocsSectionNav() {
   }, [activeLabel, activeSection?.id])
 
   return (
-    <div className="docs-section-nav">
-      <nav ref={navRef} aria-label="Documentation sections" className="docs-section-nav-scroll">
+    <div
+      className={`docs-section-nav  ${docsSectionNav().className} ${sectionSurface().className}`}
+    >
+      <nav
+        ref={navRef}
+        aria-label="Documentation sections"
+        className={`docs-section-nav-scroll ${docsSectionNavScroll().className}`}
+      >
         <ul>
           {docsSections.map((item) => {
             const Icon = sectionIcons[item.id]
@@ -198,7 +233,7 @@ export default function DocsSectionNav() {
                 >
                   {Icon && (
                     <Icon
-                      className="docs-section-icon"
+                      className={`docs-section-icon ${docsSectionIcon().className}`}
                       aria-hidden="true"
                       focusable="false"
                       width="16"
@@ -213,7 +248,7 @@ export default function DocsSectionNav() {
           })}
         </ul>
       </nav>
-      <div className="docs-section-utilities">
+      <div className={`docs-section-utilities ${docsSectionUtilities().className}`}>
         {docsUtilitySections.map((section) =>
           section.id === 'tools' ? (
             <DocsApiDropdown key={section.id} active={activeSection?.id === section.id} />
@@ -221,7 +256,7 @@ export default function DocsSectionNav() {
             <Link
               key={section.id}
               to={section.href}
-              className="docs-section-utility-link"
+              className={`docs-section-utility-link ${docsSectionUtilityLink().className}`}
               aria-current={activeSection?.id === section.id ? 'page' : undefined}
               unstable_prefetchOnEnter
               unstable_prefetchOnView

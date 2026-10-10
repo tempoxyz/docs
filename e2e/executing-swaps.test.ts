@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { expectDemoSuccess } from './helpers'
 
 test('executing swaps', async ({ page }) => {
   test.setTimeout(180000)
@@ -32,9 +33,7 @@ test('executing swaps', async ({ page }) => {
   await expect(addFundsButton).toBeVisible()
   await addFundsButton.click()
 
-  await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
   // Step 3: Execute a swap (Buy AlphaUSD with BetaUSD)
   const buyButton = page.getByRole('button', { name: 'Buy' }).first()
@@ -42,7 +41,7 @@ test('executing swaps', async ({ page }) => {
   await buyButton.click()
 
   // Wait for swap receipt
-  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

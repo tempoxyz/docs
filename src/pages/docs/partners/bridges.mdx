@@ -4,6 +4,8 @@ seoTitle: "Stablecoin Bridges for Tempo | Tempo Docs"
 description: Move stablecoins between Tempo and other networks with cross-chain bridge integrations.
 ---
 
+import { partnerLogo, partnerLogoAcross, partnerLogoChainlink, partnerLogoLayerzero, partnerLogoRelay, partnerLogoRhinoFi, partnerLogoSquid } from '../../../components/PartnerLogos.styles'
+
 <span id="bridges--exchanges-for-stablecoin-liquidity" />
 
 # Bridges
@@ -12,7 +14,7 @@ Choose a bridge integration to move stablecoins between Tempo and another networ
 
 For an application integration, follow the [LayerZero](/docs/guide/bridge-layerzero), [Relay](/docs/guide/bridge-relay), or [Bungee](/docs/guide/bridge-bungee) guide. For a wallet deposit, start with [funding an account](/docs/guide/getting-funds). [Tempo Routes](/docs/routes) provides a transfer API; the directory below lists bridge partners.
 
-## <span className="partner-logo partner-logo--across" aria-hidden="true" />Across
+## <span className={`partner-logo partner-logo--across ${partnerLogo().className + ' ' + partnerLogoAcross().className}`} aria-hidden="true" />Across
 
 [Across](https://across.to) provides intent-based bridging for moving assets to and from Tempo. Check its supported routes and quote terms before integrating.
 
@@ -24,31 +26,31 @@ Bridge assets to Tempo through the [Across app](https://app.across.to/) and expl
 
 Get started with the [Tempo Bungee guide](/docs/guide/bridge-bungee), read the [Socket migration guide](https://docs.socket.tech/integrate/migration-guide), or try the [Bungee app](https://bungee.exchange).
 
-## <span className="partner-logo partner-logo--chainlink" aria-hidden="true" />Chainlink CCIP
+## <span className={`partner-logo partner-logo--chainlink ${partnerLogo().className + ' ' + partnerLogoChainlink().className}`} aria-hidden="true" />Chainlink CCIP
 
 [Chainlink Cross-Chain Interoperability Protocol (CCIP)](https://chain.link/cross-chain) enables applications to transfer tokens and messages across blockchains. CCIP connects Tempo to supported networks through active cross-chain lanes.
 
 View supported tokens, lanes, fees, and contract configuration in the [Tempo Mainnet CCIP Directory](https://docs.chain.link/ccip/directory/mainnet/chain/tempo-mainnet).
 
-## <span className="partner-logo partner-logo--layerzero" aria-hidden="true" />LayerZero
+## <span className={`partner-logo partner-logo--layerzero ${partnerLogo().className + ' ' + partnerLogoLayerzero().className}`} aria-hidden="true" />LayerZero
 
 [LayerZero](https://layerzero.network) is an omnichain interoperability protocol that enables secure, low-level message passing between blockchains. Stargate is the global interface for value movement onchain. Within Tempo, Stargate enables native, 1&#58;1 asset transfers into and out of the ecosystem.
 
 Transfer assets to Tempo with [Stargate](https://stargate.finance/).
 
-## <span className="partner-logo partner-logo--relay" aria-hidden="true" />Relay
+## <span className={`partner-logo partner-logo--relay ${partnerLogo().className + ' ' + partnerLogoRelay().className}`} aria-hidden="true" />Relay
 
 [Relay](https://relay.link) provides cross-chain bridging and transaction execution. Relayers fill orders on the destination network; use the quoted terms and delivery status to track each transfer.
 
 Bridge to Tempo through the [Relay app](https://relay.link) and explore the [Relay docs](https://docs.relay.link/).
 
-## <span className="partner-logo partner-logo--rhino-fi" aria-hidden="true" />Rhino.fi
+## <span className={`partner-logo partner-logo--rhino-fi ${partnerLogo().className + ' ' + partnerLogoRhinoFi().className}`} aria-hidden="true" />Rhino.fi
 
 [Rhino.fi](https://rhino.fi) provides cross-chain liquidity infrastructure for stablecoin deposits and withdrawals. Check supported networks, fees, and transfer status through its integration.
 
 Learn more at [rhino.fi](https://rhino.fi) or explore the [Rhino.fi docs](https://docs.rhino.fi/get-started/introduction).
 
-## <span className="partner-logo partner-logo--squid" aria-hidden="true" />Squid
+## <span className={`partner-logo partner-logo--squid ${partnerLogo().className + ' ' + partnerLogoSquid().className}`} aria-hidden="true" />Squid
 
 [Squid](https://www.squidrouter.com) aggregates DEXs, bridges, and market makers for cross-chain transfers and swaps. Use its API, SDK, or widget to quote supported routes to and from Tempo.
 
