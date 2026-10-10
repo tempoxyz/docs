@@ -1,4 +1,3 @@
-import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
 import BotIcon from '~icons/lucide/bot'
 import BracesIcon from '~icons/lucide/braces'
 import CodeIcon from '~icons/lucide/code-xml'
@@ -7,7 +6,12 @@ import NetworkIcon from '~icons/lucide/network'
 import ServerIcon from '~icons/lucide/server'
 import WalletIcon from '~icons/lucide/wallet'
 import { docsLinkCards } from '../lib/docs-link-cards'
-import { docsSetupCard, docsSetupGrid, docsSetupLinks } from './DocsSetupCards.styles'
+import {
+  docsSetupCard,
+  docsSetupGrid,
+  docsSetupLink,
+  docsSetupLinks,
+} from './DocsSetupCards.styles'
 
 const icons = {
   network: NetworkIcon,
@@ -33,9 +37,8 @@ export function DocsLinkCards({ collection }: { collection: keyof typeof docsLin
             <p>{description}</p>
             <div className={`docs-setup-links ${docsSetupLinks().className}`}>
               {links.map(([label, href]) => (
-                <a key={href} href={href}>
+                <a key={href} href={href} className={docsSetupLink().className}>
                   {label}
-                  <ArrowUpRightIcon aria-hidden="true" focusable="false" width="16" height="16" />
                 </a>
               ))}
             </div>
