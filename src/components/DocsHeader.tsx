@@ -14,6 +14,7 @@ import { publicAssetPath } from '../lib/public-asset-path'
 import { navActiveSquare } from '../styles/surfaces.styles'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
+import { CopyIconSwap } from './CopyIconSwap'
 import * as ui from './DocsHeader.recipes'
 import {
   docsHeaderActions,
@@ -414,7 +415,7 @@ function CommandSnippet({
           !copied && ui.commandSnippetText5(),
         )}
       >
-        {copied ? <CheckIcon /> : <CopyIcon />}
+        <CopyIconSwap copied={!!copied} copyIcon={<CopyIcon />} checkIcon={<CheckIcon />} />
       </span>
     </button>
   )

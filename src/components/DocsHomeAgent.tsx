@@ -9,6 +9,7 @@ import TerminalIcon from '~icons/lucide/terminal'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
+import { CopyIconSwap } from './CopyIconSwap'
 import { tempoAgentStart, tempoAgentStartAgents, tempoAgentStartCommand } from './DocsHome.styles'
 
 const agents = [
@@ -69,10 +70,19 @@ export function DocsHomeAgent() {
 
   useEffect(() => setMounted(true), [])
 
+  // The icon and label confirm briefly; the status message below stays.
+  const [justCopied, setJustCopied] = useState(false)
+  useEffect(() => {
+    if (!justCopied) return
+    const timer = window.setTimeout(() => setJustCopied(false), 1200)
+    return () => window.clearTimeout(timer)
+  }, [justCopied])
+
   async function copyCommands() {
     try {
       await navigator.clipboard.writeText(commands)
       setCopyState('copied')
+      setJustCopied(true)
     } catch {
       setCopyState('error')
     }
@@ -132,12 +142,12 @@ export function DocsHomeAgent() {
               aria-label={`${copyLabel} for ${activeAgent.label}`}
               onClick={copyCommands}
             >
-              {copyState === 'copied' ? (
-                <CheckIcon aria-hidden="true" />
-              ) : (
-                <CopyIcon aria-hidden="true" />
-              )}
-              <span>{copyState === 'copied' ? 'Copied' : copyLabel}</span>
+              <CopyIconSwap
+                copied={justCopied}
+                copyIcon={<CopyIcon aria-hidden="true" />}
+                checkIcon={<CheckIcon aria-hidden="true" />}
+              />
+              <span>{justCopied ? 'Copied' : copyLabel}</span>
             </button>
           </div>
           <pre>

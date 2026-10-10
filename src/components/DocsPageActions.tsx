@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'waku'
+import CheckIcon from '~icons/lucide/check'
 import CopyIcon from '~icons/lucide/copy'
 import DownloadIcon from '~icons/lucide/download'
 import ExternalLinkIcon from '~icons/lucide/external-link'
 import { publicAssetPath } from '../lib/public-asset-path'
+import { CopyIconSwap } from './CopyIconSwap'
 import { usePathname } from './DocsHeader'
 import * as ui from './DocsPageActions.recipes'
 import { docsPageActions, docsPageActionsError } from './DocsPageActions.styles'
@@ -66,6 +68,13 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
     }
   }, [pathname, isDocsArticle, openApi])
 
+  // Like every copy control, the confirmation exits after a short hold.
+  useEffect(() => {
+    if (state !== 'copied') return
+    const timer = window.setTimeout(() => setState('idle'), 1200)
+    return () => window.clearTimeout(timer)
+  }, [state])
+
   const copyPage = async () => {
     const currentRequest = ++request.current
     setState('copying')
@@ -93,7 +102,11 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
             className={`docs-page-actions ${docsPageActions().className}`}
           >
             <button type="button" onClick={copyPage} disabled={state === 'copying'}>
-              <CopyIcon aria-hidden="true" width="14" height="14" />
+              <CopyIconSwap
+                copied={state === 'copied'}
+                copyIcon={<CopyIcon width="14" height="14" />}
+                checkIcon={<CheckIcon width="14" height="14" />}
+              />
               {state === 'copied' ? 'Copied' : state === 'copying' ? 'Copying…' : 'Copy for agent'}
             </button>
             <a href={markdownPath} target="_blank" rel="noreferrer" title="View Markdown">

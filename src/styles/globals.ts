@@ -4,6 +4,7 @@ import './tokens'
 import './smoothCorners'
 import './links'
 import './headingAnchors'
+import './copyFeedback'
 import '../components/DocsCards.styles'
 import { fontFace, global, layers } from 'zyzz/web'
 
