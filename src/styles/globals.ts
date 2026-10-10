@@ -1509,6 +1509,10 @@ global({
       {
         color: inherited.color.vocsTextColorPrimary,
       },
+    // TDS B2 lines (14/20) inside callouts, so the indicator centers on the first line.
+    'aside[data-v][data-v-callout] :is(p, li)[data-v]': {
+      lineHeight: tokens.lineHeight.control,
+    },
     'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
       display: 'none',
     },
@@ -1541,16 +1545,16 @@ global({
     'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"]) > [data-v-callout-icon]':
       {
         display: 'block',
-        width: '16px',
-        height: '16px',
-        // design-exception: Centres the 16px indicator box on the 20px first line.
-        marginTop: '2px !custom',
-        padding: tokens.spacing['1'],
-        // design-exception: TDS Alert indicator corner; the visible 8px square keeps a 2px radius.
-        borderRadius: '6px !custom',
+        width: tokens.spacing['2'],
+        height: tokens.spacing['2'],
+        // design-exception: Centres the 8px square on the 20px first line (20 − 8) / 2.
+        marginTop: '6px !custom',
+        marginInlineStart: tokens.spacing['1'],
+        // The TDS indicator's 2px corner, smoothed.
+        borderRadius: tokens.radius.xs,
+        '--corner-radius': tokens.radius.xs,
         // design-exception: The tone is set per context above from the status tokens.
         backgroundColor: 'var(--tempo-alert-tone) !custom',
-        backgroundClip: 'content-box',
       },
     'aside[data-v][data-v-callout] > [data-v-callout-icon] > svg': {
       display: 'none',
