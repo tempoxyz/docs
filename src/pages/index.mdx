@@ -4,6 +4,7 @@ seoTitle: "Tempo Developer Docs: APIs, SDKs & Guides"
 description: Build with Tempo Accounts, Earn, Routes, and Zones. Try developer walkthroughs, build machine payments, and explore the network and API reference.
 ---
 
+import { Badge } from '../components/Badge'
 import { tempoDocsHome } from '../components/DocsHome.styles'
 
 import { DocsHomeAgent } from '../components/DocsHomeAgent'
@@ -48,16 +49,14 @@ Build financial products with Tempo's APIs, SDKs, and protocol.
 
 ## Products
 
-<div className="tempo-docs-home-product-tiers">
-
-<div className="tempo-docs-home-product-tier">
-
-<p className="tempo-docs-home-product-tier-label">Stablecoin products</p>
-
 <div className="tempo-docs-home-product-grid">
 <div className="tempo-docs-home-product-group">
 
+<div className="tempo-docs-home-product-header">
+
 ### <DocsHomeProductIcon product="earn" />[Earn](/docs/earn)
+
+</div>
 
 Build earning balances with stablecoin vaults.
 
@@ -70,7 +69,11 @@ Build earning balances with stablecoin vaults.
 
 <span id="routes-and-exchange" />
 
+<div className="tempo-docs-home-product-header">
+
 ### <DocsHomeProductIcon product="routes" />[Routes](/docs/routes)
+
+</div>
 
 Move stablecoins between Tempo and other networks.
 
@@ -83,7 +86,11 @@ Move stablecoins between Tempo and other networks.
 
 <span id="tempo-zones" />
 
+<div className="tempo-docs-home-product-header">
+
 ### <DocsHomeProductIcon product="zones" />[Zones](/docs/zones)
+
+</div>
 
 Keep stablecoin balances in a private ledger.
 
@@ -92,19 +99,17 @@ Keep stablecoin balances in a private ledger.
 - [Deposit](/docs/zones/deposit)
 
 </div>
-</div>
-</div>
-
-<div className="tempo-docs-home-product-tier">
-
-<p className="tempo-docs-home-product-tier-label">Primitives</p>
-
-<div className="tempo-docs-home-product-grid">
 <div className="tempo-docs-home-product-group">
 
 <span id="stablecoin-payments" />
 
+<div className="tempo-docs-home-product-header">
+
 ### <DocsHomeProductIcon product="accounts" />[Accounts](/docs/accounts)
+
+<Badge variant="outline">Primitives</Badge>
+
+</div>
 
 Create accounts, send payments, and control who can use them.
 
@@ -115,7 +120,13 @@ Create accounts, send payments, and control who can use them.
 </div>
 <div className="tempo-docs-home-product-group">
 
+<div className="tempo-docs-home-product-header">
+
 ### <DocsHomeProductIcon product="network" />[Tempo EVM](/docs/development)
+
+<Badge variant="outline">Primitives</Badge>
+
+</div>
 
 Build wallets, issue stablecoins, and deploy Solidity contracts.
 
@@ -124,20 +135,18 @@ Build wallets, issue stablecoins, and deploy Solidity contracts.
 - [Network details](/docs/quickstart/connection-details)
 
 </div>
-</div>
-</div>
-
-<div className="tempo-docs-home-product-tier">
-
-<p className="tempo-docs-home-product-tier-label">Agents</p>
-
-<div className="tempo-docs-home-product-grid">
 <div className="tempo-docs-home-product-group">
 
 <span id="agents" />
 <span id="payments" />
 
+<div className="tempo-docs-home-product-header">
+
 ### <DocsHomeProductIcon product="agents" />[Machine Payments](/docs/agents)
+
+<Badge variant="outline">Agents</Badge>
+
+</div>
 
 Pay for APIs and accept payments from software and agents.
 
@@ -146,9 +155,6 @@ Pay for APIs and accept payments from software and agents.
 - [Pay with the CLI](/docs/guide/machine-payments/agent)
 
 </div>
-</div>
-</div>
-
 </div>
 </div>
 
