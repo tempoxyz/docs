@@ -96,11 +96,16 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
               <CopyIcon aria-hidden="true" width="14" height="14" />
               {state === 'copied' ? 'Copied' : state === 'copying' ? 'Copying…' : 'Copy for agent'}
             </button>
-            <a href={markdownPath} target="_blank" rel="noreferrer">
-              <ExternalLinkIcon aria-hidden="true" width="14" height="14" /> View Markdown
+            <a href={markdownPath} target="_blank" rel="noreferrer" title="View Markdown">
+              <ExternalLinkIcon aria-hidden="true" width="14" height="14" />
+              <span className="docs-page-action-label">View Markdown</span>
             </a>
-            <Link to="/docs/guide/using-tempo-with-ai#install-tempo-plugins">
-              <DownloadIcon aria-hidden="true" width="14" height="14" /> Install agent tools
+            <Link
+              to="/docs/guide/using-tempo-with-ai#install-tempo-plugins"
+              title="Install agent tools"
+            >
+              <DownloadIcon aria-hidden="true" width="14" height="14" />
+              <span className="docs-page-action-label">Install agent tools</span>
             </Link>
             <span
               role="status"

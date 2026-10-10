@@ -66,6 +66,23 @@ export const docsPageActions = style({
   },
   '@media (width < 600px)': {
     marginBottom: tokens.spacing['6'],
+    selectors: {
+      // Three labeled buttons do not fit one phone-width row; keep the primary labeled and
+      // collapse the secondary actions to icons with their labels still exposed to readers.
+      '& > :is(a, button):not(:first-child)': {
+        justifyContent: 'center',
+        minWidth: '32px',
+        paddingInline: tokens.spacing['2'],
+      },
+      '& > :is(a, button):not(:first-child) .docs-page-action-label': {
+        position: 'absolute',
+        width: '1px',
+        height: '1px',
+        overflow: 'hidden',
+        clipPath: 'inset(50%)',
+        whiteSpace: 'nowrap',
+      },
+    },
   },
 })
 
