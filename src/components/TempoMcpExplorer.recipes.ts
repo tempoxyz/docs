@@ -223,15 +223,24 @@ export const tempoMcpExplorerButton2 = style({
   height: tokens.spacing['10'],
   alignItems: 'center',
   gap: tokens.spacing['1_5'],
+  // G8: primary actions are the inverted button, smoothed md radius.
   borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
 
-  backgroundColor: inherited.color.backgroundColorAccent,
+  backgroundColor: inherited.color.backgroundColorInvert,
   paddingInline: tokens.spacing['3'],
   fontSize: tokens.fontSize.sm,
 
   lineHeight: inherited.lineHeight.textSmLineHeight,
-  color: tokens.color.white,
+  color: inherited.color.textColorInvert,
+  transitionProperty: 'opacity',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
+    '&:hover:not(:disabled)': {
+      opacity: 0.9,
+      transitionDuration: 'var(--tempo-enter)',
+    },
     '&:disabled': {
       cursor: 'not-allowed',
       opacity: '50%',
