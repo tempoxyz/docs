@@ -529,6 +529,12 @@ export const palette = defineVars({
     onOnyx: 'var(--on-surface-onyx)',
     // TDS Platform semantics, ported from tempoxyz/ds@3fd4cf7 (src/platform/vars.ts).
     // Feedback tones use the Core accents; values are literal for the compiler.
+    // G4 per theme: a hairline where a card matches the page (light), none where
+    // its fill differs (dark #141414 on black).
+    cardLine: {
+      light: 'rgb(0 0 0 / 0.08)',
+      dark: 'transparent',
+    },
     // content.tertiary
     tertiary: {
       light: 'rgb(0 0 0 / 0.4)',

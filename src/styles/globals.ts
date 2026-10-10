@@ -1419,3 +1419,34 @@ global({
     },
   },
 })
+
+// G4: a panel whose fill differs from the page has no border; one that matches
+// the page keeps the hairline. Code, prompts and inline code sit on the block
+// fill in both themes, so their Vocs borders go.
+global({
+  '@layer vocs_utilities': {
+    '[data-v-code-container] :is([data-v-code-header], [data-v-code-group-list], pre[data-v])': {
+      borderWidth: tokens.borderWidth.none,
+      backgroundColor: tokens.color.block,
+    },
+    '[data-v-prompt]': {
+      borderWidth: tokens.borderWidth.none,
+      backgroundColor: tokens.color.block,
+    },
+    // Vocs pulls the active tab's underline over the header border it no longer has;
+    // keep it inside the tab list, which clips vertically.
+    '[data-v-code-group-tab]': {
+      marginBottom: tokens.spacing['0'],
+    },
+    // The API reference overview pane sits on its own fill.
+    '[data-v-openapi-overview]': {
+      borderWidth: tokens.borderWidth.none,
+      '--corner-radius': tokens.radius.lg,
+      borderRadius: tokens.radius.lg,
+      backgroundColor: tokens.color.panel,
+    },
+    ':not(pre) > code[data-v]:not(.twoslash-popup-code)': {
+      borderWidth: tokens.borderWidth.none,
+    },
+  },
+})

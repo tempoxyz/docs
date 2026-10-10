@@ -104,8 +104,8 @@ export const pre = style({
   overflow: 'auto',
   borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  borderColor: tokens.color.gray6,
+  // G4: the fill differs from the page, so no border.
+  borderWidth: tokens.borderWidth.none,
   backgroundColor: tokens.color.gray2,
   padding: tokens.spacing['3'],
   fontSize: tokens.fontSize.compact,
@@ -173,16 +173,20 @@ export const tempoMcpExplorerButton = style({
   width: tokens.spacing['10'],
   alignItems: 'center',
   justifyContent: 'center',
+  // G8: a secondary (gray) icon button, no outline.
   borderRadius: tokens.radius.md,
-  borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  borderColor: tokens.color.gray6,
-  color: tokens.color.gray10,
+  '--corner-radius': tokens.radius.md,
+  borderWidth: tokens.borderWidth.none,
+  backgroundColor: tokens.color.container,
+  color: tokens.color.foreground,
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
     '&:hover': {
+      transitionDuration: 'var(--tempo-enter)',
       '@media (hover: hover)': {
-        backgroundColor: tokens.color.gray3,
-        color: tokens.color.gray12,
+        backgroundColor: tokens.color.containerStrong,
       },
     },
   },
@@ -270,8 +274,8 @@ export const pre2 = style({
   overflow: 'auto',
   borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  borderColor: tokens.color.gray6,
+  // G4: the fill differs from the page, so no border.
+  borderWidth: tokens.borderWidth.none,
   backgroundColor: tokens.color.gray2,
   padding: tokens.spacing['3'],
   fontSize: tokens.fontSize.xs,
@@ -311,8 +315,8 @@ export const tempoMcpExplorerLayout7 = style({
 export const tempoMcpExplorerLayout8 = style({
   borderRadius: tokens.radius.md,
   borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  borderColor: tokens.color.gray6,
+  // G4: the fill differs from the page, so no border.
+  borderWidth: tokens.borderWidth.none,
   backgroundColor: tokens.color.gray2,
   paddingInline: tokens.spacing['3'],
   paddingBlock: tokens.spacing['2'],
