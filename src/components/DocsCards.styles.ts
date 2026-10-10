@@ -92,11 +92,6 @@ global({
       fontSize: tokens.fontSize.sm,
       lineHeight: tokens.lineHeight.relaxed,
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):hover > [class~="vocs:text-heading"]':
-    {
-      textDecoration: 'underline',
-      textUnderlineOffset: '4px',
-    },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):focus-visible':
     {
       outlineWidth: tokens.borderWidth.emphasis,

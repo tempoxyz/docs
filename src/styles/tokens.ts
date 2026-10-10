@@ -13,6 +13,11 @@ global({
     '--color-white': vars.color.white,
     '--spacing': '0.25rem',
     '--tempo-section-space': '64px',
+    // Interaction motion: tempo.xyz's hover easing (TDS Platform defines none).
+    // Enter on the target state, exit a little faster on the base state.
+    '--tempo-ease': 'cubic-bezier(0.22, 1, 0.36, 1)',
+    '--tempo-enter': '200ms',
+    '--tempo-exit': '150ms',
     '--container-5xl': '64rem',
     '--container-7xl': '80rem',
     '--text-xs': '0.75rem',

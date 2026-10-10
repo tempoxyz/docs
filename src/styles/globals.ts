@@ -2,6 +2,7 @@ import { inherited } from './inherited'
 import { vars as tokens } from './theme'
 import './tokens'
 import './smoothCorners'
+import './links'
 import '../components/DocsCards.styles'
 import { fontFace, global, layers } from 'zyzz/web'
 
