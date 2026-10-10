@@ -30,7 +30,7 @@ test('filters posts with the keyboard and preserves author credits when opening 
   const post = page.getByRole('link').filter({
     has: page.getByRole('heading', { name: 'Privacy with Tempo Zones', level: 3 }),
   })
-  await expect(post.getByText('Liam & Varun', { exact: true })).toBeVisible()
+  await expect(post.getByText('Liam Horne, Varun', { exact: true })).toBeVisible()
   await post.focus()
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/\/blog\/privacy-with-tempo-zones$/)
@@ -40,7 +40,7 @@ test('filters posts with the keyboard and preserves author credits when opening 
   await expect(page.getByRole('button', { name: 'APIs & SDKs', exact: true })).toHaveCount(0)
   const article = page.getByRole('article')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Privacy with Tempo Zones')
-  await expect(article.getByText('Liam & Varun', { exact: true })).toBeVisible()
+  await expect(article.getByText('Liam Horne, Varun', { exact: true })).toBeVisible()
   await article.getByRole('link', { name: '← All posts', exact: true }).click()
   await expect(page).toHaveURL(/\/blog$/)
   await expect(filters.getByRole('button', { name: 'All posts', exact: true })).toHaveAttribute(
