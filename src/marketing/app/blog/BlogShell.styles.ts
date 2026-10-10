@@ -34,6 +34,11 @@ export const tempoBlog = style({
       outline: '2px solid currentColor !custom',
       outlineOffset: '5px',
     },
+    // TDS Tab ring: page ink at 2px, so the inverted selected tab keeps a visible ring.
+    '& [role="tab"]:focus-visible': {
+      outlineColor: inherited.color.blogInk,
+      outlineOffset: '2px',
+    },
   },
 })
 
@@ -88,41 +93,35 @@ export const tempoBlogIntro = style({
   },
 })
 
+// BL5: the featured post sits on the page under a hairline rule, no panel.
 export const tempoBlogFeatured = style({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
   alignItems: 'center',
   gap: tokens.spacing['12'],
-  // design-exception: Preserve the inherited component/framework scope at the point of use.
-  padding: 'var(--tempo-card-padding, 28px) !custom',
-  border: 0,
-  // design-exception: Preserve the inherited component/framework scope at the point of use.
-  borderRadius: 'var(--tempo-card-radius, 24px) !custom',
-  backgroundColor: inherited.color.colorSurfaceBlock,
+  paddingTop: tokens.spacing['10'],
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderTopStyle: 'solid',
+  borderTopColor: tokens.color.hairline,
   color: 'inherit !custom',
   textDecoration: 'none',
   selectors: {
-    '&:where(:hover) h2': {
-      textDecoration: 'underline',
-      textDecorationThickness: '1px',
-      textUnderlineOffset: '5px',
-    },
     '& h2': {
       margin: 0,
 
       fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
-      // design-exception: Preserve this responsive geometry across viewport sizes.
-      fontSize: 'clamp(26px, 2.5vw, 32px) !custom',
+      // design-exception: One type step above the old 26–32px clamp: 28px on phones to 40px on desktop.
+      fontSize: 'clamp(28px, 2.8vw, 40px) !custom',
       fontWeight: tokens.fontWeight.medium,
       lineHeight: tokens.lineHeight.heading,
-      // design-exception: Preserve the optical typography of this specific surface.
-      letterSpacing: '-0.8px !custom',
+      letterSpacing: tokens.letterSpacing.compact,
+      textWrap: 'balance',
     },
   },
   '@media (width < 800px)': {
     gridTemplateColumns: '1fr',
     gap: tokens.spacing['7'],
-    padding: tokens.spacing['6'],
+    paddingTop: tokens.spacing['8'],
   },
 })
 
@@ -149,6 +148,7 @@ export const tempoBlogFeaturedImage = style({
   justifyContent: 'center',
   overflow: 'hidden',
   borderRadius: tokens.radius.xl,
+  '--corner-radius': tokens.radius.xl,
   backgroundColor: inherited.color.colorSurfaceShell,
   selectors: {
     '& img': {
@@ -157,8 +157,9 @@ export const tempoBlogFeaturedImage = style({
       objectFit: 'contain',
     },
   },
+  // Stacked, the image leads like the article cards and shows in full.
   '@media (width < 800px)': {
-    maxHeight: '300px',
+    order: -1,
   },
 })
 
@@ -251,109 +252,45 @@ export const tempoBlogExplorerHeading = style({
   },
 })
 
+// BL4: the category filters are TDS Tabs (components/Tabs.tsx); this only resets
+// the fieldset that holds them.
 export const tempoBlogFilters = style({
-  display: 'flex',
-  flexWrap: 'wrap',
-  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-  gap: '8px 24px !custom',
   minWidth: 0,
-
+  margin: 0,
   paddingTop: tokens.spacing['0'],
   paddingInlineEnd: tokens.spacing['0'],
-  paddingBottom: tokens.spacing['6'],
+  paddingBottom: tokens.spacing['8'],
   paddingInlineStart: tokens.spacing['0'],
   border: 0,
-  selectors: {
-    '& button': {
-      minHeight: '36px',
-      border: 0,
-      borderBottomWidth: tokens.borderWidth.hairline,
-      borderBottomStyle: 'solid',
-      borderBottomColor: 'transparent !custom',
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      padding: '7px 0 !custom',
-
-      color: inherited.color.blogMuted,
-      backgroundColor: 'transparent !custom',
-      font: 'inherit',
-      fontSize: tokens.fontSize.compact,
-      whiteSpace: 'nowrap',
-      cursor: 'pointer',
-      transition: 'color 150ms',
-    },
-    '& button:hover': {
-      color: inherited.color.blogInk,
-    },
-    '& button[aria-pressed="true"]': {
-      borderBottomColor: inherited.color.blogInk,
-
-      color: inherited.color.blogInk,
-    },
-  },
-  '@media (width < 600px)': {
-    // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-    gap: '4px 20px !custom',
-    selectors: {
-      '& button': {
-        minHeight: '44px',
-        paddingInline: 0,
-      },
-    },
-  },
-  '@media (prefers-reduced-motion: reduce)': {
-    selectors: {
-      '& button': {
-        transition: 'none',
-      },
-    },
-  },
 })
 
+// BL3: the tempo.xyz Home Use cases grid. Up to three columns; cards have no
+// fill, so no border (G4); the image carries the card.
 export const tempoBlogPostList = style({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  rowGap: tokens.spacing['12'],
+  columnGap: tokens.spacing['6'],
   margin: 0,
   padding: 0,
-  borderTopWidth: tokens.borderWidth.hairline,
-  borderTopStyle: 'solid',
-  borderTopColor: inherited.color.blogRule,
   listStyle: 'none',
+  '@media (width >= 640px)': {
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  },
+  '@media (width >= 1024px)': {
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  },
 })
 
-export const tempoBlogPostRow = style({
-  display: 'grid',
-  gridTemplateColumns: 'minmax(0, 1fr) 220px 20px',
-  alignItems: 'center',
-  gap: tokens.spacing['8'],
-
-  paddingBlock: tokens.spacing['8'],
-  paddingInline: tokens.spacing['0'],
-  borderBottomWidth: tokens.borderWidth.hairline,
-  borderBottomStyle: 'solid',
-  borderBottomColor: inherited.color.blogRule,
+export const tempoBlogPostCard = style({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column',
+  gap: tokens.spacing['5'],
+  // The focus ring follows the image's corners; the card itself paints nothing.
+  borderRadius: tokens.radius.xl,
   color: 'inherit !custom',
   textDecoration: 'none',
-  selectors: {
-    '&:hover .tempo-blog-post-arrow': {
-      transform: 'translate(2px, -2px)',
-
-      color: inherited.color.blogInk,
-    },
-    '&:hover h3': {
-      textDecoration: 'underline',
-      textDecorationThickness: '1px',
-      textUnderlineOffset: '5px',
-    },
-  },
-  '@media (width < 800px)': {
-    gridTemplateColumns: 'minmax(0, 1fr) 170px 16px',
-    gap: tokens.spacing['5'],
-  },
-  '@media (width < 600px)': {
-    gridTemplateColumns: 'minmax(0, 1fr) 16px',
-
-    gap: tokens.spacing['4'],
-
-    paddingBlock: tokens.spacing['6'],
-  },
 })
 
 export const tempoBlogPostCopy = style({
@@ -365,20 +302,20 @@ export const tempoBlogPostCopy = style({
       margin: 0,
 
       fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
-      fontSize: tokens.fontSize.title,
+      fontSize: tokens.fontSize.lead,
       fontWeight: tokens.fontWeight.medium,
-      lineHeight: tokens.lineHeight.compact,
-      // design-exception: Preserve the optical typography of this specific surface.
-      letterSpacing: '-0.4px !custom',
+      lineHeight: tokens.lineHeight.heading,
+      letterSpacing: tokens.letterSpacing.tight,
+      textWrap: 'balance',
     },
     '& .tempo-blog-excerpt': {
       display: 'var(--tempo-clamped-display, -webkit-box)',
       overflow: 'hidden',
-      WebkitLineClamp: 2,
+      WebkitLineClamp: 3,
       WebkitBoxOrient: 'vertical',
     },
   },
-  '@media (width < 800px)': {
+  '@media (width >= 1024px)': {
     selectors: {
       '& h3': {
         fontSize: tokens.fontSize.subheading,
@@ -388,21 +325,17 @@ export const tempoBlogPostCopy = style({
 })
 
 export const tempoBlogPostThumbnail = style({
+  display: 'block',
   overflow: 'hidden',
-  backgroundColor: inherited.color.colorSurfaceShell,
-  '@media (width < 600px)': {
-    display: 'none',
-  },
-})
-
-export const tempoBlogPostArrow = style({
-  alignSelf: 'start',
-  marginTop: tokens.spacing['1'],
-
-  color: inherited.color.blogMuted,
-  transition: 'transform 150ms',
-  '@media (prefers-reduced-motion: reduce)': {
-    transition: 'none',
+  // G3: a radius sized to the card image, smoothed.
+  borderRadius: tokens.radius.xl,
+  '--corner-radius': tokens.radius.xl,
+  backgroundColor: inherited.color.colorSurfaceBlock,
+  selectors: {
+    '& img': {
+      display: 'block',
+      objectFit: 'cover',
+    },
   },
 })
 
@@ -552,12 +485,20 @@ export const tempoBlogArticleBody = style({
       // design-exception: Preserve the optical typography of this specific surface.
       letterSpacing: '-0.45px !custom',
     },
+    // Body text follows TDS Platform B1 (16/22, 0.12px tracking).
+    '& :is(p, li)': {
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.b1,
+      letterSpacing: tokens.letterSpacing.b1,
+    },
     '& img': {
       height: 'auto',
-      borderRadius: tokens.radius.xs,
+      borderRadius: tokens.radius.lg,
+      '--corner-radius': tokens.radius.lg,
     },
     '& pre': {
-      borderRadius: tokens.radius.xs,
+      borderRadius: tokens.radius.lg,
+      '--corner-radius': tokens.radius.lg,
     },
   },
   '@media (width < 600px)': {

@@ -22,27 +22,32 @@ const homeAgentSetups = [
     label: 'Codex',
     command:
       'codex plugin marketplace add tempoxyz/plugins --ref main\ncodex plugin add docs@tempo',
-    instruction: /both commands in your terminal/i,
+    instruction: null,
+    install: /^Install Codex CLI/,
   },
   {
     label: 'Claude Code',
     command: 'claude plugin marketplace add tempoxyz/plugins\nclaude plugin install docs@tempo',
-    instruction: /both commands in your terminal/i,
+    instruction: null,
+    install: /^Install Claude Code/,
   },
   {
     label: 'Amp',
     command: 'amp mcp add tempo https://mcp.tempo.xyz',
     instruction: /MCP/,
+    install: /^Install Amp/,
   },
   {
     label: 'Skills',
     command: 'npx skills add tempoxyz/plugins --skill docs',
     instruction: /skill/i,
+    install: null,
   },
   {
     label: 'MCP',
     command: 'https://mcp.tempo.xyz',
     instruction: /HTTP MCP server/i,
+    install: null,
   },
 ] as const
 
@@ -475,10 +480,15 @@ for (const path of ['/', '/blog']) {
           return box
         }),
       )
-      for (const box of boxes.slice(0, 2)) {
-        expect(box.x).toBeGreaterThan(width / 2)
-        expect(box.x + box.width).toBeLessThanOrEqual(width)
-      }
+      // Docs and Blog sit centered in the bar; Agent setup, then search, at the inline end.
+      const [docsBox, blogBox, searchBox, agentsBox] = boxes
+      const navBox = await navigation.boundingBox()
+      if (!navBox) throw new Error('Header has no visible bounds')
+      const destinationsCenter = (docsBox.x + blogBox.x + blogBox.width) / 2
+      expect(Math.abs(destinationsCenter - (navBox.x + navBox.width / 2))).toBeLessThanOrEqual(2)
+      expect(agentsBox.x).toBeGreaterThan(blogBox.x + blogBox.width)
+      expect(searchBox.x).toBeGreaterThan(agentsBox.x + agentsBox.width)
+      expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(width)
       for (const [index, a] of boxes.entries()) {
         for (const b of boxes.slice(index + 1)) {
           expect(a.x + a.width <= b.x || b.x + b.width <= a.x).toBe(true)
@@ -551,7 +561,7 @@ test('agent-first entry page offers setup and payment guides', async ({
   await expect(
     setup.getByRole('link', { name: 'All setup options', exact: false }),
   ).toHaveAttribute('href', '/docs/guide/using-tempo-with-ai')
-  for (const { label, command, instruction } of homeAgentSetups) {
+  for (const { label, command, instruction, install } of homeAgentSetups) {
     const multipleCommands = command.includes('\n')
     const commandSuccess =
       label === 'MCP'
@@ -559,11 +569,17 @@ test('agent-first entry page offers setup and payment guides', async ({
         : multipleCommands
           ? 'Commands copied. Paste them into your terminal and run both commands.'
           : 'Command copied. Paste it into your terminal and run it.'
-    await setup.getByRole('button', { name: label, exact: true }).click()
+    await setup.getByRole('radio', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
-    await expect(
-      setup.locator('.tempo-agent-start-install .tempo-agent-start-instruction'),
-    ).toContainText(instruction)
+    const instructionText = setup.locator(
+      '.tempo-agent-start-install .tempo-agent-start-instruction',
+    )
+    if (instruction) await expect(instructionText).toContainText(instruction)
+    else await expect(instructionText).toHaveCount(0)
+    // The install link sits on the Connect Tempo docs heading row.
+    const installLink = setup.locator('.tempo-agent-start-heading .tempo-agent-start-prerequisite')
+    if (install) await expect(installLink).toContainText(install)
+    else await expect(installLink).toHaveCount(0)
     await setup
       .getByRole('button', {
         name:
@@ -576,7 +592,7 @@ test('agent-first entry page offers setup and payment guides', async ({
     await expect(installStatus).toHaveText(commandSuccess)
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command)
   }
-  await setup.getByRole('button', { name: 'Codex', exact: true }).click()
+  await setup.getByRole('radio', { name: 'Codex', exact: true }).click()
   await expect(installStatus).toHaveText('')
   await expect(page.locator('.tempo-docs-home')).not.toContainText('Bring your existing EVM app')
   for (const anchor of [
@@ -633,7 +649,7 @@ test('agent setup offers manual copy recovery without overflowing a narrow viewp
         : multipleCommands
           ? 'Copy failed. Select and copy both commands above.'
           : 'Copy failed. Select and copy the command above.'
-    await setup.getByRole('button', { name: label, exact: true }).click()
+    await setup.getByRole('radio', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
     await setup
       .getByRole('button', {

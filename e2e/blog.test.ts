@@ -14,22 +14,30 @@ test('filters posts with the keyboard and preserves author credits when opening 
   ).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'APIs & SDKs', exact: true })).toHaveCount(0)
   const filters = page.getByRole('group', { name: 'Filter posts by category' })
-  const events = filters.getByRole('button', { name: 'Events', exact: true })
+  const tabs = filters.getByRole('tablist', { name: 'Post categories' })
+  const announcements = tabs.getByRole('tab', { name: 'Announcements', exact: true })
+  const events = tabs.getByRole('tab', { name: 'Events', exact: true })
   await expect(events).toBeEnabled()
-  await events.focus()
+  // Arrow keys move focus through the tabs; Enter selects.
+  await tabs.getByRole('tab', { name: 'All posts', exact: true }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(announcements).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await expect(events).toBeFocused()
   await page.keyboard.press('Enter')
-  await expect(events).toHaveAttribute('aria-pressed', 'true')
+  await expect(events).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('status')).toHaveText('0 posts')
   await expect(
     page.getByText('No posts in this category yet. Choose another category or view all posts.'),
   ).toBeVisible()
 
-  await filters.getByRole('button', { name: 'Technical posts', exact: true }).click()
+  await tabs.getByRole('tab', { name: 'Technical posts', exact: true }).click()
   await expect(page.getByRole('status')).not.toHaveText('0 posts')
   const post = page.getByRole('link').filter({
     has: page.getByRole('heading', { name: 'Privacy with Tempo Zones', level: 3 }),
   })
-  await expect(post.getByText('Liam & Varun', { exact: true })).toBeVisible()
+  await expect(post.getByText('Liam Horne, Varun', { exact: true })).toBeVisible()
   await post.focus()
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/\/blog\/privacy-with-tempo-zones$/)
@@ -39,11 +47,11 @@ test('filters posts with the keyboard and preserves author credits when opening 
   await expect(page.getByRole('button', { name: 'APIs & SDKs', exact: true })).toHaveCount(0)
   const article = page.getByRole('article')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Privacy with Tempo Zones')
-  await expect(article.getByText('Liam & Varun', { exact: true })).toBeVisible()
+  await expect(article.getByText('Liam Horne, Varun', { exact: true })).toBeVisible()
   await article.getByRole('link', { name: '← All posts', exact: true }).click()
   await expect(page).toHaveURL(/\/blog$/)
-  await expect(filters.getByRole('button', { name: 'All posts', exact: true })).toHaveAttribute(
-    'aria-pressed',
+  await expect(tabs.getByRole('tab', { name: 'All posts', exact: true })).toHaveAttribute(
+    'aria-selected',
     'true',
   )
 })
@@ -63,18 +71,22 @@ for (const width of [320, 390, 768, 1024, 1280, 1440]) {
       .toBeGreaterThan(0)
     await page.evaluate(() => document.fonts.ready)
 
-    const thumbnail = page.locator('.tempo-blog-post-list img').first()
-    if (width < 600) await expect(thumbnail).toBeHidden()
-    else await expect(thumbnail).toBeVisible()
+    // Cards keep their image at every width: 1, 2, then 3 columns.
+    await expect(page.locator('.tempo-blog-post-list img').first()).toBeVisible()
     await expect(page.locator('.tempo-blog-post-list h3').first()).toBeVisible()
+    const columns = await page
+      .locator('.tempo-blog-post-list')
+      .evaluate((list) => getComputedStyle(list).gridTemplateColumns.split(' ').length)
+    expect(columns).toBe(width >= 1024 ? 3 : width >= 640 ? 2 : 1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     )
 
-    const filters = page.getByRole('group', { name: 'Filter posts by category' })
-    for (const button of await filters.getByRole('button').all()) {
-      const bounds = await button.boundingBox()
-      expect(bounds?.height).toBeGreaterThanOrEqual(width < 600 ? 44 : 36)
+    const filters = page.getByRole('tablist', { name: 'Post categories' })
+    for (const tab of await filters.getByRole('tab').all()) {
+      const bounds = await tab.boundingBox()
+      // TDS Platform Tab, small scale.
+      expect(bounds?.height).toBeGreaterThanOrEqual(32)
       expect(bounds?.x).toBeGreaterThanOrEqual(0)
       expect((bounds?.x ?? 0) + (bounds?.width ?? 0)).toBeLessThanOrEqual(width)
     }

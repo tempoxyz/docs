@@ -14,6 +14,7 @@ import { publicAssetPath } from '../lib/public-asset-path'
 import { navActiveSquare } from '../styles/surfaces.styles'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
+import { CopyIconSwap } from './CopyIconSwap'
 import * as ui from './DocsHeader.recipes'
 import {
   docsHeaderActions,
@@ -24,6 +25,7 @@ import {
   docsHeaderDestinations,
   docsHeaderIconButton,
   docsHeaderLogo,
+  docsHeaderMenuButton,
   docsHeaderMobileActions,
   docsHeaderMobileAgents,
   docsHeaderMobileBody,
@@ -37,7 +39,6 @@ import {
   docsHeaderMobileUtilityLink,
   docsHeaderMobileWebsite,
   docsHeaderNav,
-  docsHeaderSearch,
   docsHeaderWordmark,
   docsSiteHeader,
 } from './DocsNavigation.styles'
@@ -48,6 +49,10 @@ import {
   docsUtilitySections,
   getActiveDocsSection,
 } from './DocsSectionNav'
+import { HeadingAnchorFeedback } from './HeadingAnchorFeedback'
+import { iconButton } from './IconButton.recipes'
+import { SearchDialogMotion } from './SearchDialogMotion'
+import { SmoothCorners } from './SmoothCorners'
 
 const DOCS_BASE_PATH = '/docs'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
@@ -412,7 +417,7 @@ function CommandSnippet({
           !copied && ui.commandSnippetText5(),
         )}
       >
-        {copied ? <CheckIcon /> : <CopyIcon />}
+        <CopyIconSwap copied={!!copied} copyIcon={<CopyIcon />} checkIcon={<CheckIcon />} />
       </span>
     </button>
   )
@@ -651,7 +656,13 @@ export function SidebarNodes({
                 depth === 0 ? ui.sidebarNodesLayout().className : ui.sidebarNodesLayout2().className
               }
             >
-              <p {...ui.sidebarNodesDescription()}>{node.text}</p>
+              <p
+                {...(depth === 0 && nodes.length === 1
+                  ? ui.sidebarNodesTitle()
+                  : ui.sidebarNodesDescription())}
+              >
+                {node.text}
+              </p>
               <div
                 className={
                   depth > 0
@@ -693,6 +704,16 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [agentsOpen, setAgentsOpen] = useState(false)
+  // Keep the Agent setup panel rendered through its exit fade (G5).
+  const [agentsRendered, setAgentsRendered] = useState(false)
+  useEffect(() => {
+    if (agentsOpen) {
+      setAgentsRendered(true)
+      return
+    }
+    const timer = window.setTimeout(() => setAgentsRendered(false), 150)
+    return () => window.clearTimeout(timer)
+  }, [agentsOpen])
   const agentMenuRef = useRef<HTMLDivElement | null>(null)
   const agentTriggerRef = useRef<HTMLButtonElement | null>(null)
   const mobileDialogRef = useRef<HTMLDialogElement | null>(null)
@@ -834,27 +855,17 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
 
   return (
     <header className={`docs-site-header ${docsSiteHeader().className}`}>
+      {/* The header is the one chrome shared by docs and blog pages. */}
+      <SmoothCorners />
+      <HeadingAnchorFeedback />
+      <SearchDialogMotion />
       <nav
         className={`docs-header-nav ${docsHeaderNav().className}`}
         aria-label="Developer navigation"
       >
         {brand}
-        <button
-          type="button"
-          onClick={openSearch}
-          aria-label="Search documentation"
-          aria-keyshortcuts="Meta+K Control+K"
-          className={`docs-header-search ${docsHeaderSearch().className}`}
-          disabled={!mounted}
-        >
-          <span {...ui.docsHeaderText()}>
-            <SearchIcon />
-            <span {...ui.docsHeaderText2()}>Search docs</span>
-          </span>
-          <kbd>⌘ K</kbd>
-        </button>
+        {destinations}
         <div className={`docs-header-actions ${docsHeaderActions().className}`}>
-          {destinations}
           <div
             ref={agentMenuRef}
             className={`docs-header-agent-menu ${docsHeaderAgentMenu().className}`}
@@ -871,27 +882,27 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
               Agent setup
               <Chevron open={agentsOpen} />
             </button>
-            {agentsOpen ? (
+            {agentsOpen || agentsRendered ? (
               <div
                 id="docs-agent-tools"
+                data-state={agentsOpen ? 'open' : 'closed'}
+                inert={!agentsOpen}
                 className={`docs-header-agent-panel ${docsHeaderAgentPanel().className}`}
               >
                 <AgentsPanel onNavigate={close} />
               </div>
             ) : null}
           </div>
-        </div>
-        <div className={`docs-header-mobile-actions ${docsHeaderMobileActions().className}`}>
-          {destinations}
           <button
             type="button"
             onClick={openSearch}
             aria-label="Search documentation"
             aria-keyshortcuts="Meta+K Control+K"
+            title="Search documentation (⌘K)"
             disabled={!mounted}
-            className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
+            className={`docs-header-search ${iconButton().className}`}
           >
-            <SearchIcon className={ui.searchIcon().className} />
+            <SearchIcon />
           </button>
           <button
             type="button"
@@ -900,7 +911,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
             disabled={!mounted}
             aria-expanded={open}
             aria-controls="docs-mobile-navigation"
-            className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
+            className={`docs-header-icon-button ${docsHeaderIconButton().className} ${docsHeaderMenuButton().className}`}
           >
             <MenuIcon />
           </button>

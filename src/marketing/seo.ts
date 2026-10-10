@@ -49,8 +49,9 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     url: base || 'https://tempo.xyz',
     logo: { '@type': 'ImageObject', url: absoluteUrl(base, '/icon-dark.png') },
   }
+  // Bylines separate authors with commas; slashes and ampersands are older forms.
   const authors = post.authors
-    .split(/\/|\s+&\s+/)
+    .split(/,|\/|\s+&\s+/)
     .map((name) => name.trim())
     .filter(Boolean)
     .map((name) => ({ '@type': 'Person', name }))

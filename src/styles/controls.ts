@@ -11,12 +11,17 @@ export const button = variants({
     justifyContent: 'center',
     gap: tokens.spacing['2'],
     whiteSpace: 'nowrap',
+    // G8: TDS Platform buttons, a little rounder than before, with smooth corners.
     borderRadius: tokens.radius.md,
+    '--corner-radius': tokens.radius.md,
     borderWidth: tokens.borderWidth.hairline,
     borderStyle: 'solid',
     borderColor: 'transparent !custom',
     fontWeight: tokens.fontWeight.medium,
-    transition: 'color 150ms, background-color 150ms, border-color 150ms, opacity 150ms',
+    transitionProperty: 'color, background-color, border-color, opacity, transform',
+    transitionDuration: 'var(--tempo-exit)',
+    transitionTimingFunction: 'var(--tempo-ease)',
+    ':hover': { transitionDuration: 'var(--tempo-enter)' },
     ':focus-visible': {
       outlineWidth: tokens.borderWidth.emphasis,
       outlineStyle: 'solid',
@@ -46,15 +51,14 @@ export const button = variants({
         color: inherited.color.textColorInvert,
         '@media (hover: hover)': { ':hover': { opacity: 0.9 } },
       },
+      // Secondary: the Platform gray fill, no outline.
       default: {
-        borderColor: tokens.color.lineStrong,
-        backgroundColor: tokens.color.card,
+        backgroundColor: tokens.color.container,
 
         color: inherited.color.textColorPrimary,
         '@media (hover: hover)': {
           ':hover': {
-            // design-exception: Derive this layout value from the existing responsive CSS variables.
-            backgroundColor: inherited.color.surfacePanel,
+            backgroundColor: tokens.color.containerStrong,
           },
         },
       },

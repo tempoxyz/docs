@@ -17,6 +17,7 @@ import { button } from '../../styles/controls'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Badge } from '../Badge'
 import { Container as ParentContainer } from '../Container'
+import { CopyIconSwap } from '../CopyIconSwap'
 import { isFundableWalletConnector } from '../lib/wallets'
 import * as ui from './Demo.recipes'
 import { alphaUsd } from './tokens'
@@ -85,11 +86,11 @@ export function ReceiptHash({ hash }: { hash: string }) {
         aria-label={copied ? 'Copied receipt hash' : 'Copy receipt hash'}
         title={copied ? 'Copied' : 'Copy receipt hash'}
       >
-        {copied ? (
-          <LucideCheck className={ui.lucideExternalLink().className} />
-        ) : (
-          <LucideCopy className={ui.lucideExternalLink().className} />
-        )}
+        <CopyIconSwap
+          copied={copied}
+          copyIcon={<LucideCopy className={ui.lucideExternalLink().className} />}
+          checkIcon={<LucideCheck className={ui.lucideExternalLink().className} />}
+        />
       </button>
     </div>
   )
@@ -314,11 +315,11 @@ export namespace Container {
           <div>
             <span {...ui.balancesFooterItemText2()}>pnpx gitpick</span> {src}
           </div>
-          {isCopied ? (
-            <LucideCheck className={ui.lucideCheck().className} />
-          ) : (
-            <LucideCopy className={ui.lucideCheck().className} />
-          )}
+          <CopyIconSwap
+            copied={isCopied}
+            copyIcon={<LucideCopy className={ui.lucideCheck().className} />}
+            checkIcon={<LucideCheck className={ui.lucideCheck().className} />}
+          />
         </div>
         <div {...ui.sourceFooterLayout3()}>
           <a

@@ -362,16 +362,25 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(output).not.toContain('<div')
   })
 
-  test('exports homepage guide cards as readable links and descriptions', async () => {
+  test('exports homepage guides and chevron links as readable links and descriptions', async () => {
     const output = await render(`
-<a href="/get-started/quickstart"><strong>Send your first payment <span aria-hidden="true">→</span></strong><span>Send stablecoins with a test wallet.</span></a>
-<p><a href="/docs/development">Browse developer guides →</a></p>
+<div className="tempo-docs-home-guide">
+
+Send stablecoins with a test wallet.
+
+<HomeGuideButton href="/get-started/quickstart" guide="Send your first payment" />
+
+</div>
+
+<ChevronLink href="/get-started" className="tempo-docs-home-guides-more">Find your starting point</ChevronLink>
+
+- <HomeColorLink href="/docs/sdk/typescript">TypeScript</HomeColorLink>
 `)
-    expect(output).toContain(
-      '[Send your first payment](/get-started/quickstart) — Send stablecoins with a test wallet.',
-    )
-    expect(output).toContain('[Browse developer guides →](/docs/development)')
-    expect(output).not.toMatch(/<(?:a|p|strong|span)\b/)
+    expect(output).toContain('Send stablecoins with a test wallet.')
+    expect(output).toContain('[Send your first payment](/get-started/quickstart)')
+    expect(output).toContain('[Find your starting point](/get-started)')
+    expect(output).toContain('[TypeScript](/docs/sdk/typescript)')
+    expect(output).not.toMatch(/<(?:a|p|div|HomeGuideButton|HomeColorLink|ChevronLink)\b/)
   })
 
   test('preserves anchor-only links used by legacy Zone guides', async () => {

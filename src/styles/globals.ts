@@ -1,6 +1,13 @@
 import { inherited } from './inherited'
 import { vars as tokens } from './theme'
 import './tokens'
+import './smoothCorners'
+import './links'
+import './headingAnchors'
+import './copyFeedback'
+import './docsGetStarted'
+import './docsSteps'
+import './docsSearch'
 import '../components/DocsCards.styles'
 import { fontFace, global, layers } from 'zyzz/web'
 
@@ -243,83 +250,7 @@ global({
   },
 })
 
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout]': {
-      '--tempo-callout-accent': 'var(--vocs-text-color-muted)',
-      backgroundColor: inherited.color.colorMixInSrgbTempoCalloutAccent10VocsBackgroundColorSurface,
-
-      borderColor: inherited.color.colorMixInSrgbTempoCalloutAccent28Transparent,
-
-      color: inherited.color.vocsTextColorPrimary,
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="info"]': {
-      '--tempo-callout-accent': 'var(--info)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="tip"]': {
-      '--tempo-callout-accent': 'var(--vocs-color-iris)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="warning"]': {
-      '--tempo-callout-accent': 'var(--warning)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="danger"]': {
-      '--tempo-callout-accent': 'var(--negative)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout][data-v-context="success"]': {
-      '--tempo-callout-accent': 'var(--positive)',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout] p[data-v], aside[data-v][data-v-callout] li[data-v], aside[data-v][data-v-callout] a[data-v], aside[data-v][data-v-callout] code[data-v]':
-      {
-        color: inherited.color.vocsTextColorPrimary,
-      },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout] li::marker': {
-      color: inherited.color.vocsTextColorPrimary,
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
-      color: inherited.color.tempoCalloutAccent,
-    },
-  },
-})
+// G11 callouts: see the TDS Callout and Alert treatment at the end of this file.
 
 global({
   '@layer utilities': {
@@ -517,9 +448,14 @@ global({
   },
 })
 
+// SB2: a single-section sidebar's header is its title, set like the right rail's
+// "On this page" label in the secondary color. In multi-section sidebars every
+// header is a group label (for example Accounts, Payments, Fees): entry type and
+// spacing in the secondary color. Collapsible headers are interactive, so they
+// keep the entry (primary) color. Entries use the primary color.
 global({
   '@layer utilities': {
-    '[data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header]': {
+    '[data-v-sidebar] > [data-v-sidebar-section]:only-child > [data-v-sidebar-section-header]': {
       height: 'auto',
       minHeight: 0,
       // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
@@ -529,14 +465,37 @@ global({
       paddingInline: tokens.spacing['2'],
       backgroundColor: 'transparent !custom',
 
-      color: inherited.color.colorMixInSrgbForeground78Transparent,
-      fontSize: tokens.fontSize.xs,
-      fontWeight: tokens.fontWeight.semibold,
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.compact,
+      fontWeight: tokens.fontWeight.medium,
 
-      letterSpacing: tokens.letterSpacing.wider,
+      letterSpacing: tokens.letterSpacing.normal,
       lineHeight: tokens.lineHeight.normal,
-      textTransform: 'uppercase',
+      textTransform: 'none',
     },
+    '[data-v-sidebar] > [data-v-sidebar-section]:not(:only-child) > [data-v-sidebar-section-header], [data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]:not([data-collapsable="true"])':
+      {
+        height: 'auto',
+        minHeight: '34px',
+        // design-exception: Matches the sidebar entries' geometry below.
+        margin: '0 -8px !custom',
+
+        paddingBlock: tokens.spacing['1_5'],
+        paddingInline: tokens.spacing['2'],
+        backgroundColor: 'transparent !custom',
+
+        color: tokens.color.muted,
+        fontSize: tokens.fontSize.sm,
+        fontWeight: tokens.fontWeight.normal,
+
+        letterSpacing: tokens.letterSpacing.normal,
+        lineHeight: tokens.lineHeight.normal,
+        textTransform: 'none',
+      },
+    '[data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]':
+      {
+        color: tokens.color.foreground,
+      },
   },
 })
 
@@ -549,39 +508,17 @@ global({
 
       paddingBlock: tokens.spacing['1_5'],
       paddingInline: tokens.spacing['2'],
-      borderRadius: tokens.radius.sm,
+      // SB3: one radius step rounder than before, smoothed.
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
       backgroundColor: 'transparent !custom',
 
-      color: inherited.color.colorMixInSrgbForeground72Transparent,
+      color: tokens.color.foreground,
       fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.normal,
       letterSpacing: tokens.letterSpacing.normal,
       lineHeight: tokens.lineHeight.normal,
     },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]:not([data-collapsable="true"])':
-      {
-        minHeight: '26px',
-        // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-        margin: '6px -8px 1px !custom',
-
-        color: inherited.color.colorMixInSrgbForeground65Transparent,
-        fontSize: tokens.fontSize.compact,
-        fontWeight: tokens.fontWeight.normal,
-      },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable="true"]':
-      {
-        color: inherited.color.colorMixInSrgbForeground68Transparent,
-      },
   },
 })
 
@@ -626,13 +563,49 @@ global({
 
       paddingBlock: tokens.spacing['1_5'],
       paddingInline: tokens.spacing['2'],
-      borderRadius: tokens.radius.sm,
+      // SB3: one radius step rounder than before, smoothed.
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
 
-      color: inherited.color.colorMixInSrgbForeground72Transparent,
+      color: tokens.color.foreground,
       fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.normal,
       letterSpacing: tokens.letterSpacing.normal,
       lineHeight: tokens.lineHeight.normal,
+    },
+  },
+})
+
+// SB3: entry hover fills enter and exit with the motion tokens (exit on the
+// base state, enter on hover). Top-level collapsible group labels share the
+// entry hover. Reduced motion switches instantly.
+global({
+  '@layer utilities': {
+    '[data-v-sidebar] :is([data-v-sidebar-item][data-link], [data-v-sidebar-section-header][data-collapsable="true"])':
+      {
+        transitionProperty: 'color, background-color, border-color, opacity, transform',
+        transitionDuration: 'var(--tempo-exit)',
+        transitionTimingFunction: 'var(--tempo-ease)',
+      },
+    '[data-v-sidebar] :is(a[data-v-sidebar-item][data-link], [data-v-sidebar-section-header][data-collapsable="true"]):hover':
+      {
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    '[data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]':
+      {
+        borderRadius: tokens.radius.md,
+        '--corner-radius': tokens.radius.md,
+      },
+    '[data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]:hover':
+      {
+        backgroundColor: inherited.color.colorMixInSrgbForeground4Transparent,
+        color: tokens.color.foreground,
+      },
+    '@media (prefers-reduced-motion: reduce)': {
+      '[data-v-sidebar] :is([data-v-sidebar-item][data-link], [data-v-sidebar-section-header][data-collapsable="true"])':
+        {
+          transitionProperty: 'none',
+        },
     },
   },
 })
@@ -657,10 +630,11 @@ global({
   },
 })
 
+// SB1: the current page has no hover state; hovering it keeps its fill.
 global({
   '@layer utilities': {
     '[data-v-sidebar] a[data-v-sidebar-item][data-active]:hover': {
-      backgroundColor: inherited.color.colorMixInSrgbForeground10Transparent,
+      backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
     },
   },
 })
@@ -767,6 +741,8 @@ global({
  * Tailwind theme variables at runtime so the root marketing pages can switch
  * between the same dark and light palettes while the docs remain Vocs pages. */
 
+// Neutral, shade, tint and accent values come from TDS Core via the TDS Platform
+// semantics (tempoxyz/ds@3fd4cf7af1990a86194a5d8955ec76b7f08f3810).
 global({
   ':root': {
     colorScheme: 'dark',
@@ -776,33 +752,33 @@ global({
     '--vocs-font-family': 'var(--font-pilat-book)',
     '--vocs-font-family-mono': 'var(--font-jetbrains-mono), ui-monospace, monospace',
     '--scalar-font-code': 'var(--vocs-font-family-mono)',
-    '--color-background': '#111111',
-    '--color-foreground': 'oklch(94.66% 0 0)',
-    '--color-foreground-secondary': 'oklch(70.8% 0 0)',
-    '--color-foreground-secondary-hover': 'oklch(94.66% 0 0)',
-    '--color-negative': 'oklch(71.38% 0.2147 23.49)',
-    '--color-info': 'oklch(71.7% 0.1648 250.79)',
-    '--color-positive': 'oklch(81.51% 0.2258 148.1)',
-    '--color-warning': 'oklch(77.21% 0.1991 64.28)',
+    '--color-background': '#000000', // neutral 100
+    '--color-foreground': '#ffffff', // neutral 000
+    '--color-foreground-secondary': 'rgb(255 255 255 / 0.56)', // tint 056
+    '--color-foreground-secondary-hover': '#ffffff', // neutral 000
+    '--color-negative': '#f55c45', // redDark
+    '--color-info': '#7498fb', // blueDark
+    '--color-positive': '#59e5a4', // greenDark
+    '--color-warning': '#fa8e36', // orangeDark
     '--color-on-accent': '#ffffff',
     '--color-on-negative': '#ffffff',
-    '--color-on-surface-onyx': 'oklch(94.66% 0 0)',
-    '--color-surface-block': '#0e0e0e',
-    '--color-surface-block-muted': '#121212',
-    '--color-surface-card': '#131313',
-    '--color-surface-card-elev': '#141414',
-    '--color-surface-input': '#222222',
-    '--color-surface-onyx': '#000000',
-    '--color-surface-deep': '#050505',
-    '--color-surface-skeleton': '#292929',
-    '--color-surface-panel': '#181818',
-    '--color-surface-page': '#0a0a0a',
-    '--color-surface-shell': '#0c0c0c',
-    '--color-line': '#181818',
-    '--color-line-strong': '#2e2e2e',
-    '--color-line-dashed': '#888888',
-    '--color-accent-blue': '#5d88ff',
-    '--color-indicator-green': '#57b88a',
+    '--color-on-surface-onyx': '#ffffff', // neutral 000
+    '--color-surface-block': '#141414', // neutral 092
+    '--color-surface-block-muted': '#141414', // neutral 092
+    '--color-surface-card': '#141414', // neutral 092
+    '--color-surface-card-elev': '#141414', // neutral 092
+    '--color-surface-input': '#1f1f1f', // neutral 088
+    '--color-surface-onyx': '#000000', // neutral 100
+    '--color-surface-deep': '#0a0a0a', // neutral 096
+    '--color-surface-skeleton': '#292929', // neutral 084
+    '--color-surface-panel': '#141414', // neutral 092
+    '--color-surface-page': '#000000', // neutral 100
+    '--color-surface-shell': '#000000', // neutral 100
+    '--color-line': 'rgb(255 255 255 / 0.16)', // tint 016
+    '--color-line-strong': 'rgb(255 255 255 / 0.24)', // tint 024
+    '--color-line-dashed': '#858585', // neutral 048
+    '--color-accent-blue': '#7498fb', // blueDark
+    '--color-indicator-green': '#59e5a4', // greenDark
     '--color-indicator-green-dark': '#1d6418',
     '--color-performance-tps-start': 'var(--color-accent-blue)',
     '--color-performance-tps-mid': 'var(--color-indicator-green)',
@@ -936,29 +912,33 @@ global({
 global({
   ':root:where([data-theme="light"], [data-vocs-theme="light"])': {
     colorScheme: 'light',
-    '--color-background': '#ffffff',
-    '--color-foreground': '#000000',
-    '--color-foreground-secondary': '#737373',
-    '--color-foreground-secondary-hover': '#111111',
+    '--color-background': '#ffffff', // neutral 000
+    '--color-foreground': '#000000', // neutral 100
+    '--color-foreground-secondary': 'rgb(0 0 0 / 0.56)', // shade 056
+    '--color-foreground-secondary-hover': '#000000', // neutral 100
+    '--color-negative': '#eb3417', // redLight
+    '--color-info': '#4471ed', // blueLight
+    '--color-positive': '#13a963', // greenLight
+    '--color-warning': '#e06f12', // orangeLight
     '--color-on-accent': '#ffffff',
     '--color-on-negative': '#ffffff',
-    '--color-on-surface-onyx': '#ffffff',
-    '--color-surface-block': '#f5f5f5',
-    '--color-surface-block-muted': '#f7f7f7',
-    '--color-surface-card': '#ffffff',
-    '--color-surface-card-elev': '#ffffff',
-    '--color-surface-input': '#f5f5f5',
-    '--color-surface-onyx': '#111111',
-    '--color-surface-deep': '#f4f4f5',
-    '--color-surface-skeleton': '#e5e5e5',
-    '--color-surface-panel': '#f7f7f7',
-    '--color-surface-page': '#ffffff',
-    '--color-surface-shell': '#ffffff',
-    '--color-line': '#e5e5e5',
-    '--color-line-strong': '#d4d4d4',
-    '--color-line-dashed': '#a3a3a3',
-    '--color-accent-blue': '#3c66d8',
-    '--color-indicator-green': '#168f24',
+    '--color-on-surface-onyx': '#ffffff', // neutral 000
+    '--color-surface-block': '#f5f5f5', // neutral 004
+    '--color-surface-block-muted': '#f7f7f7', // neutral 003
+    '--color-surface-card': '#ffffff', // neutral 000
+    '--color-surface-card-elev': '#ffffff', // neutral 000
+    '--color-surface-input': '#f5f5f5', // neutral 004
+    '--color-surface-onyx': '#141414', // neutral 092
+    '--color-surface-deep': '#f5f5f5', // neutral 004
+    '--color-surface-skeleton': '#e0e0e0', // neutral 012
+    '--color-surface-panel': '#f5f5f5', // neutral 004
+    '--color-surface-page': '#ffffff', // neutral 000
+    '--color-surface-shell': '#ffffff', // neutral 000
+    '--color-line': 'rgb(0 0 0 / 0.08)', // shade 008
+    '--color-line-strong': 'rgb(0 0 0 / 0.16)', // shade 016
+    '--color-line-dashed': '#a3a3a3', // neutral 036
+    '--color-accent-blue': '#4471ed', // blueLight
+    '--color-indicator-green': '#13a963', // greenLight
     '--color-indicator-green-dark': '#0f5f18',
     '--color-performance-tps-start': 'var(--color-indicator-green)',
     '--color-performance-tps-mid':
@@ -1290,14 +1270,6 @@ global({
 
 global({
   '@layer utilities': {
-    'article[data-v-content] aside[data-v-callout]': {
-      borderRadius: tokens.radius.md,
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
     '[data-v-outline-indicator]': {
       backgroundColor: tokens.color.foreground,
     },
@@ -1314,12 +1286,14 @@ global({
 
 global({
   '@layer utilities': {
-    'body:has(.docs-section-nav) :is(a, button, input, summary):focus-visible': {
-      outlineWidth: tokens.borderWidth.emphasis,
-      outlineStyle: 'solid',
-      outlineColor: tokens.color.foreground,
-      outlineOffset: '3px',
-    },
+    // Segmented-control radios and tabs keep their own TDS rings (inset for segments).
+    'body:has(.docs-section-nav) :is(a, button, input, summary):not([role="radio"], [role="tab"]):focus-visible':
+      {
+        outlineWidth: tokens.borderWidth.emphasis,
+        outlineStyle: 'solid',
+        outlineColor: tokens.color.foreground,
+        outlineOffset: '3px',
+      },
   },
 })
 
@@ -1384,3 +1358,254 @@ global({
 
 // Vocs owns the Mermaid wrapper markup.
 global({ '.data-v-mermaid-container': { minHeight: '200px' } })
+
+// G2: code blocks round once, at the container, with smooth corners. Below
+// 768px Vocs bleeds code to the viewport edge, so the container stays square.
+global({
+  '@layer vocs_utilities': {
+    '@media (width >= 768px)': {
+      '[data-v-code-container]': {
+        '--corner-radius': tokens.radius.lg,
+        borderRadius: tokens.radius.lg,
+        overflow: 'clip',
+      },
+      '[data-v-code-container] :is([data-v-code-header], pre[data-v])': {
+        borderRadius: tokens.radius.none,
+      },
+    },
+  },
+})
+
+// G3: raster images in docs content take a radius sized to content images.
+// Inline SVG diagrams, logos and icons keep their own geometry.
+global({
+  '@layer vocs_utilities': {
+    'article[data-v-content] img[data-v]:not([src$=".svg"])': {
+      '--corner-radius': tokens.radius.lg,
+      borderRadius: tokens.radius.lg,
+    },
+  },
+})
+
+// G4: a panel whose fill differs from the page has no border; one that matches
+// the page keeps the hairline. Code, prompts and inline code sit on the block
+// fill in both themes, so their Vocs borders go.
+global({
+  '@layer vocs_utilities': {
+    '[data-v-code-container] :is([data-v-code-header], [data-v-code-group-list], pre[data-v])': {
+      borderWidth: tokens.borderWidth.none,
+      backgroundColor: tokens.color.block,
+    },
+    '[data-v-prompt]': {
+      borderWidth: tokens.borderWidth.none,
+      backgroundColor: tokens.color.block,
+    },
+    // Vocs pulls the active tab's underline over the header border it no longer has;
+    // keep it inside the tab list, which clips vertically.
+    '[data-v-code-group-tab]': {
+      marginBottom: tokens.spacing['0'],
+    },
+    // The API reference overview pane sits on its own fill.
+    '[data-v-openapi-overview]': {
+      borderWidth: tokens.borderWidth.none,
+      '--corner-radius': tokens.radius.lg,
+      borderRadius: tokens.radius.lg,
+      backgroundColor: tokens.color.panel,
+    },
+    ':not(pre) > code[data-v]:not(.twoslash-popup-code)': {
+      borderWidth: tokens.borderWidth.none,
+    },
+  },
+})
+
+// G9: body sections are separated by space, not rules. Vocs marks its H2 rule
+// and margin !important in vocs_components, so the override sits in an earlier
+// layer. Table row rules, H9's top rules and the page-end footer keep theirs.
+global({
+  '@layer base': {
+    ':is(article[data-v-content], [data-v-openapi-intro], [data-v-openapi-guide]) > :not(:is(hgroup[data-v], h1[data-v])) + h2:not(:only-child)':
+      {
+        // design-exception: Vocs sets this margin !important; the section token replaces it.
+        marginTop: 'var(--tempo-section-space) !custom !important',
+      },
+  },
+  '@layer vocs_utilities': {
+    ':is(article[data-v-content], [data-v-openapi-intro], [data-v-openapi-guide]) > :not(:is(hgroup[data-v], h1[data-v])) + h2:not(:only-child)':
+      {
+        paddingTop: tokens.spacing['0'],
+        borderTopWidth: tokens.borderWidth.none,
+      },
+    'article[data-v-content] hr[data-v]': {
+      borderTopWidth: tokens.borderWidth.none,
+      marginBlock: tokens.spacing.section,
+    },
+    // API reference pages: the header rule and the rules between operations.
+    '[data-v-openapi-header], :is([data-v-openapi-intro], [data-v-openapi-guide]) > h1[data-v]': {
+      borderBottomWidth: tokens.borderWidth.none,
+    },
+    '[data-v-openapi-operation][data-separator]': {
+      marginTop: tokens.spacing.section,
+      paddingTop: tokens.spacing['0'],
+      borderTopWidth: tokens.borderWidth.none,
+    },
+    // The page footer (feedback, edit link, pager) starts a section's space below the body.
+    'article[data-v-content] > [data-v-content-footer]': {
+      marginTop: tokens.spacing.section,
+    },
+    // Pager links dim on hover instead of turning accent.
+    '[data-v-pagination] > a': {
+      transitionProperty: 'opacity',
+      transitionDuration: 'var(--tempo-exit)',
+      transitionTimingFunction: 'var(--tempo-ease)',
+    },
+    '[data-v-pagination] > a > span': {
+      transitionProperty: 'none',
+    },
+    '[data-v-pagination] > a:hover > span:first-child': {
+      color: inherited.color.vocsTextColorHeading,
+    },
+    '@media (hover: hover)': {
+      '[data-v-pagination] > a:hover': {
+        opacity: 0.56,
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    },
+  },
+})
+
+// G10: tables span exactly the content width (Vocs pulls them 12px past each
+// edge) and scroll inside their own wrapper when they are wider. Below 768px
+// Vocs bleeds them to the viewport edge, which stays.
+global({
+  '@layer vocs_utilities': {
+    '@media (width >= 768px)': {
+      'div[data-v-table-wrapper]': {
+        marginInline: tokens.spacing['0'],
+        '--corner-radius': tokens.radius.lg,
+        borderRadius: tokens.radius.lg,
+      },
+    },
+  },
+})
+
+// G11: callouts follow TDS Platform. Notes and info use Callout (subtle fill, no
+// icon); tip, warning, danger and success use Alert (tone fill, an 8px tone
+// square in place of the icon). Neither has a border, and text stays primary.
+global({
+  '@layer utilities': {
+    'aside[data-v][data-v-callout]': {
+      marginInline: tokens.spacing['0'],
+      paddingBlock: tokens.spacing['6'],
+      paddingInline: tokens.spacing['8'],
+      borderWidth: tokens.borderWidth.none,
+      '--corner-radius': tokens.radius.xl,
+      borderRadius: tokens.radius.xl,
+      backgroundColor: tokens.color.containerSubtle,
+      color: inherited.color.vocsTextColorPrimary,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.control,
+    },
+    'aside[data-v][data-v-callout] :is(p, li, a, code)[data-v], aside[data-v][data-v-callout] li::marker':
+      {
+        color: inherited.color.vocsTextColorPrimary,
+      },
+    // TDS B2 lines (14/20) inside callouts, so the indicator centers on the first line.
+    'aside[data-v][data-v-callout] :is(p, li)[data-v]': {
+      lineHeight: tokens.lineHeight.control,
+    },
+    'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
+      display: 'none',
+    },
+    'aside[data-v][data-v-callout][data-v-content] > :not(:is([data-v-callout-icon], [data-v-code-container]))':
+      {
+        paddingInlineStart: tokens.spacing['0'],
+      },
+    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"])':
+      {
+        padding: tokens.spacing['4'],
+        '--corner-radius': tokens.radius.lg,
+        borderRadius: tokens.radius.lg,
+      },
+    'aside[data-v][data-v-callout][data-v-context="tip"]': {
+      '--tempo-alert-tone': 'var(--info)',
+      backgroundColor: tokens.color.infoContainer,
+    },
+    'aside[data-v][data-v-callout][data-v-context="warning"]': {
+      '--tempo-alert-tone': 'var(--warning)',
+      backgroundColor: tokens.color.warningContainer,
+    },
+    'aside[data-v][data-v-callout][data-v-context="danger"]': {
+      '--tempo-alert-tone': 'var(--negative)',
+      backgroundColor: tokens.color.negativeContainer,
+    },
+    'aside[data-v][data-v-callout][data-v-context="success"]': {
+      '--tempo-alert-tone': 'var(--positive)',
+      backgroundColor: tokens.color.positiveContainer,
+    },
+    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"]) > [data-v-callout-icon]':
+      {
+        display: 'block',
+        width: tokens.spacing['2'],
+        height: tokens.spacing['2'],
+        // design-exception: Centres the 8px square on the 20px first line (20 − 8) / 2.
+        marginTop: '6px !custom',
+        marginInlineStart: tokens.spacing['1'],
+        // The TDS indicator's 2px corner, smoothed.
+        borderRadius: tokens.radius.xs,
+        '--corner-radius': tokens.radius.xs,
+        // design-exception: The tone is set per context above from the status tokens.
+        backgroundColor: 'var(--tempo-alert-tone) !custom',
+      },
+    'aside[data-v][data-v-callout] > [data-v-callout-icon] > svg': {
+      display: 'none',
+    },
+    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"])[data-v-content] > :not(:is([data-v-callout-icon], [data-v-code-container]))':
+      {
+        paddingInlineStart: tokens.spacing['7'],
+      },
+  },
+  '@media (width < 768px)': {
+    '@layer utilities': {
+      'aside[data-v][data-v-callout]': {
+        paddingBlock: tokens.spacing['5'],
+        paddingInline: tokens.spacing['5'],
+      },
+    },
+  },
+})
+
+// G8: Vocs-owned buttons follow the same rule: gray secondary fill, no outline,
+// smoothed md radius (OpenAPI code-panel actions, the 404 link). G4: the 404
+// icon circle keeps a hairline only where its fill matches the page.
+global({
+  '@layer vocs_utilities': {
+    '[data-v-openapi-action], [data-v-not-found-link]': {
+      borderWidth: tokens.borderWidth.none,
+      '--corner-radius': tokens.radius.md,
+      borderRadius: tokens.radius.md,
+      backgroundColor: tokens.color.container,
+      transitionProperty: 'background-color',
+      transitionDuration: 'var(--tempo-exit)',
+      transitionTimingFunction: 'var(--tempo-ease)',
+    },
+    '[data-v-openapi-action]:not(:disabled):hover, [data-v-not-found-link]:hover': {
+      backgroundColor: tokens.color.containerStrong,
+      transitionDuration: 'var(--tempo-enter)',
+    },
+    '[data-v-not-found-icon]': {
+      borderColor: tokens.color.cardLine,
+    },
+  },
+})
+
+// Body text follows TDS Platform B1 (16/22, 0.12px tracking) in docs articles.
+// Callouts keep B2 (utilities layer above), and Home keeps its own scale.
+global({
+  '@layer vocs_utilities': {
+    'article[data-v-content] :is(p, li)[data-v]': {
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.b1,
+      letterSpacing: tokens.letterSpacing.b1,
+    },
+  },
+})
