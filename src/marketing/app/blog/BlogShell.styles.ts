@@ -149,6 +149,7 @@ export const tempoBlogFeaturedImage = style({
   justifyContent: 'center',
   overflow: 'hidden',
   borderRadius: tokens.radius.xl,
+  '--corner-radius': tokens.radius.xl,
   backgroundColor: inherited.color.colorSurfaceShell,
   selectors: {
     '& img': {
@@ -554,10 +555,12 @@ export const tempoBlogArticleBody = style({
     },
     '& img': {
       height: 'auto',
-      borderRadius: tokens.radius.xs,
+      borderRadius: tokens.radius.lg,
+      '--corner-radius': tokens.radius.lg,
     },
     '& pre': {
-      borderRadius: tokens.radius.xs,
+      borderRadius: tokens.radius.lg,
+      '--corner-radius': tokens.radius.lg,
     },
   },
   '@media (width < 600px)': {

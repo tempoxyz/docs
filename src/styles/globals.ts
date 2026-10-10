@@ -1408,3 +1408,14 @@ global({
     },
   },
 })
+
+// G3: raster images in docs content take a radius sized to content images.
+// Inline SVG diagrams, logos and icons keep their own geometry.
+global({
+  '@layer vocs_utilities': {
+    'article[data-v-content] img[data-v]:not([src$=".svg"])': {
+      '--corner-radius': tokens.radius.lg,
+      borderRadius: tokens.radius.lg,
+    },
+  },
+})

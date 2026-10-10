@@ -4,6 +4,7 @@ import { vars as tokens } from '../styles/theme'
 export const img = style({
   cursor: 'zoom-in',
   borderRadius: tokens.radius.lg,
+  '--corner-radius': tokens.radius.lg,
   borderStyle: 'solid',
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray4,
@@ -39,7 +40,8 @@ export const zoomableImageLayout2 = style({
   width: '90vw',
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: tokens.radius.lg,
+  borderRadius: tokens.radius.xl,
+  '--corner-radius': tokens.radius.xl,
   borderStyle: 'solid',
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray4,
