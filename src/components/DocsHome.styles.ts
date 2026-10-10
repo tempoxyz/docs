@@ -340,7 +340,7 @@ export const tempoAgentStart = style({
       // design-exception: Shares the card radius variable with the setup tiles.
       borderRadius: 'var(--tempo-card-radius) !custom',
       '--corner-radius': 'var(--tempo-card-radius)',
-      backgroundColor: tokens.color.card,
+      backgroundColor: tokens.color.background,
     },
     // Connect Tempo docs, with the agent's install link at the inline end.
     '& .tempo-agent-start-heading': {
