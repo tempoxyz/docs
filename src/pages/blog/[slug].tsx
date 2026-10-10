@@ -2,7 +2,12 @@ import { posts } from 'virtual:blog-posts'
 import { type CategorySlug, categoryBySlug } from '../../marketing/app/blog/_lib/categories'
 import BlogPostRoute from '../../marketing/BlogPostRoute'
 import { routeMetadata } from '../../marketing/routeMetadata'
-import { blogPostImageUrl, blogPostJsonLd, type PostSeo, resolveBaseUrl } from '../../marketing/seo'
+import {
+  blogPostJsonLd,
+  blogPostShareImageUrl,
+  type PostSeo,
+  resolveBaseUrl,
+} from '../../marketing/seo'
 
 const postBySlug = new Map<string, PostSeo>(
   posts.map((post) => [
@@ -15,6 +20,7 @@ const postBySlug = new Map<string, PostSeo>(
       category: post.category as CategorySlug,
       authors: post.authors,
       ogImage: post.ogImage,
+      shareImage: post.shareImage,
     },
   ]),
 )
@@ -33,12 +39,16 @@ export default function Page({ slug }: { slug: string }) {
 
   const title = post ? post.title : routeMetadata['/blog'].title
   const description = post?.excerpt ?? routeMetadata['/blog'].description
-  const image = post ? blogPostImageUrl(base, post) : ''
+  const image = post ? blogPostShareImageUrl(base, post) : ''
 
   return (
     <BlogPostRoute
       slug={slug}
-      metadata={{ title, description, ogImage: post?.ogImage ? image : undefined }}
+      metadata={{
+        title,
+        description,
+        ogImage: post?.shareImage || post?.ogImage ? image : undefined,
+      }}
       head={
         post ? (
           <>

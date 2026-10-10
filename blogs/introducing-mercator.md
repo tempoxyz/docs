@@ -4,6 +4,7 @@ excerpt: "A new effort option for agents: discover, price, and execute paid tool
 authors: "Brendan Ryan, Parv Ahuja, Georgios Konstantopoulos"
 date: 2026-09-23
 category: product-announcements
+shareImage: /og/2026-q4/og_2026-q4_devblog_introducing-mercator_linework-000_v02.png
 ---
 
 <a id="mercator-at-a-glance"></a>
