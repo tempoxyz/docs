@@ -1508,3 +1508,18 @@ global({
     },
   },
 })
+
+// G10: tables span exactly the content width (Vocs pulls them 12px past each
+// edge) and scroll inside their own wrapper when they are wider. Below 768px
+// Vocs bleeds them to the viewport edge, which stays.
+global({
+  '@layer vocs_utilities': {
+    '@media (width >= 768px)': {
+      'div[data-v-table-wrapper]': {
+        marginInline: tokens.spacing['0'],
+        '--corner-radius': tokens.radius.lg,
+        borderRadius: tokens.radius.lg,
+      },
+    },
+  },
+})
