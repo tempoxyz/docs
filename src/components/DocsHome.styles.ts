@@ -167,6 +167,12 @@ export const tempoDocsHome = style({
       fontWeight: tokens.fontWeight.normal,
       textDecoration: 'none',
     },
+    // Product sub-links are chevron links: no underline at rest or on hover.
+    '& .tempo-docs-home-product-group li[data-v] a': {
+      color: inherited.color.homeInk,
+      fontWeight: tokens.fontWeight.normal,
+      textDecoration: 'none',
+    },
     '& p[data-v] a[data-v]': {
       color: tokens.color.accent,
       fontWeight: tokens.fontWeight.normal,
