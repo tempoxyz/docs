@@ -217,11 +217,19 @@ export const tempoDocsHome = style({
     '& .tempo-docs-home-reference-grid > div:first-child li[data-v]': {
       margin: 0,
     },
-    '& :is(a, button):focus-visible': {
+    // SegmentedControl items keep their inset ring; an outset one is clipped by the scroller.
+    '& :is(a, button):not([role="radio"]):focus-visible': {
       outlineWidth: tokens.borderWidth.emphasis,
       outlineStyle: 'solid',
       outlineColor: inherited.color.homeInk,
       outlineOffset: '4px',
+    },
+    // The docs-wide focus rule (outset 3px) outranks the SegmentedControl recipe; restore its inset ring.
+    '& [role="radio"]:focus-visible': {
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineStyle: 'solid',
+      outlineColor: 'currentColor !custom',
+      outlineOffset: '-2px',
     },
     '& :is(li, p)[data-v] a[data-v]:hover': {
       textDecoration: 'underline',
@@ -348,41 +356,15 @@ export const tempoAgentStart = style({
       letterSpacing: tokens.letterSpacing.tight,
       lineHeight: tokens.lineHeight.normal,
     },
+    // The setup chooser spans the full width; on narrow screens it scrolls sideways
+    // (SegmentedControl sets overflow-x: auto) and never wraps.
     '& .tempo-agent-start-agents': {
       marginTop: tokens.spacing['0'],
       marginInlineEnd: tokens.spacing['0'],
       marginBottom: tokens.spacing['5'],
       marginInlineStart: tokens.spacing['0'],
-      padding: 0,
-      border: 0,
     },
-    '& .tempo-agent-start-agents button': {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: tokens.spacing['2'],
-      minHeight: '40px',
-
-      paddingBlock: tokens.spacing['2'],
-      paddingInline: tokens.spacing['3_5'],
-      borderWidth: tokens.borderWidth.hairline,
-      borderStyle: 'solid',
-      borderColor: 'transparent !custom',
-
-      borderRadius: tokens.radius.pill,
-      backgroundColor: 'transparent !custom',
-
-      color: inherited.color.homeMuted,
-      fontSize: tokens.fontSize.compact,
-      fontFamily: 'inherit !custom',
-      lineHeight: tokens.lineHeight.normal,
-      cursor: 'pointer',
-    },
-    '& .tempo-agent-start-agents button[aria-pressed="true"]': {
-      borderColor: inherited.color.homeInk,
-
-      color: inherited.color.homeInk,
-    },
-    '& :is(.tempo-agent-start-agents, .tempo-agent-start-destination) svg': {
+    '& .tempo-agent-start-destination svg': {
       width: '14px',
       height: '14px',
     },
@@ -528,24 +510,6 @@ export const tempoAgentStart = style({
         padding: tokens.spacing['3_5'],
         fontSize: tokens.fontSize.xs,
       },
-    },
-  },
-})
-
-export const tempoAgentStartAgents = style({
-  selectors: {
-    '& legend': {
-      position: 'absolute',
-      width: '1px',
-      height: '1px',
-      overflow: 'hidden',
-      clipPath: 'inset(50%)',
-      whiteSpace: 'nowrap',
-    },
-    '& > div': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: tokens.spacing['2'],
     },
   },
 })

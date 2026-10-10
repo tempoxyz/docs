@@ -559,7 +559,7 @@ test('agent-first entry page offers setup and payment guides', async ({
         : multipleCommands
           ? 'Commands copied. Paste them into your terminal and run both commands.'
           : 'Command copied. Paste it into your terminal and run it.'
-    await setup.getByRole('button', { name: label, exact: true }).click()
+    await setup.getByRole('radio', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
     await expect(
       setup.locator('.tempo-agent-start-install .tempo-agent-start-instruction'),
@@ -576,7 +576,7 @@ test('agent-first entry page offers setup and payment guides', async ({
     await expect(installStatus).toHaveText(commandSuccess)
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command)
   }
-  await setup.getByRole('button', { name: 'Codex', exact: true }).click()
+  await setup.getByRole('radio', { name: 'Codex', exact: true }).click()
   await expect(installStatus).toHaveText('')
   await expect(page.locator('.tempo-docs-home')).not.toContainText('Bring your existing EVM app')
   for (const anchor of [
@@ -633,7 +633,7 @@ test('agent setup offers manual copy recovery without overflowing a narrow viewp
         : multipleCommands
           ? 'Copy failed. Select and copy both commands above.'
           : 'Copy failed. Select and copy the command above.'
-    await setup.getByRole('button', { name: label, exact: true }).click()
+    await setup.getByRole('radio', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
     await setup
       .getByRole('button', {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'waku'
 import CheckIcon from '~icons/lucide/check'
 import CopyIcon from '~icons/lucide/copy'
@@ -10,7 +10,8 @@ import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
 import { CopyIconSwap } from './CopyIconSwap'
-import { tempoAgentStart, tempoAgentStartAgents, tempoAgentStartCommand } from './DocsHome.styles'
+import { tempoAgentStart, tempoAgentStartCommand } from './DocsHome.styles'
+import { SegmentedControl } from './SegmentedControl'
 
 const agents = [
   {
@@ -70,6 +71,27 @@ export function DocsHomeAgent() {
 
   useEffect(() => setMounted(true), [])
 
+  // The chooser scrolls sideways when the five methods don't fit (narrow screens).
+  // Bring the selected method fully into view without scrolling the page.
+  const chooser = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const control = chooser.current?.querySelector<HTMLElement>('[role="radiogroup"]')
+    const selected = control?.querySelector<HTMLElement>('[aria-checked="true"]')
+    if (!control || !selected || control.scrollWidth <= control.clientWidth) return
+    const bounds = control.getBoundingClientRect()
+    const item = selected.getBoundingClientRect()
+    const inset = 8
+    const offset =
+      item.left < bounds.left
+        ? item.left - bounds.left - inset
+        : item.right > bounds.right
+          ? item.right - bounds.right + inset
+          : 0
+    if (!offset) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    control.scrollBy({ left: offset, behavior: reduce ? 'auto' : 'smooth' })
+  }, [agent])
+
   // The icon and label confirm briefly; the status message below stays.
   const [justCopied, setJustCopied] = useState(false)
   useEffect(() => {
@@ -92,26 +114,27 @@ export function DocsHomeAgent() {
     <div className={`tempo-agent-start ${tempoAgentStart().className}`}>
       <h2>Build with your agent</h2>
 
-      <fieldset className={`tempo-agent-start-agents ${tempoAgentStartAgents().className}`}>
-        <legend>Choose a setup method</legend>
-        <div>
-          {agents.map(({ id, label, Logo }) => (
-            <button
-              key={id}
-              type="button"
-              disabled={!mounted}
-              aria-pressed={agent === id}
-              onClick={() => {
-                setAgent(id)
-                setCopyState(null)
-              }}
-            >
-              {Logo ? <Logo aria-hidden="true" /> : null}
-              {label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      <div ref={chooser} className="tempo-agent-start-agents">
+        <SegmentedControl
+          aria-label="Choose a setup method"
+          disabled={!mounted}
+          items={agents.map(({ id, label, Logo }) => ({
+            value: id,
+            label: (
+              <>
+                {Logo ? <Logo aria-hidden="true" /> : null}
+                {label}
+              </>
+            ),
+          }))}
+          value={agent}
+          onValueChange={(id) => {
+            setAgent(id)
+            setCopyState(null)
+            setJustCopied(false)
+          }}
+        />
+      </div>
 
       <div className="tempo-agent-start-install">
         <h3 className="tempo-agent-start-label">Connect Tempo docs</h3>
