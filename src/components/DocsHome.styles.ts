@@ -333,14 +333,6 @@ export const tempoAgentStart = style({
       letterSpacing: tokens.letterSpacing.compact,
       lineHeight: tokens.lineHeight.compact,
     },
-    '& > p': {
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      margin: '8px 0 18px !custom',
-
-      color: inherited.color.homeMuted,
-      fontSize: tokens.fontSize.sm,
-      lineHeight: tokens.lineHeight.relaxed,
-    },
     '& .tempo-agent-start-toolbar': {
       display: 'flex',
       alignItems: 'center',
@@ -470,9 +462,8 @@ export const tempoAgentStart = style({
       width: '14px',
       height: '14px',
     },
+    // The install link can stand alone (Codex, Claude Code), so it carries no leading margin.
     '& .tempo-agent-start-prerequisite': {
-      marginInlineStart: tokens.spacing['1'],
-
       color: inherited.color.homeInk,
       textDecoration: 'underline',
 

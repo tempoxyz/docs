@@ -16,7 +16,7 @@ const agents = [
   {
     id: 'codex',
     label: 'Codex',
-    instruction: 'Run both commands in your terminal.',
+    instruction: null,
     helpLabel: 'Install Codex CLI',
     installUrl: 'https://learn.chatgpt.com/docs/codex/cli',
     Logo: CodexLogo,
@@ -24,7 +24,7 @@ const agents = [
   {
     id: 'claude',
     label: 'Claude Code',
-    instruction: 'Run both commands in your terminal.',
+    instruction: null,
     helpLabel: 'Install Claude Code',
     installUrl: 'https://code.claude.com/docs/en/quickstart',
     Logo: ClaudeLogo,
@@ -91,7 +91,6 @@ export function DocsHomeAgent() {
   return (
     <div className={`tempo-agent-start ${tempoAgentStart().className}`}>
       <h2>Build with your agent</h2>
-      <p>Connect your coding agent to Tempo documentation.</p>
 
       <fieldset className={`tempo-agent-start-agents ${tempoAgentStartAgents().className}`}>
         <legend>Choose a setup method</legend>
@@ -117,7 +116,8 @@ export function DocsHomeAgent() {
       <div className="tempo-agent-start-install">
         <h3 className="tempo-agent-start-label">Connect Tempo docs</h3>
         <p className="tempo-agent-start-instruction">
-          {activeAgent.instruction}{' '}
+          {activeAgent.instruction}
+          {activeAgent.instruction && activeAgent.installUrl ? ' ' : null}
           {activeAgent.installUrl ? (
             <a
               className="tempo-agent-start-prerequisite"

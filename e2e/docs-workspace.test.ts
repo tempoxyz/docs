@@ -22,12 +22,12 @@ const homeAgentSetups = [
     label: 'Codex',
     command:
       'codex plugin marketplace add tempoxyz/plugins --ref main\ncodex plugin add docs@tempo',
-    instruction: /both commands in your terminal/i,
+    instruction: /^Install Codex CLI/,
   },
   {
     label: 'Claude Code',
     command: 'claude plugin marketplace add tempoxyz/plugins\nclaude plugin install docs@tempo',
-    instruction: /both commands in your terminal/i,
+    instruction: /^Install Claude Code/,
   },
   {
     label: 'Amp',
