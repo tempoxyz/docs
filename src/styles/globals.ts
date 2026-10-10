@@ -1453,3 +1453,58 @@ global({
     },
   },
 })
+
+// G9: body sections are separated by space, not rules. Vocs marks its H2 rule
+// and margin !important in vocs_components, so the override sits in an earlier
+// layer. Table row rules, H9's top rules and the page-end footer keep theirs.
+global({
+  '@layer base': {
+    ':is(article[data-v-content], [data-v-openapi-intro], [data-v-openapi-guide]) > :not(:is(hgroup[data-v], h1[data-v])) + h2:not(:only-child)':
+      {
+        // design-exception: Vocs sets this margin !important; the section token replaces it.
+        marginTop: 'var(--tempo-section-space) !custom !important',
+      },
+  },
+  '@layer vocs_utilities': {
+    ':is(article[data-v-content], [data-v-openapi-intro], [data-v-openapi-guide]) > :not(:is(hgroup[data-v], h1[data-v])) + h2:not(:only-child)':
+      {
+        paddingTop: tokens.spacing['0'],
+        borderTopWidth: tokens.borderWidth.none,
+      },
+    'article[data-v-content] hr[data-v]': {
+      borderTopWidth: tokens.borderWidth.none,
+      marginBlock: tokens.spacing.section,
+    },
+    // API reference pages: the header rule and the rules between operations.
+    '[data-v-openapi-header], :is([data-v-openapi-intro], [data-v-openapi-guide]) > h1[data-v]': {
+      borderBottomWidth: tokens.borderWidth.none,
+    },
+    '[data-v-openapi-operation][data-separator]': {
+      marginTop: tokens.spacing.section,
+      paddingTop: tokens.spacing['0'],
+      borderTopWidth: tokens.borderWidth.none,
+    },
+    // The page footer (feedback, edit link, pager) starts a section's space below the body.
+    'article[data-v-content] > [data-v-content-footer]': {
+      marginTop: tokens.spacing.section,
+    },
+    // Pager links dim on hover instead of turning accent.
+    '[data-v-pagination] > a': {
+      transitionProperty: 'opacity',
+      transitionDuration: 'var(--tempo-exit)',
+      transitionTimingFunction: 'var(--tempo-ease)',
+    },
+    '[data-v-pagination] > a > span': {
+      transitionProperty: 'none',
+    },
+    '[data-v-pagination] > a:hover > span:first-child': {
+      color: inherited.color.vocsTextColorHeading,
+    },
+    '@media (hover: hover)': {
+      '[data-v-pagination] > a:hover': {
+        opacity: 0.56,
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    },
+  },
+})
