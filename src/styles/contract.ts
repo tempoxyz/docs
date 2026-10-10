@@ -87,6 +87,8 @@ export const design = extendVars(palette, {
   },
   letterSpacing: {
     normal: '0',
+    // TDS Platform body.b1 tracking.
+    b1: '0.12px',
     tight: '-0.01em',
     compact: '-0.02em',
     heading: '-0.03em',
@@ -98,6 +100,8 @@ export const design = extendVars(palette, {
   lineHeight: {
     caption: '16px',
     control: '20px',
+    // TDS Platform body.b1 (16px text).
+    b1: '22px',
     dense: '1.35rem',
     body: '1.5rem',
     none: 1,

@@ -1597,3 +1597,15 @@ global({
     },
   },
 })
+
+// Body text follows TDS Platform B1 (16/22, 0.12px tracking) in docs articles.
+// Callouts keep B2 (utilities layer above), and Home keeps its own scale.
+global({
+  '@layer vocs_utilities': {
+    'article[data-v-content] :is(p, li)[data-v]': {
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.b1,
+      letterSpacing: tokens.letterSpacing.b1,
+    },
+  },
+})
