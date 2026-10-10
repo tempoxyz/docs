@@ -14,10 +14,9 @@ export const docsPageActions = style({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-  gap: '12px 22px !custom',
-  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-  paddingBlock: '4px 22px !custom',
+  gap: tokens.spacing['2'],
+  paddingTop: tokens.spacing['1'],
+  paddingBottom: tokens.spacing['6'],
 
   marginBottom: tokens.spacing['8'],
   fontFamily: tokens.fontFamily.sansFallback,
@@ -28,20 +27,44 @@ export const docsPageActions = style({
       display: 'inline-flex',
       alignItems: 'center',
       gap: tokens.spacing['1_5'],
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      padding: '3px 0 !custom',
+      minHeight: '32px',
+      paddingBlock: tokens.spacing['1_5'],
+      paddingInline: tokens.spacing['3'],
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.lineStrong,
+      borderRadius: tokens.radius.md,
+      backgroundColor: tokens.color.card,
 
-      color: inherited.color.colorMixInSrgbForeground65Transparent,
+      color: tokens.color.foreground,
+      fontFamily: 'inherit !custom',
+      fontSize: 'inherit !custom',
       textDecoration: 'none',
       cursor: 'pointer',
+      transition: 'background-color 150ms, border-color 150ms, opacity 150ms',
     },
     '& :is(a, button):hover': {
-      color: tokens.color.foreground,
+      borderColor: inherited.color.colorMixInSrgbForeground65Transparent,
+    },
+    '& > button:first-child': {
+      borderColor: 'transparent !custom',
+      backgroundColor: inherited.color.backgroundColorInvert,
+
+      color: inherited.color.textColorInvert,
+    },
+    '& > button:first-child:hover': {
+      borderColor: 'transparent !custom',
+      opacity: 0.9,
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    selectors: {
+      '& :is(a, button)': {
+        transition: 'none',
+      },
     },
   },
   '@media (width < 600px)': {
-    // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-    gap: '8px 18px !custom',
     marginBottom: tokens.spacing['6'],
   },
 })

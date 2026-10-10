@@ -3,6 +3,7 @@ import { inherited } from '../styles/inherited'
 import { vars as tokens } from '../styles/theme'
 
 // Document/Vocs integration selectors cannot be attached to owned elements.
+// Vocs pagination links share the card markup, so they are excluded explicitly.
 global({
   ':root': {
     '--tempo-card-radius': '24px',
@@ -13,7 +14,7 @@ global({
       '--tempo-card-padding': '24px',
     },
   },
-  'article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )':
+  'article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )':
     {
       display: 'grid',
       gridTemplateColumns: 'minmax(0, 1fr)',
@@ -24,23 +25,25 @@ global({
       minWidth: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       padding: 'var(--tempo-card-padding) !custom',
-      border: 0,
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
-      backgroundColor: tokens.color.block,
+      backgroundColor: inherited.color.surfacePanel,
 
       color: inherited.color.vocsTextColorPrimary,
       textDecoration: 'none',
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > div':
+  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > div':
     {
       margin: 0,
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):has(> [class~="vocs:size-8"])':
+  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):has(> [class~="vocs:size-8"])':
     {
       gridTemplateColumns: '20px minmax(0, 1fr)',
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:size-8"]':
+  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:size-8"]':
     {
       gridColumn: 1,
       gridRow: 1,
@@ -53,12 +56,12 @@ global({
       backgroundColor: 'transparent !custom',
       color: 'inherit !custom',
     },
-  ':is(:is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:size-8"]) > svg':
+  ':is(:is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:size-8"]) > svg':
     {
       width: '20px',
       height: '20px',
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-heading"]':
+  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-heading"]':
     {
       gridRow: 1,
       fontSize: tokens.fontSize.lead,
@@ -67,7 +70,7 @@ global({
       letterSpacing: tokens.letterSpacing.tight,
       lineHeight: tokens.lineHeight.snug,
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-secondary"]':
+  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-secondary"]':
     {
       gridColumn: '1 / -1',
       alignSelf: 'start',
@@ -76,12 +79,12 @@ global({
       fontSize: tokens.fontSize.sm,
       lineHeight: tokens.lineHeight.relaxed,
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):hover > [class~="vocs:text-heading"]':
+  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):hover > [class~="vocs:text-heading"]':
     {
       textDecoration: 'underline',
       textUnderlineOffset: '4px',
     },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):focus-visible':
+  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):focus-visible':
     {
       outlineWidth: tokens.borderWidth.emphasis,
       outlineStyle: 'solid',
