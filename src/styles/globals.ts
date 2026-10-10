@@ -51,18 +51,28 @@ fontFace({
   fontDisplay: 'swap',
 })
 
+// Tempo JetBrains Mono: JetBrains Mono with the slashed zero as its default 0.
+// Medium answers every heavier weight, so bold code never fakes bold.
 fontFace({
-  fontFamily: '"JetBrains Mono"',
-  src: 'url("/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2") format("woff2")',
+  fontFamily: '"Tempo JetBrains Mono"',
+  src: 'url("/fonts/tempo-jetbrains-mono/TempoJetBrainsMono-Light.woff2") format("woff2")',
+  fontWeight: 300,
+  fontStyle: 'normal',
+  fontDisplay: 'swap',
+})
+
+fontFace({
+  fontFamily: '"Tempo JetBrains Mono"',
+  src: 'url("/fonts/tempo-jetbrains-mono/TempoJetBrainsMono-Regular.woff2") format("woff2")',
   fontWeight: 400,
   fontStyle: 'normal',
   fontDisplay: 'swap',
 })
 
 fontFace({
-  fontFamily: '"JetBrains Mono"',
-  src: 'url("/fonts/jetbrains-mono/JetBrainsMono-Medium.woff2") format("woff2")',
-  fontWeight: 500,
+  fontFamily: '"Tempo JetBrains Mono"',
+  src: 'url("/fonts/tempo-jetbrains-mono/TempoJetBrainsMono-Medium.woff2") format("woff2")',
+  fontWeight: '500 900',
   fontStyle: 'normal',
   fontDisplay: 'swap',
 })
@@ -762,9 +772,10 @@ global({
     colorScheme: 'dark',
     '--font-hbset': '"HBSet"',
     '--font-pilat-book': '"Pilat", ui-sans-serif, system-ui, sans-serif',
-    '--font-jetbrains-mono': '"JetBrains Mono"',
+    '--font-jetbrains-mono': '"Tempo JetBrains Mono", ui-monospace, monospace',
     '--vocs-font-family': 'var(--font-pilat-book)',
     '--vocs-font-family-mono': 'var(--font-jetbrains-mono), ui-monospace, monospace',
+    '--scalar-font-code': 'var(--vocs-font-family-mono)',
     '--color-background': '#111111',
     '--color-foreground': 'oklch(94.66% 0 0)',
     '--color-foreground-secondary': 'oklch(70.8% 0 0)',
