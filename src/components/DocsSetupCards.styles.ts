@@ -103,3 +103,34 @@ export const docsSetupLink = style({
     transition: 'none',
   },
 })
+
+// A visible chevron at the inline end of each setup link button (tempo.xyz
+// use-case geometry); it travels 0.15em on hover or focus, and flips in RTL.
+export const docsSetupLinkChevron = style({
+  '--tempo-chevron-travel': '0.15em',
+  display: 'inline-block',
+  flexShrink: 0,
+  width: '0.274em',
+  height: '0.477em',
+  marginInlineStart: tokens.spacing['2'],
+  transitionProperty: 'transform, translate, scale, rotate',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  selectors: {
+    ':is(a:hover, a:focus-visible) > &': {
+      transform: 'translateX(var(--tempo-chevron-travel))',
+      transitionDuration: 'var(--tempo-enter)',
+    },
+    ':dir(rtl) &': {
+      '--tempo-chevron-travel': '-0.15em',
+      scale: '-1 1',
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    selectors: {
+      ':is(a:hover, a:focus-visible) > &': {
+        transform: 'none',
+      },
+    },
+  },
+})

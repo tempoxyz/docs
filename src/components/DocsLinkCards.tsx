@@ -10,6 +10,7 @@ import {
   docsSetupCard,
   docsSetupGrid,
   docsSetupLink,
+  docsSetupLinkChevron,
   docsSetupLinks,
 } from './DocsSetupCards.styles'
 
@@ -39,6 +40,19 @@ export function DocsLinkCards({ collection }: { collection: keyof typeof docsLin
               {links.map(([label, href]) => (
                 <a key={href} href={href} className={docsSetupLink().className}>
                   {label}
+                  <svg
+                    viewBox="0 0 30.45 53"
+                    aria-hidden="true"
+                    className={docsSetupLinkChevron().className}
+                  >
+                    <path
+                      d="M2.79 2.79 26.5 26.5 2.79 50.21"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="7.9"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </a>
               ))}
             </div>
