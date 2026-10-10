@@ -704,6 +704,16 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [agentsOpen, setAgentsOpen] = useState(false)
+  // Keep the Agent setup panel rendered through its exit fade (G5).
+  const [agentsRendered, setAgentsRendered] = useState(false)
+  useEffect(() => {
+    if (agentsOpen) {
+      setAgentsRendered(true)
+      return
+    }
+    const timer = window.setTimeout(() => setAgentsRendered(false), 150)
+    return () => window.clearTimeout(timer)
+  }, [agentsOpen])
   const agentMenuRef = useRef<HTMLDivElement | null>(null)
   const agentTriggerRef = useRef<HTMLButtonElement | null>(null)
   const mobileDialogRef = useRef<HTMLDialogElement | null>(null)
@@ -872,9 +882,11 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
               Agent setup
               <Chevron open={agentsOpen} />
             </button>
-            {agentsOpen ? (
+            {agentsOpen || agentsRendered ? (
               <div
                 id="docs-agent-tools"
+                data-state={agentsOpen ? 'open' : 'closed'}
+                inert={!agentsOpen}
                 className={`docs-header-agent-panel ${docsHeaderAgentPanel().className}`}
               >
                 <AgentsPanel onNavigate={close} />

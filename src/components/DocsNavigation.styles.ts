@@ -226,6 +226,25 @@ export const docsHeaderAgentPanel = style({
   // design-exception: Preserve this surface's layered artwork or focus treatment.
   boxShadow: '0 8px 24px #0000000d !custom',
   overflow: 'hidden',
+  // G5: the panel fades and settles in, and fades out before it unmounts.
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: 'var(--tempo-enter)',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  '@starting-style': {
+    opacity: 0,
+    transform: 'translateY(-4px)',
+  },
+  selectors: {
+    '&[data-state="closed"]': {
+      opacity: 0,
+      transform: 'translateY(-4px)',
+      transitionDuration: 'var(--tempo-exit)',
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    transitionProperty: 'opacity',
+    transform: 'none',
+  },
 })
 
 export const docsHeaderMobileActions = style({
@@ -306,6 +325,14 @@ export const docsHeaderMobileDialog = style({
   border: 0,
   color: tokens.color.foreground,
   backgroundColor: inherited.color.colorSurfacePage,
+  // G5: the menu fades in on open and out on close; display and overlay switch
+  // discretely at the end so the exit is visible.
+  opacity: 0,
+  transitionProperty:
+    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  transitionBehavior: 'allow-discrete',
   selectors: {
     '&:not([open])': {
       display: 'none',
@@ -313,11 +340,23 @@ export const docsHeaderMobileDialog = style({
     '&[open]': {
       display: 'flex',
       flexDirection: 'column',
+      opacity: 1,
+      transitionDuration: 'var(--tempo-enter)',
     },
     '&::backdrop': {
       // design-exception: Preserve this surface's layered artwork or focus treatment.
       background: '#0006 !custom',
     },
+  },
+  '@starting-style': {
+    selectors: {
+      '&[open]': {
+        opacity: 0,
+      },
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    transitionProperty: 'none',
   },
 })
 
