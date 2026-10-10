@@ -459,6 +459,9 @@ export const docsSectionNavScroll = style({
   overflowX: 'auto',
   paddingInline: tokens.spacing['5'],
   scrollbarWidth: 'none',
+  // design-exception: Fade the scroll edges so clipped section tabs read as scrollable instead of cut off.
+  maskImage:
+    'linear-gradient(to right, transparent, black 16px, black calc(100% - 24px), transparent) !custom',
   selectors: {
     '&::-webkit-scrollbar': {
       display: 'none',
@@ -517,6 +520,7 @@ export const docsSectionUtilities = style({
   alignItems: 'center',
   flexShrink: 0,
   gap: tokens.spacing['6'],
+  marginInlineStart: tokens.spacing['3'],
   marginInlineEnd: tokens.spacing['5'],
   '@media (width < 800px)': {
     display: 'none',
