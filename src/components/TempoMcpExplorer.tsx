@@ -4,51 +4,18 @@ import * as React from 'react'
 import LucideExternalLink from '~icons/lucide/external-link'
 import LucidePlay from '~icons/lucide/play'
 import LucideRotateCcw from '~icons/lucide/rotate-ccw'
+import {
+  buildArguments,
+  type FormState,
+  parseMcpResponse,
+  TOOLS,
+  type ToolName,
+  toolErrorMessage,
+} from '../lib/mcp-explorer'
 import { Container } from './Container'
 import * as ui from './TempoMcpExplorer.recipes'
 
 const MCP_ENDPOINT = 'https://mcp.tempo.xyz'
-const DEFAULT_SOURCE = 'tempo'
-
-const TOOLS = [
-  {
-    name: 'search',
-    label: 'Search docs',
-  },
-  {
-    name: 'find_pages',
-    label: 'Find pages',
-  },
-  {
-    name: 'read_page',
-    label: 'Read page',
-  },
-] as const
-
-type ToolName = (typeof TOOLS)[number]['name']
-
-type FormState = {
-  tool: ToolName
-  query: string
-  path: string
-  url: string
-  maxResults: number
-  maxChars: number
-}
-
-type McpEnvelope = {
-  result?: {
-    content?: Array<{ type: string; text?: string }>
-    structuredContent?: {
-      success?: boolean
-      result?: unknown
-    }
-  }
-  error?: {
-    message?: string
-  }
-}
-
 type SearchChunk = {
   score?: number
   source?: string
@@ -69,48 +36,6 @@ const initialState: FormState = {
   url: '',
   maxResults: 3,
   maxChars: 1600,
-}
-
-function parseSseResponse(body: string) {
-  const dataLines = body
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith('data:'))
-    .map((line) => line.slice(5).trim())
-    .filter((line) => line && line !== '[DONE]')
-
-  const last = dataLines.at(-1)
-  if (!last) throw new Error('MCP server returned an empty response.')
-  return JSON.parse(last) as McpEnvelope
-}
-
-function buildArguments(state: FormState) {
-  if (state.tool === 'search') {
-    return {
-      query: state.query,
-      max_results: state.maxResults,
-      max_total_chars: state.maxChars,
-      response_format: 'structured',
-    }
-  }
-
-  if (state.tool === 'find_pages') {
-    return {
-      source: DEFAULT_SOURCE,
-      query: state.query,
-      max_results: state.maxResults,
-      response_format: 'structured',
-    }
-  }
-
-  return {
-    source: DEFAULT_SOURCE,
-    path: state.path || undefined,
-    url: state.url || undefined,
-    query: state.query || undefined,
-    max_chars: state.maxChars,
-    response_format: 'structured',
-  }
 }
 
 function requestPreview(state: FormState) {
@@ -258,21 +183,25 @@ export function TempoMcpExplorer() {
     setResult(null)
 
     try {
-      const response = await fetch(MCP_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          'Content-Type': 'application/json',
-        },
-        body: preview,
-      })
-
-      const body = await response.text()
-      const envelope = parseSseResponse(body)
-
-      if (!response.ok || envelope.error) {
-        throw new Error(envelope.error?.message ?? response.statusText)
+      let response: Response
+      try {
+        response = await fetch(MCP_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            'Content-Type': 'application/json',
+          },
+          body: preview,
+        })
+      } catch {
+        throw new Error(`Could not reach the MCP server at ${MCP_ENDPOINT}. Try again.`)
       }
+
+      const envelope = parseMcpResponse(await response.text(), response.status)
+
+      if (envelope.error) throw new Error(envelope.error.message ?? 'MCP request failed.')
+      if (!response.ok) throw new Error(`MCP server returned HTTP ${response.status}.`)
+      if (envelope.result?.isError) throw new Error(toolErrorMessage(envelope.result))
 
       setResult(envelope.result?.structuredContent?.result ?? envelope.result ?? envelope)
     } catch (err) {
