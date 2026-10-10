@@ -50,6 +50,8 @@ Use the source account's signer to submit the returned calls in order. Calls can
 
 For an `evm:calls` action, pass each call's `to`, `data`, and `value` to your source-chain wallet client. Wait for successful execution before the next call, and retain all hashes as `transactionHashes`. If submission stops partway through, inspect the transactions already sent before resuming. The Routes API key does not authorize the source account.
 
+On Tempo, [Tempo Wallet](/docs/accounts/integrate) submits every call as one atomic transaction, so the sender signs once. Try both paths in the [Routes API demo](/docs/routes/test).
+
 ### Register the source transactions
 
 Enter the transfer `id` from creation and the actual `transactionHashes` produced by your signer. Use `transactionHash` instead when there is only one source transaction.

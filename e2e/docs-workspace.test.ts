@@ -89,6 +89,7 @@ test('seven sections expose product tasks and expandable developer chapters', as
       label: 'Routes',
       path: '/docs/routes',
       links: [
+        '/docs/routes/test',
         '/docs/routes/networks',
         '/docs/routes/deposits',
         '/docs/routes/transfers',

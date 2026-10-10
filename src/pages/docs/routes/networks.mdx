@@ -5,12 +5,19 @@ description: "Discover valid chain and token pairs, funding methods, and amount 
 ---
 
 import { OpenApi } from 'vocs'
+import { SupportedRoutesTable } from '../../../components/SupportedRoutesTable'
 
 <span id="supported-networks-and-assets" />
 
 # Supported routes
 
 Read the route directory before offering a network or asset in your application. A network being supported does not mean every token, direction, or funding method is available.
+
+## Available routes
+
+Every route in the live directory, with its funding methods and whether fee coverage is available. Your organization's access policy can narrow the routes your API key can use; the [Routes API demo](/docs/routes/test) lists them for your key.
+
+<SupportedRoutesTable />
 
 <span id="read-the-route-directory" />
 

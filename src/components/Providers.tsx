@@ -18,16 +18,19 @@ const queryClient = new QueryClient({
 export default function Providers({
   children,
   mipd,
+  accessKey = true,
 }: {
   children: React.ReactNode
   mipd?: boolean
+  accessKey?: boolean
 }) {
   const config = React.useMemo(
     () =>
       WagmiConfig.getConfig({
         multiInjectedProviderDiscovery: Boolean(mipd),
+        accessKey,
       }),
-    [mipd],
+    [mipd, accessKey],
   )
 
   return (
