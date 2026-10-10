@@ -223,6 +223,10 @@ export const tempoDocsHome = style({
     '& .tempo-docs-home-reference-grid > div:first-child li[data-v]': {
       margin: 0,
     },
+    // "All APIs & SDKs" leads the group on its own row, above the SDK pairs.
+    '& .tempo-docs-home-reference-grid > div:first-child li[data-v]:first-child': {
+      gridColumn: '1 / -1',
+    },
     // SegmentedControl items keep their inset ring; an outset one is clipped by the scroller.
     '& :is(a, button):not([role="radio"]):focus-visible': {
       outlineWidth: tokens.borderWidth.emphasis,
