@@ -516,6 +516,12 @@ export const palette = defineVars({
     card: 'var(--surface-card)',
     elevated: 'var(--surface-card-elev)',
     block: 'var(--surface-block)',
+    // Docs panels and cards: the light surface-block fill, lifted to surface-panel in dark so
+    // borderless panels separate from the page.
+    panel: {
+      light: '#f5f5f5',
+      dark: '#181818',
+    },
     line: 'var(--line)',
     lineStrong: 'var(--line-strong)',
     accent: 'var(--accent-blue)',
