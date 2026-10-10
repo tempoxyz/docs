@@ -12,6 +12,7 @@ global({
     '--color-black': vars.color.black,
     '--color-white': vars.color.white,
     '--spacing': '0.25rem',
+    '--tempo-section-space': '64px',
     '--container-5xl': '64rem',
     '--container-7xl': '80rem',
     '--text-xs': '0.75rem',
@@ -249,6 +250,14 @@ global({
     '--color-line-dashed': 'var(--line-dashed)',
     '--color-accent-blue': 'var(--accent-blue)',
     '--color-indicator-green': 'var(--indicator-green)',
+  },
+})
+
+global({
+  '@media (width >= 768px)': {
+    ':root': {
+      '--tempo-section-space': '80px',
+    },
   },
 })
 

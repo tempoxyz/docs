@@ -34,6 +34,8 @@ export const design = extendVars(palette, {
     '3_5': '14px',
     '2_5': '10px',
     '0_5': '2px',
+    // Body section rhythm: 80px (TDS Platform section.md), 64px below 768px.
+    section: 'var(--tempo-section-space)',
   },
   fontWeight: {
     light: 300,
@@ -41,6 +43,9 @@ export const design = extendVars(palette, {
     medium: 500,
     semibold: 600,
   },
+  // Steps from 4px up follow TDS Platform radius (tempoxyz/ds@3fd4cf7):
+  // sm = 3xs, md = 2xs, lg = xs, xl = sm, panel = md. Rounded elements also
+  // set --corner-radius so SmoothCorners can smooth them (see smoothCorners.ts).
   radius: {
     none: '0px',
     hairline: '1px',
@@ -50,9 +55,10 @@ export const design = extendVars(palette, {
     full: 'calc(infinity * 1px)',
     pill: '50px',
     round: '50%',
-    md: '6px',
-    lg: '8px',
-    xl: '12px',
+    md: '8px',
+    lg: '12px',
+    xl: '16px',
+    panel: '24px',
   },
   fontSize: {
     micro: '9px',

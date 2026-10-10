@@ -104,7 +104,7 @@ test('component recipes preserve badges and keyboard-accessible docs buttons', a
   const badge = page.locator('.docs-specification-meta span').first()
   // Inline flex is blockified inside the specification's flex link.
   await expect(badge).toHaveCSS('display', 'flex')
-  await expect(badge).toHaveCSS('border-radius', '6px')
+  await expect(badge).toHaveCSS('border-radius', '8px')
 
   await page.goto('/docs/guide/using-tempo-with-ai')
   await page.getByRole('tab', { name: 'Cursor', exact: true }).click()

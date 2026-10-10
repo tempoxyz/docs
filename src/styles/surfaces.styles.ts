@@ -99,19 +99,19 @@ export const showcaseVisualPanel = style({
 
 export const themePreserveDark = style({
   colorScheme: 'dark',
-  '--color-background': '#111111',
-  '--color-foreground': 'oklch(94.66% 0 0)',
-  '--color-foreground-secondary': 'oklch(70.8% 0 0)',
-  '--color-foreground-secondary-hover': 'oklch(94.66% 0 0)',
+  '--color-background': '#000000', // neutral 100
+  '--color-foreground': '#ffffff', // neutral 000
+  '--color-foreground-secondary': 'rgb(255 255 255 / 0.56)', // tint 056
+  '--color-foreground-secondary-hover': '#ffffff', // neutral 000
   '--color-on-accent': '#ffffff',
-  '--color-surface-block': '#0e0e0e',
-  '--color-surface-card': '#131313',
-  '--color-surface-card-elev': '#141414',
-  '--color-surface-input': '#222222',
-  '--color-surface-onyx': '#000000',
-  '--color-surface-panel': '#181818',
-  '--color-line': '#181818',
-  '--color-line-strong': '#2e2e2e',
+  '--color-surface-block': '#141414', // neutral 092
+  '--color-surface-card': '#141414', // neutral 092
+  '--color-surface-card-elev': '#141414', // neutral 092
+  '--color-surface-input': '#1f1f1f', // neutral 088
+  '--color-surface-onyx': '#000000', // neutral 100
+  '--color-surface-panel': '#141414', // neutral 092
+  '--color-line': 'rgb(255 255 255 / 0.16)', // tint 016
+  '--color-line-strong': 'rgb(255 255 255 / 0.24)', // tint 024
   '--background': 'var(--color-background)',
   '--foreground': 'var(--color-foreground)',
   '--foreground-secondary': 'var(--color-foreground-secondary)',

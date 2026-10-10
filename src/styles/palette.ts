@@ -519,14 +519,91 @@ export const palette = defineVars({
     // Docs panels and cards: the light surface-block fill, lifted to surface-panel in dark so
     // borderless panels separate from the page.
     panel: {
-      light: '#f5f5f5',
-      dark: '#181818',
+      light: '#f5f5f5', // TDS neutral 004
+      dark: '#141414', // TDS neutral 092
     },
     line: 'var(--line)',
     lineStrong: 'var(--line-strong)',
     accent: 'var(--accent-blue)',
     onyx: 'var(--surface-onyx)',
     onOnyx: 'var(--on-surface-onyx)',
+    // TDS Platform semantics, ported from tempoxyz/ds@3fd4cf7 (src/platform/vars.ts).
+    // Feedback tones use the Core accents; values are literal for the compiler.
+    // content.tertiary
+    tertiary: {
+      light: 'rgb(0 0 0 / 0.4)',
+      dark: 'rgb(255 255 255 / 0.4)',
+    },
+    // content.subtle
+    subtle: {
+      light: 'rgb(0 0 0 / 0.2)',
+      dark: 'rgb(255 255 255 / 0.2)',
+    },
+    // container.regular
+    container: {
+      light: 'rgb(0 0 0 / 0.04)',
+      dark: 'rgb(255 255 255 / 0.12)',
+    },
+    // container.subtle
+    containerSubtle: {
+      light: 'rgb(0 0 0 / 0.03)',
+      dark: 'rgb(255 255 255 / 0.08)',
+    },
+    // container.strong
+    containerStrong: {
+      light: 'rgb(0 0 0 / 0.08)',
+      dark: 'rgb(255 255 255 / 0.16)',
+    },
+    // line.secondary
+    hairline: {
+      light: 'rgb(0 0 0 / 0.08)',
+      dark: 'rgb(255 255 255 / 0.16)',
+    },
+    // content.positive
+    positive: {
+      light: '#13a963',
+      dark: '#59e5a4',
+    },
+    // content.warning
+    warning: {
+      light: '#e06f12',
+      dark: '#fa8e36',
+    },
+    // content.negative
+    negative: {
+      light: '#eb3417',
+      dark: '#f55c45',
+    },
+    // Core accent.blueLight / blueDark
+    info: {
+      light: '#4471ed',
+      dark: '#7498fb',
+    },
+    // container.positive
+    positiveContainer: {
+      light: 'rgb(19 169 99 / 0.08)',
+      dark: 'rgb(89 229 164 / 0.16)',
+    },
+    // container.warning
+    warningContainer: {
+      light: 'rgb(224 111 18 / 0.08)',
+      dark: 'rgb(250 142 54 / 0.16)',
+    },
+    // container.negative
+    negativeContainer: {
+      light: 'rgb(235 52 23 / 0.08)',
+      dark: 'rgb(245 92 69 / 0.16)',
+    },
+    // Alert tip tone
+    infoContainer: {
+      light: 'rgb(68 113 237 / 0.08)',
+      dark: 'rgb(68 113 237 / 0.08)',
+    },
+    // scrim.regular
+    scrim: {
+      light: 'rgb(0 0 0 / 0.16)',
+      dark: 'rgb(0 0 0 / 0.16)',
+    },
   },
   fontFamily: {
     sans: 'var(--font-pilat-book)',

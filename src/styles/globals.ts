@@ -767,6 +767,8 @@ global({
  * Tailwind theme variables at runtime so the root marketing pages can switch
  * between the same dark and light palettes while the docs remain Vocs pages. */
 
+// Neutral, shade, tint and accent values come from TDS Core via the TDS Platform
+// semantics (tempoxyz/ds@3fd4cf7af1990a86194a5d8955ec76b7f08f3810).
 global({
   ':root': {
     colorScheme: 'dark',
@@ -776,33 +778,33 @@ global({
     '--vocs-font-family': 'var(--font-pilat-book)',
     '--vocs-font-family-mono': 'var(--font-jetbrains-mono), ui-monospace, monospace',
     '--scalar-font-code': 'var(--vocs-font-family-mono)',
-    '--color-background': '#111111',
-    '--color-foreground': 'oklch(94.66% 0 0)',
-    '--color-foreground-secondary': 'oklch(70.8% 0 0)',
-    '--color-foreground-secondary-hover': 'oklch(94.66% 0 0)',
-    '--color-negative': 'oklch(71.38% 0.2147 23.49)',
-    '--color-info': 'oklch(71.7% 0.1648 250.79)',
-    '--color-positive': 'oklch(81.51% 0.2258 148.1)',
-    '--color-warning': 'oklch(77.21% 0.1991 64.28)',
+    '--color-background': '#000000', // neutral 100
+    '--color-foreground': '#ffffff', // neutral 000
+    '--color-foreground-secondary': 'rgb(255 255 255 / 0.56)', // tint 056
+    '--color-foreground-secondary-hover': '#ffffff', // neutral 000
+    '--color-negative': '#f55c45', // redDark
+    '--color-info': '#7498fb', // blueDark
+    '--color-positive': '#59e5a4', // greenDark
+    '--color-warning': '#fa8e36', // orangeDark
     '--color-on-accent': '#ffffff',
     '--color-on-negative': '#ffffff',
-    '--color-on-surface-onyx': 'oklch(94.66% 0 0)',
-    '--color-surface-block': '#0e0e0e',
-    '--color-surface-block-muted': '#121212',
-    '--color-surface-card': '#131313',
-    '--color-surface-card-elev': '#141414',
-    '--color-surface-input': '#222222',
-    '--color-surface-onyx': '#000000',
-    '--color-surface-deep': '#050505',
-    '--color-surface-skeleton': '#292929',
-    '--color-surface-panel': '#181818',
-    '--color-surface-page': '#0a0a0a',
-    '--color-surface-shell': '#0c0c0c',
-    '--color-line': '#181818',
-    '--color-line-strong': '#2e2e2e',
-    '--color-line-dashed': '#888888',
-    '--color-accent-blue': '#5d88ff',
-    '--color-indicator-green': '#57b88a',
+    '--color-on-surface-onyx': '#ffffff', // neutral 000
+    '--color-surface-block': '#141414', // neutral 092
+    '--color-surface-block-muted': '#141414', // neutral 092
+    '--color-surface-card': '#141414', // neutral 092
+    '--color-surface-card-elev': '#141414', // neutral 092
+    '--color-surface-input': '#1f1f1f', // neutral 088
+    '--color-surface-onyx': '#000000', // neutral 100
+    '--color-surface-deep': '#0a0a0a', // neutral 096
+    '--color-surface-skeleton': '#292929', // neutral 084
+    '--color-surface-panel': '#141414', // neutral 092
+    '--color-surface-page': '#000000', // neutral 100
+    '--color-surface-shell': '#000000', // neutral 100
+    '--color-line': 'rgb(255 255 255 / 0.16)', // tint 016
+    '--color-line-strong': 'rgb(255 255 255 / 0.24)', // tint 024
+    '--color-line-dashed': '#858585', // neutral 048
+    '--color-accent-blue': '#7498fb', // blueDark
+    '--color-indicator-green': '#59e5a4', // greenDark
     '--color-indicator-green-dark': '#1d6418',
     '--color-performance-tps-start': 'var(--color-accent-blue)',
     '--color-performance-tps-mid': 'var(--color-indicator-green)',
@@ -936,29 +938,33 @@ global({
 global({
   ':root:where([data-theme="light"], [data-vocs-theme="light"])': {
     colorScheme: 'light',
-    '--color-background': '#ffffff',
-    '--color-foreground': '#000000',
-    '--color-foreground-secondary': '#737373',
-    '--color-foreground-secondary-hover': '#111111',
+    '--color-background': '#ffffff', // neutral 000
+    '--color-foreground': '#000000', // neutral 100
+    '--color-foreground-secondary': 'rgb(0 0 0 / 0.56)', // shade 056
+    '--color-foreground-secondary-hover': '#000000', // neutral 100
+    '--color-negative': '#eb3417', // redLight
+    '--color-info': '#4471ed', // blueLight
+    '--color-positive': '#13a963', // greenLight
+    '--color-warning': '#e06f12', // orangeLight
     '--color-on-accent': '#ffffff',
     '--color-on-negative': '#ffffff',
-    '--color-on-surface-onyx': '#ffffff',
-    '--color-surface-block': '#f5f5f5',
-    '--color-surface-block-muted': '#f7f7f7',
-    '--color-surface-card': '#ffffff',
-    '--color-surface-card-elev': '#ffffff',
-    '--color-surface-input': '#f5f5f5',
-    '--color-surface-onyx': '#111111',
-    '--color-surface-deep': '#f4f4f5',
-    '--color-surface-skeleton': '#e5e5e5',
-    '--color-surface-panel': '#f7f7f7',
-    '--color-surface-page': '#ffffff',
-    '--color-surface-shell': '#ffffff',
-    '--color-line': '#e5e5e5',
-    '--color-line-strong': '#d4d4d4',
-    '--color-line-dashed': '#a3a3a3',
-    '--color-accent-blue': '#3c66d8',
-    '--color-indicator-green': '#168f24',
+    '--color-on-surface-onyx': '#ffffff', // neutral 000
+    '--color-surface-block': '#f5f5f5', // neutral 004
+    '--color-surface-block-muted': '#f7f7f7', // neutral 003
+    '--color-surface-card': '#ffffff', // neutral 000
+    '--color-surface-card-elev': '#ffffff', // neutral 000
+    '--color-surface-input': '#f5f5f5', // neutral 004
+    '--color-surface-onyx': '#141414', // neutral 092
+    '--color-surface-deep': '#f5f5f5', // neutral 004
+    '--color-surface-skeleton': '#e0e0e0', // neutral 012
+    '--color-surface-panel': '#f5f5f5', // neutral 004
+    '--color-surface-page': '#ffffff', // neutral 000
+    '--color-surface-shell': '#ffffff', // neutral 000
+    '--color-line': 'rgb(0 0 0 / 0.08)', // shade 008
+    '--color-line-strong': 'rgb(0 0 0 / 0.16)', // shade 016
+    '--color-line-dashed': '#a3a3a3', // neutral 036
+    '--color-accent-blue': '#4471ed', // blueLight
+    '--color-indicator-green': '#13a963', // greenLight
     '--color-indicator-green-dark': '#0f5f18',
     '--color-performance-tps-start': 'var(--color-indicator-green)',
     '--color-performance-tps-mid':
