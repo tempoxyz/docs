@@ -6,7 +6,6 @@ export const tempoDocsHome = style({
   '--home-muted': 'var(--vocs-text-color-secondary)',
   '--home-ink': 'var(--vocs-text-color-primary)',
   '--home-panel': tokens.color.panel,
-  '--home-line': 'var(--vocs-border-color-primary)',
 
   color: inherited.color.homeInk,
 
@@ -16,8 +15,9 @@ export const tempoDocsHome = style({
       display: 'block',
       scrollMarginTop: 'calc(var(--vocs-spacing-topNav) + 32px)',
     },
+    // Every Home section sits one section token (80px, 64px under 768px) below the last.
     '& .tempo-docs-home-heading': {
-      paddingBottom: tokens.spacing['10'],
+      paddingBottom: tokens.spacing.section,
     },
     '& h1[data-v]': {
       // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
@@ -98,7 +98,7 @@ export const tempoDocsHome = style({
       textDecoration: 'none',
     },
     '& .tempo-docs-home-products': {
-      marginTop: tokens.spacing['12'],
+      marginTop: tokens.spacing.section,
     },
     '& .tempo-docs-home-product-grid': {
       display: 'grid',
@@ -185,17 +185,13 @@ export const tempoDocsHome = style({
       textUnderlineOffset: '3px',
     },
     '& .tempo-docs-home-reference': {
-      marginTop: tokens.spacing['12'],
-      paddingTop: tokens.spacing['9'],
-      borderTopWidth: tokens.borderWidth.hairline,
-      borderTopStyle: 'solid',
-      borderTopColor: inherited.color.homeLine,
+      marginTop: tokens.spacing.section,
     },
     '& .tempo-docs-home-reference-grid': {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
       gap: tokens.spacing['12'],
-      marginTop: tokens.spacing['8'],
+      marginTop: tokens.spacing['7'],
     },
     '& .tempo-docs-home-reference-grid h3[data-v]': {
       marginTop: tokens.spacing['0'],
@@ -265,7 +261,6 @@ export const tempoDocsHome = style({
       '& .tempo-docs-home-product-grid': {
         gridTemplateColumns: 'minmax(0, 1fr)',
         gap: tokens.spacing['4'],
-        marginTop: tokens.spacing['6'],
       },
       '& .tempo-docs-home-product-group p[data-v]': {
         minHeight: 0,
@@ -277,22 +272,12 @@ export const tempoDocsHome = style({
       '& h1[data-v]': {
         fontSize: tokens.fontSize.display,
       },
-      '& .tempo-docs-home-heading': {
-        paddingBottom: tokens.spacing['8'],
-      },
       '& .tempo-docs-home-heading p[data-v]': {
         fontSize: tokens.fontSize.bodySmall,
       },
       '& .tempo-docs-home-reference-grid': {
         gridTemplateColumns: 'minmax(0, 1fr)',
         gap: tokens.spacing['8'],
-      },
-      '& .tempo-docs-home-products': {
-        marginTop: tokens.spacing['9'],
-      },
-      '& .tempo-docs-home-reference': {
-        marginTop: tokens.spacing['9'],
-        paddingTop: tokens.spacing['7'],
       },
     },
   },
@@ -338,7 +323,7 @@ export const tempoAgentStart = style({
     // The setup chooser spans the full width; on narrow screens it scrolls sideways
     // (SegmentedControl sets overflow-x: auto) and never wraps.
     '& .tempo-agent-start-agents': {
-      marginTop: tokens.spacing['0'],
+      marginTop: tokens.spacing['7'],
       marginInlineEnd: tokens.spacing['0'],
       marginBottom: tokens.spacing['5'],
       marginInlineStart: tokens.spacing['0'],
