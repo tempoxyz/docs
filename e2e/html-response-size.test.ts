@@ -4,7 +4,8 @@ import { expect, test } from '@playwright/test'
 test.skip(!process.env.CI, 'requires the production build output')
 
 const pages = [
-  { path: '/docs/protocol/transactions', maxBytes: 225_000, shiki: false },
+  // main crossed 225 kB once #965 added routes to the shared route manifest (225,076 bytes in CI).
+  { path: '/docs/protocol/transactions', maxBytes: 230_000, shiki: false },
   // The expanded guide includes CLI, Viem, and Wagmi variants.
   { path: '/docs/guide/tempo-transaction', maxBytes: 2_100_000, shiki: true },
   { path: '/docs/changelog', maxBytes: 1_000_000, shiki: false },
