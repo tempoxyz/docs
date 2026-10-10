@@ -4,6 +4,7 @@ excerpt: "How Tempo enables AI-accelerated development securely"
 authors: "Shane da Silva"
 date: 2026-08-17
 category: [technical, case-studies]
+shareImage: /og/2026-q4/og_2026-q4_devblog_human-authorization-in-agentic-workflows_linework-000_v02.png
 ---
 
 At Tempo, we are building more workflows where software can move quickly on a person's behalf. That is useful, but it can also be risky.

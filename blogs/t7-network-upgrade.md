@@ -4,6 +4,7 @@ excerpt: "The T7 network upgrade lowers fees on Tempo with capped dynamic fees a
 date: 2026-07-09
 category: network-upgrades
 authors: "Jen Parak, Maxime Di Giacinto"
+shareImage: /og/2026-q4/og_2026-q4_devblog_t7-network-upgrade_linework-000_v02.png
 ---
 
 **The T7 network upgrade lowers fees on Tempo. T7 introduces capped dynamic fees: the base fee cap is 40% below today's fixed fee and can fall a further 20x during off-peak periods. New storage credits make repeated onchain workflows cheaper, from user contracts to StablecoinDEX orders and MPP payment channels.** [Read the T7 docs to start integrating →](/docs/protocol/upgrades/t7)

@@ -33,5 +33,6 @@ export const routeMetadata: Record<string, RouteMetadata> = {
     title: 'Blog',
     description:
       'Product announcements, engineering deep dives, network upgrades, events, and case studies from the Tempo team.',
+    ogImage: '/og/2026-q4/og_2026-q4_hub_developers-blog_title-f5_v02.png',
   },
 }

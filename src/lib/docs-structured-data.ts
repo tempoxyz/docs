@@ -41,21 +41,66 @@ export function docsStructuredDataHead(
       },
     }
   }
+
+  const developersUrl = 'https://tempo.xyz/developers'
+  // Pages set a root-relative share image in frontmatter `ogImage`. Generated
+  // API reference pages have no source file, so their images are listed here.
+  const apiReferenceImages = [
+    'activities',
+    'api-keys',
+    'balances',
+    'billing',
+    'blocks',
+    'coingecko',
+    'console/authentication',
+    'earn',
+    'exchange',
+    'faucet',
+    'fee-amm',
+    'indexer',
+    'invitations',
+    'invite-links',
+    'mcp',
+    'members',
+    'mpp',
+    'organizations',
+    'projects',
+    'routes/deposit-addresses',
+    'routes/routes',
+    'routes/transfers',
+    'rpc',
+    'tokens',
+    'usage',
+    'users',
+    'verified-token-requests',
+    'verified-tokens',
+    'webhooks',
+  ]
+  const apiReference = pagePath.replace(/^\/docs\/api\//, '')
+  const image =
+    frontmatter?.ogImage ??
+    (apiReferenceImages.includes(apiReference)
+      ? `/og/2026-q4/og_2026-q4_docs_api-${apiReference.replace('/', '-')}_title-f5_v02.png`
+      : undefined)
+  const ogImage = image
+    ? { ogImage: image.startsWith('/') ? `${developersUrl}${image}` : image }
+    : {}
+
   if (
     pagePath !== '/' &&
     pagePath !== '/get-started' &&
     !pagePath.startsWith('/get-started/') &&
     !pagePath.startsWith('/docs/')
   ) {
-    return { base: false, meta: {} }
+    return { base: false, meta: ogImage }
   }
 
-  const developersUrl = 'https://tempo.xyz/developers'
   // The public mount has no trailing slash. Match its redirect policy and the
   // URLs used by the docs graph instead of Vocs' default baseUrl + "/".
   const canonical = pagePath === '/' ? { canonical: developersUrl } : {}
   const title = frontmatter?.title?.trim()
-  if (!title) return { base: false, ...canonical, meta: { articleModifiedTime: false as const } }
+  if (!title)
+    return { base: false, ...canonical, meta: { articleModifiedTime: false as const, ...ogImage } }
 
   const docsUrl = developersUrl
   const organizationId = 'https://tempo.xyz/#organization'
@@ -153,7 +198,7 @@ export function docsStructuredDataHead(
   return {
     base: false,
     ...canonical,
-    meta: { articleModifiedTime: false as const },
+    meta: { articleModifiedTime: false as const, ...ogImage },
     script: [{ type: 'application/ld+json', innerHTML }],
   }
 }

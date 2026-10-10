@@ -18,6 +18,7 @@ category: technical # product-announcements | network-upgrades | events | techni
 # category: [technical, case-studies]
 featured: true # optional — pins the post to the hero card on /blog
 ogImage: /blog/my-post-og.png # optional — overrides the generated social card
+shareImage: /og/2026-q4/my-post.png # optional — social card only; the blog cards keep ogImage
 ---
 ```
 

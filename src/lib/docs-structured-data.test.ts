@@ -143,7 +143,11 @@ describe('docs structured data', () => {
   test('does not emit JSON-LD outside the page frontmatter context', () => {
     expect(docsStructuredDataHead('/docs/api/activities', {})).toEqual({
       base: false,
-      meta: { articleModifiedTime: false },
+      meta: {
+        articleModifiedTime: false,
+        ogImage:
+          'https://tempo.xyz/developers/og/2026-q4/og_2026-q4_docs_api-activities_title-f5_v02.png',
+      },
     })
   })
 })
