@@ -258,7 +258,7 @@ export function EarnVaultDemo() {
                             setError('Could not copy the vault address.')
                         }}
                       >
-                        {copied ? 'Copied address' : 'Copy vault address'}
+                        {copied ? 'Copied' : 'Copy vault address'}
                       </Button>
                     </div>
                   </div>
