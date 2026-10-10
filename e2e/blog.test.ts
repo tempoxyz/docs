@@ -64,10 +64,13 @@ for (const width of [320, 390, 768, 1024, 1280, 1440]) {
       .toBeGreaterThan(0)
     await page.evaluate(() => document.fonts.ready)
 
-    const thumbnail = page.locator('.tempo-blog-post-list img').first()
-    if (width < 600) await expect(thumbnail).toBeHidden()
-    else await expect(thumbnail).toBeVisible()
+    // Cards keep their image at every width: 1, 2, then 3 columns.
+    await expect(page.locator('.tempo-blog-post-list img').first()).toBeVisible()
     await expect(page.locator('.tempo-blog-post-list h3').first()).toBeVisible()
+    const columns = await page
+      .locator('.tempo-blog-post-list')
+      .evaluate((list) => getComputedStyle(list).gridTemplateColumns.split(' ').length)
+    expect(columns).toBe(width >= 1024 ? 3 : width >= 640 ? 2 : 1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     )

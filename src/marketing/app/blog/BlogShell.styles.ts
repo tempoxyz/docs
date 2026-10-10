@@ -310,51 +310,33 @@ export const tempoBlogFilters = style({
   },
 })
 
+// BL3: the tempo.xyz Home Use cases grid. Up to three columns; cards have no
+// fill, so no border (G4); the image carries the card.
 export const tempoBlogPostList = style({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  rowGap: tokens.spacing['12'],
+  columnGap: tokens.spacing['6'],
   margin: 0,
   padding: 0,
-  borderTopWidth: tokens.borderWidth.hairline,
-  borderTopStyle: 'solid',
-  borderTopColor: inherited.color.blogRule,
   listStyle: 'none',
+  '@media (width >= 640px)': {
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  },
+  '@media (width >= 1024px)': {
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  },
 })
 
-export const tempoBlogPostRow = style({
-  display: 'grid',
-  gridTemplateColumns: 'minmax(0, 1fr) 220px 20px',
-  alignItems: 'center',
-  gap: tokens.spacing['8'],
-
-  paddingBlock: tokens.spacing['8'],
-  paddingInline: tokens.spacing['0'],
-  borderBottomWidth: tokens.borderWidth.hairline,
-  borderBottomStyle: 'solid',
-  borderBottomColor: inherited.color.blogRule,
+export const tempoBlogPostCard = style({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column',
+  gap: tokens.spacing['5'],
+  // The focus ring follows the image's corners; the card itself paints nothing.
+  borderRadius: tokens.radius.xl,
   color: 'inherit !custom',
   textDecoration: 'none',
-  selectors: {
-    '&:hover .tempo-blog-post-arrow': {
-      transform: 'translate(2px, -2px)',
-
-      color: inherited.color.blogInk,
-    },
-    '&:hover h3': {
-      textDecoration: 'underline',
-      textDecorationThickness: '1px',
-      textUnderlineOffset: '5px',
-    },
-  },
-  '@media (width < 800px)': {
-    gridTemplateColumns: 'minmax(0, 1fr) 170px 16px',
-    gap: tokens.spacing['5'],
-  },
-  '@media (width < 600px)': {
-    gridTemplateColumns: 'minmax(0, 1fr) 16px',
-
-    gap: tokens.spacing['4'],
-
-    paddingBlock: tokens.spacing['6'],
-  },
 })
 
 export const tempoBlogPostCopy = style({
@@ -366,20 +348,20 @@ export const tempoBlogPostCopy = style({
       margin: 0,
 
       fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
-      fontSize: tokens.fontSize.title,
+      fontSize: tokens.fontSize.lead,
       fontWeight: tokens.fontWeight.medium,
-      lineHeight: tokens.lineHeight.compact,
-      // design-exception: Preserve the optical typography of this specific surface.
-      letterSpacing: '-0.4px !custom',
+      lineHeight: tokens.lineHeight.heading,
+      letterSpacing: tokens.letterSpacing.tight,
+      textWrap: 'balance',
     },
     '& .tempo-blog-excerpt': {
       display: 'var(--tempo-clamped-display, -webkit-box)',
       overflow: 'hidden',
-      WebkitLineClamp: 2,
+      WebkitLineClamp: 3,
       WebkitBoxOrient: 'vertical',
     },
   },
-  '@media (width < 800px)': {
+  '@media (width >= 1024px)': {
     selectors: {
       '& h3': {
         fontSize: tokens.fontSize.subheading,
@@ -389,21 +371,17 @@ export const tempoBlogPostCopy = style({
 })
 
 export const tempoBlogPostThumbnail = style({
+  display: 'block',
   overflow: 'hidden',
-  backgroundColor: inherited.color.colorSurfaceShell,
-  '@media (width < 600px)': {
-    display: 'none',
-  },
-})
-
-export const tempoBlogPostArrow = style({
-  alignSelf: 'start',
-  marginTop: tokens.spacing['1'],
-
-  color: inherited.color.blogMuted,
-  transition: 'transform 150ms',
-  '@media (prefers-reduced-motion: reduce)': {
-    transition: 'none',
+  // G3: a radius sized to the card image, smoothed.
+  borderRadius: tokens.radius.xl,
+  '--corner-radius': tokens.radius.xl,
+  backgroundColor: inherited.color.colorSurfaceBlock,
+  selectors: {
+    '& img': {
+      display: 'block',
+      objectFit: 'cover',
+    },
   },
 })
 

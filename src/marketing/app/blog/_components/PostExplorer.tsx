@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Link } from 'waku'
+import { ChevronText } from '../../../../components/ChevronLink'
 import { categories, type PostMeta } from '../_lib/categories'
 import {
   tempoBlogEmpty,
@@ -9,10 +10,9 @@ import {
   tempoBlogExplorer,
   tempoBlogExplorerHeading,
   tempoBlogFilters,
-  tempoBlogPostArrow,
+  tempoBlogPostCard,
   tempoBlogPostCopy,
   tempoBlogPostList,
-  tempoBlogPostRow,
   tempoBlogPostThumbnail,
 } from '../BlogShell.styles'
 import PostByline from './PostByline'
@@ -62,25 +62,21 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
           <li key={post.slug}>
             <Link
               to={`/blog/${post.slug}`}
-              className={`tempo-blog-post-row ${tempoBlogPostRow().className}`}
+              className={`tempo-blog-post-card ${tempoBlogPostCard().className}`}
             >
+              <span className={`tempo-blog-post-thumbnail ${tempoBlogPostThumbnail().className}`}>
+                <PostImage post={post} />
+              </span>
               <div className={`tempo-blog-post-copy ${tempoBlogPostCopy().className}`}>
                 <PostLabels post={post} />
-                <h3>{post.title}</h3>
+                <h3>
+                  <ChevronText>{post.title}</ChevronText>
+                </h3>
                 <p className={`tempo-blog-excerpt ${tempoBlogExcerpt().className}`}>
                   {post.excerpt}
                 </p>
                 <PostByline post={post} />
               </div>
-              <span className={`tempo-blog-post-thumbnail ${tempoBlogPostThumbnail().className}`}>
-                <PostImage post={post} />
-              </span>
-              <span
-                className={`tempo-blog-post-arrow ${tempoBlogPostArrow().className}`}
-                aria-hidden="true"
-              >
-                ↗
-              </span>
             </Link>
           </li>
         ))}
