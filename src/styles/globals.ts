@@ -587,10 +587,11 @@ global({
   },
 })
 
+// SB1: the current page has no hover state; hovering it keeps its fill.
 global({
   '@layer utilities': {
     '[data-v-sidebar] a[data-v-sidebar-item][data-active]:hover': {
-      backgroundColor: inherited.color.colorMixInSrgbForeground10Transparent,
+      backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
     },
   },
 })
