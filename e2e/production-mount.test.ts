@@ -8,6 +8,48 @@ import { productionDocsUrl, proxyProductionMount } from './production-mount'
 const upstream = process.env.TEMPO_E2E_PRODUCTION_ORIGIN ?? ''
 test.skip(!upstream, 'Requires a production build and server mounted behind /developers.')
 
+for (const javaScriptEnabled of [false, true]) {
+  test(`homepage links preserve the production mount with JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled })
+    const audit = await proxyProductionMount(context, upstream)
+    const page = await context.newPage()
+    for (const [name, path, title] of [
+      ['Find your starting point', '/get-started', 'Build on Tempo'],
+      ['Send your first payment', '/get-started/quickstart', 'Quickstart'],
+      ['Stablecoins on Tempo', '/get-started/stablecoins', 'Stablecoins on Tempo'],
+    ]) {
+      await page.goto(`${productionDocsUrl}/`)
+      const escapedLinks = await page.locator('.tempo-docs-home a[href]').evaluateAll((links) =>
+        links
+          .map((link) => new URL(link.getAttribute('href') ?? '', location.href))
+          .filter(
+            (url) => url.origin === location.origin && !url.pathname.startsWith('/developers'),
+          )
+          .map((url) => url.href),
+      )
+      expect(escapedLinks).toEqual([])
+      const navigationResponse = javaScriptEnabled
+        ? undefined
+        : page.waitForResponse(
+            (response) =>
+              response.request().isNavigationRequest() &&
+              response.url() === `${productionDocsUrl}${path}`,
+          )
+      await page.getByRole('link', { name, exact: false }).click()
+      await expect(page).toHaveURL(`${productionDocsUrl}${path}`)
+      if (navigationResponse) expect((await navigationResponse).status()).toBe(200)
+      // The interactive quickstart renders its provider content after hydration.
+      if (javaScriptEnabled || path !== '/get-started/quickstart')
+        await expect(page.getByRole('heading', { level: 1 })).toHaveText(title)
+    }
+    expect(audit.errors).toEqual([])
+    expect(audit.failedRequests).toEqual([])
+    await context.close()
+  })
+}
+
 test('production navigation preserves the mount through history and page tools', async ({
   context,
 }) => {
@@ -20,6 +62,7 @@ test('production navigation preserves the mount through history and page tools',
   await expect(sections.locator('[aria-current]')).toHaveText('Get Started')
   await sections.getByRole('link', { name: 'Accounts', exact: true }).click()
   await expect(page).toHaveURL(`${productionDocsUrl}/docs/accounts`)
+  await sidebar.getByRole('button', { name: 'Account setup', exact: true }).click()
   await sidebar.locator('a[href$="/docs/accounts/create"]').click()
   await expect(page).toHaveURL(`${productionDocsUrl}/docs/accounts/create`)
   await expect(sidebar.locator('a[data-active]')).toHaveAttribute(
@@ -67,7 +110,7 @@ test('production blog search opens a new account guide with its interactive demo
     `${productionDocsUrl}/docs/accounts/admin-keys#authorize-an-admin-key`,
   )
   await expect(dialog).toBeHidden()
-  await expect(page.locator('.docs-section-nav a[aria-current]')).toHaveText('Accounts')
+  await expect(page.locator('.docs-section-nav a[aria-current]')).toHaveText('Tempo EVM')
   await expect(page.getByTestId('admin-key-demo')).toBeVisible()
   await expect(
     page.getByTestId('admin-key-demo').getByRole('button', { name: 'Create test account' }),

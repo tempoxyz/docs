@@ -102,4 +102,15 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
       '<a href="https://tempo.xyz/developers/get-started/stablecoins?ref=nav#token-amounts">Tokens</a> [Tokens](https://tempo.xyz/developers/get-started/stablecoins#token-amounts)',
     )
   })
+
+  test('keeps blog links and homepage section anchors inside the developers mount', () => {
+    expect(
+      canonicalizeGeneratedDeveloperLinks(
+        '<a href="/#products">Products</a> <a href="/blog">Blog</a> {"href":"/blog/privacy-with-tempo-zones#privacy","to":"/blog/privacy-with-tempo-zones#privacy"}',
+        publicDevelopersUrl,
+      ),
+    ).toBe(
+      '<a href="https://tempo.xyz/developers#products">Products</a> <a href="https://tempo.xyz/developers/blog">Blog</a> {"href":"https://tempo.xyz/developers/blog/privacy-with-tempo-zones#privacy","to":"/blog/privacy-with-tempo-zones#privacy"}',
+    )
+  })
 })
