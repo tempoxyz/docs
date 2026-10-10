@@ -48,6 +48,7 @@ import {
   docsUtilitySections,
   getActiveDocsSection,
 } from './DocsSectionNav'
+import { SmoothCorners } from './SmoothCorners'
 
 const DOCS_BASE_PATH = '/docs'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
@@ -834,6 +835,8 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
 
   return (
     <header className={`docs-site-header ${docsSiteHeader().className}`}>
+      {/* The header is the one chrome shared by docs and blog pages. */}
+      <SmoothCorners />
       <nav
         className={`docs-header-nav ${docsHeaderNav().className}`}
         aria-label="Developer navigation"

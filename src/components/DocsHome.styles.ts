@@ -128,6 +128,7 @@ export const tempoDocsHome = style({
       padding: 'var(--tempo-card-padding) !custom',
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
+      '--corner-radius': 'var(--tempo-card-radius)',
       backgroundColor: inherited.color.homePanel,
     },
     '& .tempo-docs-home-product-group h3[data-v]': {

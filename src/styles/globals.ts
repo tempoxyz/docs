@@ -1,6 +1,7 @@
 import { inherited } from './inherited'
 import { vars as tokens } from './theme'
 import './tokens'
+import './smoothCorners'
 import '../components/DocsCards.styles'
 import { fontFace, global, layers } from 'zyzz/web'
 
@@ -1390,3 +1391,20 @@ global({
 
 // Vocs owns the Mermaid wrapper markup.
 global({ '.data-v-mermaid-container': { minHeight: '200px' } })
+
+// G2: code blocks round once, at the container, with smooth corners. Below
+// 768px Vocs bleeds code to the viewport edge, so the container stays square.
+global({
+  '@layer vocs_utilities': {
+    '@media (width >= 768px)': {
+      '[data-v-code-container]': {
+        '--corner-radius': tokens.radius.lg,
+        borderRadius: tokens.radius.lg,
+        overflow: 'clip',
+      },
+      '[data-v-code-container] :is([data-v-code-header], pre[data-v])': {
+        borderRadius: tokens.radius.none,
+      },
+    },
+  },
+})

@@ -20,7 +20,7 @@ global({
 // Vocs pagination links share the card markup, so they are excluded explicitly.
 global({
   ':root': {
-    '--tempo-card-radius': '24px',
+    '--tempo-card-radius': tokens.radius.panel,
     '--tempo-card-padding': '28px',
   },
   '@media (width < 700px)': {
@@ -42,6 +42,7 @@ global({
       border: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
+      '--corner-radius': 'var(--tempo-card-radius)',
       backgroundColor: tokens.color.panel,
 
       color: inherited.color.vocsTextColorPrimary,
