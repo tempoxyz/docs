@@ -447,9 +447,14 @@ global({
   },
 })
 
+// SB2: a single-section sidebar's header is its title, set like the right rail's
+// "On this page" label in the secondary color. In multi-section sidebars every
+// header is a group label (for example Accounts, Payments, Fees): entry type and
+// spacing in the tertiary color. Collapsible headers are interactive, so they
+// keep the entry (primary) color. Entries use the primary color.
 global({
   '@layer utilities': {
-    '[data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header]': {
+    '[data-v-sidebar] > [data-v-sidebar-section]:only-child > [data-v-sidebar-section-header]': {
       height: 'auto',
       minHeight: 0,
       // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
@@ -459,14 +464,37 @@ global({
       paddingInline: tokens.spacing['2'],
       backgroundColor: 'transparent !custom',
 
-      color: inherited.color.colorMixInSrgbForeground78Transparent,
-      fontSize: tokens.fontSize.xs,
-      fontWeight: tokens.fontWeight.semibold,
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.compact,
+      fontWeight: tokens.fontWeight.medium,
 
-      letterSpacing: tokens.letterSpacing.wider,
+      letterSpacing: tokens.letterSpacing.normal,
       lineHeight: tokens.lineHeight.normal,
-      textTransform: 'uppercase',
+      textTransform: 'none',
     },
+    '[data-v-sidebar] > [data-v-sidebar-section]:not(:only-child) > [data-v-sidebar-section-header], [data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]:not([data-collapsable="true"])':
+      {
+        height: 'auto',
+        minHeight: '34px',
+        // design-exception: Matches the sidebar entries' geometry below.
+        margin: '0 -8px !custom',
+
+        paddingBlock: tokens.spacing['1_5'],
+        paddingInline: tokens.spacing['2'],
+        backgroundColor: 'transparent !custom',
+
+        color: tokens.color.tertiary,
+        fontSize: tokens.fontSize.sm,
+        fontWeight: tokens.fontWeight.normal,
+
+        letterSpacing: tokens.letterSpacing.normal,
+        lineHeight: tokens.lineHeight.normal,
+        textTransform: 'none',
+      },
+    '[data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]':
+      {
+        color: tokens.color.foreground,
+      },
   },
 })
 
@@ -482,36 +510,12 @@ global({
       borderRadius: tokens.radius.sm,
       backgroundColor: 'transparent !custom',
 
-      color: inherited.color.colorMixInSrgbForeground72Transparent,
+      color: tokens.color.foreground,
       fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.normal,
       letterSpacing: tokens.letterSpacing.normal,
       lineHeight: tokens.lineHeight.normal,
     },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]:not([data-collapsable="true"])':
-      {
-        minHeight: '26px',
-        // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-        margin: '6px -8px 1px !custom',
-
-        color: inherited.color.colorMixInSrgbForeground65Transparent,
-        fontSize: tokens.fontSize.compact,
-        fontWeight: tokens.fontWeight.normal,
-      },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable="true"]':
-      {
-        color: inherited.color.colorMixInSrgbForeground68Transparent,
-      },
   },
 })
 
@@ -558,7 +562,7 @@ global({
       paddingInline: tokens.spacing['2'],
       borderRadius: tokens.radius.sm,
 
-      color: inherited.color.colorMixInSrgbForeground72Transparent,
+      color: tokens.color.foreground,
       fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.normal,
       letterSpacing: tokens.letterSpacing.normal,
