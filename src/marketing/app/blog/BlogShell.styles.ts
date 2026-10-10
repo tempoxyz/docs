@@ -93,41 +93,35 @@ export const tempoBlogIntro = style({
   },
 })
 
+// BL5: the featured post sits on the page under a hairline rule, no panel.
 export const tempoBlogFeatured = style({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
   alignItems: 'center',
   gap: tokens.spacing['12'],
-  // design-exception: Preserve the inherited component/framework scope at the point of use.
-  padding: 'var(--tempo-card-padding, 28px) !custom',
-  border: 0,
-  // design-exception: Preserve the inherited component/framework scope at the point of use.
-  borderRadius: 'var(--tempo-card-radius, 24px) !custom',
-  backgroundColor: inherited.color.colorSurfaceBlock,
+  paddingTop: tokens.spacing['10'],
+  borderTopWidth: tokens.borderWidth.hairline,
+  borderTopStyle: 'solid',
+  borderTopColor: tokens.color.hairline,
   color: 'inherit !custom',
   textDecoration: 'none',
   selectors: {
-    '&:where(:hover) h2': {
-      textDecoration: 'underline',
-      textDecorationThickness: '1px',
-      textUnderlineOffset: '5px',
-    },
     '& h2': {
       margin: 0,
 
       fontFamily: inherited.fontFamily.tempoFontDisplayVarFontPilatBook,
-      // design-exception: Preserve this responsive geometry across viewport sizes.
-      fontSize: 'clamp(26px, 2.5vw, 32px) !custom',
+      // design-exception: One type step above the old 26–32px clamp: 28px on phones to 40px on desktop.
+      fontSize: 'clamp(28px, 2.8vw, 40px) !custom',
       fontWeight: tokens.fontWeight.medium,
       lineHeight: tokens.lineHeight.heading,
-      // design-exception: Preserve the optical typography of this specific surface.
-      letterSpacing: '-0.8px !custom',
+      letterSpacing: tokens.letterSpacing.compact,
+      textWrap: 'balance',
     },
   },
   '@media (width < 800px)': {
     gridTemplateColumns: '1fr',
     gap: tokens.spacing['7'],
-    padding: tokens.spacing['6'],
+    paddingTop: tokens.spacing['8'],
   },
 })
 
@@ -163,8 +157,9 @@ export const tempoBlogFeaturedImage = style({
       objectFit: 'contain',
     },
   },
+  // Stacked, the image leads like the article cards and shows in full.
   '@media (width < 800px)': {
-    maxHeight: '300px',
+    order: -1,
   },
 })
 
