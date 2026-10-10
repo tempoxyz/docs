@@ -1,10 +1,11 @@
 'use client'
 
+import { TextInput } from '@tempoxyz/ds/platform/components'
+
 import * as React from 'react'
 import { isAddress, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-import { cx as composeStyles } from 'zyzz'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
 import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
@@ -107,8 +108,8 @@ export function SendPayment(props: DemoStepProps) {
                 <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   id="recipient"
                   type="text"
@@ -122,12 +123,9 @@ export function SendPayment(props: DemoStepProps) {
                 <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
-                <input
-                  {...composeStyles(
-                    form.validatedInput(),
-                    !!memoError && form.invalidBorder(),
-                    !memoError && form.defaultBorder(),
-                  )}
+                <TextInput
+                  appearance="secondary"
+                  aria-invalid={!!memoError}
                   data-1p-ignore
                   id="memo"
                   type="text"

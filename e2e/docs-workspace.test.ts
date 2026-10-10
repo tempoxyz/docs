@@ -559,7 +559,7 @@ test('agent-first entry page offers setup and payment guides', async ({
         : multipleCommands
           ? 'Commands copied. Paste them into your terminal and run both commands.'
           : 'Command copied. Paste it into your terminal and run it.'
-    await setup.getByRole('button', { name: label, exact: true }).click()
+    await setup.getByRole('tab', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
     await expect(
       setup.locator('.tempo-agent-start-install .tempo-agent-start-instruction'),
@@ -576,7 +576,7 @@ test('agent-first entry page offers setup and payment guides', async ({
     await expect(installStatus).toHaveText(commandSuccess)
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command)
   }
-  await setup.getByRole('button', { name: 'Codex', exact: true }).click()
+  await setup.getByRole('tab', { name: 'Codex', exact: true }).click()
   await expect(installStatus).toHaveText('')
   await expect(page.locator('.tempo-docs-home')).not.toContainText('Bring your existing EVM app')
   for (const anchor of [
@@ -633,7 +633,7 @@ test('agent setup offers manual copy recovery without overflowing a narrow viewp
         : multipleCommands
           ? 'Copy failed. Select and copy both commands above.'
           : 'Copy failed. Select and copy the command above.'
-    await setup.getByRole('button', { name: label, exact: true }).click()
+    await setup.getByRole('tab', { name: label, exact: true }).click()
     await expect(installStatus).toHaveText('')
     await setup
       .getByRole('button', {
@@ -1150,3 +1150,32 @@ test('the developer guide catalog opens Browser payments in its Accounts home', 
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', '/docs/guide/payments/send-a-payment/browser')
 })
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`shared DS tabs support keyboard navigation in ${theme} mode`, async ({ page }) => {
+    await page.addInitScript((value) => localStorage.setItem('vocs-theme', value), theme)
+    await page.goto('/')
+    const tabs = page.getByRole('tablist', { name: 'Choose a setup method' })
+    const codex = tabs.getByRole('tab', { name: 'Codex', exact: true })
+    await expect(codex).toBeEnabled()
+    await codex.focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(tabs.getByRole('tab', { name: 'Claude Code', exact: true })).toBeFocused()
+    await page.keyboard.press('Enter')
+    const selected = tabs.getByRole('tab', { selected: true })
+    await expect(selected).toBeFocused()
+    await expect(selected).not.toHaveText('Codex')
+    const panel = page.getByRole('tabpanel')
+    await expect(panel).toBeVisible()
+    await expect(selected).toHaveAttribute('aria-controls', (await panel.getAttribute('id')) ?? '')
+    await expect(page.locator('html')).toHaveCSS('color-scheme', theme)
+    // Resolve actual package styles and theme tokens, not only React markup.
+    await expect(selected).toHaveCSS('height', '32px')
+    const colors = await selected.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return { foreground: style.color, background: style.backgroundColor }
+    })
+    expect(colors.foreground).not.toBe(colors.background)
+    expect(colors.background).not.toBe('rgba(0, 0, 0, 0)')
+  })
+}

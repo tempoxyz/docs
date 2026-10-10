@@ -1,0 +1,77 @@
+diff --git a/dist/platform/components.d.ts b/dist/platform/components.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..a5725179fcf3f747848ca24a86a46985e9c8915c
+--- /dev/null
++++ b/dist/platform/components.d.ts
+@@ -0,0 +1,25 @@
++export { Alert } from './components/Alert.js';
++export { Avatar } from './components/Avatar.js';
++export { Badge } from './components/Badge.js';
++export { Button } from './components/Button.js';
++export { ButtonGroup } from './components/ButtonGroup.js';
++export { Callout } from './components/Callout.js';
++export { Checkbox } from './components/Checkbox.js';
++export { DenseTable } from './components/DenseTable.js';
++export { IconBadge } from './components/IconBadge.js';
++export { IconButton } from './components/IconButton.js';
++export { InlineCode } from './components/InlineCode.js';
++export { KeyboardKey } from './components/KeyboardKey.js';
++export { NativeSelect } from './components/NativeSelect.js';
++export { Progress } from './components/Progress.js';
++export { RadioGroup } from './components/RadioGroup.js';
++export { Search } from './components/Search.js';
++export { SegmentedControl } from './components/SegmentedControl.js';
++export { SimpleTable } from './components/SimpleTable.js';
++export { Spinner } from './components/Spinner.js';
++export { StatusIndicator } from './components/StatusIndicator.js';
++export { Tab } from './components/Tab.js';
++export { TextButton } from './components/TextButton.js';
++export { TextInput } from './components/TextInput.js';
++export { Toast } from './components/Toast.js';
++export { Tooltip } from './components/Tooltip.js';
+diff --git a/dist/platform/components.js b/dist/platform/components.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..a5725179fcf3f747848ca24a86a46985e9c8915c
+--- /dev/null
++++ b/dist/platform/components.js
+@@ -0,0 +1,25 @@
++export { Alert } from './components/Alert.js';
++export { Avatar } from './components/Avatar.js';
++export { Badge } from './components/Badge.js';
++export { Button } from './components/Button.js';
++export { ButtonGroup } from './components/ButtonGroup.js';
++export { Callout } from './components/Callout.js';
++export { Checkbox } from './components/Checkbox.js';
++export { DenseTable } from './components/DenseTable.js';
++export { IconBadge } from './components/IconBadge.js';
++export { IconButton } from './components/IconButton.js';
++export { InlineCode } from './components/InlineCode.js';
++export { KeyboardKey } from './components/KeyboardKey.js';
++export { NativeSelect } from './components/NativeSelect.js';
++export { Progress } from './components/Progress.js';
++export { RadioGroup } from './components/RadioGroup.js';
++export { Search } from './components/Search.js';
++export { SegmentedControl } from './components/SegmentedControl.js';
++export { SimpleTable } from './components/SimpleTable.js';
++export { Spinner } from './components/Spinner.js';
++export { StatusIndicator } from './components/StatusIndicator.js';
++export { Tab } from './components/Tab.js';
++export { TextButton } from './components/TextButton.js';
++export { TextInput } from './components/TextInput.js';
++export { Toast } from './components/Toast.js';
++export { Tooltip } from './components/Tooltip.js';
+diff --git a/package.json b/package.json
+index 1f855119797eabb75bdf4a844d07af0863990d38..15eb44ce62b72489a5845fae36f852aafc5a42ff 100644
+--- a/package.json
++++ b/package.json
+@@ -2115,6 +2115,10 @@
+     "./site.css": {
+       "src": "./src/site/styles.css",
+       "default": "./dist/site/styles.css"
++    },
++    "./platform/components": {
++      "types": "./dist/platform/components.d.ts",
++      "default": "./dist/platform/components.js"
+     }
+   },
+   "peerDependencies": {

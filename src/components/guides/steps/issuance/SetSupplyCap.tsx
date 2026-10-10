@@ -1,5 +1,7 @@
 'use client'
 
+import { TextInput } from '@tempoxyz/ds/platform/components'
+
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
@@ -90,8 +92,8 @@ export function SetSupplyCap(props: DemoStepProps) {
                 <label {...form.label()} htmlFor="supplyCap">
                   Supply cap amount
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="supplyCap"

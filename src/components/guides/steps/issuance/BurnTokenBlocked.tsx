@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { TextInput } from '@tempoxyz/ds/platform/components'
 import * as React from 'react'
 import { parseUnits } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
@@ -110,8 +111,8 @@ export function BurnTokenBlocked(props: DemoStepProps) {
                 <label {...form.label()} htmlFor="blockedAddress">
                   Blocked address
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="blockedAddress"

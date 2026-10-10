@@ -5,7 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  tapimo>accounts: 0.18.4
   baseline-browser-mapping@<2.11.0: 2.11.0
   browserslist@<4.28.7: 4.28.7
   dompurify: '>=3.4.0'
@@ -15,6 +14,7 @@ overrides:
   nanoid@>=3.0.0 <3.3.18: 3.3.18
   protobufjs: '>=7.5.5'
   remark-mdx-frontmatter@5>toml: 4.2.0
+  tapimo>accounts: 0.18.4
   tar: '>=7.5.21'
   undici@>=8.0.0 <8.10.2: 8.10.2
 
@@ -22,6 +22,9 @@ patchedDependencies:
   '@braintree/sanitize-url@7.1.2':
     hash: 74e2e7d501bbd370f1be1835a3907a7ab1281616bfb77ec2ed3d7cd014afae59
     path: patches/@braintree__sanitize-url@7.1.2.patch
+  '@tempoxyz/ds@0.0.5':
+    hash: e8447431a4f51775365cf2cbed427b027b68ebabb64a220c472d356fecc23057
+    path: patches/@tempoxyz__ds@0.0.5.patch
   dayjs@1.11.20:
     hash: 47bfcf62e3c84ba85d881815422a02e23f372df46bddb9b022eb3705361fd165
     path: patches/dayjs@1.11.20.patch
@@ -63,6 +66,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.101.1
         version: 5.101.2(react@19.2.7)
+      '@tempoxyz/ds':
+        specifier: 0.0.5
+        version: 0.0.5(patch_hash=e8447431a4f51775365cf2cbed427b027b68ebabb64a220c472d356fecc23057)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zyzz@0.0.27(patch_hash=8eb9543282cbf3185cc6fec7756cc443a1f253d82303cf3c6fce96c46f6cf13b)(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.2.7)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)))
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(react@19.2.7)(vue@3.5.38(typescript@6.0.3))
@@ -323,8 +329,35 @@ packages:
       date-fns:
         optional: true
 
+  '@base-ui/react@1.8.0':
+    resolution: {integrity: sha512-P0/1sxo6SBVZOklKMIedvTWqw2s2IQzi9x5bIVsXu980cuSOD4NeuRSs+/L7LZQfDkZP/uRZyGPyfFl/B1oH+Q==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      '@date-fns/tz': ^1.2.0
+      '@types/react': ^17 || ^18 || ^19
+      date-fns: ^4.0.0
+      react: ^17 || ^18 || ^19
+      react-dom: ^17 || ^18 || ^19
+    peerDependenciesMeta:
+      '@date-fns/tz':
+        optional: true
+      '@types/react':
+        optional: true
+      date-fns:
+        optional: true
+
   '@base-ui/utils@0.3.1':
     resolution: {integrity: sha512-gFFiltORVmW/N6IILTGxizP3PBpVpysqML1ALY5Vk0mH+7faVkCknOU31goYHN5Aoek2dkjxva1XOD2Ce9WuIg==}
+    peerDependencies:
+      '@types/react': ^17 || ^18 || ^19
+      react: ^17 || ^18 || ^19
+      react-dom: ^17 || ^18 || ^19
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@base-ui/utils@0.4.0':
+    resolution: {integrity: sha512-bO9fz25kKtPf+aZVyfQrC0PDmJdmVni31W2hCS5/Owb+inwdIL3XU26pCPRPlt4LSxZrBgLwubXQXQlKaFEZzw==}
     peerDependencies:
       '@types/react': ^17 || ^18 || ^19
       react: ^17 || ^18 || ^19
@@ -715,11 +748,23 @@ packages:
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
 
+  '@floating-ui/core@1.8.0':
+    resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
+
   '@floating-ui/dom@1.7.6':
     resolution: {integrity: sha512-9gZSAI5XM36880PPMm//9dfiEngYoC6Am2izES1FF406YFsjvyBMmeJ2g4SAju3xWwtuynNRFL2s9hgxpLI5SQ==}
 
+  '@floating-ui/dom@1.8.0':
+    resolution: {integrity: sha512-yXSrzeHZBTZadLOlfyhCkJHNeLJnHRnRInwdZ40L7ZiaAtrBwoYlsDrX3v5zB1Utk7CLfzcOVnVVWoXEky7Ceg==}
+
   '@floating-ui/react-dom@2.1.8':
     resolution: {integrity: sha512-cC52bHwM/n/CxS87FH0yWdngEZrjdtLW/qVruo68qg+prK7ZQ4YGdut2GyDVpoGeAYe/h899rVeOVm6Oi40k2A==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
+  '@floating-ui/react-dom@2.1.9':
+    resolution: {integrity: sha512-JDjEFGCpImxDCA7JJKviA0M9+RtmJdj0m/NVU5IMgBK+AmZouAQQ7/+2GLH0GXXY0YMw9oXPB8hKdbPYg5QLYg==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -729,6 +774,9 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@floating-ui/utils@0.2.12':
+    resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
   '@floating-ui/vue@1.1.11':
     resolution: {integrity: sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw==}
@@ -2461,6 +2509,28 @@ packages:
     resolution: {integrity: sha512-MWb9tNHjpar3sP34b8+3A4I5j9akveoPXIYqqp7/ipyWd49a/kso+1S1LqEmAVR/+g/k1WWTJC4ktvdCGWgXYQ==}
     peerDependencies:
       vue: ^2.7.0 || ^3.0.0
+
+  '@tempoxyz/ds@0.0.5':
+    resolution: {integrity: sha512-PopnT++7S8q2B/IBU+c3XvKut8FjCgrhAZ1Ggba4nL96n48kTEaMVFzcLoWfynR1/mZpJFOejmVkOkpzraMKZA==}
+    peerDependencies:
+      expo-haptics: '>=57.0.0'
+      react: ^19.0.0
+      react-dom: ^19.0.0
+      react-native: '>=0.86.0 <1.0.0'
+      react-native-reanimated: ^4.5.1
+      react-native-svg: ^15.15.0
+      zyzz: ^0.0.27
+    peerDependenciesMeta:
+      expo-haptics:
+        optional: true
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+      react-native-reanimated:
+        optional: true
+      react-native-svg:
+        optional: true
 
   '@toon-format/toon@2.3.1':
     resolution: {integrity: sha512-sWqEMeAJGMda9qRrfPKrX3C4c33CO9SJuvJzzrcBEn5sbDB+k6pSLkDsfN0rVnLQwR97MV3sDgVbcxQNsq8xVw==}
@@ -6513,10 +6583,33 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
+  '@base-ui/react@1.8.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@base-ui/utils': 0.4.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@floating-ui/react-dom': 2.1.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@floating-ui/utils': 0.2.12
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      use-sync-external-store: 1.6.0(react@19.2.7)
+    optionalDependencies:
+      '@types/react': 19.2.17
+
   '@base-ui/utils@0.3.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@floating-ui/utils': 0.2.11
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      reselect: 5.2.0
+      use-sync-external-store: 1.6.0(react@19.2.7)
+    optionalDependencies:
+      '@types/react': 19.2.17
+
+  '@base-ui/utils@0.4.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@floating-ui/utils': 0.2.12
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
       reselect: 5.2.0
@@ -6876,10 +6969,19 @@ snapshots:
     dependencies:
       '@floating-ui/utils': 0.2.11
 
+  '@floating-ui/core@1.8.0':
+    dependencies:
+      '@floating-ui/utils': 0.2.12
+
   '@floating-ui/dom@1.7.6':
     dependencies:
       '@floating-ui/core': 1.7.5
       '@floating-ui/utils': 0.2.11
+
+  '@floating-ui/dom@1.8.0':
+    dependencies:
+      '@floating-ui/core': 1.8.0
+      '@floating-ui/utils': 0.2.12
 
   '@floating-ui/react-dom@2.1.8(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
@@ -6887,9 +6989,17 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
+  '@floating-ui/react-dom@2.1.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@floating-ui/dom': 1.8.0
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
   '@floating-ui/utils@0.2.10': {}
 
   '@floating-ui/utils@0.2.11': {}
+
+  '@floating-ui/utils@0.2.12': {}
 
   '@floating-ui/vue@1.1.11(vue@3.5.38(typescript@6.0.3))':
     dependencies:
@@ -8608,6 +8718,18 @@ snapshots:
     dependencies:
       '@tanstack/virtual-core': 3.17.1
       vue: 3.5.38(typescript@6.0.3)
+
+  '@tempoxyz/ds@0.0.5(patch_hash=e8447431a4f51775365cf2cbed427b027b68ebabb64a220c472d356fecc23057)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zyzz@0.0.27(patch_hash=8eb9543282cbf3185cc6fec7756cc443a1f253d82303cf3c6fce96c46f6cf13b)(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.2.7)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)))':
+    dependencies:
+      '@base-ui/react': 1.8.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react: 19.2.7
+      zyzz: 0.0.27(patch_hash=8eb9543282cbf3185cc6fec7756cc443a1f253d82303cf3c6fce96c46f6cf13b)(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.2.7)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1))
+    optionalDependencies:
+      react-dom: 19.2.7(react@19.2.7)
+    transitivePeerDependencies:
+      - '@date-fns/tz'
+      - '@types/react'
+      - date-fns
 
   '@toon-format/toon@2.3.1': {}
 

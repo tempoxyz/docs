@@ -35,22 +35,6 @@ fontFace({
   fontDisplay: 'swap',
 })
 
-fontFace({
-  fontFamily: '"Pilat"',
-  src: 'url("/fonts/pilat/Pilat-Book.woff2") format("woff2")',
-  fontWeight: '400 500',
-  fontStyle: 'normal',
-  fontDisplay: 'swap',
-})
-
-fontFace({
-  fontFamily: '"Pilat"',
-  src: 'url("/fonts/pilat/Pilat-Demi.woff2") format("woff2")',
-  fontWeight: '600 700',
-  fontStyle: 'normal',
-  fontDisplay: 'swap',
-})
-
 // Tempo JetBrains Mono: JetBrains Mono with the slashed zero as its default 0.
 // Medium answers every heavier weight, so bold code never fakes bold.
 fontFace({
@@ -1384,3 +1368,9 @@ global({
 
 // Vocs owns the Mermaid wrapper markup.
 global({ '.data-v-mermaid-container': { minHeight: '200px' } })
+
+// Preserve guide validation and destructive intent on shared DS controls.
+global({
+  'button[data-destructive="true"]': { color: inherited.color.vocsColorRed },
+  'input[aria-invalid="true"]': { borderColor: inherited.color.vocsColorRed },
+})

@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { TextInput } from '@tempoxyz/ds/platform/components'
 import type { TokenRole } from 'ox/tempo'
 import * as React from 'react'
 import { useConnection, useConnectionEffect } from 'wagmi'
@@ -107,8 +108,8 @@ export function GrantTokenRoles(
                 <label {...form.label()} htmlFor="recipient">
                   Grant role to yourself
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="recipient"

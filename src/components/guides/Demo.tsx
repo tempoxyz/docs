@@ -1,11 +1,12 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
+import { Button as PlatformButton } from '@tempoxyz/ds/platform/components'
 import * as React from 'react'
 import type { Address, BaseError } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { useAccount, useConnect, useConnections, useDisconnect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-import { cx, type Props as StyleProps } from 'zyzz'
+import { cx } from 'zyzz'
 import LucideCheck from '~icons/lucide/check'
 import LucideCopy from '~icons/lucide/copy'
 import LucideExternalLink from '~icons/lucide/external-link'
@@ -13,7 +14,6 @@ import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
 import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { usePostHogTracking } from '../../lib/posthog'
-import { button } from '../../styles/controls'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Badge } from '../Badge'
 import { Container as ParentContainer } from '../Container'
@@ -495,25 +495,18 @@ export function Logout({ label = 'Sign out' }: { label?: string } = {}) {
   )
 }
 
-export function Button(
-  props: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> &
-    StyleProps.Variants<typeof button> & {
-      render?: React.ReactElement
-    },
-) {
-  const { className, disabled, render, size, static: static_, variant, ...rest } = props
-  const Element = render ? (p: typeof props) => React.cloneElement(render, p) : 'button'
+// Keep the guide action vocabulary while TDS owns the control and its states.
+export function Button({
+  variant = 'default',
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: 'default' | 'accent' | 'destructive'
+}) {
   return (
-    <Element
-      disabled={disabled ? true : undefined}
-      {...button({
-        className,
-        disabled,
-        size,
-        static: static_,
-        variant,
-      })}
-      {...rest}
+    <PlatformButton
+      {...props}
+      variant={variant === 'accent' ? 'primary' : 'secondary'}
+      data-destructive={variant === 'destructive' || undefined}
     />
   )
 }

@@ -56,6 +56,9 @@ Before finishing docs-only changes, run at least `pnpm check:types` when practic
 
 ## Site styling rules
 
+- Use `@tempoxyz/ds/platform/components` for shared docs controls and `@tempoxyz/ds/brand` for brand assets. Keep docs-specific layout in local recipes. Do not recreate library controls or copy their styles.
+- The DS 0.0.5 patch adds a component-only entrypoint. Its main barrel also exports token metadata that exceeded Zyzz 0.0.27’s compiler memory limit in this site. Keep the docs token contract local until that upstream integration is resolved.
+
 - Import `style`/`variants` from `src/styles/recipes.ts` for layout recipes, `theme.ts` for semantic components, or `scoped.ts` for existing unlayered selectors. Do not import unrestricted helpers from `zyzz` or create component-local configs.
 - Use the shared `vars` exported by `theme.ts`, or configured token names. `contract.ts` owns spacing, typography, radius, border, and stacking scales; `palette.ts` owns colors. Add a token only for a reusable design decision.
 - `inherited.ts` is the reviewed bridge to existing Vocs, blog, terminal, and artwork CSS scopes. Its expressions must resolve on the styled element; do not hoist local CSS variables into root tokens.

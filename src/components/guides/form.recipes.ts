@@ -48,61 +48,10 @@ export const label = style({
   color: tokens.color.gray9,
 })
 
-export const input = style({
-  height: '34px',
-  borderRadius: tokens.radius.pill,
-  borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  borderColor: tokens.color.gray4,
-  paddingInline: tokens.spacing.controlInset,
-  fontSize: tokens.fontSize.sm,
-  fontWeight: tokens.fontWeight.normal,
-  letterSpacing: tokens.letterSpacing.compact,
-  color: tokens.color.black,
-  selectors: {
-    '&::placeholder': {
-      color: tokens.color.gray9,
-    },
-    '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
-      {
-        color: tokens.color.white,
-      },
-  },
-})
-
 export const secondaryField = style({
   display: 'flex',
   flex: '1 1 0%',
   flexDirection: 'column',
-})
-
-export const validatedInput = style({
-  height: '34px',
-  borderRadius: tokens.radius.pill,
-  borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  paddingInline: tokens.spacing.controlInset,
-  fontSize: tokens.fontSize.sm,
-  fontWeight: tokens.fontWeight.normal,
-  letterSpacing: tokens.letterSpacing.compact,
-  color: tokens.color.black,
-  selectors: {
-    '&::placeholder': {
-      color: tokens.color.gray9,
-    },
-    '&:where( [data-vocs-theme="dark"], [data-vocs-theme="dark"] *, [style*="color-scheme: dark"], [style*="color-scheme: dark"] * )':
-      {
-        color: tokens.color.white,
-      },
-  },
-})
-
-export const invalidBorder = style({
-  borderColor: inherited.color.colorRed500,
-})
-
-export const defaultBorder = style({
-  borderColor: tokens.color.gray4,
 })
 
 export const errorText = style({

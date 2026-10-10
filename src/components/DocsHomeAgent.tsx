@@ -1,5 +1,6 @@
 'use client'
 
+import { Button, Tab } from '@tempoxyz/ds/platform/components'
 import { useEffect, useState } from 'react'
 import { Link } from 'waku'
 import CheckIcon from '~icons/lucide/check'
@@ -83,83 +84,86 @@ export function DocsHomeAgent() {
       <h2>Build with your agent</h2>
       <p>Connect your coding agent to Tempo documentation.</p>
 
-      <fieldset className={`tempo-agent-start-agents ${tempoAgentStartAgents().className}`}>
-        <legend>Choose a setup method</legend>
-        <div>
+      <Tab.Root
+        value={agent}
+        onValueChange={(value) => {
+          if (agents.some((item) => item.id === value)) {
+            setAgent(value as Agent)
+            setCopyState(null)
+          }
+        }}
+      >
+        <Tab.List
+          aria-label="Choose a setup method"
+          className={`tempo-agent-start-agents ${tempoAgentStartAgents().className}`}
+        >
           {agents.map(({ id, label, Logo }) => (
-            <button
-              key={id}
-              type="button"
-              disabled={!mounted}
-              aria-pressed={agent === id}
-              onClick={() => {
-                setAgent(id)
-                setCopyState(null)
-              }}
-            >
+            <Tab key={id} value={id} scale="small" disabled={!mounted}>
               {Logo ? <Logo aria-hidden="true" /> : null}
               {label}
-            </button>
+            </Tab>
           ))}
-        </div>
-      </fieldset>
+        </Tab.List>
 
-      <div className="tempo-agent-start-install">
-        <h3 className="tempo-agent-start-label">Connect Tempo docs</h3>
-        <p className="tempo-agent-start-instruction">
-          {activeAgent.instruction}{' '}
-          {activeAgent.installUrl ? (
-            <a
-              className="tempo-agent-start-prerequisite"
-              href={activeAgent.installUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {activeAgent.helpLabel} <span aria-hidden="true">↗</span>
-            </a>
-          ) : null}
-        </p>
-        <div className={`tempo-agent-start-command ${tempoAgentStartCommand().className}`}>
-          <div className="tempo-agent-start-toolbar">
-            <span className="tempo-agent-start-destination">
-              {isMcp ? <PlugIcon aria-hidden="true" /> : <TerminalIcon aria-hidden="true" />}
-              {isMcp ? 'MCP server URL' : 'Terminal'}
-            </span>
-            <button
-              type="button"
-              disabled={!mounted}
-              className="tempo-agent-start-copy"
-              aria-label={`${copyLabel} for ${activeAgent.label}`}
-              onClick={copyCommands}
-            >
-              {copyState === 'copied' ? (
-                <CheckIcon aria-hidden="true" />
-              ) : (
-                <CopyIcon aria-hidden="true" />
-              )}
-              <span>{copyState === 'copied' ? 'Copied' : copyLabel}</span>
-            </button>
+        <Tab.Panel value={agent} className="tempo-agent-start-install">
+          <h3 className="tempo-agent-start-label">Connect Tempo docs</h3>
+          <p className="tempo-agent-start-instruction">
+            {activeAgent.instruction}{' '}
+            {activeAgent.installUrl ? (
+              <a
+                className="tempo-agent-start-prerequisite"
+                href={activeAgent.installUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {activeAgent.helpLabel} <span aria-hidden="true">↗</span>
+              </a>
+            ) : null}
+          </p>
+          <div className={`tempo-agent-start-command ${tempoAgentStartCommand().className}`}>
+            <div className="tempo-agent-start-toolbar">
+              <span className="tempo-agent-start-destination">
+                {isMcp ? <PlugIcon aria-hidden="true" /> : <TerminalIcon aria-hidden="true" />}
+                {isMcp ? 'MCP server URL' : 'Terminal'}
+              </span>
+              <Button
+                variant="tertiary"
+                scale="small"
+                type="button"
+                disabled={!mounted}
+                className="tempo-agent-start-copy"
+                aria-label={`${copyLabel} for ${activeAgent.label}`}
+                onClick={copyCommands}
+              >
+                {copyState === 'copied' ? (
+                  <CheckIcon aria-hidden="true" />
+                ) : (
+                  <CopyIcon aria-hidden="true" />
+                )}
+                <span>{copyState === 'copied' ? 'Copied' : copyLabel}</span>
+              </Button>
+            </div>
+            <pre>
+              <code>{isMcp ? commands : <AgentSetupCommand command={commands} />}</code>
+            </pre>
           </div>
-          <pre>
-            <code>{isMcp ? commands : <AgentSetupCommand command={commands} />}</code>
-          </pre>
-        </div>
-        <p role="status" className="tempo-agent-start-feedback">
-          {copyState === 'copied'
-            ? isMcp
-              ? 'URL copied. Add it as an HTTP MCP server in your agent’s settings.'
-              : multipleCommands
-                ? 'Commands copied. Paste them into your terminal and run both commands.'
-                : 'Command copied. Paste it into your terminal and run it.'
-            : copyState === 'error'
+          <p role="status" className="tempo-agent-start-feedback">
+            {copyState === 'copied'
               ? isMcp
-                ? 'Copy failed. Select and copy the server URL above.'
+                ? 'URL copied. Add it as an HTTP MCP server in your agent’s settings.'
                 : multipleCommands
-                  ? 'Copy failed. Select and copy both commands above.'
-                  : 'Copy failed. Select and copy the command above.'
-              : ''}
-        </p>
-      </div>
+                  ? 'Commands copied. Paste them into your terminal and run both commands.'
+                  : 'Command copied. Paste it into your terminal and run it.'
+              : copyState === 'error'
+                ? isMcp
+                  ? 'Copy failed. Select and copy the server URL above.'
+                  : multipleCommands
+                    ? 'Copy failed. Select and copy both commands above.'
+                    : 'Copy failed. Select and copy the command above.'
+                : ''}
+          </p>
+        </Tab.Panel>
+      </Tab.Root>
 
       <div className="tempo-agent-start-footer">
         <Link to="/docs/guide/using-tempo-with-ai">

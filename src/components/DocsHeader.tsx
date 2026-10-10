@@ -1,5 +1,6 @@
 'use client'
 
+import tempoWordmark from '@tempoxyz/ds/brand/logos/TempoLogoWordmark.svg?url&no-inline'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRouter, Link as WakuLink } from 'waku'
 import { cx as composeStyles } from 'zyzz'
@@ -115,8 +116,7 @@ function TempoLogo({ className }: { className?: string }) {
     <span
       aria-hidden="true"
       {...ui.tempoLogoTextAppearance({
-        value0: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
-        value1: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
+        image: `url('${publicAssetPath(tempoWordmark)}')`,
         className: ` ${ui.tempoLogoText().className} ${className ?? ''}`,
       })}
     />

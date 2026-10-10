@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { TextInput } from '@tempoxyz/ds/platform/components'
 import * as React from 'react'
 import { type Address, parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
@@ -111,8 +112,8 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
                 <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -127,8 +128,8 @@ export function MintToken(props: DemoStepProps & { recipient?: Address }) {
                 <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="memo"

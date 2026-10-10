@@ -350,7 +350,7 @@ export const tempoAgentStart = style({
   minWidth: 0,
   padding: tokens.spacing['7'],
 
-  borderRadius: tokens.radius.xl,
+  borderRadius: 'xl',
   backgroundColor: inherited.color.homePanel,
   selectors: {
     '& h2': {
@@ -392,30 +392,7 @@ export const tempoAgentStart = style({
       border: 0,
     },
     '& .tempo-agent-start-agents button': {
-      display: 'inline-flex',
-      alignItems: 'center',
       gap: tokens.spacing['2'],
-      minHeight: '40px',
-
-      paddingBlock: tokens.spacing['2'],
-      paddingInline: tokens.spacing['3_5'],
-      borderWidth: tokens.borderWidth.hairline,
-      borderStyle: 'solid',
-      borderColor: 'transparent !custom',
-
-      borderRadius: tokens.radius.pill,
-      backgroundColor: 'transparent !custom',
-
-      color: inherited.color.homeMuted,
-      fontSize: tokens.fontSize.compact,
-      fontFamily: 'inherit !custom',
-      lineHeight: tokens.lineHeight.normal,
-      cursor: 'pointer',
-    },
-    '& .tempo-agent-start-agents button[aria-pressed="true"]': {
-      borderColor: inherited.color.homeInk,
-
-      color: inherited.color.homeInk,
     },
     '& :is(.tempo-agent-start-agents, .tempo-agent-start-destination) svg': {
       width: '14px',
@@ -424,7 +401,7 @@ export const tempoAgentStart = style({
     '& .tempo-agent-start-command': {
       marginTop: tokens.spacing['3'],
       overflow: 'hidden',
-      borderRadius: tokens.radius.xl,
+      borderRadius: 'xl',
       backgroundColor: inherited.color.vocsBackgroundColorPrimary,
     },
     '& .tempo-agent-start-destination': {
@@ -569,21 +546,9 @@ export const tempoAgentStart = style({
 })
 
 export const tempoAgentStartAgents = style({
-  selectors: {
-    '& legend': {
-      position: 'absolute',
-      width: '1px',
-      height: '1px',
-      overflow: 'hidden',
-      clipPath: 'inset(50%)',
-      whiteSpace: 'nowrap',
-    },
-    '& > div': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: tokens.spacing['2'],
-    },
-  },
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: tokens.spacing['2'],
 })
 
 export const tempoAgentStartCommand = style({

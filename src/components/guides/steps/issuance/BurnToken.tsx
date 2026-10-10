@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { TextInput } from '@tempoxyz/ds/platform/components'
 import * as React from 'react'
 import { parseUnits, toHex } from 'viem'
 import { useConnection, useConnectionEffect } from 'wagmi'
@@ -103,8 +104,8 @@ export function BurnToken(props: DemoStepProps) {
                 <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="memo"

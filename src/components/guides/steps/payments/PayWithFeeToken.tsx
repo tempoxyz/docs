@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { TextInput } from '@tempoxyz/ds/platform/components'
 import * as React from 'react'
 import type { Address } from 'viem'
 import { isAddress, parseUnits, toHex } from 'viem'
@@ -173,8 +174,8 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -188,8 +189,8 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
-                <input
-                  {...form.input()}
+                <TextInput
+                  appearance="secondary"
                   data-1p-ignore
                   type="text"
                   id="memo"

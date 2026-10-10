@@ -415,21 +415,18 @@ export const arrowUpRight3 = style({
   width: tokens.spacing['4'],
   height: tokens.spacing['4'],
 })
-export const tempoLogoTextAppearance = instanceStyle(
-  (values: { value0: string; value1: string }) => ({
-    aspectRatio: '102.461 / 23.2394',
-    '--tempo-maskImage': values.value0,
-    maskImage: 'var(--tempo-maskImage)',
-    maskRepeat: 'no-repeat',
-    maskSize: 'contain',
-    maskPosition: 'center',
-    '--tempo-WebkitMaskImage': values.value1,
-    WebkitMaskImage: 'var(--tempo-WebkitMaskImage)',
-    WebkitMaskRepeat: 'no-repeat',
-    WebkitMaskSize: 'contain',
-    WebkitMaskPosition: 'center',
-  }),
-)
+export const tempoLogoTextAppearance = instanceStyle((values: { image: string }) => ({
+  aspectRatio: '91 / 20',
+  '--tempo-maskImage': values.image,
+  maskImage: 'var(--tempo-maskImage)',
+  maskRepeat: 'no-repeat',
+  maskSize: 'contain',
+  maskPosition: 'center',
+  WebkitMaskImage: 'var(--tempo-maskImage)',
+  WebkitMaskRepeat: 'no-repeat',
+  WebkitMaskSize: 'contain',
+  WebkitMaskPosition: 'center',
+}))
 export const sidebarLeafAnchorAppearance = instanceStyle((values: { value0: string }) => ({
   '--tempo-paddingLeft': values.value0,
   // design-exception: Preserve the inherited component/framework scope at the point of use.
