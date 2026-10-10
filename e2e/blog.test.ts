@@ -14,6 +14,7 @@ test('filters posts with the keyboard and preserves author credits when opening 
   ).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'APIs & SDKs', exact: true })).toHaveCount(0)
   const filters = page.getByRole('group', { name: 'Filter posts by category' })
+  await expect(filters.getByRole('button', { name: 'Announcements', exact: true })).toHaveCount(1)
   const events = filters.getByRole('button', { name: 'Events', exact: true })
   await expect(events).toBeEnabled()
   await events.focus()
