@@ -1569,3 +1569,27 @@ global({
     },
   },
 })
+
+// G8: Vocs-owned buttons follow the same rule: gray secondary fill, no outline,
+// smoothed md radius (OpenAPI code-panel actions, the 404 link). G4: the 404
+// icon circle keeps a hairline only where its fill matches the page.
+global({
+  '@layer vocs_utilities': {
+    '[data-v-openapi-action], [data-v-not-found-link]': {
+      borderWidth: tokens.borderWidth.none,
+      '--corner-radius': tokens.radius.md,
+      borderRadius: tokens.radius.md,
+      backgroundColor: tokens.color.container,
+      transitionProperty: 'background-color',
+      transitionDuration: 'var(--tempo-exit)',
+      transitionTimingFunction: 'var(--tempo-ease)',
+    },
+    '[data-v-openapi-action]:not(:disabled):hover, [data-v-not-found-link]:hover': {
+      backgroundColor: tokens.color.containerStrong,
+      transitionDuration: 'var(--tempo-enter)',
+    },
+    '[data-v-not-found-icon]': {
+      borderColor: tokens.color.cardLine,
+    },
+  },
+})
