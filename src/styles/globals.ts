@@ -5,6 +5,7 @@ import './smoothCorners'
 import './links'
 import './headingAnchors'
 import './copyFeedback'
+import './docsGetStarted'
 import '../components/DocsCards.styles'
 import { fontFace, global, layers } from 'zyzz/web'
 
