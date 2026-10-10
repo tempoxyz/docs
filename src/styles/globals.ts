@@ -507,7 +507,9 @@ global({
 
       paddingBlock: tokens.spacing['1_5'],
       paddingInline: tokens.spacing['2'],
-      borderRadius: tokens.radius.sm,
+      // SB3: one radius step rounder than before, smoothed.
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
       backgroundColor: 'transparent !custom',
 
       color: tokens.color.foreground,
@@ -560,13 +562,49 @@ global({
 
       paddingBlock: tokens.spacing['1_5'],
       paddingInline: tokens.spacing['2'],
-      borderRadius: tokens.radius.sm,
+      // SB3: one radius step rounder than before, smoothed.
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
 
       color: tokens.color.foreground,
       fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.normal,
       letterSpacing: tokens.letterSpacing.normal,
       lineHeight: tokens.lineHeight.normal,
+    },
+  },
+})
+
+// SB3: entry hover fills enter and exit with the motion tokens (exit on the
+// base state, enter on hover). Top-level collapsible group labels share the
+// entry hover. Reduced motion switches instantly.
+global({
+  '@layer utilities': {
+    '[data-v-sidebar] :is([data-v-sidebar-item][data-link], [data-v-sidebar-section-header][data-collapsable="true"])':
+      {
+        transitionProperty: 'color, background-color, border-color, opacity, transform',
+        transitionDuration: 'var(--tempo-exit)',
+        transitionTimingFunction: 'var(--tempo-ease)',
+      },
+    '[data-v-sidebar] :is(a[data-v-sidebar-item][data-link], [data-v-sidebar-section-header][data-collapsable="true"]):hover':
+      {
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    '[data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]':
+      {
+        borderRadius: tokens.radius.md,
+        '--corner-radius': tokens.radius.md,
+      },
+    '[data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]:hover':
+      {
+        backgroundColor: inherited.color.colorMixInSrgbForeground4Transparent,
+        color: tokens.color.foreground,
+      },
+    '@media (prefers-reduced-motion: reduce)': {
+      '[data-v-sidebar] :is([data-v-sidebar-item][data-link], [data-v-sidebar-section-header][data-collapsable="true"])':
+        {
+          transitionProperty: 'none',
+        },
     },
   },
 })
