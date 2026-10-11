@@ -144,19 +144,19 @@ export function DocsApiDropdown({
         aria-current={active ? 'page' : undefined}
         onClick={() => setOpen(!open)}
       >
-        APIs & SDKs <ChevronDownIcon aria-hidden="true" width="14" height="14" />
+        SDKs & CLI <ChevronDownIcon aria-hidden="true" width="14" height="14" />
       </button>
       <nav
         id={panelId}
-        aria-label="APIs & SDKs"
+        aria-label="SDKs & CLI"
         hidden={!open}
         className={`docs-reference-panel docs-resource-links ${docsReferencePanel().className} ${docsResourceLinks().className}`}
       >
         {[
-          { label: 'Overview', href: '/docs/tools', icon: CompassIcon },
-          { label: 'API reference', href: '/docs/api', icon: BracesIcon },
-          { label: 'SDKs', href: '/docs/tools#sdks', icon: CodeIcon },
+          { label: 'Overview', href: '/docs/sdk', icon: CompassIcon },
+          { label: 'SDKs', href: '/docs/sdk', icon: CodeIcon },
           { label: 'CLI', href: '/docs/cli', icon: TerminalIcon },
+          { label: 'Server handlers', href: '/docs/server', icon: BracesIcon },
         ].map((item) => (
           <Link
             key={item.href}

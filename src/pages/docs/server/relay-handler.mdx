@@ -11,7 +11,7 @@ Use `Handler.relay` to proxy RPC requests through your backend. The handler can 
 
 ## Create a relay handler
 
-Apply the [Tempo API dependency override](/docs/api/typed-client#install-tempo-api-package), then install `tapimo@0.18.2` with `viem@2.56.9` in the relay server. This release of the handler depends on Viem exports removed in `2.57`; application clients can use the current Viem release independently.
+Apply the [Tempo API dependency override](/docs/sdk/typescript/api-client#install-tempo-api-package), then install `tapimo@0.18.2` with `viem@2.56.9` in the relay server. This release of the handler depends on Viem exports removed in `2.57`; application clients can use the current Viem release independently.
 
 ```bash
 pnpm add --save-exact tapimo@0.18.2 viem@2.56.9

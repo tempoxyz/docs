@@ -11,7 +11,7 @@ export const aiDocsDescription =
 
 const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   overview:
-    'Choose a starting point, send a test payment, get testnet funds, or connect a coding agent.',
+    'Choose a starting point, send a test payment, get testnet funds, connect a coding agent, and find the SDKs and CLI.',
   accounts:
     'Create accounts, connect wallets, read balances, send and receive payments, and reconcile deposits.',
   earn: 'Choose a vault, deposit stablecoins, read positions, and withdraw. Earn is in beta; see the introduction for access.',
@@ -23,8 +23,7 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
     'Pay for APIs, accept API payments, find services, and use Machine Payments Protocol (MPP).',
   developers:
     'Build on Tempo EVM: wallets and keys, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.',
-  tools:
-    'API reference and authentication, SDKs, CLI, wallet and server libraries. An API key authenticates API requests; an account signing key authorizes transactions.',
+  api: 'Tempo API reference: authentication, conventions, endpoints grouped by product, Console management endpoints, JSON-RPC, and the indexer. An API key authenticates API requests; an account signing key authorizes transactions.',
   ecosystem:
     'Find wallet providers, bridges, RPC infrastructure, data services, and other third-party integrations.',
 }
@@ -81,7 +80,7 @@ export function renderAiIndex(content: string) {
     '',
     aiDocsDescription,
     '',
-    'Start with the product guide for your task, then use APIs & SDKs for exact methods and schemas. Use Tempo EVM for chain behavior and protocol details.',
+    'Start with the product guide for your task, then use the API reference, SDKs, and CLI for exact methods and schemas. Use Tempo EVM for chain behavior and protocol details.',
     '',
     aiDocsNotice(),
     '[Docs skill](/SKILL.md) · [Full documentation](/llms-full.txt)',

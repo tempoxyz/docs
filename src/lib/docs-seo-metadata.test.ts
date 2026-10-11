@@ -29,7 +29,6 @@ const migratedOpenApiTitleFiles = [
   'api/transactions-and-transfers.mdx',
   'api/transactions.mdx',
   'api/transfers.mdx',
-  'api/typed-client.mdx',
   'api/versioning-policy.mdx',
 ]
 

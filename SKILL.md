@@ -13,17 +13,17 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 
 | Section | Start here when the reader wants to… |
 | --- | --- |
-| [Get Started](https://tempo.xyz/developers/get-started.md) | Choose an integration, send a first test payment, get testnet funds, or connect a coding agent. |
+| [Get Started](https://tempo.xyz/developers/get-started.md) | Choose an integration, send a first test payment, get testnet funds, connect a coding agent, or find the SDKs and CLI. |
 | [Accounts](https://tempo.xyz/developers/docs/accounts.md) | Create accounts, connect wallets, read balances, send or receive payments, and reconcile customer deposits. |
 | [Earn](https://tempo.xyz/developers/docs/earn.md) | Choose a vault, deposit stablecoins, read positions, or withdraw. Earn is in beta; check access on the introduction page. |
 | [Routes](https://tempo.xyz/developers/docs/routes.md) | Accept cross-network deposits, quote transfers, or track delivery. Routes is in beta; check access on the introduction page. |
 | [Zones](https://tempo.xyz/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is in limited preview; check access on the introduction page. |
 | [Machine Payments](https://tempo.xyz/developers/docs/agents.md) | Pay for APIs, accept API payments, discover services, or integrate MPP. |
 | [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
-| [APIs & SDKs](https://tempo.xyz/developers/docs/tools.md) | Find the API reference, authentication, SDKs, CLI, and wallet or server libraries. |
+| [API reference](https://tempo.xyz/developers/docs/api.md) | Find Tempo API endpoints by product, authentication, Console management endpoints, JSON-RPC, and the indexer. |
 | [Partners](https://tempo.xyz/developers/docs/partners.md) | Find third-party wallets, bridges, RPC infrastructure, data services, and integrations. |
 
-Accounts covers application payment workflows; Tempo EVM covers the chain capabilities behind them. Routes covers cross-network movement. API reference belongs under APIs & SDKs; it supplements product guides.
+Accounts covers application payment workflows; Tempo EVM covers the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.
 
 Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in the limited preview.
 

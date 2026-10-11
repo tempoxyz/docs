@@ -1,42 +1,69 @@
 ---
-title: "tempo download: CLI command reference"
-seoTitle: "tempo download: CLI Reference | Docs"
+title: "tempo download"
+seoTitle: "tempo download: CLI Reference | Tempo Docs"
 description: Download chain snapshots for faster initial sync of a Tempo node.
 ---
 
-# `tempo download`: CLI command reference
+import { Cards, Card } from 'vocs'
 
-Download chain snapshots for faster initial sync. Fetches execution state, static files, and consensus data, and generates a `reth.toml` prune config for the target data directory. Current releases resolve the default data directory and snapshot manifest from the selected chain.
+# `tempo download`
 
-Running `tempo download` without a snapshot profile opens an interactive component selector. Passing a profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal`. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
+Download chain snapshots for faster initial sync. `tempo download` fetches execution state, static files, and consensus data, and generates a `reth.toml` prune config for the target data directory. Current releases resolve the default data directory and snapshot manifest from the selected chain.
 
-## `tempo download` usage
+Running `tempo download` without a snapshot profile opens an interactive component selector. A profile flag such as `--minimal` or `--archive` skips the selector. Validators should use `--minimal`. RPC providers, indexers, and other workloads that need complete historical data should use `--archive`.
 
-```bash
-tempo download [flags]
+<span id="tempo-download-usage" />
+
+## Usage
+
+```bash [Terminal]
+tempo download [FLAGS]
 ```
 
-## `tempo download` flags
+<span id="tempo-download-examples" />
 
-| Flag | Description |
-| --- | --- |
-| `--chain <network>` | Target network (`mainnet`, `moderato`) |
-| `--datadir <path>` | Data directory for downloaded state |
-| `--consensus.datadir <path>` | Destination for consensus snapshot data. Defaults to `<datadir>/consensus`; match this to the node's `--consensus.datadir` when using a separate volume. |
-| `-u, --url <url>` | Download a single legacy snapshot archive URL |
-| `--manifest-url <url>` | Download a specific modular snapshot manifest URL |
-| `--list` | List available snapshots |
-| `--print-plan-json` | Print the selected execution and consensus archive plan without downloading archives or modifying the data directory. Select a profile such as `--minimal`. |
-| `--resumable[=<bool>]` | Download to disk before extraction so interrupted downloads can resume. Enabled by default. |
-| `--minimal` | Download the minimal component set without opening the interactive selector. Validators should use this profile. |
-| `--full` | Download the full node component set. |
-| `--archive`, `--all` | Download all available components without opening the interactive selector. Recommended for RPC providers and indexers. |
-| `-y, --non-interactive` | Skip the interactive selector and download the minimal component set unless explicit component flags are provided. |
-| `--force` | Replace existing snapshot state, including the entire consensus directory. Preserves `discovery-secret` and `known-peers.json`. |
+## Examples
 
-## Validator Migration Guidance
+Preview a validator snapshot download before making changes:
 
-Validators should use the minimal snapshot profile, even if the previous validator data directory used a different snapshot profile.
+```bash [Terminal]
+tempo download --chain mainnet --minimal --print-plan-json
+```
+
+The JSON plan includes archive URLs, sizes, and checksums when the manifest supplies them. It includes the consensus archive from `v1.12.0` onward. Planning still fetches snapshot metadata.
+
+Open the interactive selector for mainnet:
+
+```bash [Terminal]
+tempo download --chain mainnet
+```
+
+Download an archive snapshot for an RPC node:
+
+```bash [Terminal]
+tempo download --chain mainnet --archive
+```
+
+List available snapshots, optionally for one chain:
+
+```bash [Terminal]
+tempo download --list
+tempo download --list --chain moderato
+```
+
+If the data directory has limited free disk space, disable resumable downloads and stream the snapshot directly into extraction:
+
+```bash [Terminal]
+tempo download --chain mainnet --minimal --resumable=false
+```
+
+Use the [snapshots viewer](https://snapshots.tempo.xyz/) to compare snapshot profiles and copy generated commands. Then start your node with [`tempo node`](/docs/cli/node).
+
+<span id="validator-migration-guidance" />
+
+## Validator migration
+
+Validators should use the minimal snapshot profile, even if the previous validator data directory used a different profile.
 
 Migrating from archive v1 to minimal v2 reduces validator node size approximately as follows:
 
@@ -45,25 +72,23 @@ Migrating from archive v1 to minimal v2 reduces validator node size approximatel
 | Mainnet | 27 GB | 10 GB | 2.7x |
 | Moderato testnet | 1 TB | 100 GB | 10x |
 
-### What is Minimal Mode?
+### What is minimal mode?
 
-Minimal Mode is a Reth storage profile for nodes that need to follow the chain and serve recent state, such as validators. It keeps disk usage low by pruning older historical data. If the node serves historical RPC, indexing, archive, or tracing workloads, use `--archive` instead.
+Minimal mode is a Reth storage profile for nodes that need to follow the chain and serve recent state, such as validators. It keeps disk usage low by pruning older historical data. If the node serves historical RPC, indexing, archive, or tracing workloads, use `--archive` instead.
 
 See Reth's [Minimal Storage Mode](https://reth.rs/run/storage/minimal/) docs for the storage trade-offs.
 
-### Am I Running a Minimal Node?
+### Am I running a minimal node?
 
-To check whether an existing validator has already migrated, inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. If `pruning_mode` is `minimal`, no migration is needed unless you are replacing the node. If you are unsure which configuration your validator is running, reach out to the Tempo team before replacing snapshot data.
+Inspect the node startup logs for the `Loaded storage settings` line and its `pruning_mode` field. If `pruning_mode` is `minimal`, no migration is needed unless you are replacing the node.
 
-To migrate or replace a mainnet validator snapshot, run:
+To migrate or replace a validator snapshot, run the command for your network:
 
-```bash
+```bash [Terminal]
+# Mainnet
 tempo download --chain mainnet --minimal --force
-```
 
-To migrate or replace a testnet validator snapshot, run:
-
-```bash
+# Moderato testnet
 tempo download --chain moderato --minimal --force
 ```
 
@@ -73,46 +98,45 @@ tempo download --chain moderato --minimal --force
 If you are unsure which pruning configuration your validator is running, reach out to the Tempo team before replacing snapshot data.
 :::
 
-## `tempo download` examples
+<span id="tempo-download-flags" />
 
-Preview a validator snapshot download before making changes:
+## Flags
 
-```bash
-tempo download --chain mainnet --minimal --print-plan-json
-```
+| Flag | Description |
+| --- | --- |
+| `--chain <NETWORK>` | Target network: `mainnet` or `moderato`. |
+| `--datadir <PATH>` | Data directory for downloaded state. |
+| `--consensus.datadir <PATH>` | Destination for consensus snapshot data. Defaults to `<DATADIR>/consensus`. Match the node's `--consensus.datadir` when using a separate volume. |
+| `-u, --url <URL>` | Download a single legacy snapshot archive URL. |
+| `--manifest-url <URL>` | Download a specific modular snapshot manifest URL. |
+| `--list` | List available snapshots. |
+| `--print-plan-json` | Print the selected execution and consensus archive plan without downloading archives or modifying the data directory. Select a profile such as `--minimal`. |
+| `--resumable[=<BOOL>]` | Download to disk before extraction so interrupted downloads can resume. Defaults to `true`. |
+| `--minimal` | Download the minimal component set without opening the selector. Validators should use this profile. |
+| `--full` | Download the full node component set. |
+| `--archive, --all` | Download all available components without opening the selector. Recommended for RPC providers and indexers. |
+| `-y, --non-interactive` | Skip the selector and download the minimal component set unless component flags are set. |
+| `--force` | Replace existing snapshot state, including the entire consensus directory. Preserves `discovery-secret` and `known-peers.json`. |
 
-The JSON plan includes archive URLs, sizes, and checksums when supplied by the manifest. It includes the consensus archive from v1.12.0 onward. Planning still fetches snapshot metadata.
+## Related
 
-Open the interactive selector for mainnet:
-
-```bash
-tempo download --chain mainnet
-```
-
-Download an archive snapshot for an RPC node:
-
-```bash
-tempo download --chain mainnet --archive
-```
-
-List available snapshots:
-
-```bash
-tempo download --list
-```
-
-List available snapshots for a specific chain:
-
-```bash
-tempo download --list --chain moderato
-```
-
-If the data directory has limited free disk space, disable resumable downloads and stream the snapshot directly into extraction:
-
-```bash
-tempo download --chain mainnet --minimal --resumable=false
-```
-
-Use the [snapshots viewer](https://snapshots.tempo.xyz/) to compare snapshot profiles and copy generated commands.
-
-Then start your node with [`tempo node`](/docs/cli/node).
+<Cards>
+  <Card
+    title="tempo node"
+    description="Start a node from the downloaded snapshot"
+    to="/docs/cli/node"
+    icon="lucide:server"
+  />
+  <Card
+    title="Run a Tempo node"
+    description="System requirements, systemd, monitoring"
+    to="/docs/guide/node"
+    icon="lucide:book-open"
+  />
+  <Card
+    title="Snapshots viewer"
+    description="Compare profiles and copy download commands"
+    to="https://snapshots.tempo.xyz/"
+    icon="lucide:database"
+  />
+</Cards>

@@ -1,114 +1,54 @@
 ---
-title: "Tempo Wallet CLI: setting up and using it"
-seoTitle: "Tempo Wallet CLI: Setup & Use | Docs"
-description: Use Tempo Wallet CLI from the terminal for wallet auth, balances, access keys, MPP service discovery, paid requests, and agent workflows.
+title: "tempo wallet"
+seoTitle: "tempo wallet: CLI Reference | Tempo Docs"
+description: Use Tempo Wallet from the terminal for sign-in, balances, access keys, MPP service discovery, funding, payment sessions, and agent workflows.
 ---
 
 import { Cards, Card } from 'vocs'
 
-# Tempo Wallet CLI: setting up and using it
+# `tempo wallet`
 
-Tempo Wallet CLI is the command-line way to use [Tempo Wallet](https://wallet.tempo.xyz) from scripts, terminals, and AI agents. Use `tempo wallet` to authenticate, manage balances and access keys, discover [MPP](https://mpp.dev/overview) services, fund token or credit balances, and manage payment sessions. Use [`tempo request`](/docs/cli/request) when you want the CLI to make the paid HTTP call.
+`tempo wallet` is the command-line way to use [Tempo Wallet](https://wallet.tempo.xyz) from scripts, terminals, and AI agents. Use it to sign in, manage balances and access keys, discover [MPP](https://mpp.dev/overview) services, fund token or credit balances, and manage payment sessions. Use [`tempo request`](/docs/cli/request) when you want the CLI to make the paid HTTP call.
 
-<Cards>
-  <Card
-    title="Download"
-    description="Install the Tempo launcher and wallet extensions"
-    to="#download-the-tempo-wallet-cli"
-    icon="lucide:download"
-  />
-  <Card
-    title="Authenticate"
-    description="Connect to your Tempo Wallet"
-    to="#authenticate-with-tempo-wallet-cli"
-    icon="lucide:log-in"
-  />
-  <Card
-    title="Agent Mode"
-    description="Use TOON output, dry runs, and spend caps"
-    to="#agent-and-script-mode"
-    icon="lucide:bot"
-  />
-  <Card
-    title="Balances"
-    description="View your address, balances, credits, and key state"
-    to="#balances-and-credits"
-    icon="lucide:coins"
-  />
-  <Card
-    title="Add Funds"
-    description="Fund your wallet or transfer tokens"
-    to="#add-wallet-funds"
-    icon="lucide:plus-circle"
-  />
-  <Card
-    title="Discover Services"
-    description="Browse MPP-registered service providers"
-    to="#discover-services"
-    icon="lucide:search"
-  />
-  <Card
-    title="Manage Sessions"
-    description="Track and close payment sessions"
-    to="#manage-payment-sessions"
-    icon="lucide:refresh-cw"
-  />
-</Cards>
+<span id="download-the-tempo-wallet-cli" />
 
-## Download the Tempo Wallet CLI
+[Install the Tempo CLI](/docs/cli#install) first. The launcher installs the wallet and request extensions the first time you run them.
 
-```bash
-curl -fsSL https://tempo.xyz/install | bash
+## Usage
+
+```bash [Terminal]
+tempo wallet <COMMAND> [FLAGS]
 ```
 
-The launcher manages `tempo wallet` and `tempo request` extensions. To update later, run `tempoup`. Verify with `tempo --version`.
+<span id="authenticate-with-tempo-wallet-cli" />
 
-## Authenticate with Tempo Wallet CLI
+## Sign in
 
-```bash
+```bash [Terminal]
 tempo wallet login
-```
-
-Opens a browser flow to connect to your [Tempo Wallet](https://wallet.tempo.xyz). If you don't have one, the flow creates it.
-
-For remote hosts where the browser is on another device:
-
-```bash
-tempo wallet login --no-browser
-```
-
-Once logged in, verify everything works:
-
-```bash
 tempo wallet whoami
 ```
 
-If `ready=true`, the wallet is configured for [`tempo request`](/docs/cli/request). Check the balance and preview the request to confirm it can cover that payment.
+`login` opens a browser flow to connect your [Tempo Wallet](https://wallet.tempo.xyz). If you don't have one, the flow creates it. When `whoami` reports `ready=true`, the wallet is configured for [`tempo request`](/docs/cli/request). Check the balance and preview the request to confirm it can cover the payment.
 
-Refresh a stale access key without logging out:
-
-```bash
-tempo wallet refresh
-```
-
-To disconnect:
-
-```bash
-tempo wallet logout --yes
-```
+- On a remote host where the browser is on another device, run `tempo wallet login --no-browser`.
+- Run `tempo wallet refresh` to refresh a stale access key without signing out.
+- Run `tempo wallet logout --yes` to disconnect.
 
 ## Balances and credits
 
-```bash
+```bash [Terminal]
 tempo wallet whoami
 tempo wallet whoami --credits
 ```
 
-Shows your address, token balances, key state, and optional MPP Credits balance. Credits are separate from token balances and only apply to eligible one-time MPP charges.
+`whoami` shows your address, token balances, key state, and optional MPP Credits balance. Credits are separate from token balances and only apply to eligible one-time MPP charges.
 
-## Manage access keys
+<span id="manage-access-keys" />
 
-```bash
+## Access keys
+
+```bash [Terminal]
 tempo wallet keys
 tempo wallet revoke <ACCESS_KEY_ADDRESS> --dry-run
 tempo wallet revoke <ACCESS_KEY_ADDRESS>
@@ -116,9 +56,11 @@ tempo wallet revoke <ACCESS_KEY_ADDRESS>
 
 Each wallet can have multiple access keys with independent spending limits. Use access-key limits to constrain account spending, and revoke keys that are no longer needed. These keys authorize transactions; they are separate from [Tempo API keys](/docs/api/authentication).
 
-## Add wallet funds
+<span id="add-wallet-funds" />
 
-```bash
+## Add funds
+
+```bash [Terminal]
 tempo wallet fund
 tempo wallet fund --credits
 tempo wallet fund --crypto
@@ -126,43 +68,36 @@ tempo wallet fund --crypto
 
 On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--credits` opens MPP Credits purchase for eligible one-time services.
 
-To transfer tokens to another address:
+Transfer tokens to another address:
 
-```bash
-tempo wallet transfer <amount> <token> <to> --dry-run
-tempo wallet transfer <amount> <token> <to>
+```bash [Terminal]
+tempo wallet transfer <AMOUNT> <TOKEN> <TO_ADDRESS> --dry-run
+tempo wallet transfer <AMOUNT> <TOKEN> <TO_ADDRESS>
 ```
 
 Check the network and balance with `tempo wallet whoami` before funding. For more options, see [Fund an account](/docs/guide/getting-funds).
 
 ## Discover services
 
-```bash
+```bash [Terminal]
 tempo wallet services
-tempo wallet services --search <query>
-tempo wallet services <id>
+tempo wallet services --search <QUERY>
+tempo wallet services <SERVICE_ID>
 ```
 
 The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets HTTP endpoints accept payments inline. The service directory indexes MPP-registered providers. Each entry shows endpoint URLs, HTTP methods, pricing, whether credits are supported, and request schemas. Use it to find the exact URL and payload for [`tempo request`](/docs/cli/request).
 
 Agents that support MCP can also use the read-only services MCP server at `https://mpp.dev/mcp/services`. See [Find services](/docs/guide/machine-payments/discover-services) for MCP setup, JSON-RPC examples, and the public catalog API.
 
-Agent workflow:
+<span id="manage-payment-sessions" />
 
-```bash
-tempo wallet -t services --search ai
-tempo wallet -t services <SERVICE_ID>
-tempo request -t --dry-run -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
-tempo request -t -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
-```
+## Payment sessions
 
-## Manage payment sessions
+When you use [pay-as-you-go](/docs/guide/machine-payments/pay-as-you-go) services, MPP opens a [session](https://mpp.dev/payment-methods/tempo/session): a payment channel where your wallet deposits funds into a reserve contract, then pays per request with signed [vouchers](https://mpp.dev/protocol/credentials). Vouchers are exchanged offchain; opening, funding, settling, and closing a channel are onchain operations.
 
-When you use [pay-as-you-go](/docs/guide/machine-payments/pay-as-you-go) services, MPP opens a [session](https://mpp.dev/payment-methods/tempo/session) — a payment channel where your wallet deposits funds into a reserve contract, then pays per request using signed [vouchers](https://mpp.dev/protocol/credentials) off-chain. Individual vouchers are exchanged offchain; opening, funding, settling, and closing a channel involve onchain operations.
+`tempo wallet` tracks session state locally:
 
-Tempo Wallet CLI tracks session state locally:
-
-```bash
+```bash [Terminal]
 tempo wallet sessions list
 tempo wallet sessions sync
 tempo wallet sessions close --all
@@ -170,94 +105,133 @@ tempo wallet sessions close --orphaned
 tempo wallet sessions close --finalize
 ```
 
-`sync` reconciles local records with onchain state. `close --orphaned` targets orphaned onchain channels. `close --finalize` finalizes channels already pending close. Use `--dry-run` with any close command to preview before executing.
+`sync` reconciles local records with onchain state. `close --orphaned` targets orphaned onchain channels. `close --finalize` finalizes channels already pending close. Add `--dry-run` to any close command to preview it first.
 
 ## Agent and script mode
 
-Use [TOON](https://toonformat.dev/) output for compact, machine-readable responses:
+Add `-t` for compact, machine-readable [TOON](https://toonformat.dev/) output. Preview paid requests with `--dry-run` and cap them with `--max-spend`:
 
-```bash
+```bash [Terminal]
 tempo wallet -t whoami
-tempo wallet -t services --search ai
+tempo wallet -t services --search <QUERY>
 tempo wallet -t services <SERVICE_ID>
-```
-
-Before spending, preview and cap paid requests:
-
-```bash
 tempo request -t --dry-run -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 tempo request -t --max-spend 1.00 -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 ```
 
-If a service supports MPP Credits, inspect the challenge first, then pay with credits:
+If a service supports MPP Credits, capture the challenge first, then pay with credits:
 
-```bash
+```bash [Terminal]
 headers="$(mktemp)"
 tempo request -t --dry-run -D "$headers" -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
 tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 ```
 
-## Tempo Wallet CLI command reference
+See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 
-### Wallet authentication commands
+<span id="tempo-wallet-cli-command-reference" />
+<span id="wallet-authentication-commands" />
+<span id="wallet-key-commands" />
+<span id="wallet-funding-commands" />
+<span id="wallet-service-discovery-commands" />
+<span id="wallet-session-commands" />
+<span id="advanced-wallet-commands" />
 
-| Command | Description |
-| --- | --- |
-| `tempo wallet login` | Connect or create a wallet via browser auth |
-| `tempo wallet login --no-browser` | Print an auth URL for remote-host login |
-| `tempo wallet refresh` | Refresh the current access key |
-| `tempo wallet logout` | Disconnect and clear local credentials |
-| `tempo wallet whoami` | Print readiness, address, balances, and key state |
-| `tempo wallet whoami --credits` | Print MPP Credits balance |
-
-### Wallet key commands
+## Commands
 
 | Command | Description |
 | --- | --- |
-| `tempo wallet keys` | List keys and their spending limits |
-| `tempo wallet revoke <access-key> --dry-run` | Preview access-key revocation |
-| `tempo wallet revoke <access-key>` | Revoke an access key |
+| `tempo wallet login` | Connect or create a wallet through browser sign-in. |
+| `tempo wallet logout` | Disconnect and clear local credentials. |
+| `tempo wallet refresh` | Refresh the current access key. |
+| `tempo wallet whoami` | Print readiness, address, balances, and key state. |
+| `tempo wallet keys` | List access keys and their spending limits. |
+| `tempo wallet revoke <ACCESS_KEY_ADDRESS>` | Revoke an access key. |
+| `tempo wallet fund` | Fund the wallet: the faucet on testnet, funding options on mainnet. |
+| `tempo wallet transfer <AMOUNT> <TOKEN> <TO_ADDRESS>` | Transfer tokens to another address. |
+| `tempo wallet services [<SERVICE_ID>]` | List registered services, or show one service's endpoints, methods, and request schemas. |
+| `tempo wallet sessions list` | List active payment sessions. |
+| `tempo wallet sessions sync` | Reconcile local sessions with onchain state. |
+| `tempo wallet sessions close` | Close payment sessions. |
+| `tempo wallet debug` | Collect debug info for support. |
+| `tempo wallet completions <SHELL>` | Generate shell completions. |
 
-### Wallet funding commands
+## Flags
 
-| Command | Description |
+### All commands
+
+| Flag | Description |
 | --- | --- |
-| `tempo wallet fund` | Fund wallet (faucet on testnet, bridge on mainnet) |
-| `tempo wallet fund --crypto` | Open direct crypto funding |
-| `tempo wallet fund --credits` | Buy MPP Credits for eligible one-time services |
-| `tempo wallet transfer <amount> <token> <to>` | Transfer tokens to another address |
-| `tempo wallet transfer --credits --mpp-challenge-file <file>` | Pay an MPP challenge with credits |
+| `-t` | Print compact, machine-readable [TOON](https://toonformat.dev/) output. |
+| `--help` | Show the command's flags. |
 
-### Wallet service discovery commands
+### `tempo wallet login`
 
-| Command | Description |
+| Flag | Description |
 | --- | --- |
-| `tempo wallet services` | List all registered services |
-| `tempo wallet services --search <query>` | Filter services by keyword |
-| `tempo wallet services <id>` | Show endpoints, methods, and request schemas |
+| `--no-browser` | Print the sign-in URL instead of opening a browser, for remote hosts. |
 
-### Wallet session commands
+### `tempo wallet logout`
 
-| Command | Description |
+| Flag | Description |
 | --- | --- |
-| `tempo wallet sessions list` | List active payment sessions |
-| `tempo wallet sessions sync` | Reconcile local sessions with onchain state |
-| `tempo wallet sessions close --all` | Close all sessions |
-| `tempo wallet sessions close --orphaned` | Close orphaned onchain channels |
-| `tempo wallet sessions close --finalize` | Finalize channels pending close |
-| `tempo wallet sessions close --cooperative <url>` | Request a cooperative close from the service |
+| `--yes` | Skip the confirmation prompt. |
 
-### Advanced wallet commands
+### `tempo wallet whoami`
 
-| Command | Description |
+| Flag | Description |
 | --- | --- |
-| `tempo wallet debug` | Collect debug info for support |
-| `tempo wallet completions <shell>` | Generate shell completions |
+| `--credits` | Include the MPP Credits balance. |
 
-## Learn more about Tempo Wallet CLI
+### `tempo wallet revoke`
+
+| Flag | Description |
+| --- | --- |
+| `--dry-run` | Preview the revocation without submitting it. |
+
+### `tempo wallet fund`
+
+| Flag | Description |
+| --- | --- |
+| `--crypto` | Open direct crypto funding. |
+| `--credits` | Buy MPP Credits for eligible one-time services. |
+
+### `tempo wallet transfer`
+
+| Flag | Description |
+| --- | --- |
+| `--dry-run` | Preview the transfer without submitting it. |
+| `--credits` | Pay with MPP Credits instead of tokens. |
+| `--mpp-challenge-file <FILE>` | Pay the MPP challenge in this headers file, captured with `tempo request -D`. |
+
+### `tempo wallet services`
+
+| Flag | Description |
+| --- | --- |
+| `--search <QUERY>` | Filter services by keyword. |
+
+### `tempo wallet sessions close`
+
+| Flag | Description |
+| --- | --- |
+| `--all` | Close all sessions. |
+| `--orphaned` | Close orphaned onchain channels. |
+| `--finalize` | Finalize channels already pending close. |
+| `--cooperative <URL>` | Request a cooperative close from the service. |
+| `--dry-run` | Preview the close without submitting it. |
+
+<span id="learn-more-about-tempo-wallet-cli" />
+
+## Related
 
 <Cards>
+  <Card
+    title="tempo request"
+    description="Make paid HTTP requests from the terminal"
+    to="/docs/cli/request"
+    icon="lucide:send"
+  />
   <Card
     title="Tempo Wallet"
     description="Open the web wallet to manage your account"
@@ -269,12 +243,6 @@ tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
     description="How services request and verify payment"
     to="https://mpp.dev/overview"
     icon="lucide:book-open"
-  />
-  <Card
-    title="tempo request"
-    description="Make paid HTTP requests from the terminal"
-    to="/docs/cli/request"
-    icon="lucide:send"
   />
   <Card
     title="Source code"

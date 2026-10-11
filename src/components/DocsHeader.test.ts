@@ -59,7 +59,7 @@ describe('getActiveDocsSection', () => {
   })
 
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
-    expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('tools')
+    expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('api')
     expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
     expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('developers')
     expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Tempo EVM')
@@ -72,7 +72,7 @@ describe('getActiveDocsSection', () => {
     ['/docs/network/transactions', 'developers'],
     ['/get-started/stablecoins', 'overview'],
     ['/docs/development', 'developers'],
-    ['/docs/api/console', 'tools'],
+    ['/docs/api/console', 'api'],
     ['/docs/quickstart/evm-compatibility', 'developers'],
     ['/docs/guide/using-tempo-with-ai', 'overview'],
     ['/docs/quickstart/faucet', 'overview'],
@@ -145,14 +145,14 @@ describe('getActiveDocsSection', () => {
     ['/docs/guide/node/upgrade-cadence', 'developers'],
     ['/docs/guide/node/network-upgrades', 'developers'],
     ['/docs/changelog', 'developers'],
-    ['/docs/api/indexer-api', 'tools'],
+    ['/docs/api/indexer-api', 'api'],
     ['/docs/protocol/rpc/eth_getBalance', 'developers'],
-    ['/docs/sdk/typescript', 'tools'],
-    ['/docs/cli/request', 'tools'],
-    ['/docs/wallet/recipes', 'tools'],
-    ['/docs/server/relay-handler', 'tools'],
-    ['/docs/tools', 'tools'],
-    ['/docs/quickstart/developer-tools', 'tools'],
+    ['/docs/sdk/typescript', 'overview'],
+    ['/docs/cli/request', 'overview'],
+    ['/docs/wallet/recipes', 'overview'],
+    ['/docs/server/relay-handler', 'overview'],
+    ['/docs/tools', 'overview'],
+    ['/docs/quickstart/developer-tools', 'overview'],
   ])('assigns %s to the %s section', (pathname, expected) => {
     expect(getActiveDocsSection(pathname)?.id).toBe(expected)
     expect(getActiveDocsSection(`/developers${pathname}/`)?.id).toBe(expected)
