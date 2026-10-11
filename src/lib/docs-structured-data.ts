@@ -23,8 +23,7 @@ type DocsHeadTags = {
  * Builds the docs JSON-LD head entry from Vocs' page context.
  *
  * Vocs serializes this callback for the client, so every runtime dependency must
- * remain inside the function body. Keep lookup data compact because this source
- * is embedded in each page's initial HTML response.
+ * remain inside the function body.
  */
 export function docsStructuredDataHead(
   path: string,
@@ -46,10 +45,37 @@ export function docsStructuredDataHead(
   const developersUrl = 'https://tempo.xyz/developers'
   // Pages set a root-relative share image in frontmatter `ogImage`. Generated
   // API reference pages have no source file, so their images are listed here.
-  const apiReferenceImages =
-    'activities api-keys balances billing blocks coingecko console/authentication earn exchange faucet fee-amm indexer invitations invite-links mcp members mpp organizations projects routes/deposit-addresses routes/routes routes/transfers rpc tokens usage users verified-token-requests verified-tokens webhooks'.split(
-      ' ',
-    )
+  const apiReferenceImages = [
+    'activities',
+    'api-keys',
+    'balances',
+    'billing',
+    'blocks',
+    'coingecko',
+    'console/authentication',
+    'earn',
+    'exchange',
+    'faucet',
+    'fee-amm',
+    'indexer',
+    'invitations',
+    'invite-links',
+    'mcp',
+    'members',
+    'mpp',
+    'organizations',
+    'projects',
+    'routes/deposit-addresses',
+    'routes/routes',
+    'routes/transfers',
+    'rpc',
+    'tokens',
+    'usage',
+    'users',
+    'verified-token-requests',
+    'verified-tokens',
+    'webhooks',
+  ]
   const apiReference = pagePath.replace(/^\/docs\/api\//, '')
   const image =
     frontmatter?.ogImage ??
