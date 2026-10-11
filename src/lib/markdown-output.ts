@@ -86,7 +86,9 @@ const interactiveDescriptions: Record<string, string> = {
     'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   SupportedRoutesTable:
     'The interactive page lists every route in the live directory, read from GET https://api.tempo.xyz/v1/routes, ' +
-    "with each route's source and destination asset, funding methods, and whether fee coverage (1:1 delivery) is available.",
+    "with each route's source and destination asset, funding methods, and whether fixed rates (1:1 or 1:par execution) are available. " +
+    'Filter it by source, destination, funding method, or fixed rates; the filters are the same query parameters on GET /v1/routes. ' +
+    'Fixed rates are available from the Tempo API Console (https://console.tempo.xyz); contact Tempo (https://tempo.xyz/contact) for eligibility.',
   RoutesTester:
     'Open the interactive Routes API demo at /docs/routes/test. Choose source and destination assets, ' +
     'optionally request subsidized 1:1 delivery, get a quote, create the transfer or deposit address, ' +

@@ -225,16 +225,32 @@ export function quoteRequest(
     query: { ...routeQuoteRequest(route, input) },
   }
 }
+/** `GET /v1/routes` filters: each one keeps only the routes that match it. */
+export type RouteFilters = Partial<
+  Record<
+    | 'sourceChain'
+    | 'sourceToken'
+    | 'destinationChain'
+    | 'destinationToken'
+    | 'method'
+    | 'mode'
+    | 'subsidies',
+    string
+  >
+>
 /**
- * Read the whole route directory. With an API key the API applies the caller's access policy, so
- * only routes (and subsidies) that key can use are listed; without one it lists every route.
+ * Read the whole route directory, or the part `filters` keep. With an API key the API applies the
+ * caller's access policy, so only routes (and subsidies) that key can use are listed; without one
+ * it lists every route.
  */
-export async function loadRoutes(signal: AbortSignal, apiKey = '') {
+export async function loadRoutes(signal: AbortSignal, apiKey = '', filters: RouteFilters = {}) {
   const data: TestRoute[] = []
   const seen = new Set<string>()
   let cursor: string | null = null
   for (let page = 0; page < 20; page++) {
     const url = new URL(routesApi)
+    for (const [name, value] of Object.entries(filters))
+      if (value) url.searchParams.set(name, value)
     url.searchParams.set('limit', '50')
     if (cursor) url.searchParams.set('cursor', cursor)
     const response = await fetch(url, {

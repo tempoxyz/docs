@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { cx } from 'zyzz'
-import { loadRoutes, RoutesApiError } from '../lib/routes-execution'
-import type { TestRoute } from '../lib/routes-test'
+import { loadRoutes, type RouteFilters, RoutesApiError } from '../lib/routes-execution'
+import type { TestMethod, TestRoute } from '../lib/routes-test'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
 import { Container } from './Container'
@@ -11,30 +11,92 @@ import * as Demo from './guides/Demo'
 import { ChainLogo, TokenLogo } from './RouteIcons'
 import { label, note, Select } from './RoutesControls'
 
-const assetLabel = (route: TestRoute, side: 'source' | 'destination') =>
-  `${route[`${side}Token`].symbol} · ${route[`${side}Chain`].name}`
-const unique = (values: string[]) => [...new Set(values)].sort((a, b) => a.localeCompare(b))
+type Filters = {
+  /** Source token key, which also names its network. */
+  source: string
+  /** Destination token key, which also names its network. */
+  destination: string
+  method: '' | TestMethod
+  fixedRates: '' | 'true' | 'false'
+}
+type Option = { value: string; label: string }
+
+const noFilters: Filters = { source: '', destination: '', method: '', fixedRates: '' }
+const methodLabels: Record<TestMethod, string> = {
+  transfer: 'Transfer',
+  depositAddress: 'Deposit address',
+}
+const fields = [
+  { key: 'source', name: 'Source', all: 'All sources' },
+  { key: 'destination', name: 'Destination', all: 'All destinations' },
+  { key: 'method', name: 'Funding', all: 'All funding methods' },
+  { key: 'fixedRates', name: 'Fixed rates', all: 'Any' },
+] as const
+
+const supports = (route: TestRoute, method: TestMethod) =>
+  method === 'transfer'
+    ? !!route.capabilities.transfer?.modes.length
+    : !!route.capabilities.depositAddress
+/** Whether the route takes `subsidize: true`, for one funding method or for either. */
+const hasFixedRates = (route: TestRoute, method: Filters['method']) =>
+  method
+    ? !!route.subsidies?.[method]
+    : !!(route.subsidies?.transfer || route.subsidies?.depositAddress)
+/** Applies the filters the way `GET /v1/routes` does, so the selectors only offer choices with routes. */
+const matches = (route: TestRoute, filters: Filters) =>
+  (!filters.source || route.sourceToken.tokenKey === filters.source) &&
+  (!filters.destination || route.destinationToken.tokenKey === filters.destination) &&
+  (!filters.method || supports(route, filters.method)) &&
+  (!filters.fixedRates || hasFixedRates(route, filters.method) === (filters.fixedRates === 'true'))
+const isFiltered = (filters: Filters) => Object.values(filters).some(Boolean)
 const fundingMethods = (route: TestRoute) =>
-  [
-    route.capabilities.transfer?.modes.length && 'Transfer',
-    route.capabilities.depositAddress && 'Deposit address',
-  ]
-    .filter(Boolean)
+  (Object.keys(methodLabels) as TestMethod[])
+    .filter((method) => supports(route, method))
+    .map((method) => methodLabels[method])
     .join(' · ')
+
+function assets(routes: TestRoute[], side: 'source' | 'destination'): Option[] {
+  const labels = new Map<string, string>()
+  for (const route of routes)
+    labels.set(
+      route[`${side}Token`].tokenKey,
+      `${route[`${side}Token`].symbol} · ${route[`${side}Chain`].name}`,
+    )
+  return [...labels]
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+}
+
+/** The `GET /v1/routes` filters for a selection. The API takes each token with its network. */
+function directoryFilters(filters: Filters, routes: TestRoute[]): RouteFilters {
+  const source = routes.find((route) => route.sourceToken.tokenKey === filters.source)
+  const destination = routes.find(
+    (route) => route.destinationToken.tokenKey === filters.destination,
+  )
+  return {
+    sourceChain: source?.sourceChain.id,
+    sourceToken: source?.sourceToken.tokenKey,
+    destinationChain: destination?.destinationChain.id,
+    destinationToken: destination?.destinationToken.tokenKey,
+    method: filters.method,
+    subsidies: filters.fixedRates,
+  }
+}
 
 /** The live route directory as a filterable table, matching the console's available routes. */
 export function SupportedRoutesTable() {
-  const [routes, setRoutes] = useState<TestRoute[]>()
+  const [directory, setDirectory] = useState<TestRoute[]>()
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
-  const [source, setSource] = useState('')
-  const [destination, setDestination] = useState('')
-  const [network, setNetwork] = useState('')
+  const [filters, setFilters] = useState(noFilters)
+  // The routes the directory returned, and the filters they were read with.
+  const [shown, setShown] = useState<{ filters: Filters; routes: TestRoute[] }>()
+
   useEffect(() => {
     const controller = new AbortController()
     setError('')
     loadRoutes(AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]))
-      .then(setRoutes)
+      .then(setDirectory)
       .catch((e) => {
         if (!controller.signal.aborted)
           setError(e instanceof RoutesApiError ? e.message : 'Could not load routes. Try again.')
@@ -42,77 +104,135 @@ export function SupportedRoutesTable() {
     return () => controller.abort()
   }, [attempt])
 
-  const all = routes ?? []
-  const filtered = all.filter(
-    (route) =>
-      (!source || assetLabel(route, 'source') === source) &&
-      (!destination || assetLabel(route, 'destination') === destination) &&
-      (!network || route.sourceChain.name === network || route.destinationChain.name === network),
-  )
-  const filter = (
-    name: string,
-    value: string,
-    onChange: (value: string) => void,
-    options: string[],
-  ) => (
-    <label {...cx(label(), filterLabel())} htmlFor={`supported-routes-${name.toLowerCase()}`}>
-      {name}
-      <Select
-        id={`supported-routes-${name.toLowerCase()}`}
-        value={value}
-        disabled={!routes}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">All {name.toLowerCase()}s</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </Select>
-    </label>
-  )
+  // Each selection reads the directory with the API's own filters.
+  useEffect(() => {
+    if (!directory) return
+    if (!isFiltered(filters)) {
+      setShown({ filters, routes: directory })
+      return
+    }
+    const controller = new AbortController()
+    setError('')
+    loadRoutes(
+      AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]),
+      '',
+      directoryFilters(filters, directory),
+    )
+      .then((routes) => {
+        if (routes.length) return setShown({ filters, routes })
+        // The directory changed since it loaded, so start again from every route.
+        setFilters(noFilters)
+        setAttempt((n) => n + 1)
+      })
+      .catch((e) => {
+        if (!controller.signal.aborted)
+          setError(e instanceof RoutesApiError ? e.message : 'Could not load routes. Try again.')
+      })
+    return () => controller.abort()
+  }, [directory, filters])
+
+  const all = directory ?? []
+  const candidates: Record<keyof Filters, Option[]> = {
+    source: assets(all, 'source'),
+    destination: assets(all, 'destination'),
+    method: (Object.keys(methodLabels) as TestMethod[]).map((value) => ({
+      value,
+      label: methodLabels[value],
+    })),
+    fixedRates: [
+      { value: 'true', label: 'Available' },
+      { value: 'false', label: 'Not available' },
+    ],
+  }
+  // Offer only the choices that leave at least one route, given the other selections.
+  const choices = (key: keyof Filters) =>
+    candidates[key].filter((option) =>
+      all.some((route) => matches(route, { ...filters, [key]: option.value })),
+    )
+  const change = (key: keyof Filters, value: string) => {
+    const next = { ...filters, [key]: value } as Filters
+    // Clearing the funding method widens what fixed rates refer to, which can leave no route.
+    setFilters(
+      all.some((route) => matches(route, next))
+        ? next
+        : all.some((route) => matches(route, { ...next, fixedRates: '' }))
+          ? { ...next, fixedRates: '' }
+          : noFilters,
+    )
+  }
+  const filtered = isFiltered(filters)
+  const loading = !!shown && shown.filters !== filters
 
   return (
     <div data-testid="supported-routes">
       <Container
         headerLeft={<span {...title()}>Available routes</span>}
         headerRight={
-          routes && (
-            <span {...note()}>
-              {filtered.length === all.length
-                ? `${all.length} routes`
-                : `${filtered.length} of ${all.length} routes`}
+          shown && (
+            <span {...headerMeta()}>
+              <span {...note()}>
+                {isFiltered(shown.filters)
+                  ? `${shown.routes.length} of ${all.length} routes`
+                  : `${shown.routes.length} routes`}
+              </span>
+              {filtered && (
+                <button type="button" {...textButton()} onClick={() => setFilters(noFilters)}>
+                  Reset
+                </button>
+              )}
             </span>
           )
         }
         footer={
           <span>
-            Fee coverage means the route supports 1:1 delivery through a Tempo subsidy. Eligibility
-            depends on your organization, billing, and transfer details.
+            Fixed rates make 1:1 or 1:par execution available for stablecoin payments or asset
+            conversion. Access from the{' '}
+            <a href="https://console.tempo.xyz" target="_blank" rel="noreferrer" {...quietLink()}>
+              Tempo API Console
+            </a>
+            .{' '}
+            <a href="https://tempo.xyz/contact" target="_blank" rel="noreferrer" {...quietLink()}>
+              Contact
+            </a>{' '}
+            for eligibility.
           </span>
         }
       >
         <div {...stack()}>
-          <div {...filters()}>
-            {filter(
-              'Source',
-              source,
-              setSource,
-              unique(all.map((route) => assetLabel(route, 'source'))),
-            )}
-            {filter(
-              'Destination',
-              destination,
-              setDestination,
-              unique(all.map((route) => assetLabel(route, 'destination'))),
-            )}
-            {filter(
-              'Network',
-              network,
-              setNetwork,
-              unique(all.flatMap((route) => [route.sourceChain.name, route.destinationChain.name])),
-            )}
+          <div {...filterRow()}>
+            {fields.map(({ key, name, all: everything }) => {
+              const id = `supported-routes-${key}`
+              return (
+                <div key={key} {...cx(label(), field())}>
+                  <span {...fieldHead()}>
+                    <label htmlFor={id}>{name}</label>
+                    {filters[key] && (
+                      <button
+                        type="button"
+                        aria-label={`Clear ${name.toLowerCase()} filter`}
+                        {...textButton()}
+                        onClick={() => change(key, '')}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </span>
+                  <Select
+                    id={id}
+                    value={filters[key]}
+                    disabled={!directory}
+                    onChange={(e) => change(key, e.target.value)}
+                  >
+                    <option value="">{everything}</option>
+                    {choices(key).map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              )
+            })}
           </div>
           {error ? (
             <div {...errorRow()}>
@@ -123,27 +243,25 @@ export function SupportedRoutesTable() {
                 Retry
               </Demo.Button>
             </div>
-          ) : !routes ? (
+          ) : !shown ? (
             <p role="status" {...note()}>
               Loading routes…
             </p>
-          ) : filtered.length === 0 ? (
-            <p {...cx(note(), empty())}>
-              {all.length === 0 ? 'No routes are available yet.' : 'No routes match these filters.'}
-            </p>
+          ) : shown.routes.length === 0 ? (
+            <p {...cx(note(), empty())}>No routes are available yet.</p>
           ) : (
-            <div {...scroller()}>
+            <div {...cx(scroller(), loading && busy())} aria-busy={loading}>
               <table {...table()}>
                 <thead>
                   <tr {...headRow()}>
                     <th {...head()}>Source</th>
                     <th {...head()}>Destination</th>
                     <th {...head()}>Funding</th>
-                    <th {...cx(head(), alignEnd())}>Fee coverage</th>
+                    <th {...cx(head(), alignEnd())}>Fixed rates</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((route) => (
+                  {shown.routes.map((route) => (
                     <tr key={route.id} {...row()}>
                       <AssetCell
                         chainId={route.sourceChain.id}
@@ -159,9 +277,7 @@ export function SupportedRoutesTable() {
                       />
                       <td {...cx(cell(), detail())}>{fundingMethods(route)}</td>
                       <td {...cx(cell(), detail(), alignEnd())}>
-                        {route.subsidies?.depositAddress || route.subsidies?.transfer
-                          ? 'Available'
-                          : 'Not available'}
+                        {hasFixedRates(route, shown.filters.method) ? 'Available' : 'Not available'}
                       </td>
                     </tr>
                   ))}
@@ -203,16 +319,50 @@ function AssetCell({
 }
 
 const title = style({ fontWeight: tokens.fontWeight.medium, fontSize: tokens.fontSize.sm })
+const headerMeta = style({ display: 'flex', alignItems: 'center', gap: tokens.spacing['3'] })
 const stack = style({
   selectors: { '& > :not(:last-child)': { marginBlockEnd: tokens.spacing['4'] } },
 })
-const filters = style({
-  display: 'flex',
-  flexDirection: 'column',
+const filterRow = style({
+  display: 'grid',
   gap: tokens.spacing['3'],
-  '@media (width >= 40rem)': { flexDirection: 'row', flexWrap: 'wrap' },
+  '@media (width >= 40rem)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' },
+  '@media (width >= 64rem)': { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' },
 })
-const filterLabel = style({ '@media (width >= 40rem)': { width: '224px' } })
+const field = style({ minWidth: 0 })
+const fieldHead = style({
+  display: 'flex',
+  alignItems: 'baseline',
+  justifyContent: 'space-between',
+  gap: tokens.spacing['2'],
+})
+// Clear and Reset read as quiet links beside the labels and the route count.
+const textButton = style({
+  color: tokens.color.gray10,
+  fontSize: tokens.fontSize.compact,
+  textDecorationLine: 'underline',
+  textUnderlineOffset: '2px',
+  cursor: 'pointer',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: '150ms',
+  '@media (hover: hover)': { ':hover': { color: inherited.color.textColorPrimary } },
+  ':focus-visible': {
+    outlineWidth: tokens.borderWidth.emphasis,
+    outlineStyle: 'solid',
+    outlineColor: tokens.color.accent,
+  },
+  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+})
+// A link inside the footer note: grey and underlined, so it reads as part of the sentence.
+const quietLink = style({
+  color: tokens.color.gray11,
+  textDecorationLine: 'underline',
+  textUnderlineOffset: '2px',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: '150ms',
+  '@media (hover: hover)': { ':hover': { color: inherited.color.textColorPrimary } },
+  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+})
 const errorRow = style({
   display: 'flex',
   flexWrap: 'wrap',
@@ -233,7 +383,12 @@ const scroller = style({
   borderTopWidth: tokens.borderWidth.hairline,
   borderTopStyle: 'solid',
   borderTopColor: tokens.color.line,
+  transitionProperty: 'opacity',
+  transitionDuration: '150ms',
+  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
 })
+// The previous rows stay in place, dimmed, while the directory answers a new selection.
+const busy = style({ opacity: 0.6 })
 const table = style({
   width: '100%',
   minWidth: '36rem',
