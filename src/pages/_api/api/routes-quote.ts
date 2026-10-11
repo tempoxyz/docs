@@ -65,9 +65,21 @@ export async function POST(request: Request): Promise<Response> {
   }
 }
 
-function failure(status: number, code: string, message: string) {
+/** Quotes only arrive as POST bodies; a query string would put addresses back in URLs. */
+export function GET(): Response {
+  return failure(405, 'method_not_allowed', 'Send the quote as a JSON POST body.', {
+    allow: 'POST',
+  })
+}
+
+function failure(
+  status: number,
+  code: string,
+  message: string,
+  headers: Record<string, string> = {},
+) {
   return Response.json(
     { error: { code, message } },
-    { status, headers: { 'cache-control': 'no-store' } },
+    { status, headers: { 'cache-control': 'no-store', ...headers } },
   )
 }
