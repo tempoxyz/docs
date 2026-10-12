@@ -3,7 +3,7 @@ import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
 import Icons from 'unplugin-icons/vite'
-import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
+import { defineConfig, type Environment, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
@@ -29,24 +29,27 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV ?? ''),
     },
     plugins: [
+      deferAiIndexDuringRscScan(),
       // Example regions are not complete modules. Keep server tooling out of
       // the client discovery graph; Vocs owns the persisted color scheme.
-      zyzz({
-        exclude: [
-          'src/snippets',
-          'src/test',
-          'src/pages/_api',
-          'src/marketing/blogPlugin.ts',
-          'scripts',
-          'e2e',
-          'search-benchmark',
-          'playwright.config.ts',
-          'playwright.zones.config.ts',
-          'playwright.production.config.ts',
-          'vocs.config.ts',
-        ],
-        script: false,
-      }),
+      skipDuringRscScan(
+        zyzz({
+          exclude: [
+            'src/snippets',
+            'src/test',
+            'src/pages/_api',
+            'src/marketing/blogPlugin.ts',
+            'scripts',
+            'e2e',
+            'search-benchmark',
+            'playwright.config.ts',
+            'playwright.zones.config.ts',
+            'playwright.production.config.ts',
+            'vocs.config.ts',
+          ],
+          script: false,
+        }),
+      ),
       blogPostsPlugin(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),
@@ -77,6 +80,40 @@ export default defineConfig(({ mode }) => {
     server: useHttp ? { host: 'localhost' } : undefined,
   }
 })
+
+// The RSC plugin first runs unwritten rsc and ssr builds that only discover
+// client and server references; it reduces every module to its imports.
+function isRscScanBuild(environment: Environment) {
+  return environment.config.command === 'build' && environment.config.build.write === false
+}
+
+// Zyzz compiles each module's whole style graph, which dominates every build
+// pass. It only adds stylesheet imports and erases authoring imports, so the
+// uncompiled source exposes the same client and server references.
+function skipDuringRscScan(plugin: Plugin): Plugin {
+  const transform = plugin.transform
+  if (typeof transform !== 'function')
+    throw new Error('Zyzz changed its transform hook; update the RSC scan bypass')
+  plugin.transform = function (code, id, options) {
+    if (isRscScanBuild(this.environment)) return
+    return transform.call(this, code, id, options)
+  }
+  return plugin
+}
+
+function deferAiIndexDuringRscScan(): Plugin {
+  return {
+    name: 'tempo-defer-ai-index-during-rsc-scan',
+    apply: 'build',
+    enforce: 'pre',
+    // The AI index fetches external llms.txt pages for minutes. Let it keep
+    // building through the scans instead of holding up reference discovery.
+    load(id) {
+      if (id === '\0virtual:vocs/ai-search-manifest' && isRscScanBuild(this.environment))
+        return 'export const getAiSearchManifest = async () => undefined'
+    },
+  }
+}
 
 function developersProxyBasePath(): Plugin {
   return {
