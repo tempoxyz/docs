@@ -199,6 +199,8 @@ A standard TIP-20 transfer (~50,000 gas) costs approximately 600 microdollars ($
 
 Precompile input charges include the selector and are deducted before dispatch and ABI decoding. Duplicate-check charges apply to AccountKeychain call scopes and ZoneFactory role lists before sorting. T11 requires canonical ABI encoding without gaps, overlaps, trailing bytes, or nonzero padding. T12 permits trailing bytes while retaining the other checks; see the [T12 activation schedule](/docs/protocol/upgrades/t12).
 
+From T12, native storage writes also require more than 2,300 gas remaining in the call, following EIP-2200. State-changing native functions invoked in a static context consume the gas forwarded to that call and return no error data. A caller that handles the failure can continue with its remaining gas. Re-estimate fixed gas limits and review explicitly capped calls; see [T12 breaking changes](/docs/protocol/upgrades/t12#breaking-changes).
+
 ### Removing validator preference
 
 The zero address is not a valid fee token, so `setValidatorToken(address(0))` reverts. To choose the fallback token explicitly, set pathUSD:

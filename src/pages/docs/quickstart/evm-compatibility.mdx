@@ -86,6 +86,24 @@ Tempo's [state creation costs](https://github.com/tempoxyz/tempo/blob/main/tips/
 
 This means transfers to new addresses cost ~300k gas, and contract deployments cost 5-10x more than on Ethereum. Update your `gas_limit` estimates accordingly.
 
+### Read-only calls to native contracts
+
+Use `STATICCALL` only for read-only native functions, such as TIP-20 `balanceOf`. After [T12 activates on your network](/docs/protocol/upgrades/t12), invoking a state-changing native function in a static context halts that call, consumes its forwarded gas, and returns empty data. Before T12, the call reverted with `StaticCallNotAllowed()`.
+
+Wrappers must check the success flag before decoding return data and must not depend on the old error selector. For example:
+
+```solidity
+function readBalance(address token, address account) external view returns (uint256) {
+    (bool ok, bytes memory result) = token.staticcall(
+        abi.encodeWithSignature("balanceOf(address)", account)
+    );
+    require(ok, "Balance query failed");
+    return abi.decode(result, (uint256));
+}
+```
+
+For state-changing functions such as `approve`, use a normal call outside a static context. If you cap the gas forwarded to a native contract, test that cap on T12: storage writes require more than 2,300 gas remaining. See [T12 breaking changes](/docs/protocol/upgrades/t12#breaking-changes).
+
 ### Balance Opcodes and RPC Methods
 
 | Feature | Behavior on Tempo | Alternatives |
