@@ -115,7 +115,7 @@ for (const { receipt } of payments) console.log(receipt.transactionHash)
 The example uses `nonceKey: maxUint256` with an explicit expiry time. Viem 2.57.3 and 2.57.4 also preserve a supplied `nonce` with the `nonceKey: 'expiring'` shortcut. Choose a new nonce for each otherwise identical payment within the same expiry window.
 
 :::warning[JavaScript nonce values]
-With Viem 2.57.3 and 2.57.4, keep custom nonces between `0` and `Number.MAX_SAFE_INTEGER`. T12 accepts the full `uint64` range, but these SDK versions decode transaction nonces as JavaScript numbers. Larger values can cause transaction reads or receipt waiting to throw even after a transaction succeeds. Recover the receipt by transaction hash before retrying a payment.
+With Viem 2.57.3 through 2.57.5, keep custom nonces between `0` and `Number.MAX_SAFE_INTEGER`. T12 accepts the full `uint64` range, but these SDK versions decode transaction nonces as JavaScript numbers. Larger values can cause transaction reads or receipt waiting to throw even after a transaction succeeds. Recover the receipt by transaction hash before retrying a payment.
 :::
 
 If you add access-list entries only to make transactions unique, you can replace them with different nonce values after activation. Other [payment-lane requirements](/docs/protocol/blockspace/payment-lane-specification) still apply.
