@@ -20,7 +20,7 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   zones:
     'Connect to a Zone and work with private balances, deposits, and withdrawals. Zones is in limited preview; see the introduction for access. Earlier testnet sandbox guides describe a separate integration.',
   'machine-payments':
-    'Pay for APIs, accept API payments, find services, and use Machine Payments Protocol (MPP).',
+    'Pay for APIs, accept API payments, find services, and use MPP (https://mpp.dev).',
   developers:
     'Build on Tempo EVM: wallets and keys, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.',
   api: 'Tempo API reference: authentication, conventions, endpoints grouped by product, Console management endpoints, JSON-RPC, and the indexer. An API key authenticates API requests; an account signing key authorizes transactions.',
