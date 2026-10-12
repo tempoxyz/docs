@@ -1,53 +1,48 @@
 ---
-title: "tempo request: CLI command reference"
-seoTitle: "tempo request: CLI Reference | Docs"
+title: "tempo request"
+seoTitle: "tempo request: CLI Reference | Tempo Docs"
 description: Make curl-compatible HTTP requests that automatically negotiate Machine Payments Protocol payments.
 ogImage: /og/2026-q4/og_2026-q4_docs_cli-request_title-f5_v02.png
 ---
 
 import { Cards, Card } from 'vocs'
 
-# `tempo request`: CLI command reference
+# `tempo request`
 
 A curl-compatible HTTP client that handles [Machine Payments Protocol](https://mpp.dev/overview) negotiation transparently. When a server responds with [`402 Payment Required`](https://mpp.dev/protocol/http-402), `tempo request` reads the [challenge](https://mpp.dev/protocol/challenges), authorizes payment using the configured method, then retries with the [credential](https://mpp.dev/protocol/credentials) in one command.
 
-For the wallet-backed flow, run [`tempo wallet login`](/docs/cli/wallet) first. A `--dry-run` preview can read payment terms without logging in. Use [`tempo wallet services`](/docs/cli/wallet#discover-services) before calling paid endpoints so agents and scripts use registered URLs, methods, pricing, and request schemas instead of guessing.
+For the wallet-backed flow, run [`tempo wallet login`](/docs/cli/wallet#sign-in) first. A `--dry-run` preview can read payment terms without logging in. Use [`tempo wallet services`](/docs/cli/wallet#discover-services) before calling paid endpoints so agents and scripts use registered URLs, methods, pricing, and request schemas instead of guessing.
 
-## `tempo request` usage
+<span id="tempo-request-usage" />
 
-| Command | Description |
-| --- | --- |
-| `tempo request <url>` | Make an HTTP request with automatic payment |
-| `tempo request --dry-run <url>` | Preview cost without executing payment |
-| `tempo request --max-spend <amount> <url>` | Set a hard cap for cumulative payment spend |
-| `tempo request -X POST <url> --json '{...}'` | Send a JSON body |
-| `tempo request <url> -H 'Header: Value'` | Add a custom header |
+## Usage
 
-## `tempo request` flags
+```bash [Terminal]
+tempo request [FLAGS] <URL>
+```
 
-| Flag | Description |
-| --- | --- |
-| `-X <method>` | HTTP method (`GET`, `POST`, etc.) |
-| `--json <body>` | Send a JSON body (implies `-X POST`) |
-| `-H <header>` | Add a custom header |
-| `--dry-run` | Request payment terms without paying |
-| `--max-spend <amount>` | Set a hard cap for cumulative payment spend |
-| `-D <file>` / `--dump-header <file>` | Write response headers, useful for inspecting MPP challenges |
-| `-t` / `--toon-output` | Compact machine-readable output for scripts and agents |
+```bash [Terminal]
+tempo request --dry-run <URL>
+tempo request --max-spend <AMOUNT> <URL>
+tempo request -X POST --json '<BODY>' <URL>
+tempo request -H '<HEADER>: <VALUE>' <URL>
+```
 
-## `tempo request` examples
+<span id="tempo-request-examples" />
 
-Preview cost before paying:
+## Examples
 
-```bash
+Preview the cost before paying:
+
+```bash [Terminal]
 tempo request --dry-run -X POST \
   --json '{"prompt":"a sunset over the ocean"}' \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
 ```
 
-Execute a paid request:
+Make the paid request:
 
-```bash
+```bash [Terminal]
 tempo request -X POST \
   --json '{"prompt":"a sunset over the ocean"}' \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
@@ -55,29 +50,45 @@ tempo request -X POST \
 
 Capture headers for an agent-controlled MPP Credits flow:
 
-```bash
+```bash [Terminal]
 headers="$(mktemp)"
 tempo request -t --dry-run -D "$headers" -X POST \
   --json '{"input":"hello"}' \
   <SERVICE_URL>/<ENDPOINT_PATH>
 ```
 
-Discover the right URL and request schema first with [`tempo wallet services`](/docs/cli/wallet#discover-services).
+Find the right URL and request schema first with [`tempo wallet services`](/docs/cli/wallet#discover-services).
 
-## Learn more about paid Tempo requests
+<span id="tempo-request-flags" />
+
+## Flags
+
+| Flag | Description |
+| --- | --- |
+| `-X <METHOD>` | HTTP method, such as `GET` or `POST`. |
+| `--json <BODY>` | Send a JSON body. Implies `-X POST`. |
+| `-H <HEADER>` | Add a custom header. |
+| `--dry-run` | Request payment terms without paying. |
+| `--max-spend <AMOUNT>` | Set a hard cap on cumulative payment spend. |
+| `-D, --dump-header <FILE>` | Write response headers to a file, useful for inspecting MPP challenges. |
+| `-t, --toon-output` | Print compact, machine-readable output for scripts and agents. |
+
+<span id="learn-more-about-paid-tempo-requests" />
+
+## Related
 
 <Cards>
+  <Card
+    title="tempo wallet"
+    description="Sign in and discover services"
+    to="/docs/cli/wallet"
+    icon="lucide:wallet"
+  />
   <Card
     title="MPP protocol"
     description="Challenges, credentials, and receipts"
     to="https://mpp.dev/protocol"
     icon="lucide:book-open"
-  />
-  <Card
-    title="Wallet CLI"
-    description="Authenticate and discover services"
-    to="/docs/cli/wallet"
-    icon="lucide:wallet"
   />
   <Card
     title="MPP SDKs"

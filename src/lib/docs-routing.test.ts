@@ -315,8 +315,8 @@ describe('docs routing redirects', () => {
   })
 
   it.each([
-    ['/tools', '/docs/tools'],
-    ['/tools/:path*', '/docs/tools/:path*'],
+    ['/tools', '/docs/sdk'],
+    ['/tools/:path*', '/docs/sdk'],
     ['/partners', '/docs/partners'],
     ['/docs/ecosystem', '/docs/partners'],
     ['/docs/ecosystem/node-infrastructure', '/docs/partners/rpc-and-nodes'],

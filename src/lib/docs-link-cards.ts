@@ -123,7 +123,8 @@ export const docsLinkCards = {
       icon: 'network',
       links: [
         ['RPC endpoints and chain IDs', '/docs/quickstart/connection-details'],
-        ['SDKs and CLI', '/docs/tools'],
+        ['SDKs', '/docs/sdk'],
+        ['CLI', '/docs/cli'],
         ['EVM differences', '/docs/quickstart/evm-compatibility'],
       ],
     },
@@ -155,7 +156,7 @@ export const docsLinkCards = {
       icon: 'wallet',
       links: [
         ['Fee payer', '/docs/api/fee-payer'],
-        ['Typed API client', '/docs/api/typed-client'],
+        ['Tempo API client', '/docs/sdk/typescript/api-client'],
       ],
     },
     {
