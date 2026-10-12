@@ -10,6 +10,7 @@ export function normalizeRscFetchUrl(url: string, currentHref: string, origin: s
 }
 
 // Static bootstrap executes before the RSC client initializes.
+// Strip formatting whitespace from the inline script sent in every HTML response.
 export const normalizeProxiedRscFetch = `
 (() => {
   if (
@@ -50,4 +51,4 @@ export const normalizeProxiedRscFetch = `
     return originalFetch(new Request(rewritten, input), init);
   };
 })();
-`
+`.replace(/\n\s*/g, '')
