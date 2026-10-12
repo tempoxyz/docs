@@ -11,6 +11,12 @@ ogImage: /og/2026-q4/og_2026-q4_docs_protocol-tips-tip-1009_title-f5_v02.png
 
 # TIP-1009: Expiring Nonces
 
+This TIP describes the original 30-second validity limit and 300,000-entry replay-protection buffer.
+
+:::info[T11 validity window]
+At T11, [TIP-1093](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1093.md) increased the validity limit to 300 seconds (five minutes) and the replay-protection buffer to 3,000,000 entries.
+:::
+
 ## Abstract
 
 TIP-1009 introduces expiring nonces, an alternative replay protection mechanism where transactions are valid only within a specified time window. Instead of tracking sequential nonces, the protocol uses transaction hashes with expiry timestamps to prevent replay attacks. This enables use cases like gasless transactions, meta-transactions, and simplified UX where users don't need to manage nonce ordering.
