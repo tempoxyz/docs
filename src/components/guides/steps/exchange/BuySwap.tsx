@@ -19,7 +19,11 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
 
   const amount = parseUnits('10', tokenInMetadata?.decimals || 6)
 
-  const { data: quote } = Hooks.dex.useBuyQuote({
+  const {
+    data: quote,
+    error: quoteError,
+    isPending: isQuotePending,
+  } = Hooks.dex.useBuyQuote({
     tokenIn: betaUsd,
     tokenOut: alphaUsd,
     amountOut: amount,
@@ -42,6 +46,9 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
       },
     },
   })
+
+  const hasQuote = quote !== undefined && quote > 0n && !quoteError && !isQuotePending
+  const canSwap = !!address && hasQuote && !sendCalls.isPending
 
   useConnectionEffect({
     onDisconnect() {
@@ -69,8 +76,9 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
         <h3 className="font-semibold text-sm">Buy 10 AlphaUSD with BetaUSD</h3>
         <Button
           variant={sendCalls.isSuccess ? 'default' : 'accent'}
-          disabled={!address}
+          disabled={!canSwap}
           onClick={() => {
+            if (!canSwap) return
             sendCalls.sendCallsSync({
               calls,
             })
@@ -81,8 +89,17 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
           {sendCalls.isPending ? 'Buying...' : 'Buy'}
         </Button>
       </div>
+      {address && isQuotePending && <div role="status">Getting a quote...</div>}
+      {address && quoteError && (
+        <div role="alert" className="text-[14px] text-red-500">
+          Couldn't get a quote. Waiting for a new quote before you can buy.
+        </div>
+      )}
+      {address && !isQuotePending && !quoteError && quote === 0n && (
+        <div role="status">No quote is available for this amount.</div>
+      )}
       {sendCalls.error && <div className="text-[14px] text-red-500">{sendCalls.error.message}</div>}
-      {quote && address && (
+      {hasQuote && quote !== undefined && address && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-start gap-1">
             <span className="text-[14px] text-gray11">Quote:</span>
