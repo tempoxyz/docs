@@ -105,7 +105,7 @@ test('mobile blog articles share developer navigation and return to docs', async
   const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
   await expect(menu).toBeVisible()
   await expect(menu.getByRole('button', { name: 'Close menu', exact: true })).toBeFocused()
-  await menu.getByRole('link', { name: 'Docs', exact: true }).click()
+  await menu.getByRole('link', { name: 'Tempo documentation', exact: true }).click()
   await expect(page).toHaveURL((url) => url.pathname === '/')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Documentation')
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')

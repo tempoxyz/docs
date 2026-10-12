@@ -2,13 +2,14 @@
 title: "Give an agent access"
 seoTitle: "Give an Agent Limited Access to a Tempo Account | Tempo Docs"
 description: Define an agent's account permissions, authorize a limited access key, and revoke access when its task is complete.
+ogImage: /og/2026-q4/og_2026-q4_docs_accounts-agents_title-f5_v02.png
 ---
 
 # Give an agent access
 
 Let an agent transact from your account with an access key. Set its budget, expiry, and allowed actions, then connect the signer to your payment client.
 
-For an agent that pays for APIs, start with [Tempo Wallet with agents](/docs/wallet/use-with-agents). The steps below use a key authorized to send test stablecoins to one recipient.
+For an agent that pays for APIs, start with [Let an agent pay for services](/docs/wallet/recipes#let-an-agent-pay-for-services). The steps below use a key authorized to send test stablecoins to one recipient.
 
 ## Authorize the agent's task
 
@@ -48,4 +49,4 @@ Provide a revoke action using the root or an active admin key. Wait for revocati
 
 ## Keep account and request budgets distinct
 
-Use the [access-key budget](/docs/accounts/access-keys#set-limits-that-match-the-task) for the account's spending allowance and a per-request limit for each purchase. Tempo Wallet CLI exposes `--max-spend`; its [agent guide](/docs/wallet/use-with-agents#tempo-wallet-agent-pattern) shows how to preview and pay for a request.
+Use the [access-key budget](/docs/accounts/access-keys#set-limits-that-match-the-task) for the account's spending allowance and a per-request limit for each purchase. Tempo Wallet CLI exposes `--max-spend`; its [agent and script mode](/docs/cli/wallet#agent-and-script-mode) shows how to preview and pay for a request.

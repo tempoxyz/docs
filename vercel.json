@@ -117,6 +117,56 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/api/members",
+      "destination": "/developers/docs/api/team",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/invitations",
+      "destination": "/developers/docs/api/team",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/invite-links",
+      "destination": "/developers/docs/api/team",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/usage",
+      "destination": "/developers/docs/api/billing",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/users",
+      "destination": "/developers/docs/api/organizations",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/typed-client",
+      "destination": "/developers/docs/sdk/typescript/api-client",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/tools",
+      "destination": "/developers/docs/sdk",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/wallet",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/wallet/use-with-agents",
+      "destination": "/developers/docs/wallet/recipes#let-an-agent-pay-for-services",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/wallet/reference",
+      "destination": "/developers/docs/cli/wallet#tempo-wallet-cli-command-reference",
+      "permanent": true
+    },
+    {
       "source": "/developers/wallet",
       "destination": "/developers/docs/cli/wallet",
       "permanent": true
@@ -1068,12 +1118,12 @@
     },
     {
       "source": "/tools",
-      "destination": "/docs/tools",
+      "destination": "/docs/sdk",
       "permanent": true
     },
     {
       "source": "/tools/:path*",
-      "destination": "/docs/tools/:path*",
+      "destination": "/docs/sdk",
       "permanent": true
     },
     {

@@ -12,7 +12,7 @@ const routes = [
   '/docs/zones',
   '/docs/agents',
   '/docs/development',
-  '/docs/tools',
+  '/docs/cli',
   '/docs/partners',
   '/docs/api',
   '/docs/guide/issuance/create-a-stablecoin',

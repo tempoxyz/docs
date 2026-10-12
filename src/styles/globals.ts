@@ -499,6 +499,27 @@ global({
   },
 })
 
+// A collapsed section has no items below its label, so drop the label's bottom
+// margin; the divider padding above matches the sidebar gap below.
+global({
+  '@layer utilities': {
+    '[data-v-sidebar] > [data-v-sidebar-section][data-collapsed="true"] > [data-v-sidebar-section-header]':
+      {
+        marginBottom: tokens.spacing['0'],
+      },
+  },
+})
+
+// Vocs adds a bottom margin to open sections on top of the sidebar gap; drop it so
+// the space after a section's last item matches the space between sections.
+global({
+  '@layer utilities': {
+    '[data-v-sidebar] > [data-v-sidebar-section][data-collapsed="false"]': {
+      marginBottom: tokens.spacing['0'],
+    },
+  },
+})
+
 global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]': {
@@ -1351,6 +1372,21 @@ global({
     'article[data-v-content] :is(p, li, td)[data-v] a[data-v]:is(:hover, :focus-visible)': {
       textDecorationColor: 'currentColor !custom',
     },
+  },
+})
+
+// Linked inline code, such as a CLI command, keeps its code styling; hover reveals the link.
+global({
+  '@layer utilities': {
+    'article[data-v-content] :is(p, li, td)[data-v] a[data-v]:has(> code:only-child)': {
+      color: tokens.color.foreground,
+      textDecorationLine: 'none',
+    },
+    'article[data-v-content] :is(p, li, td)[data-v] a[data-v]:has(> code:only-child):is(:hover, :focus-visible)':
+      {
+        textDecorationLine: 'underline',
+        textDecorationColor: 'currentColor !custom',
+      },
   },
 })
 

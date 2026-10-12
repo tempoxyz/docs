@@ -2,6 +2,7 @@
 title: "Node releases"
 seoTitle: "Tempo Node Releases | Tempo Docs"
 description: Read Tempo node release notes and find binaries, fixes, and changes for each version.
+ogImage: /og/2026-q4/og_2026-q4_docs_changelog_linework-000_v02.png
 ---
 
 <span id="changelog" />

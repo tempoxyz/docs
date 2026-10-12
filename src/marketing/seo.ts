@@ -15,6 +15,7 @@ export type PostSeo = {
   category: CategorySlug
   authors: string
   ogImage?: string // root-relative static asset under public/
+  shareImage?: string // social card only; the blog cards keep ogImage
 }
 
 export function absoluteUrl(base: string, pathname: string): string {
@@ -37,6 +38,10 @@ export function blogPostImageUrl(base: string, post: PostSeo): string {
   return post.ogImage
     ? absoluteUrl(base, post.ogImage)
     : ogImageUrl(base, { title: post.title, section: 'BLOG' })
+}
+
+export function blogPostShareImageUrl(base: string, post: PostSeo): string {
+  return post.shareImage ? absoluteUrl(base, post.shareImage) : blogPostImageUrl(base, post)
 }
 
 // schema.org BlogPosting payload for a post, serialized for a

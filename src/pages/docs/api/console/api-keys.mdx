@@ -2,6 +2,7 @@
 title: "How to create and manage API keys"
 seoTitle: "Create & Manage API Keys | Tempo Docs"
 description: Create project-scoped Tempo API keys, select permissions, store tokens securely, authenticate requests, and safely rotate or revoke credentials when needed.
+ogImage: /og/2026-q4/og_2026-q4_docs_api-console-api-keys_title-f5_v02.png
 ---
 
 # How to create and manage API keys
@@ -47,7 +48,7 @@ curl 'https://api.tempo.xyz/v1/blocks' \
   --header 'Authorization: Bearer tempo:sk:...'
 ```
 
-You can also use the `tempo-api-key` header or configure the [Tempo API Typed Client](/docs/api/typed-client):
+You can also use the `tempo-api-key` header or configure the [Tempo API client](/docs/sdk/typescript/api-client):
 
 ```ts
 import { Client } from 'tapimo'

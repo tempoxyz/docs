@@ -44,7 +44,7 @@ describe('AI documentation navigation', () => {
       /## Zones[\s\S]*limited preview[\s\S]*### Earlier testnet sandbox[\s\S]*Legacy swap/,
     )
     expect(output).toMatch(/## Tempo EVM[\s\S]*\[Keys\]/)
-    expect(output).toMatch(/## APIs & SDKs[\s\S]*\[API reference\]/)
+    expect(output).toMatch(/## API reference[\s\S]*\[API reference\]/)
     expect(output).toContain('Earn is in beta')
     expect(output).toContain('Routes is in beta')
     expect(renderAiIndex(output)).toBe(output)

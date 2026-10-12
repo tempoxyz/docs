@@ -69,9 +69,8 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
   await page.waitForURL(/\/docs\/development\/?$/)
   await expectSingleTitle(page, 'Tempo EVM | Tempo Docs')
 
-  await page.getByRole('button', { name: 'APIs & SDKs', exact: true }).click()
   await page
-    .getByRole('navigation', { name: 'APIs & SDKs', exact: true })
+    .locator('.docs-section-utilities')
     .getByRole('link', { name: 'API reference', exact: true })
     .click()
   await page.waitForURL(/\/docs\/api\/?$/)
