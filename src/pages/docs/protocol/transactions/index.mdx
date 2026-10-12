@@ -39,7 +39,7 @@ Submit independent transactions without waiting for a single sequential nonce st
 
 ### Expiring nonces
 
-Use expiring nonces for transactions with a bounded validity window and no application-managed sequential nonce. See the [SDK examples](/docs/guide/tempo-transaction#expiring-nonces) and [TIP-1009](/docs/protocol/tips/tip-1009).
+Use expiring nonces for transactions with a bounded validity window and no application-managed sequential nonce. Set `validBefore` later than the current block timestamp and no more than 300 seconds (five minutes) ahead of it. [TIP-1093](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1093.md) increased the maximum from 30 seconds at T11. See the [SDK examples](/docs/guide/tempo-transaction#expiring-nonces).
 
 <span id="distinguishing-identical-transactions" />
 
