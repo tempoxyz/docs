@@ -14,20 +14,20 @@ A Tempo account moves funds only when signers whose weights add up to its thresh
 
 Each signer has a weight of at least 1. A transaction executes once the signers that approve it reach the threshold in total weight.
 
-Take a customer account with a passkey of weight 2, a Google login of weight 1, and a Privy login of weight 1, with a threshold of 2. The passkey approves alone. The two logins approve together. One login alone reaches 1 of 2 and can't pay.
+Take a customer account with a passkey of weight 2, a backup key of weight 1, and a recovery provider's key of weight 1, with a threshold of 2. The passkey approves alone. The backup and recovery keys approve together. One of them alone reaches 1 of 2 and can't pay.
 
-One approval covers the whole transaction, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys), unless you add [approval escalation](#approval-escalation-for-larger-payments). Access keys never count toward it: they pay alone, within limits, instead of approving.
+One approval covers the whole transaction, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys never count toward it: they pay alone, within limits, instead of approving.
 
 <span id="what-a-threshold-protects" />
 
 ### What a threshold protects
 
-Each signer can fail: a phone gets lost, a login provider is compromised, an approver leaves. Set weights so the account survives both kinds of failure:
+Each signer can fail: a phone gets lost, a key leaks, an approver leaves. Set weights so the account survives both kinds of failure:
 
 - **Theft:** no single party's signers reach the threshold alone, unless that party is the customer. A compromised signer then can't pay.
 - **Loss:** the remaining signers still reach the threshold after you lose any one. Total weight minus the largest weight must be at least the threshold.
 
-Count parties, not signers. Each issuer and OAuth client ID is its own signer, but logins one auth service issues, such as its own sign-ins and the Privy sign-ins it bridges, belong to one party: that service can reach weight 2 alone. Use logins from different issuers, such as Google and your auth service, when they must be independent.
+Count parties, not signers. Two keys in the same KMS, or a wallet provider's key and a recovery key it also runs, belong to one party: that party can reach their combined weight alone. Keep signers that must be independent with different holders.
 
 <span id="recommended-setup" />
 <span id="recommended-weights" />
@@ -38,14 +38,14 @@ Count parties, not signers. Each issuer and OAuth client ID is its own signer, b
 
 | For | Signers | Threshold | Who can approve |
 | --- | --- | --- | --- |
-| Getting started | Google login (1), passkey (1) | 1 | Either one |
-| Customer accounts | Passkey (2), Google login (1), Privy login (1) | 2 | The passkey, or both logins |
-| Enterprise apps | Customer's passkey (2), your provider key (1), recovery provider (1) | 2 | The customer, or both providers |
+| Getting started | Passkey (1), backup key (1) | 1 | Either one |
+| Customer accounts | Passkey (2), backup key (1), recovery provider (1) | 2 | The passkey, or both keys |
+| Embedded wallets | Customer's passkey (2), your provider key (1), recovery provider (1) | 2 | The customer, or both providers |
 | Company treasury | Three approvers (1 each) | 2 | Any two |
 
-- **Getting started** fails the theft test: the Google login reaches the threshold alone, so its identity provider can approve without the customer. Move customers to the customer accounts setup before they hold funds.
-- **Customer accounts** is multi-factor approval. Signer changes, new devices, and payments beyond a device key's limits need the passkey, which only the customer's device holds, or both logins. A login approves for up to 10 minutes after sign-in, 9 by default in viem, so collect both in one session.
-- **Enterprise apps** keeps each provider below the threshold. Neither can pay without the customer or the other provider.
+- **Getting started** survives a lost passkey, but either signer can pay alone, so keep both with the customer. Move customers to the customer accounts setup before they hold large balances.
+- **Customer accounts** is multi-factor approval. Signer changes, new devices, and payments beyond a device key's limits need the passkey, which only the customer's device holds, or both keys together.
+- **Embedded wallets** keeps each provider below the threshold. Neither can pay without the customer or the other provider.
 
 Walkthroughs: [Set up self-custody](/docs/accounts/guides/self-custody) and [Set up a company treasury wallet](/docs/accounts/guides/company-treasury).
 
@@ -57,6 +57,13 @@ A treasury can also give a team its own budget without lowering its threshold. T
 
 <span id="approval-rules-beyond-the-threshold" />
 <span id="verified-facts-as-approval-factors" />
+<span id="tiered-approvals" />
+<span id="recommended-rules" />
+<span id="recommended-treasury-policy" />
+<span id="recommended-weights-for-a-passkey-and-two-logins" />
+<span id="require-more-approval-for-larger-payments" />
+<span id="approval-rules-for-larger-payments" />
+<span id="approval-escalation-for-larger-payments" />
 
 ## Collect approvals from several approvers
 
@@ -68,70 +75,6 @@ await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner
 ```
 
 A relay with `Relay.accounts` holds the approvals and submits once they reach the threshold. Tempo rejects signatures beyond the threshold, so stop collecting once it's met. A signer change voids approvals collected for the old configuration.
-
-<span id="tiered-approvals" />
-<span id="recommended-rules" />
-<span id="recommended-treasury-policy" />
-<span id="recommended-weights-for-a-passkey-and-two-logins" />
-<span id="require-more-approval-for-larger-payments" />
-<span id="approval-rules-for-larger-payments" />
-
-## Approval escalation for larger payments
-
-An escalation policy raises the threshold when a transaction sends more, or when the account holds more. Approval escalation is specified in [TIP-1135](https://tips.sh/1135) and isn't live on Tempo devnet yet.
-
-For a treasury with three approvers of weight 1 each:
-
-| Situation | Required approvals |
-| --- | --- |
-| Payments up to $5,000 in one transaction | 1 of 3 |
-| More than $5,000 in one transaction | 2 of 3 |
-| Balance above $100,000, for any payment | 3 of 3 |
-| Signer changes, new access keys, and every other action | 3 of 3 |
-
-The last row is the administrative threshold. It covers everything that isn't a direct payment a rule names. For a customer account with a passkey (2) and two logins (1 each), require weight 2 up to $5,000, weight 3 above it, and weight 4 for signer changes. Use logins from different providers: weight counts approvals, not independent parties.
-
-<span id="what-approval-rules-measure" />
-<span id="what-account-policies-measure" />
-
-### What escalation rules measure
-
-| Rule | Measures | Counts | Doesn't count |
-| --- | --- | --- | --- |
-| Outflow | What one transaction sends in one stablecoin | Every call in a batch: two $3,000 payments count as $6,000. The maximum fee, when the account pays its own fees in that stablecoin. | Incoming transfers, refunds, and sponsored fees |
-| Balance | The account's balance before the transaction | Funds received in earlier transactions | Funds received in the same transaction |
-
-- Rules cover USD TIP-20 stablecoins at face value, one stablecoin per rule. Amounts in different stablecoins don't add up.
-- The strictest matching rule wins. Requirements don't add up.
-- An amount equal to the limit stays in the lower tier. A $5,000 payment plus its fee in the same stablecoin goes above it.
-- Rules measure one transaction, not a rolling total. Separate payments under the limit each need only the lower tier.
-
-<span id="actions-that-need-the-administrative-threshold" />
-
-Only direct payments use the payment tiers: every call is `transfer` or `transferWithMemo` on a stablecoin a rule names. Token allowances, contract calls, swaps, signer and rule changes, access-key changes, and transfers of tokens no rule names need the administrative threshold, whatever the amount.
-
-<span id="what-approval-rules-turn-off" />
-<span id="what-account-policies-turn-off" />
-
-### What escalation turns off
-
-An access key or an allowance would let funds leave without the tiers, so a policy turns them off:
-
-| While a policy is on | Effect |
-| --- | --- |
-| Access keys | Can't spend for the account, including keys authorized earlier and team budgets |
-| Allowances | Third parties can't pull funds, including with allowances granted earlier |
-| Fee sponsorship | The account can't pay fees for other accounts |
-
-Removing the policy turns existing access keys and allowances back on, so revoke the ones you don't want first. A policy doesn't cover funds already held by other contracts, such as open orders.
-
-<span id="install-approval-rules" />
-<span id="install-an-account-policy" />
-<span id="install-an-escalation-policy" />
-
-### Installing an escalation policy
-
-Signers install a policy with `setEscalationPolicy` on the native multisig precompile, approved at the new administrative threshold. An access key can't install one. The call takes the policy's current revision and fails if someone changed it since you read it. See [Require more approvals for larger payments](/docs/accounts/guides/company-treasury#require-more-approvals-for-larger-payments) for the code.
 
 <span id="receive-policies" />
 
@@ -151,7 +94,6 @@ Your contract or backend can check that an account approved a message, against t
 | An account's signers reached its threshold | `verifyMultisig` | In a contract |
 | An active access key of an account signed | `verifyKeychain` | In a contract |
 | A passkey or key signed | `verify` | In a contract |
-| A login approved a message | Login message signature | Offchain |
 
 <span id="verify-an-account-approval-in-solidity" />
 
@@ -180,10 +122,6 @@ contract ApprovalCheck {
 - Include your chain ID, contract address, and the account in `hash`, so an approval can't be replayed elsewhere.
 - `verifyKeychain` accepts only access keys that sign with a single key. A configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`.
 
-<span id="verify-a-login-on-your-backend" />
-
-To sign customers in to your backend, verify a login message signature offchain. It signs for the login's address, so check that the login is a signer of the account. Name your domain, the chain, and an expiry or nonce in the message, and reject logins whose provider key was revoked since the sign-in.
-
 <span id="security-policy-limits" />
 <span id="approval-limits" />
 <span id="approval-rule-limits" />
@@ -198,54 +136,15 @@ To sign customers in to your backend, verify a login message signature offchain.
 | Signers per account | 1 to 48 |
 | Total weight | Up to 255 |
 | Approvals per transaction | Up to 8, so the eight largest weights must reach the threshold |
-| Login approvals per transaction | Up to 2. If logins together reach the threshold, two of them must. |
-| Escalation rules per account | 1 to 16 |
-| Stablecoins across escalation rules | Up to 8 |
-| Each escalation rule's threshold | Above the base threshold, up to the administrative threshold |
-| Administrative threshold | Reachable with up to 8 approvals |
 
 - A signer update voids approvals collected for the old configuration. Approve again.
 - Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
 
 <span id="private-policies" />
-
-## Experimental: private policies
-
-A private policy is one signer that stands for a hidden rule, such as any 3 of 7 approvers, or a Google login, a Privy login, and a passkey together. Observers see that the policy approved, not who approved. Private policies are specified in [TIP-1136](https://tips.sh/1136).
-
-| Public | Known only to the policy's holders |
-| --- | --- |
-| The policy signer, its weight, and that it approved | The members, threshold, and roles |
-| The exact transaction or access key it approved | Which members or factors approved |
-| Payments, balances, and timing | The Google account, phone number, and passkey |
-
+<span id="experimental-private-policies" />
 <span id="how-a-private-policy-approves" />
-
-### How a private policy approves
-
-- The account lists a commitment to the policy, not the policy itself.
-- Each approval is a zero-knowledge proof that the policy approved one exact transaction or access key grant, for this account and its current signers.
-- The policy adds its weight like any signer. The account's other signers and threshold still apply.
-- Changing the policy is a signer change, approved by the current signers. It voids pending proofs, but doesn't revoke access keys the policy authorized.
-- A policy can include a verified fact as a factor, such as "passkey and KYC passed". Verified facts support your compliance checks; they don't replace your compliance program.
-
 <span id="keep-policy-backups" />
-
-### Keep private policy backups
-
-Without the policy data, the policy can't approve.
-
-- Keep encrypted backups in more than one place, such as two devices and a hosted store. Hosted storage can withhold or lose the data, but can't read it or change the policy.
-- Keep a backup signer outside the policy. A lost policy can't approve its own recovery.
-- Restore a backup of a new policy on another device before you install it.
-
 <span id="private-policy-limits" />
+<span id="verify-a-login-on-your-backend" />
 
-### Private policy limits
-
-- Conditions checked at key grant don't constrain later payments. The key enforces only its public limits. To enforce a hidden vendor list or budget, approve each payment with a proof.
-- The prover sees the evidence it proves with, but can't forge an approval. Prove on the device to keep the evidence there.
-- A login provider can vouch falsely for its own factor, but can't satisfy the other factors.
-- Distinct members aren't necessarily distinct people. To require independent providers, write it into the policy.
-
-Specifications: [configurable accounts](https://tips.sh/1107), [native multisig accounts](https://tips.sh/1114), [login signatures](https://tips.sh/1131), [approval rules](https://tips.sh/1135), [private policies](https://tips.sh/1136), [configurable account access keys](https://tips.sh/1111), [signature verifier](/docs/protocol/tips/tip-1020).
+Specifications: [configurable accounts](https://tips.sh/1107), [native multisig accounts](https://tips.sh/1114), [configurable account access keys](https://tips.sh/1111), [signature verifier](/docs/protocol/tips/tip-1020).

@@ -11,7 +11,7 @@ import { PasskeyAccountDemo } from '../../../../components/guides/PasskeyAccount
 
 A passkey is a WebAuthn key that the customer approves with their face, fingerprint, PIN, or security key. It's the signer only the customer holds, so it keeps the account in their control.
 
-The private key never leaves the customer's authenticator, and Tempo checks each WebAuthn signature on chain. A passkey trusts the customer's device and, for a synced passkey, their passkey provider. No app, wallet provider, or login service is involved. Use it for customer approvals, signer changes, and recovery of other signers.
+The private key never leaves the customer's authenticator, and Tempo checks each WebAuthn signature on chain. A passkey trusts the customer's device and, for a synced passkey, their passkey provider. No app or wallet provider is involved. Use it for customer approvals, signer changes, and recovery of other signers.
 
 ## Passkey authenticators
 
@@ -45,6 +45,6 @@ const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
 
 ## Passkey signer weights
 
-We recommend a passkey at weight 2 next to two logins at weight 1, at threshold 2, so the passkey approves alone and the logins together recover it. Use logins from different issuers, so no single issuer approves alone. See [Signing thresholds](/docs/accounts/security-policies).
+We recommend a passkey at weight 2 next to a backup key and a recovery provider's key at weight 1 each, at threshold 2. The passkey approves alone, and the two keys together recover it. Keep the backup key with the customer and the recovery key with a separate party, so neither approves alone. See [Signing thresholds](/docs/accounts/security-policies).
 
-To add a passkey to an existing account or require it alongside a login, see [Set up self-custody](/docs/accounts/guides/self-custody). For other methods, see [Signing methods](/docs/accounts/authentication).
+To add a passkey to an existing account or back it up with other keys, see [Set up self-custody](/docs/accounts/guides/self-custody). For other methods, see [Signing methods](/docs/accounts/authentication).

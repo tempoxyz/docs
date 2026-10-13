@@ -536,7 +536,6 @@ export default defineConfig({
               { text: 'Private keys', link: '/docs/accounts/authentication/private-keys' },
               { text: 'Device keys', link: '/docs/accounts/authentication/device-keys' },
               { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
-              { text: 'OIDC logins', link: '/docs/accounts/authentication/oidc' },
             ],
           },
           { text: 'Signing thresholds', link: '/docs/accounts/security-policies' },
@@ -549,7 +548,7 @@ export default defineConfig({
         text: 'Users',
         items: [
           { text: 'Use a wallet provider', link: '/docs/accounts/guides/wallet-provider' },
-          { text: 'Enterprise SSO login', link: '/docs/accounts/guides/enterprise-sso' },
+          { text: 'Enterprise SSO login', link: '/docs/accounts/guides/wallet-provider' },
           { text: 'Set up self-custody', link: '/docs/accounts/guides/self-custody' },
           { text: 'Set up a spending account', link: '/docs/accounts/guides/spending-account' },
         ],
@@ -1380,13 +1379,23 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/accounts/authentication/oidc',
+      destination: '/docs/accounts/authentication',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/enterprise-sso',
+      destination: '/docs/accounts/guides/wallet-provider',
+      status: 301,
+    },
+    {
       source: '/docs/accounts/guides/identity-provider',
-      destination: '/docs/accounts/guides/enterprise-sso',
+      destination: '/docs/accounts/guides/wallet-provider',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/relay',
-      destination: '/docs/accounts/authentication/oidc#login-services',
+      destination: '/docs/accounts/authentication',
       status: 301,
     },
     {
@@ -1396,22 +1405,22 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/authentication/email-otp',
-      destination: '/docs/accounts/authentication/oidc#email-and-sms-codes',
+      destination: '/docs/accounts/authentication',
       status: 301,
     },
     {
       source: '/docs/accounts/authentication/privy',
-      destination: '/docs/accounts/authentication/oidc#privy-logins',
+      destination: '/docs/accounts/guides/wallet-provider#build-with-privy',
       status: 301,
     },
     {
       source: '/docs/accounts/authentication/login-services',
-      destination: '/docs/accounts/authentication/oidc#login-services',
+      destination: '/docs/accounts/authentication',
       status: 301,
     },
     {
       source: '/docs/accounts/authentication/relays',
-      destination: '/docs/accounts/authentication/oidc#login-services',
+      destination: '/docs/accounts/authentication',
       status: 301,
     },
     {
@@ -1436,7 +1445,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/change-email',
-      destination: '/docs/accounts/guides/enterprise-sso#handle-an-email-change',
+      destination: '/docs/accounts/recovery',
       status: 301,
     },
     {
@@ -1471,7 +1480,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/advanced/approval-rules',
-      destination: '/docs/accounts/security-policies#approval-escalation-for-larger-payments',
+      destination: '/docs/accounts/security-policies',
       status: 301,
     },
     {
@@ -1511,17 +1520,17 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/policies',
-      destination: '/docs/accounts/security-policies#approval-escalation-for-larger-payments',
+      destination: '/docs/accounts/security-policies',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/private-policies',
-      destination: '/docs/accounts/security-policies#experimental-private-policies',
+      destination: '/docs/accounts/security-policies',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/verified-facts',
-      destination: '/docs/accounts/security-policies#experimental-private-policies',
+      destination: '/docs/accounts/security-policies',
       status: 301,
     },
     {

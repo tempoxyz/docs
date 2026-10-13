@@ -3,29 +3,23 @@
 import * as React from 'react'
 import { cx } from 'zyzz'
 import LucideCircleCheck from '~icons/lucide/circle-check'
-import LucideCircleUserRound from '~icons/lucide/circle-user-round'
 import LucideFileCog from '~icons/lucide/file-cog'
 import LucideFingerprint from '~icons/lucide/fingerprint'
 import LucideKeyRound from '~icons/lucide/key-round'
 import LucideLaptop from '~icons/lucide/laptop'
-import LucideRadioTower from '~icons/lucide/radio-tower'
 import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideServer from '~icons/lucide/server'
-import LucideShieldCheck from '~icons/lucide/shield-check'
 import LucideSmartphone from '~icons/lucide/smartphone'
 import LucideUsers from '~icons/lucide/users'
 import { Container } from '../Container'
 import { AccountState, TxHash } from './AccountSandbox'
 import { accountSandbox } from './AccountSandbox.styles'
 import { analyzeAccount, isCreated } from './account-sandbox'
-import type { LoginSignInRequest } from './account-sandbox-devnet'
 import { diffAccounts } from './account-sandbox-diff'
-import type { LoginMethod } from './account-sandbox-oidc'
 import { Button, Step } from './Demo'
 import { guideDemo, guideDemoNetwork, guideDemoTitle } from './GuideDemo.styles'
 import {
   type DemoAction,
-  DemoError,
   type DemoScript,
   type DemoState,
   type GuideContext,
@@ -42,27 +36,18 @@ import { thisDevice } from './this-device'
 const localIcons: Record<LocalIcon, typeof LucideSmartphone> = {
   device: LucideSmartphone,
   laptop: LucideLaptop,
-  login: LucideCircleUserRound,
   passkey: LucideFingerprint,
-  relay: LucideRadioTower,
-  publisher: LucideShieldCheck,
   update: LucideFileCog,
   server: LucideServer,
   team: LucideUsers,
   key: LucideKeyRound,
 }
 
-const loginWords: Record<LoginMethod, string> = {
-  google: 'Google',
-  privy: 'Privy',
-}
-
 // ---------------------------------------------------------------------------
-// Environment: devnet, the local auth app, and a platform passkey
+// Environment: devnet and a platform passkey
 
 type Modules = {
   devnet: typeof import('./account-sandbox-devnet')
-  logins: typeof import('./account-sandbox-oidc')
   chain: typeof import('./guide-demo-devnet')
 }
 
@@ -73,7 +58,7 @@ type Environment =
       status: 'ready'
       modules: Modules
       live: ReadonlySet<Need>
-      context: Omit<GuideContext, 'options' | 'signIn'>
+      context: Omit<GuideContext, 'options'>
     }
 
 let loaded: Promise<Modules> | undefined
@@ -82,9 +67,8 @@ let loaded: Promise<Modules> | undefined
 function loadModules() {
   loaded ??= Promise.all([
     import('./account-sandbox-devnet'),
-    import('./account-sandbox-oidc'),
     import('./guide-demo-devnet'),
-  ]).then(([devnet, logins, chain]) => ({ devnet, logins, chain }))
+  ]).then(([devnet, chain]) => ({ devnet, chain }))
   return loaded
 }
 
@@ -97,8 +81,7 @@ async function hasPlatformPasskey() {
   }
 }
 
-/** `signsIn`: whether the demo signs in, so the local auth app is probed only then. */
-function useEnvironment(signsIn: boolean): Environment {
+function useEnvironment(): Environment {
   const [environment, setEnvironment] = React.useState<Environment>({ status: 'checking' })
   React.useEffect(() => {
     // HTTPS pages can't call the plain-HTTP devnet, so don't load it.
@@ -113,16 +96,8 @@ function useEnvironment(signsIn: boolean): Environment {
           if (active) setEnvironment({ status: 'offline' })
           return
         }
-        const [logins, passkey] = await Promise.all([
-          signsIn ? modules.devnet.probeLogins().catch(() => new Set()) : new Set(),
-          hasPlatformPasskey(),
-        ])
-        const live = new Set<Need>(
-          [...logins].filter((kind): kind is LoginMethod =>
-            modules.logins.loginMethods.includes(kind as LoginMethod),
-          ),
-        )
-        if (passkey) live.add('passkey')
+        const live = new Set<Need>()
+        if (await hasPlatformPasskey()) live.add('passkey')
         if (active)
           setEnvironment({
             status: 'ready',
@@ -138,7 +113,7 @@ function useEnvironment(signsIn: boolean): Environment {
     return () => {
       active = false
     }
-  }, [signsIn])
+  }, [])
   return environment
 }
 
@@ -146,12 +121,6 @@ function useEnvironment(signsIn: boolean): Environment {
 // The demo
 
 type Entry = { state: DemoState; outcome?: StepOutcome }
-
-type SignInPrompt = {
-  method: LoginMethod
-  message: string
-  resolve: (popup: Window | null) => void
-}
 
 /** A guide's steps, run on Tempo devnet with your own signers. */
 export function GuideDemo({ guide }: { guide: GuideId }) {
@@ -161,11 +130,7 @@ export function GuideDemo({ guide }: { guide: GuideId }) {
 }
 
 function Demo({ guide, script }: { guide: GuideId; script: DemoScript }) {
-  const environment = useEnvironment(
-    (script.choices?.map((choice) => choice.id) ?? ['']).some((choice) =>
-      script.needs(choice).some((need) => need !== 'passkey'),
-    ),
-  )
+  const environment = useEnvironment()
   return (
     <Container
       headerLeft={
@@ -205,12 +170,6 @@ function Runner(props: {
   ])
   const [busy, setBusy] = React.useState<string | null>(null)
   const [error, setError] = React.useState<{ index: number; message: string } | null>(null)
-  const [prompt, setPrompt] = React.useState<SignInPrompt | null>(null)
-  const [signingIn, setSigningIn] = React.useState(false)
-  const popup = React.useRef<Window | null>(null)
-  const cancel = React.useRef<AbortController | null>(null)
-  const latest = React.useRef(history)
-  latest.current = history
 
   const actions = [...script.setup, ...script.steps]
   const done = history.length - 1
@@ -234,68 +193,20 @@ function Runner(props: {
       .map((item) => item.id),
   )
 
-  /** Ask the reader to open a sign-in window from a click. */
-  function ask(method: LoginMethod, message: string) {
-    return new Promise<Window | null>((resolve) => setPrompt({ method, message, resolve }))
-  }
-
-  function answer(start: boolean) {
-    if (!prompt) return
-    prompt.resolve(start ? modules.devnet.openSignInWindow() : null)
-    setPrompt(null)
-  }
-
-  /** Who an expired login is, so the reader signs in as the right one. */
-  function renewMessage(request: LoginSignInRequest) {
-    if (request.reason === 'add') return `Sign in to add your ${loginWords[request.method]} login.`
-    const account = latest.current[latest.current.length - 1].state.account
-    const signer = account.signers.find((item) => item.name === request.signer)
-    const who =
-      signer?.kind === 'google' || !signer?.subject
-        ? `Your ${loginWords[request.method]} login`
-        : signer.subject
-    return `${who} signed in over 9 minutes ago. Sign in again to approve.`
-  }
-
-  function context(controller: AbortController): GuideContext {
+  function context(): GuideContext {
     const working = 'Sending to devnet…'
     const labels = modules.devnet.devnetPromptLabels
     return {
       ...environment.context,
-      options: {
-        onPrompt: (next) => {
-          setBusy(next ? labels[next] : working)
-          setSigningIn(Boolean(next?.startsWith('sign-in-')))
-        },
-        requestSignIn: (request) => ask(request.method, renewMessage(request)),
-        signal: controller.signal,
-      },
-      async signIn(method) {
-        // The click's window serves the first sign-in; later ones ask for another click.
-        let opened = popup.current
-        popup.current = null
-        if (!opened || opened.closed)
-          opened = await ask(method, `Next, sign in with ${loginWords[method]}.`)
-        if (!opened) throw new DemoError('Sign-in cancelled.')
-        setBusy(labels[`sign-in-${method}`])
-        setSigningIn(true)
-        try {
-          return await modules.logins.signIn({ method, popup: opened, signal: controller.signal })
-        } finally {
-          setSigningIn(false)
-          setBusy(working)
-        }
-      },
+      options: { onPrompt: (next) => setBusy(next ? labels[next] : working) },
     }
   }
 
   async function run(action: DemoAction, from: DemoState, index: number) {
     setError(null)
-    const controller = new AbortController()
-    cancel.current = controller
     setBusy('Sending to devnet…')
     try {
-      const outcome = await action.run(from, context(controller))
+      const outcome = await action.run(from, context())
       setHistory((items) => [...items, { state: outcome.state, outcome }])
     } catch (cause) {
       setError({
@@ -304,20 +215,12 @@ function Runner(props: {
       })
     } finally {
       setBusy(null)
-      setPrompt(null)
-      setSigningIn(false)
-      cancel.current = null
-      if (popup.current && !popup.current.closed) popup.current.close()
-      popup.current = null
     }
   }
 
-  /** Run the next action. A sign-in window must open in this click, before any `await`. */
   function advance() {
     const action = actions[done]
     if (!action || busy) return
-    const method = action.signIn?.(state) ?? null
-    popup.current = method ? modules.devnet.openSignInWindow() : null
     void run(action, state, done)
   }
 
@@ -329,12 +232,6 @@ function Runner(props: {
   function startOver() {
     setError(null)
     setHistory([{ state: scriptStart(guide, state.choice) }])
-  }
-
-  function cancelSignIn() {
-    prompt?.resolve(null)
-    setPrompt(null)
-    cancel.current?.abort()
   }
 
   const renderAction = (action: DemoAction, index: number, number: number) => {
@@ -392,32 +289,6 @@ function Runner(props: {
       {...cx(accountSandbox({ className: 'account-sandbox guide-demo' }), guideDemo())}
       aria-busy={Boolean(busy)}
     >
-      {prompt && (
-        <section className="as-signin" aria-label="Sign in">
-          <LucideCircleUserRound aria-hidden="true" />
-          <span>{prompt.message}</span>
-          <button
-            type="button"
-            className="as-button as-button-primary"
-            onClick={() => answer(true)}
-          >
-            Sign in with {loginWords[prompt.method]}
-          </button>
-          <button type="button" className="as-link" onClick={() => answer(false)}>
-            Cancel
-          </button>
-        </section>
-      )}
-      {signingIn && busy && !prompt && (
-        <div className="as-signin" role="status">
-          <LucideCircleUserRound aria-hidden="true" />
-          <span>{busy}</span>
-          <button type="button" className="as-link" onClick={cancelSignIn}>
-            Cancel sign-in
-          </button>
-        </div>
-      )}
-
       {script.choices && done === 0 && (
         <div className="gd-choice">
           <span className="as-label">{script.choiceLabel ?? 'Choose'}</span>
@@ -506,8 +377,7 @@ function Runner(props: {
             />
           ) : (
             <p className="gd-empty">
-              No account yet. Its address comes from its first signer
-              {guide === 'identity-provider' ? ': your login' : ''}.
+              No account yet. Its address comes from its first signer.
             </p>
           )}
         </section>

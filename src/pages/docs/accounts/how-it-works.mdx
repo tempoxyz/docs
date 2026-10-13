@@ -10,7 +10,7 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 A Tempo account is an address with rules about who can move its funds. Signers approve together by weight, access keys pay alone within limits, and Tempo checks both on every transaction. Tempo has no admin key or override, so only the keys the account lists can move its funds.
 
-This page follows one account with three signers: a passkey on the customer's phone, a recovery key in your KMS, and a Google login. Any two can approve. A payout server also holds an access key with a daily limit.
+This page follows one account with three signers: a passkey on the customer's phone, a backup key the customer keeps in a hardware wallet, and a recovery key in your KMS. Any two can approve. A payout server also holds an access key with a daily limit.
 
 <span id="tempo-account-model" />
 <span id="signers-change-the-address-doesnt" />
@@ -29,7 +29,7 @@ The address is the account's public identifier. It holds the account's TIP-20 ba
 | Single-key account | One key, as on other EVM chains. [Upgrade it](/docs/accounts/create#upgrade-an-existing-account) to a configurable account at the same address. |
 | Configurable account | [Signers](#signers) with weights and a threshold. Its address comes from its first configuration and never changes as signers change. |
 
-The example account is configurable, so the customer keeps the same address when they replace a lost phone or drop the Google login. Either kind can have [access keys](#access-keys).
+The example account is configurable, so the customer keeps the same address when they replace a lost phone or rotate the recovery key. Either kind can have [access keys](#access-keys).
 
 [Create an account](/docs/accounts/create)
 
@@ -40,17 +40,16 @@ The example account is configurable, so the customer keeps the same address when
 
 <AccountDiagram
   name="signers"
-  alt="A signer has a weight and is one of four types: private key, device key, passkey, or OIDC login. The sum of approving signers' weights must reach the threshold."
+  alt="A signer has a weight and is one of three types: private key, device key, or passkey. The sum of approving signers' weights must reach the threshold."
 />
 
-Signers approve payments and account changes. Each signer has an auth type and a weight, and a transaction executes once signers whose weights reach the threshold approve it. In the example, each signer has weight 1 and the threshold is 2, so the passkey and the Google login can pay together, and the recovery key can stand in for either one.
+Signers approve payments and account changes. Each signer has an auth type and a weight, and a transaction executes once signers whose weights reach the threshold approve it. In the example, each signer has weight 1 and the threshold is 2, so the passkey and the backup key can pay together, and the recovery key can stand in for either one.
 
 Each auth type has its own [authentication](/docs/accounts/authentication) guide:
 
 - [Private keys](/docs/accounts/authentication/private-keys)
 - [Device keys](/docs/accounts/authentication/device-keys)
 - [Passkeys](/docs/accounts/authentication/passkeys)
-- [OIDC logins](/docs/accounts/authentication/oidc): Google and other social logins, SSO, and Privy
 
 Only signers can change signers and the threshold. A change voids approvals collected for the old configuration.
 
@@ -92,7 +91,7 @@ Custody comes down to one question: who can approve a payment without the custom
 | Your app or wallet provider | Only with signers it holds |
 | Fee payers, Tempo, and validators | No |
 
-In the example, your app holds the recovery key, which has weight 1 against a threshold of 2. It can't pay without the customer's passkey or login. Give the customer a signer only they hold, such as a passkey, and keep any signer you hold below the threshold on its own.
+In the example, your app holds the recovery key, which has weight 1 against a threshold of 2. It can't pay without the customer's passkey or backup key. Give the customer a signer only they hold, such as a passkey, and keep any signer you hold below the threshold on its own.
 
 ## Trust assumptions by signer
 
@@ -101,13 +100,13 @@ Non-custodial doesn't mean trustless. Each signer type trusts something differen
 | Signer | Trusts |
 | --- | --- |
 | Passkey or device key | The customer's device and its secure hardware |
+| Key in a hardware wallet | Whoever holds the device, and its PIN |
 | Key in your KMS or HSM | Your infrastructure and its access controls |
-| Login | Its issuer and [login services](/docs/accounts/authentication/oidc#login-services) |
 
-Mix signer types so no single party can approve alone. The example's Google login trusts Google, but it can't approve without a second signer. See [Signing thresholds](/docs/accounts/security-policies).
+Mix signer types and holders so no single party can approve alone. The example's recovery key trusts your KMS, but it can't approve without a second signer. See [Signing thresholds](/docs/accounts/security-policies).
 
 ## Leaving an app
 
-A customer leaves by adding their own signer and removing the app's, in one update. In the example, they add a new key and remove your recovery key and the Google login. No private key is exported. The customer then opens the same account in a self-custodial wallet, such as Tempo Wallet. See [Hand off to a self-custodial wallet](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet).
+A customer leaves by adding their own signer and removing the app's, in one update. In the example, they replace your recovery key with a second key of their own. No private key is exported. The customer then opens the same account in a self-custodial wallet, such as Tempo Wallet. See [Hand off to a self-custodial wallet](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet).
 
 Specifications: [configurable accounts](https://tips.sh/1107), [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys](https://tips.sh/1049).

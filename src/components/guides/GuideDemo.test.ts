@@ -12,7 +12,6 @@ import {
   setThreshold,
 } from './account-sandbox'
 import type { DevnetCallOptions } from './account-sandbox-devnet'
-import type { LoginMethod, LoginOwner, SignInResult } from './account-sandbox-oidc'
 import {
   asOneUpdate,
   consume,
@@ -28,11 +27,9 @@ import {
 } from './guide-demo-scripts'
 
 const pages: Record<GuideId, string> = {
-  'identity-provider': 'guides/enterprise-sso',
   'add-signers': 'guides/self-custody',
   'multi-factor': 'guides/self-custody',
   'rotate-keys': 'guides/company-treasury',
-  'change-email': 'guides/enterprise-sso',
   recover: 'guides/self-custody',
   export: 'guides/self-custody',
   'backend-automation': 'guides/automate-backend',
@@ -54,31 +51,20 @@ function stepHeadings(guide: GuideId) {
 
 // ---------------------------------------------------------------------------
 // A test double for devnet: the engine's own edits, with made-up addresses and hashes. It checks
-// that steps hand the adapter the keys and sign-ins they made earlier.
+// that steps hand the adapter the keys they made earlier.
 
 type Fake = GuideContext & {
   /** Signers and access keys that used a key made in an earlier step. */
   preparedUses: string[]
-  /** Logins that used a sign-in made in an earlier step. */
-  signInUses: string[]
 }
 
-function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): Fake {
+function fakeContext(): Fake {
   let serial = 0
   const next = (width: number) => `0x${(++serial).toString(16).padStart(width, '0')}`
   const signerAddresses = new Map<string, string>()
   const accounts = new Map<string, SandboxAccount>()
   const registered = new Set<string>()
-  const signInCounts: Record<string, number> = {}
   const preparedUses: string[] = []
-  const signInUses: string[] = []
-
-  function identity(method: LoginMethod) {
-    const list = identities[method] ?? [`reader-${method}`]
-    const index = signInCounts[method] ?? 0
-    signInCounts[method] = index + 1
-    return list[Math.min(index, list.length - 1)]
-  }
 
   function addressFor(signer: Signer, options: DevnetCallOptions | undefined) {
     const known = signerAddresses.get(signer.id)
@@ -86,14 +72,7 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
     const prepared = options?.prepared?.signer?.(signer)
     let address = prepared?.address ?? next(40)
     if (prepared) preparedUses.push(`${signer.kind}:${signer.name}`)
-    if (signer.kind === 'private-key' && signer.privateKey)
-      address = `0x${signer.privateKey.slice(-40)}`
-    if (signer.kind === 'google' || signer.kind === 'privy') {
-      const result = options?.signIns?.find((item) => item.method === signer.kind)
-      if (!result) throw new Error(`No sign-in for the new ${signer.kind} login.`)
-      signInUses.push(signer.kind)
-      address = result.owner.address
-    }
+    if (signer.privateKey) address = `0x${signer.privateKey.slice(-40)}`
     signerAddresses.set(signer.id, address)
     return address
   }
@@ -114,7 +93,6 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
 
   return {
     preparedUses,
-    signInUses,
     adapter: {
       async sync(previous, nextAccount, options) {
         for (const signer of configuredSigners(nextAccount)) addressFor(signer, options)
@@ -174,8 +152,6 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
       },
     },
     chain: {
-      publishedKeys: async (method) => ({ issuer: method, publisherId: next(64), count: 2 }),
-      relay: async () => ({ chainId: 31_318, methods: ['google', 'privy'] }),
       commitment: async (address) => (registered.has(address) ? 'committed' : null),
       configCommitment: () => 'committed',
       inferAddress: () => next(40),
@@ -183,23 +159,8 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
       remaining: async () => 950,
       generatePrivateKey: () => next(64),
       addressOf: (privateKey) => `0x${privateKey.slice(-40)}`,
-      identity: (result) => {
-        const subject = result.email ?? result.owner.address
-        return { subject, detail: `OIDC · ${subject}` }
-      },
     },
     options: {},
-    async signIn(method) {
-      const who = identity(method)
-      const address = `0x${Buffer.from(who).toString('hex').padStart(40, '0').slice(-40)}`
-      const owner = {
-        type: 'login',
-        method,
-        address,
-        validUntil: Math.floor(Date.now() / 1_000) + 540,
-      } as unknown as LoginOwner
-      return { method, owner, email: `${who}@example.com` } as SignInResult
-    },
   }
 }
 
@@ -241,13 +202,12 @@ describe('GuideDemo scripts', () => {
     expect(guideScripts[guide].steps.map((step) => step.title)).toEqual(stepHeadings(guide))
   })
 
-  it('has no demo for approval rules, which devnet doesn’t run', () => {
+  it('has no demo for logins or approval rules', () => {
     expect(guideDemoIds).not.toContain('approval-rules')
-    const page = readFileSync(
-      new URL('../../pages/docs/accounts/security-policies.mdx', import.meta.url),
-      'utf8',
-    )
-    expect(page).not.toContain('GuideDemo')
+    expect(guideDemoIds).not.toContain('identity-provider')
+    expect(guideDemoIds).not.toContain('change-email')
+    const source = readFileSync(new URL('./guide-demo-scripts.ts', import.meta.url), 'utf8')
+    expect(source).not.toMatch(/[Ll]ogin|\b[Ss]ign[ -]in\b|OIDC|Privy|Google/)
   })
 
   it('names no made-up people and simulates nothing', () => {
@@ -260,9 +220,7 @@ describe('GuideDemo scripts', () => {
   it.each(
     runs,
   )('%s (%s) runs every action and shows a hash for every change', async (guide, choice) => {
-    // An email change signs in with a second Google account.
-    const ctx = guide === 'change-email' ? fakeContext({ google: ['first', 'second'] }) : undefined
-    const { outcomes, states } = await run(guide, choice || undefined, ctx)
+    const { outcomes, states } = await run(guide, choice || undefined)
     outcomes.forEach((outcome, index) => {
       expect(outcome.result).not.toBe('')
       expect(outcome.state.account.notice).toBeNull()
@@ -271,22 +229,8 @@ describe('GuideDemo scripts', () => {
     })
   })
 
-  it('creates the sign-in account from the login, then authorizes the device key it made first', async () => {
-    for (const choice of ['google', 'privy'] as const) {
-      const guide = 'identity-provider'
-      const { states, account, ctx, outcomes } = await run(guide, choice)
-      const opened = guideScripts[guide].steps.findIndex((step) => step.title.startsWith('Open'))
-      expect(states.findIndex((state) => isCreated(state.account))).toBe(opened + 1)
-      expect(ctx.signInUses).toEqual([choice])
-      expect(ctx.preparedUses).toEqual(['browser:This browser'])
-      expect(account.accessKeys.map((key) => [key.name, key.spent])).toEqual([['This browser', 5]])
-      // The first payment carries the key's authorization: one transaction.
-      expect(outcomes.at(-1)?.hashes.map((item) => item.label)).toEqual(['Pay $5 and authorize'])
-    }
-  })
-
   it('adds the passkey made in the first step, approved by the account’s first signer', async () => {
-    for (const choice of ['google', 'privy', 'private-key']) {
+    for (const choice of ['private-key', 'device']) {
       const { account, ctx } = await run('add-signers', choice)
       expect(ctx.preparedUses).toEqual(['passkey:Passkey'])
       expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
@@ -297,19 +241,20 @@ describe('GuideDemo scripts', () => {
     }
   })
 
-  it('turns on multi-factor in one update with the Google sign-in and the prepared passkey', async () => {
-    const { states, ctx } = await run('multi-factor')
+  it('turns on multi-factor in one update with the backup and recovery keys', async () => {
+    const { states } = await run('multi-factor')
     const before = states[3].account
     const after = states[4].account
     expect(after.version).toBe(before.version + 1)
     expect(after.threshold).toBe(2)
-    expect(configuredSigners(after).map((signer) => [signer.kind, signer.weight])).toEqual([
-      ['privy', 1],
-      ['passkey', 2],
-      ['google', 1],
+    expect(
+      configuredSigners(after).map((signer) => [signer.kind, signer.name, signer.weight]),
+    ).toEqual([
+      ['passkey', 'Passkey', 2],
+      ['private-key', 'Backup key', 1],
+      ['recovery-provider', 'Recovery key', 1],
     ])
-    expect(ctx.signInUses).toEqual(['privy', 'google'])
-    expect(ctx.preparedUses).toContain('passkey:Passkey')
+    expect(recoveryCheck(after).ok).toBe(true)
   })
 
   it('rotates Approver key 2 for a new key and revokes the service key', async () => {
@@ -323,28 +268,11 @@ describe('GuideDemo scripts', () => {
     expect(account.accessKeys.find((key) => key.name === 'Service key')?.status).toBe('revoked')
   })
 
-  it('swaps the Google login for the second account the reader signs in with', async () => {
-    const ctx = fakeContext({ google: ['first', 'second'] })
-    const { account } = await run('change-email', undefined, ctx)
-    const logins = configuredSigners(account).filter((signer) => signer.kind === 'google')
-    expect(logins).toHaveLength(1)
-    expect(account.version).toBe(1)
-    expect(ctx.signInUses).toEqual(['google', 'google'])
-  })
-
-  it('refuses a new Google account that’s already on the account', async () => {
-    const ctx = fakeContext({ google: ['same'] })
-    const script = guideScripts['change-email']
-    let state = scriptStart('change-email')
-    state = (await script.setup[0].run(state, ctx)).state
-    await expect(script.steps[0].run(state, ctx)).rejects.toThrow('already on the account')
-  })
-
-  it('recovers with both logins, replaces the lost passkey, and revokes the device key', async () => {
+  it('recovers with the backup and recovery keys, replaces the lost passkey, and revokes the device key', async () => {
     const { account, ctx } = await run('recover')
     expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
-      ['privy', 1],
-      ['google', 1],
+      ['private-key', 1],
+      ['recovery-provider', 1],
       ['passkey', 2],
     ])
     const passkeys = configuredSigners(account).filter((signer) => signer.kind === 'passkey')
@@ -401,13 +329,12 @@ describe('GuideDemo helpers', () => {
     expect(recoveryCheck(two)).toMatchObject({ ok: true })
   })
 
-  it('drops held keys and sign-ins once a transaction uses them', () => {
+  it('drops held keys once a transaction uses them', () => {
     const before = addSigner(loadPreset('from-scratch'), 'private-key', { privateKey: '0x03' })
     const after = addSigner(before, 'passkey')
     const passkey = after.signers.at(-1) as Signer
     const held = consume(
       {
-        signIns: [{ method: 'google' } as SignInResult],
         signers: [
           { id: passkey.id, kind: 'passkey', key: { address: '0x01' } },
           { id: 'later', kind: 'passkey', key: { address: '0x02' } },
@@ -419,17 +346,13 @@ describe('GuideDemo helpers', () => {
       before,
       after,
     )
-    expect(held.signIns).toEqual([])
     expect(held.signers.map((item) => item.id)).toEqual(['later'])
     expect(held.accessKeys).toHaveLength(1)
   })
 
   it('says what a demo is missing', () => {
-    expect(missingNeed(['google'], new Set(['google']))).toBeNull()
-    expect(missingNeed(['google'], new Set())).toBe('Start the local auth app to sign in.')
-    expect(missingNeed(['google', 'privy'], new Set(['google']))).toBe(
-      'Start the local auth app to sign in.',
-    )
-    expect(missingNeed(['passkey'], new Set(['google']))).toContain('Touch ID')
+    expect(missingNeed(['passkey'], new Set(['passkey']))).toBeNull()
+    expect(missingNeed([], new Set())).toBeNull()
+    expect(missingNeed(['passkey'], new Set())).toContain('Touch ID')
   })
 })

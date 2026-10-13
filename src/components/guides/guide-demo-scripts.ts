@@ -1,13 +1,13 @@
 /**
  * Guide demos: one script per guide, run on Tempo devnet with the reader's own signers. Each
  * step's title matches the guide's step heading. Steps that change the account send real devnet
- * transactions and return their hashes; the others do a real local action (create a key, sign in)
- * or read Tempo.
+ * transactions and return their hashes; the others do a real local action (create a key) or read
+ * Tempo.
  *
  * No React and no network code here: steps act through `GuideContext`, which `GuideDemo` builds
  * from the devnet adapter and `guide-demo-devnet.ts`, and which the verification script builds the
- * same way. Only types come from the devnet and login modules, so production bundles stay free of
- * the viem previews.
+ * same way. Only types come from the devnet module, so production bundles stay free of the viem
+ * previews.
  */
 import {
   type AccessKey,
@@ -43,18 +43,15 @@ import type {
   DevnetSessionInfo,
   PreparedKey,
 } from './account-sandbox-devnet'
-import type { LoginMethod, SignInResult } from './account-sandbox-oidc'
 import { thisDevice } from './this-device'
 
 // ---------------------------------------------------------------------------
 // Types
 
 export type GuideId =
-  | 'identity-provider'
   | 'add-signers'
   | 'multi-factor'
   | 'rotate-keys'
-  | 'change-email'
   | 'recover'
   | 'export'
   | 'backend-automation'
@@ -63,10 +60,7 @@ export type GuideId =
 export type LocalIcon =
   | 'device'
   | 'laptop'
-  | 'login'
   | 'passkey'
-  | 'relay'
-  | 'publisher'
   | 'update'
   | 'server'
   | 'team'
@@ -81,10 +75,8 @@ export type LocalItem = {
   status: 'ready' | 'pending' | 'done' | 'gone'
 }
 
-/** Keys and sign-ins a step made for a later step's transaction. */
+/** Keys a step made for a later step's transaction. */
 export type Held = {
-  /** Real sign-ins not yet used by a transaction. */
-  signIns: SignInResult[]
   /** Signer keys created before the update that adds them, by the signer ID they'll get. */
   signers: { id: string; kind: SignerKind; key: PreparedKey }[]
   /** Access keys created before the transaction that authorizes them. */
@@ -100,7 +92,7 @@ export type DemoState = {
   account: SandboxAccount
   local: LocalItem[]
   held: Held
-  /** The reader's choice, such as the login they sign in with. */
+  /** The reader's choice, such as the account's first signer. */
   choice: string
 }
 
@@ -131,12 +123,6 @@ export type GuideAdapter = {
 
 /** Reads and local key work on devnet (`guide-demo-devnet.ts`). */
 export type GuideChain = {
-  /** Signing keys the relay's Key Publisher lists on devnet for this login's issuer. */
-  publishedKeys(
-    method: LoginMethod,
-  ): Promise<{ issuer: string; publisherId: string; count: number }>
-  /** The local auth app's chain and sign-in methods, or `null` when it isn't running. */
-  relay(): Promise<{ chainId: number; methods: readonly LoginMethod[] } | null>
   /** The account's configuration commitment on Tempo, or `null` before its first transaction. */
   commitment(address: string): Promise<string | null>
   configCommitment(config: ChainConfig): string
@@ -151,17 +137,13 @@ export type GuideChain = {
   remaining(account: string, keyId: string): Promise<number>
   generatePrivateKey(): string
   addressOf(privateKey: string): string
-  /** How a login names itself: the account's email, the Privy identity, or the login's address. */
-  identity(result: SignInResult): { subject: string; detail: string }
 }
 
 export type GuideContext = {
   adapter: GuideAdapter
   chain: GuideChain
-  /** Prompts, sign-in requests for expired logins, and cancellation. */
+  /** Passkey prompts. */
   options: DevnetCallOptions
-  /** Sign the reader in for real. The first call in a click uses that click's sign-in window. */
-  signIn(method: LoginMethod): Promise<SignInResult>
 }
 
 export type StepOutcome = {
@@ -179,21 +161,19 @@ export type DemoAction = {
   title: string
   /** The button. */
   action: (state: DemoState) => string
-  /** The login this click signs in with first, so the click can open its sign-in window. */
-  signIn?: (state: DemoState) => LoginMethod | null
   run: (state: DemoState, ctx: GuideContext) => Promise<StepOutcome>
 }
 
-/** What a demo needs live: devnet always, plus a platform passkey or login methods. */
-export type Need = 'passkey' | LoginMethod
+/** What a demo needs live: devnet always, plus a platform passkey. */
+export type Need = 'passkey'
 
-export type DemoChoice = { id: string; label: string; method?: LoginMethod }
+export type DemoChoice = { id: string; label: string }
 
 export type DemoScript = {
   title: string
-  /** Choices the reader makes before starting, such as the login to sign in with. */
+  /** Choices the reader makes before starting, such as the account's first signer. */
   choices?: readonly DemoChoice[]
-  /** What the choice is about, such as "Sign in with". */
+  /** What the choice is about, such as "First signer". */
   choiceLabel?: string
   needs: (choice: string) => Need[]
   /** Builds the starting account before the guide's steps, when the guide needs one. */
@@ -205,9 +185,7 @@ export type DemoScript = {
 export function missingNeed(needs: readonly Need[], live: ReadonlySet<Need>): string | null {
   const missing = needs.filter((need) => !live.has(need))
   if (missing.length === 0) return null
-  if (missing.includes('passkey'))
-    return 'This demo creates a passkey. Open it in a browser with Touch ID, Face ID, or Windows Hello.'
-  return 'Start the local auth app to sign in.'
+  return 'This demo creates a passkey. Open it in a browser with Touch ID, Face ID, or Windows Hello.'
 }
 
 /** A step that can't finish, with a message for the reader. */
@@ -221,7 +199,7 @@ export class DemoError extends Error {
 // ---------------------------------------------------------------------------
 // Pure helpers
 
-const emptyHeld: Held = { signIns: [], signers: [], accessKeys: [], privateKeys: {}, notes: {} }
+const emptyHeld: Held = { signers: [], accessKeys: [], privateKeys: {}, notes: {} }
 
 export function startState(choice = '', name?: string): DemoState {
   const account = loadPreset('from-scratch')
@@ -365,7 +343,7 @@ function lowerFirst(text: string) {
   return text.charAt(0).toLowerCase() + text.slice(1)
 }
 
-/** Signer names in a sentence, such as "your Privy login and your Google login". */
+/** Signer names in a sentence, such as "your backup key and your recovery key". */
 export function approverNames(signers: readonly Signer[]) {
   return joinAnd(signers.map(signerPhrase))
 }
@@ -379,7 +357,7 @@ function signerPhrase(signer: Signer) {
   return namedSigner(signer) ? signer.name : `your ${lowerFirst(signer.name)}`
 }
 
-/** The configuration in one line, such as "passkey (2), Google login (1), threshold 2". */
+/** The configuration in one line, such as "passkey (2), backup key (1), threshold 2". */
 export function describeConfig(account: SandboxAccount) {
   const owners = configuredSigners(account).map(
     (signer) => `${namedSigner(signer) ? signer.name : lowerFirst(signer.name)} (${signer.weight})`,
@@ -425,17 +403,11 @@ function hashes(...entries: [string, string | undefined][]) {
   return entries.flatMap(([label, hash]) => (hash ? [{ label, hash }] : []))
 }
 
-const loginWords: Record<LoginMethod, string> = {
-  google: 'Google',
-  privy: 'Privy',
-}
-
-/** Which devnet keys a call may use: keys and sign-ins made in earlier steps. */
+/** Which devnet keys a call may use: keys made in earlier steps. */
 export function callOptions(state: DemoState, ctx: GuideContext): DevnetCallOptions {
   const { held } = state
   return {
     ...ctx.options,
-    signIns: held.signIns,
     prepared: {
       signer: (signer) =>
         held.signers.find((item) => item.id === signer.id && item.kind === signer.kind)?.key,
@@ -444,7 +416,7 @@ export function callOptions(state: DemoState, ctx: GuideContext): DevnetCallOpti
   }
 }
 
-/** Drop held keys and sign-ins once a transaction used them. */
+/** Drop held keys once a transaction used them. */
 export function consume(held: Held, previous: SandboxAccount, next: SandboxAccount): Held {
   const owners = new Set(configuredSigners(next).map((signer) => signer.id))
   const added = next.accessKeys
@@ -452,7 +424,6 @@ export function consume(held: Held, previous: SandboxAccount, next: SandboxAccou
     .map((key) => key.kind)
   return {
     ...held,
-    signIns: [],
     signers: held.signers.filter((item) => !owners.has(item.id)),
     accessKeys: held.accessKeys.filter((item) => !added.includes(item.kind)),
   }
@@ -519,27 +490,7 @@ function commitmentNote(matches: boolean | null, version: bigint) {
 // ---------------------------------------------------------------------------
 // Shared steps
 
-async function signInStep(
-  state: DemoState,
-  ctx: GuideContext,
-  method: LoginMethod,
-  item: { id: string; label: string; pending: boolean },
-): Promise<{ state: DemoState; result: SignInResult; who: string }> {
-  const result = await ctx.signIn(method)
-  const { subject } = ctx.chain.identity(result)
-  const who = method === 'google' ? `your Google account (${short(result.owner.address)})` : subject
-  let next = hold(state, { signIns: [result, ...state.held.signIns] })
-  next = withLocal(next, {
-    id: item.id,
-    icon: 'login',
-    label: item.label,
-    detail: `${method === 'google' ? `Google · ${short(result.owner.address)}` : subject} · approves until ${until(result.owner.validUntil)}${item.pending ? ' · not a signer yet' : ''}`,
-    status: item.pending ? 'pending' : 'ready',
-  })
-  return { state: next, result, who }
-}
-
-/** Create the account with its first signer: a login, a passkey, or a private key. */
+/** Create the account with its first signer: a passkey, a device key, or a private key. */
 async function createAccount(
   state: DemoState,
   ctx: GuideContext,
@@ -594,215 +545,36 @@ function addHeldPasskey(account: SandboxAccount, held: Held, weight: number) {
   }
 }
 
-async function prepareBrowserKey(
-  state: DemoState,
-  ctx: GuideContext,
-  label: string,
-  icon: LocalIcon,
-) {
-  const key = await ctx.adapter.prepareAccessKey(
-    draftAccessKey('browser', { name: 'This browser' }),
-    callOptions(state, ctx),
-  )
-  let next = hold(state, { accessKeys: [...state.held.accessKeys, { kind: 'browser', key }] })
-  next = withLocal(next, {
-    id: 'device',
-    icon,
-    label,
-    detail: `WebCrypto P-256 · ${short(key.address)} · not authorized yet`,
-    status: 'pending',
-  })
-  return { state: next, key }
-}
-
-/** Authorize the held "This browser" key, then pay $5 with it. */
-/** The held "This browser" key's first payment, which carries its authorization. */
-async function authorizeAndPay(state: DemoState, ctx: GuideContext, approver: string) {
-  const next = checked(addAccessKey(state.account, 'browser'))
-  const key = addedKey(state.account, next)
-  // Not synced first: the adapter sends the payment with the key's authorization riding along.
-  const paid = await payWithKey({ ...state, account: next }, ctx, key.name, 5)
-  const keyId = state.held.accessKeys.find((item) => item.kind === 'browser')?.key.address
-  const done = updateLocal(
-    { ...paid.state, held: consume(state.held, state.account, paid.state.account) },
-    'device',
-    {
-      detail: `WebCrypto P-256 · ${keyId ? short(keyId) : 'this browser'} · authorized`,
-      status: 'done',
-    },
-  )
-  return {
-    state: done,
-    result: `${approver} signed the device key’s authorization, and the key’s first $5 payment carried it in one transaction. From now on the key pays up to 500 USD a day with no prompt. ${keyLeft(paid.state.account, key.name)} left today.`,
-    hashes: hashes(['Pay $5 and authorize', paid.hash]),
-  }
-}
-
-function method(state: DemoState): LoginMethod {
-  return state.choice === 'privy' ? 'privy' : 'google'
-}
-
-const loginChoices: DemoChoice[] = [
-  { id: 'google', label: 'Google', method: 'google' },
-  { id: 'privy', label: 'Privy', method: 'privy' },
-]
-
 /** The account's first signer when the reader chooses it. */
 const firstSignerChoices: DemoChoice[] = [
-  { id: 'google', label: 'Google login', method: 'google' },
-  { id: 'privy', label: 'Privy login', method: 'privy' },
   { id: 'private-key', label: 'Private key' },
+  { id: 'device', label: 'Device key' },
 ]
 
-function choiceMethod(choice: string): LoginMethod | null {
-  return choice === 'google' || choice === 'privy' ? choice : null
-}
-
-// ---------------------------------------------------------------------------
-// One script per guide, following its steps
-
-const identityProvider: DemoScript = {
-  title: 'Sign in with your identity provider',
-  choices: loginChoices,
-  choiceLabel: 'Sign in with',
-  needs: (choice) => [choice === 'privy' ? 'privy' : 'google'],
-  setup: [],
-  steps: [
-    {
-      title: 'Check that your provider’s keys are published',
-      action: (state) =>
-        method(state) === 'google' ? 'Check Google’s keys' : 'Check the auth app’s keys',
-      run: async (state, ctx) => {
-        const login = method(state)
-        const { count, publisherId } = await ctx.chain.publishedKeys(login)
-        const issuer =
-          login === 'google' ? 'Google' : 'The local auth app (the issuer that bridges Privy)'
-        if (count === 0)
-          throw new DemoError(
-            `${issuer} has no signing keys listed on devnet, so its sign-ins can’t approve.`,
-          )
-        return {
-          state: withLocal(state, {
-            id: 'publisher',
-            icon: 'publisher',
-            label: `Key Publisher · ${login === 'google' ? 'Google' : 'Privy bridge'}`,
-            detail: `${count} signing key${count === 1 ? '' : 's'} listed · ${short(publisherId)}`,
-            status: 'ready',
-          }),
-          result: `${issuer} has ${count} signing key${count === 1 ? '' : 's'} listed in the demo’s Key Publisher on devnet.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Connect to a salt service',
-      action: () => 'Connect',
-      run: async (state, ctx) => {
-        const relay = await ctx.chain.relay()
-        if (!relay) throw new DemoError('Start the local auth app to sign in.')
-        return {
-          state: withLocal(state, {
-            id: 'relay',
-            icon: 'relay',
-            label: 'Salt service · local auth app',
-            detail: `localhost:5173 · chain ${relay.chainId}`,
-            status: 'ready',
-          }),
-          result: `Connected to the local auth app on chain ${relay.chainId}. It signs in with ${joinAnd(relay.methods.map((item) => loginWords[item]))} and returns a ZK proof of each sign-in.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Create a key on the device',
-      action: () => 'Create device key',
-      run: async (state, ctx) => {
-        const { state: next, key } = await prepareBrowserKey(state, ctx, 'Device key', 'device')
-        return {
-          state: next,
-          result: `A P-256 key whose private key can’t leave this browser. Key ID ${short(key.address)}. It can’t pay until the account authorizes it.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Sign the customer in',
-      action: (state) => `Sign in with ${loginWords[method(state)]}`,
-      signIn: method,
-      run: async (state, ctx) => {
-        const login = method(state)
-        const signedIn = await signInStep(state, ctx, login, {
-          id: 'login',
-          label: signerKinds[login].label,
-          pending: false,
-        })
-        return {
-          state: signedIn.state,
-          result: `Signed in as ${signedIn.who}. The proof lets this login approve until ${until(signedIn.result.owner.validUntil)}.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Open the customer’s account',
-      action: () => 'Open account',
-      run: async (state, ctx) => {
-        const created = await createAccount(state, ctx, method(state))
-        const address = addressOf(created.state.account)
-        const registered = (await ctx.chain.commitment(address)) !== null
-        return {
-          state: created.state,
-          result: `Your login’s address is ${short(address)}, and the devnet faucet funded it. ${registered ? 'It’s already on Tempo: this login opened it before.' : 'It registers on Tempo with its first transaction.'}`,
-          hashes: hashes(['Faucet', created.hash]),
-        }
-      },
-    },
-    {
-      title: 'Authorize the device key with the first payment',
-      action: () => 'Pay $5',
-      run: (state, ctx) => authorizeAndPay(state, ctx, 'Your login'),
-    },
-  ],
-}
-
 function firstSignerLabel(choice: string) {
-  return choice === 'private-key'
-    ? 'private key'
-    : `${loginWords[choiceMethod(choice) ?? 'google']} login`
+  return choice === 'device' ? 'device key' : 'private key'
+}
+
+function upperFirst(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
 const addSigners: DemoScript = {
   title: 'Add a passkey to your account',
   choices: firstSignerChoices,
   choiceLabel: 'First signer',
-  needs: (choice) => {
-    const login = choiceMethod(choice)
-    return login ? ['passkey', login] : ['passkey']
-  },
+  needs: () => ['passkey'],
   setup: [
     {
       title: 'Create your account',
-      action: (state) =>
-        state.choice === 'private-key'
-          ? 'Create with a private key'
-          : `Sign in with ${loginWords[choiceMethod(state.choice) ?? 'google']}`,
-      signIn: (state) => choiceMethod(state.choice),
+      action: (state) => `Create with a ${firstSignerLabel(state.choice)}`,
       run: async (state, ctx) => {
-        const login = choiceMethod(state.choice)
-        let next = state
-        if (login)
-          next = (
-            await signInStep(state, ctx, login, {
-              id: 'login',
-              label: signerKinds[login].label,
-              pending: false,
-            })
-          ).state
-        const privateKey = login ? undefined : ctx.chain.generatePrivateKey()
-        const created = await createAccount(next, ctx, login ?? 'private-key', privateKey)
+        const device = state.choice === 'device'
+        const privateKey = device ? undefined : ctx.chain.generatePrivateKey()
+        const created = await createAccount(state, ctx, device ? 'device' : 'private-key', privateKey)
         return {
           state: created.state,
-          result: `Created ${short(addressOf(created.state.account))} with your ${firstSignerLabel(state.choice)} as its only signer (weight 1, threshold 1)${privateKey ? ', a key this page generated and holds' : ''}. The devnet faucet funded it.`,
+          result: `Created ${short(addressOf(created.state.account))} with a ${firstSignerLabel(state.choice)} as its only signer (weight 1, threshold 1), a key this page generated and holds. The devnet faucet funded it.`,
           hashes: hashes(['Faucet', created.hash]),
         }
       },
@@ -899,22 +671,12 @@ const addSigners: DemoScript = {
   ],
 }
 
-function upperFirst(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1)
-}
-
-/** Create the account with a Privy login and authorize a "This browser" device key. */
-const privyWithDeviceKey: DemoAction = {
+/** Create the account with a passkey and authorize a "This browser" device key. */
+const passkeyWithDeviceKey: DemoAction = {
   title: 'Create your account',
-  action: () => 'Sign in with Privy',
-  signIn: () => 'privy',
+  action: () => 'Create with a passkey',
   run: async (state, ctx) => {
-    const signedIn = await signInStep(state, ctx, 'privy', {
-      id: 'login',
-      label: 'Privy login',
-      pending: false,
-    })
-    const created = await createAccount(signedIn.state, ctx, 'privy')
+    const created = await createAccount(state, ctx, 'passkey')
     const next = addAccessKey(created.state.account, 'browser')
     addedKey(created.state.account, next)
     const authorized = await update(created.state, ctx, next)
@@ -927,42 +689,90 @@ const privyWithDeviceKey: DemoAction = {
     })
     return {
       state: done,
-      result: `Created ${short(addressOf(done.account))} with ${signedIn.who} as its signer, and your login authorized a device key in this browser.`,
+      result: `Created ${short(addressOf(done.account))} with your passkey (${thisDevice().unlock}) as its signer, and your passkey authorized a device key in this browser. The devnet faucet funded it.`,
       hashes: hashes(['Faucet', created.hash], ['Authorize', authorized.hash]),
     }
   },
 }
 
+/** Generate a key this page holds for a signer that a later update adds. */
+function generateSignerKey(
+  state: DemoState,
+  ctx: GuideContext,
+  slot: 'backup' | 'recovery',
+  label: string,
+) {
+  const privateKey = ctx.chain.generatePrivateKey()
+  const next = withLocal(
+    { ...state, held: { ...state.held, privateKeys: { ...state.held.privateKeys, [slot]: privateKey } } },
+    {
+      id: slot,
+      icon: slot === 'backup' ? 'key' : 'server',
+      label,
+      detail: `secp256k1 · ${short(ctx.chain.addressOf(privateKey))} · not a signer yet`,
+      status: 'pending',
+    },
+  )
+  return { state: next, address: ctx.chain.addressOf(privateKey) }
+}
+
+/**
+ * Move to the multi-factor configuration in one update: the passkey (2), the held backup key (1),
+ * and the held recovery key (1), at threshold 2.
+ */
+function withBackupSigners(account: SandboxAccount, held: Held) {
+  const { backup, recovery } = held.privateKeys
+  if (!backup || !recovery) throw new DemoError('Create the backup key and the recovery key first.')
+  const passkey = configuredSigners(account).find((signer) => signer.kind === 'passkey')
+  if (!passkey) throw new DemoError('The account has no passkey.')
+  const weighted = checked(setSignerWeight(account, passkey.id, 2))
+  const withBackup = checked(addSigner(weighted, 'private-key', { privateKey: backup }))
+  const backupSigner = addedSigner(weighted, withBackup)
+  const namedBackup = patchSigner(withBackup, backupSigner.id, { name: 'Backup key' })
+  const withRecovery = checked(
+    addSigner(namedBackup, 'recovery-provider', { privateKey: recovery }),
+  )
+  const recoverySigner = addedSigner(namedBackup, withRecovery)
+  const named = patchSigner(withRecovery, recoverySigner.id, { name: 'Recovery key' })
+  return asOneUpdate(account, checked(setThreshold(named, 2)))
+}
+
+function markSigners(state: DemoState) {
+  let done = updateLocal(state, 'backup', { status: 'done', detail: 'secp256k1 · signer' })
+  done = updateLocal(done, 'recovery', { status: 'done', detail: 'secp256k1 · signer' })
+  return done
+}
+
 const multiFactor: DemoScript = {
   title: 'Turn on multi-factor approval',
-  needs: () => ['passkey', 'privy', 'google'],
-  setup: [privyWithDeviceKey],
+  needs: () => ['passkey'],
+  setup: [passkeyWithDeviceKey],
   steps: [
     {
-      title: 'Sign the customer in with Google',
-      action: () => 'Sign in with Google',
-      signIn: () => 'google',
+      title: 'Create the backup key',
+      action: () => 'Generate the backup key',
       run: async (state, ctx) => {
-        const signedIn = await signInStep(state, ctx, 'google', {
-          id: 'google',
-          label: 'Google login',
-          pending: true,
-        })
+        const { state: next, address } = generateSignerKey(state, ctx, 'backup', 'Backup key')
         return {
-          state: signedIn.state,
-          result: `Signed in as ${signedIn.who}. It isn’t a signer yet.`,
+          state: next,
+          result: `This page generated a backup key (${short(address)}), standing in for one the customer keeps offline, such as in a hardware wallet. It isn’t a signer yet.`,
           hashes: [],
         }
       },
     },
     {
-      title: 'Create the passkey',
-      action: () => 'Create passkey',
+      title: 'Get the recovery key’s address',
+      action: () => 'Generate the recovery key',
       run: async (state, ctx) => {
-        const { state: next, key } = await preparePasskey(state, ctx, 'Passkey')
+        const { state: next, address } = generateSignerKey(
+          state,
+          ctx,
+          'recovery',
+          'Recovery key',
+        )
         return {
           state: next,
-          result: `You created a passkey with ${thisDevice().unlock}. Its address is ${short(key.address)}.`,
+          result: `This page generated a recovery key (${short(address)}), standing in for the key a recovery provider holds. It isn’t a signer yet.`,
           hashes: [],
         }
       },
@@ -971,24 +781,12 @@ const multiFactor: DemoScript = {
       title: 'Switch to the multi-factor configuration',
       action: () => 'Send the update',
       run: async (state, ctx) => {
-        const before = state.account
-        const approvers = nextApprovers(before)
-        const withPasskey = addHeldPasskey(before, state.held, 2).account
-        const withGoogle = checked(addSigner(withPasskey, 'google'))
-        addedSigner(withPasskey, withGoogle)
-        const next = asOneUpdate(before, checked(setThreshold(withGoogle, 2)))
-        const sent = await update(state, ctx, next)
-        let done = updateLocal(sent.state, 'google', {
-          status: 'done',
-          detail: 'Google login · signer',
-        })
-        done = updateLocal(done, 'passkey', {
-          status: 'done',
-          detail: `WebAuthn · ${thisDevice().unlock} · signer`,
-        })
+        const approvers = nextApprovers(state.account)
+        const sent = await update(state, ctx, withBackupSigners(state.account, state.held))
+        const done = markSigners(sent.state)
         return {
           state: done,
-          result: `One update, config v${done.account.version}: ${describeConfig(done.account)}. ${upperFirst(approverNames(approvers))} approved it alone, at the old threshold 1.`,
+          result: `One update, config v${done.account.version}: ${describeConfig(done.account)}. ${upperFirst(approverNames(approvers))} approved it alone, at the old threshold 1. Now the passkey approves alone, and the backup and recovery keys only together.`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
@@ -1006,7 +804,7 @@ const multiFactor: DemoScript = {
       },
     },
     {
-      title: 'Authorize new device keys with the passkey or both logins',
+      title: 'Authorize new device keys with the passkey',
       action: () => 'Authorize with the passkey',
       run: async (state, ctx) => {
         const approvers = nextApprovers(state.account)
@@ -1174,167 +972,29 @@ const rotateKeys: DemoScript = {
   ],
 }
 
-/** The account's Google login: the one an email change replaces. */
-function googleLogin(account: SandboxAccount) {
-  const signer = configuredSigners(account).find((item) => item.kind === 'google')
-  // The devnet adapter names a login after its sign-in; until then it has only its label.
-  return signer && { ...signer, subject: signer.subject ?? signer.name }
-}
-
-const changeEmail: DemoScript = {
-  title: 'Change your Google login',
-  needs: () => ['google'],
-  setup: [
-    {
-      title: 'Create your account',
-      action: () => 'Sign in with Google',
-      signIn: () => 'google',
-      run: async (state, ctx) => {
-        const signedIn = await signInStep(state, ctx, 'google', {
-          id: 'login',
-          label: 'Google login',
-          pending: false,
-        })
-        const created = await createAccount(signedIn.state, ctx, 'google')
-        return {
-          state: created.state,
-          result: `Created ${short(addressOf(created.state.account))} with ${signedIn.who} as its only signer. The devnet faucet funded it.`,
-          hashes: hashes(['Faucet', created.hash]),
-        }
-      },
-    },
-  ],
-  steps: [
-    {
-      title: 'Sign the customer in with the new email',
-      action: () => 'Sign in with another Google account',
-      signIn: () => 'google',
-      run: async (state, ctx) => {
-        const info = await ctx.adapter.inspect(addressOf(state.account))
-        const signedIn = await signInStep(state, ctx, 'google', {
-          id: 'new-login',
-          label: 'New Google login',
-          pending: true,
-        })
-        const address = signedIn.result.owner.address.toLowerCase()
-        if (info?.config.owners.some(({ owner }) => owner.toLowerCase() === address))
-          throw new DemoError(
-            'That’s the Google account already on the account. Sign in with a different one.',
-          )
-        return {
-          state: signedIn.state,
-          result: `Signed in as ${signedIn.who}. It isn’t a signer yet.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Replace the old login at the same weight',
-      action: () => 'Draft the swap',
-      run: async (state, ctx) => {
-        const old = googleLogin(state.account)
-        const signIn = state.held.signIns[0]
-        if (!old || !signIn) throw new DemoError('Sign in with the new Google account first.')
-        const next = ctx.chain.identity(signIn).subject
-        return {
-          state: withLocal(state, {
-            id: 'update',
-            icon: 'update',
-            label: 'Update draft',
-            detail: `Remove ${old.subject}, add ${next} at weight ${old.weight} · needs weight ${state.account.threshold}`,
-            status: 'pending',
-          }),
-          result: `Draft: ${next} replaces ${old.subject} at weight ${old.weight}. The threshold stays ${state.account.threshold}.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Approve the swap',
-      action: (state) => `Approve with ${googleLogin(state.account)?.subject ?? 'the old login'}`,
-      run: async (state, ctx) => {
-        const old = googleLogin(state.account)
-        if (!old) throw new DemoError('The account has no Google login.')
-        const added = checked(addSigner(state.account, 'google'))
-        addedSigner(state.account, added)
-        const next = asOneUpdate(state.account, checked(removeSigner(added, old.id)))
-        const sent = await update(state, ctx, next)
-        const now = googleLogin(sent.state.account)
-        let done = updateLocal(sent.state, 'update', {
-          detail: `Approved by ${old.subject} · sent`,
-          status: 'done',
-        })
-        done = updateLocal(done, 'new-login', {
-          detail: `${now?.subject} · signer`,
-          status: 'done',
-        })
-        done = updateLocal(done, 'login', { detail: `${old.subject} · removed`, status: 'gone' })
-        return {
-          state: done,
-          result: `${old.subject} approved config v${done.account.version}. ${now?.subject} is the account’s login now.`,
-          hashes: hashes(['Update', sent.hash]),
-        }
-      },
-    },
-    {
-      title: 'Open the account by its saved address from now on',
-      action: () => 'Compare addresses',
-      run: async (state, ctx) => {
-        const saved = addressOf(state.account)
-        const info = await ctx.adapter.inspect(saved)
-        const login = info?.config.owners[0]
-        if (!login) throw new DemoError('This page didn’t create that account on devnet.')
-        const inferred = ctx.chain.inferAddress({
-          owners: [{ owner: login.owner, weight: 1 }],
-          threshold: 1,
-        })
-        const [savedBalance, inferredBalance] = await Promise.all([
-          ctx.chain.balance(saved),
-          ctx.chain.balance(inferred),
-        ])
-        return {
-          state,
-          result: `The saved address ${short(saved)} holds ${formatBalance(savedBalance)}. Deriving an address from your new login gives ${short(inferred)}, a different account holding ${formatBalance(inferredBalance)}.`,
-          hashes: [],
-        }
-      },
-    },
-  ],
-}
-
 const recover: DemoScript = {
   title: 'Recover after losing your passkey',
-  needs: () => ['passkey', 'privy', 'google'],
+  needs: () => ['passkey'],
   setup: [
-    privyWithDeviceKey,
+    passkeyWithDeviceKey,
     {
-      title: 'Add your Google login and a passkey',
-      action: () => 'Sign in with Google',
-      signIn: () => 'google',
+      title: 'Add a backup key and a recovery key',
+      action: () => 'Add both keys',
       run: async (state, ctx) => {
-        const signedIn = await signInStep(state, ctx, 'google', {
-          id: 'google',
-          label: 'Google login',
-          pending: false,
+        let next = generateSignerKey(state, ctx, 'backup', 'Backup key').state
+        next = generateSignerKey(next, ctx, 'recovery', 'Recovery key').state
+        const approvers = nextApprovers(next.account)
+        const sent = await update(next, ctx, withBackupSigners(next.account, next.held))
+        const done = withLocal(markSigners(sent.state), {
+          id: 'old-passkey',
+          icon: 'passkey',
+          label: 'Passkey',
+          detail: `WebAuthn · ${thisDevice().unlock} · signer`,
+          status: 'done',
         })
-        const before = signedIn.state.account
-        const approvers = nextApprovers(before)
-        const withPasskey = checked(addSigner(before, 'passkey'))
-        const passkey = addedSigner(before, withPasskey)
-        const weighted = checked(setSignerWeight(withPasskey, passkey.id, 2))
-        const withGoogle = checked(addSigner(weighted, 'google'))
-        addedSigner(weighted, withGoogle)
-        const next = asOneUpdate(before, checked(setThreshold(withGoogle, 2)))
-        const sent = await update(signedIn.state, ctx, next)
         return {
-          state: withLocal(sent.state, {
-            id: 'old-passkey',
-            icon: 'passkey',
-            label: 'Passkey',
-            detail: `WebAuthn · ${thisDevice().unlock} · signer`,
-            status: 'done',
-          }),
-          result: `Config v${sent.state.account.version}: ${describeConfig(sent.state.account)}. ${upperFirst(approverNames(approvers))} approved it. You created the passkey during the update.`,
+          state: done,
+          result: `Config v${done.account.version}: ${describeConfig(done.account)}. ${upperFirst(approverNames(approvers))} approved it. This page generated and holds both new keys.`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
@@ -1376,39 +1036,17 @@ const recover: DemoScript = {
       },
     },
     {
-      title: 'Sign in with the remaining signers',
-      action: () => 'Sign in with Privy and Google',
-      signIn: () => 'privy',
+      title: 'Check the remaining signers',
+      action: () => 'Check signers',
       run: async (state, ctx) => {
-        const info = await ctx.adapter.inspect(addressOf(state.account))
-        const isOwner = (result: SignInResult) =>
-          info?.config.owners.some(
-            ({ owner }) => owner.toLowerCase() === result.owner.address.toLowerCase(),
-          )
-        const subject = (kind: SignerKind) =>
-          configuredSigners(state.account).find((signer) => signer.kind === kind)?.subject
-        const privy = await signInStep(state, ctx, 'privy', {
-          id: 'login',
-          label: 'Privy login',
-          pending: false,
-        })
-        if (!isOwner(privy.result))
-          throw new DemoError(
-            `That isn’t this account’s Privy login. Sign in as ${subject('privy')}.`,
-          )
-        const google = await signInStep(privy.state, ctx, 'google', {
-          id: 'google',
-          label: 'Google login',
-          pending: false,
-        })
-        if (!isOwner(google.result))
-          throw new DemoError(
-            `That isn’t this account’s Google login. Sign in as ${subject('google')}.`,
-          )
-        const validUntil = Math.min(privy.result.owner.validUntil, google.result.owner.validUntil)
+        const { info } = await onChainConfig(ctx, state.account)
+        const remaining = usableSigners(configuredSigners(state.account))
+        const weight = remaining.reduce((sum, signer) => sum + signer.weight, 0)
+        if (weight < state.account.threshold)
+          throw new DemoError('The remaining signers can’t reach the threshold.')
         return {
-          state: google.state,
-          result: `Your Privy and Google logins signed in. Together they have weight 2, and both approve until ${until(validUntil)}.`,
+          state,
+          result: `Config v${info.config.version} on Tempo. Without the passkey, ${approverNames(remaining)} have weight ${weight} together, enough for threshold ${state.account.threshold}.`,
           hashes: [],
         }
       },
@@ -1776,11 +1414,9 @@ const teamAccounts: DemoScript = {
 }
 
 export const guideScripts: Record<GuideId, DemoScript> = {
-  'identity-provider': identityProvider,
   'add-signers': addSigners,
   'multi-factor': multiFactor,
   'rotate-keys': rotateKeys,
-  'change-email': changeEmail,
   recover,
   export: exportAccount,
   'backend-automation': backendAutomation,

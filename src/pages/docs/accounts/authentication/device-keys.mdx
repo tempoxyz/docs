@@ -11,7 +11,7 @@ import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
 
 A device key is a P-256 key that the customer's phone, computer, or browser creates and can't export. A signer authorizes it once as an [access key](/docs/accounts/access-keys), and it then pays within limits with no prompt.
 
-The key lives in the platform's key store, which signs without revealing it. A device key trusts only that device: whoever unlocks it can pay up to the key's limits until it expires. Use it for everyday payments, with the customer's passkey or login approving the key and anything above its limits.
+The key lives in the platform's key store, which signs without revealing it. A device key trusts only that device: whoever unlocks it can pay up to the key's limits until it expires. Use it for everyday payments, with the customer's passkey approving the key and anything above its limits.
 
 ## Device key stores by platform
 
@@ -45,7 +45,7 @@ const keyPair = await WebCryptoP256.createKeyPair() // non-extractable; store ke
 const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
 const keyAuthorization = await client.accessKey.signAuthorization({
   accessKey: deviceKey,
-  account, // approved by the customer's passkey or login
+  account, // approved by the customer's passkey
   expiry: Expiry.days(30),
   limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
 })
@@ -59,8 +59,10 @@ await client.token.transferSync({
 })
 ```
 
-Later payments omit `keyAuthorization`. A P-256 key can also be a weighted signer, but a signer has no limits, so keep device keys as access keys.
+Later payments omit `keyAuthorization`.
+
+A device key can also be a weighted signer, such as a second factor next to the customer's passkey. A signer has no spending limits, so give it a weight below the threshold, and keep the key that pays every day as an access key.
 
 For a lost device, [revoke its key](/docs/accounts/access-keys#revoke-an-access-key). The account's signers don't change.
 
-For a sign-in that authorizes a device key, see [Enterprise SSO login](/docs/accounts/guides/enterprise-sso). For other methods, see [Signing methods](/docs/accounts/authentication).
+For other methods, see [Signing methods](/docs/accounts/authentication).
