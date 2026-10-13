@@ -107,6 +107,8 @@ describe('development AI Markdown', () => {
     expect(output.indexOf('<span id="deposit-funds" />')).toBeGreaterThan(second)
     expect(output.slice(0, second)).toContain('<span id="earn" />')
     expect(output).toContain('## API reference')
+    expect(output).toContain('## Nodes')
+    expect(output).toContain('## Changelog')
     expect(() => renderAiDevFull(full.replace('# Deposit', '## Deposit'))).toThrow(
       'page headings for 2 entries',
     )

@@ -9,7 +9,7 @@ const sectionLabels = [
   'Machine Payments',
   'Tempo EVM',
 ]
-const utilityLabels = ['API reference', 'Partners']
+const utilityLabels = ['API reference', 'Nodes', 'Changelog', 'Partners']
 const externalTools = [
   ['MPP', 'https://mpp.dev/'],
   ['Mercator', 'https://mercator.sh/'],
@@ -200,7 +200,6 @@ for (const section of [
       '/docs/guide/issuance/create-a-stablecoin',
       '/docs/guide/stablecoin-dex/executing-swaps',
       '/docs/guide/issuance/manage-stablecoin',
-      '/docs/guide/node/installation',
     ],
   },
   {
@@ -234,7 +233,16 @@ for (const section of [
     paths: ['/docs/api/console', '/docs/api/console/api-keys', '/docs/api/team'],
   },
   {
-    label: 'Tempo EVM (Changelog)',
+    label: 'Nodes',
+    overview: '/docs/guide/node',
+    paths: [
+      '/docs/guide/node/installation',
+      '/docs/guide/node/validator-keys',
+      '/docs/guide/node/network-upgrades',
+    ],
+  },
+  {
+    label: 'Changelog',
     overview: '/docs/protocol/upgrades',
     paths: ['/docs/protocol/upgrades/t11', '/docs/changelog'],
   },
@@ -344,22 +352,83 @@ test('Earn task pages and API reference remain distinct', async ({ page }) => {
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('API reference')
 })
 
-test('Changelog lives inside Tempo EVM and retains upgrade URLs', async ({ page }) => {
+test('Changelog has its own sidebar and retains upgrade and release URLs', async ({ page }) => {
   await page.goto('/docs/development')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-  await expect(page.locator('.docs-section-utilities').getByText('Changelog')).toHaveCount(0)
-  await sidebar.getByRole('button', { name: 'Changelog', exact: true }).click()
-  await sidebar.locator('a[href="/docs/protocol/upgrades"]').click()
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
+  await expect(sidebar.getByRole('button', { name: 'Changelog', exact: true })).toHaveCount(0)
+  await expect(sidebar.getByRole('button', { name: 'Run a node', exact: true })).toHaveCount(0)
+  await page
+    .locator('.docs-section-utilities')
+    .getByRole('link', { name: 'Changelog', exact: true })
+    .click()
+  await expect(page).toHaveURL(/\/docs\/protocol\/upgrades\/?$/)
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Changelog')
+  await expect(sidebar.locator('a[href="/docs/development"]')).toHaveCount(0)
   await sidebar.locator('a[href="/docs/protocol/upgrades/t11"]').click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('T11 Network Upgrade')
   expect((await page.reload())?.status()).toBe(200)
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Changelog')
   await sidebar.getByRole('link', { name: 'Node releases', exact: true }).click()
   await expect(page).toHaveURL(/\/docs\/changelog\/?$/)
-  await sidebar.locator('a[href="/docs/development"]').click()
-  await expect(page).toHaveURL(/\/docs\/development\/?$/)
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Changelog')
+  await sidebar.getByRole('link', { name: 'Operator updates', exact: true }).click()
+  await expect(page).toHaveURL(/\/docs\/guide\/node\/network-upgrades\/?$/)
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Nodes')
+  await expect(sidebar.getByRole('link', { name: 'Run a node', exact: true })).toBeVisible()
 })
+
+for (const mobile of [false, true]) {
+  test(`${mobile ? 'mobile' : 'desktop'} Nodes navigation opens its own operating guides`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(mobile ? { width: 390, height: 844 } : { width: 1440, height: 1000 })
+    await page.goto('/docs/development')
+    if (mobile) {
+      await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+      await page
+        .getByRole('dialog', { name: 'Documentation navigation', exact: true })
+        .getByRole('link', { name: 'Nodes', exact: true })
+        .click()
+    } else {
+      await page
+        .locator('.docs-section-utilities')
+        .getByRole('link', { name: 'Nodes', exact: true })
+        .click()
+    }
+    await expect(page).toHaveURL(/\/docs\/guide\/node\/?$/)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Run a node')
+    if (mobile)
+      await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+    const sidebar = mobile
+      ? page.getByRole('dialog', { name: 'Documentation', exact: true })
+      : page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
+    await expect(sidebar.getByRole('link', { name: 'Installation', exact: true })).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: 'Operator updates', exact: true })).toBeVisible()
+    await expect(sidebar.locator('a[href="/docs/development"]')).toHaveCount(0)
+    await developerDisclosure(sidebar, 'Run a validator', mobile).click()
+    await sidebar.getByRole('link', { name: 'Managing validator keys', exact: true }).click()
+    await expect(page).toHaveURL(/\/docs\/guide\/node\/validator-keys\/?$/)
+    expect((await page.reload())?.status()).toBe(200)
+    if (mobile)
+      await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+    await expectOnlyActiveLeaf(sidebar, '/docs/guide/node/validator-keys')
+    await expect(
+      sidebar.getByRole('link', { name: 'Validator failover', exact: true }),
+    ).toBeVisible()
+    await sidebar.getByRole('link', { name: 'Operator updates', exact: true }).click()
+    await expect(page).toHaveURL(/\/docs\/guide\/node\/network-upgrades\/?$/)
+    if (mobile) {
+      await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+      await expect(
+        page
+          .getByRole('dialog', { name: 'Documentation navigation', exact: true })
+          .getByRole('link', { name: 'Nodes', exact: true }),
+      ).toHaveAttribute('aria-current', 'page')
+    } else {
+      await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Nodes')
+    }
+  })
+}
 
 test('API reference is a keyboard-accessible utility and the old tools hub redirects', async ({
   page,
@@ -399,16 +468,12 @@ for (const path of ['/', '/blog']) {
       await expect(link).toHaveAttribute('target', '_blank')
       await expect(link).toHaveAttribute('rel', /noopener/)
     }
-    await menu.getByRole('link', { name: 'Tempo EVM', exact: true }).click()
-    await expect(page).toHaveURL(/\/docs\/development\/?$/)
+    await menu.getByRole('link', { name: 'Changelog', exact: true }).click()
+    await expect(page).toHaveURL(/\/docs\/protocol\/upgrades\/?$/)
     await expect(menu).toBeHidden()
     await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
     await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
     const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-    await drawer
-      .locator('summary')
-      .filter({ hasText: /^Changelog$/ })
-      .click()
     await drawer.locator('a[href="/docs/protocol/upgrades/t12"]').click()
     await expect(page).toHaveURL(/\/docs\/protocol\/upgrades\/t12\/?$/)
     await expect(drawer).toBeHidden()
@@ -732,7 +797,7 @@ test('mobile article drawer traps focus and survives client navigation', async (
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
   const close = drawer.getByRole('button', { name: 'Close docs navigation', exact: true })
   await expect(close).toBeFocused()
-  const specifications = drawer.locator('summary').filter({ hasText: /^Changelog$/ })
+  const specifications = drawer.getByRole('link', { name: 'All specifications', exact: true })
   await page.keyboard.press('Shift+Tab')
   await expect(specifications).toBeFocused()
   await page.keyboard.press('Tab')

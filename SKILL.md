@@ -1,6 +1,6 @@
 ---
 name: tempo-docs
-description: Find and explain official Tempo documentation for stablecoin accounts and payments, Earn vaults, Routes, Zones, Machine Payments, Tempo EVM, APIs, SDKs, CLI tools, and ecosystem integrations. Use for Tempo integration questions, code examples, protocol behavior, and documentation lookup.
+description: Find and explain official Tempo documentation for stablecoin accounts and payments, Earn vaults, Routes, Zones, Machine Payments, Tempo EVM, APIs, SDKs, CLI tools, node operations, changelog, and ecosystem integrations. Use for Tempo integration questions, code examples, protocol behavior, and documentation lookup.
 ---
 
 # Tempo Docs
@@ -19,8 +19,10 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 | [Routes](https://tempo.xyz/developers/docs/routes.md) | Accept cross-network deposits, quote transfers, or track delivery. Routes is in beta; check access on the introduction page. |
 | [Zones](https://tempo.xyz/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is in limited preview; check access on the introduction page. |
 | [Machine Payments](https://tempo.xyz/developers/docs/agents.md) | Pay for APIs, accept API payments, discover services, or integrate MPP. |
-| [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
+| [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, or read protocol specifications. |
 | [API reference](https://tempo.xyz/developers/docs/api.md) | Find Tempo API endpoints by product, authentication, Console management endpoints, JSON-RPC, and the indexer. |
+| [Nodes](https://tempo.xyz/developers/docs/guide/node.md) | Install, run, secure, monitor, troubleshoot, and upgrade RPC, standby, or validator nodes. |
+| [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md) | Track network upgrades, protocol activation, integration impact, and node software releases. |
 | [Partners](https://tempo.xyz/developers/docs/partners.md) | Find third-party wallets, bridges, RPC infrastructure, data services, and integrations. |
 
 Accounts covers application payment workflows; Tempo EVM covers the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.

@@ -84,6 +84,11 @@ describe('specification navigation ownership', () => {
     ['/docs/protocol/transactions/AccountKeychain', 'developers', '/docs/development'],
     ['/docs/protocol/tip20/virtual-addresses', 'accounts', '/docs/accounts'],
     ['/docs/protocol/tip403/receive-policies', 'accounts', '/docs/accounts'],
+    ['/docs/guide/node/installation', 'nodes', '/docs/guide/node'],
+    ['/docs/guide/node/validator-keys', 'nodes', '/docs/guide/node'],
+    ['/docs/guide/node/network-upgrades', 'nodes', '/docs/guide/node'],
+    ['/docs/protocol/upgrades/t12', 'changelog', '/docs/protocol/upgrades'],
+    ['/docs/changelog', 'changelog', '/docs/protocol/upgrades'],
     ...['', '/architecture', '/accounts', '/bridging', '/rpc', '/execution', '/proving'].map(
       (suffix) => [`/docs/protocol/zones${suffix}`, 'zones', '/docs/zones'],
     ),

@@ -6,6 +6,8 @@ export type DocsSection = {
     | 'routes'
     | 'zones'
     | 'developers'
+    | 'nodes'
+    | 'changelog'
     | 'machine-payments'
     | 'api'
     | 'tools'
@@ -74,11 +76,9 @@ export const docsSections: DocsSection[] = [
       '/docs/development',
       '/docs/quickstart',
       '/docs/protocol',
-      '/docs/changelog',
       '/docs/guide/tempo-transaction',
       '/docs/guide/issuance',
       '/docs/guide/stablecoin-dex',
-      '/docs/guide/node',
     ],
   },
 ]
@@ -89,6 +89,18 @@ export const docsUtilitySections: DocsSection[] = [
     label: 'API reference',
     href: '/docs/api',
     matches: ['/docs/api'],
+  },
+  {
+    id: 'nodes',
+    label: 'Nodes',
+    href: '/docs/guide/node',
+    matches: ['/docs/guide/node'],
+  },
+  {
+    id: 'changelog',
+    label: 'Changelog',
+    href: '/docs/protocol/upgrades',
+    matches: ['/docs/protocol/upgrades', '/docs/changelog'],
   },
   {
     id: 'ecosystem',
