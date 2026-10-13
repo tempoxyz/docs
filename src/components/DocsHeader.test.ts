@@ -92,7 +92,7 @@ describe('getActiveDocsSection', () => {
     ['/docs/build', 'developers'],
     ['/docs/guide/getting-funds', 'developers'],
     ['/docs/guide/payments/send-a-payment', 'developers'],
-    ['/docs/guide/payments/configure-receive-policies', 'developers'],
+    ['/docs/accounts/policies/receive-policies', 'accounts'],
     ['/docs/guide/tempo-transaction', 'developers'],
     ['/docs/quickstart/wallet-developers', 'developers'],
     ['/docs/quickstart/tokenlist', 'developers'],

@@ -6,7 +6,13 @@ description: Compare the three ways a Tempo account signer approves, private key
 
 # Signing methods
 
-A signer is a key that a Tempo account lists as able to approve. Each approval is a signature that Tempo checks on chain against the account's signers and threshold. Tempo supports three signing methods, and an account can mix them.
+A Tempo account approves with private keys, device keys, or passkeys, and one account can mix all three. Choose by who must hold the key: a passkey keeps the account with the customer, while a server or provider key adds a party who can approve.
+
+<span id="what-a-signer-is" />
+
+## What a signer is
+
+A signer is a key that an account lists as able to approve, at a weight. Each approval is a signature that Tempo checks on chain against the account's signers, and a transaction executes once approving weights reach the account's [threshold](/docs/accounts/policies/signing-thresholds). A signing method is the kind of key behind a signer: where it lives and what it trusts.
 
 <span id="tempo-account-signer-types" />
 <span id="tempo-sign-in-methods" />
@@ -37,17 +43,16 @@ None of them depends on an outside service: the key that signs is the key the ac
 
 ## Combine signing methods
 
-A signer approves at its weight, and a transaction executes once approving weights reach the account's threshold. Mix methods and holders so no single party reaches the threshold alone:
+Mix methods and holders so no single party reaches the threshold alone:
 
-- **Customer accounts:** a passkey at weight 2, a backup key the customer keeps offline at weight 1, and a recovery provider's key at weight 1, at threshold 2. The passkey approves alone, and the two keys together recover it.
+- **Customer accounts:** a passkey that approves alone, plus a backup key and a recovery provider's key that together recover it.
 - **Treasuries:** private keys in separate wallets or HSMs, such as 2 of 3.
 - **Everyday payments:** a device key or a server key as an [access key](/docs/accounts/access-keys), which pays alone within limits and never counts toward the threshold.
 
-See [Signing thresholds](/docs/accounts/security-policies) for recommended setups, and the [guides](/docs/accounts/guides/self-custody) for walkthroughs.
+See [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) for weights, and the [guides](/docs/accounts/guides/self-custody) for walkthroughs.
 
 <span id="who-can-sign-in-as-a-customer" />
-
-## Who can sign for a customer
+<span id="who-can-sign-for-a-customer" />
 
 Only the keys an account lists can approve, and only at their weights. Tempo has no admin key or override, so your app, a wallet provider, or a recovery provider can approve only with the signers it holds. Keep any signer you hold below the threshold on its own, and pair it with a passkey the customer holds.
 
@@ -56,12 +61,13 @@ Only the keys an account lists can approve, and only at their weights. Tempo has
 
 ## Signing method limits
 
-| Limit | Value |
+Each method's page lists its limits. Limits on signers per account, total weight, and approvals per transaction apply to every method; see [Signing threshold limits](/docs/accounts/policies/signing-thresholds#signing-threshold-limits).
+
+| Method | Main limit |
 | --- | --- |
-| Signers per account | 1 to 48, each a secp256k1, P-256, or WebAuthn key |
-| Signatures per transaction | Up to 8 |
-| Passkey prompt | `NotAllowedError` when the customer cancels or the page isn't served over HTTPS |
-| Access keys toward the threshold | Never |
+| [Private keys](/docs/accounts/authentication/private-keys#private-key-limits) | Anyone with the key approves at its full weight. |
+| [Device keys](/docs/accounts/authentication/device-keys#device-key-limits) | A browser key is gone if the customer clears site data. |
+| [Passkeys](/docs/accounts/authentication/passkeys#passkey-limits) | A passkey works only on the domain that created it. |
 
 <span id="login-sign-in-in-code" />
 

@@ -9,9 +9,11 @@ import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
 
 # Device keys
 
-A device key is a P-256 key that the customer's phone, computer, or browser creates and can't export. A signer authorizes it once as an [access key](/docs/accounts/access-keys), and it then pays within limits with no prompt.
+A device key lets the customer's phone, computer, or browser pay with no prompt, within limits a signer sets once. Add it as an [access key](/docs/accounts/access-keys), not a signer, so a lost or unlocked device can spend only up to those limits until the key expires.
 
-The key lives in the platform's key store, which signs without revealing it. A device key trusts only that device: whoever unlocks it can pay up to the key's limits until it expires. Use it for everyday payments, with the customer's passkey approving the key and anything above its limits.
+## What a device key is
+
+A device key is a P-256 key that the device creates in its platform key store and can't export. The key store signs without revealing the key. The customer's passkey authorizes it once with a spending limit and an expiry, and Tempo checks those limits on every payment it makes.
 
 ## Device key stores by platform
 
@@ -21,15 +23,20 @@ The key lives in the platform's key store, which signs without revealing it. A d
 | Mac | Secure Enclave |
 | Android | Android Keystore, hardware-backed, or StrongBox where available |
 | Windows | TPM, through the Microsoft Platform Crypto Provider |
-| Browsers | WebCrypto non-extractable key, kept in IndexedDB. Gone if the customer clears site data. |
+| Browsers | WebCrypto non-extractable key, kept in IndexedDB |
 
 For keys on servers, use a KMS or HSM. See [Private keys](/docs/accounts/authentication/private-keys).
+
+## What a device key trusts
+
+A device key trusts only the device that holds it. Whoever unlocks the device can pay up to the key's limits until it expires. No app server or wallet provider holds the key or can use it.
 
 <span id="create-the-key-on-the-device" />
 <span id="authorize-it-from-a-signer" />
 <span id="pay-with-it" />
+<span id="how-a-device-key-starts-paying" />
 
-## How a device key starts paying
+## Create a device key
 
 <P256KeyDemo />
 
@@ -61,8 +68,12 @@ await client.token.transferSync({
 
 Later payments omit `keyAuthorization`.
 
-A device key can also be a weighted signer, such as a second factor next to the customer's passkey. A signer has no spending limits, so give it a weight below the threshold, and keep the key that pays every day as an access key.
+## Device key limits
 
-For a lost device, [revoke its key](/docs/accounts/access-keys#revoke-an-access-key). The account's signers don't change.
+- A browser key lives in IndexedDB and is gone if the customer clears site data. Sign in again to authorize a new one.
+- A key can't move to a new device. Each device authorizes its own key.
+- A P-256 key can also be a weighted signer, but a signer has no spending limits, so keep device keys as access keys.
+- For a lost device, [revoke its key](/docs/accounts/access-keys/revocation#revoke-an-access-key). The account's signers don't change.
+- Limits, expiry, and scopes work as for any access key: see [Spending limits](/docs/accounts/access-keys/spending-limits), [Expiry](/docs/accounts/access-keys/expiry), and [Scopes](/docs/accounts/access-keys/scopes).
 
 For other methods, see [Signing methods](/docs/accounts/authentication).

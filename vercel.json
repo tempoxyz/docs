@@ -737,7 +737,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -748,7 +748,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -1278,7 +1278,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/change-email",
-      "destination": "/developers/docs/accounts/recovery",
+      "destination": "/developers/docs/accounts/key-rotation/signer-rotation",
       "permanent": true
     },
     {
@@ -1303,17 +1303,17 @@
     },
     {
       "source": "/developers/docs/accounts/advanced/verify-approvals",
-      "destination": "/developers/docs/accounts/security-policies#verify-approvals",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/advanced/team-accounts",
-      "destination": "/developers/docs/accounts/security-policies#team-budgets",
+      "destination": "/developers/docs/accounts/guides/company-treasury#give-a-team-a-budget",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/advanced/approval-rules",
-      "destination": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/policies",
       "permanent": true
     },
     {
@@ -1337,33 +1337,53 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/recovery",
+      "destination": "/developers/docs/accounts/key-rotation",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/policies/escalation-rules",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/policies/private-policies",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/accounts/key-management",
-      "destination": "/developers/docs/accounts/recovery",
+      "destination": "/developers/docs/accounts/key-rotation",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/approvals",
-      "destination": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/team-budgets",
-      "destination": "/developers/docs/accounts/security-policies#team-budgets",
-      "permanent": true
-    },
-    {
-      "source": "/developers/docs/accounts/policies",
-      "destination": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/guides/company-treasury#give-a-team-a-budget",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/advanced/private-policies",
-      "destination": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/policies",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/advanced/verified-facts",
-      "destination": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/policies",
       "permanent": true
     },
     {
@@ -1433,12 +1453,12 @@
     },
     {
       "source": "/developers/learn/tempo/receive-policies",
-      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
       "source": "/developers/docs/learn/tempo/receive-policies",
-      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {

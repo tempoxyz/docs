@@ -538,17 +538,52 @@ export default defineConfig({
               { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
             ],
           },
-          { text: 'Signing thresholds', link: '/docs/accounts/security-policies' },
-          { text: 'Access keys', link: '/docs/accounts/access-keys' },
-          { text: 'Key rotation', link: '/docs/accounts/recovery' },
-          { text: 'Fee management', link: '/docs/accounts/fees' },
+          {
+            text: 'Policies',
+            link: '/docs/accounts/policies',
+            collapsed: true,
+            items: [
+              { text: 'Signing thresholds', link: '/docs/accounts/policies/signing-thresholds' },
+              { text: 'Receive policies', link: '/docs/accounts/policies/receive-policies' },
+            ],
+          },
+          {
+            text: 'Access keys',
+            link: '/docs/accounts/access-keys',
+            collapsed: true,
+            items: [
+              { text: 'Spending limits', link: '/docs/accounts/access-keys/spending-limits' },
+              { text: 'Expiry', link: '/docs/accounts/access-keys/expiry' },
+              { text: 'Scopes', link: '/docs/accounts/access-keys/scopes' },
+              { text: 'Admin access keys', link: '/docs/accounts/access-keys/admin-access-keys' },
+              { text: 'Revocation', link: '/docs/accounts/access-keys/revocation' },
+            ],
+          },
+          {
+            text: 'Key rotation',
+            link: '/docs/accounts/key-rotation',
+            collapsed: true,
+            items: [
+              { text: 'Signer rotation', link: '/docs/accounts/key-rotation/signer-rotation' },
+              { text: 'Signer recovery', link: '/docs/accounts/key-rotation/signer-recovery' },
+              { text: 'Account upgrade', link: '/docs/accounts/key-rotation/account-upgrade' },
+            ],
+          },
+          {
+            text: 'Fees',
+            link: '/docs/accounts/fees',
+            collapsed: true,
+            items: [
+              { text: 'Fee tokens', link: '/docs/accounts/fees/fee-tokens' },
+              { text: 'Fee sponsorship', link: '/docs/accounts/fees/fee-sponsorship' },
+            ],
+          },
         ],
       },
       {
         text: 'Users',
         items: [
           { text: 'Use a wallet provider', link: '/docs/accounts/guides/wallet-provider' },
-          { text: 'Enterprise SSO login', link: '/docs/accounts/guides/wallet-provider' },
           { text: 'Set up self-custody', link: '/docs/accounts/guides/self-custody' },
           { text: 'Set up a spending account', link: '/docs/accounts/guides/spending-account' },
         ],
@@ -968,10 +1003,6 @@ export default defineConfig({
                     link: '/docs/guide/payments/virtual-addresses',
                   },
                   { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
-                  {
-                    text: 'Receive policies',
-                    link: '/docs/guide/payments/configure-receive-policies',
-                  },
                   {
                     text: 'Verify payments',
                     link: '/docs/guide/payments/accept-a-payment/examples',
@@ -1445,7 +1476,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/change-email',
-      destination: '/docs/accounts/recovery',
+      destination: '/docs/accounts/key-rotation/signer-rotation',
       status: 301,
     },
     {
@@ -1470,17 +1501,17 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/advanced/verify-approvals',
-      destination: '/docs/accounts/security-policies#verify-approvals',
+      destination: '/docs/accounts/policies/signing-thresholds',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/team-accounts',
-      destination: '/docs/accounts/security-policies#team-budgets',
+      destination: '/docs/accounts/guides/company-treasury#give-a-team-a-budget',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/approval-rules',
-      destination: '/docs/accounts/security-policies',
+      destination: '/docs/accounts/policies',
       status: 301,
     },
     {
@@ -1504,33 +1535,53 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/accounts/security-policies',
+      destination: '/docs/accounts/policies/signing-thresholds',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/recovery',
+      destination: '/docs/accounts/key-rotation',
+      status: 301,
+    },
+    {
+      source: '/docs/guide/payments/configure-receive-policies',
+      destination: '/docs/accounts/policies/receive-policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/policies/escalation-rules',
+      destination: '/docs/accounts/policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/policies/private-policies',
+      destination: '/docs/accounts/policies',
+      status: 301,
+    },
+    {
       source: '/docs/accounts/key-management',
-      destination: '/docs/accounts/recovery',
+      destination: '/docs/accounts/key-rotation',
       status: 301,
     },
     {
       source: '/docs/accounts/approvals',
-      destination: '/docs/accounts/security-policies',
+      destination: '/docs/accounts/policies/signing-thresholds',
       status: 301,
     },
     {
       source: '/docs/accounts/team-budgets',
-      destination: '/docs/accounts/security-policies#team-budgets',
-      status: 301,
-    },
-    {
-      source: '/docs/accounts/policies',
-      destination: '/docs/accounts/security-policies',
+      destination: '/docs/accounts/guides/company-treasury#give-a-team-a-budget',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/private-policies',
-      destination: '/docs/accounts/security-policies',
+      destination: '/docs/accounts/policies',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/verified-facts',
-      destination: '/docs/accounts/security-policies',
+      destination: '/docs/accounts/policies',
       status: 301,
     },
     {
