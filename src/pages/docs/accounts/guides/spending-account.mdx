@@ -68,7 +68,7 @@ Tempo rejects a transfer over what's left today, to any other address, or after 
 
 ### Show the limit and let the customer pause the card
 
-Show `client.accessKey.getRemainingLimit({ accessKey: accessKeyAddress, account, token: alphaUsd })` next to the card. To pause it, [revoke the key](/docs/accounts/access-keys#revoke-an-access-key); to change the limit, use `updateSpendingLimit`.
+Show `client.accessKey.getRemainingLimit({ accessKey: accessKeyAddress, account, token: alphaUsd })` next to the card. To pause it, [revoke the key](/docs/accounts/access-keys#revoke-an-access-key); to change the limit, [update it](/docs/accounts/access-keys#change-an-access-key) with `client.accessKey.updateLimitSync`.
 
 :::::
 

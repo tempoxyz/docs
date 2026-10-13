@@ -51,7 +51,6 @@ import { thisDevice } from './this-device'
 
 export type GuideId =
   | 'identity-provider'
-  | 'email-otp'
   | 'add-signers'
   | 'multi-factor'
   | 'rotate-keys'
@@ -152,7 +151,7 @@ export type GuideChain = {
   remaining(account: string, keyId: string): Promise<number>
   generatePrivateKey(): string
   addressOf(privateKey: string): string
-  /** How a login names itself: the email, a masked number, or the Google account's address. */
+  /** How a login names itself: the account's email, the Privy identity, or the login's address. */
   identity(result: SignInResult): { subject: string; detail: string }
 }
 
@@ -208,8 +207,6 @@ export function missingNeed(needs: readonly Need[], live: ReadonlySet<Need>): st
   if (missing.length === 0) return null
   if (missing.includes('passkey'))
     return 'This demo creates a passkey. Open it in a browser with Touch ID, Face ID, or Windows Hello.'
-  if (missing.length === 1 && missing[0] === 'sms' && live.has('email'))
-    return 'Start the local auth app’s SMS gateway to sign in with SMS.'
   return 'Start the local auth app to sign in.'
 }
 
@@ -368,7 +365,7 @@ function lowerFirst(text: string) {
   return text.charAt(0).toLowerCase() + text.slice(1)
 }
 
-/** Signer names in a sentence, such as "your email login and your SMS login". */
+/** Signer names in a sentence, such as "your Privy login and your Google login". */
 export function approverNames(signers: readonly Signer[]) {
   return joinAnd(signers.map(signerPhrase))
 }
@@ -382,7 +379,7 @@ function signerPhrase(signer: Signer) {
   return namedSigner(signer) ? signer.name : `your ${lowerFirst(signer.name)}`
 }
 
-/** The configuration in one line, such as "passkey (2), email login (1), threshold 2". */
+/** The configuration in one line, such as "passkey (2), Google login (1), threshold 2". */
 export function describeConfig(account: SandboxAccount) {
   const owners = configuredSigners(account).map(
     (signer) => `${namedSigner(signer) ? signer.name : lowerFirst(signer.name)} (${signer.weight})`,
@@ -429,10 +426,8 @@ function hashes(...entries: [string, string | undefined][]) {
 }
 
 const loginWords: Record<LoginMethod, string> = {
-  email: 'email',
   google: 'Google',
   privy: 'Privy',
-  sms: 'SMS',
 }
 
 /** Which devnet keys a call may use: keys and sign-ins made in earlier steps. */
@@ -644,23 +639,23 @@ async function authorizeAndPay(state: DemoState, ctx: GuideContext, approver: st
 }
 
 function method(state: DemoState): LoginMethod {
-  return state.choice === 'google' ? 'google' : 'email'
+  return state.choice === 'privy' ? 'privy' : 'google'
 }
 
 const loginChoices: DemoChoice[] = [
   { id: 'google', label: 'Google', method: 'google' },
-  { id: 'email', label: 'Email', method: 'email' },
+  { id: 'privy', label: 'Privy', method: 'privy' },
 ]
 
 /** The account's first signer when the reader chooses it. */
 const firstSignerChoices: DemoChoice[] = [
-  { id: 'email', label: 'Email login', method: 'email' },
   { id: 'google', label: 'Google login', method: 'google' },
+  { id: 'privy', label: 'Privy login', method: 'privy' },
   { id: 'private-key', label: 'Private key' },
 ]
 
 function choiceMethod(choice: string): LoginMethod | null {
-  return choice === 'email' || choice === 'google' ? choice : null
+  return choice === 'google' || choice === 'privy' ? choice : null
 }
 
 // ---------------------------------------------------------------------------
@@ -670,17 +665,18 @@ const identityProvider: DemoScript = {
   title: 'Sign in with your identity provider',
   choices: loginChoices,
   choiceLabel: 'Sign in with',
-  needs: (choice) => [choice === 'google' ? 'google' : 'email'],
+  needs: (choice) => [choice === 'privy' ? 'privy' : 'google'],
   setup: [],
   steps: [
     {
       title: 'Check that your provider’s keys are published',
       action: (state) =>
-        method(state) === 'google' ? 'Check Google’s keys' : 'Check the email issuer’s keys',
+        method(state) === 'google' ? 'Check Google’s keys' : 'Check the auth app’s keys',
       run: async (state, ctx) => {
         const login = method(state)
         const { count, publisherId } = await ctx.chain.publishedKeys(login)
-        const issuer = login === 'google' ? 'Google' : 'The local auth app (the email issuer)'
+        const issuer =
+          login === 'google' ? 'Google' : 'The local auth app (the issuer that bridges Privy)'
         if (count === 0)
           throw new DemoError(
             `${issuer} has no signing keys listed on devnet, so its sign-ins can’t approve.`,
@@ -689,7 +685,7 @@ const identityProvider: DemoScript = {
           state: withLocal(state, {
             id: 'publisher',
             icon: 'publisher',
-            label: `Key Publisher · ${login === 'google' ? 'Google' : 'email issuer'}`,
+            label: `Key Publisher · ${login === 'google' ? 'Google' : 'Privy bridge'}`,
             detail: `${count} signing key${count === 1 ? '' : 's'} listed · ${short(publisherId)}`,
             status: 'ready',
           }),
@@ -731,8 +727,7 @@ const identityProvider: DemoScript = {
     },
     {
       title: 'Sign the customer in',
-      action: (state) =>
-        method(state) === 'google' ? 'Sign in with Google' : 'Sign in with email',
+      action: (state) => `Sign in with ${loginWords[method(state)]}`,
       signIn: method,
       run: async (state, ctx) => {
         const login = method(state)
@@ -770,66 +765,10 @@ const identityProvider: DemoScript = {
   ],
 }
 
-const emailOtp: DemoScript = {
-  title: 'Sign in with an email code',
-  needs: () => ['email'],
-  setup: [],
-  steps: [
-    {
-      title: 'Create a key in the browser',
-      action: () => 'Create device key',
-      run: async (state, ctx) => {
-        const { state: next, key } = await prepareBrowserKey(state, ctx, 'Device key', 'device')
-        return {
-          state: next,
-          result: `A P-256 key whose private key can’t leave this browser. Key ID ${short(key.address)}. It can’t pay until the account authorizes it.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Sign in with an email code',
-      action: () => 'Sign in with email',
-      signIn: () => 'email',
-      run: async (state, ctx) => {
-        const signedIn = await signInStep(state, ctx, 'email', {
-          id: 'login',
-          label: 'Email login',
-          pending: false,
-        })
-        return {
-          state: signedIn.state,
-          result: `Signed in as ${signedIn.who} with a one-time code. The proof lets this login approve until ${until(signedIn.result.owner.validUntil)}.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Open the account',
-      action: () => 'Open account',
-      run: async (state, ctx) => {
-        const created = await createAccount(state, ctx, 'email')
-        const address = addressOf(created.state.account)
-        const registered = (await ctx.chain.commitment(address)) !== null
-        return {
-          state: created.state,
-          result: `Your email login’s address is ${short(address)}, from config v0 with the login as its only signer. The devnet faucet funded it. ${registered ? 'It’s already on Tempo: this email opened it before.' : 'It registers on Tempo with its first transaction.'}`,
-          hashes: hashes(['Faucet', created.hash]),
-        }
-      },
-    },
-    {
-      title: 'Pay with the device key',
-      action: () => 'Pay $5',
-      run: (state, ctx) => authorizeAndPay(state, ctx, 'Your email login'),
-    },
-  ],
-}
-
 function firstSignerLabel(choice: string) {
   return choice === 'private-key'
     ? 'private key'
-    : `${loginWords[choiceMethod(choice) ?? 'email']} login`
+    : `${loginWords[choiceMethod(choice) ?? 'google']} login`
 }
 
 const addSigners: DemoScript = {
@@ -846,7 +785,7 @@ const addSigners: DemoScript = {
       action: (state) =>
         state.choice === 'private-key'
           ? 'Create with a private key'
-          : `Sign in with ${loginWords[choiceMethod(state.choice) ?? 'email']}`,
+          : `Sign in with ${loginWords[choiceMethod(state.choice) ?? 'google']}`,
       signIn: (state) => choiceMethod(state.choice),
       run: async (state, ctx) => {
         const login = choiceMethod(state.choice)
@@ -964,18 +903,18 @@ function upperFirst(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-/** Create the account with an email login and authorize a "This browser" device key. */
-const emailWithDeviceKey: DemoAction = {
+/** Create the account with a Privy login and authorize a "This browser" device key. */
+const privyWithDeviceKey: DemoAction = {
   title: 'Create your account',
-  action: () => 'Sign in with email',
-  signIn: () => 'email',
+  action: () => 'Sign in with Privy',
+  signIn: () => 'privy',
   run: async (state, ctx) => {
-    const signedIn = await signInStep(state, ctx, 'email', {
+    const signedIn = await signInStep(state, ctx, 'privy', {
       id: 'login',
-      label: 'Email login',
+      label: 'Privy login',
       pending: false,
     })
-    const created = await createAccount(signedIn.state, ctx, 'email')
+    const created = await createAccount(signedIn.state, ctx, 'privy')
     const next = addAccessKey(created.state.account, 'browser')
     addedKey(created.state.account, next)
     const authorized = await update(created.state, ctx, next)
@@ -996,17 +935,17 @@ const emailWithDeviceKey: DemoAction = {
 
 const multiFactor: DemoScript = {
   title: 'Turn on multi-factor approval',
-  needs: () => ['passkey', 'email', 'sms'],
-  setup: [emailWithDeviceKey],
+  needs: () => ['passkey', 'privy', 'google'],
+  setup: [privyWithDeviceKey],
   steps: [
     {
-      title: 'Sign the customer in with SMS',
-      action: () => 'Sign in with SMS',
-      signIn: () => 'sms',
+      title: 'Sign the customer in with Google',
+      action: () => 'Sign in with Google',
+      signIn: () => 'google',
       run: async (state, ctx) => {
-        const signedIn = await signInStep(state, ctx, 'sms', {
-          id: 'sms',
-          label: 'SMS login',
+        const signedIn = await signInStep(state, ctx, 'google', {
+          id: 'google',
+          label: 'Google login',
           pending: true,
         })
         return {
@@ -1035,11 +974,14 @@ const multiFactor: DemoScript = {
         const before = state.account
         const approvers = nextApprovers(before)
         const withPasskey = addHeldPasskey(before, state.held, 2).account
-        const withSms = checked(addSigner(withPasskey, 'sms'))
-        addedSigner(withPasskey, withSms)
-        const next = asOneUpdate(before, checked(setThreshold(withSms, 2)))
+        const withGoogle = checked(addSigner(withPasskey, 'google'))
+        addedSigner(withPasskey, withGoogle)
+        const next = asOneUpdate(before, checked(setThreshold(withGoogle, 2)))
         const sent = await update(state, ctx, next)
-        let done = updateLocal(sent.state, 'sms', { status: 'done', detail: 'SMS login · signer' })
+        let done = updateLocal(sent.state, 'google', {
+          status: 'done',
+          detail: 'Google login · signer',
+        })
         done = updateLocal(done, 'passkey', {
           status: 'done',
           detail: `WebAuthn · ${thisDevice().unlock} · signer`,
@@ -1232,21 +1174,28 @@ const rotateKeys: DemoScript = {
   ],
 }
 
+/** The account's Google login: the one an email change replaces. */
+function googleLogin(account: SandboxAccount) {
+  const signer = configuredSigners(account).find((item) => item.kind === 'google')
+  // The devnet adapter names a login after its sign-in; until then it has only its label.
+  return signer && { ...signer, subject: signer.subject ?? signer.name }
+}
+
 const changeEmail: DemoScript = {
-  title: 'Change your email login',
-  needs: () => ['email'],
+  title: 'Change your Google login',
+  needs: () => ['google'],
   setup: [
     {
       title: 'Create your account',
-      action: () => 'Sign in with email',
-      signIn: () => 'email',
+      action: () => 'Sign in with Google',
+      signIn: () => 'google',
       run: async (state, ctx) => {
-        const signedIn = await signInStep(state, ctx, 'email', {
+        const signedIn = await signInStep(state, ctx, 'google', {
           id: 'login',
-          label: 'Email login',
+          label: 'Google login',
           pending: false,
         })
-        const created = await createAccount(signedIn.state, ctx, 'email')
+        const created = await createAccount(signedIn.state, ctx, 'google')
         return {
           state: created.state,
           result: `Created ${short(addressOf(created.state.account))} with ${signedIn.who} as its only signer. The devnet faucet funded it.`,
@@ -1258,18 +1207,19 @@ const changeEmail: DemoScript = {
   steps: [
     {
       title: 'Sign the customer in with the new email',
-      action: () => 'Sign in with another email',
-      signIn: () => 'email',
+      action: () => 'Sign in with another Google account',
+      signIn: () => 'google',
       run: async (state, ctx) => {
-        const old = configuredSigners(state.account).find((signer) => signer.kind === 'email')
-        const signedIn = await signInStep(state, ctx, 'email', {
+        const info = await ctx.adapter.inspect(addressOf(state.account))
+        const signedIn = await signInStep(state, ctx, 'google', {
           id: 'new-login',
-          label: 'New email login',
+          label: 'New Google login',
           pending: true,
         })
-        if (old?.subject && old.subject === signedIn.who)
+        const address = signedIn.result.owner.address.toLowerCase()
+        if (info?.config.owners.some(({ owner }) => owner.toLowerCase() === address))
           throw new DemoError(
-            'That’s the email already on the account. Sign in with a different one.',
+            'That’s the Google account already on the account. Sign in with a different one.',
           )
         return {
           state: signedIn.state,
@@ -1281,10 +1231,11 @@ const changeEmail: DemoScript = {
     {
       title: 'Replace the old login at the same weight',
       action: () => 'Draft the swap',
-      run: async (state) => {
-        const old = configuredSigners(state.account).find((signer) => signer.kind === 'email')
-        const next = state.held.signIns[0]?.email
-        if (!old || !next) throw new DemoError('Sign in with the new email first.')
+      run: async (state, ctx) => {
+        const old = googleLogin(state.account)
+        const signIn = state.held.signIns[0]
+        if (!old || !signIn) throw new DemoError('Sign in with the new Google account first.')
+        const next = ctx.chain.identity(signIn).subject
         return {
           state: withLocal(state, {
             id: 'update',
@@ -1300,16 +1251,15 @@ const changeEmail: DemoScript = {
     },
     {
       title: 'Approve the swap',
-      action: (state) =>
-        `Approve with ${configuredSigners(state.account).find((signer) => signer.kind === 'email')?.subject ?? 'the old email'}`,
+      action: (state) => `Approve with ${googleLogin(state.account)?.subject ?? 'the old login'}`,
       run: async (state, ctx) => {
-        const old = configuredSigners(state.account).find((signer) => signer.kind === 'email')
-        if (!old) throw new DemoError('The account has no email login.')
-        const added = checked(addSigner(state.account, 'email'))
+        const old = googleLogin(state.account)
+        if (!old) throw new DemoError('The account has no Google login.')
+        const added = checked(addSigner(state.account, 'google'))
         addedSigner(state.account, added)
         const next = asOneUpdate(state.account, checked(removeSigner(added, old.id)))
         const sent = await update(state, ctx, next)
-        const now = configuredSigners(sent.state.account).find((signer) => signer.kind === 'email')
+        const now = googleLogin(sent.state.account)
         let done = updateLocal(sent.state, 'update', {
           detail: `Approved by ${old.subject} · sent`,
           status: 'done',
@@ -1354,17 +1304,17 @@ const changeEmail: DemoScript = {
 
 const recover: DemoScript = {
   title: 'Recover after losing your passkey',
-  needs: () => ['passkey', 'email', 'sms'],
+  needs: () => ['passkey', 'privy', 'google'],
   setup: [
-    emailWithDeviceKey,
+    privyWithDeviceKey,
     {
-      title: 'Add your SMS login and a passkey',
-      action: () => 'Sign in with SMS',
-      signIn: () => 'sms',
+      title: 'Add your Google login and a passkey',
+      action: () => 'Sign in with Google',
+      signIn: () => 'google',
       run: async (state, ctx) => {
-        const signedIn = await signInStep(state, ctx, 'sms', {
-          id: 'sms',
-          label: 'SMS login',
+        const signedIn = await signInStep(state, ctx, 'google', {
+          id: 'google',
+          label: 'Google login',
           pending: false,
         })
         const before = signedIn.state.account
@@ -1372,9 +1322,9 @@ const recover: DemoScript = {
         const withPasskey = checked(addSigner(before, 'passkey'))
         const passkey = addedSigner(before, withPasskey)
         const weighted = checked(setSignerWeight(withPasskey, passkey.id, 2))
-        const withSms = checked(addSigner(weighted, 'sms'))
-        addedSigner(weighted, withSms)
-        const next = asOneUpdate(before, checked(setThreshold(withSms, 2)))
+        const withGoogle = checked(addSigner(weighted, 'google'))
+        addedSigner(weighted, withGoogle)
+        const next = asOneUpdate(before, checked(setThreshold(withGoogle, 2)))
         const sent = await update(signedIn.state, ctx, next)
         return {
           state: withLocal(sent.state, {
@@ -1427,8 +1377,8 @@ const recover: DemoScript = {
     },
     {
       title: 'Sign in with the remaining signers',
-      action: () => 'Sign in with email',
-      signIn: () => 'email',
+      action: () => 'Sign in with Privy and Google',
+      signIn: () => 'privy',
       run: async (state, ctx) => {
         const info = await ctx.adapter.inspect(addressOf(state.account))
         const isOwner = (result: SignInResult) =>
@@ -1437,26 +1387,28 @@ const recover: DemoScript = {
           )
         const subject = (kind: SignerKind) =>
           configuredSigners(state.account).find((signer) => signer.kind === kind)?.subject
-        const email = await signInStep(state, ctx, 'email', {
+        const privy = await signInStep(state, ctx, 'privy', {
           id: 'login',
-          label: 'Email login',
+          label: 'Privy login',
           pending: false,
         })
-        if (!isOwner(email.result))
+        if (!isOwner(privy.result))
           throw new DemoError(
-            `That isn’t this account’s email login. Sign in as ${subject('email')}.`,
+            `That isn’t this account’s Privy login. Sign in as ${subject('privy')}.`,
           )
-        const sms = await signInStep(email.state, ctx, 'sms', {
-          id: 'sms',
-          label: 'SMS login',
+        const google = await signInStep(privy.state, ctx, 'google', {
+          id: 'google',
+          label: 'Google login',
           pending: false,
         })
-        if (!isOwner(sms.result))
-          throw new DemoError(`That isn’t this account’s SMS login. Sign in as ${subject('sms')}.`)
-        const validUntil = Math.min(email.result.owner.validUntil, sms.result.owner.validUntil)
+        if (!isOwner(google.result))
+          throw new DemoError(
+            `That isn’t this account’s Google login. Sign in as ${subject('google')}.`,
+          )
+        const validUntil = Math.min(privy.result.owner.validUntil, google.result.owner.validUntil)
         return {
-          state: sms.state,
-          result: `Your email and SMS logins signed in. Together they have weight 2, and both approve until ${until(validUntil)}.`,
+          state: google.state,
+          result: `Your Privy and Google logins signed in. Together they have weight 2, and both approve until ${until(validUntil)}.`,
           hashes: [],
         }
       },
@@ -1825,7 +1777,6 @@ const teamAccounts: DemoScript = {
 
 export const guideScripts: Record<GuideId, DemoScript> = {
   'identity-provider': identityProvider,
-  'email-otp': emailOtp,
   'add-signers': addSigners,
   'multi-factor': multiFactor,
   'rotate-keys': rotateKeys,

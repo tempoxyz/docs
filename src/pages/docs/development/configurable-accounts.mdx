@@ -131,7 +131,7 @@ import { client } from './client'
 const config = await client.accounts.getConfig({ address: account.address })
 ```
 
-`getConfig` returns the configuration a relay recorded, or `null` if it has none. It needs a client whose transport is a relay with `Relay.accounts`, as in [Run your own salt service](/docs/accounts/authentication/login-services#run-your-own-salt-service). A bare node returns only the hash, through `client.accounts.getConfigCommitment`.
+`getConfig` returns the configuration a relay recorded, or `null` if it has none. It needs a client whose transport is a relay with `Relay.accounts`, as in [Run your own salt service](/docs/accounts/authentication/oidc#run-your-own-salt-service). A bare node returns only the hash, through `client.accounts.getConfigCommitment`.
 
 <span id="login-signers" />
 

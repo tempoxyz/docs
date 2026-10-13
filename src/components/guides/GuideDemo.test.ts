@@ -29,7 +29,6 @@ import {
 
 const pages: Record<GuideId, string> = {
   'identity-provider': 'guides/enterprise-sso',
-  'email-otp': 'authentication/oidc',
   'add-signers': 'guides/self-custody',
   'multi-factor': 'guides/self-custody',
   'rotate-keys': 'guides/company-treasury',
@@ -75,7 +74,7 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
   const signInUses: string[] = []
 
   function identity(method: LoginMethod) {
-    const list = identities[method] ?? [method === 'sms' ? '+15551230142' : `reader-${method}`]
+    const list = identities[method] ?? [`reader-${method}`]
     const index = signInCounts[method] ?? 0
     signInCounts[method] = index + 1
     return list[Math.min(index, list.length - 1)]
@@ -89,7 +88,7 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
     if (prepared) preparedUses.push(`${signer.kind}:${signer.name}`)
     if (signer.kind === 'private-key' && signer.privateKey)
       address = `0x${signer.privateKey.slice(-40)}`
-    if (signer.kind === 'email' || signer.kind === 'google' || signer.kind === 'sms') {
+    if (signer.kind === 'google' || signer.kind === 'privy') {
       const result = options?.signIns?.find((item) => item.method === signer.kind)
       if (!result) throw new Error(`No sign-in for the new ${signer.kind} login.`)
       signInUses.push(signer.kind)
@@ -176,7 +175,7 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
     },
     chain: {
       publishedKeys: async (method) => ({ issuer: method, publisherId: next(64), count: 2 }),
-      relay: async () => ({ chainId: 31_318, methods: ['email', 'google', 'sms'] }),
+      relay: async () => ({ chainId: 31_318, methods: ['google', 'privy'] }),
       commitment: async (address) => (registered.has(address) ? 'committed' : null),
       configCommitment: () => 'committed',
       inferAddress: () => next(40),
@@ -185,7 +184,7 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
       generatePrivateKey: () => next(64),
       addressOf: (privateKey) => `0x${privateKey.slice(-40)}`,
       identity: (result) => {
-        const subject = result.email ?? result.phone ?? result.owner.address
+        const subject = result.email ?? result.owner.address
         return { subject, detail: `OIDC · ${subject}` }
       },
     },
@@ -199,12 +198,7 @@ function fakeContext(identities: Partial<Record<LoginMethod, string[]>> = {}): F
         address,
         validUntil: Math.floor(Date.now() / 1_000) + 540,
       } as unknown as LoginOwner
-      return {
-        method,
-        owner,
-        ...(method === 'email' ? { email: `${who}@example.com` } : {}),
-        ...(method === 'sms' ? { phone: who } : {}),
-      } as SignInResult
+      return { method, owner, email: `${who}@example.com` } as SignInResult
     },
   }
 }
@@ -266,7 +260,9 @@ describe('GuideDemo scripts', () => {
   it.each(
     runs,
   )('%s (%s) runs every action and shows a hash for every change', async (guide, choice) => {
-    const { outcomes, states } = await run(guide, choice || undefined)
+    // An email change signs in with a second Google account.
+    const ctx = guide === 'change-email' ? fakeContext({ google: ['first', 'second'] }) : undefined
+    const { outcomes, states } = await run(guide, choice || undefined, ctx)
     outcomes.forEach((outcome, index) => {
       expect(outcome.result).not.toBe('')
       expect(outcome.state.account.notice).toBeNull()
@@ -276,11 +272,12 @@ describe('GuideDemo scripts', () => {
   })
 
   it('creates the sign-in account from the login, then authorizes the device key it made first', async () => {
-    for (const guide of ['identity-provider', 'email-otp'] as const) {
-      const { states, account, ctx, outcomes } = await run(guide)
+    for (const choice of ['google', 'privy'] as const) {
+      const guide = 'identity-provider'
+      const { states, account, ctx, outcomes } = await run(guide, choice)
       const opened = guideScripts[guide].steps.findIndex((step) => step.title.startsWith('Open'))
       expect(states.findIndex((state) => isCreated(state.account))).toBe(opened + 1)
-      expect(ctx.signInUses).toEqual([guide === 'email-otp' ? 'email' : 'google'])
+      expect(ctx.signInUses).toEqual([choice])
       expect(ctx.preparedUses).toEqual(['browser:This browser'])
       expect(account.accessKeys.map((key) => [key.name, key.spent])).toEqual([['This browser', 5]])
       // The first payment carries the key's authorization: one transaction.
@@ -289,7 +286,7 @@ describe('GuideDemo scripts', () => {
   })
 
   it('adds the passkey made in the first step, approved by the account’s first signer', async () => {
-    for (const choice of ['email', 'google', 'private-key']) {
+    for (const choice of ['google', 'privy', 'private-key']) {
       const { account, ctx } = await run('add-signers', choice)
       expect(ctx.preparedUses).toEqual(['passkey:Passkey'])
       expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
@@ -300,18 +297,18 @@ describe('GuideDemo scripts', () => {
     }
   })
 
-  it('turns on multi-factor in one update with the SMS sign-in and the prepared passkey', async () => {
+  it('turns on multi-factor in one update with the Google sign-in and the prepared passkey', async () => {
     const { states, ctx } = await run('multi-factor')
     const before = states[3].account
     const after = states[4].account
     expect(after.version).toBe(before.version + 1)
     expect(after.threshold).toBe(2)
     expect(configuredSigners(after).map((signer) => [signer.kind, signer.weight])).toEqual([
-      ['email', 1],
+      ['privy', 1],
       ['passkey', 2],
-      ['sms', 1],
+      ['google', 1],
     ])
-    expect(ctx.signInUses).toEqual(['email', 'sms'])
+    expect(ctx.signInUses).toEqual(['privy', 'google'])
     expect(ctx.preparedUses).toContain('passkey:Passkey')
   })
 
@@ -326,36 +323,30 @@ describe('GuideDemo scripts', () => {
     expect(account.accessKeys.find((key) => key.name === 'Service key')?.status).toBe('revoked')
   })
 
-  it('swaps the email login for the second address the reader signs in with', async () => {
-    const ctx = fakeContext({ email: ['first', 'second'] })
+  it('swaps the Google login for the second account the reader signs in with', async () => {
+    const ctx = fakeContext({ google: ['first', 'second'] })
     const { account } = await run('change-email', undefined, ctx)
-    const logins = configuredSigners(account).filter((signer) => signer.kind === 'email')
+    const logins = configuredSigners(account).filter((signer) => signer.kind === 'google')
     expect(logins).toHaveLength(1)
     expect(account.version).toBe(1)
-    expect(ctx.signInUses).toEqual(['email', 'email'])
+    expect(ctx.signInUses).toEqual(['google', 'google'])
   })
 
-  it('refuses a new email that’s already on the account', async () => {
-    const ctx = fakeContext({ email: ['same'] })
+  it('refuses a new Google account that’s already on the account', async () => {
+    const ctx = fakeContext({ google: ['same'] })
     const script = guideScripts['change-email']
     let state = scriptStart('change-email')
     state = (await script.setup[0].run(state, ctx)).state
-    // The real adapter names the login after its sign-in.
-    const login = configuredSigners(state.account)[0]
-    state = {
-      ...state,
-      account: {
-        ...state.account,
-        signers: state.account.signers.map((signer) =>
-          signer.id === login.id ? { ...signer, subject: 'same@example.com' } : signer,
-        ),
-      },
-    }
     await expect(script.steps[0].run(state, ctx)).rejects.toThrow('already on the account')
   })
 
   it('recovers with both logins, replaces the lost passkey, and revokes the device key', async () => {
     const { account, ctx } = await run('recover')
+    expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
+      ['privy', 1],
+      ['google', 1],
+      ['passkey', 2],
+    ])
     const passkeys = configuredSigners(account).filter((signer) => signer.kind === 'passkey')
     expect(passkeys.map((signer) => [signer.weight, signer.lost])).toEqual([[2, false]])
     expect(ctx.preparedUses).toEqual(['passkey:New passkey'])
@@ -416,7 +407,7 @@ describe('GuideDemo helpers', () => {
     const passkey = after.signers.at(-1) as Signer
     const held = consume(
       {
-        signIns: [{ method: 'email' } as SignInResult],
+        signIns: [{ method: 'google' } as SignInResult],
         signers: [
           { id: passkey.id, kind: 'passkey', key: { address: '0x01' } },
           { id: 'later', kind: 'passkey', key: { address: '0x02' } },
@@ -434,9 +425,11 @@ describe('GuideDemo helpers', () => {
   })
 
   it('says what a demo is missing', () => {
-    expect(missingNeed(['email'], new Set(['email']))).toBeNull()
-    expect(missingNeed(['email'], new Set())).toBe('Start the local auth app to sign in.')
-    expect(missingNeed(['email', 'sms'], new Set(['email']))).toContain('SMS gateway')
-    expect(missingNeed(['passkey'], new Set(['email']))).toContain('Touch ID')
+    expect(missingNeed(['google'], new Set(['google']))).toBeNull()
+    expect(missingNeed(['google'], new Set())).toBe('Start the local auth app to sign in.')
+    expect(missingNeed(['google', 'privy'], new Set(['google']))).toBe(
+      'Start the local auth app to sign in.',
+    )
+    expect(missingNeed(['passkey'], new Set(['google']))).toContain('Touch ID')
   })
 })

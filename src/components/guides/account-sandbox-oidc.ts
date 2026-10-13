@@ -1,7 +1,7 @@
 /**
- * Real login signers for the account sandbox on the internal PR-8211 devnet: email-code, Google,
- * SMS, and Privy sign-in through a locally running oidc-demos auth app (its relay, its issuer for
- * email, SMS, and bridged Privy tokens, and the hosted prover). Each sign-in proves an OIDC ID token
+ * Real login signers for the account sandbox on the internal PR-8211 devnet: Google and Privy
+ * sign-in through a locally running oidc-demos auth app (its relay, its issuer for bridged Privy
+ * tokens, and the hosted prover). Each sign-in proves an OIDC ID token
  * in zero knowledge (TIP-1130, TIP-1131) and returns a login owner: a ZK signer address that a
  * configurable account lists as an owner.
  *
@@ -39,7 +39,7 @@ type Address = `0x${string}`
 // ---------------------------------------------------------------------------
 // Constants
 
-/** The local oidc-demos auth app: sign-in page, relay, and email/SMS/Privy issuer. */
+/** The local oidc-demos auth app: sign-in page, relay, and Privy issuer. */
 export const relayOrigin = 'http://localhost:5173'
 export const relayChainId = 31_318
 /** Where the relay sends the popup back to, on this docs origin. */
@@ -48,22 +48,18 @@ export const callbackMessageType = 'tempo-oidc-callback'
 export const callbackChannel = 'tempo-oidc'
 export const googleIssuer = 'https://accounts.google.com'
 
-export const loginMethods = ['email', 'google', 'sms', 'privy'] as const
+export const loginMethods = ['google', 'privy'] as const
 export type LoginMethod = (typeof loginMethods)[number]
 
 /** What each method's UI says while the popup is open. */
 export const loginPromptLabels: Record<LoginMethod, string> = {
-  email: 'Check your email for a code…',
   google: 'Sign in with Google…',
-  sms: 'Check your phone for a code…',
   privy: 'Sign in with Privy…',
 }
 
 /** What a different identity is called when a renewed sign-in doesn't match. */
 export const loginAccountNouns: Record<LoginMethod, string> = {
-  email: 'address',
   google: 'Google account',
-  sms: 'number',
   privy: 'Privy account',
 }
 
@@ -121,16 +117,15 @@ export type ConfigurableConfig = {
 export type SignInResult = {
   method: LoginMethod
   credential: LoginCredential
-  /** `iss`: Google for Google, the relay's own issuer for email, SMS, and Privy. */
+  /** `iss`: Google for Google, the relay's own issuer for Privy. */
   issuer: string
   /**
    * The identity's address seed: a hash of `sub`, `aud`, and the relay's salt. The relay doesn't
    * reveal `sub`, so this is the stable, pseudonymous subject.
    */
   subject: Hex
-  /** The address or number the code went to, when the relay reports it. */
+  /** The verified email the relay reports beside the credential, when it has one. */
   email?: string
-  phone?: string
   /** A Privy sign-in's user DID, such as `did:privy:cm…`. */
   privy?: string
   owner: LoginOwner
@@ -172,65 +167,27 @@ export type RelayStatus = {
 }
 
 /**
- * Methods a relay config offers. A relay that lists `methods` (the SMS and Privy builds do) is taken
- * at its word; otherwise its issuers decide: its own origin issues email tokens, and Google issues
- * Google tokens. SMS and Privy need an explicit `methods` entry, since they share the relay's issuer
- * with email (the relay bridges each Privy sign-in into its own ID token).
+ * Methods a relay config offers. A relay that lists `methods` (the Privy build does) is taken at its
+ * word; otherwise its issuers decide: Google issues Google tokens. Privy needs an explicit `methods`
+ * entry, since the relay bridges each Privy sign-in into its own ID token.
  */
-export function relayMethods(
-  config: { issuers?: readonly unknown[]; methods?: readonly unknown[] },
-  origin = relayOrigin,
-): LoginMethod[] {
+export function relayMethods(config: {
+  issuers?: readonly unknown[]
+  methods?: readonly unknown[]
+}): LoginMethod[] {
   if (Array.isArray(config.methods))
     return loginMethods.filter((method) => config.methods?.includes(method))
   const issuers = config.issuers ?? []
-  const methods: LoginMethod[] = []
-  if (issuers.includes(origin)) methods.push('email')
-  if (issuers.includes(googleIssuer)) methods.push('google')
-  return methods
+  return issuers.includes(googleIssuer) ? ['google'] : []
 }
 
-/** The local SMS gateway the relay texts codes through (it sends with this Mac's Messages). */
-export const smsGatewayOrigin = 'http://127.0.0.1:5199'
-/** The gateway's health route. Its root path answers 404 and logs a rejection. */
-export const smsGatewayHealthUrl = `${smsGatewayOrigin}/health`
-
-/**
- * Whether anything answers at the SMS gateway. A `no-cors` request settles on any HTTP answer and
- * fails when nothing listens, so it needs no CORS headers from the gateway.
- */
-export async function checkSmsGateway(
-  options: { url?: string; timeoutMs?: number; fetch?: typeof globalThis.fetch } = {},
-) {
-  const {
-    url = smsGatewayHealthUrl,
-    timeoutMs = 1_500,
-    fetch: fetchFn = globalThis.fetch,
-  } = options
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  try {
-    await fetchFn(url, { mode: 'no-cors', signal: controller.signal })
-    return true
-  } catch {
-    return false
-  } finally {
-    clearTimeout(timer)
-  }
-}
-
-/**
- * The relay's config, or `null` when this page can't use it (HTTPS page, down, wrong chain). SMS
- * counts only while the SMS gateway answers too.
- */
+/** The relay's config, or `null` when this page can't use it (HTTPS page, down, wrong chain). */
 export async function checkRelay(
   options: {
     url?: string
     timeoutMs?: number
     fetch?: typeof globalThis.fetch
     protocol?: string
-    /** The SMS gateway to probe, or `false` to skip the probe. */
-    smsGateway?: string | false
   } = {},
 ): Promise<RelayStatus | null> {
   const {
@@ -238,7 +195,6 @@ export async function checkRelay(
     timeoutMs = 2_000,
     fetch: fetchFn = globalThis.fetch,
     protocol = globalThis.location?.protocol,
-    smsGateway = smsGatewayHealthUrl,
   } = options
   if (protocol === 'https:' || !fetchFn) return null
   const controller = new AbortController()
@@ -252,18 +208,10 @@ export async function checkRelay(
       methods?: unknown
     }
     if (body.chainId !== relayChainId || !Array.isArray(body.issuers)) return null
-    let methods = relayMethods(
-      {
-        issuers: body.issuers,
-        methods: Array.isArray(body.methods) ? body.methods : undefined,
-      },
-      url,
-    )
-    if (
-      methods.includes('sms') &&
-      (smsGateway === false || !(await checkSmsGateway({ url: smsGateway, fetch: fetchFn })))
-    )
-      methods = methods.filter((method) => method !== 'sms')
+    const methods = relayMethods({
+      issuers: body.issuers,
+      methods: Array.isArray(body.methods) ? body.methods : undefined,
+    })
     return {
       chainId: relayChainId,
       issuers: body.issuers.filter((issuer): issuer is string => typeof issuer === 'string'),
@@ -320,7 +268,6 @@ export type CallbackMessage = {
   credential?: string | null
   error?: string | null
   email?: string | null
-  phone?: string | null
   /** A Privy sign-in's user DID. */
   privy?: string | null
 }
@@ -331,7 +278,6 @@ export type CallbackResult =
       error?: undefined
       credential: LoginCredential
       email?: string
-      phone?: string
       privy?: string
     }
 
@@ -352,13 +298,12 @@ export function parseCallback(message: unknown, requestId: string): CallbackResu
   return {
     credential,
     ...(data.email ? { email: String(data.email) } : {}),
-    ...(data.phone ? { phone: String(data.phone) } : {}),
     ...(data.privy ? { privy: String(data.privy) } : {}),
   }
 }
 
 /**
- * `iss` for each method: email, SMS, and Privy tokens come from the relay itself. The relay checks
+ * `iss` for each method: Privy tokens come from the relay itself. The relay checks
  * each Privy sign-in and issues its own RS256 ID token for it, so Privy's issuer never reaches the
  * proof.
  */
@@ -419,15 +364,6 @@ export function needsSignIn(owner: Pick<LoginOwner, 'validUntil'> | undefined, m
   return !owner || owner.validUntil - Math.floor(Date.now() / 1_000) < margin
 }
 
-/** A phone number with all but its last four digits hidden, like `+1 ••• ••• 7442`. */
-export function maskPhone(phone: string) {
-  const digits = phone.replace(/\D/g, '')
-  const last = digits.slice(-4)
-  if (digits.length === 11 && digits.startsWith('1')) return `+1 ••• ••• ${last}`
-  const country = digits.slice(0, Math.max(1, digits.length - 10))
-  return `+${country} ••• ${last}`
-}
-
 /** An email address with all but the first letter of its name hidden, like `l•••@tempo.xyz`. */
 export function maskEmail(email: string) {
   const at = email.lastIndexOf('@')
@@ -454,24 +390,17 @@ export function maskPrivyIdentity(options: {
 }
 
 /**
- * How the sandbox names a real login: the email, a masked number, the Google signer, or the
- * Privy account.
+ * How the sandbox names a real login: the Google account or the Privy account.
  */
 export function loginIdentity(options: {
   method: LoginMethod
   address: Address
   email?: string | undefined
-  phone?: string | undefined
   /** A Privy sign-in's user DID. */
   privy?: string | undefined
 }) {
-  const { method, address, email, phone, privy } = options
+  const { method, address, email, privy } = options
   const short = `${address.slice(0, 6)}…${address.slice(-4)}`
-  if (method === 'email' && email) return { subject: email, detail: `OIDC · ${email}` }
-  if (method === 'sms' && phone) {
-    const masked = maskPhone(phone)
-    return { subject: masked, detail: `OIDC · ${masked}` }
-  }
   // The relay asks Google for `openid email` and returns the verified email beside the credential.
   if (method === 'google')
     return email
@@ -538,18 +467,16 @@ async function postJson(url: string, body: unknown, signal?: AbortSignal) {
 function waitForCallback(options: {
   popup: Window
   requestId: string
-  method: LoginMethod
   timeoutMs: number
   signal?: AbortSignal
 }) {
-  const { popup, requestId, method, timeoutMs, signal } = options
+  const { popup, requestId, timeoutMs, signal } = options
   return new Promise<CallbackResult>((resolve, reject) => {
     const channel =
       typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel(callbackChannel)
     const cleanup = () => {
       window.removeEventListener('message', onMessage)
       channel?.close()
-      clearInterval(poll)
       clearTimeout(timer)
       signal?.removeEventListener('abort', onAbort)
     }
@@ -572,21 +499,16 @@ function waitForCallback(options: {
     window.addEventListener('message', onMessage)
     if (channel) channel.onmessage = (event) => settle(event.data)
     signal?.addEventListener('abort', onAbort)
-    // Google's pages isolate the popup (COOP), which makes it look closed from here while the
-    // person is still signing in, and Privy's social logins can hand the popup to such a page.
-    // Only the relay's own pages keep `closed` meaningful.
-    const poll = setInterval(() => {
-      if (method !== 'google' && method !== 'privy' && popup.closed)
-        fail(new LoginError('cancelled', 'Sign-in window closed.'))
-    }, 500)
+    // No closed-window check: Google's pages isolate the popup (COOP), which makes it look closed
+    // from here while the person is still signing in, and Privy's social logins can hand the popup
+    // to such a page. The timeout and `signal` end an abandoned sign-in.
     const timer = setTimeout(() => fail(new LoginError('timeout', 'Sign-in timed out.')), timeoutMs)
   })
 }
 
 /**
- * Sign in with a real login and return its owner. Email and SMS open the relay's sign-in page,
- * where the person enters the code, and Privy opens the same page with Privy's sign-in; Google
- * goes straight to Google. The popup must come from `openSignInWindow` in the click handler, or
+ * Sign in with a real login and return its owner. Privy opens the relay's sign-in page with
+ * Privy's sign-in; Google goes straight to Google. The popup must come from `openSignInWindow` in the click handler, or
  * this opens one itself (and may be blocked).
  */
 export async function signIn(options: {
@@ -626,7 +548,7 @@ export async function signIn(options: {
       return url.toString()
     })()
     popup.location.href = target
-    const result = await waitForCallback({ popup, requestId, method, timeoutMs, signal })
+    const result = await waitForCallback({ popup, requestId, timeoutMs, signal })
     if (!popup.closed) popup.close()
     if (result.error !== undefined) throw new LoginError('sign-in-failed', result.error)
     if (result.credential.validUntil !== prepared.validUntil)
@@ -643,7 +565,6 @@ export async function signIn(options: {
       issuer: owner.issuer,
       subject: result.credential.addressSeed,
       ...(result.email ? { email: result.email } : {}),
-      ...(result.phone ? { phone: result.phone } : {}),
       ...(result.privy ? { privy: result.privy } : {}),
       owner,
     }

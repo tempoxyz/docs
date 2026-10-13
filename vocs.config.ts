@@ -529,42 +529,47 @@ export default defineConfig({
         text: 'Setup',
         items: [
           {
-            text: 'Authentication',
+            text: 'Signing methods',
             link: '/docs/accounts/authentication',
             collapsed: true,
             items: [
               { text: 'Private keys', link: '/docs/accounts/authentication/private-keys' },
               { text: 'Device keys', link: '/docs/accounts/authentication/device-keys' },
               { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
-              {
-                text: 'OIDC logins',
-                link: '/docs/accounts/authentication/oidc',
-                items: [
-                  { text: 'Login services', link: '/docs/accounts/authentication/login-services' },
-                ],
-              },
+              { text: 'OIDC logins', link: '/docs/accounts/authentication/oidc' },
             ],
           },
-          { text: 'Delegation', link: '/docs/accounts/access-keys' },
-          { text: 'Policies', link: '/docs/accounts/security-policies' },
-          { text: 'Recovery', link: '/docs/accounts/recovery' },
-          { text: 'Fees', link: '/docs/accounts/fees' },
+          { text: 'Signing thresholds', link: '/docs/accounts/security-policies' },
+          { text: 'Access keys', link: '/docs/accounts/access-keys' },
+          { text: 'Key rotation', link: '/docs/accounts/recovery' },
+          { text: 'Fee management', link: '/docs/accounts/fees' },
         ],
       },
       {
-        text: 'Guides',
+        text: 'Users',
         items: [
           { text: 'Use a wallet provider', link: '/docs/accounts/guides/wallet-provider' },
           { text: 'Enterprise SSO login', link: '/docs/accounts/guides/enterprise-sso' },
           { text: 'Set up self-custody', link: '/docs/accounts/guides/self-custody' },
-          { text: 'Set up an agent wallet', link: '/docs/accounts/guides/agent-wallet' },
-          { text: 'Automate a backend', link: '/docs/accounts/guides/automate-backend' },
+          { text: 'Set up a spending account', link: '/docs/accounts/guides/spending-account' },
+        ],
+      },
+      {
+        text: 'Teams',
+        items: [
           {
             text: 'Set up a company treasury wallet',
             link: '/docs/accounts/guides/company-treasury',
           },
-          { text: 'Set up a spending account', link: '/docs/accounts/guides/spending-account' },
         ],
+      },
+      {
+        text: 'Automations',
+        items: [{ text: 'Automate a backend', link: '/docs/accounts/guides/automate-backend' }],
+      },
+      {
+        text: 'Agents',
+        items: [{ text: 'Set up an agent wallet', link: '/docs/accounts/guides/agent-wallet' }],
       },
     ]
     const machinePaymentsSidebar = [
@@ -1381,7 +1386,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/advanced/relay',
-      destination: '/docs/accounts/authentication/login-services',
+      destination: '/docs/accounts/authentication/oidc#login-services',
       status: 301,
     },
     {
@@ -1400,8 +1405,13 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/accounts/authentication/login-services',
+      destination: '/docs/accounts/authentication/oidc#login-services',
+      status: 301,
+    },
+    {
       source: '/docs/accounts/authentication/relays',
-      destination: '/docs/accounts/authentication/login-services',
+      destination: '/docs/accounts/authentication/oidc#login-services',
       status: 301,
     },
     {

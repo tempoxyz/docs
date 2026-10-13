@@ -15,7 +15,7 @@ An account's address comes from its first signer. Nothing to deploy: the address
 
 <AccountSandbox />
 
-Every step runs on Tempo devnet. Logins use a local auth service and [salt service](/docs/accounts/authentication/login-services) on `localhost:5173`.
+Every step runs on Tempo devnet. Logins use a local auth service and [salt service](/docs/accounts/authentication/oidc#login-services) on `localhost:5173`.
 
 <span id="try-a-passkey-account" />
 
@@ -30,7 +30,7 @@ Every step runs on Tempo devnet. Logins use a local auth service and [salt servi
 
 | Account | First signer | Then add |
 | --- | --- | --- |
-| Embedded wallet | The customer's login in your app: [OIDC](/docs/accounts/authentication/oidc), [email](/docs/accounts/authentication/oidc#email-and-sms-codes), or [Privy](/docs/accounts/authentication/oidc#privy-logins) | A passkey the customer holds, so they can [take the account with them](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet) |
+| Embedded wallet | The customer's login in your app: [OIDC](/docs/accounts/authentication/oidc), such as Google, or [Privy](/docs/accounts/authentication/oidc#privy-logins) | A passkey the customer holds, so they can [take the account with them](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet) |
 | Customer | A login or a passkey | A second signer as backup |
 | Company SSO | An SSO login | A passkey or a recovery provider, threshold 2 |
 | Treasury | One approver's key | The other approvers, then raise the threshold |
@@ -75,7 +75,7 @@ cast wallet new
 
 ::::
 
-For a full sign-in with the first payment, see [Email and SMS codes](/docs/accounts/authentication/oidc#email-and-sms-codes) or [OIDC logins](/docs/accounts/authentication/oidc). Shared setup: [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools).
+For a full sign-in with the first payment, see [Enterprise SSO login](/docs/accounts/guides/enterprise-sso#sign-in-with-sso) or [OIDC logins](/docs/accounts/authentication/oidc). Shared setup: [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools).
 
 <span id="fund-and-use-the-account" />
 

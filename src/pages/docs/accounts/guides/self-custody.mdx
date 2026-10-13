@@ -98,20 +98,20 @@ Count at most two logins toward what remains, since a transaction carries at mos
 
 ## Require multi-factor approval
 
-Move to a passkey (2), an email login (1), and an SMS login (1), with threshold 2. Signer changes and new devices then need the passkey, or both logins. See [Multi-factor approval](/docs/accounts/security-policies#multi-factor-approval) for why the logins need different issuers.
+Move to a passkey (2), the customer's Privy login (1), and a Google login (1), with threshold 2. Signer changes and new devices then need the passkey, or both logins. See [What a threshold protects](/docs/accounts/security-policies#what-a-threshold-protects) for why the logins need different issuers.
 
 <GuideDemo guide="multi-factor" />
 
 :::::steps
 
-### Sign the customer in with SMS
+### Sign the customer in with Google
 
 ```ts [multi-factor.ts]
 const { credential } = await client.oidc.prove({
-  getToken: ({ nonce }) => signInWithSms({ nonce }), // your SMS sign-in
+  getToken: ({ nonce }) => signInWithGoogle({ nonce }), // a second issuer
   publicKey: keyPair.publicKey,
 })
-const sms = Account.fromZk(credential)
+const google = Account.fromZk(credential)
 ```
 
 ### Create the passkey
@@ -131,7 +131,7 @@ await client.accounts.updateConfigSync({
     owners: [
       { owner: passkey.address, weight: 2 },
       { owner: login.address, weight: 1 },
-      { owner: sms.address, weight: 1 },
+      { owner: google.address, weight: 1 },
     ],
     threshold: 2,
   },
@@ -139,7 +139,7 @@ await client.accounts.updateConfigSync({
 })
 ```
 
-The email login approves alone because the current threshold is 1. After the update, one login alone reaches only 1 of 2.
+`login` is the customer's Privy login. It approves alone because the current threshold is 1. After the update, one login alone reaches only 1 of 2.
 
 ### Keep paying with the device key
 
@@ -169,7 +169,7 @@ const pending = await client.accessKey.signAuthorization({
   limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
   owner: login,
 })
-const keyAuthorization = await client.accessKey.signAuthorization({ hash: pending.hash, owner: sms })
+const keyAuthorization = await client.accessKey.signAuthorization({ hash: pending.hash, owner: google })
 ```
 
 ::::
@@ -202,8 +202,8 @@ const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ l
 ### Sign in with the remaining signers
 
 ```ts [recover.ts]
-const email = Account.fromZk(emailCredential)
-const sms = Account.fromZk(smsCredential)
+const privy = Account.fromZk(privyCredential)
+const google = Account.fromZk(googleCredential)
 const account = Account.fromConfig(address) // the customer's saved account address
 ```
 
@@ -217,15 +217,15 @@ const { receipt: pending } = await client.accounts.updateConfigSync({
   nextConfig: {
     owners: [
       { owner: passkey.address, weight: 2 },
-      { owner: email.address, weight: 1 },
-      { owner: sms.address, weight: 1 },
+      { owner: privy.address, weight: 1 },
+      { owner: google.address, weight: 1 },
     ],
     threshold: 2,
   },
-  owner: email,
+  owner: privy,
 })
 
-await client.sendTransactionSync({ account, hash: pending.transactionHash, owner: sms })
+await client.sendTransactionSync({ account, hash: pending.transactionHash, owner: google })
 ```
 
 The update lands when the second login approves, and the lost passkey can no longer approve.

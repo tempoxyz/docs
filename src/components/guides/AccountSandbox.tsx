@@ -19,7 +19,6 @@ import LucideFingerprint from '~icons/lucide/fingerprint'
 import LucideKeyRound from '~icons/lucide/key-round'
 import LucideLaptop from '~icons/lucide/laptop'
 import LucideLifeBuoy from '~icons/lucide/life-buoy'
-import LucideMail from '~icons/lucide/mail'
 import LucideMinus from '~icons/lucide/minus'
 import LucidePlus from '~icons/lucide/plus'
 import LucideServer from '~icons/lucide/server'
@@ -31,7 +30,6 @@ import LucideUsb from '~icons/lucide/usb'
 import LucideUsers from '~icons/lucide/users'
 import SimpleIconsApple from '~icons/simple-icons/apple'
 import SimpleIconsGoogle from '~icons/simple-icons/google'
-import SimpleIconsImessage from '~icons/simple-icons/imessage'
 import { Container } from '../Container'
 import { accountSandbox, accountSandboxLimitFill } from './AccountSandbox.styles'
 import {
@@ -81,8 +79,6 @@ import { type AccountDiff, diffAccounts } from './account-sandbox-diff'
 import { thisDevice, thisDevicePasskey } from './this-device'
 
 const signerIcons: Record<SignerKind, typeof LucideFingerprint> = {
-  email: LucideMail,
-  sms: SimpleIconsImessage,
   google: SimpleIconsGoogle,
   privy: LucideCircleUserRound,
   apple: SimpleIconsApple,
@@ -485,7 +481,7 @@ type SignerChoice = {
 
 /**
  * Signers the reader can add to their own account, real ones first: a passkey on this device,
- * Google, email, SMS and Privy (each when the auth app offers it), and a generated private key.
+ * Google and Privy (when the auth app offers them), and a generated private key.
  */
 function signerChoices(
   network: Network,
@@ -501,12 +497,8 @@ function signerChoices(
       reason: platform ? null : 'No Touch ID or platform authenticator in this browser',
     },
     { kind: 'google', label: 'Google login', reason: login('google') },
-    { kind: 'email', label: 'Email login', reason: login('email') },
+    { kind: 'privy', label: 'Privy login', reason: login('privy') },
   ]
-  if (network.loginBlocker('sms') === null)
-    choices.push({ kind: 'sms', label: 'SMS login', reason: null })
-  if (network.loginBlocker('privy') === null)
-    choices.push({ kind: 'privy', label: 'Privy login', reason: null })
   choices.push({ kind: 'private-key', label: 'Private key', reason: null })
   if (options.first)
     choices.push({
@@ -1221,9 +1213,7 @@ function PayPanel(props: {
 
 /** Signer and threshold changes, one update each, at the same address. */
 const signInButtons: Record<LoginSignInRequest['method'], string> = {
-  email: 'Sign in with email',
   google: 'Sign in with Google',
-  sms: 'Sign in with SMS',
   privy: 'Sign in with Privy',
 }
 

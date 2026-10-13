@@ -53,10 +53,8 @@ const localIcons: Record<LocalIcon, typeof LucideSmartphone> = {
 }
 
 const loginWords: Record<LoginMethod, string> = {
-  email: 'email',
   google: 'Google',
   privy: 'Privy',
-  sms: 'SMS',
 }
 
 // ---------------------------------------------------------------------------
@@ -509,7 +507,7 @@ function Runner(props: {
           ) : (
             <p className="gd-empty">
               No account yet. Its address comes from its first signer
-              {guide === 'identity-provider' || guide === 'email-otp' ? ': your login' : ''}.
+              {guide === 'identity-provider' ? ': your login' : ''}.
             </p>
           )}
         </section>
