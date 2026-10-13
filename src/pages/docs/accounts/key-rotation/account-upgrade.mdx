@@ -1,7 +1,7 @@
 ---
 title: Account upgrade
 seoTitle: Upgrade a Single-Key Tempo Account to Configurable Signers | Tempo Docs
-description: Give a single-key account a backup signer and a threshold in place, keeping its address, balances, token approvals, and access keys.
+description: Turn a single-key (EOA) account into a recoverable configurable account at the same address, keeping its balances, token approvals, and access keys.
 ---
 
 # Account upgrade
@@ -10,7 +10,7 @@ description: Give a single-key account a backup signer and a threshold in place,
 **Not live yet.** Account upgrade ([TIP-1113](https://tips.sh/1113)) is in early development and runs only on Tempo devnet. We're seeking feedback; behavior may change.
 :::
 
-An account upgrade turns a single-key account into a configurable account at the same address, so losing the key no longer loses the account. It's permanent, and only the original key can sign it.
+An account upgrade turns a single-key (EOA) account into a configurable account at the same address, so losing the key no longer loses the account. It's permanent, only the original key can sign it, and it gives up cross-chain recovery.
 
 <span id="make-a-single-key-account-recoverable" />
 
@@ -35,7 +35,7 @@ Before you upgrade, [revoke the access keys](/docs/accounts/access-keys/revocati
 
 ## Send the upgrade
 
-The original key calls `upgradeAccount(threshold, owners)` on the native multisig precompile, as the transaction's only call. Viem 2.57.5 has no upgrade action, so call the precompile with `writeContractSync`:
+The original key calls `upgradeAccount(threshold, owners)` on the native multisig precompile, as the transaction's only call. viem 2.57.5 has no upgrade action, so call the precompile with `writeContractSync`:
 
 ```ts [upgrade.ts]
 import { parseAbi } from 'viem'
@@ -61,7 +61,7 @@ await client.writeContractSync({
 })
 ```
 
-`AccountConfig.from` sorts the signers by address, as Tempo requires. After the upgrade, open the account with `Account.fromConfig` and its version-1 configuration, since every approval carries it. [Upgrade an existing account](/docs/accounts/create#upgrade-an-existing-account) runs the full flow in a live demo, including saving the configuration.
+`AccountConfig.from` sorts the signers by address, as Tempo requires. After the upgrade, open the account with `Account.fromConfig` and its version-1 configuration, since every approval carries it. From then on, [rotate](/docs/accounts/key-rotation/signer-rotation) and [recover](/docs/accounts/key-rotation/signer-recovery) signers like any configurable account. [Upgrade an existing account](/docs/accounts/create#upgrade-an-existing-account) runs the full flow in a live demo, including saving the configuration.
 
 ## Account upgrade limits
 
