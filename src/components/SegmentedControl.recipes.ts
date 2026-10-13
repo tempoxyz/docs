@@ -14,6 +14,23 @@ export const control = style({
   overflowX: 'auto',
   overscrollBehaviorX: 'contain',
   scrollbarWidth: 'none',
+  // When the items overflow (five agents at phone width), the clipped edge fades so
+  // the control reads as scrollable. SegmentedControl.tsx sets data-overflow.
+  selectors: {
+    '&[data-overflow="end"]': {
+      // design-exception: Fades the clipped end, matching the docs section nav's scroll fade.
+      maskImage: 'linear-gradient(to right, black calc(100% - 32px), transparent) !custom',
+    },
+    '&[data-overflow="start"]': {
+      // design-exception: Fades the clipped start, matching the docs section nav's scroll fade.
+      maskImage: 'linear-gradient(to right, transparent, black 32px) !custom',
+    },
+    '&[data-overflow="both"]': {
+      // design-exception: Fades both clipped edges, matching the docs section nav's scroll fade.
+      maskImage:
+        'linear-gradient(to right, transparent, black 32px, black calc(100% - 32px), transparent) !custom',
+    },
+  },
 })
 
 export const item = style({
@@ -42,7 +59,7 @@ export const item = style({
   transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
     '&[data-checked]': {
-      backgroundColor: tokens.color.card,
+      backgroundColor: tokens.color.segmentSelected,
       transitionDuration: 'var(--tempo-enter)',
     },
     '&:focus-visible': {

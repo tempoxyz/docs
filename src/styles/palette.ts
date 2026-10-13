@@ -560,6 +560,13 @@ export const palette = defineVars({
       light: 'rgb(0 0 0 / 0.08)',
       dark: 'rgb(255 255 255 / 0.16)',
     },
+    // SegmentedControl selected item. TDS pairs a #141414 selected fill with a white
+    // 12% track in dark, which reads darker than the track and so looks unselected;
+    // container.strong over the track lifts it above the track instead.
+    segmentSelected: {
+      light: '#ffffff', // TDS neutral 000
+      dark: 'rgb(255 255 255 / 0.16)',
+    },
     // line.secondary
     hairline: {
       light: 'rgb(0 0 0 / 0.08)',

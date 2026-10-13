@@ -1,10 +1,11 @@
 'use client'
 
-import { type KeyboardEvent, type ReactNode, useRef } from 'react'
+import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 'react'
 import * as ui from './SegmentedControl.recipes'
 
 /** TDS Platform SegmentedControl: a radio group of buttons. Arrow keys move focus
- * and select (roving tab index), Home and End jump to the ends. */
+ * and select (roving tab index), Home and End jump to the ends. When the items
+ * overflow, the control scrolls sideways and fades its clipped edges. */
 export function SegmentedControl<const value extends string>(props: {
   'aria-label': string
   className?: string | undefined
@@ -15,6 +16,34 @@ export function SegmentedControl<const value extends string>(props: {
 }) {
   const { className, disabled, items, onValueChange, value } = props
   const buttons = useRef<(HTMLButtonElement | null)[]>([])
+  const control = useRef<HTMLDivElement>(null)
+  const [overflow, setOverflow] = useState<'start' | 'end' | 'both'>()
+
+  useEffect(() => {
+    const scroller = control.current
+    if (!scroller) return
+    const update = () => {
+      const scrolled = Math.abs(scroller.scrollLeft)
+      const start = scrolled > 1
+      const end = scrolled < scroller.scrollWidth - scroller.clientWidth - 1
+      setOverflow(start && end ? 'both' : start ? 'start' : end ? 'end' : undefined)
+    }
+    update()
+    scroller.addEventListener('scroll', update, { passive: true })
+    const observer = new ResizeObserver(update)
+    observer.observe(scroller)
+    return () => {
+      scroller.removeEventListener('scroll', update)
+      observer.disconnect()
+    }
+  }, [])
+
+  function select(index: number) {
+    const item = items[index]
+    if (!item) return
+    onValueChange(item.value)
+    buttons.current[index]?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const index = items.findIndex((item) => item.value === value)
@@ -35,17 +64,16 @@ export function SegmentedControl<const value extends string>(props: {
               : -1
     if (next < 0) return
     event.preventDefault()
-    const item = items[next]
-    if (!item) return
-    onValueChange(item.value)
+    select(next)
     buttons.current[next]?.focus()
-    buttons.current[next]?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
   }
 
   return (
     <div
+      ref={control}
       role="radiogroup"
       aria-label={props['aria-label']}
+      data-overflow={overflow}
       onKeyDown={onKeyDown}
       className={[ui.control().className, className].filter(Boolean).join(' ')}
     >
@@ -64,7 +92,7 @@ export function SegmentedControl<const value extends string>(props: {
             data-checked={checked ? '' : undefined}
             tabIndex={checked ? 0 : -1}
             disabled={disabled}
-            onClick={() => onValueChange(item.value)}
+            onClick={() => select(index)}
             className={ui.item().className}
           >
             {item.label}
