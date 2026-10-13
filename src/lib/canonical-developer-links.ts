@@ -14,6 +14,9 @@ export function canonicalizeGeneratedDeveloperLinks(content: string, publicDocsU
       route === '/get-started' ||
       route === '/get-started.md' ||
       route.startsWith('/get-started/') ||
+      route === '/blog' ||
+      route === '/blog.md' ||
+      route.startsWith('/blog/') ||
       route.startsWith('/docs/')
     ) {
       return `${siteUrl}${route}${suffix}`

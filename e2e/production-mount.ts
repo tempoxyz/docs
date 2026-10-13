@@ -19,6 +19,11 @@ export async function proxyProductionMount(context: BrowserContext, upstream: st
   })) {
     if (font.endsWith('.woff2')) rootAssets.add(`/fonts/${font}`)
   }
+  for (const sticker of await readdir(new URL('../dist/public/stickers/', import.meta.url), {
+    recursive: true,
+  })) {
+    if (sticker.endsWith('.svg')) rootAssets.add(`/stickers/${sticker}`)
+  }
 
   context.on('page', (page) => {
     page.on('pageerror', (error) => errors.push(error.message))

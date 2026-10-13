@@ -140,11 +140,9 @@ function llmsAgentPreamble(): Plugin {
           const publicDevelopersUrl = `${resolveBaseUrl()}/docs`
           const generatedFiles = (
             await Promise.all(
-              publicDirectories.map(async (directory) => [
-                path.join(directory, 'llms.txt'),
-                path.join(directory, 'llms-full.txt'),
-                ...(await markdownFiles(path.join(directory, 'assets/md'))),
-              ]),
+              publicDirectories.map((directory) =>
+                generatedContentFiles(directory, ['.md', '.html', '.txt']),
+              ),
             )
           ).flat()
           await Promise.all(
@@ -158,14 +156,14 @@ function llmsAgentPreamble(): Plugin {
   }
 }
 
-async function markdownFiles(directory: string): Promise<string[]> {
+async function generatedContentFiles(directory: string, extensions = ['.md']): Promise<string[]> {
   try {
     const entries = await fs.readdir(directory, { withFileTypes: true })
     const files = await Promise.all(
       entries.map(async (entry) => {
         const entryPath = path.join(directory, entry.name)
-        if (entry.isDirectory()) return markdownFiles(entryPath)
-        if (entry.isFile() && entry.name.endsWith('.md')) return [entryPath]
+        if (entry.isDirectory()) return generatedContentFiles(entryPath, extensions)
+        if (entry.isFile() && extensions.includes(path.extname(entry.name))) return [entryPath]
         return []
       }),
     )
@@ -187,7 +185,7 @@ async function writeAiDocumentation(directory: string, root: string) {
   const markdownDir = path.join(directory, 'assets/md')
   const pages = new Map<string, string>()
   await Promise.all(
-    (await markdownFiles(markdownDir)).map(async (file) => {
+    (await generatedContentFiles(markdownDir)).map(async (file) => {
       const route = markdownRoute(`/${path.relative(markdownDir, file)}`)
       const content = renderAiPage(await fs.readFile(file, 'utf8'), route)
       pages.set(route, content)
