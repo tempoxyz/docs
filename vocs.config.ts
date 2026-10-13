@@ -785,7 +785,7 @@ export default defineConfig({
             items: [
               {
                 text: 'T12',
-                badge: { text: 'latest', variant: 'info' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
