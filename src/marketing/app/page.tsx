@@ -1,13 +1,14 @@
 import { lazy, Suspense } from 'react'
 import Header from './_components/Header'
 import Hero from './_components/Hero'
+import * as ui from './page.recipes'
 
 const HomeBelowFold = lazy(() => import('./_components/HomeBelowFold'))
 
 export default function Home() {
   return (
-    <main className="min-h-screen w-full bg-surface-page">
-      <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
+    <main {...ui.main()}>
+      <div {...ui.homeLayout()}>
         <Header />
         <Hero />
         <Suspense fallback={null}>

@@ -1,0 +1,164 @@
+---
+title: "tempo api"
+seoTitle: "tempo api: CLI Reference | Tempo Docs"
+description: Sign in to the Tempo API from your terminal, create API keys, and call any Tempo API endpoint as a command.
+---
+
+import { Cards, Card } from 'vocs'
+
+# `tempo api`
+
+`tempo api` signs in with [Tempo Console](/docs/api/console) and turns every `/v1/` endpoint in the [API reference](/docs/api) into a command. [Install the Tempo CLI](/docs/cli#install) first; the launcher installs `tempo api` the first time you run it.
+
+## Usage
+
+```bash [Terminal]
+tempo api <COMMAND> [FLAGS]
+```
+
+```bash [Terminal]
+tempo api login
+tempo api keys create --name "my-app"
+tempo api v1 tokens get --format json
+```
+
+## Sign in
+
+```bash [Terminal]
+tempo api login
+tempo api whoami
+```
+
+`login` prints a code and a `console.tempo.xyz` link, and opens the browser when it can. Check that the code matches, then click **Authorize CLI**. The request expires after 10 minutes.
+
+- On a remote host, run `tempo api login --no-browser` and open the link on another device.
+- The session lasts 30 days and acts as you in Tempo Console. Run `tempo api logout` to revoke it.
+- The approval page defaults to the `data:read`, `routes:read`, `routes:write`, and `rpc-relay:read` scopes. Select only what the device needs. Routes writes still require a Tempo-approved project key.
+
+## Create an API key
+
+```bash [Terminal]
+tempo api keys create --name "my-app"
+tempo api keys create --name "staging" --env sandbox --scopes data:read --scopes management:read
+```
+
+The token is shown once. Store it in your secret manager, for example as `TEMPO_API_KEY`, and never in source files. See [API keys](/docs/api/console/api-keys) for scopes and environments.
+
+## Call endpoints
+
+Every `/v1/` endpoint is a command, generated from the live API document. Command names follow the endpoint path:
+
+```bash [Terminal]
+tempo api v1 --help
+tempo api v1 tokens get --format json
+tempo api v1 orgs get --format json
+tempo api v1 routes transfers get --format json
+```
+
+## Credentials
+
+The CLI picks a credential for each call:
+
+- **Management commands** (organizations, projects, keys, members, webhooks) use your session.
+- **Data commands** use `TEMPO_API_KEY` when it is set. Otherwise they use a scoped project key from your session, falling back to anonymous, rate-limited access.
+- **API-key-only commands** use a scoped project key from your session when `TEMPO_API_KEY` is not set. These keys expire with the session and are revoked on logout.
+- **Routes writes** derive from an existing approved key in the project and environment. If several match, choose one with `TEMPO_API_SOURCE_KEY`.
+
+The CLI picks the organization and project only when each is unique. Otherwise, set `TEMPO_API_ORG` and `TEMPO_API_PROJECT`.
+
+## Use with agents
+
+`tempo api --mcp` serves the same commands to MCP clients. `tempo api docs` searches the Tempo documentation.
+
+## Commands
+
+| Command | Description |
+| --- | --- |
+| `tempo api login` | Sign in by approving this device in Tempo Console. |
+| `tempo api whoami` | Show the signed-in account. |
+| `tempo api logout` | Sign out and revoke the stored CLI session. |
+| `tempo api keys create` | Create an API key for a project. The key is shown once. |
+| `tempo api v1 <ENDPOINT>` | Call any Tempo API endpoint. Run `tempo api v1 --help` for the list. |
+| `tempo api docs` | Search the Tempo documentation. |
+| `tempo update api` | Install the latest release. The launcher also checks for updates on its own. |
+
+## Flags
+
+### All commands
+
+| Flag | Description |
+| --- | --- |
+| `--format json` | Print machine-readable output. |
+| `--help` | Show the command's flags. |
+| `--update` | Install the latest release of `tempo api`. Same as `tempo update api`. |
+
+### `tempo api login`
+
+| Flag | Description |
+| --- | --- |
+| `--no-browser` | Print the approval link instead of opening a browser, for remote hosts. |
+
+### `tempo api keys create`
+
+| Flag | Description |
+| --- | --- |
+| `--name <NAME>` | Key name shown in Tempo Console. Prompted for when omitted. |
+| `--env <ENV>` | `production` works on every chain; `sandbox` works only on testnets. Defaults to `production`. |
+| `--scopes <SCOPE>` | Scope to grant. Defaults to `data:read`. Repeat for more. |
+| `--allowed-ips <IP_OR_CIDR>` | Client IP address or CIDR range allowed to use the key. Repeat for more. |
+| `--org <ORG_ID>` | Organization ID (`org_…`). Defaults to the only one; prompted for when there are several. |
+| `--project <PROJECT_ID>` | Project ID (`prj_…`). Defaults to the only one; prompted for when there are several. |
+
+### `tempo api v1 <ENDPOINT>`
+
+| Flag | Description |
+| --- | --- |
+| `--cursor <CURSOR>` | Read the next page of a list. List responses return `nextCursor`. |
+| `--tempo-api-key <KEY>` | Use this API key for one call. |
+| `--authorization "Bearer <KEY>"` | Use this credential for one call. |
+
+## Environment variables
+
+| Variable | Description |
+| --- | --- |
+| `TEMPO_API_KEY` | API key for data commands. |
+| `TEMPO_API_URL` | API origin. Defaults to `https://api.tempo.xyz`. |
+| `TEMPO_API_ORG` | Organization for session credentials. Defaults to the only organization. |
+| `TEMPO_API_PROJECT` | Project for session credentials. Defaults to the only project. |
+| `TEMPO_API_ENV` | `production` or `sandbox` for testnet-only credentials. Defaults to `production`. |
+| `TEMPO_API_SOURCE_KEY` | Approved project key that Routes write credentials derive from. |
+| `TEMPO_HOME` | CLI home directory. Defaults to `~/.tempo`. |
+
+## Errors
+
+| Error | Fix |
+| --- | --- |
+| `not_signed_in` | Run `tempo api login`. |
+| `login_expired` | The code wasn't approved within 10 minutes. Run `tempo api login` again. |
+| `login_denied` | The request was denied in Tempo Console. Run `tempo api login` again. |
+| `scope_not_approved` | Sign in again and select the required scopes on the approval page. |
+| `api_key_required` | Create a Tempo-approved key for the project, or set `TEMPO_API_KEY`. |
+| `403` "CLI sessions cannot call this route" | Set `TEMPO_API_KEY`, or create a key with `tempo api keys create`. |
+
+## Related
+
+<Cards>
+  <Card
+    title="API reference"
+    description="Every endpoint, with request and response schemas"
+    to="/docs/api"
+    icon="lucide:braces"
+  />
+  <Card
+    title="API keys"
+    description="Scopes, environments, and key management"
+    to="/docs/api/console/api-keys"
+    icon="lucide:key-round"
+  />
+  <Card
+    title="Tempo Console"
+    description="Projects, keys, billing, and team access"
+    to="/docs/api/console"
+    icon="lucide:layout-grid"
+  />
+</Cards>

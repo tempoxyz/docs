@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+// URL mapping does not need to build or load the site's search index.
+vi.mock('../../search', () => ({ loadSearchIndex: vi.fn(), searchDocs: vi.fn() }))
+
 describe('searchResultHref', () => {
   afterEach(() => {
     vi.unstubAllEnvs()

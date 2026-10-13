@@ -1,10 +1,10 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: The chart SVG is decorative and described by nearby labels.
-
 'use client'
 
 import { useEffect, useState } from 'react'
+import { laneFlow, zoneBreathe } from '../../../../styles/surfaces.styles'
 import { linePath, scaleLinear } from '../_lib/chart'
 import { fmtInt, type PerfRun } from '../_lib/runs'
+import * as ui from './PaymentLanes.recipes'
 import useMeasure from './useMeasure'
 
 // The payment-lanes story: the chart is split into two always-visible bands to
@@ -74,9 +74,15 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
   ]
 
   return (
-    <div ref={ref} className="relative w-full" style={{ height: H }}>
+    <div
+      ref={ref}
+      {...ui.paymentLanesLayoutAppearance({
+        value0: `${H}px`,
+        className: ui.paymentLanesLayout().className,
+      })}
+    >
       {width > 0 ? (
-        <svg width={width} height={H} className="block" aria-hidden>
+        <svg width={width} height={H} {...ui.paymentLanesIcon()} aria-hidden="true">
           {/* General blockspace zone, carrying the benchmark load. */}
           <rect
             x={PAD.l}
@@ -84,13 +90,9 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             width={endX - PAD.l}
             height={DIVIDER - PAD.t}
             fill="var(--background)"
-            className="zone-breathe motion-reduce:animate-none"
+            {...ui.rect({ className: `zone-breathe ${zoneBreathe().className}` })}
           />
-          <text
-            x={PAD.l + 12}
-            y={PAD.t + 18}
-            className="fill-foreground/35 font-mono text-[10px] tracking-wider"
-          >
+          <text x={PAD.l + 12} y={PAD.t + 18} {...ui.text()}>
             NETWORK LOAD · NIGHTLY TPS
           </text>
 
@@ -108,7 +110,7 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             y={DIVIDER + 20}
             fill="var(--indicator-green)"
             fillOpacity="0.8"
-            className="font-mono text-[10px] tracking-wider"
+            {...ui.text2()}
           >
             DEDICATED PAYMENT LANE · RESERVED BLOCKSPACE
           </text>
@@ -135,20 +137,20 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
                 pathLength={1}
                 strokeDasharray="1"
                 strokeDashoffset={drawn ? 0 : 1}
-                className="motion-reduce:transition-none"
-                style={{
-                  transition: `stroke-dashoffset ${DRAW_MS}ms ease-out`,
-                }}
+                {...ui.paymentLanesPathAppearance({
+                  value0: `stroke-dashoffset ${DRAW_MS}ms ease-out`,
+                  className: ui.path().className,
+                })}
               />
               <text
                 x={mobile ? endX - 12 : endX + 12}
                 y={mobile ? PAD.t + 18 : loadEndY + 4}
                 textAnchor={mobile ? 'end' : 'start'}
-                className="fill-foreground/40 font-mono text-[11px] motion-reduce:transition-none"
-                style={{
-                  opacity: drawn ? 1 : 0,
-                  transition: `opacity 250ms ease-out ${DRAW_MS}ms`,
-                }}
+                {...ui.paymentLanesTextAppearance({
+                  value0: drawn ? 1 : 0,
+                  value1: `opacity 250ms ease-out ${DRAW_MS}ms`,
+                  className: ui.text3().className,
+                })}
               >
                 {fmtInt(values[values.length - 1])} TPS
               </text>
@@ -175,14 +177,14 @@ export default function PaymentLanes({ runs }: { runs: PerfRun[] }) {
             strokeDasharray="26 162"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="lane-flow motion-reduce:animate-none"
+            {...ui.path2({ className: `lane-flow ${laneFlow().className}` })}
           />
           <text
             x={mobile ? endX - 12 : endX + 12}
             y={mobile ? DIVIDER + 20 : LANE_Y + 4}
             textAnchor={mobile ? 'end' : 'start'}
             fill="var(--indicator-green)"
-            className="font-mono text-[11px]"
+            {...ui.text4()}
           >
             payments keep flowing
           </text>

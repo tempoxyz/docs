@@ -1,14 +1,17 @@
 ---
-title: "Client quickstart: build an MPP client"
-seoTitle: "Build an MPP Client | Tempo Docs"
+title: "Pay for services"
+seoTitle: "Pay for services | Tempo Docs"
 description: Set up an MPP client on Tempo. Polyfill fetch to automatically pay for 402 responses with TIP-20 stablecoins.
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-machine-payments-client_title-f5_v02.png
 ---
 
 import { Card, Cards } from 'vocs'
 
-# Client quickstart: build an MPP client
+<span id="client-quickstart-build-an-mpp-client" />
 
-Polyfill `fetch` to handle `402` responses. Your existing code works unchanged — payments happen in the background.
+# Pay for services
+
+Use an MPP client to pay for an API request from your application. The client handles the payment challenge and retries with a credential using the account you configure. The examples below use a funded Tempo Mainnet account; use a testnet account only with a testnet service.
 
 ::::steps
 
@@ -28,10 +31,12 @@ bun add mppx viem
 
 ### Define the MPP payer account
 
+Keep the signing key on your server. Load it from an environment variable instead of putting it in application code.
+
 ```ts
 import { privateKeyToAccount } from 'viem/accounts'
 
-const account = privateKeyToAccount('0xabc…123')
+const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
 ```
 
 :::tip
@@ -46,12 +51,14 @@ Call `Mppx.create` at startup. This polyfills `fetch` to automatically handle `4
 import { privateKeyToAccount } from 'viem/accounts'
 import { Mppx, tempo } from 'mppx/client'
 
-const account = privateKeyToAccount('0xabc…123')
+const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
 
 Mppx.create({
-  methods: [tempo({ account })],
+  methods: [tempo({ account, allowedChainIds: [4217] })],
 })
 ```
+
+`tempo()` handles one-time charges and payment sessions. If the service uses sessions, set [`maxDeposit`](https://mpp.dev/sdk/typescript/client/Method.tempo#maxdeposit-optional) to cap the amount locked in a channel.
 
 :::tip
 If you want to avoid polyfilling, use the bound `fetch` instead.
@@ -59,7 +66,7 @@ If you want to avoid polyfilling, use the bound `fetch` instead.
 ```ts
 const mppx = Mppx.create({
   polyfill: false,
-  methods: [tempo({ account })]
+  methods: [tempo({ account, allowedChainIds: [4217] })],
 })
 
 const response = await mppx.fetch('https://api.example.com/resource')
@@ -74,38 +81,46 @@ Use `fetch`. Payment happens when a server returns `402`.
 const response = await fetch('https://api.example.com/resource')
 ```
 
+In browsers, the fetch polyfill sends `Accept-Payment` to same-origin requests by default. For a paid API on another origin, configure [`acceptPaymentPolicy`](https://mpp.dev/sdk/typescript/client/Mppx.create#acceptpaymentpolicy-optional) for that origin if it supports the header.
+
 ::::
 
 ## Advanced MPP client patterns
 
 ### Use MPP with Wagmi
 
-You can inject a [Wagmi](https://wagmi.sh) connector into Mppx by passing the `getConnectorClient` function.
+You can inject a [Wagmi](https://wagmi.sh) connector into Mppx by passing the `getConnectorClient` function. This example connects to Tempo Mainnet; connect the wallet before making a paid request.
 
 :::code-group
 
 ```ts [example.ts]
 import { Mppx, tempo } from 'mppx/client'
 import { getConnectorClient } from 'wagmi/actions'
+import { tempo as tempoMainnet } from 'viem/chains'
 import { config } from './config'
 
 Mppx.create({
   methods: [tempo({
-    getClient: (parameters) => getConnectorClient(config, parameters),
+    allowedChainIds: [tempoMainnet.id],
+    getClient: ({ chainId }) => {
+      if (chainId !== undefined && chainId !== tempoMainnet.id)
+        throw new Error('This wallet supports Tempo Mainnet only')
+      return getConnectorClient(config, { chainId: tempoMainnet.id })
+    },
   })],
 })
 ```
 
 ```ts [config.ts]
 import { createConfig, http } from 'wagmi'
-import { tempoModerato } from 'viem/chains'
+import { tempo as tempoMainnet } from 'viem/chains'
 import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet()],
-  chains: [tempoModerato],
+  chains: [tempoMainnet],
   transports: {
-    [tempoModerato.id]: http(),
+    [tempoMainnet.id]: http(),
   },
 })
 ```
@@ -122,13 +137,13 @@ import { Mppx, tempo } from 'mppx/client'
 
 const mppx = Mppx.create({
   polyfill: false,
-  methods: [tempo()]
+  methods: [tempo({ allowedChainIds: [4217] })],
 })
 
 const response = await mppx.fetch('https://api.example.com/resource', {
   context: {
-    account: privateKeyToAccount('0xabc…123'),
-  }
+    account: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
+  },
 })
 ```
 
@@ -146,19 +161,23 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 const mppx = Mppx.create({
   polyfill: false,
-  methods: [tempo()],
+  methods: [tempo({ allowedChainIds: [4217] })],
 })
 
-const response = await fetch('https://api.example.com/resource')
+const url = 'https://api.example.com/resource'
+const request: RequestInit = { method: 'GET' }
+const response = await mppx.rawFetch(url, request)
 
 if (response.status === 402) {
-  const credential = await mppx.createCredential(response, {
-    account: privateKeyToAccount('0x...'),
-  })
+  const payment = await mppx.preparePayment(response, { request })
+  console.log(payment.challenge.request)
 
-  const paidResponse = await fetch('https://api.example.com/resource', {
-    headers: { Authorization: credential },
+  // Review the payment terms before signing.
+  const credential = await payment.createCredential({
+    account: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
   })
+  const paidRequest = payment.setCredential(request, credential)
+  const paidResponse = await mppx.rawFetch(url, { ...paidRequest, redirect: 'manual' })
 }
 ```
 
@@ -171,20 +190,24 @@ import { Receipt } from 'mppx'
 
 const response = await fetch('https://api.example.com/resource')
 
+if (!response.ok) throw new Error(`Request failed: ${response.status}`)
+
 const receipt = Receipt.fromResponse(response)
 
 console.log(receipt.status)
 // success
 console.log(receipt.reference)
-// 0xtx789abc...
+// 0x...
 ```
+
+For a one-time charge, `reference` is the transaction hash. For a session, it is the channel ID; settlement has a separate transaction hash when the channel closes.
 
 ## Next steps for MPP clients
 
 <Cards>
   <Card
     icon="lucide:server"
-    title="Server quickstart"
+    title="Accept payments for an API"
     description="Add payment gating to your HTTP endpoints"
     to="/docs/guide/machine-payments/server"
   />

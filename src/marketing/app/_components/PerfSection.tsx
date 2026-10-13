@@ -1,14 +1,13 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: Section charts are decorative summaries with adjacent text labels.
-// biome-ignore-all lint/suspicious/noArrayIndexKey: The uptime sparkline is a fixed static strip with no item state.
-
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { laneFlow } from '../../../styles/surfaces.styles'
 import { developersPath } from '../_lib/developersPaths'
 import { linePath } from '../performance/_lib/chart'
 import { type PerfRun, workloadSegments } from '../performance/_lib/runs'
 import ArrowUpRight from './ArrowUpRight'
 import Button from './Button'
 import EdgeMarkers from './EdgeMarkers'
+import * as ui from './PerfSection.recipes'
 import { PALETTE } from './palette'
 import Reveal from './Reveal'
 import type { Stat } from './stats'
@@ -28,7 +27,7 @@ const sparkPoints = (values: number[]): [number, number][] => {
 function TpsSpark({ runs }: { runs: PerfRun[] }) {
   const pts = sparkPoints(runs.map((r) => r.settledTps))
   return (
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-40 w-full" aria-hidden>
+    <svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" {...ui.tpsSparkIcon()}>
       <defs>
         <linearGradient id="spark-tps" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor={PALETTE[1]} />
@@ -64,16 +63,15 @@ function LaneSpark({ runs }: { runs: PerfRun[] }) {
   )
 
   return (
-    <div className="relative h-40 overflow-hidden" aria-hidden>
-      <div className="absolute inset-x-0 top-0 h-[58%]">
-        <div className="absolute inset-0 bg-background" />
-        <p className="absolute top-2 left-3 font-mono text-[9px] text-foreground/45 tracking-wider">
-          GENERAL BLOCKSPACE
-        </p>
+    <div {...ui.laneSparkLayout()} aria-hidden="true">
+      <div {...ui.laneSparkLayout2()}>
+        <div {...ui.laneSparkLayout3()} />
+        <p {...ui.laneSparkDescription()}>GENERAL BLOCKSPACE</p>
         <svg
+          aria-hidden="true"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          className="absolute inset-x-0 bottom-0 h-3/5 w-full"
+          {...ui.laneSparkIcon()}
         >
           <path
             d={linePath(pts)}
@@ -86,15 +84,14 @@ function LaneSpark({ runs }: { runs: PerfRun[] }) {
           />
         </svg>
       </div>
-      <div className="absolute inset-x-0 top-[58%] border-line-strong border-t border-dashed" />
-      <div className="absolute inset-x-0 bottom-0 h-[42%] bg-indicator-green/5">
-        <p className="absolute top-2 left-3 font-mono text-[9px] text-indicator-green/80 tracking-wider">
-          DEDICATED PAYMENT LANE
-        </p>
+      <div {...ui.laneSparkLayout4()} />
+      <div {...ui.laneSparkLayout5()}>
+        <p {...ui.laneSparkDescription2()}>DEDICATED PAYMENT LANE</p>
         <svg
+          aria-hidden="true"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          className="absolute inset-0 h-full w-full"
+          {...ui.laneSparkIcon2()}
         >
           <path
             d={linePath(feePts)}
@@ -115,7 +112,7 @@ function LaneSpark({ runs }: { runs: PerfRun[] }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
-            className="lane-flow motion-reduce:animate-none"
+            {...ui.path({ className: `lane-flow ${laneFlow().className}` })}
           />
         </svg>
       </div>
@@ -127,9 +124,9 @@ function LaneSpark({ runs }: { runs: PerfRun[] }) {
 // solid green — the visual form of the uptime claim.
 function UptimeSpark() {
   return (
-    <div className="flex h-20 items-stretch gap-[2px]" aria-hidden>
+    <div {...ui.uptimeSparkLayout()} aria-hidden="true">
       {Array.from({ length: 60 }, (_, i) => (
-        <div key={i} className="flex-1 rounded-[1px] bg-indicator-green/65" />
+        <div key={i} {...ui.uptimeSparkLayout2()} />
       ))}
     </div>
   )
@@ -153,33 +150,22 @@ function StatCard({
   numberOnly?: boolean
 }) {
   return (
-    <Link
-      href={href}
-      className={`group flex h-full min-h-[310px] flex-col border-line border-b px-5 py-6 transition-colors last:border-b-0 hover:bg-surface-card sm:min-h-[360px] lg:px-8 ${className}`}
-    >
-      <div className="flex items-start justify-between">
+    <Link href={href} className={` ${ui.link({ className: 'group' }).className} ${className}`}>
+      <div {...ui.statCardLayout()}>
         <div>
-          <p className="font-sans text-[17px] text-foreground leading-[1.2] tracking-[0] lg:text-[20px]">
-            {label}
-          </p>
-          {!numberOnly ? (
-            <p className="mt-2 font-sans text-[24px] text-foreground/55 tracking-[-0.01em] lg:text-[28px]">
-              {value}
-            </p>
-          ) : null}
+          <p {...ui.statCardDescription()}>{label}</p>
+          {!numberOnly ? <p {...ui.statCardDescription2()}>{value}</p> : null}
         </div>
-        <ArrowUpRight className="mt-1 size-4 shrink-0 text-foreground/25 transition-colors group-hover:text-foreground" />
+        <ArrowUpRight className={ui.arrowUpRight().className} />
       </div>
       {numberOnly ? (
-        <div className="flex flex-1 items-center py-8">
-          <p className="font-sans text-[clamp(3rem,7vw,5.25rem)] text-foreground/55 leading-none tracking-[-0.04em]">
-            {value}
-          </p>
+        <div {...ui.statCardLayout2()}>
+          <p {...ui.statCardDescription3()}>{value}</p>
         </div>
       ) : (
-        <div className="my-auto py-8 empty:hidden">{children}</div>
+        <div {...ui.statCardLayout3()}>{children}</div>
       )}
-      <p className="font-sans text-[13px] text-foreground/50 leading-[1.5]">{desc}</p>
+      <p {...ui.statCardDescription4()}>{desc}</p>
     </Link>
   )
 }
@@ -200,7 +186,7 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
       value: `${mainValue('Speed', '508')} ms`,
       desc: 'Average time between finalized blocks in the latest benchmark data.',
       spark: null,
-      className: 'sm:border-r lg:col-span-2',
+      className: ui.perfSectionStateState().className,
       numberOnly: true,
     },
     {
@@ -209,7 +195,7 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
       value: `${mainValue('Reliability', '15,600')} TPS`,
       desc: 'Settled transactions per second in the latest multi-region benchmark.',
       spark: hasFeed ? <TpsSpark runs={sparkRuns} /> : null,
-      className: 'lg:col-span-4',
+      className: ui.throughputCard().className,
     },
     {
       href: `${PERFORMANCE_PAGE}#fees`,
@@ -217,7 +203,7 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
       value: '<$0.001',
       desc: 'Average fee for standard stablecoin transfers.',
       spark: hasFeed ? <LaneSpark runs={sparkRuns} /> : null,
-      className: 'sm:border-r lg:col-span-3',
+      className: ui.perfSectionStateState2().className,
     },
     {
       href: `${PERFORMANCE_PAGE}#uptime`,
@@ -225,24 +211,22 @@ export default function PerfSection({ stats, runs }: { stats: Stat[]; runs: Perf
       value: '99.999%',
       desc: 'Network availability target for production payment workloads.',
       spark: <UptimeSpark />,
-      className: 'lg:col-span-3',
+      className: ui.uptimeCard().className,
     },
   ]
 
   return (
-    <section className="relative border-line border-b">
+    <section {...ui.perfSectionSection()}>
       <EdgeMarkers edge="bottom" wideOnly />
-      <Reveal className="flex flex-col items-center px-5 text-center">
-        <h2 className="max-w-[700px] font-sans text-[clamp(2rem,6vw,3rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased">
-          Pushing the frontier of blockchain performance.
-        </h2>
-        <Button href={PERFORMANCE_PAGE} arrow className="mt-9">
+      <Reveal className={ui.reveal().className}>
+        <h2 {...ui.perfSectionHeading()}>Pushing the frontier of blockchain performance.</h2>
+        <Button href={PERFORMANCE_PAGE} arrow className={ui.perfSectionButton().className}>
           Explore performance
         </Button>
       </Reveal>
 
-      <Reveal className="mt-14">
-        <div className="grid border-line border-t sm:auto-rows-fr sm:grid-cols-2 lg:grid-cols-6">
+      <Reveal className={ui.reveal2().className}>
+        <div {...ui.perfSectionLayout()}>
           {cards.map((card) => (
             <StatCard
               key={card.label}

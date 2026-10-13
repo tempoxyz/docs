@@ -1,6 +1,25 @@
 const TEMPLATE_URL_PATTERN = /<url>\s*<loc>([^<]*\/\[[^\]]+\][^<]*)<\/loc>[\s\S]*?<\/url>\s*/g
 const LOCATION_PATTERN = /<loc>([^<]+)<\/loc>/g
 
+/** Check built content routes without requiring the retired `/docs` landing page. */
+export function sitemapCoverage(sitemap: string, routes: readonly string[]) {
+  const locations = new Set(
+    Array.from(sitemap.matchAll(LOCATION_PATTERN), ([, location]) => location.replace(/\/$/, '')),
+  )
+  const indexUrl = [...locations].find((location) =>
+    /\/(?:blog|get-started|docs\/api)$/.test(location),
+  )
+  if (!indexUrl) throw new Error('Could not resolve the site base URL from the sitemap')
+  const baseUrl = indexUrl.replace(/\/(?:blog|get-started|docs\/api)$/, '')
+  const urls = [...new Set(routes)].map((route) => {
+    const pathname = route.replace(/^\/+|\/+$/g, '')
+    return pathname
+      ? `${baseUrl}/${pathname.split('/').map(encodeURIComponent).join('/')}`
+      : baseUrl
+  })
+  return { urls, missing: urls.filter((url) => !locations.has(url)) }
+}
+
 export type BlogSitemapEntry = {
   slug: string
   lastmod?: string
@@ -13,7 +32,7 @@ export function finalizeSitemap(
 ): string {
   let blogBaseUrl: string | undefined
 
-  const withoutTemplates = sitemap.replace(TEMPLATE_URL_PATTERN, (_entry, location: string) => {
+  let withoutTemplates = sitemap.replace(TEMPLATE_URL_PATTERN, (_entry, location: string) => {
     const blogTemplate = /^(.*\/blog\/)\[slug\]\/?$/.exec(location)
     if (blogTemplate) blogBaseUrl = blogTemplate[1]
     return ''
@@ -28,6 +47,35 @@ export function finalizeSitemap(
       /\/blog\/?$/.test(location),
     )
     if (blogIndexUrl) blogBaseUrl = `${blogIndexUrl.replace(/\/$/, '')}/`
+  }
+
+  // Redirected marketing pages are not canonical content. Keep the sitemap
+  // limited to the docs and blog surfaces, including when finalizing older output.
+  const docsIndexUrl = Array.from(existingLocations).find((location) =>
+    /\/(?:docs|get-started)\/?$/.test(location),
+  )
+  const siteBaseUrl =
+    blogBaseUrl?.replace(/blog\/$/, '') ?? docsIndexUrl?.replace(/(?:docs|get-started)\/?$/, '')
+  if (siteBaseUrl) {
+    withoutTemplates = withoutTemplates.replace(
+      /<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>\s*/g,
+      (entry, location: string) => {
+        const relativePath = location.startsWith(siteBaseUrl)
+          ? location.slice(siteBaseUrl.length)
+          : undefined
+        if (
+          location === siteBaseUrl.replace(/\/$/, '') ||
+          relativePath === '' ||
+          /^get-started(?:\/|$)/.test(relativePath ?? '') ||
+          /^docs\/.+/.test(relativePath ?? '') ||
+          /^blog(?:\/|$)/.test(relativePath ?? '')
+        ) {
+          return entry
+        }
+        existingLocations.delete(location)
+        return ''
+      },
+    )
   }
 
   const uniqueBlogPosts = [

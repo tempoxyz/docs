@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { rehypeCompactShikiStyles } from './compact-shiki-styles'
 
+type ShikiTree = Parameters<ReturnType<typeof rehypeCompactShikiStyles>>[0]
+
 describe('rehypeCompactShikiStyles', () => {
   it('deduplicates inline styles inside Shiki markup', () => {
-    const tree = {
+    const tree: ShikiTree = {
       type: 'root',
       children: [
         { type: 'mdxjsEsm', value: "import { Tabs } from 'vocs/components'" },
@@ -61,7 +63,7 @@ describe('rehypeCompactShikiStyles', () => {
   })
 
   it('does not add a registry when the page has no Shiki markup', () => {
-    const tree = {
+    const tree: ShikiTree = {
       type: 'root',
       children: [
         {

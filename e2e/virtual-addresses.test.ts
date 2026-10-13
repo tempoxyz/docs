@@ -7,9 +7,9 @@ async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
     try {
       await page.goto('/docs/guide/payments/virtual-addresses', { waitUntil: 'domcontentloaded' })
 
-      await expect(
-        page.getByRole('heading', { name: 'Use virtual addresses for deposits' }),
-      ).toBeVisible({ timeout: 30000 })
+      await expect(page.getByRole('heading', { name: 'Customer deposit addresses' })).toBeVisible({
+        timeout: 30000,
+      })
 
       const realRegistrationTab = page.getByRole('tab', { name: 'Real registration' })
       await expect(realRegistrationTab).toBeVisible({ timeout: 30000 })

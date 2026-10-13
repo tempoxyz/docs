@@ -9,6 +9,41 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Do not make protocol, API, chain, fee, or token claims without checking repo source docs first.
 - Prefer small, scoped docs changes that preserve existing URLs, anchors, and sidebar organization.
 
+## Audience
+
+- Write for CTOs and staff software engineers integrating stablecoins into payment, payroll, remittance, or financial products.
+- Start with their integration decisions and workflows, then explain the signing methods, APIs, and protocol mechanics needed to implement them.
+- Use product plans to understand intent and positioning. Verify availability separately; do not describe planned capabilities as live features.
+
+## Documentation IA and agent exports
+
+- `src/lib/docs-sections.ts` owns the section labels, landing routes, and route ownership; `vocs.config.ts` owns the sidebar within each section.
+- Primary sections: Get Started (`/get-started`), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), and Machine Payments (`/docs/agents`). Get Started also owns the SDK, CLI, wallet CLI, and server handler pages (`/docs/sdk`, `/docs/cli`, `/docs/wallet`, `/docs/server`) as its Tempo CLI and Tempo SDK sections.
+- Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
+- API reference (`/docs/api`) is its own top-nav link, matching Console's "API Docs" link. Partners (`/docs/partners`) contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
+- Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
+- `SKILL.md` is the docs site's published skill. The installable plugin's skill lives in `tempoxyz/plugins`; update it separately when routing changes.
+- `src/lib/ai-docs.ts` and the Vite build hook generate `llms.txt`, `llms-full.txt`, Markdown section context, and the published skill from source. Never edit `dist` or `.vercel` copies by hand.
+- After changing navigation or exported components, build and run `pnpm check:markdown` to check content and IA coverage. Keep Markdown exports useful without interactive UI.
+- When a top-nav section is added, renamed, or removed, update its routing description in `src/lib/ai-docs.ts`, the routing table in `SKILL.md`, and the tests that name sections (`DocsHeader.test.ts`, `ai-docs.test.ts`, `ai-docs-dev.test.ts`, `markdown-output.test.ts`).
+
+### API reference sidebar
+
+- The sidebar comes from the `openapi` entry in `vocs.config.ts`: `intro` holds the API reference overview pages, and the endpoint sections come from the OpenAPI spec's `x-tagGroups`. Until the API repo's spec carries the grouping, `regroupApiTags` rewrites tags, merges, and groups as the spec loads.
+- Sections: API reference (overview, authentication, conventions, MCP server, all endpoints, FAQ), Accounts, Earn API, Routes API, Zones API, Data API, Console (in Console app order), and MPP last.
+- Put each guide inside the endpoint group it explains (for example, Fee payer › Guide) instead of listing it again at the top. Each page appears once in the sidebar.
+- Keep the API reference to API pages: endpoints, authentication, conventions, and API guides. Client libraries live under Get Started › Tempo SDK; the Tempo API client for TypeScript (`tapimo`) is at `/docs/sdk/typescript/api-client`.
+- A single-tag section renders its operations directly under the section header, so give that tag the section's name as its `x-displayName`.
+- When renaming or merging a tag, set `x-pagePath` to keep the existing URL; the display name otherwise changes the page path.
+- The `introFlat`, `hide`, `groupExtrasByName`, and `sectionExtras` sidebar options are local additions to vocs. Ship them through `patches/vocs@2.8.5.patch`, including their types, or upstream.
+
+### Moving, renaming, or removing pages
+
+- Add the redirect in `vocs.config.ts` and mirror it under `/developers` in `vercel.json`; `docs-routing.test.ts` enforces the mirror. Point older redirects at the final destination instead of chaining.
+- Repoint inbound links instead of relying on redirects: search `src/pages`, `src/lib/docs-link-cards.ts`, `src/lib/docs-setup.ts`, and `SKILL.md`.
+- Keep linked heading anchors working with `<span id="old-anchor" />` above the renamed heading.
+- Every page needs a sidebar home; `sidebar-coverage.test.ts` fails otherwise. Merge redundant pages into the canonical page and redirect, rather than keeping link-only pages.
+
 ## Source of Truth
 
 Use repo-local sources first:
@@ -21,6 +56,8 @@ Use repo-local sources first:
 - `src/snippets/` - shared MDX snippets and reusable reference content
 - `src/components/` - custom React/MDX components and interactive guide surfaces
 
+For the `tempo api` CLI, the source of truth is `tempoxyz/api`: `apps/cli/SKILL.md` and the commands in `src/cli/`. Do not document the internal `admin` commands.
+
 When documenting MPP concepts on Tempo, cross-check the relevant MPP docs or SDK references. Keep MPP protocol facts aligned with MPP, but write the page around the Tempo user journey.
 
 ## Commands
@@ -31,11 +68,40 @@ Use `pnpm`.
 - `pnpm build` - typecheck and build docs plus marketing site
 - `pnpm check` - run Biome format/lint with fixes
 - `pnpm check:types` - run TypeScript check
-- `pnpm test` - run Vitest tests
+- `pnpm test` - run Vitest tests (`vitest run --dir src`; a bare `vitest run` also picks up the Playwright `e2e/` files and fails)
 - `pnpm test:e2e` - run Playwright tests
 - `pnpm preview` - preview the production build
 
+### Dev server
+
+- Start `pnpm dev` once and keep it running. Do not stop or restart it between edits.
+- MDX pages, components, styles, and `src/lib` changes hot-reload. Refresh the page instead of restarting.
+- Vocs reads `vocs.config.ts` (sidebar, redirects, OpenAPI options) only at startup and does not watch it. Batch config edits, then restart once to check them.
+- Vite restarts the server by itself when a file imported by `vite.config.ts` changes, including `src/lib/ai-docs.ts` and `src/lib/docs-sections.ts`. Make all edits to those files in one pass.
+- Adding or deleting a page file also restarts the server, so routes stay current.
+- The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting. If responses stay slow (20 seconds or more per page) after many edits, one restart clears it.
+- Check rendered pages with headless Playwright screenshots against the running server. Wait for React hydration before clicking sidebar controls.
+- If the server runs out of memory, start it with `NODE_OPTIONS=--max-old-space-size=16384`. Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
+
 Before finishing docs-only changes, run at least `pnpm check:types` when practical. Run `pnpm build` for config, component, routing, sidebar, or MDX structure changes. Run targeted tests for changed interactive components.
+
+## CLI pages
+
+- Title each page with just the command: ``# `tempo request` ``. Wallet subpages use ``# `tempo wallet` recipes``.
+- Order sections Usage → task sections or Examples → Commands → Flags → Related. `/docs/cli` covers Install, the commands table, agent setup, and common flags only; command-specific details stay on the command's page.
+- Show commands in `bash [Terminal]` code blocks with the flags in use. Write placeholders as `<UPPER_SNAKE>`, such as `<SERVICE_ID>`.
+- Tables: `Command | Description` lists each command once, without flag variants. `Flag | Description` details flags, with one `###` subsection per command on multi-command pages. Write flags as `-D, --dump-header <FILE>`, defaults as "Defaults to `X`.", and descriptions as sentences ending with a period.
+- Keep each command's flag table self-contained, even when commands share flags (`tempo download` and `tempo node` both take `--chain` and `--datadir`).
+
+## Site styling rules
+
+- Import `style`/`variants` from `src/styles/recipes.ts` for layout recipes, `theme.ts` for semantic components, or `scoped.ts` for existing unlayered selectors. Do not import unrestricted helpers from `zyzz` or create component-local configs.
+- Use the shared `vars` exported by `theme.ts`, or configured token names. `contract.ts` owns spacing, typography, radius, border, and stacking scales; `palette.ts` owns colors. Add a token only for a reusable design decision.
+- `inherited.ts` is the reviewed bridge to existing Vocs, blog, terminal, and artwork CSS scopes. Its expressions must resolve on the styled element; do not hoist local CSS variables into root tokens.
+- An intentional one-off uses ` !custom` and a declaration-local `// design-exception: <specific reason>` comment. Native CSS keywords need no explanation. Prefer normalizing incidental values to the scale over adding exceptions.
+- Global styles and keyframes use explicit token references. Use token-based border/background longhands, logical properties, and explicit transition properties. Style interactive state through existing ARIA/data attributes or native `:checked`/`:disabled` selectors. Reserve DOM style writes for scroll locking, theme application, and named CSS-variable bindings for runtime measurements.
+- Linked inline code (for example, a command linked to its page) keeps the code style and shows its link on hover; see the `a[data-v]:has(> code:only-child)` rule in `globals.ts`.
+- `pnpm check` runs Biome plus the architecture policy and Zyzz Oxlint rules. `pnpm check:types` checks token/variant contracts, including negative fixtures. `pnpm build` also enforces the compiler contract. Keep all three passing; do not suppress errors or weaken helper mappings to make a new value fit.
 
 ## Project Structure
 
@@ -66,7 +132,9 @@ Before finishing docs-only changes, run at least `pnpm check:types` when practic
 4. Preserve old deep links with explicit anchors when renaming headings:
 
    ```mdx
-   ## Tempo API pagination modes {#modes}
+   <span id="modes" />
+
+   ## Tempo API pagination modes
    ```
 
 5. Verify with `pnpm check:types` and `pnpm build` when navigation, imports, MDX syntax, or components changed.
@@ -148,6 +216,13 @@ Each step should be actionable and concrete. Keep long conceptual background out
 - Use "stablecoins" for Tempo payment assets unless discussing broader cryptocurrency categories.
 
 ## Protocol Concept Naming
+
+- Match task names across the sidebar, page title, cards, and incoming links. Preserve existing URLs and anchors when changing a visible label.
+- Distinguish an account and its signing authority from the wallet software or provider that manages signing. API keys and account access keys grant different kinds of access.
+- Identify who acts: the application, backend service, customer, wallet provider, or agent. Distinguish application authentication, provider signing policies, and onchain permissions.
+- Use "transaction" for execution, "transfer" for token movement, and "payment" for the application's business operation. A batch contains atomic calls; concurrently submitted transactions have separate outcomes.
+- Keep account balance, DEX balance, vault shares, position value, earnings, and available withdrawal amount distinct. Use "base units" for integer token amounts.
+- Keep shared explanations in one primary guide with short, relevant reminders beside examples. Product plans inform positioning, not deployment claims.
 
 - Use literal concept names in user-facing docs.
 - Use `TIP-20 Tokens` for sidebar labels, page titles, headings, and first-introduction contexts.

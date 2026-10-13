@@ -1,9 +1,7 @@
 'use client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { createClient, type Hex, parseAbiItem, parseUnits } from 'viem'
-import { Actions, tempoActions } from 'viem/tempo'
-import { http as zoneHttp, zoneModerato } from 'viem/tempo/zones'
+import { type Hex, parseAbiItem, parseUnits } from 'viem'
 import { useConnection, useConnectorClient, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import {
@@ -15,10 +13,12 @@ import {
 } from '../../../lib/private-zones.ts'
 import { useRootWebAuthnAccount } from '../../../lib/useRootWebAuthnAccount.ts'
 import { useZoneAuthorization, type ZoneAuthClientLike } from '../../../lib/useZoneAuthorization.ts'
+import { Actions, createClient, Zone, http as zoneHttp } from '../../../lib/zone-sandbox-sdk'
 import { Button, ExplorerLink, Logout, Step } from '../Demo'
 import { SignInButtons } from '../EmbedPasskeys'
 import { ousd } from '../tokens'
 import { useStickyStepCompletion } from './useStickyStepCompletion.ts'
+import * as ui from './WithdrawFromZone.recipes'
 
 const ZONE_LABEL = 'Zone A'
 const ZONE_ID = 6 as const
@@ -111,19 +111,20 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
       rootWebAuthnAccount
         ? (createClient({
             account: rootWebAuthnAccount,
-            chain: zoneModerato(ZONE_ID),
+            chain: Zone.a,
             transport: zoneHttp(
               getZoneRpcHttpUrl(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
               getZoneRpcTransportConfig(ZONE_ID, moderatoZoneRpcUrls[ZONE_ID]),
             ),
-          }).extend(tempoActions()) as unknown as ZoneClientLike)
+          }) as unknown as ZoneClientLike)
         : undefined,
     [rootWebAuthnAccount],
   )
 
   const zoneAuthorization = useZoneAuthorization({
     address,
-    chainId: zoneModerato(ZONE_ID).id,
+    chainId: Zone.a.id,
+    zoneId: ZONE_ID,
     queryKey: ['guide-private-zones-withdraw-auth', address, ZONE_ID],
     zoneClient,
   })
@@ -271,7 +272,6 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     },
   })
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: switching modes should clear the previous submission state.
   React.useEffect(() => {
     withdrawMutation.reset()
   }, [mode])
@@ -354,7 +354,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
     zoneAuthorization.isChecking || zoneAuthorization.authorizeMutation.isPending
   const stepTwoAction = zoneAuthorization.isAuthorized ? undefined : (
     <Button
-      className="font-normal text-[14px] -tracking-[2%]"
+      className={ui.connectedZoneFlowButton().className}
       disabled={authIsPreparing || !zoneClient}
       onClick={() => zoneAuthorization.authorizeMutation.mutate()}
       type="button"
@@ -384,7 +384,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   } else if (withdrawalFeeQuery.isPending || zoneBalanceQuery.isPending) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled
         type="button"
         variant="default"
@@ -395,7 +395,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   } else if (!hasEnoughZoneBalance && !hasRootBalance) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={fundMutation.isPending || !zoneAuthorization.isAuthorized || rootBalanceIsPending}
         onClick={() => fundMutation.mutate()}
         type="button"
@@ -407,7 +407,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   } else if (!hasEnoughZoneBalance) {
     stepThreeAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={topUpMutation.isPending || !zoneAuthorization.isAuthorized}
         onClick={() => topUpMutation.mutate()}
         type="button"
@@ -424,7 +424,7 @@ function ConnectedZoneFlow(props: { address: Hex; mode: WithdrawalMode }) {
   } else {
     stepFourAction = (
       <Button
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.connectedZoneFlowButton().className}
         disabled={withdrawMutation.isPending || withdrawMutation.isSuccess}
         onClick={() => withdrawMutation.mutate()}
         type="button"
@@ -543,16 +543,16 @@ function WithdrawalModeSelector(props: {
   const { mode, onChange } = props
 
   return (
-    <div className="ms-[42px] rounded-xl border border-gray4 bg-gray2/40 p-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div className="max-w-[34rem]">
-          <p className="text-[12px] text-gray9 uppercase tracking-[0.12em]">Withdrawal mode</p>
-          <p className="mt-1 text-[13px] text-gray10 leading-relaxed -tracking-[1%]">
+    <div {...ui.withdrawalModeSelectorLayout()}>
+      <div {...ui.withdrawalModeSelectorLayout2()}>
+        <div {...ui.withdrawalModeSelectorLayout3()}>
+          <p {...ui.withdrawalModeSelectorDescription()}>Withdrawal mode</p>
+          <p {...ui.withdrawalModeSelectorDescription2()}>
             Authenticated withdrawals add sender details encrypted to the reveal key. The
             destination and amount are public in both modes.
           </p>
         </div>
-        <div className="flex shrink-0 self-start rounded-lg border border-gray4 bg-background p-1">
+        <div {...ui.withdrawalModeSelectorLayout4()}>
           {[
             ['standard', 'Standard'],
             ['authenticated', 'Authenticated'],
@@ -565,8 +565,10 @@ function WithdrawalModeSelector(props: {
                 type="button"
                 aria-pressed={selected}
                 className={[
-                  'rounded-md px-3 py-1.5 font-normal text-[13px] -tracking-[1%] transition-colors',
-                  selected ? 'bg-invert text-invert' : 'text-gray10 hover:text-gray12',
+                  ui.withdrawalModeSelectorButtonState().className,
+                  selected
+                    ? ui.withdrawalModeSelectorButtonState2().className
+                    : ui.withdrawalModeSelectorButtonState3().className,
                 ].join(' ')}
                 onClick={() => onChange(value as WithdrawalMode)}
               >
@@ -582,9 +584,9 @@ function WithdrawalModeSelector(props: {
 
 function StepBody(props: React.PropsWithChildren) {
   return (
-    <div className="mx-6 pb-4">
-      <div className="mt-3 border-gray4 border-s-2 ps-5">
-        <div className="flex flex-col gap-2 py-0.5">{props.children}</div>
+    <div {...ui.stepBodyLayout()}>
+      <div {...ui.stepBodyLayout2()}>
+        <div {...ui.stepBodyLayout3()}>{props.children}</div>
       </div>
     </div>
   )
@@ -610,9 +612,9 @@ function DetailLine(props: { label: string; value: string; dataTestId?: string |
   const { dataTestId, label, value } = props
 
   return (
-    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] -tracking-[1%]">
-      <span className="text-gray9">{label}</span>
-      <span className="break-all font-mono text-[12px] text-gray12" data-testid={dataTestId}>
+    <div {...ui.detailLineLayout()}>
+      <span {...ui.detailLineText()}>{label}</span>
+      <span {...ui.detailLineText2()} data-testid={dataTestId}>
         {value}
       </span>
     </div>

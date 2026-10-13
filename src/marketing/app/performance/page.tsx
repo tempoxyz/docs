@@ -1,4 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
+import { zoneBreathe } from '../../../styles/surfaces.styles'
 import ArrowUpRight from '../_components/ArrowUpRight'
 import Button from '../_components/Button'
 import Footer from '../_components/Footer'
@@ -10,6 +12,7 @@ import TpsTrendChart from './_components/TpsTrendChart'
 import TpsTrendChartFrame from './_components/TpsTrendChartFrame'
 import UptimeStrip from './_components/UptimeStrip'
 import { fetchPerfRuns, fmtInt, type PerfRun } from './_lib/runs'
+import * as ui from './page.recipes'
 
 const STATUS_PAGE_URL = 'https://status.tempo.xyz'
 const PERF_DASHBOARD_URL = 'https://perf.tempo.xyz/'
@@ -46,36 +49,27 @@ function Section({
   children: ReactNode
 }) {
   return (
-    <section id={id} className="scroll-mt-12 border-line border-b px-5 py-16 lg:px-8">
+    <section id={id} {...ui.sectionSection()}>
       <Reveal>
-        <h2 className="font-sans text-[24px] text-foreground tracking-[0]">{title}</h2>
-        <p className="mt-3 max-w-[640px] font-sans text-[16px] text-foreground/50 leading-[1.5]">
-          {note}
-        </p>
-        <div className="mt-10">{children}</div>
+        <h2 {...ui.sectionHeading()}>{title}</h2>
+        <p {...ui.sectionDescription()}>{note}</p>
+        <div {...ui.sectionLayout()}>{children}</div>
       </Reveal>
     </section>
   )
 }
 
 function SkeletonBlock({ className }: { className: string }) {
-  return (
-    <span
-      aria-hidden
-      className={`block animate-pulse bg-surface-skeleton/35 motion-reduce:animate-none ${className}`}
-    />
-  )
+  return <span aria-hidden="true" className={` ${ui.skeletonBlockText().className} ${className}`} />
 }
 
 function HeroChartSkeleton() {
   return (
-    <Reveal delay={150} className="mt-16">
+    <Reveal delay={150} className={ui.reveal().className}>
       <TpsTrendChartFrame />
-      <div className="mt-5 text-center">
-        <p className="font-sans text-[20px] text-foreground leading-tight tracking-[0]">
-          Transactions per second
-        </p>
-        <SkeletonBlock className="mx-auto mt-2 h-4 w-[300px] max-w-[70vw]" />
+      <div {...ui.heroChartSkeletonLayout()}>
+        <p {...ui.heroChartSkeletonDescription()}>Transactions per second</p>
+        <SkeletonBlock className={ui.skeletonBlock().className} />
       </div>
     </Reveal>
   )
@@ -83,9 +77,9 @@ function HeroChartSkeleton() {
 
 function HeroChartUnavailable() {
   return (
-    <Reveal className="mt-16">
-      <div className="flex h-[360px] items-center justify-center border-line border-y bg-surface-block/40 px-5 text-center">
-        <p className="max-w-[420px] font-mono text-[12px] text-foreground/40 leading-[1.6]">
+    <Reveal className={ui.reveal().className}>
+      <div {...ui.heroChartUnavailableLayout()}>
+        <p {...ui.heroChartUnavailableDescription()}>
           Benchmark feed unavailable. Charts will return when the API is reachable.
         </p>
       </div>
@@ -96,16 +90,17 @@ function HeroChartUnavailable() {
 function HeroStatsSkeleton() {
   return (
     <Reveal>
-      <div className="grid grid-cols-3 border-line border-b">
+      <div {...ui.heroStatsSkeletonLayout()}>
         {HERO_STAT_LABELS.map((label, i) => (
           <div
             key={label}
-            className={`px-3 py-6 sm:px-5 lg:px-8 ${i > 0 ? 'border-line border-l' : ''}`}
+            {...composeStyles(
+              ui.heroStatsSkeletonLayout2(),
+              !!(i > 0) && ui.heroStatsSkeletonLayout3(),
+            )}
           >
-            <p className="min-h-[2.75em] font-sans text-[15px] text-foreground leading-snug tracking-[0]">
-              {label}
-            </p>
-            <SkeletonBlock className="mt-3 h-8 w-28" />
+            <p {...ui.heroStatsSkeletonDescription()}>{label}</p>
+            <SkeletonBlock className={ui.skeletonBlock2().className} />
           </div>
         ))}
       </div>
@@ -115,23 +110,20 @@ function HeroStatsSkeleton() {
 
 function SettlementStreamSkeleton() {
   return (
-    <div className="relative h-[180px] w-full overflow-hidden" aria-hidden>
-      <SkeletonBlock className="absolute top-[26px] right-0 h-3 w-24" />
-      <div className="absolute top-[58px] right-0 flex gap-[14px]">
+    <div {...ui.settlementStreamSkeletonLayout()} aria-hidden="true">
+      <SkeletonBlock className={ui.skeletonBlock3().className} />
+      <div {...ui.settlementStreamSkeletonLayout2()}>
         {SETTLEMENT_SKELETON_CELLS.map((cell) => (
-          <div
-            key={cell}
-            className="flex size-16 items-center justify-center border border-line-strong bg-surface-panel"
-          >
-            <SkeletonBlock className="size-4 rounded-full" />
+          <div key={cell} {...ui.settlementStreamSkeletonLayout3()}>
+            <SkeletonBlock className={ui.skeletonBlock4().className} />
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-surface-shell to-transparent" />
-      <div className="absolute right-8 bottom-2 flex w-[78px] items-center">
-        <span className="h-2 w-px bg-foreground/25" />
-        <span className="h-px flex-1 bg-foreground/25" />
-        <span className="h-2 w-px bg-foreground/25" />
+      <div {...ui.settlementStreamSkeletonLayout4()} />
+      <div {...ui.settlementStreamSkeletonLayout5()}>
+        <span {...ui.settlementStreamSkeletonText()} />
+        <span {...ui.settlementStreamSkeletonText2()} />
+        <span {...ui.settlementStreamSkeletonText()} />
       </div>
     </div>
   )
@@ -141,14 +133,14 @@ function PaymentLanesSkeleton() {
   const gridLines = [70, 120, 240]
 
   return (
-    <div className="relative h-[300px] w-full overflow-hidden" aria-hidden>
-      <div className="zone-breathe absolute inset-x-0 top-5 h-[170px] bg-background motion-reduce:animate-none" />
-      <SkeletonBlock className="absolute top-10 left-3 h-2 w-48" />
-      <svg
-        viewBox="0 0 1000 300"
-        preserveAspectRatio="none"
-        className="absolute inset-0 h-full w-full"
-      >
+    <div {...ui.paymentLanesSkeletonLayout()} aria-hidden="true">
+      <div
+        {...ui.paymentLanesSkeletonLayout2({
+          className: `zone-breathe ${zoneBreathe().className}`,
+        })}
+      />
+      <SkeletonBlock className={ui.skeletonBlock5().className} />
+      <svg viewBox="0 0 1000 300" preserveAspectRatio="none" {...ui.paymentLanesSkeletonIcon()}>
         <title>Payment lanes placeholder</title>
         {gridLines.map((y) => (
           <line key={y} x1="0" x2="1000" y1={y} y2={y} stroke="var(--line)" strokeOpacity="0.65" />
@@ -162,30 +154,27 @@ function PaymentLanesSkeleton() {
           strokeDasharray="3 4"
         />
       </svg>
-      <div className="absolute inset-x-0 top-[190px] bottom-6 bg-indicator-green/5" />
-      <SkeletonBlock className="absolute top-[210px] left-3 h-2 w-44" />
+      <div {...ui.paymentLanesSkeletonLayout3()} />
+      <SkeletonBlock className={ui.skeletonBlock6().className} />
     </div>
   )
 }
 
 function UptimeStripSkeleton() {
   return (
-    <div aria-hidden>
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <SkeletonBlock className="h-3 w-40" />
-        <SkeletonBlock className="h-3 w-24" />
+    <div aria-hidden="true">
+      <div {...ui.uptimeStripSkeletonLayout()}>
+        <SkeletonBlock className={ui.skeletonBlock7().className} />
+        <SkeletonBlock className={ui.skeletonBlock8().className} />
       </div>
-      <div className="flex h-12 items-stretch gap-[2px]">
+      <div {...ui.uptimeStripSkeletonLayout2()}>
         {UPTIME_SKELETON_BARS.map((bar) => (
-          <span
-            key={bar}
-            className="flex-1 animate-pulse rounded-[1px] bg-indicator-green/35 motion-reduce:animate-none"
-          />
+          <span key={bar} {...ui.uptimeStripSkeletonText()} />
         ))}
       </div>
-      <div className="mt-3 flex items-center justify-between">
-        <SkeletonBlock className="h-2 w-12" />
-        <SkeletonBlock className="h-2 w-12" />
+      <div {...ui.uptimeStripSkeletonLayout3()}>
+        <SkeletonBlock className={ui.skeletonBlock9().className} />
+        <SkeletonBlock className={ui.skeletonBlock9().className} />
       </div>
     </div>
   )
@@ -208,7 +197,7 @@ function PerformanceSectionsSkeleton() {
         note="Tempo gives payment transactions reserved blockspace with a separate consensus gas limit, so spikes in other activity cannot crowd them out. Fees are fixed, not congestion-priced: a TIP-20 transfer stays under $0.001 regardless of network load."
       >
         <PaymentLanesSkeleton />
-        <SkeletonBlock className="mt-10 h-10 w-56" />
+        <SkeletonBlock className={ui.skeletonBlock10().className} />
       </Section>
 
       <Section
@@ -217,7 +206,7 @@ function PerformanceSectionsSkeleton() {
         note="Tempo takes uptime seriously, with network operations designed for 24/7 availability. Continuous block production, monitoring, and incident response keep payment infrastructure online when developers need it."
       >
         <UptimeStripSkeleton />
-        <SkeletonBlock className="mt-10 h-10 w-40" />
+        <SkeletonBlock className={ui.skeletonBlock11().className} />
       </Section>
     </>
   )
@@ -272,30 +261,24 @@ export default function PerformancePage() {
     : []
 
   return (
-    <main className="min-h-screen w-full bg-surface-page">
-      <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
+    <main {...ui.main()}>
+      <div {...ui.performancePageLayout()}>
         <Header />
 
         {/* Hero: headline + multi-region nightly history */}
-        <section className="relative border-line border-b px-5 pt-20 pb-12 lg:px-8 lg:pt-28">
-          <Reveal className="flex flex-col items-center text-center">
-            <h1 className="max-w-[880px] text-balance font-sans text-[clamp(2.5rem,6vw,3.5rem)] text-foreground leading-[1.05] tracking-[-0.03em] antialiased">
-              Pushing the frontier of blockchain performance.
-            </h1>
+        <section {...ui.performancePageSection()}>
+          <Reveal className={ui.reveal2().className}>
+            <h1 {...ui.performancePageTitle()}>Pushing the frontier of blockchain performance.</h1>
           </Reveal>
 
           {!runsLoaded ? (
             <HeroChartSkeleton />
           ) : hasChartRuns ? (
-            <Reveal delay={150} className="mt-16">
+            <Reveal delay={150} className={ui.reveal().className}>
               <TpsTrendChart runs={runs} />
-              <div className="mt-10 text-center">
-                <p className="font-sans text-[20px] text-foreground leading-tight tracking-[0]">
-                  Transactions per second
-                </p>
-                <p className="mt-1 font-sans text-[14px] text-foreground/45 leading-[1.4]">
-                  Multi-region benchmark history
-                </p>
+              <div {...ui.performancePageLayout2()}>
+                <p {...ui.heroChartSkeletonDescription()}>Transactions per second</p>
+                <p {...ui.performancePageDescription()}>Multi-region benchmark history</p>
               </div>
             </Reveal>
           ) : (
@@ -308,18 +291,17 @@ export default function PerformancePage() {
           <HeroStatsSkeleton />
         ) : heroStats.length > 0 ? (
           <Reveal>
-            <div className="grid grid-cols-3 border-line border-b">
+            <div {...ui.heroStatsSkeletonLayout()}>
               {heroStats.map((stat, i) => (
                 <div
                   key={stat.label}
-                  className={`px-3 py-6 sm:px-5 lg:px-8 ${i > 0 ? 'border-line border-l' : ''}`}
+                  {...composeStyles(
+                    ui.heroStatsSkeletonLayout2(),
+                    !!(i > 0) && ui.heroStatsSkeletonLayout3(),
+                  )}
                 >
-                  <p className="min-h-[2.75em] font-sans text-[15px] text-foreground leading-snug tracking-[0]">
-                    {stat.label}
-                  </p>
-                  <p className="mt-2 font-sans text-[24px] text-foreground tracking-[-0.01em] lg:text-[28px]">
-                    {stat.value}
-                  </p>
+                  <p {...ui.heroStatsSkeletonDescription()}>{stat.label}</p>
+                  <p {...ui.performancePageDescription2()}>{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -347,7 +329,7 @@ export default function PerformancePage() {
               <PaymentLanes runs={runs} />
               <Button
                 href="/docs/protocol/blockspace/payment-lane-specification"
-                className="mt-10"
+                className={ui.sectionLayout().className}
                 arrow
               >
                 Payment lane architecture
@@ -360,40 +342,38 @@ export default function PerformancePage() {
               note="Tempo takes uptime seriously, with network operations designed for 24/7 availability. Continuous block production, monitoring, and incident response keep payment infrastructure online when developers need it."
             >
               <UptimeStrip runs={runs} status={statusState} />
-              <Button href={STATUS_PAGE_URL} className="mt-10" arrow>
+              <Button href={STATUS_PAGE_URL} className={ui.sectionLayout().className} arrow>
                 status.tempo.xyz
               </Button>
             </Section>
           </>
         ) : null}
 
-        <section id="dashboard" className="scroll-mt-12 border-line border-b">
+        <section id="dashboard" {...ui.performancePageSection2()}>
           <Reveal>
             <a
               href={PERF_DASHBOARD_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col gap-8 px-5 py-16 transition-colors hover:bg-surface-block focus-visible:bg-surface-block focus-visible:outline-none lg:flex-row lg:items-start lg:justify-between lg:px-8"
+              {...ui.performancePageLink({ className: 'group' })}
             >
               <span>
-                <span className="block font-sans text-[24px] text-foreground tracking-[0]">
-                  Tempo is continuously evolving.
-                </span>
-                <span className="mt-3 block max-w-[760px] font-sans text-[16px] text-foreground/50 leading-[1.5] transition-colors group-hover:text-foreground/65 group-focus-visible:text-foreground/65">
+                <span {...ui.performancePageText()}>Tempo is continuously evolving.</span>
+                <span {...ui.performancePageText2()}>
                   Tempo keeps pushing the limits of execution and transaction throughput. The public
                   performance dashboard has the details and updates nightly as the node software
                   underlying Tempo improves.
                 </span>
               </span>
-              <span className="flex items-center gap-2 font-sans text-[14px] text-foreground/55 tracking-[0] transition-colors group-hover:text-foreground group-focus-visible:text-foreground">
+              <span {...ui.performancePageText3()}>
                 Open performance dashboard
-                <ArrowUpRight className="size-[14px] shrink-0" />
+                <ArrowUpRight className={ui.arrowUpRight().className} />
               </span>
             </a>
           </Reveal>
         </section>
 
-        <div className="mt-[100px]">
+        <div {...ui.performancePageLayout3()}>
           <Footer />
         </div>
       </div>

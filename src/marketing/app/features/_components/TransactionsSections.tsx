@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Fragment, useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
 import Button from '../../_components/Button'
 import CodeWindow, { type CodeVariant } from '../../_components/CodeWindow'
 import EdgeMarkers from '../../_components/EdgeMarkers'
@@ -20,6 +21,7 @@ import {
 import FeatureDiagram from '../../diagrams/_components/FeatureDiagram'
 import type { FeatureDiagramSpec } from '../../diagrams/_lib/featureDiagram'
 import FeatureFaq, { type FaqItem } from './FeatureFaq'
+import * as ui from './TransactionsSections.recipes'
 
 type TransactionPrimitive = {
   title: string
@@ -317,27 +319,35 @@ function AccessKeysSection() {
   const [mode, setMode] = useState<ShowcaseMode>('visual')
 
   return (
-    <section id="access-keys" className="mt-[140px] scroll-mt-12">
-      <Reveal className="relative border-line border-t">
+    <section id="access-keys" {...ui.accessKeysSectionSection()}>
+      <Reveal className={ui.reveal().className}>
         <EdgeMarkers wideOnly />
         {/* Alternated layout: visual on the left, content on the right. */}
-        <div className="grid border-line border-b lg:grid-cols-2">
-          <div className="relative border-line border-b lg:min-h-0 lg:border-r lg:border-b-0">
-            <div className="absolute right-5 bottom-5 z-20 lg:right-8 lg:bottom-8">
+        <div {...ui.accessKeysSectionLayout()}>
+          <div {...ui.accessKeysSectionLayout2()}>
+            <div {...ui.accessKeysSectionLayout3()}>
               <ModeToggle mode={mode} setMode={setMode} />
             </div>
-            <div className="grid grid-cols-1 lg:absolute lg:inset-0 lg:min-h-0">
+            <div {...ui.accessKeysSectionLayout4()}>
               <div
                 inert={mode !== 'visual'}
-                className={`grid lg:h-full lg:min-h-0 ${mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
+                {...composeStyles(
+                  ui.accessKeysSectionLayout5(),
+                  !!(mode === 'visual') && ui.accessKeysSectionLayout6(),
+                  !(mode === 'visual') && ui.accessKeysSectionLayout7(),
+                )}
               >
                 <FeatureDiagram spec={accessKeysSpec} />
               </div>
               <div
                 inert={mode !== 'code'}
-                className={`flex min-h-[520px] items-center justify-center p-6 pb-20 lg:h-full lg:min-h-0 lg:p-10 lg:pb-24 ${mode === 'code' ? '[grid-area:1/1]' : 'hidden'}`}
+                {...composeStyles(
+                  ui.accessKeysSectionLayout8(),
+                  !!(mode === 'code') && ui.accessKeysSectionLayout6(),
+                  !(mode === 'code') && ui.accessKeysSectionLayout7(),
+                )}
               >
-                <div className="w-full max-w-[600px]">
+                <div {...ui.accessKeysSectionLayout9()}>
                   <CodeWindow
                     title="access-keys.ts"
                     variants={accessKeyCodeVariants}
@@ -348,16 +358,14 @@ function AccessKeysSection() {
             </div>
           </div>
 
-          <div className="bg-surface-shell">
-            <div className="px-5 py-14 lg:px-12 lg:py-20">
-              <h2 className="max-w-[560px] text-balance font-sans text-[clamp(2rem,6vw,3rem)] text-foreground leading-[1.08] tracking-[-0.03em] antialiased">
-                Set spending limits using access keys.
-              </h2>
-              <p className="mt-5 max-w-[540px] font-sans text-[16px] text-foreground/50 leading-[1.5] tracking-[0]">
+          <div {...ui.accessKeysSectionLayout10()}>
+            <div {...ui.accessKeysSectionLayout11()}>
+              <h2 {...ui.accessKeysSectionHeading()}>Set spending limits using access keys.</h2>
+              <p {...ui.accessKeysSectionDescription()}>
                 Authorize scoped keys with spending limits and expiry so apps and agents can move
                 approved funds without repeated user prompts.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-2.5">
+              <div {...ui.accessKeysSectionLayout12()}>
                 <Button
                   href="/docs/protocol/transactions/spec-tempo-transaction#access-keys"
                   variant="primary"
@@ -370,19 +378,15 @@ function AccessKeysSection() {
               </div>
             </div>
 
-            <div className="grid border-line border-t sm:grid-cols-3 lg:grid-cols-1">
+            <div {...ui.accessKeysSectionLayout13()}>
               {accessKeyItems.map((item) => (
                 <Link
                   key={item.title}
                   href={item.href}
-                  className="group border-line border-b px-5 py-6 transition-colors last:border-b-0 hover:bg-surface-block sm:border-r sm:last:border-r-0 lg:border-r-0 lg:px-12"
+                  className={ui.link({ className: 'group' }).className}
                 >
-                  <h3 className="font-sans text-[18px] text-foreground leading-[1.2] tracking-[0]">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 font-sans text-[14px] text-foreground/45 leading-[1.45] tracking-[0] group-hover:text-foreground/55">
-                    {item.desc}
-                  </p>
+                  <h3 {...ui.accessKeysSectionHeading2()}>{item.title}</h3>
+                  <p {...ui.accessKeysSectionDescription2()}>{item.desc}</p>
                 </Link>
               ))}
             </div>
@@ -402,17 +406,19 @@ function PrimitiveGroupSection({ group, index }: { group: PrimitiveGroup; index:
   }
 
   return (
-    <section id={group.id} className={`${index === 0 ? '' : 'mt-[140px]'} scroll-mt-12`}>
-      <Reveal className="relative border-line border-y">
+    <section
+      id={group.id}
+      {...composeStyles(
+        !(index === 0) && ui.primitiveGroupSectionSection(),
+        ui.primitiveGroupSectionSection2(),
+      )}
+    >
+      <Reveal className={ui.reveal2().className}>
         <EdgeMarkers wideOnly />
-        <div className="flex flex-col items-center px-5 py-14 text-center lg:py-20">
-          <h2 className="text-balance font-sans text-[clamp(2rem,6vw,3rem)] text-foreground leading-[1.08] tracking-[-0.03em] antialiased">
-            {group.title}
-          </h2>
-          <p className="mt-5 max-w-[560px] text-balance font-sans text-[16px] text-foreground/50 leading-[1.5] tracking-[0] lg:text-[18px]">
-            {group.desc}
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+        <div {...ui.primitiveGroupSectionLayout()}>
+          <h2 {...ui.primitiveGroupSectionHeading()}>{group.title}</h2>
+          <p {...ui.primitiveGroupSectionDescription()}>{group.desc}</p>
+          <div {...ui.primitiveGroupSectionLayout2()}>
             {group.ctas.map((cta) => (
               <Button
                 key={cta.label}
@@ -429,60 +435,65 @@ function PrimitiveGroupSection({ group, index }: { group: PrimitiveGroup; index:
         {/* Mirrors the SDK paired-grid: primitive cards on the left drive the
             shared diagram/code panel on the right. The dotted icons tie each
             card to its accent color in the diagram. */}
-        <div className="grid border-line border-t bg-surface-shell lg:grid-cols-2">
-          <ul className="grid border-line border-b lg:border-r lg:border-b-0">
+        <div {...ui.primitiveGroupSectionLayout3()}>
+          <ul {...ui.primitiveGroupSectionList()}>
             {group.items.map((item, i) => (
-              <li key={item.title} className="border-line border-b last:border-b-0">
+              <li key={item.title} {...ui.primitiveGroupSectionItem()}>
                 <Link
                   href={item.href}
                   onMouseEnter={() => selectItem(i)}
                   onFocus={() => selectItem(i)}
                   onClick={() => selectItem(i)}
-                  className={`group flex h-full w-full flex-col gap-3 p-7 text-left transition-colors lg:p-8 ${
-                    active === i
-                      ? 'bg-surface-block text-foreground'
-                      : 'text-foreground/55 hover:bg-surface-block hover:text-foreground/80'
-                  }`}
+                  className={
+                    composeStyles(
+                      ui.link2({ className: 'group' }),
+                      !!(active === i) && ui.link3(),
+                      !(active === i) && ui.link4(),
+                    ).className
+                  }
                 >
-                  <span className="flex items-center gap-3">
+                  <span {...ui.primitiveGroupSectionText()}>
                     <span
-                      aria-hidden
-                      className="size-4 shrink-0"
-                      style={{
-                        backgroundImage: `radial-gradient(circle, ${colorForIndex(i)} 1px, transparent 1.4px)`,
-                        backgroundSize: '5px 5px',
-                      }}
+                      aria-hidden="true"
+                      {...ui.primitiveGroupSectionTextAppearance({
+                        value0: `radial-gradient(circle, ${colorForIndex(i)} 1px, transparent 1.4px)`,
+                        className: ui.primitiveGroupSectionText2().className,
+                      })}
                     />
-                    <span className="font-sans text-[20px] leading-[1.2] tracking-[0] lg:text-[24px]">
-                      {item.title}
-                    </span>
+                    <span {...ui.primitiveGroupSectionText3()}>{item.title}</span>
                   </span>
-                  <span className="max-w-[480px] font-sans text-[16px] text-foreground/45 leading-[1.4] tracking-[0] group-hover:text-foreground/55">
-                    {item.desc}
-                  </span>
+                  <span {...ui.primitiveGroupSectionText4()}>{item.desc}</span>
                 </Link>
               </li>
             ))}
           </ul>
 
-          <div className="relative lg:min-h-[520px]">
-            <div className="absolute right-5 bottom-5 z-20 lg:right-8 lg:bottom-8">
+          <div {...ui.primitiveGroupSectionLayout4()}>
+            <div {...ui.accessKeysSectionLayout3()}>
               <ModeToggle mode={mode} setMode={setMode} />
             </div>
-            <div className="grid grid-cols-1 lg:absolute lg:inset-0 lg:min-h-0">
+            <div {...ui.accessKeysSectionLayout4()}>
               {group.items.map((item, i) => (
                 <Fragment key={item.title}>
                   <div
                     inert={!(i === active && mode === 'visual')}
-                    className={`grid lg:h-full lg:min-h-0 ${i === active && mode === 'visual' ? '[grid-area:1/1]' : 'hidden'}`}
+                    {...composeStyles(
+                      ui.accessKeysSectionLayout5(),
+                      !!(i === active && mode === 'visual') && ui.accessKeysSectionLayout6(),
+                      !(i === active && mode === 'visual') && ui.accessKeysSectionLayout7(),
+                    )}
                   >
                     <FeatureDiagram spec={item.spec} />
                   </div>
                   <div
                     inert={!(i === active && mode === 'code')}
-                    className={`flex min-h-[460px] items-center justify-center p-6 pb-20 lg:h-full lg:min-h-0 lg:p-10 lg:pb-24 ${i === active && mode === 'code' ? '[grid-area:1/1]' : 'hidden'}`}
+                    {...composeStyles(
+                      ui.primitiveGroupSectionLayout5(),
+                      !!(i === active && mode === 'code') && ui.accessKeysSectionLayout6(),
+                      !(i === active && mode === 'code') && ui.accessKeysSectionLayout7(),
+                    )}
                   >
-                    <div className="w-full max-w-[560px]">
+                    <div {...ui.primitiveGroupSectionLayout6()}>
                       <CodeWindow
                         title={item.panelTitle}
                         variants={item.variants}

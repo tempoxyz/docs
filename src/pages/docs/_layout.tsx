@@ -2,10 +2,12 @@
 
 import { lazy, type PropsWithChildren, Suspense } from 'react'
 import DocsHeader from '../../components/DocsHeader'
+import DocsPageActions from '../../components/DocsPageActions'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
 import { usePageSettled } from '../../lib/pageSettled'
 import { normalizeRscFetchUrl } from '../../lib/rsc-route-normalization'
+import * as ui from './_layout.recipes'
 
 const Analytics = lazy(() =>
   import('@vercel/analytics/react').then((module) => ({ default: module.Analytics })),
@@ -60,10 +62,11 @@ export default function DocsLayout(
       <DocsSectionNav />
       <DocsSidebarDrawer />
       {props.children}
+      <DocsPageActions openApi />
       <Suspense fallback={null}>
         {needsToaster && (
           <Toaster
-            className="z-42069 select-none"
+            className={ui.toaster().className}
             expand={false}
             position="bottom-right"
             swipeDirections={['right', 'left', 'top', 'bottom']}

@@ -1,30 +1,39 @@
 ---
-title: "Tempo CLI: installation and usage"
-seoTitle: "Install & Use the Tempo CLI | Docs"
-description: Use the Tempo CLI for Tempo Wallet CLI, paid HTTP requests with MPP, and Tempo node operations from your terminal.
+title: "Tempo CLI"
+seoTitle: "Tempo CLI: Install & Commands | Tempo Docs"
+description: Install the Tempo CLI to call the Tempo API, use Tempo Wallet, make paid HTTP requests with MPP, and run Tempo nodes from your terminal.
+ogImage: /og/2026-q4/og_2026-q4_docs_cli_linework-000_v02.png
 ---
 
-import { Cards, Card } from 'vocs'
+# Tempo CLI
 
-# Tempo CLI: installation and usage
+The `tempo` binary works with the Tempo API, Tempo Wallet, paid HTTP requests, and Tempo nodes from your terminal.
 
-The `tempo` binary covers three core workflows:
+<span id="install-the-tempo-cli" />
 
-- **Tempo Wallet CLI (`tempo wallet`)** — use Tempo Wallet from the terminal: balances, funding, access keys, service discovery, and agent-ready wallet operations
-- **`tempo request`** — make paid HTTP requests with automatic [MPP](https://mpp.dev/overview) payment negotiation
-- **`tempo node`** / **`tempo download`** — run and sync a Tempo node
+## Install
 
-## Install the Tempo CLI
-
-:::code-group
 ```bash [Terminal]
 curl -fsSL https://tempo.xyz/install | bash
 ```
-:::
 
-To update later, run `tempoup`.
+The launcher installs each command's extension the first time you run it. Run `tempoup` to update, and `tempo --version` to check the installed version.
 
-## Teach your agent to use Tempo
+<span id="tempo-cli-commands" />
+
+## Commands
+
+| Command | Use it for |
+| --- | --- |
+| [`tempo api`](/docs/cli/api) | Signing in to the Tempo API, creating API keys, and calling any endpoint. |
+| [`tempo wallet`](/docs/cli/wallet) | Using Tempo Wallet: balances, funding, access keys, service discovery, and payment sessions. |
+| [`tempo request`](/docs/cli/request) | Making HTTP requests that pay automatically with [MPP](https://mpp.dev/overview). |
+| [`tempo download`](/docs/cli/download) | Downloading chain snapshots for a faster initial node sync. |
+| [`tempo node`](/docs/cli/node) | Running a Tempo RPC or validator node. |
+
+<span id="teach-your-agent-to-use-tempo" />
+
+## Set up your agent
 
 Paste this into your AI agent to set up Tempo Wallet CLI and start making paid requests:
 
@@ -40,35 +49,8 @@ codex exec "Read https://tempo.xyz/SKILL.md and set up tempo"
 ```
 :::
 
-All commands support `--help` for documentation and `--describe` for JSON command schemas. For scripts and agents, pass `-t` (`--toon-output`) to get compact, machine-readable output, and use `--dry-run` or `--max-spend` before paid calls.
+See [Let an agent pay for services](/docs/wallet/recipes#let-an-agent-pay-for-services) for the installed skills and spending limits.
 
-## Tempo CLI commands
+## Common flags
 
-Dive into each command:
-
-<Cards>
-  <Card
-    title="tempo download"
-    description="Fetch chain snapshots for faster initial sync"
-    to="/docs/cli/node"
-    icon="lucide:download"
-  />
-  <Card
-    title="Wallet CLI"
-    description="Use Tempo Wallet CLI from the command line for agents and scripts"
-    to="/docs/cli/wallet"
-    icon="lucide:wallet"
-  />
-  <Card
-    title="tempo request"
-    description="Make HTTP requests that pay automatically via MPP"
-    to="/docs/cli/request"
-    icon="lucide:send"
-  />
-  <Card
-    title="tempo node"
-    description="Run and configure a Tempo RPC or validator node"
-    to="/docs/cli/node"
-    icon="lucide:server"
-  />
-</Cards>
+Run any command with `--help` to see its flags. Wallet and request extensions also provide `--schema` for JSON command schemas and `--format toon` for compact output. Preview paid requests with `--dry-run` and cap them with `--max-spend`; these payment flags do not apply to node commands.

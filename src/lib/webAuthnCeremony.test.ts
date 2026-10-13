@@ -1,3 +1,4 @@
+import type { WebAuthnCeremony } from 'accounts'
 import { Bytes } from 'ox'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { Authentication, Registration } from 'webauthx/server'
@@ -55,11 +56,10 @@ describe('hosted Tempo WebAuthn ceremony', () => {
       excludeCredentialIds: [credentialId],
     }
     const loginParameters = {
-      allowCredentialIds: [credentialId],
       challenge,
       credentialId,
-      mediation: 'required' as const,
-    }
+      mediation: 'required',
+    } satisfies WebAuthnCeremony.getAuthenticationOptions.Parameters
     const registrationOptions = {
       options: Registration.getOptions({
         challenge,

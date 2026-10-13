@@ -1,4 +1,4 @@
-import { Storage } from 'viem/tempo'
+import { Store } from 'viem/tempo'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { getZoneAuthorizationStatus, type ZoneAuthClientLike } from './useZoneAuthorization'
 
@@ -8,7 +8,7 @@ const accountKey = `auth:${address}:${chainId}`
 const chainKey = `auth:token:${chainId}`
 
 function setup() {
-  const storage = Storage.memory()
+  const storage = Store.memory()
   const info = { account: address, expiresAt: BigInt(Math.floor(Date.now() / 1000) + 3600) }
   const getInfo = vi.fn().mockResolvedValue(info)
   const zoneClient: ZoneAuthClientLike = {

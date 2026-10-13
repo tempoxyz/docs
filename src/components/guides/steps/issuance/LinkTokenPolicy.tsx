@@ -1,11 +1,14 @@
 'use client'
+
 import * as React from 'react'
 import { useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './LinkTokenPolicy.recipes'
 
 export function LinkTokenPolicy(props: DemoStepProps) {
   const { stepNumber } = props
@@ -56,7 +59,7 @@ export function LinkTokenPolicy(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -67,7 +70,7 @@ export function LinkTokenPolicy(props: DemoStepProps) {
             disabled={!tokenAddress || !policyId || isComplete}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -77,33 +80,31 @@ export function LinkTokenPolicy(props: DemoStepProps) {
       title={`Link the policy to ${metadata ? metadata.name : 'your token'}.`}
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-1 flex-col">
-                <div className="mb-2 text-[13px] text-gray9 -tracking-[1%]">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.secondaryField()}>
+                <div {...ui.linkTokenPolicyLayout5()}>
                   This will link the transfer policy to {metadata ? metadata.name : 'your token'},
                   enforcing the blacklist.
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+            <div {...ui.linkTokenPolicyLayout6()}>
               <Button
                 variant="accent"
                 onClick={handleLinkPolicy}
                 disabled={isLinking}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={form.actionButton().className}
               >
                 {isLinking ? 'Linking...' : 'Link Policy'}
               </Button>
             </div>
 
             {hasError && (
-              <div className="mt-2 text-[13px] text-red-500">
-                Failed to link policy. Please try again.
-              </div>
+              <div {...ui.linkTokenPolicyLayout7()}>Failed to link policy. Please try again.</div>
             )}
 
             {isComplete && linkPolicy.data && (

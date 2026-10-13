@@ -1,6 +1,7 @@
 import { blogPostImageUrl } from '../../../seo'
 import { developersPath } from '../../_lib/developersPaths'
 import type { PostMeta } from '../_lib/categories'
+import * as ui from './PostImage.recipes'
 
 export default function PostImage({
   post,
@@ -20,11 +21,7 @@ export default function PostImage({
       loading={priority ? 'eager' : 'lazy'}
       fetchPriority={priority ? 'high' : undefined}
       decoding="async"
-      className={
-        thumbnail
-          ? 'absolute inset-0 h-full w-full object-contain'
-          : 'aspect-[1200/657] w-full object-contain'
-      }
+      className={thumbnail ? ui.img().className : ui.img2().className}
     />
   )
 }

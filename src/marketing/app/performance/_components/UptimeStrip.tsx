@@ -1,10 +1,10 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: The availability strip is decorative and backed by adjacent status text.
-
 'use client'
 
 import { useEffect, useState } from 'react'
+import { indicatorFlow } from '../../../../styles/surfaces.styles'
 import { fmtInt, type PerfRun } from '../_lib/runs'
 import ChartTooltip from './ChartTooltip'
+import * as ui from './UptimeStrip.recipes'
 import useMeasure from './useMeasure'
 
 // Status-page-style availability strip: one thin cell per UTC night over the
@@ -82,28 +82,34 @@ export default function UptimeStrip({ runs, status }: { runs: PerfRun[]; status:
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div {...ui.uptimeStripLayout()}>
         {status ? (
-          <div className="flex items-center gap-2.5">
+          <div {...ui.uptimeStripLayout2()}>
             <span
-              aria-hidden
-              className={`size-2 rounded-full ${
-                status === 'operational' ? 'indicator-flow' : 'bg-warning'
+              aria-hidden="true"
+              className={` ${ui.uptimeStripText().className} ${
+                status === 'operational'
+                  ? `indicator-flow ${indicatorFlow().className}`
+                  : ui.uptimeStripText2().className
               }`}
             />
-            <p className="font-mono text-[11px] text-foreground/60 uppercase tracking-wider">
+            <p {...ui.uptimeStripDescription()}>
               {status === 'operational' ? 'All systems operational' : status.replace(/_/g, ' ')}
             </p>
           </div>
         ) : null}
-        <p className="ml-auto font-mono text-[11px] text-foreground/40 uppercase tracking-wider">
-          Last {DAYS} nights
-        </p>
+        <p {...ui.uptimeStripDescription2()}>Last {DAYS} nights</p>
       </div>
 
-      <div ref={ref} className="relative w-full" style={{ height: H }}>
+      <div
+        ref={ref}
+        {...ui.uptimeStripLayoutAppearance({
+          value0: `${H}px`,
+          className: ui.uptimeStripLayout3().className,
+        })}
+      >
         {width > 0 ? (
-          <svg width={width} height={H} className="block" aria-hidden>
+          <svg width={width} height={H} {...ui.uptimeStripIcon()} aria-hidden="true">
             {nights.map((night, i) => (
               <rect
                 key={night.date}
@@ -114,13 +120,11 @@ export default function UptimeStrip({ runs, status }: { runs: PerfRun[]; status:
                 rx="1"
                 fill="var(--indicator-green)"
                 opacity={hover === i ? 1 : 0.65}
-                className="motion-reduce:transition-none"
-                style={{
-                  transform: `scaleY(${grown ? 1 : 0})`,
-                  transformBox: 'fill-box',
-                  transformOrigin: 'bottom',
-                  transition: `transform ${GROW_MS}ms ease-out ${(i / (n - 1)) * STAGGER_MS}ms`,
-                }}
+                {...ui.uptimeStripRectAppearance({
+                  value0: `scaleY(${grown ? 1 : 0})`,
+                  value1: `transform ${GROW_MS}ms ease-out ${(i / (n - 1)) * STAGGER_MS}ms`,
+                  className: ui.rect().className,
+                })}
               />
             ))}
 
@@ -138,14 +142,10 @@ export default function UptimeStrip({ runs, status }: { runs: PerfRun[]; status:
 
         {active && hover !== null ? (
           <ChartTooltip x={step * hover + step / 2} width={width}>
-            <p className="whitespace-nowrap font-mono text-[11px] text-foreground/40">
-              {nightLabel(active.date)}
-            </p>
-            <p className="mt-1 whitespace-nowrap font-mono text-[13px] text-foreground">
-              Operational
-            </p>
+            <p {...ui.uptimeStripDescription3()}>{nightLabel(active.date)}</p>
+            <p {...ui.uptimeStripDescription4()}>Operational</p>
             {active.run ? (
-              <p className="mt-0.5 whitespace-nowrap font-mono text-[11px] text-foreground/40">
+              <p {...ui.uptimeStripDescription5()}>
                 {fmtInt(active.run.settledTps)} TPS settled · {fmtInt(active.run.blockCount)} blocks
               </p>
             ) : null}
@@ -153,7 +153,7 @@ export default function UptimeStrip({ runs, status }: { runs: PerfRun[]; status:
         ) : null}
       </div>
 
-      <div className="mt-3 flex items-center justify-between font-mono text-[10px] text-foreground/35 uppercase tracking-wider">
+      <div {...ui.uptimeStripLayout4()}>
         <span>{nightLabel(nights[0].date)}</span>
         <span>{nightLabel(nights[n - 1].date)}</span>
       </div>
