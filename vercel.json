@@ -1298,7 +1298,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/upgrade",
-      "destination": "/developers/docs/accounts/create#upgrade-an-existing-account",
+      "destination": "/developers/docs/accounts/key-rotation/account-upgrade",
       "permanent": true
     },
     {
