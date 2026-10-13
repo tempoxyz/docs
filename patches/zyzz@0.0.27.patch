@@ -1,3 +1,26 @@
+diff --git a/dist/compiler/internal/Catalogs.js b/dist/compiler/internal/Catalogs.js
+index 8e5196947e104449ca37b1e2d0d36294f72d662c..55b2fbafbd78e2e2bc73903caf1bb5d2f03ff234 100644
+--- a/dist/compiler/internal/Catalogs.js
++++ b/dist/compiler/internal/Catalogs.js
+@@ -2,7 +2,18 @@
+ import * as Appearance from '../../runtime/Appearance.js';
+ import * as ThemeValues from '../../web/internal/Themes.js';
+ /** Reads each configuration's theme catalog and storage key from a contract, one per configuration identity. */
++// Contracts are immutable strings, and Vite plugins re-read every packed contract on each module
++// compile, so cache the parsed catalogs per contract.
++const cache = new Map();
+ export function read(contract) {
++    const cached = cache.get(contract);
++    if (cached)
++        return cached;
++    const result = readUncached(contract);
++    cache.set(contract, result);
++    return result;
++}
++function readUncached(contract) {
+     const parsed = JSON.parse(contract);
+     const configurations = new Map();
+     // Local configuration calls publish their catalogs without an export.
 diff --git a/dist/vite/index.d.ts b/dist/vite/index.d.ts
 index ad5de1ad177684d7c8e7134b862984e3da472d8f..53552aeb5b0b92a5eb5f05c03c31cde793649eed 100644
 --- a/dist/vite/index.d.ts

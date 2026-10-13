@@ -1,0 +1,62 @@
+---
+title: Key rotation
+seoTitle: Rotate, Replace, and Recover Tempo Account Signers | Tempo Docs
+description: Rotate a key, replace a lost passkey, or remove a compromised key with one signer update at the same address, approved by the account's remaining signers.
+---
+
+# Key rotation
+
+:::warning
+**Not live yet.** Key rotation ([TIP-1107](https://tips.sh/1107)) is in early development and runs only on Tempo devnet. We're seeking feedback; behavior may change.
+:::
+
+Rotating a key, replacing a lost one, and removing a compromised one are the same operation: a signer update that the account's other signers approve, at the same address. Tempo has no override, so set up the account to survive losing any one signer before you need to.
+
+## One signer update, same address
+
+A signer update replaces the account's list of signers and its threshold in one transaction. Signers whose weights reach the current threshold approve it, and the address, balances, token approvals, and history stay the same. Once it lands, a removed signer can't approve, and approvals collected for the old configuration stop verifying.
+
+What changes between situations is who approves. When you rotate a key on schedule, the old key can still sign. When a key is lost or compromised, the other signers must reach the threshold without it.
+
+<span id="key-replacement" />
+<span id="recovery-situations" />
+<span id="recovery-by-situation" />
+
+## Key rotation by situation
+
+| Situation | Change | Approved by | Reference | Walkthrough |
+| --- | --- | --- | --- | --- |
+| Scheduled key rotation | Swap a KMS, hardware, or provider key at the same weight | The current signers, including the old key | [Signer rotation](/docs/accounts/key-rotation/signer-rotation) | [Rotate an approver's key](/docs/accounts/guides/company-treasury#rotate-an-approvers-key) |
+| Compromised key | Swap or remove it, and revoke the access keys it could reach | The other signers, without it | [Signer rotation](/docs/accounts/key-rotation/signer-rotation#rotate-a-compromised-signer) | [Rotate an approver's key](/docs/accounts/guides/company-treasury#rotate-an-approvers-key) |
+| Departing approver | Remove their signer, and lower the threshold if needed | The remaining approvers | [Signer rotation](/docs/accounts/key-rotation/signer-rotation) | [Remove a departing approver](/docs/accounts/guides/company-treasury#remove-a-departing-approver) |
+| Lost phone or passkey | Swap the lost passkey for a new one, and revoke the phone's access keys | The remaining signers, such as a backup key and a recovery key | [Signer recovery](/docs/accounts/key-rotation/signer-recovery) | [Recover from a lost passkey](/docs/accounts/guides/self-custody#recover-from-a-lost-passkey) |
+| Funds sent to the address on another chain | Deploy a recovery wallet at the same address there | The initial secp256k1 signers | [Signer recovery](/docs/accounts/key-rotation/signer-recovery#recover-funds-sent-on-another-chain) | [Recover funds sent on another chain](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain) |
+| Single-key account with no backup | Upgrade it to a configurable account with a backup signer | The original key | [Account upgrade](/docs/accounts/key-rotation/account-upgrade) | [Upgrade an existing account](/docs/accounts/create#upgrade-an-existing-account) |
+| Customer leaves your app | Swap your app's signers for the customer's | Your app's signers | [Signer rotation](/docs/accounts/key-rotation/signer-rotation) | [Hand off to a self-custodial wallet](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet) |
+
+Use signer rotation while the signers you need can still approve, signer recovery once one of them can't, and an account upgrade when the account has only one key.
+
+<span id="plan-for-recovery-before-you-need-it" />
+
+## Plan for recovery
+
+Recovery works only when the account can lose any one signer and still reach the threshold with the rest. After a key is lost, only the remaining signers can change the configuration, so set this up when you create the account.
+
+The rule: for every signer, the total weight minus that signer's weight must be at least the threshold.
+
+For example, give a passkey weight 2, and a backup key and a recovery provider's key weight 1 each, at threshold 2. The passkey replaces a lost key alone, and the two keys together replace a lost passkey. [Signing thresholds](/docs/accounts/policies/signing-thresholds) lists setups that pass, and [Add a backup signer](/docs/accounts/guides/self-custody#add-a-backup-signer) adds one to an existing account.
+
+<span id="key-management-limits" />
+<span id="account-recovery-limits" />
+<span id="recovery-limits" />
+<span id="revoke-a-key" />
+<span id="revoke-access-keys" />
+
+## Key rotation limits
+
+- Tempo can't recover an account whose remaining signers can't reach the threshold.
+- Signer updates don't touch access keys. A device key on a lost phone keeps paying within its limits until you [revoke it](/docs/accounts/access-keys/revocation).
+- Recovery signers can also approve payments at their weight. Keep each one below the threshold on its own.
+- Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
+
+Specification: [configurable accounts](https://tips.sh/1107).

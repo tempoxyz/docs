@@ -6,21 +6,40 @@ description: Give each signer a weight and set the threshold their approvals mus
 
 # Signing thresholds
 
-A Tempo account moves funds only when signers whose weights add up to its threshold approve. The threshold decides custody: whoever holds signers that reach it can pay without anyone else, and nobody below it can. Tempo checks the sum on every transaction.
+:::warning
+**Not live yet.** Signing thresholds ([TIP-1107](https://tips.sh/1107)) is in early development and runs only on Tempo devnet. We're seeking feedback; behavior may change.
+:::
+
+A Tempo account moves funds only when signers whose weights add up to its threshold approve. The threshold decides custody: whoever holds signers that reach it can pay without anyone else, and nobody below it can.
 
 <span id="signer-weights-and-the-threshold" />
+<span id="how-approvals-add-up" />
 
-## How approvals add up
+## Signer weights and the threshold
 
-Each signer has a weight of at least 1. A transaction executes once the signers that approve it reach the threshold in total weight.
+Each signer has a weight of at least 1. Tempo checks every transaction and executes it once the signers that approve it reach the threshold in total weight.
 
 Take a customer account with a passkey of weight 2, a backup key of weight 1, and a recovery provider's key of weight 1, with a threshold of 2. The passkey approves alone. The backup and recovery keys approve together. One of them alone reaches 1 of 2 and can't pay.
 
 One approval covers the whole transaction, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys never count toward it: they pay alone, within limits, instead of approving.
 
+Read an account's signers and threshold, then replace them in one signer update approved at the current threshold:
+
+```ts [threshold.ts]
+const { owners, threshold } = await client.accounts.getConfig({ address: account.address })
+
+await client.accounts.updateConfigSync({
+  account,
+  nextConfig: { owners: [...owners, { owner: backup.address, weight: 1 }], threshold },
+  owner: passkey, // a signer that reaches the current threshold
+})
+```
+
+`client.accounts.getConfig` needs a relay with `Relay.accounts`. A bare node doesn't serve it.
+
 <span id="what-a-threshold-protects" />
 
-### What a threshold protects
+## What a threshold protects against
 
 Each signer can fail: a phone gets lost, a key leaks, an approver leaves. Set weights so the account survives both kinds of failure:
 
@@ -53,19 +72,14 @@ Walkthroughs: [Set up self-custody](/docs/accounts/guides/self-custody) and [Set
 <span id="set-up-a-team-account" />
 <span id="team-account-limits" />
 
-A treasury can also give a team its own budget without lowering its threshold. The treasury authorizes the team's account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/guides/company-treasury#give-a-team-a-budget).
+A treasury can give a team its own budget without lowering its threshold. The treasury authorizes the team's account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/guides/company-treasury#give-a-team-a-budget).
 
-<span id="approval-rules-beyond-the-threshold" />
-<span id="verified-facts-as-approval-factors" />
-<span id="tiered-approvals" />
-<span id="recommended-rules" />
-<span id="recommended-treasury-policy" />
-<span id="recommended-weights-for-a-passkey-and-two-logins" />
-<span id="require-more-approval-for-larger-payments" />
-<span id="approval-rules-for-larger-payments" />
-<span id="approval-escalation-for-larger-payments" />
+<span id="collect-approvals-from-several-approvers" />
+<span id="verify-approvals" />
+<span id="signature-verification" />
+<span id="tempo-approval-verification-methods" />
 
-## Collect approvals from several approvers
+## Collect and verify approvals
 
 Each approval is a signature over the same transaction hash, so approvers sign separately, on their own devices, in any order. The first approver starts the transaction, and the others approve its hash:
 
@@ -76,18 +90,7 @@ await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner
 
 A relay with `Relay.accounts` holds the approvals and submits once they reach the threshold. Tempo rejects signatures beyond the threshold, so stop collecting once it's met. A signer change voids approvals collected for the old configuration.
 
-<span id="receive-policies" />
-
-## Receive policies
-
-A signing threshold controls what leaves the account. A receive policy controls what arrives: which TIP-20 tokens the address accepts and which senders can pay it. Tempo holds blocked payments for a recovery authority to claim. See [Receive policies](/docs/guide/payments/configure-receive-policies).
-
-<span id="signature-verification" />
-<span id="tempo-approval-verification-methods" />
-
-## Verify approvals
-
-Your contract or backend can check that an account approved a message, against the account's signers and threshold.
+Your contract or backend can check that an account approved a message, against the account's current signers and threshold:
 
 | To check that | Use | Runs |
 | --- | --- | --- |
@@ -124,8 +127,6 @@ contract ApprovalCheck {
 
 <span id="security-policy-limits" />
 <span id="approval-limits" />
-<span id="approval-rule-limits" />
-<span id="account-policy-limits" />
 <span id="account-security-limits" />
 <span id="multi-factor-approval-limits" />
 
@@ -139,12 +140,5 @@ contract ApprovalCheck {
 
 - A signer update voids approvals collected for the old configuration. Approve again.
 - Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
-
-<span id="private-policies" />
-<span id="experimental-private-policies" />
-<span id="how-a-private-policy-approves" />
-<span id="keep-policy-backups" />
-<span id="private-policy-limits" />
-<span id="verify-a-login-on-your-backend" />
 
 Specifications: [configurable accounts](https://tips.sh/1107), [native multisig accounts](https://tips.sh/1114), [configurable account access keys](https://tips.sh/1111), [signature verifier](/docs/protocol/tips/tip-1020).

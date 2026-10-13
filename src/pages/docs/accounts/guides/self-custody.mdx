@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../components/guides/GuideDemo'
 
 Take a customer account from one key to self-custody: add a passkey, back it up with a backup key and a recovery key, recover from a lost passkey, then hand the account to a self-custodial wallet, such as Tempo Wallet. The address and balance never change.
 
-The examples use a `client` whose transport is a relay with `Relay.accounts`, as in [Read the current configuration](/docs/development/configurable-accounts#read-the-current-configuration). The weights follow the [customer accounts setup](/docs/accounts/security-policies#recommended-signer-setups).
+The examples use a `client` whose transport is a relay with `Relay.accounts`, as in [Read the current configuration](/docs/development/configurable-accounts#read-the-current-configuration). The weights follow the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
 
 <span id="adding-signers" />
 <span id="add-a-signer" />
@@ -95,7 +95,7 @@ const recoverable = config.owners.every(({ weight }) => total - weight >= config
 
 ## Require multi-factor approval
 
-Move to a passkey (2), a backup key the customer keeps offline (1), and a recovery provider's key (1), with threshold 2. The passkey approves alone. Signer changes and new devices without the passkey need both keys, which different parties hold. See [What a threshold protects](/docs/accounts/security-policies#what-a-threshold-protects).
+Move to a passkey (2), a backup key the customer keeps offline (1), and a recovery provider's key (1), with threshold 2. The passkey approves alone. Signer changes and new devices without the passkey need both keys, which different parties hold. See [What a threshold protects](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects).
 
 <GuideDemo guide="multi-factor" />
 
@@ -269,7 +269,7 @@ await client.accounts.updateConfigSync({
 })
 ```
 
-To keep backups, use the [customer accounts setup](/docs/accounts/security-policies#recommended-signer-setups), with a backup key the customer holds.
+To keep backups, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups), with a backup key the customer holds.
 
 ### Send the customer to their wallet
 

@@ -53,11 +53,11 @@ export const docsLinkCards = {
     },
     {
       title: 'Account setup',
-      description: 'Sign-in, security policies, access keys, and recovery.',
+      description: 'Sign-in, policies, access keys, and recovery.',
       icon: 'network',
       links: [
         ['Signing methods', '/docs/accounts/authentication'],
-        ['Security policies', '/docs/accounts/security-policies'],
+        ['Policies', '/docs/accounts/policies'],
         ['Access keys', '/docs/accounts/access-keys'],
         ['Account recovery', '/docs/accounts/guides/self-custody#recover-from-a-lost-passkey'],
       ],

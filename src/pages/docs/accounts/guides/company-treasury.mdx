@@ -33,7 +33,7 @@ const treasury = Account.fromConfig({
 })
 ```
 
-Each payment then needs two approvals. Your app collects them, for example in your backend: see [Collect approvals from several approvers](/docs/accounts/security-policies#collect-approvals-from-several-approvers).
+Each payment then needs two approvals. Your app collects them, for example in your backend: see [Collect approvals from several approvers](/docs/accounts/policies/signing-thresholds#collect-approvals-from-several-approvers).
 
 <span id="set-up-a-team-budget" />
 
@@ -59,7 +59,7 @@ One team member proposes a payment from the treasury, and a second approves it. 
 
 ### Track the budget
 
-[Read the remaining limit](/docs/accounts/access-keys#read-an-access-key) as for any access key. The treasury [revokes](/docs/accounts/access-keys#revoke-an-access-key) the team account like any other access key when the team no longer needs it.
+[Read the remaining limit](/docs/accounts/access-keys/spending-limits#read-the-remaining-limit) as for any access key. The treasury [revokes](/docs/accounts/access-keys/revocation#revoke-an-access-key) the team account like any other access key when the team no longer needs it.
 
 :::::
 

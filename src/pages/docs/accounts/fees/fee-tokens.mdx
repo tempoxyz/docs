@@ -1,0 +1,52 @@
+---
+title: Fee tokens
+seoTitle: Choose the Stablecoin a Tempo Account Pays Fees In | Tempo Docs
+description: Set the USD stablecoin an account pays network fees in once, and override it on any transaction that should pay in a different one.
+---
+
+# Fee tokens
+
+A fee token is the USD stablecoin an account pays network fees in. Set a default once, such as OUSD, so the account never falls back to pathUSD, and override it on any transaction that should pay in another stablecoin.
+
+## Supported fee tokens
+
+Any TIP-20 token whose currency is USD can pay fees, as long as it has enough liquidity on the [Fee AMM](/docs/protocol/fees/spec-fee-amm) against the validator's preferred stablecoin. Tempo checks both before execution: a token that isn't USD, or lacks the liquidity, makes the transaction invalid. For most accounts, the recommended fee token is [OUSD](/docs/guide/ousd).
+
+<span id="set-an-accounts-default-fee-token" />
+
+## Set a default fee token
+
+An account's default fee token applies to every transaction the account pays for, including the ones it sponsors for other accounts as a fee payer. Without one, Tempo infers the token from the transaction and falls back to pathUSD, as described in [Fee token precedence](/docs/accounts/fees#fee-token-precedence).
+
+```ts [set-fee-token.ts]
+const { receipt } = await client.fee.setUserTokenSync({
+  token: '0x20c0000000000000000000006a37da5c996874be', // OUSD on Tempo mainnet
+})
+```
+
+`setUserTokenSync` calls `setUserToken` on the FeeManager precompile. Read the current default with `client.fee.getUserToken`.
+
+## Override the fee token per transaction
+
+Pass `feeToken` on a transaction to pay that one transaction's fee in another stablecoin. It takes precedence over every other preference, for that transaction only:
+
+```ts [transfer.ts]
+import { parseUnits } from 'viem'
+
+await client.token.transferSync({
+  amount: parseUnits('25', 6),
+  feeToken: usdc, // this transaction's fee token
+  to: recipient,
+  token: ousd,
+})
+```
+
+[Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) walks through both, with a live demo and examples in each SDK.
+
+## Fee token limits
+
+- The fee payer must hold enough of the fee token to cover the gas limit at the transaction's gas price, before execution.
+- Tempo checks only the first fee token it finds. If that one fails, the transaction is invalid; Tempo doesn't try the next.
+- On a sponsored transaction, the account doesn't sign the fee token. The fee payer chooses it.
+
+Specification: [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).

@@ -10,21 +10,40 @@ import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
 # Access keys
 
-An access key pays from an account on its own, within a spending limit, an expiry, and scopes that Tempo enforces on every transaction. The account's signers authorize it once, and it pays without them until it expires or they revoke it. An access key never counts toward the [signing threshold](/docs/accounts/security-policies).
+:::warning
+**Not live yet.** Committed access keys ([TIP-1134](https://tips.sh/1134)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
+:::
+
+An access key pays from an account without the signers, inside a spending limit, an expiry, and scopes that Tempo checks on every transaction. Give each device, backend, or agent its own key with the narrowest bounds its task needs, because Tempo enforces those bounds even if the key leaks.
 
 <span id="access-keys" />
+
+## What an access key is
+
+An access key is a signing key that the account's signers authorize once. After that, it signs transactions from the account's address and pays from the account's balance. The key holds no funds of its own, and the account stores only its address, type, and bounds, never its private key.
+
+| Control | What it restricts | Page |
+| --- | --- | --- |
+| <span id="access-key-controls" /><span id="set-limits-that-match-the-task" /><span id="access-key-lifecycle" /><span id="read-the-remaining-permission" /><span id="read-an-access-key" /><span id="change-an-access-key" />Spending limit | How much of each TIP-20 token the key can spend, once or per period | [Spending limits](/docs/accounts/access-keys/spending-limits) |
+| <span id="access-key-expiry" />Expiry | The second after which Tempo rejects the key | [Expiry](/docs/accounts/access-keys/expiry) |
+| <span id="scopes" /><span id="scope-an-access-key" />Scopes | Which contracts, functions, and recipients the key can call | [Scopes](/docs/accounts/access-keys/scopes) |
+| <span id="admin-access-keys" />Admin flag | Replaces all three bounds with authority over the account's other keys | [Admin access keys](/docs/accounts/access-keys/admin-access-keys) |
+| <span id="key-revocation" /><span id="key-revocation-by-situation" /><span id="revoke-an-access-key" />Revocation | Ends the key permanently | [Revocation](/docs/accounts/access-keys/revocation) |
+
+Give a backend, agent, or card key all three bounds: a limit for the amount, scopes for the destinations, and an expiry for the time window. Give an admin key only to a party you'd trust with the whole balance.
+
 <span id="try-an-access-key" />
 <span id="choose-the-authority-to-delegate" />
 
 ## Access keys and signers
 
-Signers approve together, by weight. That suits signer changes and large payments, but a phone paying for coffee, a backend running payouts, or an agent buying API calls can't wait for approvals. An access key replaces approval with bounds: it can do only what its limits allow, and Tempo rejects the rest, even if the key leaks.
+Signers approve together, by weight. That suits signer changes and large payments, but a phone paying for coffee, a backend running payouts, or an agent buying API calls can't wait for approvals. An access key replaces approval with bounds: it does only what its bounds allow, and Tempo rejects the rest.
 
 The demo authorizes a key on Moderato testnet, pays with it, shows Tempo rejecting an overspend, then revokes it.
 
 <AccessKeyDemo />
 
-Payments come from the account's address and balance. The key holds no funds and approves nothing: it can't change signers, authorize other keys, or add weight toward the threshold. Changing signers doesn't revoke it.
+An access key never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds). It can't change signers or add weight, and a limited key can't authorize, change, or revoke keys. Changing signers doesn't revoke it.
 
 <span id="access-key-patterns" />
 <span id="access-keys-by-holder" />
@@ -44,8 +63,6 @@ Give each holder its own key, so you can revoke one without affecting the others
 - A card program: [Set up a spending account](/docs/accounts/guides/spending-account)
 - A team spending from a treasury: [Give a team a budget](/docs/accounts/guides/company-treasury#give-a-team-a-budget)
 
-<span id="access-key-types" />
-
 ## Access key types
 
 | Key type | Typical holder |
@@ -55,65 +72,13 @@ Give each holder its own key, so you can revoke one without affecting the others
 | secp256k1 | A key in your KMS, HSM, or a wallet |
 | Configurable account | A team account with its own signers and threshold, which approve as the key. Specified in [TIP-1111](https://tips.sh/1111), a Draft that runs on Tempo devnet. |
 
-Keep a key where its holder signs. A device key stays on the device, and a backend key stays in your secret manager. The account stores the key's address, type, and bounds, never its private key.
-
-<span id="access-key-controls" />
-<span id="set-limits-that-match-the-task" />
-
-## TIP-20 spending limits
-
-A spending limit caps how much of one TIP-20 token a key can spend, in base units. Set one per token:
-
-| `period` | Behavior | Example |
-| --- | --- | --- |
-| `0` | One-time. The key stops spending that token once it's used up. | 100 USD for one purchase |
-| Seconds, such as `86_400` | Renewing. The limit resets every period. | 500 USD a day |
-
-The limit meters direct TIP-20 transfers, increases in token approvals, fees the account pays, and token pulls by protocol precompiles. It doesn't meter native value or `transferFrom`. Because approval increases count, a key can't grant a contract more than its limit to pull. A payment over the remaining limit reverts with `SpendingLimitExceeded`. Omit `limits` and the key spends without a cap.
-
-A limit caps the amount, not the destination. Pair it with [scopes](#access-key-scopes) so the key can pay only the recipients and contracts its task uses.
-
-<span id="access-key-expiry" />
-
-## Access key expiry
-
-An expiry is a Unix timestamp. From that second on, Tempo rejects the key's transactions with `KeyExpired`. viem's `Expiry` helpers, such as `Expiry.days(30)`, compute it. Omit `expiry` for a key that never expires.
-
-Set the expiry to how long the holder needs the key, such as 30 days for a device or 90 days for a backend. Before it passes, have the signers authorize a new key.
-
-<span id="scopes" />
-<span id="scope-an-access-key" />
-
-## Access key scopes
-
-Scopes list the calls a key can make, as targets, functions, and recipients. Tempo checks them on every top-level call the key signs and reverts any other call with `CallNotAllowed`.
-
-| Task | Scope |
-| --- | --- |
-| Payments to approved recipients | `transfer(address,uint256)` on the stablecoin, with `recipients` |
-| Payments with a reference | `transferWithMemo(address,uint256,bytes32)` on the stablecoin |
-| Earn deposits | `approve(address,uint256)` on the stablecoin and `deposit(uint256,address,uint256)` on the vault |
-
-- Omit `scopes` and the key can call anything. An empty list denies every call.
-- A target with no function listed allows any function on it.
-- `recipients` applies to `transfer`, `transferWithMemo`, and `approve`.
-- An access key can't create a contract at the top level. A factory the scopes allow still can.
-
-Scope every backend, agent, and card key. Spending limits don't meter every way value can move, such as native value or a `transferFrom` against an allowance the account granted earlier.
-
-<span id="admin-access-keys" />
-
-## Admin access keys
-
-An admin access key manages the account's other access keys: it authorizes and revokes keys, including other admin keys, and changes their limits and scopes. It has no spending limits, expiry, or scopes, so it can also spend the whole balance. Admin keys are specified in [TIP-1049](https://tips.sh/1049) and live since T6.
-
-An admin key can't change a configurable account's signers or threshold, and it doesn't count toward the threshold. Whoever holds one can still pay without the signers, so give one only to a party you'd trust with the account's funds, such as your own key-management service. Authorize it with `admin: true`, which ignores `limits`, `expiry`, and `scopes`.
+Keep a key where its holder signs. A device key stays on the device, and a backend key stays in your secret manager.
 
 <span id="authorize-a-limited-key" />
 
 ## Authorize an access key
 
-Signers that reach the threshold sign a key authorization, or an admin key signs it. There are two ways to submit it:
+Signers that reach the threshold sign a key authorization, or an [admin key](/docs/accounts/access-keys/admin-access-keys) signs it. There are two ways to submit it:
 
 | Path | Behavior |
 | --- | --- |
@@ -160,55 +125,24 @@ await client.token.transferSync({
 })
 ```
 
-Authorizing a key costs about $0.003, whatever its limits. To cancel a signed authorization before it lands, bind a witness to it and burn the witness. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses).
-
-Options for each control: [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) and [Set permissions and limits](https://viem.sh/tempo/guides/access-keys/permissions) in viem.
-
-<span id="access-key-lifecycle" />
-<span id="read-the-remaining-permission" />
-
-## Read an access key
+The other pages in this section continue from this example's `client`, `account`, `accessKey`, and `alphaUsd`. To confirm the key landed, read it back:
 
 ```ts [read-key.ts]
-const metadata = await client.accessKey.getMetadata({ account, accessKey }) // keyType, expiry, spendPolicy, isRevoked
-const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ account, accessKey, token: alphaUsd })
-const admin = await client.accessKey.isAdmin({ account, accessKey })
+const { expiry, isRevoked, keyType, spendPolicy } = await client.accessKey.getMetadata({ account, accessKey })
 ```
 
-`remaining` accounts for renewal: once a period ends, it reads as the full limit again. A missing, revoked, or expired key reads as zero. Show the remaining limit and the expiry wherever the customer manages the key.
-
-<span id="change-an-access-key" />
-
-## Change an access key
-
-Signers that reach the threshold, or an admin key, change a live key without revoking it:
-
-```ts [change-key.ts]
-await client.accessKey.updateLimitSync({ account, accessKey, limit: parseUnits('50', 6), token: alphaUsd })
-```
-
-`updateLimit` sets the remaining amount to the new limit and keeps the period. To change scopes, call `setAllowedCalls` or `removeAllowedCalls` on the [Account Keychain](/docs/development/account-keychain#account-keychain-functions) directly. Admin keys have no limits or scopes to change.
-
-<span id="key-revocation" />
-<span id="key-revocation-by-situation" />
-
-## Revoke an access key
-
-```ts [revoke.ts]
-await client.accessKey.revokeSync({ accessKey: accessKeyAddress, account })
-```
-
-Signers that reach the threshold, or an admin key, approve the revocation. A revoked key can't pay, and its address can't be authorized again for that account. Save each key's address with a device or service name when you authorize it, so you can match a lost phone or a leaked backend key to the key to revoke.
-
-Signer changes don't revoke access keys. After you replace a lost signer or hand the account off, revoke each key the old holder could reach.
+Authorizing a key costs about $0.003, whatever its bounds. To cancel a signed authorization before it lands, bind a witness to it and burn the witness. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
 
 <span id="troubleshoot-backend-payments" />
 
 ## Access key limits
 
+Each control's page lists its own limits. These apply to every access key:
+
 - Access keys never count toward the threshold. Among access keys, only admin keys can authorize, change, or revoke keys.
+- An access key can't create a contract at the top level of a transaction. See [Scope limits](/docs/accounts/access-keys/scopes#scope-limits).
 - An account's payments share one sequential nonce by default, so they land in order. Send concurrent payments with expiring nonces or separate nonce keys. See [Parallel payments](/docs/guide/payments/send-parallel-transactions).
 - Key management calls must come from the account's own transaction (`msg.sender == tx.origin`), not through a contract.
-- To check that a signature came from an active access key of an account, use `verifyKeychain`. See [Verify approvals](/docs/accounts/security-policies#verify-approvals).
+- To check that a signature came from an active access key of an account, use `verifyKeychain`. See [Verify approvals](/docs/accounts/policies/signing-thresholds#collect-and-verify-approvals).
 
-Specifications: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys](https://tips.sh/1049), [configurable account access keys](https://tips.sh/1111).
+Specifications: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys](https://tips.sh/1049), [configurable account access keys](https://tips.sh/1111), [committed access keys](https://tips.sh/1134).

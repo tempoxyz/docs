@@ -6,13 +6,16 @@ description: Add keys from CLI, hardware, and browser wallets, or from your KMS 
 
 # Private keys
 
-A private key is a secp256k1 or P-256 key that you or a provider already hold, in a wallet, a KMS, or an HSM. It approves for a Tempo account as a weighted signer, or pays alone within limits as an [access key](/docs/accounts/access-keys).
+A private key from a wallet, KMS, or HSM can approve for a Tempo account as a weighted signer, or pay alone within limits as an [access key](/docs/accounts/access-keys). Whoever holds the key approves at its full weight, so give each key a weight below the threshold unless one holder should pay alone.
 
-The key stays where it is: the account lists only its address or public key, and the wallet, KMS, or HSM signs each approval. A private key trusts whoever controls it and the infrastructure that holds it, and depends on no outside service. Use it for treasury approvers, servers, scripts, and recovery keys.
+## What a private key is
+
+A private key is a secp256k1 or P-256 key that you or a provider already hold. The account lists only its address or public key. The wallet, KMS, or HSM keeps the key and signs each approval, and Tempo checks that signature on chain.
 
 <span id="recommended-roles-for-your-keys" />
+<span id="private-key-sources" />
 
-## Private key sources
+## Where private keys live
 
 | Source | Examples | Recommended role |
 | --- | --- | --- |
@@ -22,7 +25,13 @@ The key stays where it is: the account lists only its address or public key, and
 | Other crypto wallets | Mobile wallets, and [wallet providers](/docs/accounts/guides/wallet-provider) such as Turnkey or Privy | Signer at weight 1. A provider's policies apply before it signs. |
 | KMS or HSM | Keys in your cloud KMS or HSM | Signer for recovery, or [access key](/docs/accounts/guides/automate-backend) for automation |
 
-## Require two treasury signers
+## What a private key trusts
+
+A private key trusts whoever controls it and the infrastructure that holds it: the wallet's device, the provider's signing policies, or your cloud's KMS permissions. It depends on no Tempo-side service. Anyone who can make that infrastructure sign approves with the key's weight, so split approvers across separate wallets, teams, or HSMs.
+
+<span id="require-two-treasury-signers" />
+
+## Add a private-key signer
 
 Two keys at weight 1 and a threshold of 2 means neither approver can pay alone:
 
@@ -34,8 +43,14 @@ const operations = Account.fromSecp256k1(process.env.OPERATIONS_SIGNER_KEY as `0
 const account = Account.fromConfig({ address: 'infer', owners: [finance, operations], threshold: 2 })
 ```
 
-The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, use that source's viem account adapter instead.
+The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, use that source's viem account adapter instead. Use `Account.fromP256` for a raw P-256 key.
 
-A secp256k1 key in the account's first configuration can also recover funds sent to the same address on another EVM chain. See [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).
+For walkthroughs, see [Set up a company treasury wallet](/docs/accounts/guides/company-treasury) and [Automate a backend](/docs/accounts/guides/automate-backend).
 
-For walkthroughs, see [Set up a company treasury wallet](/docs/accounts/guides/company-treasury) and [Automate a backend](/docs/accounts/guides/automate-backend). For other methods, see [Signing methods](/docs/accounts/authentication).
+## Private key limits
+
+- Tempo can't tell whether a key is still held, or held by whom. A leaked key approves at its weight until you remove it.
+- A signer has no spending limit. To bound what a key can pay, add it as an [access key](/docs/accounts/access-keys) instead.
+- Only the account's initial secp256k1 signers, reaching the original threshold, can recover funds sent to the same address on another EVM chain. Signers added later can't. See [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).
+
+For other methods, see [Signing methods](/docs/accounts/authentication).
