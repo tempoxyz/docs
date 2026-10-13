@@ -1,0 +1,272 @@
+---
+title: Receive policies
+seoTitle: Control Incoming Payments with Receive Policies | Tempo Docs
+description: Choose which TIP-20 tokens and senders a Tempo account accepts, and who can recover payments the policy holds instead of delivering.
+interactive: true
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-payments-configure-receive-policies_title-f5_v02.png
+---
+
+import * as Demo from '../../../../components/guides/Demo'
+import { ReceivePolicyDemo } from '../../../../components/guides/steps/payments/ReceivePolicyDemo'
+
+<span id="configure-receive-policies" />
+<span id="control-incoming-payments" />
+
+# Receive policies
+
+A receive policy decides which TIP-20 tokens an address accepts and which senders can pay it. A blocked payment doesn't revert: Tempo holds it in `ReceivePolicyGuard` for the recovery authority you choose to claim.
+
+<span id="receive-policies" />
+<span id="when-to-configure-a-receive-policy" />
+
+## What a receive policy checks
+
+A [signing threshold](/docs/accounts/policies/signing-thresholds) controls what leaves an account. A receive policy controls what arrives. A regulated business can accept payments only from addresses it has verified, and an exchange can accept only the stablecoins its deposit addresses settle in.
+
+Each policy has three parts, set per address in the TIP-403 registry at `0x403c000000000000000000000000000000000000`:
+
+| Part | Decides | Can reference |
+| --- | --- | --- |
+| Token filter (`tokenFilterId`) | Which TIP-20 tokens the address accepts. Members are token contract addresses. | Built-in policy `0` (reject all) or `1` (allow all), or a simple TIP-403 `WHITELIST` or `BLACKLIST` policy |
+| Sender policy (`senderPolicyId`) | Which senders can pay the address | The same: `0`, `1`, `WHITELIST`, or `BLACKLIST`. `COMPOUND` policies aren't valid for either part. |
+| Recovery authority | Who can claim payments the policy blocks | `address(0)` for the originator, the receiver's own address, or another nonzero address |
+
+An address without a receive policy accepts every transfer and mint the token itself allows.
+
+<span id="account-level-receive-policies" />
+<span id="understand-receive-policy-behavior" />
+
+## How Tempo enforces receive policies
+
+Tempo checks the token's own [TIP-403](/docs/protocol/tip403/spec) policy first, then the receiver's receive policy, then credits the receiver:
+
+| Result | Transaction result | Where the funds go |
+|---|---|---|
+| Token-level checks fail | The call reverts | Funds are not delivered |
+| Receive policy allows | The call succeeds | Receiver is credited normally |
+| Receive policy blocks | The call succeeds | `ReceivePolicyGuard` is credited and records a receipt |
+
+Within the receive policy, Tempo checks the token filter first, then the sender, and reports `TOKEN_FILTER` or `RECEIVE_POLICY` as the blocked reason. For a transfer, the sender is the `from` address, so for a delegated `transferFrom` it's the token owner, not the spender. For a mint, it's the minter.
+
+The check applies to `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `systemTransferFrom`, `mint`, and `mintWithMemo`. It doesn't apply to `approve`, `permit`, `burn`, fee deposits and refunds, TIP-20 rewards, or internal balances.
+
+<span id="monitor-blocked-receipts" />
+
+### Blocked receipts
+
+`ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000` holds the funds for every blocked payment and records one receipt each: the token, recovery authority, originator, recipient, timestamp, nonce, blocked reason, inbound kind, and memo. Receipts aren't enumerable on chain, so index events to find them:
+
+| Event | Purpose |
+|---|---|
+| `ReceivePolicyUpdated` | A receive policy changed for an address |
+| `TransferBlocked` | A transfer or mint was blocked and a receipt was created |
+| `ReceiptClaimed` | A receipt was consumed and funds were released |
+| `ReceiptBurned` | A receipt was consumed and funds were burned |
+
+A blocked payment still emits the token's regular `Transfer` event, and `Mint` for a mint, with `ReceivePolicyGuard` as the recipient. A successful transaction alone doesn't prove the recipient received funds. `TransferBlocked.receipt` holds the encoded receipt to pass when you claim or burn it.
+
+<span id="virtual-address-behavior" />
+
+A payment to a [virtual address](/docs/protocol/tip20/virtual-addresses) is checked against its master address's policy, and a blocked receipt records the master while keeping the original `to` for attribution.
+
+<span id="try-receive-policies" />
+<span id="configure-the-policy" />
+
+## Set a receive policy
+
+Create a temporary test account, allow AlphaUSD, and compare delivery with a blocked BetaUSD transfer. Then recover the held payment with the receiving account. The demo uses test tokens on Moderato and keeps its signing key in this tab's memory.
+
+<Demo.Container name="Receive policies" footerVariant={undefined} showRestart={false}>
+  <ReceivePolicyDemo />
+</Demo.Container>
+
+The steps below accept only AlphaUSD, from any sender, on Moderato testnet, and let the receiving account recover blocked payments. In TypeScript, `client` is a Viem client from the [client setup](/docs/guide/payments/send-a-payment/examples#payment-client-setup), `receiver` is the receiving account's address, and `alphaUsd` is `0x20c0000000000000000000000000000000000001`. The CLI examples use the Foundry setup's `TEMPO_RPC_URL`, `TEMPO_PRIVATE_KEY`, `TEMPO_ACCOUNT_ADDRESS`, and `ALPHA_USD`, plus:
+
+```bash [Terminal]
+export TIP403_REGISTRY=0x403c000000000000000000000000000000000000
+```
+
+:::::steps
+
+### Create or choose a sender policy
+
+A receive policy uses `senderPolicyId` to decide which senders are allowed. The sender policy can be:
+
+- built-in policy `0`, which rejects all
+- built-in policy `1`, which allows all
+- an existing simple TIP-403 `WHITELIST` or `BLACKLIST` policy
+- a newly created simple TIP-403 `WHITELIST` or `BLACKLIST` policy
+
+`COMPOUND` policies are not valid for `senderPolicyId`. This example uses policy `1` to allow any sender; substitute a sender allowlist to restrict counterparties.
+
+### Create or choose a token filter
+
+A receive policy uses `tokenFilterId` to decide which TIP-20 tokens are allowed. Token filters use existing TIP-403 policy data and membership sets, where members are interpreted as TIP-20 token addresses.
+
+The token filter can use built-in policy `0`, built-in policy `1`, or a simple TIP-403 `WHITELIST` or `BLACKLIST` policy. `COMPOUND` policies are not valid for `tokenFilterId`.
+
+Create a token allowlist containing AlphaUSD. The policy members are token contract addresses, not customer addresses.
+
+::::code-group
+
+```ts [Viem]
+const { policyId: tokenPolicyId } = await client.policy.createSync({
+  type: 'whitelist',
+  addresses: [alphaUsd],
+})
+```
+
+```bash [CLI]
+cast send "$TIP403_REGISTRY" \
+  'createPolicyWithAccounts(address,uint8,address[])' \
+  "$TEMPO_ACCOUNT_ADDRESS" 0 "[$ALPHA_USD]" \
+  --tempo.fee-token "$ALPHA_USD" \
+  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
+```
+
+```tsx [Wagmi]
+import { Hooks } from 'wagmi/tempo'
+const { mutate: createFilter, data: filter, isPending, error } = Hooks.policy.useCreateSync()
+const createTokenFilter = () => createFilter({
+  type: 'whitelist', addresses: [alphaUsd],
+})
+const tokenPolicyId = filter?.policyId
+```
+
+::::
+
+Save the confirmed `policyId` for the next step. In the CLI receipt, it is the second topic (`topics[1]`) of `PolicyCreated(uint64,address,uint8)`; set `TOKEN_POLICY_ID` to that value. In Wagmi, wait for `filter` before enabling the next action. The CLI's policy type `0` means whitelist, distinct from the built-in policy ID `0` that rejects all.
+
+### Choose a recovery authority
+
+The recovery authority controls who may claim receipts for future blocked transfers or mints:
+
+| Recovery authority | Who can claim |
+|---|---|
+| `address(0)` | the originator of the transfer or mint |
+| the receiver's address | the receiver |
+| another nonzero address | that address |
+
+Changing the recovery authority affects future receipts only. Existing receipts keep the recovery authority captured when they were created.
+
+Nonzero recovery authorities cannot be `ReceivePolicyGuard`, [virtual addresses](/docs/protocol/tip20/virtual-addresses), or system precompile addresses that cannot initiate calls.
+
+### Set the receive policy
+
+Call `setReceivePolicy(senderPolicyId, tokenFilterId, recoveryAuthority)` from the receiving account. Here the receiver also acts as recovery authority:
+
+::::code-group
+
+```ts [Viem]
+await client.receivePolicy.setSync({
+  senderPolicyId: 'allow-all',
+  tokenPolicyId,
+  claimer: 'self',
+})
+```
+
+```bash [CLI]
+cast send "$TIP403_REGISTRY" 'setReceivePolicy(uint64,uint64,address)' \
+  1 "$TOKEN_POLICY_ID" "$TEMPO_ACCOUNT_ADDRESS" \
+  --tempo.fee-token "$ALPHA_USD" \
+  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
+```
+
+```tsx [Wagmi]
+import { useWriteContract } from 'wagmi'
+import { Abis, Addresses } from 'viem/tempo'
+const { writeContract, data: hash, isPending, error } = useWriteContract()
+const setPolicy = () => tokenPolicyId !== undefined && writeContract({
+  address: Addresses.tip403Registry, abi: Abis.tip403Registry,
+  functionName: 'setReceivePolicy', args: [1n, tokenPolicyId, receiver],
+})
+```
+
+::::
+
+Viem names the token filter `tokenPolicyId` and maps `claimer: 'self'` to the signing account. The raw contract ABI calls these fields `tokenFilterId` and `recoveryAuthority`. Wait for the setting transaction to confirm before checking deposits.
+
+If the receiver is using virtual addresses, configure the policy on the resolved master address. A virtual address must not call `setReceivePolicy(...)`.
+
+:::::
+
+<span id="check-a-payment-before-sending" />
+
+### Check a payment before sending
+
+Ask whether the receiver's policy accepts a token from a sender:
+
+::::code-group
+
+```ts [Viem]
+const { authorized, blockedReason } = await client.receivePolicy.validate({
+  token: alphaUsd, sender, receiver,
+})
+```
+
+```bash [CLI]
+cast call "$TIP403_REGISTRY" \
+  'validateReceivePolicy(address,address,address)(bool,uint8)' \
+  "$ALPHA_USD" "$TEMPO_SENDER" "$TEMPO_ACCOUNT_ADDRESS" \
+  --rpc-url "$TEMPO_RPC_URL"
+```
+
+```tsx [Wagmi]
+import { useReadContract } from 'wagmi'
+import { Abis, Addresses } from 'viem/tempo'
+const { data: validation } = useReadContract({
+  address: Addresses.tip403Registry, abi: Abis.tip403Registry,
+  functionName: 'validateReceivePolicy', args: [alphaUsd, sender, receiver],
+})
+```
+
+::::
+
+This checks only the receive policy, not token-level restrictions, balances, or the full transaction. A policy can change before execution, so check the confirmed receipt too.
+
+<span id="claim-blocked-receipts" />
+
+### Claim a held payment
+
+The recovery authority claims one whole receipt and releases it to one destination. With the receiver as recovery authority, sign as the receiving account and pass the `TransferBlocked.receipt` bytes:
+
+::::code-group
+
+```ts [Viem]
+await client.receivePolicy.claimSync({ to: receiver, receipt: blockedReceipt })
+```
+
+```bash [CLI]
+cast send 0xB10C000000000000000000000000000000000000 \
+  'claim(address,bytes)' "$TEMPO_ACCOUNT_ADDRESS" "$BLOCKED_RECEIPT" \
+  --tempo.fee-token "$ALPHA_USD" \
+  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
+```
+
+```tsx [Wagmi]
+import { useWriteContract } from 'wagmi'
+import { Abis, Addresses } from 'viem/tempo'
+const { writeContract, data: hash, isPending, error } = useWriteContract()
+const claimPayment = () => writeContract({
+  address: Addresses.receivePolicyGuard, abi: Abis.receivePolicyGuard,
+  functionName: 'claim', args: [receiver, blockedReceipt],
+})
+```
+
+::::
+
+A claim back to the receiver doesn't recheck the receive policy, but the token's own policy still applies. Release a held payment only after your application approves it. Claims to other destinations are reroutes, with extra checks: see the [claim rules](/docs/protocol/tip403/receive-policies#claims).
+
+<span id="burn-blocked-receipts" />
+<span id="learn-more-about-receive-policies" />
+
+## Receive policy limits
+
+- Partial claims aren't supported. A claim consumes the full receipt.
+- Changing the recovery authority affects future receipts only. Existing receipts keep the authority captured when they were blocked.
+- A nonzero recovery authority can't be `ReceivePolicyGuard`, a virtual address, or a system precompile that can't initiate calls.
+- A virtual address can't set its own policy. Set it on the master address.
+- For `transferFrom`, the spender's allowance is consumed even when the policy blocks delivery.
+- Only the token's issuer can burn a held payment, with `burnBlockedReceipt` and the `BURN_BLOCKED_ROLE`, and only while the receipt's policy subject is unauthorized as a sender under the token's policy. See [burns](/docs/protocol/tip403/receive-policies#burns).
+
+Specification: [receive policies (TIP-1028)](https://tips.sh/1028). Protocol reference: [TIP-403 receive policies](/docs/protocol/tip403/receive-policies).

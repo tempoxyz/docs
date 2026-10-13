@@ -26,7 +26,7 @@ Receive stablecoins at a Tempo account, confirm the token and amount delivered, 
 
 Share an account address you control with the sender. For customer-specific addresses that credit a shared account, use [customer deposit addresses](/docs/guide/payments/virtual-addresses); your application maintains the customer ledger. For deposits from other networks, use [Routes](/docs/routes/deposits).
 
-Show the network and token alongside the receiving address, then read incoming transfer events to confirm delivery. To accept only specific tokens or senders, [configure an address-level receive policy](/docs/guide/payments/configure-receive-policies) before sharing the address.
+Show the network and token alongside the receiving address, then read incoming transfer events to confirm delivery. To accept only specific tokens or senders, [configure an address-level receive policy](/docs/accounts/policies/receive-policies) before sharing the address.
 
 This demo funds a test account and displays its token balances. The examples below use AlphaUSD on Moderato testnet. Configure your client or `RPC_URL` / `TEMPO_RPC_URL` for `https://rpc.moderato.tempo.xyz`; use an account you control as the recipient.
 
@@ -43,7 +43,7 @@ Use the account balance to display available funds. To verify a payment, match t
 
 The event examples below read activity for a token contract. Filter by recipient and use the transaction hash and log index to process each payment once. For virtual addresses, follow the [deposit attribution flow](/docs/guide/payments/virtual-addresses#what-to-verify-in-virtual-address-deposits).
 
-For payments held by a receive policy, see [Handle blocked receipts](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts).
+For payments held by a receive policy, see [Handle blocked receipts](/docs/accounts/policies/receive-policies#blocked-receipts).
 
 <span id="check-receiver-token-balance" />
 

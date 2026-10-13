@@ -1,41 +1,29 @@
 ---
-title: Fee management
+title: Fees
 seoTitle: Pay or Sponsor Tempo Account Fees in Stablecoins | Tempo Docs
-description: Choose the USD stablecoin an account pays network fees in, override it per transaction, or sponsor fees with a fee payer that can't move the account's funds.
+description: Pay network fees in a USD stablecoin the account chooses, or have a fee payer sponsor them without gaining any control over the account's funds.
 ---
 
-# Fee management
+# Fees
 
-Tempo has no native gas token. Every transaction pays its network fee in a USD TIP-20 stablecoin, either from the account's own balance in a fee token it chooses, or from a fee payer that sponsors the transaction.
+Every Tempo transaction pays its network fee in a USD stablecoin, never a gas token. Decide two things per account: which stablecoin pays the fee, and who pays it, the account itself or a fee payer that sponsors it.
 
-## How an account pays fees
+| Page | What it covers | Use it when |
+| --- | --- | --- |
+| [Fee tokens](/docs/accounts/fees/fee-tokens) | Which stablecoins can pay fees, the account's default, and per-transaction overrides | The account pays its own fees |
+| [Fee sponsorship](/docs/accounts/fees/fee-sponsorship) | A fee payer that pays another account's fees, and how to run one | Accounts shouldn't need a fee balance, such as a customer's first payment |
 
-The fee comes from the transaction's fee payer, which is the account itself unless a fee payer signs. Before execution, Tempo deducts the maximum fee (gas limit times gas price) from the fee payer's balance in the fee token, then refunds the unused gas after execution. A standard TIP-20 transfer costs about $0.0006 at the base-fee cap and about $0.00003 at the floor.
+<span id="how-an-account-pays-fees" />
 
-The fee token can be any USD-denominated TIP-20 token with enough liquidity on the [Fee AMM](/docs/protocol/fees/spec-fee-amm), which converts it to the stablecoin the block's validator receives. If the balance or the liquidity falls short, the transaction is invalid and isn't included. A transaction that is included and then reverts still pays its fee.
+## How Tempo account fees work
 
-## Set an account's default fee token
+The fee comes from the transaction's fee payer, which is the account itself unless a fee payer signs. Before execution, Tempo deducts the maximum fee, the gas limit times the gas price, from the fee payer's balance in the fee token, then refunds the unused gas afterward. A standard TIP-20 transfer costs about $0.0006 at the base-fee cap and about $0.00003 at the floor.
 
-An account sets a default fee token once, and Tempo uses it for every transaction the account pays for. Set one explicitly: otherwise Tempo infers the token from the transaction and falls back to pathUSD. For most accounts, the recommended default is [OUSD](/docs/guide/ousd).
+The block's validator may want a different stablecoin. The [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the fee token to it, so the fee token needs enough liquidity there. If the balance or the liquidity falls short, the transaction is invalid and isn't included. A transaction that's included and then reverts still pays its fee.
 
-```ts [set-fee-token.ts]
-const { receipt } = await client.fee.setUserTokenSync({
-  token: '0x20c0000000000000000000006a37da5c996874be', // OUSD on Tempo mainnet
-})
-```
+<span id="set-an-accounts-default-fee-token" />
 
-To pay one transaction's fee in another stablecoin, pass `feeToken` on that transaction. It overrides the default for that transaction only:
-
-```ts [transfer.ts]
-import { parseUnits } from 'viem'
-
-await client.token.transferSync({
-  amount: parseUnits('25', 6),
-  feeToken: usdc, // this transaction's fee token
-  to: recipient,
-  token: ousd,
-})
-```
+## Fee token precedence
 
 Tempo picks the fee token from the first of these that's set:
 
@@ -45,70 +33,11 @@ Tempo picks the fee token from the first of these that's set:
 4. The input token of a single Stablecoin DEX swap.
 5. pathUSD.
 
-Tempo checks only the first token it finds. If the fee payer lacks the balance or the token lacks liquidity, the transaction is invalid; Tempo doesn't try the next one. See [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) for examples in each SDK and [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences) for the full rules.
+Tempo checks only the first token it finds. If the fee payer lacks the balance or the token lacks liquidity, the transaction is invalid; Tempo doesn't try the next one. Set a default fee token explicitly so the account doesn't fall back to pathUSD: see [Set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token). Full rules: [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).
 
 <span id="sponsor-an-accounts-fees" />
+<span id="sponsor-fees-with-a-fee-payer" />
 
-## Sponsor fees with a fee payer
+## Who pays the fee
 
-A fee payer pays an account's fees so the account needs no fee balance, such as a new account sending its first payment right after the customer creates it. The account signs its calls with the fee token left blank. The fee payer checks the transaction against its policy, chooses the fee token, and adds its own signature. Tempo verifies both signatures and takes the fee from the fee payer's balance.
-
-The fee payer's signature covers one specific transaction and authorizes only the fee:
-
-| A fee payer can | A fee payer can't |
-| --- | --- |
-| Pay the fee from its own balance | Approve a transaction or count toward the account's threshold |
-| Choose the fee token for transactions it sponsors | Change the calls the account signed |
-| Refuse or delay sponsorship | Move the account's funds |
-
-Because the fee payer holds no signer or access key, a fee payer that stops working can't take funds. The account can still pay its own fees when it holds a fee token.
-
-To use one, point the client's relay at a fee payer service and mark each sponsored transaction with `feePayer: true`:
-
-```ts [client.ts]
-import { http, parseUnits } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { createClient, withRelay } from 'viem/tempo'
-
-export const client = createClient({
-  chain: tempoModerato,
-  transport: withRelay(http(), http('https://sponsor.moderato.tempo.xyz')),
-})
-
-await client.token.transferSync({
-  account,
-  amount: parseUnits('25', 6),
-  feePayer: true, // request sponsorship
-  to: recipient,
-  token: alphaUsd,
-})
-```
-
-The endpoint above is the public fee payer on Moderato testnet and needs no API key. In production, use the hosted [Fee Payer API](/docs/api/fee-payer) with a Tempo API key, or run your own. [Sponsor fees](/docs/guide/payments/sponsor-user-fees) walks through the full flow with a live demo.
-
-## Run your own fee payer
-
-Anyone can run a fee payer: you, your wallet provider, or another operator. Host one with viem's `Relay` and its `Relay.feePayer` plugin, funded with the stablecoins it pays fees in. Its `validate` callback receives each transaction request and decides whether to sponsor it:
-
-```ts [fee-payer.ts]
-import { http, type Hex } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { tempoModerato } from 'viem/chains'
-import { createClient, Relay, withRelay } from 'viem/tempo'
-
-const plugins = [
-  Relay.feePayer({
-    account: privateKeyToAccount(process.env.FEE_PAYER_KEY as Hex),
-    validate: async (request) => request.from !== undefined && (await isCustomer(request.from)),
-  }),
-]
-
-export const client = createClient({
-  chain: tempoModerato,
-  transport: withRelay(http(), { plugins }),
-})
-```
-
-Only `true` sponsors the transaction. `false`, or a named reason such as `'spend_limit_exceeded'`, refuses it, and the relay returns the transaction for the account to pay itself. Without `validate`, the fee payer sponsors every request it receives, so add authentication and rate limits before you fund it.
-
-To serve the fee payer to other clients, pass the same plugins to `Relay.create({ client, plugins })` and serve `relay.fetch`. When the relay also runs `Relay.accounts`, list `Relay.accounts` first.
+By default, the account pays its own fees from its balance. A fee payer can sponsor a transaction instead by adding its own signature, and then the fee comes from the fee payer's balance in the token it chooses. The fee payer's signature authorizes only the fee: it can't approve the account's calls or move its funds. See [Fee sponsorship](/docs/accounts/fees/fee-sponsorship).

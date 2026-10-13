@@ -1,0 +1,75 @@
+---
+title: Spending limits
+seoTitle: TIP-20 Spending Limits for Access Keys on Tempo | Tempo Docs
+description: Cap how much of each TIP-20 token an access key can spend, once or per period, and read or change the remaining amount without revoking the key.
+---
+
+# Spending limits
+
+A spending limit caps how much of one TIP-20 token an access key can spend, and Tempo reverts any transaction that would go over it. A limit caps the amount, not the destination, so pair it with [scopes](/docs/accounts/access-keys/scopes) to control where the money goes.
+
+<span id="tip-20-spending-limits" />
+
+## Per-token spending limits
+
+Each limit names a token and an amount in base units. A key can carry one limit per token. A key with no `limits` spends without a cap.
+
+Tempo meters these against the key's limit:
+
+- Direct TIP-20 transfers the key signs
+- Increases in token approvals, so a key can't grant a contract more than its limit to pull
+- Fees the account pays for the key's transactions
+- Token pulls by protocol precompiles, and `burnAt` on the account's tokens since T12
+
+It doesn't meter native value or `transferFrom`. A transaction that would exceed the remaining limit reverts entirely with `SpendingLimitExceeded`.
+
+## One-time and periodic limits
+
+`period` sets whether the limit renews:
+
+| `period` | Behavior | Example |
+| --- | --- | --- |
+| `0` or omitted | One-time. The key stops spending that token once it's used up. | 100 USD for one purchase |
+| Seconds, such as `86_400` | Renewing. The limit resets to its full amount when each period ends. | 500 USD a day |
+
+Set limits when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key):
+
+```ts [limits.ts]
+limits: [
+  { token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }, // 500 AlphaUSD a day
+],
+```
+
+For limits sized to a task, see [Recommended limits for backend automations](/docs/accounts/guides/automate-backend#recommended-limits-for-backend-automations) and [Set up a spending account](/docs/accounts/guides/spending-account).
+
+<span id="read-an-access-key" />
+<span id="read-the-remaining-permission" />
+
+## Read the remaining limit
+
+```ts [remaining.ts]
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ account, accessKey, token: alphaUsd })
+```
+
+`remaining` accounts for renewal: once a period ends, it reads as the full limit again. `periodEnd` is when the current period ends. A missing, revoked, or expired key reads as zero. Show the remaining limit and the [expiry](/docs/accounts/access-keys/expiry) wherever the customer manages the key.
+
+<span id="change-an-access-key" />
+
+## Change a spending limit
+
+Signers that reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a live key's limit without revoking it:
+
+```ts [update-limit.ts]
+await client.accessKey.updateLimitSync({ account, accessKey, limit: parseUnits('50', 6), token: alphaUsd })
+```
+
+The update sets both the limit and the remaining amount to the new value, and keeps the period and the current period's end. On a key with no limits, it turns limits on. The key can't change its own limit.
+
+## Spending limit limits
+
+- A limit applies to one TIP-20 token. Other assets, native value, and `transferFrom` against an allowance the account granted earlier aren't metered.
+- A limit can't exceed the TIP-20 supply range (`u128`).
+- `updateLimit` reverts on a revoked key (`KeyAlreadyRevoked`), an expired key (`KeyExpired`), or an admin key (`InvalidKeyId`), which has no limits.
+- A fee payer that sponsors the key's transactions pays the fees, so they don't count against the limit.
+
+Specification: [Account Keychain spending limits](/docs/protocol/transactions/AccountKeychain#spending-limit-enforcement).

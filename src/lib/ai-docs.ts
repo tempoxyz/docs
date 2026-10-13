@@ -13,7 +13,7 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   overview:
     'Choose a starting point, send a test payment, get testnet funds, connect a coding agent, and find the SDKs and CLI.',
   accounts:
-    'Create accounts, set up sign-in, security policies, access keys, and fees, and follow guides for wallet providers, SSO, self-custody, agents, automations, spending, and treasuries.',
+    'Create accounts, set up signing methods, policies, access keys, key rotation, and fees, and follow guides for users, automations, agents, and teams.',
   earn: 'Choose a vault, deposit stablecoins, read positions, and withdraw. Earn is in beta; see the introduction for access.',
   routes:
     'Move stablecoins between Tempo and other networks: try a route, set up API access, choose a supported route, quote it, accept deposits or make a transfer, and track delivery. Routes is in beta; see the introduction for access.',

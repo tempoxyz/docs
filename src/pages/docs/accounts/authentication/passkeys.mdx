@@ -9,9 +9,11 @@ import { PasskeyAccountDemo } from '../../../../components/guides/PasskeyAccount
 
 # Passkeys
 
-A passkey is a WebAuthn key that the customer approves with their face, fingerprint, PIN, or security key. It's the signer only the customer holds, so it keeps the account in their control.
+A passkey is the signer only the customer holds, so it keeps the account in their control. Give it enough weight to approve alone, and add a second signer so a lost passkey doesn't lock the customer out.
 
-The private key never leaves the customer's authenticator, and Tempo checks each WebAuthn signature on chain. A passkey trusts the customer's device and, for a synced passkey, their passkey provider. No app or wallet provider is involved. Use it for customer approvals, signer changes, and recovery of other signers.
+## What a passkey is
+
+A passkey is a WebAuthn P-256 key that the customer approves with their face, fingerprint, PIN, or security key. The private key never leaves the customer's authenticator, and Tempo checks each WebAuthn signature on chain.
 
 ## Passkey authenticators
 
@@ -22,13 +24,19 @@ The private key never leaves the customer's authenticator, and Tempo checks each
 | Android | The device's fingerprint, face, or screen lock |
 | Security keys | A touch on a key such as YubiKey |
 
-Synced passkeys follow the customer to new devices through iCloud Keychain, Google Password Manager, or a password manager. A security key's passkey stays on that key, so add a second signer for [recovery](/docs/accounts/guides/self-custody#recover-from-a-lost-passkey).
+Synced passkeys follow the customer to new devices through iCloud Keychain, Google Password Manager, or a password manager. A security key's passkey stays on that key.
+
+## What a passkey trusts
+
+A passkey trusts the customer's device and, for a synced passkey, their passkey provider. No app server or wallet provider is involved, so no one but the customer can approve with it. Use it for customer approvals, signer changes, and recovery of other signers.
 
 <span id="try-a-passkey-account" />
 <span id="create-the-passkey" />
 <span id="open-the-account-with-it" />
+<span id="open-an-account-with-a-passkey" />
+<span id="passkey-signer-weights" />
 
-## Open an account with a passkey
+## Create a passkey signer
 
 <PasskeyAccountDemo />
 
@@ -43,8 +51,12 @@ const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
 
 `account.address` receives stablecoins right away. The first transaction registers the account.
 
-## Passkey signer weights
+For weights alongside backup and recovery keys, see [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). To add a passkey to an existing account or back it up with other keys, see [Set up self-custody](/docs/accounts/guides/self-custody).
 
-We recommend a passkey at weight 2 next to a backup key and a recovery provider's key at weight 1 each, at threshold 2. The passkey approves alone, and the two keys together recover it. Keep the backup key with the customer and the recovery key with a separate party, so neither approves alone. See [Signing thresholds](/docs/accounts/security-policies).
+## Passkey limits
 
-To add a passkey to an existing account or back it up with other keys, see [Set up self-custody](/docs/accounts/guides/self-custody). For other methods, see [Signing methods](/docs/accounts/authentication).
+- A passkey works only on the domain it was created for, its relying party ID. Set `rpId` in `WebAuthnP256.createCredential` to choose it before customers create passkeys.
+- The prompt fails with `NotAllowedError` when the customer cancels or the page isn't served over HTTPS.
+- A passkey on a security key isn't synced. Losing the key loses the signer, so add a second signer for [recovery](/docs/accounts/guides/self-custody#recover-from-a-lost-passkey).
+
+For other methods, see [Signing methods](/docs/accounts/authentication).
