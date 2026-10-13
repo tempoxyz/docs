@@ -50,11 +50,11 @@ Each auth type has its own [authentication](/docs/accounts/authentication) guide
 - [Private keys](/docs/accounts/authentication/private-keys)
 - [Device keys](/docs/accounts/authentication/device-keys)
 - [Passkeys](/docs/accounts/authentication/passkeys)
-- [OIDC logins](/docs/accounts/authentication/oidc): email and SMS codes, social logins, SSO, and Privy
+- [OIDC logins](/docs/accounts/authentication/oidc): Google and other social logins, SSO, and Privy
 
 Only signers can change signers and the threshold. A change voids approvals collected for the old configuration.
 
-[Policies](/docs/accounts/security-policies) · [Set up self-custody](/docs/accounts/guides/self-custody) · [Set up a company treasury wallet](/docs/accounts/guides/company-treasury)
+[Signing thresholds](/docs/accounts/security-policies) · [Set up self-custody](/docs/accounts/guides/self-custody) · [Set up a company treasury wallet](/docs/accounts/guides/company-treasury)
 
 ## Access keys
 
@@ -73,7 +73,7 @@ Collecting two approvals for every payout is too slow for a server. An access ke
 
 The example payout server's key can spend up to its daily limit, only until it expires, and only on the calls its scopes allow. An admin access key has no bounds and manages the account's other access keys instead. Access keys never count toward the threshold.
 
-[Delegation](/docs/accounts/access-keys) · [Device keys](/docs/accounts/authentication/device-keys) · [Account Keychain](/docs/protocol/transactions/AccountKeychain)
+[Access keys](/docs/accounts/access-keys) · [Device keys](/docs/accounts/authentication/device-keys) · [Account Keychain](/docs/protocol/transactions/AccountKeychain)
 
 <span id="an-embedded-wallet-account-on-tempo" />
 
@@ -102,9 +102,9 @@ Non-custodial doesn't mean trustless. Each signer type trusts something differen
 | --- | --- |
 | Passkey or device key | The customer's device and its secure hardware |
 | Key in your KMS or HSM | Your infrastructure and its access controls |
-| Login | Its issuer and [login services](/docs/accounts/authentication/login-services) |
+| Login | Its issuer and [login services](/docs/accounts/authentication/oidc#login-services) |
 
-Mix signer types so no single party can approve alone. The example's Google login trusts Google, but it can't approve without a second signer. See [Policies](/docs/accounts/security-policies).
+Mix signer types so no single party can approve alone. The example's Google login trusts Google, but it can't approve without a second signer. See [Signing thresholds](/docs/accounts/security-policies).
 
 ## Leaving an app
 

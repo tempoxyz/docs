@@ -1,12 +1,14 @@
 ---
 title: Private keys
 seoTitle: Use Wallet, KMS, and HSM Keys as Tempo Account Signers | Tempo Docs
-description: Add keys from CLI, hardware, and browser wallets, or from your KMS or HSM, as weighted signers or limited access keys.
+description: Add keys from CLI, hardware, and browser wallets, or from your KMS or HSM, as weighted signers or limited access keys on a Tempo account.
 ---
 
 # Private keys
 
-A private key you already hold signs as a weighted signer or as a limited [access key](/docs/accounts/access-keys).
+A private key is a secp256k1 or P-256 key that you or a provider already hold, in a wallet, a KMS, or an HSM. It approves for a Tempo account as a weighted signer, or pays alone within limits as an [access key](/docs/accounts/access-keys).
+
+The key stays where it is: the account lists only its address or public key, and the wallet, KMS, or HSM signs each approval. A private key trusts whoever controls it and the infrastructure that holds it, and depends on no outside service. Use it for treasury approvers, servers, scripts, and recovery keys.
 
 <span id="recommended-roles-for-your-keys" />
 
@@ -22,6 +24,8 @@ A private key you already hold signs as a weighted signer or as a limited [acces
 
 ## Require two treasury signers
 
+Two keys at weight 1 and a threshold of 2 means neither approver can pay alone:
+
 ```ts [treasury.ts]
 import { Account } from 'viem/tempo'
 
@@ -30,6 +34,8 @@ const operations = Account.fromSecp256k1(process.env.OPERATIONS_SIGNER_KEY as `0
 const account = Account.fromConfig({ address: 'infer', owners: [finance, operations], threshold: 2 })
 ```
 
-To keep a key in its wallet, KMS, HSM, or provider, use that source's Viem account adapter instead.
+The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, use that source's viem account adapter instead.
 
-For other sign-in methods, see [Authentication](/docs/accounts/authentication).
+A secp256k1 key in the account's first configuration can also recover funds sent to the same address on another EVM chain. See [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).
+
+For walkthroughs, see [Set up a company treasury wallet](/docs/accounts/guides/company-treasury) and [Automate a backend](/docs/accounts/guides/automate-backend). For other methods, see [Signing methods](/docs/accounts/authentication).

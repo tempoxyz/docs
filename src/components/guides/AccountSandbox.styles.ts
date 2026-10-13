@@ -206,10 +206,6 @@ export const accountSandbox = style({
       // design-exception: Google's mark keeps its published brand blue in both themes.
       color: '#4285f4 !custom',
     },
-    '& .as-icon[data-kind="sms"]': {
-      // design-exception: The SMS mark keeps the Messages brand green in both themes.
-      color: '#34c759 !custom',
-    },
     '& .as-icon[data-kind="apple"]': {
       color: tokens.color.foreground,
     },

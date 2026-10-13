@@ -1,7 +1,7 @@
 ---
 title: Set up a company treasury wallet
 seoTitle: Set Up a Multi-Approver Company Treasury on Tempo | Tempo Docs
-description: Create a 2-of-3 treasury account, give a team its own daily budget, rotate an approver's key, and remove a departing approver without moving funds.
+description: Create a 2-of-3 treasury account, give a team its own daily budget, require more approvals for larger payments, and rotate or remove approver keys without moving funds.
 interactive: true
 ---
 
@@ -9,7 +9,7 @@ import { GuideDemo } from '../../../../components/guides/GuideDemo'
 
 # Set up a company treasury wallet
 
-Build a treasury that three approvers control, where any two approve a payment. Give the operations team its own daily budget, then rotate and remove approver keys at the same address and balance.
+Build a treasury that three approvers control, where any two approve a payment. Give the operations team its own daily budget, require more approvals for larger payments, then rotate and remove approver keys at the same address and balance.
 
 The examples use Moderato testnet and a `client` whose transport is a relay with `Relay.accounts`, such as the one in [OIDC logins](/docs/accounts/authentication/oidc#connect-to-a-salt-service). `client.accounts.getConfig` needs that relay; a bare node doesn't serve it.
 
@@ -33,7 +33,7 @@ const treasury = Account.fromConfig({
 })
 ```
 
-Each payment then needs two approvals. Your app collects them, for example in your backend: see [Collect approvals from several approvers](/docs/accounts/security-policies#collect-approvals-from-several-approvers). To require all three above a payment size, add [approval escalation](/docs/accounts/security-policies#approval-escalation-for-larger-payments).
+Each payment then needs two approvals. Your app collects them, for example in your backend: see [Collect approvals from several approvers](/docs/accounts/security-policies#collect-approvals-from-several-approvers). To require all three above a payment size, [add an escalation policy](#require-more-approvals-for-larger-payments).
 
 <span id="set-up-a-team-budget" />
 
@@ -59,11 +59,63 @@ One team member proposes a payment from the treasury, and a second approves it. 
 
 ### Track the budget
 
-[Read the remaining limit](/docs/accounts/access-keys#read-the-remaining-permission) as for any access key. The treasury [revokes](/docs/accounts/access-keys#revoke-an-access-key) the team account like any other access key when the team no longer needs it.
+[Read the remaining limit](/docs/accounts/access-keys#read-an-access-key) as for any access key. The treasury [revokes](/docs/accounts/access-keys#revoke-an-access-key) the team account like any other access key when the team no longer needs it.
 
 :::::
 
-Team budget rules: [Team budgets](/docs/accounts/security-policies#team-budgets).
+<span id="team-budget-rules" />
+
+The budget follows these rules:
+
+- It covers the whole team, not each member. Changing team signers keeps the authorization and the spending so far.
+- Payments come from the treasury's address and balance, approved by the team's signers alone.
+- Team members approve directly. The team's own access keys can't use the treasury's authorization.
+- The team can't authorize keys, change treasury signers, or count toward the treasury's threshold.
+- Approval escalation on either account turns off team spending. Use the team's budget instead.
+
+<span id="require-all-approvers-for-larger-payments" />
+
+## Require more approvals for larger payments
+
+Install an [escalation policy](/docs/accounts/security-policies#approval-escalation-for-larger-payments) so payments up to $5,000 keep needing two approvers, while larger payments, and any payment while the treasury holds more than $100,000, need all three. Approval escalation ([TIP-1135](https://tips.sh/1135)) isn't live on Tempo devnet yet; the example follows its interface.
+
+Installing the policy needs its administrative threshold, 3 of 3, approved by the treasury's signers directly. It must be the transaction's only call.
+
+```ts [rules.ts]
+import { parseAbi, parseUnits } from 'viem'
+
+// metric 0 measures outflow, 1 measures balance. Limits use six decimals.
+// Sort rules by token, metric, then limit.
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const rules = [
+  { token: alphaUsd, metric: 0, limit: parseUnits('5000', 6), threshold: 3 }, // sends more than $5,000
+  { token: alphaUsd, metric: 1, limit: parseUnits('100000', 6), threshold: 3 }, // holds more than $100,000
+] as const
+
+const multisig = '0xAACC000000000000000000000000000000000000'
+const abi = parseAbi([
+  'struct Rule { address token; uint8 metric; uint256 limit; uint8 threshold; }',
+  'function getEscalationPolicy(address account) view returns (uint64 revision, bool enabled, uint8 adminThreshold, Rule[] rules)',
+  'function setEscalationPolicy(uint64 expectedRevision, uint8 adminThreshold, Rule[] rules)',
+])
+
+const [revision] = await client.readContract({
+  abi,
+  address: multisig,
+  args: [treasury.address],
+  functionName: 'getEscalationPolicy',
+})
+
+await client.writeContractSync({
+  abi,
+  account: treasury, // collect all three approvals, as for any treasury payment
+  address: multisig,
+  args: [revision, 3, rules], // administrative threshold: 3
+  functionName: 'setEscalationPolicy',
+})
+```
+
+The revision check makes the call fail if someone changed the policy since you read it. Remove the policy with `removeEscalationPolicy(expectedRevision)`, approved at the administrative threshold. While the policy is on, the team's budget and every other access key can't spend, so choose between escalation and team budgets.
 
 <span id="rotate-a-key" />
 <span id="key-rotation" />
@@ -145,4 +197,4 @@ Then revoke each access key the departing approver could reach, and add their re
 - Signer changes don't revoke access keys. A revoked key can't be authorized again.
 - Approval escalation on the treasury or the team account turns off the team's budget.
 
-Specifications: [configurable accounts](https://tips.sh/1107), [configurable account access keys](https://tips.sh/1111).
+Specifications: [configurable accounts](https://tips.sh/1107), [configurable account access keys](https://tips.sh/1111), [approval rules](https://tips.sh/1135).

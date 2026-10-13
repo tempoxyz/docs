@@ -1,113 +1,61 @@
 ---
-title: Authentication
-seoTitle: Sign In to Tempo Accounts with Keys, Passkeys, or OIDC Logins | Tempo Docs
-description: Choose how customers, employees, and services approve for a Tempo account, with private keys, device keys, passkeys, or your existing OIDC login.
+title: Signing methods
+seoTitle: Sign for Tempo Accounts with Keys, Passkeys, or OIDC Logins | Tempo Docs
+description: Compare the four ways a Tempo account signer approves, private keys, device keys, passkeys, and OIDC logins, by where the key lives and what each trusts.
 ---
 
-import { DocsHomeProductIcon } from '../../../components/DocsHomeProductIcon'
-import { docsProductGrid } from '../../../components/DocsProductGrid.styles'
+# Signing methods
 
-# Authentication
-
-Every approval for a Tempo account comes from a key or a login. Choose the method that matches who approves.
+A signer is a key or a login that a Tempo account lists as able to approve. Each approval is a signature that Tempo checks on chain against the account's signers and threshold. Tempo supports four signing methods, and an account can mix them.
 
 <span id="tempo-account-signer-types" />
+<span id="tempo-sign-in-methods" />
 
-## Tempo sign-in methods
+## Tempo signing methods
 
-| Method | Approves with | On a new device | Use for |
+| Method | Where the key lives | What it trusts | Use for |
 | --- | --- | --- | --- |
-| [Private keys](/docs/accounts/authentication/private-keys) | A CLI, hardware, or browser wallet, or a KMS or HSM key | Copy the key, or call its service | Treasury approvers, servers, and scripts |
-| [Device keys](/docs/accounts/authentication/device-keys) | A key in the device's secure hardware or browser, with no prompt | A new key per device | Everyday payments within limits |
-| [Passkeys](/docs/accounts/authentication/passkeys) | Face ID, Touch ID, Windows Hello, Android, or a security key | Synced passkeys follow the customer | Customer approvals and signer changes |
-| [OIDC logins](/docs/accounts/authentication/oidc) | An email or SMS code, a social login, enterprise SSO, or Privy | Sign in anywhere | Apps that already sign customers in, and recovery |
+| [Private keys](/docs/accounts/authentication/private-keys) | A CLI, hardware, or browser wallet, or your KMS or HSM | Whoever holds the key, and that key's infrastructure | Treasury approvers, servers, and scripts |
+| [Device keys](/docs/accounts/authentication/device-keys) | The device's secure hardware or browser, non-extractable | The customer's device | Everyday payments within limits, with no prompt |
+| [Passkeys](/docs/accounts/authentication/passkeys) | The customer's authenticator, synced or on a security key | The customer's device and passkey provider | Customer approvals and signer changes |
+| [OIDC logins](/docs/accounts/authentication/oidc) | The customer's device; the login approves the key | The identity provider and its key publisher owner | Apps that already sign customers in, and recovery |
 
-OIDC logins depend on [login services](/docs/accounts/authentication/login-services): an identity provider, a salt service, a prover, and a key publisher. The other methods don't.
+Only OIDC logins depend on outside services: an identity provider, a salt service, a prover, and a key publisher. See [Login services](/docs/accounts/authentication/oidc#login-services).
 
-## Set up a sign-in method
-
-<div className={`docs-product-grid ${docsProductGrid().className}`}>
-<div className="docs-product-group">
-
+<span id="set-up-a-sign-in-method" />
 <span id="private-keys" />
-
-### <DocsHomeProductIcon product="zones" />[Private keys](/docs/accounts/authentication/private-keys)
-
-Wallet, KMS, and HSM keys as signers or access keys.
-
-- [Private key sources](/docs/accounts/authentication/private-keys#private-key-sources)
-- [Require two treasury signers](/docs/accounts/authentication/private-keys#require-two-treasury-signers)
-- [Automate a backend](/docs/accounts/guides/automate-backend)
-
-</div>
-<div className="docs-product-group">
-
 <span id="p-256-keys" />
 <span id="device-sessions" />
-
-### <DocsHomeProductIcon product="accessKeys" />[Device keys](/docs/accounts/authentication/device-keys)
-
-A key on one device pays within limits, with no prompt.
-
-- [Create a device key](/docs/accounts/authentication/device-keys#create-the-key-on-the-device)
-- [Device key stores by platform](/docs/accounts/authentication/device-keys#device-key-stores-by-platform)
-- [Revoke a key](/docs/accounts/access-keys#revoke-an-access-key)
-
-</div>
-<div className="docs-product-group">
-
 <span id="try-a-passkey-account" />
-
-### <DocsHomeProductIcon product="authentication" />[Passkeys](/docs/accounts/authentication/passkeys)
-
-Customers approve with Face ID, Touch ID, Windows Hello, or a security key.
-
-- [Create a passkey account](/docs/accounts/authentication/passkeys#create-the-passkey)
-- [Passkey authenticators](/docs/accounts/authentication/passkeys#passkey-authenticators)
-- [Passkey signer weights](/docs/accounts/authentication/passkeys#passkey-signer-weights)
-
-</div>
-<div className="docs-product-group">
-
 <span id="add-email-sign-in" />
 <span id="how-login-signers-work" />
 <span id="use-a-hosted-auth-service-as-the-issuer" />
 <span id="restore-the-session-on-a-returning-visit" />
 <span id="publish-your-providers-keys" />
-
-### <DocsHomeProductIcon product="accounts" />[OIDC logins](/docs/accounts/authentication/oidc)
-
-Email and SMS codes, social logins, SSO, and Privy as signers. Pair each with a passkey.
-
-- [Enterprise SSO login](/docs/accounts/guides/enterprise-sso)
-- [Email and SMS codes](/docs/accounts/authentication/oidc#email-and-sms-codes)
-- [Privy logins](/docs/accounts/authentication/oidc#privy-logins)
-
-</div>
-<div className="docs-product-group">
-
 <span id="self-hosted-relay" />
 <span id="run-your-relay" />
 <span id="relay-trust" />
 
-### <DocsHomeProductIcon product="network" />[Login services](/docs/accounts/authentication/login-services)
+## Combine signing methods
 
-The identity provider, salt service, prover, and key publisher behind each OIDC login.
+A signer approves at its weight, and a transaction executes once approving weights reach the account's threshold. Mix methods so no single party reaches the threshold alone:
 
-- [What each service does](/docs/accounts/authentication/login-services#what-each-service-does)
-- [Run your own salt service](/docs/accounts/authentication/login-services#run-your-own-salt-service)
-- [Who you trust](/docs/accounts/authentication/login-services#what-each-service-can-and-cant-do)
+- **Customer accounts:** a passkey at weight 2 and two OIDC logins from different issuers at weight 1, at threshold 2. The passkey approves alone, and the logins recover it.
+- **Treasuries:** private keys in separate wallets or HSMs, such as 2 of 3.
+- **Everyday payments:** a device key or a server key as an [access key](/docs/accounts/access-keys), which pays alone within limits and never counts toward the threshold.
 
-</div>
-</div>
+See [Signing thresholds](/docs/accounts/security-policies) for recommended setups, and the [guides](/docs/accounts/guides/self-custody) for walkthroughs.
 
-## Who can sign in as a customer
+<span id="who-can-sign-in-as-a-customer" />
 
-The ID token names the customer's device key, and Tempo checks its proof on chain, so the salt service and prover can't sign for a customer. Two parties can sign in as any customer they cover: the issuer, and the owner of the key publisher that lists its keys. For email, SMS, and Privy logins, your auth service is that issuer. Pair each login with a passkey the customer holds, and use logins from different issuers, so no single issuer approves alone. See [Policies](/docs/accounts/security-policies).
+## Who can sign for a customer
+
+Only the keys and logins an account lists can approve. For an OIDC login, the ID token names the customer's device key and Tempo checks its proof on chain, so the salt service and prover can't sign. Two parties can sign in as any customer they cover: the issuer, and the owner of the key publisher that lists its keys. Keep each login below the threshold, and pair it with a passkey the customer holds.
 
 <span id="signer-rules" />
+<span id="authentication-limits" />
 
-## Authentication limits
+## Signing method limits
 
 | Limit | Value |
 | --- | --- |

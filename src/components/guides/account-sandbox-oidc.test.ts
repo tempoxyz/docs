@@ -23,7 +23,6 @@ import {
   loginOwner,
   loginPromptLabels,
   maskEmail,
-  maskPhone,
   maskPrivyIdentity,
   needsSignIn,
   nextConfig,
@@ -60,15 +59,15 @@ const keyAccount = (privateKey = generatePrivateKey()) => Tempo.Account.fromSecp
 
 describe('relay probe', () => {
   it('derives methods from issuers, or takes an explicit list', () => {
-    expect(relayMethods({ issuers: [googleIssuer, relayOrigin] })).toEqual(['email', 'google'])
-    expect(relayMethods({ issuers: [relayOrigin] })).toEqual(['email'])
-    expect(relayMethods({ issuers: [googleIssuer], methods: ['sms', 'email', 'workos'] })).toEqual([
-      'email',
-      'sms',
-    ])
+    expect(relayMethods({ issuers: [googleIssuer, relayOrigin] })).toEqual(['google'])
+    expect(relayMethods({ issuers: [relayOrigin] })).toEqual([])
+    // Methods the docs don't offer, such as email and SMS codes, drop out of an explicit list.
+    expect(relayMethods({ issuers: [googleIssuer], methods: ['sms', 'email', 'workos'] })).toEqual(
+      [],
+    )
     // Privy shares the relay's issuer, so only an explicit `methods` entry offers it.
     expect(relayMethods({ issuers: [relayOrigin], methods: ['privy', 'google', 'email'] })).toEqual(
-      ['email', 'google', 'privy'],
+      ['google', 'privy'],
     )
     expect(relayMethods({ issuers: [googleIssuer, relayOrigin] })).not.toContain('privy')
   })
@@ -77,11 +76,11 @@ describe('relay probe', () => {
     const config = {
       chainId: 31_318,
       issuers: [googleIssuer, relayOrigin],
-      methods: ['email', 'google', 'privy'],
+      methods: ['email', 'sms', 'google', 'privy'],
     }
     const fetchOk = (async () => Response.json(config)) as unknown as typeof fetch
     await expect(checkRelay({ fetch: fetchOk, protocol: 'http:' })).resolves.toMatchObject({
-      methods: ['email', 'google', 'privy'],
+      methods: ['google', 'privy'],
     })
   })
 
@@ -91,7 +90,7 @@ describe('relay probe', () => {
     await expect(checkRelay({ fetch: fetchOk, protocol: 'http:' })).resolves.toEqual({
       chainId: 31_318,
       issuers: config.issuers,
-      methods: ['email', 'google'],
+      methods: ['google'],
     })
     await expect(checkRelay({ fetch: fetchOk, protocol: 'https:' })).resolves.toBeNull()
     const wrongChain = (async () =>
@@ -107,33 +106,6 @@ describe('relay probe', () => {
   })
 })
 
-describe('SMS availability', () => {
-  const config = {
-    chainId: 31_318,
-    issuers: [googleIssuer, 'http://localhost:5173'],
-    methods: ['email', 'sms', 'google', 'workos'],
-  }
-  const relayWith = (gateway: 'up' | 'down') =>
-    (async (input: string | URL | Request) => {
-      if (String(input).endsWith('/api/config')) return Response.json(config)
-      if (gateway === 'down') throw new TypeError('Failed to fetch')
-      return new Response(null, { status: 404 })
-    }) as unknown as typeof fetch
-
-  it('offers SMS only while the gateway answers', async () => {
-    const up = await checkRelay({ fetch: relayWith('up'), protocol: 'http:' })
-    expect(up?.methods).toEqual(['email', 'google', 'sms'])
-    const down = await checkRelay({ fetch: relayWith('down'), protocol: 'http:' })
-    expect(down?.methods).toEqual(['email', 'google'])
-    const skipped = await checkRelay({
-      fetch: relayWith('up'),
-      protocol: 'http:',
-      smsGateway: false,
-    })
-    expect(skipped?.methods).toEqual(['email', 'google'])
-  })
-})
-
 describe('sign-in', () => {
   it('commits to a fresh P-256 key for 540 seconds', () => {
     const prepared = prepareLogin({ now: 1_000_000.7 })
@@ -142,7 +114,7 @@ describe('sign-in', () => {
     const owner = loginOwner({
       credential: credential(),
       privateKey: prepared.privateKey,
-      method: 'email',
+      method: 'google',
     })
     expect(owner.accessKeyAddress.toLowerCase()).toBe(prepared.accessKeyAddress.toLowerCase())
   })
@@ -177,7 +149,6 @@ describe('sign-in', () => {
       credential: JSON.stringify(value),
       privy: 'did:privy:cmabcdefghijklmnop7xyz',
       email: 'liam@tempo.xyz',
-      phone: null,
     }
     expect(parseCallback(message, 'abc')).toEqual({
       credential: value,
@@ -192,15 +163,13 @@ describe('sign-in', () => {
 
   it('names the issuer per method', () => {
     expect(issuerFor('google')).toBe(googleIssuer)
-    expect(issuerFor('email')).toBe(relayOrigin)
-    expect(issuerFor('sms')).toBe(relayOrigin)
     // The relay bridges Privy sign-ins into its own ID tokens.
     expect(issuerFor('privy')).toBe(relayOrigin)
     expect(issuerFor('privy', 'http://localhost:6000')).toBe('http://localhost:6000')
   })
 
   it('labels every method’s prompt and wrong-identity message', () => {
-    expect(loginMethods).toContain('privy')
+    expect(loginMethods).toEqual(['google', 'privy'])
     expect(loginPromptLabels.privy).toBe('Sign in with Privy…')
     expect(loginAccountNouns.privy).toBe('Privy account')
   })
@@ -209,17 +178,7 @@ describe('sign-in', () => {
 describe('login identities', () => {
   const address: Address = '0x132017efba342842f04f6bc2bc7f0ed1dd13cb87'
 
-  it('shows the email, a masked number, or the Google signer', () => {
-    expect(maskPhone('+15192227442')).toBe('+1 ••• ••• 7442')
-    expect(maskPhone('+44 20 7946 0958')).toBe('+44 ••• 0958')
-    expect(loginIdentity({ method: 'email', address, email: 'liam@tempo.xyz' })).toEqual({
-      subject: 'liam@tempo.xyz',
-      detail: 'OIDC · liam@tempo.xyz',
-    })
-    expect(loginIdentity({ method: 'sms', address, phone: '+15192227442' })).toEqual({
-      subject: '+1 ••• ••• 7442',
-      detail: 'OIDC · +1 ••• ••• 7442',
-    })
+  it('shows the Google account’s email, or the Google signer', () => {
     expect(loginIdentity({ method: 'google', address, email: 'liam@tempo.xyz' })).toEqual({
       subject: 'liam@tempo.xyz',
       detail: 'OIDC · Google · liam@tempo.xyz',
@@ -281,7 +240,7 @@ describe('login owner', () => {
     const owner = loginOwner({
       credential: credential({ issuedAt: now() - 700, validUntil: now() - 100 }),
       privateKey: P256.randomPrivateKey(),
-      method: 'email',
+      method: 'privy',
     })
     expect(owner.secondsLeft()).toBeLessThan(0)
     expect(needsSignIn(owner)).toBe(true)
@@ -296,7 +255,7 @@ describe('configurable signatures with logins', () => {
     loginOwner({
       credential: credential({ addressSeed: `0x${seed.repeat(32)}` }),
       privateKey: P256.randomPrivateKey(),
-      method: 'email',
+      method: 'privy',
     })
 
   it('chooses approvers up to the threshold and allows two logins at most', () => {

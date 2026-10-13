@@ -41,12 +41,7 @@ import {
   upgradeSalt,
   usdToUnits,
 } from './account-sandbox-devnet'
-import {
-  checkRelay,
-  LoginError,
-  type SignInResult,
-  smsGatewayHealthUrl,
-} from './account-sandbox-oidc'
+import { LoginError, type SignInResult } from './account-sandbox-oidc'
 
 function signer(id: string, kind: SignerKind, weight: number, lost = false): Signer {
   return {
@@ -82,8 +77,6 @@ describe('devnetKeyType', () => {
       (Object.keys(signerKinds) as SignerKind[]).map((kind) => [kind, devnetKeyType(kind)]),
     )
     expect(types).toEqual({
-      email: null,
-      sms: null,
       google: null,
       privy: null,
       apple: null,
@@ -192,7 +185,7 @@ describe('devnetBlocker', () => {
 
   it('blocks accounts with a login signer, applied or draft', () => {
     expect(devnetBlocker(loadPreset('multi-factor'))).toBe(reason)
-    expect(devnetBlocker(addSigner(loadPreset('from-scratch'), 'email'))).toBe(reason)
+    expect(devnetBlocker(addSigner(loadPreset('from-scratch'), 'google'))).toBe(reason)
   })
 
   it('allows accounts whose signers all sign for real', () => {
@@ -203,10 +196,10 @@ describe('devnetBlocker', () => {
 
   it('ignores removed logins', () => {
     const multiFactor = loadPreset('multi-factor')
-    const passkeyOnly = removeSigner(removeSigner(multiFactor, 'email'), 'sms')
+    const passkeyOnly = removeSigner(removeSigner(multiFactor, 'google'), 'privy')
     expect(passkeyOnly.signers.filter((item) => item.revoked).map((item) => item.id)).toEqual([
-      'email',
-      'sms',
+      'google',
+      'privy',
     ])
     expect(devnetBlocker(passkeyOnly)).toBeNull()
   })
@@ -216,24 +209,18 @@ describe('devnetBlocker with real logins', () => {
   afterEach(() => setLiveLogins([]))
   const logins = { logins: true }
 
-  it('runs email and Google logins on your own account while the auth app is up', () => {
-    setLiveLogins(['email', 'google'])
+  it('runs Google and Privy logins on your own account while the auth app is up', () => {
+    setLiveLogins(['google'])
     const scratch = loadPreset('from-scratch')
-    expect(devnetBlocker(addSigner(scratch, 'email'), logins)).toBeNull()
     expect(devnetBlocker(addSigner(scratch, 'google'), logins)).toBeNull()
-    expect(devnetBlocker(addSigner(scratch, 'sms'), logins)).toBe(
-      'Start the local auth app to use logins on devnet.',
-    )
-    setLiveLogins(['email', 'google', 'sms'])
-    expect(devnetBlocker(addSigner(scratch, 'sms'), logins)).toBeNull()
     // Privy is live only while the relay's config lists it.
     expect(loginBlocker('privy')).toBe('Start the local auth app to use logins on devnet.')
-    setLiveLogins(['email', 'google', 'sms', 'privy'])
+    setLiveLogins(['google', 'privy'])
     expect(devnetBlocker(addSigner(scratch, 'privy'), logins)).toBeNull()
   })
 
   it('blocks example logins, Apple, and SSO', () => {
-    setLiveLogins(['email', 'google', 'sms'])
+    setLiveLogins(['google', 'privy'])
     expect(devnetBlocker(loadPreset('multi-factor'), logins)).toBe(
       'This example’s logins aren’t live on devnet.',
     )
@@ -245,21 +232,21 @@ describe('devnetBlocker with real logins', () => {
 
   it('blocks every login while the auth app is down', () => {
     setLiveLogins([])
-    expect(loginBlocker('email')).toBe('Start the local auth app to use logins on devnet.')
+    expect(loginBlocker('privy')).toBe('Start the local auth app to use logins on devnet.')
     expect(devnetBlocker(addSigner(loadPreset('from-scratch'), 'google'), logins)).toBe(
       'Start the local auth app to use logins on devnet.',
     )
   })
 
   it('creates no devnet account when a sign-in is cancelled', async () => {
-    setLiveLogins(['email'])
+    setLiveLogins(['google'])
     const adapter = createDevnetAdapter({ rpcUrl: 'http://127.0.0.1:9', passkeys: 'headless' })
-    const account = addSigner(loadPreset('from-scratch'), 'email')
+    const account = addSigner(loadPreset('from-scratch'), 'google')
     const requestSignIn = vi.fn(async () => null)
     await expect(adapter.prepare(account, { requestSignIn })).rejects.toThrow('Sign-in cancelled.')
     expect(requestSignIn).toHaveBeenCalledWith({
-      method: 'email',
-      signer: 'Email login',
+      method: 'google',
+      signer: 'Google login',
       reason: 'add',
     })
     expect(await adapter.inspect('from-scratch')).toBeUndefined()
@@ -559,29 +546,6 @@ describe('access keys the reader adds', () => {
   })
 })
 
-describe('SMS gateway probe', () => {
-  it('asks the gateway’s health route with a no-cors GET by default', async () => {
-    expect(smsGatewayHealthUrl).toBe('http://127.0.0.1:5199/health')
-    const calls: [string, RequestInit | undefined][] = []
-    const fetch = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
-      calls.push([String(url), init])
-      if (String(url).endsWith('/api/config'))
-        return new Response(
-          JSON.stringify({ chainId: 31_318, issuers: ['http://localhost:5173'], methods: ['sms'] }),
-        )
-      return new Response(null, { status: 200 })
-    })
-    const status = await checkRelay({ fetch, protocol: 'http:' })
-    expect(status?.methods).toEqual(['sms'])
-    const [url, init] = calls[1]
-    expect(url).toBe('http://127.0.0.1:5199/health')
-    // A no-cors GET carries no Origin header, and the probe adds none.
-    expect(init?.mode).toBe('no-cors')
-    expect(init?.method ?? 'GET').toBe('GET')
-    expect(init?.headers).toBeUndefined()
-  })
-})
-
 describe('salt collisions', () => {
   const config = {
     owners: [{ owner: '0x00000000000000000000000000000000000000aa' as const, weight: 1 }],
@@ -646,19 +610,19 @@ describe('keys prepared before the step that adds them', () => {
   })
 
   it('adds a login from a completed sign-in instead of asking for one', async () => {
-    setLiveLogins(['email'])
+    setLiveLogins(['google'])
     const devnet = adapter()
     const address = '0x00000000000000000000000000000000000000ee' as const
-    const done = { method: 'email', email: 'reader@example.com', owner: { address } }
+    const done = { method: 'google', email: 'reader@example.com', owner: { address } }
     const requestSignIn = vi.fn(async () => null)
     const options = { signIns: [done as unknown as SignInResult], requestSignIn }
-    expect(await devnet.prepareSigner({ kind: 'email', name: 'Email login' }, options)).toEqual({
+    expect(await devnet.prepareSigner({ kind: 'google', name: 'Google login' }, options)).toEqual({
       address,
     })
     expect(requestSignIn).not.toHaveBeenCalled()
     // Each completed sign-in adds one login.
     await expect(
-      devnet.prepareSigner({ kind: 'email', name: 'Email login' }, options),
+      devnet.prepareSigner({ kind: 'google', name: 'Google login' }, options),
     ).rejects.toThrow('Sign-in cancelled.')
     expect(requestSignIn).toHaveBeenCalledTimes(1)
   })

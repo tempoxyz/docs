@@ -1218,7 +1218,7 @@
     },
     {
       "source": "/developers/docs/accounts/advanced/relay",
-      "destination": "/developers/docs/accounts/authentication/login-services",
+      "destination": "/developers/docs/accounts/authentication/oidc#login-services",
       "permanent": true
     },
     {
@@ -1237,8 +1237,13 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/accounts/authentication/login-services",
+      "destination": "/developers/docs/accounts/authentication/oidc#login-services",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/accounts/authentication/relays",
-      "destination": "/developers/docs/accounts/authentication/login-services",
+      "destination": "/developers/docs/accounts/authentication/oidc#login-services",
       "permanent": true
     },
     {
