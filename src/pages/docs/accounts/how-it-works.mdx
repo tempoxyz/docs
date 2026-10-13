@@ -19,10 +19,10 @@ This page follows one account with three signers: a passkey on the customer's ph
 
 <AccountDiagram
   name="address"
-  alt="An address holds TIP-20 balances. It is a single-key account or a configurable account, and either kind can add access keys."
+  alt="An address is either a single-key account (EOA) with one key, or a configurable account with weighted signers and a threshold. Both kinds have TIP-20 balances, access keys, and a fee token."
 />
 
-The address is the account's public identifier, and it holds the account's TIP-20 balances. It's one of two kinds:
+The address is the account's public identifier. It holds the account's TIP-20 balances and sets the account's default [fee token](/docs/accounts/fees). It's one of two kinds:
 
 | Kind | Who approves |
 | --- | --- |
@@ -40,7 +40,7 @@ The example account is configurable, so the customer keeps the same address when
 
 <AccountDiagram
   name="signers"
-  alt="A passkey, a key, and a login each carry weight 1. Signers whose weights reach the threshold of 2 approve the transaction."
+  alt="A signer has a weight and is one of four types: private key, device key, passkey, or OIDC login. The sum of approving signers' weights must reach the threshold."
 />
 
 Signers approve payments and account changes. Each signer has an auth type and a weight, and a transaction executes once signers whose weights reach the threshold approve it. In the example, each signer has weight 1 and the threshold is 2, so the passkey and the Google login can pay together, and the recovery key can stand in for either one.
@@ -60,7 +60,7 @@ Only signers can change signers and the threshold. A change voids approvals coll
 
 <AccountDiagram
   name="access-keys"
-  alt="An access key is bound by a TIP-20 spending limit, an expiry, and scopes. An admin access key has no limits and manages the other access keys."
+  alt="An access key has a key type (passkey, P-256, or secp256k1), spending limits per TIP-20 token that apply once or per period, an expiry, and scopes over contracts, functions, and recipients. An admin access key has no limits and manages other access keys."
 />
 
 Collecting two approvals for every payout is too slow for a server. An access key pays on its own, with no signer approval, and Tempo enforces its bounds instead. Each access key is a passkey, a P-256 key, or a secp256k1 key.
