@@ -10,10 +10,6 @@ import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
 # Access keys
 
-:::warning
-**Not live yet.** Committed access keys ([TIP-1134](https://tips.sh/1134)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
-:::
-
 An access key pays from an account without the signers, inside a spending limit, an expiry, and scopes that Tempo checks on every transaction. Give each device, backend, or agent its own key with the narrowest bounds its task needs, because Tempo enforces those bounds even if the key leaks.
 
 <span id="access-keys" />
@@ -145,4 +141,4 @@ Each control's page lists its own limits. These apply to every access key:
 - Key management calls must come from the account's own transaction (`msg.sender == tx.origin`), not through a contract.
 - To check that a signature came from an active access key of an account, use `verifyKeychain`. See [Verify approvals](/docs/accounts/policies/signing-thresholds#collect-and-verify-approvals).
 
-Specifications: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys](https://tips.sh/1049), [configurable account access keys](https://tips.sh/1111), [committed access keys](https://tips.sh/1134).
+Specifications: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys](https://tips.sh/1049), [configurable account access keys](https://tips.sh/1111).
