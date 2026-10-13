@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { POST } from '../pages/_api/api/routes-quote'
+import { GET, POST } from '../pages/_api/api/routes-quote'
 
 const fetchMock = vi.fn<typeof fetch>()
 const quote = { sourceAmount: { baseUnits: '1000000' }, requestId: 'req_1' }
@@ -103,6 +103,14 @@ describe('Routes quote proxy', () => {
       ),
     )
     expect(response.status).toBe(403)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  test('answers GET with 405, so quotes never travel in a URL', async () => {
+    const response = GET()
+    expect(response.status).toBe(405)
+    expect(response.headers.get('allow')).toBe('POST')
+    expect(response.headers.get('cache-control')).toBe('no-store')
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
