@@ -13,7 +13,7 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   overview:
     'Choose a starting point, send a test payment, get testnet funds, connect a coding agent, and find the SDKs and CLI.',
   accounts:
-    'Create accounts, connect wallets, read balances, send and receive payments, and reconcile deposits.',
+    'Create accounts, set up sign-in, security policies, access keys, and fees, and follow guides for wallet providers, SSO, self-custody, agents, automations, spending, and treasuries.',
   earn: 'Choose a vault, deposit stablecoins, read positions, and withdraw. Earn is in beta; see the introduction for access.',
   routes:
     'Accept cross-network deposits, quote transfers, and track delivery. Routes is in beta; see the introduction for access.',
@@ -22,7 +22,7 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   'machine-payments':
     'Pay for APIs, accept API payments, find services, and use Machine Payments Protocol (MPP).',
   developers:
-    'Build on Tempo EVM: wallets and keys, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.',
+    'Build on Tempo EVM: wallets and keys, payments, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.',
   api: 'Tempo API reference: authentication, conventions, endpoints grouped by product, Console management endpoints, JSON-RPC, and the indexer. An API key authenticates API requests; an account signing key authorizes transactions.',
   ecosystem:
     'Find wallet providers, bridges, RPC infrastructure, data services, and other third-party integrations.',

@@ -1,0 +1,75 @@
+---
+title: Set up a spending account
+seoTitle: Fund a Card Program from a Tempo Account with a Daily Limit | Tempo Docs
+description: Authorize an access key that funds a card program from a Tempo account within a renewing daily limit, payable only to the program's funding address.
+interactive: true
+---
+
+import { AccessKeyDemo } from '../../../../components/guides/AccessKeyDemo'
+
+# Set up a spending account
+
+Fund a customer's card from their Tempo account. The account's signers authorize one access key for your card program, payable only to its funding address and capped by a daily limit that renews. Card spend then needs no prompt, and Tempo rejects anything over the limit.
+
+## Fund a card with a daily limit
+
+The demo authorizes a key with a 10 AlphaUSD daily limit on Moderato testnet, pays with it, shows Tempo rejecting an overspend, then revokes it.
+
+<AccessKeyDemo />
+
+:::::steps
+
+### Get the card program's funding address
+
+Choose a [card issuing partner](/docs/partners/cards) and get the address that funds the customer's card. Save it with the customer's record.
+
+### Create the funding key in your backend
+
+```ts [backend/card-key.ts]
+import { Account, P256 } from 'viem/tempo'
+
+const privateKey = P256.randomPrivateKey()
+await secrets.put(`cards/${address}`, privateKey) // your secret manager
+
+const cardKey = Account.fromP256(privateKey, { access: address }) // the customer's account address
+```
+
+### Authorize a renewing daily limit
+
+```ts [app/enable-card.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+await client.accessKey.authorizeSync({
+  accessKey: { accessKeyAddress, keyType: 'p256' },
+  account,
+  expiry: Expiry.days(30),
+  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }], // renews each day
+  scopes: [{ address: alphaUsd, selector: 'transfer(address,uint256)', recipients: [cardFundingAddress] }],
+})
+```
+
+The customer approves once in your app. Show the daily limit, the card program, and the expiry first.
+
+### Fund card spend without prompts
+
+```ts [backend/fund-card.ts]
+await client.token.transferSync({
+  account: cardKey,
+  amount: parseUnits('42.50', 6),
+  to: cardFundingAddress,
+  token: alphaUsd,
+})
+```
+
+Tempo rejects a transfer over what's left today, to any other address, or after expiry.
+
+### Show the limit and let the customer pause the card
+
+Show `client.accessKey.getRemainingLimit({ accessKey: accessKeyAddress, account, token: alphaUsd })` next to the card. To pause it, [revoke the key](/docs/accounts/access-keys#revoke-an-access-key); to change the limit, use `updateSpendingLimit`.
+
+:::::
+
+Before the key expires, have the customer authorize a new one. Access key rules and limits: [Access keys](/docs/accounts/access-keys#access-key-limits).

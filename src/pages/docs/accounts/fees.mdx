@@ -1,0 +1,39 @@
+---
+title: Fees
+seoTitle: Sponsor Fees and Set a Default Fee Token for Tempo Accounts | Tempo Docs
+description: Pay network fees for your customers' accounts with a fee payer, or set the stablecoin an account pays its own fees in.
+---
+
+# Fees
+
+Every Tempo transaction pays its network fee in a USD stablecoin. Either your fee payer pays it for the account, or the account pays it in a fee token it chooses.
+
+## Sponsor an account's fees
+
+Point the client at a fee payer service, then mark each sponsored transaction with `feePayer: true`. The account needs no fee balance, and the fee payer can only pay fees: it can't approve or move the account's funds.
+
+```ts [config.ts]
+import { tempoModerato } from 'viem/chains'
+import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
+
+export const config = createConfig({
+  connectors: [tempoWallet({ feePayer: 'https://sponsor.moderato.tempo.xyz' })],
+  chains: [tempoModerato],
+  transports: { [tempoModerato.id]: http() },
+})
+```
+
+The endpoint above is the public Moderato testnet fee payer. For production, use the [Fee Payer API](/docs/api/fee-payer) or [run your own](/docs/server/relay-handler) with your own sponsorship policy. Full walkthrough: [Sponsor fees](/docs/guide/payments/sponsor-user-fees).
+
+## Set an account's default fee token
+
+Set the stablecoin an account pays its fees in, so its transactions don't pass `feeToken` each time:
+
+```ts [set-fee-token.ts]
+const { receipt } = await client.fee.setUserTokenSync({
+  token: '0x20c0000000000000000000000000000000000001', // AlphaUSD
+})
+```
+
+To pay one transaction's fee in another token, pass `feeToken` on that transaction. See [Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) and [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).

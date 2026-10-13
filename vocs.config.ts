@@ -500,64 +500,52 @@ export default defineConfig({
     ]
     const accountsSidebar = [
       {
-        text: 'Accounts',
+        text: 'Tempo Accounts',
         items: [
-          { text: 'Introduction', link: '/docs/accounts' },
-          { text: 'Choose an account model', link: '/docs/accounts/integration' },
-          {
-            text: 'Account setup',
-            collapsed: true,
-            items: [
-              { text: 'Client setup', link: '/docs/accounts/examples' },
-              { text: 'Create an account', link: '/docs/accounts/create' },
-              { text: 'Connect a wallet', link: '/docs/accounts/integrate' },
-              { text: 'Wallet providers', link: '/docs/accounts/providers' },
-            ],
-          },
-          { text: 'Balances and activity', link: '/docs/accounts/balances' },
-          { text: 'Delegate account access', link: '/docs/accounts/agents' },
+          { text: 'Overview', link: '/docs/accounts' },
+          { text: 'How it works', link: '/docs/accounts/how-it-works' },
+          { text: 'Create an account', link: '/docs/accounts/create' },
         ],
       },
       {
-        text: 'Payments',
+        text: 'Setup',
         items: [
-          { text: 'Payment integration', link: '/docs/guide/payments' },
-          { text: 'Fund an account', link: '/docs/guide/getting-funds' },
           {
-            text: 'Send payments',
-            link: '/docs/guide/payments/send-a-payment',
+            text: 'Authentication',
+            link: '/docs/accounts/authentication',
             collapsed: true,
             items: [
-              { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
+              { text: 'Private keys', link: '/docs/accounts/authentication/private-keys' },
+              { text: 'Device keys', link: '/docs/accounts/authentication/device-keys' },
+              { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
               {
-                text: 'Parallel payments',
-                link: '/docs/guide/payments/send-parallel-transactions',
+                text: 'OIDC logins',
+                link: '/docs/accounts/authentication/oidc',
+                items: [
+                  { text: 'Login services', link: '/docs/accounts/authentication/login-services' },
+                ],
               },
             ],
           },
-          {
-            text: 'Receive payments',
-            link: '/docs/guide/payments/accept-a-payment',
-            collapsed: true,
-            items: [
-              {
-                text: 'Customer deposit addresses',
-                link: '/docs/guide/payments/virtual-addresses',
-              },
-              { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
-              { text: 'Receive policies', link: '/docs/guide/payments/configure-receive-policies' },
-              { text: 'Verify payments', link: '/docs/guide/payments/accept-a-payment/examples' },
-              { text: 'Deposit address reference', link: '/docs/protocol/tip20/virtual-addresses' },
-              { text: 'Receive policy reference', link: '/docs/protocol/tip403/receive-policies' },
-            ],
-          },
+          { text: 'Delegation', link: '/docs/accounts/access-keys' },
+          { text: 'Policies', link: '/docs/accounts/security-policies' },
+          { text: 'Recovery', link: '/docs/accounts/recovery' },
+          { text: 'Fees', link: '/docs/accounts/fees' },
         ],
       },
       {
-        text: 'Fees',
+        text: 'Guides',
         items: [
-          { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
-          { text: 'Choose a fee token', link: '/docs/guide/payments/pay-fees-in-any-stablecoin' },
+          { text: 'Use a wallet provider', link: '/docs/accounts/guides/wallet-provider' },
+          { text: 'Enterprise SSO login', link: '/docs/accounts/guides/enterprise-sso' },
+          { text: 'Set up self-custody', link: '/docs/accounts/guides/self-custody' },
+          { text: 'Set up an agent wallet', link: '/docs/accounts/guides/agent-wallet' },
+          { text: 'Automate a backend', link: '/docs/accounts/guides/automate-backend' },
+          {
+            text: 'Set up a company treasury wallet',
+            link: '/docs/accounts/guides/company-treasury',
+          },
+          { text: 'Set up a spending account', link: '/docs/accounts/guides/spending-account' },
         ],
       },
     ]
@@ -910,12 +898,67 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Account model', link: '/docs/accounts/keys' },
-              { text: 'Access keys', link: '/docs/accounts/access-keys' },
-              { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
+              { text: 'Single-key accounts', link: '/docs/development/single-key-accounts' },
+              { text: 'Configurable accounts', link: '/docs/development/configurable-accounts' },
+              { text: 'Account Keychain', link: '/docs/development/account-keychain' },
               { text: 'Integrate a wallet', link: '/docs/quickstart/wallet-developers' },
               {
                 text: 'Keychain specification',
                 link: '/docs/protocol/transactions/AccountKeychain',
+              },
+            ],
+          },
+          {
+            text: 'Payments',
+            collapsed: true,
+            items: [
+              { text: 'Payment integration', link: '/docs/guide/payments' },
+              { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
+              { text: 'Choose a fee token', link: '/docs/guide/payments/pay-fees-in-any-stablecoin' },
+              { text: 'Fund an account', link: '/docs/guide/getting-funds' },
+              {
+                text: 'Send payments',
+                link: '/docs/guide/payments/send-a-payment',
+                collapsed: true,
+                items: [
+                  { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
+                  {
+                    text: 'Parallel payments',
+                    link: '/docs/guide/payments/send-parallel-transactions',
+                  },
+                  {
+                    text: 'Payment examples',
+                    link: '/docs/guide/payments/send-a-payment/examples',
+                  },
+                ],
+              },
+              {
+                text: 'Receive payments',
+                link: '/docs/guide/payments/accept-a-payment',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Customer deposit addresses',
+                    link: '/docs/guide/payments/virtual-addresses',
+                  },
+                  { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
+                  {
+                    text: 'Receive policies',
+                    link: '/docs/guide/payments/configure-receive-policies',
+                  },
+                  {
+                    text: 'Verify payments',
+                    link: '/docs/guide/payments/accept-a-payment/examples',
+                  },
+                  {
+                    text: 'Deposit address reference',
+                    link: '/docs/protocol/tip20/virtual-addresses',
+                  },
+                  {
+                    text: 'Receive policy reference',
+                    link: '/docs/protocol/tip403/receive-policies',
+                  },
+                ],
               },
             ],
           },
@@ -1292,6 +1335,181 @@ export default defineConfig({
     {
       source: '/sdk/typescript/prool',
       destination: '/docs/sdk/typescript/prool/setup',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/sandbox',
+      destination: '/docs/accounts/create',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/new-device',
+      destination: '/docs/accounts/authentication/device-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/admin-keys',
+      destination: '/docs/accounts/access-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/identity-provider',
+      destination: '/docs/accounts/guides/enterprise-sso',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/relay',
+      destination: '/docs/accounts/authentication/login-services',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/p256-keys',
+      destination: '/docs/accounts/authentication/device-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/email-otp',
+      destination: '/docs/accounts/authentication/oidc#email-and-sms-codes',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/privy',
+      destination: '/docs/accounts/authentication/oidc#privy-logins',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/relays',
+      destination: '/docs/accounts/authentication/login-services',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/add-signers',
+      destination: '/docs/accounts/guides/self-custody#add-a-backup-signer',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/multi-factor',
+      destination: '/docs/accounts/guides/self-custody#require-multi-factor-approval',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/rotate-keys',
+      destination: '/docs/accounts/guides/company-treasury#rotate-an-approvers-key',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/replace-keys',
+      destination: '/docs/accounts/guides/self-custody#recover-from-a-lost-passkey',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/change-email',
+      destination: '/docs/accounts/guides/enterprise-sso#handle-an-email-change',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/revoke-keys',
+      destination: '/docs/accounts/access-keys#revoke-an-access-key',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/export',
+      destination: '/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/recover',
+      destination: '/docs/accounts/guides/self-custody#recover-from-a-lost-passkey',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/upgrade',
+      destination: '/docs/accounts/create#upgrade-an-existing-account',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/verify-approvals',
+      destination: '/docs/accounts/security-policies#verify-approvals',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/team-accounts',
+      destination: '/docs/accounts/security-policies#team-budgets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/approval-rules',
+      destination: '/docs/accounts/security-policies#approval-escalation-for-larger-payments',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/integration',
+      destination: '/docs/accounts/how-it-works',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/agents',
+      destination: '/docs/accounts/guides/agent-wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/backend-automation',
+      destination: '/docs/accounts/guides/automate-backend',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/security',
+      destination: '/docs/accounts/guides/self-custody',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-management',
+      destination: '/docs/accounts/recovery',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/approvals',
+      destination: '/docs/accounts/security-policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/team-budgets',
+      destination: '/docs/accounts/security-policies#team-budgets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/policies',
+      destination: '/docs/accounts/security-policies#approval-escalation-for-larger-payments',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/private-policies',
+      destination: '/docs/accounts/security-policies#experimental-private-policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/verified-facts',
+      destination: '/docs/accounts/security-policies#experimental-private-policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/integrate',
+      destination: '/docs/accounts/guides/wallet-provider#connect-tempo-wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/balances',
+      destination: '/docs/guide/payments/accept-a-payment#read-balances',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/examples',
+      destination: '/docs/guide/payments/send-a-payment/examples#payment-client-setup',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/providers',
+      destination: '/docs/accounts/guides/wallet-provider',
       status: 301,
     },
     {

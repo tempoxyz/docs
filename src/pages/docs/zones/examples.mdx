@@ -41,6 +41,6 @@ export const zoneConfig = createConfig({
 
 Import `zoneConfig` into each example. Set `account` to the authenticated address, `token` to the enabled token address, and `decimals` to the token's configured precision. The RPC scopes every read to the account represented by the authorization token.
 
-For React applications, use your backend's authenticated, account-scoped RPC proxy as the browser transport and configure its chain in your [Wagmi provider](/docs/accounts/examples#wagmi-client). The server must authenticate the current user and select that user's Zone token on every request. Do not use one shared account token for all customers.
+For React applications, use your backend's authenticated, account-scoped RPC proxy as the browser transport and configure its chain in your [Wagmi provider](/docs/guide/payments/send-a-payment/examples#wagmi-client). The server must authenticate the current user and select that user's Zone token on every request. Do not use one shared account token for all customers.
 
 Continue with [Balances and activity](/docs/zones/balances).

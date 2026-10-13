@@ -1,0 +1,120 @@
+---
+title: Use a wallet provider
+seoTitle: Use Privy, Turnkey, or Tempo Wallet with Tempo Accounts | Tempo Docs
+description: Make your wallet provider's key one signer on each customer's Tempo account, integrate Privy or Turnkey, and connect Tempo Wallet with the Accounts SDK.
+interactive: true
+ogImage: /og/2026-q4/og_2026-q4_docs_accounts-providers_title-f5_v02.png
+---
+
+import * as Demo from '../../../../components/guides/Demo'
+import { SignInWithTempo } from '../../../../components/guides/steps/wallet/SignInWithTempo'
+
+# Use a wallet provider
+
+Run embedded wallets with a provider such as Privy or Turnkey, while the customer keeps a signer only they hold. Tempo enforces the threshold and access-key limits on whatever the provider signs.
+
+<span id="choose-the-controls-your-application-needs" />
+
+| Party | Responsibility |
+| --- | --- |
+| Your application | Authenticates customers, maps their records to account addresses, and decides when to request a payment |
+| Your wallet provider | Manages its signing key and enforces its configured policies before signing |
+| Tempo | Validates signatures and enforces the account's threshold and access-key limits |
+
+<span id="make-the-providers-key-one-signer" />
+
+## Make the provider's key one signer
+
+This example uses the [enterprise apps setup](/docs/accounts/security-policies#recommended-signer-setups): the customer's passkey (2), your provider's key (1), and a recovery provider (1), with threshold 2. The customer approves alone; the providers approve only together.
+
+:::::steps
+
+### Create the account with the customer's passkey
+
+```ts [account.ts]
+import { Account, WebAuthnP256 } from 'viem/tempo'
+
+const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
+const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
+```
+
+### Add the provider's key and a recovery provider
+
+```ts [account.ts]
+await client.accounts.updateConfigSync({
+  account,
+  nextConfig: {
+    owners: [
+      { owner: passkey.address, weight: 2 },
+      { owner: providerKeyAddress, weight: 1 }, // the address of the key your provider manages
+      { owner: recoveryAddress, weight: 1 }, // the address your recovery provider gives you
+    ],
+    threshold: 2,
+  },
+  owner: passkey,
+})
+```
+
+The customer approves the update with their passkey. See [Add a backup signer](/docs/accounts/guides/self-custody#add-a-backup-signer) for the full flow.
+
+### Authorize a device key for everyday payments
+
+Give the customer's device an [access key](/docs/accounts/access-keys) with a daily limit, so payments within it need no prompt.
+
+### Hand the account to the customer when they leave
+
+Swap the provider's key for a signer the customer holds. See [Hand off to a self-custodial wallet](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet).
+
+:::::
+
+To sign customers in with your existing login and keep no provider key, use an [OIDC login](/docs/accounts/authentication/oidc) or a [Privy login](/docs/accounts/authentication/oidc#privy-logins).
+
+## Build with Privy
+
+Privy's [Tempo integration](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) exposes Tempo transaction signing from embedded wallets. Its Tempo transaction API supports batched calls, fee-token selection, sponsorship, and validity windows.
+
+Start with the [Privy Tempo example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) for wallet creation, authentication, and payments in a browser application. Keep Privy and your RPC client on the same network.
+
+## Build with Turnkey
+
+Turnkey's [Tempo integration](https://docs.turnkey.com/features/networks/tempo) covers address derivation, transaction construction, and signing policies. It uses `ADDRESS_TYPE_ETHEREUM` for Tempo addresses and exposes Tempo transaction fields to its policy engine through the `tempo.tx` namespace.
+
+Start with Turnkey's [Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo) for transaction construction and broadcast, including single calls, batches, and fee sponsorship. For embedded wallet UI, use the [Embedded Wallet Kit](https://docs.turnkey.com/sdks/react/getting-started).
+
+<span id="let-the-provider-run-login-services" />
+
+## Let the provider run login services
+
+With a login signer, Tempo checks each sign-in on chain and the signing key stays on the customer's device. Your wallet provider can run the [salt service and prover](/docs/accounts/authentication/login-services) for your customers and hold no key for them, so it can't move their funds. If the wallet provider also issues the logins, it can sign in as those customers, so pair each login with a passkey the customer holds.
+
+<span id="integrate-accounts" />
+<span id="connect-tempo-wallet" />
+<span id="use-tempo-wallet-sign-in" />
+<span id="use-tempos-hosted-sign-in" />
+
+## Connect Tempo Wallet
+
+If customers already hold a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet handles signing; your application uses the selected address. This example uses Moderato testnet.
+
+<Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
+  <SignInWithTempo stepNumber={1} />
+</Demo.Container>
+
+```bash
+pnpm add --save-exact accounts@0.18.4 viem
+```
+
+<span id="connect-tempo-wallet-from-your-application" />
+
+```ts [connect.ts]
+import { Provider } from 'accounts'
+import { tempoModerato } from 'viem/chains'
+
+const provider = Provider.create({ chains: [tempoModerato], testnet: true })
+const [address] = await provider.request({ method: 'eth_requestAccounts' })
+if (!address) throw new Error('No account was selected')
+```
+
+On `accountsChanged`, update the selected address or clear it when the wallet disconnects. On `chainChanged`, refresh network-dependent state before enabling transactions. Keep this connection separate from your application's authenticated customer session. The [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup) creates wallet and public clients from this provider.
+
+Browse [wallet partners](/docs/partners/wallets) for other integrations.

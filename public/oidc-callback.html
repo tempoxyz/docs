@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Signing in</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1a1a1a;
+        --muted: #6b6b6b;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111111;
+          --fg: #f2f2f2;
+          --muted: #9a9a9a;
+        }
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        color: var(--fg);
+        font: 15px/1.5 system-ui, -apple-system, sans-serif;
+      }
+      p {
+        margin: 0 16px;
+        max-width: 28rem;
+        text-align: center;
+      }
+      #detail {
+        color: var(--muted);
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p id="status">Finishing sign-in…</p>
+      <p id="detail"></p>
+    </main>
+    <script>
+      // The account sandbox's sign-in popup lands here. The local auth app redirects with the
+      // ZK credential in the URL fragment (which no server sees) and the sandbox's request ID in
+      // the query. This page hands both to the sandbox on this origin and closes.
+      ;(() => {
+        const params = new URLSearchParams(location.hash.slice(1))
+        const request = new URLSearchParams(location.search).get('request')
+        // Drop the credential from the address bar and history.
+        history.replaceState(null, '', location.pathname)
+        const message = {
+          type: 'tempo-oidc-callback',
+          request,
+          credential: params.get('credential'),
+          error: params.get('error'),
+          email: params.get('email'),
+          phone: params.get('phone'),
+          // A Privy sign-in's DID, such as `did:privy:cm…`.
+          privy: params.get('privy'),
+        }
+        let delivered = false
+        // Only a sandbox on this same origin can receive it: postMessage targets this origin, and
+        // BroadcastChannel never leaves it. The channel covers popups whose opener link was cut
+        // when a provider's page isolated the window.
+        try {
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage(message, location.origin)
+            delivered = true
+          }
+        } catch {}
+        try {
+          const channel = new BroadcastChannel('tempo-oidc')
+          channel.postMessage(message)
+          channel.close()
+          delivered = true
+        } catch {}
+        const status = document.getElementById('status')
+        const detail = document.getElementById('detail')
+        if (!request) {
+          status.textContent = 'This page finishes sign-ins started from the account sandbox.'
+          return
+        }
+        status.textContent = message.error ? 'Sign-in failed.' : 'Signed in.'
+        detail.textContent = message.error
+          ? message.error
+          : delivered
+            ? 'You can close this window.'
+            : 'Return to the docs tab.'
+        window.close()
+      })()
+    </script>
+  </body>
+</html>

@@ -13,7 +13,7 @@ function links(value: unknown): string[] {
   ]
 }
 
-// Retained landing URLs overlap the current Accounts and tools hubs.
+// Retained landing URLs overlap the current Tempo EVM and tools hubs.
 const retainedLandings = new Set([
   '/docs/build',
   '/docs/payments',
@@ -82,8 +82,8 @@ describe('specification navigation ownership', () => {
 
   it.each([
     ['/docs/protocol/transactions/AccountKeychain', 'developers', '/docs/development'],
-    ['/docs/protocol/tip20/virtual-addresses', 'accounts', '/docs/accounts'],
-    ['/docs/protocol/tip403/receive-policies', 'accounts', '/docs/accounts'],
+    ['/docs/protocol/tip20/virtual-addresses', 'developers', '/docs/development'],
+    ['/docs/protocol/tip403/receive-policies', 'developers', '/docs/development'],
     ...['', '/architecture', '/accounts', '/bridging', '/rpc', '/execution', '/proving'].map(
       (suffix) => [`/docs/protocol/zones${suffix}`, 'zones', '/docs/zones'],
     ),

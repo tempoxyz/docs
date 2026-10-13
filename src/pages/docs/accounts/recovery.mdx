@@ -1,0 +1,123 @@
+---
+title: Recovery
+seoTitle: Rotate, Replace, Revoke, and Recover Tempo Account Signers | Tempo Docs
+description: Replace a lost phone, a changed email, or a compromised key with the remaining signers, revoke access keys, and hand an account to its customer, at the same address and balance.
+---
+
+# Recovery
+
+Every recovery is one signer update: the account's remaining signers approve a new configuration, and the address, balance, and history stay the same. Tempo can't override an account's signers, so the remaining signers must reach the threshold.
+
+<span id="key-rotation" />
+<span id="key-replacement" />
+<span id="recovery-situations" />
+
+## Recovery by situation
+
+| Situation | Change | Approved by | Walkthrough |
+| --- | --- | --- | --- |
+| Lost phone or passkey | Swap the lost passkey for a new one, and revoke the phone's access keys | The remaining signers, such as two logins | [Recover from a lost passkey](/docs/accounts/guides/self-custody#recover-from-a-lost-passkey) |
+| New email or login | Swap the old login signer for the new one at the same weight | The other signers | [Enterprise SSO login](/docs/accounts/guides/enterprise-sso) |
+| Scheduled key rotation | Swap a KMS, hardware, or provider key at the same weight | The current signers, including the old key | [Rotate an approver's key](/docs/accounts/guides/company-treasury#rotate-an-approvers-key) |
+| Compromised key | Swap or remove it, and revoke access keys it authorized | The other signers, without it | [Rotate an approver's key](/docs/accounts/guides/company-treasury#rotate-an-approvers-key) |
+| Departing approver | Remove their signer, and lower the threshold if needed | The remaining approvers | [Remove a departing approver](/docs/accounts/guides/company-treasury#remove-a-departing-approver) |
+| Single-key account with no backup | [Upgrade it](#make-a-single-key-account-recoverable) to a configurable account with a backup signer | The original key | [Upgrade an existing account](/docs/accounts/create#upgrade-an-existing-account) |
+| Customer leaves your app | Swap your app's signers for the customer's | Your app's signers | [Hand off to a self-custodial wallet](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet) |
+
+<span id="replace-a-signer" />
+
+## Replace a signer
+
+Read the current signers, swap the one you're replacing at the same weight, and approve with signers that reach the threshold:
+
+```ts [replace-signer.ts]
+import { isAddressEqual } from 'viem'
+import { Account } from 'viem/tempo'
+
+const account = Account.fromConfig(address) // the account's saved address
+const { owners, threshold } = await client.accounts.getConfig({ address: account.address })
+
+const { receipt } = await client.accounts.updateConfigSync({
+  account,
+  nextConfig: {
+    owners: owners.map((entry) =>
+      isAddressEqual(entry.owner, lostSigner) ? { owner: newSigner, weight: entry.weight } : entry,
+    ),
+    threshold,
+  },
+  owner: remainingSigner,
+})
+
+await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
+```
+
+`getConfig` needs a client whose transport is a relay with `Relay.accounts`. Skip the second approval when the first signer reaches the threshold. Once the update lands, the old signer can't approve, and approvals collected before it are void.
+
+<span id="revoke-a-key" />
+
+## Revoke access keys
+
+Signer changes don't touch access keys. Revoke each one the old holder could still use, such as a device key on a lost phone:
+
+```ts [revoke.ts]
+await client.accessKey.revokeSync({ accessKey: lostDeviceKey, account })
+```
+
+A revoked key can't be authorized again. Authorize a new one instead. See [Delegation](/docs/accounts/access-keys#revoke-an-access-key).
+
+## Plan for recovery before you need it
+
+Set up signers so that losing any one still leaves enough weight to replace it: for example, a passkey (2) plus two logins from different issuers (1 each), at threshold 2. A lost passkey is replaced by both logins, and a lost login by the passkey. See [Policies](/docs/accounts/security-policies#recommended-signer-setups).
+
+```ts [check-recoverable.ts]
+const config = await client.accounts.getConfig({ address: account.address })
+const total = config.owners.reduce((sum, { weight }) => sum + weight, 0)
+const recoverable = config.owners.every(({ weight }) => total - weight >= config.threshold)
+```
+
+Count at most two logins toward what remains, since a transaction carries at most two login approvals.
+
+## Make a single-key account recoverable
+
+A single-key account, like an Ethereum EOA, has no recovery: losing its one key loses the account. Upgrade it in place to a configurable account with a backup signer, at the same address, balances, token approvals, and access keys:
+
+```ts [upgrade.ts]
+import { parseAbi } from 'viem'
+import { AccountConfig } from 'viem/tempo'
+
+const { owners, threshold } = AccountConfig.from({
+  owners: [
+    { owner: original.address, weight: 1 }, // the existing key
+    { owner: backupSigner, weight: 1 }, // a passkey, login, or recovery key
+  ],
+  threshold: 1,
+})
+
+await client.writeContractSync({
+  account: original,
+  address: '0xAACC000000000000000000000000000000000000',
+  abi: parseAbi(['function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)']),
+  functionName: 'upgradeAccount',
+  args: [threshold, owners],
+})
+```
+
+Only the original key signs the upgrade, which is permanent and must be the transaction's only call. From then on, either signer can replace the other. See [Upgrade an existing account](/docs/accounts/create#upgrade-an-existing-account) for the full walkthrough and a live demo.
+
+## Recover funds sent on another chain
+
+The address is the same on every EVM chain. On supported chains, the account's initial secp256k1 signers that reach the original threshold can recover funds sent there by mistake, even after you remove them on Tempo. Passkeys and logins don't count, so accounts created with only passkeys and logins, and accounts [upgraded in place](/docs/accounts/create#upgrade-an-existing-account), can't recover funds this way.
+
+<span id="key-management-limits" />
+<span id="account-recovery-limits" />
+
+## Recovery limits
+
+- The remaining signers must reach the threshold. Tempo can't recover an account whose signers can't.
+- A login approves for up to 10 minutes after sign-in, 9 by default in viem. Collect login approvals in one session; after that, approvals fail with `ZkCredentialExpiredError`.
+- `InvalidConfig` means another signer update landed first. Read the signers again and rebuild the update.
+- After a signer change, `address: 'infer'` derives a different address. Open the account with `Account.fromConfig(address)`.
+- Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
+- Recovery signers can also approve payments. To require more weight for signer changes, add an [approval policy](/docs/accounts/security-policies).
+
+Specification: [configurable accounts](https://tips.sh/1107).

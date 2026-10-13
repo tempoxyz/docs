@@ -1,7 +1,7 @@
 ---
 title: "Receive payments"
 seoTitle: "Receive Stablecoin Payments | Tempo Docs"
-description: Verify incoming stablecoin transfers, confirm delivery to your account, and match payments to customers and invoices.
+description: Verify incoming stablecoin transfers, read balances and activity, confirm delivery to your account, and match payments to customers and invoices.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-payments-accept-a-payment_title-f5_v02.png
 ---
@@ -47,15 +47,16 @@ For payments held by a receive policy, see [Handle blocked receipts](/docs/guide
 
 <span id="check-receiver-token-balance" />
 
-For balance snapshots and display formatting, use [Balances and activity](/docs/accounts/balances#read-a-stablecoin-balance). A balance change alone does not identify which customer or invoice to credit.
+For balance snapshots and display formatting, see [Read balances](#read-balances). A balance change alone does not identify which customer or invoice to credit.
 
+<span id="watch-for-changes" />
 <span id="listen-for-tip-20-transfer-events" />
 
 Enter the receiving account as both `address` and `recipient`. Set `chainId` to `42431` and `type` to `transfer` to read incoming payments on Moderato:
 
 <OpenApi.Playground operationId="getAddressActivities" query="chainId=42431&type=transfer" anchors={false} />
 
-For direct transfer subscriptions, use the [CLI, Viem, or Wagmi setup](/docs/accounts/examples#choose-your-tools). Set `account` to the recipient and `token` to AlphaUSD. Wagmi hooks run inside a React component and clean up on unmount:
+For direct transfer subscriptions, use the [CLI, Viem, or Wagmi setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools). Set `account` to the recipient and `token` to AlphaUSD. Wagmi hooks run inside a React component and clean up on unmount:
 
 ::::code-group
 
@@ -84,6 +85,60 @@ Hooks.token.useWatchTransfer({
 ::::
 
 Use [webhooks](/docs/api/webhooks) for backend callbacks. Read historical activity after reconnecting and follow pagination to recover missed events. The [complete event examples](/docs/guide/payments/accept-a-payment/examples#listen-for-tip-20-transfer-events) cover direct RPC log queries.
+
+<span id="balances-and-activity" />
+<span id="read-a-stablecoin-balance" />
+<span id="query-balances-across-tokens" />
+<span id="balances-across-tokens" />
+
+## Read balances
+
+Read indexed token balances with the Tempo API. Enter the account address, choose Moderato (`chainId=42431`), and click **Try**. It needs no wallet connection or signing key.
+
+<OpenApi.Playground operationId="getAddressBalances" query="chainId=42431" anchors={false} />
+
+For a direct read, use the [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools):
+
+::::code-group
+
+```ts [Viem]
+const token = '0x20c0000000000000000000000000000000000001'
+const balance = await client.token.getBalance({ account, token })
+console.log(balance.formatted)
+```
+
+```bash [CLI]
+cast erc20 balance "$ALPHA_USD" "$TEMPO_ACCOUNT_ADDRESS" --rpc-url "$TEMPO_RPC_URL"
+```
+
+```tsx [Wagmi]
+import { Hooks } from 'wagmi/tempo'
+const token = '0x20c0000000000000000000000000000000000001'
+const { data: balance, isPending, error } = Hooks.token.useGetBalance({ account, token })
+```
+
+```python [Python]
+from web3 import Web3
+from pytempo.contracts import TIP20
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+token = Web3.to_checksum_address("0x20c0000000000000000000000000000000000001")
+balance = TIP20(token).balance_of(w3, account=account_address)
+print(balance)
+```
+
+::::
+
+`balance.amount` contains integer base units; `balance.formatted` is the decimal string for display. Python and Cast return integer base units. Identify each token by its network and contract address.
+
+<span id="explain-changes-in-a-balance" />
+<span id="list-payments" />
+
+For indexed history, use [account activity](/docs/api/activities) and [transfers](/docs/api/transfers); one transaction can produce several transfers. Follow the [API pagination](/docs/api/pagination) fields for older activity, or query chain logs with the [onchain example](/docs/guide/payments/send-a-payment/examples#onchain-balances-and-history).
+
+<span id="show-balances-that-users-can-spend" />
+<span id="available-funds" />
+
+Use TIP-20 balances for spendable stablecoins. Tempo's `eth_getBalance` response is a [compatibility value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks), not a spendable stablecoin balance. Show [Earn positions](/docs/earn) and [Zone balances](/docs/zones) separately.
 
 <span id="reconcile-payments-with-memos" />
 <span id="payment-reconciliation-with-memos" />

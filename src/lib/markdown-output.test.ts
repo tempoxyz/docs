@@ -65,7 +65,7 @@ Token rules.
 
 Connect users to Tempo Wallet.
 
-[Connect an account](/docs/accounts/integrate) to send a test payment.
+[Connect an account](/docs/accounts/guides/wallet-provider) to send a test payment.
 
 </DocsProductOverview>
 
@@ -76,7 +76,7 @@ Read the account's transfer history.
 
     expect(output).toContain('# Accounts\n\nConnect users to Tempo Wallet.')
     expect(output).toContain('Connect users to Tempo Wallet.')
-    expect(output).toContain('[Connect an account](/docs/accounts/integrate)')
+    expect(output).toContain('[Connect an account](/docs/accounts/guides/wallet-provider)')
     expect(output).toContain('A connected account receives stablecoins and sends a payment.')
     expect(output).toContain("## Reconcile payments\n\nRead the account's transfer history.")
     expect(output).not.toContain('DocsProductOverview')
@@ -200,6 +200,18 @@ Status: <Badge variant="red">Required</Badge>
     expect(output).toContain('Status: **Required**')
     expect(output).toContain('[Open MCP server](https://mcp.tempo.xyz)')
     expect(output).not.toMatch(/<\/?[A-Z]/)
+  })
+
+  test('replaces an account diagram with its description', async () => {
+    const output = await render(`
+<AccountDiagram name="signers" alt="Signers approve, and their weights reach the threshold." />
+
+Following text.
+`)
+
+    expect(output).toContain('Signers approve, and their weights reach the threshold.')
+    expect(output).toContain('Following text.')
+    expect(output).not.toContain('AccountDiagram')
   })
 
   test('preserves validator topology relationships in plain Markdown', async () => {
