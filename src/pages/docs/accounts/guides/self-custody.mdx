@@ -1,7 +1,7 @@
 ---
 title: Set up self-custody
 seoTitle: Set Up a Self-Custodial Tempo Account with Passkeys and Recovery | Tempo Docs
-description: Add a passkey and a backup signer, require two factors, recover a lost passkey, and hand a customer's account to a self-custodial wallet at the same address.
+description: Add a passkey and a backup key, require two factors, recover a lost passkey with the remaining signers, and hand a customer's account to a self-custodial wallet at the same address.
 interactive: true
 ---
 
@@ -9,9 +9,9 @@ import { GuideDemo } from '../../../../components/guides/GuideDemo'
 
 # Set up self-custody
 
-Take a customer account from one login to self-custody: add a passkey and a backup signer, require two factors, recover from a lost passkey, then hand the account to a self-custodial wallet, such as Tempo Wallet. The address and balance never change.
+Take a customer account from one key to self-custody: add a passkey, back it up with a backup key and a recovery key, recover from a lost passkey, then hand the account to a self-custodial wallet, such as Tempo Wallet. The address and balance never change.
 
-The examples use the `client` from [OIDC logins](/docs/accounts/authentication/oidc#connect-to-a-salt-service). The weights follow the [customer accounts setup](/docs/accounts/security-policies#recommended-signer-setups).
+The examples use a `client` whose transport is a relay with `Relay.accounts`, as in [Read the current configuration](/docs/development/configurable-accounts#read-the-current-configuration). The weights follow the [customer accounts setup](/docs/accounts/security-policies#recommended-signer-setups).
 
 <span id="adding-signers" />
 <span id="add-a-signer" />
@@ -36,12 +36,11 @@ const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ l
 const newSigner = passkey.address
 ```
 
-```ts [Backup login]
-const { credential } = await client.oidc.prove({
-  getToken: ({ nonce }) => signInWithGoogle({ nonce }), // a second provider
-  publicKey: keyPair.publicKey,
-})
-const newSigner = Account.fromZk(credential).address
+```ts [Device key]
+import { Account, WebCryptoP256 } from 'viem/tempo'
+
+const keyPair = await WebCryptoP256.createKeyPair() // non-extractable; store keyPair in IndexedDB
+const newSigner = Account.fromWebCryptoP256(keyPair).address
 ```
 
 ```ts [Recovery provider]
@@ -69,7 +68,7 @@ const { receipt } = await client.accounts.updateConfigSync({
     owners: [...owners, { owner: newSigner, weight: 1 }],
     threshold, // keep it, or raise it
   },
-  owner: login, // a current signer
+  owner: firstSigner, // a current signer
 })
 ```
 
@@ -89,8 +88,6 @@ const total = config.owners.reduce((sum, { weight }) => sum + weight, 0)
 const recoverable = config.owners.every(({ weight }) => total - weight >= config.threshold)
 ```
 
-Count at most two logins toward what remains, since a transaction carries at most two login approvals.
-
 :::::
 
 <span id="multi-factor-approval" />
@@ -98,28 +95,26 @@ Count at most two logins toward what remains, since a transaction carries at mos
 
 ## Require multi-factor approval
 
-Move to a passkey (2), the customer's Privy login (1), and a Google login (1), with threshold 2. Signer changes and new devices then need the passkey, or both logins. See [What a threshold protects](/docs/accounts/security-policies#what-a-threshold-protects) for why the logins need different issuers.
+Move to a passkey (2), a backup key the customer keeps offline (1), and a recovery provider's key (1), with threshold 2. The passkey approves alone. Signer changes and new devices without the passkey need both keys, which different parties hold. See [What a threshold protects](/docs/accounts/security-policies#what-a-threshold-protects).
 
 <GuideDemo guide="multi-factor" />
 
 :::::steps
 
-### Sign the customer in with Google
+### Create the backup key
+
+The customer creates a key they keep apart from their phone, such as in a hardware wallet, and gives your app its address:
 
 ```ts [multi-factor.ts]
-const { credential } = await client.oidc.prove({
-  getToken: ({ nonce }) => signInWithGoogle({ nonce }), // a second issuer
-  publicKey: keyPair.publicKey,
-})
-const google = Account.fromZk(credential)
+const backupKey = '0x…' // the backup key's address
 ```
 
-### Create the passkey
+### Get the recovery key's address
+
+A recovery provider holds a key for the customer and gives you its address. It approves only together with the backup key or the passkey.
 
 ```ts [multi-factor.ts]
-import { WebAuthnP256 } from 'viem/tempo'
-
-const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
+const recoveryKey = '0x…' // the address your recovery provider gives you
 ```
 
 ### Switch to the multi-factor configuration
@@ -130,28 +125,26 @@ await client.accounts.updateConfigSync({
   nextConfig: {
     owners: [
       { owner: passkey.address, weight: 2 },
-      { owner: login.address, weight: 1 },
-      { owner: google.address, weight: 1 },
+      { owner: backupKey, weight: 1 },
+      { owner: recoveryKey, weight: 1 },
     ],
     threshold: 2,
   },
-  owner: login,
+  owner: passkey,
 })
 ```
 
-`login` is the customer's Privy login. It approves alone because the current threshold is 1. After the update, one login alone reaches only 1 of 2.
+The passkey approves alone because the current threshold is 1. After the update, the backup key or the recovery key alone reaches only 1 of 2.
 
 ### Keep paying with the device key
 
-The device key from sign-in keeps its limits: signer changes don't touch access keys.
+The device key the passkey authorized keeps its limits: signer changes don't touch access keys.
 
 <span id="authorize-device-keys" />
 
-### Authorize new device keys with the passkey or both logins
+### Authorize new device keys with the passkey
 
-::::code-group
-
-```ts [Passkey]
+```ts [multi-factor.ts]
 const keyAuthorization = await client.accessKey.signAuthorization({
   accessKey: deviceKey,
   account,
@@ -161,20 +154,7 @@ const keyAuthorization = await client.accessKey.signAuthorization({
 })
 ```
 
-```ts [Both logins]
-const pending = await client.accessKey.signAuthorization({
-  accessKey: deviceKey,
-  account,
-  expiry: Expiry.days(30),
-  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
-  owner: login,
-})
-const keyAuthorization = await client.accessKey.signAuthorization({ hash: pending.hash, owner: google })
-```
-
-::::
-
-Pass `keyAuthorization` with the new device key's first payment, as at sign-in.
+Pass `keyAuthorization` with the new device key's first payment. Without the passkey, the backup key and the recovery key sign the same authorization together: pass `hash` from the first signature and `owner` for the second.
 
 :::::
 
@@ -185,7 +165,7 @@ Pass `keyAuthorization` with the new device key's first payment, as at sign-in.
 
 ## Recover from a lost passkey
 
-The remaining signers replace a lost one in one update. They must reach the threshold: Tempo can't override an account's signers. Here the account has the multi-factor configuration above, the customer lost the passkey, and both logins replace it.
+The remaining signers replace a lost one in one update. They must reach the threshold: Tempo can't override an account's signers. Here the account has the multi-factor configuration above, the customer lost the passkey, and the backup key and the recovery key replace it together.
 
 <GuideDemo guide="recover" />
 
@@ -199,15 +179,14 @@ import { Account, WebAuthnP256 } from 'viem/tempo'
 const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
 ```
 
-### Sign in with the remaining signers
+### Check the remaining signers
 
 ```ts [recover.ts]
-const privy = Account.fromZk(privyCredential)
-const google = Account.fromZk(googleCredential)
 const account = Account.fromConfig(address) // the customer's saved account address
+const { owners, threshold } = await client.accounts.getConfig({ address })
 ```
 
-Get each credential from `client.oidc.prove`.
+The backup key and the recovery key have weight 2 together, enough for threshold 2 without the passkey.
 
 ### Replace the lost signer in one update
 
@@ -217,18 +196,18 @@ const { receipt: pending } = await client.accounts.updateConfigSync({
   nextConfig: {
     owners: [
       { owner: passkey.address, weight: 2 },
-      { owner: privy.address, weight: 1 },
-      { owner: google.address, weight: 1 },
+      { owner: backupKey.address, weight: 1 },
+      { owner: recoveryKey.address, weight: 1 },
     ],
-    threshold: 2,
+    threshold,
   },
-  owner: privy,
+  owner: backupKey,
 })
 
-await client.sendTransactionSync({ account, hash: pending.transactionHash, owner: google })
+await client.sendTransactionSync({ account, hash: pending.transactionHash, owner: recoveryKey })
 ```
 
-The update lands when the second login approves, and the lost passkey can no longer approve.
+The update lands when the recovery key approves, and the lost passkey can no longer approve.
 
 ### Revoke the access keys the lost signer could reach
 
@@ -240,11 +219,11 @@ Changing signers doesn't revoke access keys, such as the device key on a lost ph
 
 :::::
 
-A lost login works the same way: the passkey approves its replacement alone.
+A lost backup key or recovery key works the same way: the passkey approves its replacement alone.
 
 <span id="recover-funds-sent-on-another-chain" />
 
-The address is the same on every EVM chain. On supported chains, the account's initial secp256k1 signers that reach the original threshold can recover funds sent there by mistake, even after you remove them on Tempo. Passkeys and logins don't count, so accounts created with only passkeys and logins, and accounts [upgraded in place](/docs/accounts/create#upgrade-an-existing-account), can't recover funds this way.
+The address is the same on every EVM chain. On supported chains, the account's initial secp256k1 signers that reach the original threshold can recover funds sent there by mistake, even after you remove them on Tempo. Passkeys and device keys don't count, so accounts created with only passkeys and device keys, and accounts [upgraded in place](/docs/accounts/create#upgrade-an-existing-account), can't recover funds this way.
 
 <span id="account-export" />
 <span id="hand-off-to-the-customer" />
@@ -252,7 +231,7 @@ The address is the same on every EVM chain. On supported chains, the account's i
 
 ## Hand off to a self-custodial wallet
 
-Swap your app's signers, including any login your auth service issues, for one the customer holds, and they control the same address from their own wallet. Your app keeps no key. A handoff is safer than exporting a private key: an export leaves your app with a copy and its access keys active, and passkeys and logins have no exportable key.
+Swap your app's signers for one the customer holds, and they control the same address from their own wallet. Your app keeps no key. A handoff is safer than exporting a private key: an export leaves your app with a copy and its access keys active, and passkeys have no exportable key.
 
 <GuideDemo guide="export" />
 
@@ -290,7 +269,7 @@ await client.accounts.updateConfigSync({
 })
 ```
 
-To keep backups, use the [customer accounts setup](/docs/accounts/security-policies#recommended-signer-setups), where no login approves alone.
+To keep backups, use the [customer accounts setup](/docs/accounts/security-policies#recommended-signer-setups), with a backup key the customer holds.
 
 ### Send the customer to their wallet
 
@@ -306,7 +285,6 @@ The customer opens the same address in their wallet. Funds don't move, and payme
 - Access keys survive signer changes. Revoke each one the old holder could use. A revoked key can't be authorized again.
 - `InvalidConfig` means another signer update landed first. Read the signers again and rebuild the update.
 - After a signer change, `address: 'infer'` derives a different address. Open the account with `Account.fromConfig(address)`.
-- A login approves for up to 10 minutes after sign-in, 9 by default in viem. After that, approvals fail with `ZkCredentialExpiredError`.
 - Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
 
 Specification: [configurable accounts](https://tips.sh/1107).

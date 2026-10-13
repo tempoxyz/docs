@@ -1212,13 +1212,23 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/accounts/authentication/oidc",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/enterprise-sso",
+      "destination": "/developers/docs/accounts/guides/wallet-provider",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/accounts/guides/identity-provider",
-      "destination": "/developers/docs/accounts/guides/enterprise-sso",
+      "destination": "/developers/docs/accounts/guides/wallet-provider",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/advanced/relay",
-      "destination": "/developers/docs/accounts/authentication/oidc#login-services",
+      "destination": "/developers/docs/accounts/authentication",
       "permanent": true
     },
     {
@@ -1228,22 +1238,22 @@
     },
     {
       "source": "/developers/docs/accounts/authentication/email-otp",
-      "destination": "/developers/docs/accounts/authentication/oidc#email-and-sms-codes",
+      "destination": "/developers/docs/accounts/authentication",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/authentication/privy",
-      "destination": "/developers/docs/accounts/authentication/oidc#privy-logins",
+      "destination": "/developers/docs/accounts/guides/wallet-provider#build-with-privy",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/authentication/login-services",
-      "destination": "/developers/docs/accounts/authentication/oidc#login-services",
+      "destination": "/developers/docs/accounts/authentication",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/authentication/relays",
-      "destination": "/developers/docs/accounts/authentication/oidc#login-services",
+      "destination": "/developers/docs/accounts/authentication",
       "permanent": true
     },
     {
@@ -1268,7 +1278,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/change-email",
-      "destination": "/developers/docs/accounts/guides/enterprise-sso#handle-an-email-change",
+      "destination": "/developers/docs/accounts/recovery",
       "permanent": true
     },
     {
@@ -1303,7 +1313,7 @@
     },
     {
       "source": "/developers/docs/accounts/advanced/approval-rules",
-      "destination": "/developers/docs/accounts/security-policies#approval-escalation-for-larger-payments",
+      "destination": "/developers/docs/accounts/security-policies",
       "permanent": true
     },
     {
@@ -1343,17 +1353,17 @@
     },
     {
       "source": "/developers/docs/accounts/policies",
-      "destination": "/developers/docs/accounts/security-policies#approval-escalation-for-larger-payments",
+      "destination": "/developers/docs/accounts/security-policies",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/advanced/private-policies",
-      "destination": "/developers/docs/accounts/security-policies#experimental-private-policies",
+      "destination": "/developers/docs/accounts/security-policies",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/advanced/verified-facts",
-      "destination": "/developers/docs/accounts/security-policies#experimental-private-policies",
+      "destination": "/developers/docs/accounts/security-policies",
       "permanent": true
     },
     {

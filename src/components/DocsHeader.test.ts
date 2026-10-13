@@ -82,7 +82,7 @@ describe('getActiveDocsSection', () => {
     ['/docs/accounts/guides/wallet-provider', 'accounts'],
     ['/docs/accounts/access-keys', 'accounts'],
     ['/docs/accounts/authentication', 'accounts'],
-    ['/docs/accounts/authentication/oidc', 'accounts'],
+    ['/docs/accounts/authentication/passkeys', 'accounts'],
     ['/docs/accounts/security-policies', 'accounts'],
     ['/docs/accounts/guides/company-treasury', 'accounts'],
     ['/docs/protocol/transactions/AccountKeychain', 'developers'],

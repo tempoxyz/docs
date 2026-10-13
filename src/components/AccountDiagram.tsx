@@ -28,7 +28,6 @@ const diagrams = {
   address: AccountAddress,
   signers: SignerApproval,
   'access-keys': AccessKeyBounds,
-  login: LoginApproval,
   'account-types': AccountTypes,
   'single-key': SingleKeyAccount,
   configurable: ConfigurableAccount,
@@ -232,7 +231,6 @@ function SignerApproval() {
               ['accessKey', 'Private key'],
               ['device', 'Device key'],
               ['passkey', 'Passkey'],
-              ['login', 'OIDC login'],
             ]}
           />
         </Field>
@@ -272,23 +270,6 @@ function AccessKeyBounds() {
         <Field icon="infinity" label="No limits" />
         <Field icon="accessKey" label="Manages access keys" />
       </Part>
-    </div>
-  )
-}
-
-function LoginApproval() {
-  return (
-    <div className="ad-strip">
-      <Chip icon="device" label="Device" value={<Icon name="accessKey" />} tone="strong" />
-      <Then>
-        <Chip icon="login" label="ID token" tone="quiet" />
-      </Then>
-      <Then>
-        <Chip icon="verified" label="Proof" tone="quiet" />
-      </Then>
-      <Then>
-        <Chip icon="approved" label="Tempo" />
-      </Then>
     </div>
   )
 }

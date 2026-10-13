@@ -1,7 +1,7 @@
 ---
 title: Accounts
 seoTitle: Self-Custodial Stablecoin Accounts on Tempo | Tempo Docs
-description: Self-custodial stablecoin accounts with login signers, passkeys, approval thresholds, and access keys enforced by Tempo.
+description: Self-custodial stablecoin accounts with passkeys, device keys, and private keys as weighted signers, plus access keys with spending limits, all enforced by Tempo.
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 ---
 
@@ -27,7 +27,7 @@ A Tempo account is a stablecoin address whose signers, approval rules, and spend
 ## Tempo account building blocks
 
 - **Address:** the account's public identifier, which holds its TIP-20 balances and never changes.
-- **Signers:** passkeys, keys, and logins that approve, each with a weight toward a threshold.
+- **Signers:** private keys, device keys, and passkeys that approve, each with a weight toward a threshold.
 - **Access keys:** keys on devices, servers, and agents that pay on their own within spending limits, an expiry, and scopes.
 
 Already have single-key accounts? [Upgrade them in place](/docs/accounts/create#upgrade-an-existing-account), at the same address and balance.
@@ -41,10 +41,10 @@ Already have single-key accounts? [Upgrade them in place](/docs/accounts/create#
 
 ### <DocsHomeProductIcon product="accounts" />[Embedded wallets](/docs/accounts/guides/wallet-provider)
 
-An account for every customer inside your app, under the login they already use.
+An account for every customer inside your app, with your provider's key as one signer and the customer's passkey as another.
 
 - [Use a wallet provider](/docs/accounts/guides/wallet-provider)
-- [Enterprise SSO login](/docs/accounts/guides/enterprise-sso)
+- [Make the provider's key one signer](/docs/accounts/guides/wallet-provider#make-the-providers-key-one-signer)
 - [Connect Tempo Wallet](/docs/accounts/guides/wallet-provider#connect-tempo-wallet)
 
 </div>
@@ -93,7 +93,7 @@ Card payments from an access key with a daily limit that renews.
 
 ### <DocsHomeProductIcon product="approvals" />[Company treasury](/docs/accounts/guides/company-treasury)
 
-Several approvers, team budgets, and key rotation without moving funds.
+Several approvers, a team budget, and key rotation without moving funds.
 
 - [Create the treasury account](/docs/accounts/guides/company-treasury#create-the-treasury-account)
 - [Give a team a budget](/docs/accounts/guides/company-treasury#give-a-team-a-budget)
@@ -131,22 +131,22 @@ Build an account from its first signer on Tempo devnet, or upgrade a single-key 
 
 ### <DocsHomeProductIcon product="authentication" />[Signing methods](/docs/accounts/authentication)
 
-Private keys, device keys, passkeys, and OIDC logins that sign for the account.
+Private keys, device keys, and passkeys that sign for the account.
 
-- [Passkeys](/docs/accounts/authentication/passkeys)
+- [Private keys](/docs/accounts/authentication/private-keys)
 - [Device keys](/docs/accounts/authentication/device-keys)
-- [OIDC logins](/docs/accounts/authentication/oidc)
+- [Passkeys](/docs/accounts/authentication/passkeys)
 
 </div>
 <div className="docs-product-group">
 
 ### <DocsHomeProductIcon product="approvals" />[Signing thresholds](/docs/accounts/security-policies)
 
-Weighted signers, a threshold, and rules for what an account accepts and approves.
+Weighted signers, a threshold, and rules for what an account accepts.
 
 - [Thresholds and weights](/docs/accounts/security-policies#recommended-signer-setups)
+- [Verify approvals](/docs/accounts/security-policies#verify-approvals)
 - [Receive policies](/docs/guide/payments/configure-receive-policies)
-- [Private policies](/docs/accounts/security-policies#experimental-private-policies)
 
 </div>
 <div className="docs-product-group">

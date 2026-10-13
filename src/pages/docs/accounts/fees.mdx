@@ -51,7 +51,7 @@ Tempo checks only the first token it finds. If the fee payer lacks the balance o
 
 ## Sponsor fees with a fee payer
 
-A fee payer pays an account's fees so the account needs no fee balance, such as a new account sending its first payment right after the customer signs in. The account signs its calls with the fee token left blank. The fee payer checks the transaction against its policy, chooses the fee token, and adds its own signature. Tempo verifies both signatures and takes the fee from the fee payer's balance.
+A fee payer pays an account's fees so the account needs no fee balance, such as a new account sending its first payment right after the customer creates it. The account signs its calls with the fee token left blank. The fee payer checks the transaction against its policy, chooses the fee token, and adds its own signature. Tempo verifies both signatures and takes the fee from the fee payer's balance.
 
 The fee payer's signature covers one specific transaction and authorizes only the fee:
 

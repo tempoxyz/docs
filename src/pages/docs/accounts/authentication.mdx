@@ -1,12 +1,12 @@
 ---
 title: Signing methods
-seoTitle: Sign for Tempo Accounts with Keys, Passkeys, or OIDC Logins | Tempo Docs
-description: Compare the four ways a Tempo account signer approves, private keys, device keys, passkeys, and OIDC logins, by where the key lives and what each trusts.
+seoTitle: Sign for Tempo Accounts with Private Keys, Device Keys, or Passkeys | Tempo Docs
+description: Compare the three ways a Tempo account signer approves, private keys, device keys, and passkeys, by where the key lives and what each trusts.
 ---
 
 # Signing methods
 
-A signer is a key or a login that a Tempo account lists as able to approve. Each approval is a signature that Tempo checks on chain against the account's signers and threshold. Tempo supports four signing methods, and an account can mix them.
+A signer is a key that a Tempo account lists as able to approve. Each approval is a signature that Tempo checks on chain against the account's signers and threshold. Tempo supports three signing methods, and an account can mix them.
 
 <span id="tempo-account-signer-types" />
 <span id="tempo-sign-in-methods" />
@@ -15,12 +15,11 @@ A signer is a key or a login that a Tempo account lists as able to approve. Each
 
 | Method | Where the key lives | What it trusts | Use for |
 | --- | --- | --- | --- |
-| [Private keys](/docs/accounts/authentication/private-keys) | A CLI, hardware, or browser wallet, or your KMS or HSM | Whoever holds the key, and that key's infrastructure | Treasury approvers, servers, and scripts |
+| [Private keys](/docs/accounts/authentication/private-keys) | A CLI, hardware, or browser wallet, or your KMS or HSM | Whoever holds the key, and that key's infrastructure | Treasury approvers, backup and recovery keys, servers, and scripts |
 | [Device keys](/docs/accounts/authentication/device-keys) | The device's secure hardware or browser, non-extractable | The customer's device | Everyday payments within limits, with no prompt |
 | [Passkeys](/docs/accounts/authentication/passkeys) | The customer's authenticator, synced or on a security key | The customer's device and passkey provider | Customer approvals and signer changes |
-| [OIDC logins](/docs/accounts/authentication/oidc) | The customer's device; the login approves the key | The identity provider and its key publisher owner | Apps that already sign customers in, and recovery |
 
-Only OIDC logins depend on outside services: an identity provider, a salt service, a prover, and a key publisher. See [Login services](/docs/accounts/authentication/oidc#login-services).
+None of them depends on an outside service: the key that signs is the key the account lists.
 
 <span id="set-up-a-sign-in-method" />
 <span id="private-keys" />
@@ -38,9 +37,9 @@ Only OIDC logins depend on outside services: an identity provider, a salt servic
 
 ## Combine signing methods
 
-A signer approves at its weight, and a transaction executes once approving weights reach the account's threshold. Mix methods so no single party reaches the threshold alone:
+A signer approves at its weight, and a transaction executes once approving weights reach the account's threshold. Mix methods and holders so no single party reaches the threshold alone:
 
-- **Customer accounts:** a passkey at weight 2 and two OIDC logins from different issuers at weight 1, at threshold 2. The passkey approves alone, and the logins recover it.
+- **Customer accounts:** a passkey at weight 2, a backup key the customer keeps offline at weight 1, and a recovery provider's key at weight 1, at threshold 2. The passkey approves alone, and the two keys together recover it.
 - **Treasuries:** private keys in separate wallets or HSMs, such as 2 of 3.
 - **Everyday payments:** a device key or a server key as an [access key](/docs/accounts/access-keys), which pays alone within limits and never counts toward the threshold.
 
@@ -50,7 +49,7 @@ See [Signing thresholds](/docs/accounts/security-policies) for recommended setup
 
 ## Who can sign for a customer
 
-Only the keys and logins an account lists can approve. For an OIDC login, the ID token names the customer's device key and Tempo checks its proof on chain, so the salt service and prover can't sign. Two parties can sign in as any customer they cover: the issuer, and the owner of the key publisher that lists its keys. Keep each login below the threshold, and pair it with a passkey the customer holds.
+Only the keys an account lists can approve, and only at their weights. Tempo has no admin key or override, so your app, a wallet provider, or a recovery provider can approve only with the signers it holds. Keep any signer you hold below the threshold on its own, and pair it with a passkey the customer holds.
 
 <span id="signer-rules" />
 <span id="authentication-limits" />
@@ -59,14 +58,11 @@ Only the keys and logins an account lists can approve. For an OIDC login, the ID
 
 | Limit | Value |
 | --- | --- |
-| Login approval lifetime | At most 10 minutes after the token is issued; viem defaults to 9 minutes from the start of sign-in. After that, approvals fail with `ZkCredentialExpiredError`. |
-| Login approvals per transaction | Up to 2 |
-| ID token size | Up to 1,024 bytes |
-| Signers per login | One per issuer and OAuth client ID. The same person through two providers is two signers. |
-| Dropped provider keys | Valid for one hour after removal, so logins in progress still succeed |
+| Signers per account | 1 to 48, each a secp256k1, P-256, or WebAuthn key |
+| Signatures per transaction | Up to 8 |
 | Passkey prompt | `NotAllowedError` when the customer cancels or the page isn't served over HTTPS |
 | Access keys toward the threshold | Never |
 
 <span id="login-sign-in-in-code" />
 
-Specifications: [OIDC signers](https://tips.sh/1130), [configurable accounts](https://tips.sh/1107), [key publisher](https://tips.sh/1132), [committed access keys](https://tips.sh/1134).
+Specifications: [configurable accounts](https://tips.sh/1107), [multisig signatures](https://tips.sh/1114).

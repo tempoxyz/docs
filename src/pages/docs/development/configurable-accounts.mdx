@@ -1,7 +1,7 @@
 ---
 title: Configurable accounts
 seoTitle: Tempo Configurable Accounts, Owners, Thresholds, and Multisig Signatures | Tempo Docs
-description: Reference for Tempo configurable accounts, covering address derivation, owner weights and thresholds, configuration updates, the 0x05 signature, login owners, and onchain verification.
+description: Reference for Tempo configurable accounts, covering address derivation, owner weights and thresholds, configuration updates, the 0x05 signature, and onchain verification.
 ---
 
 import { AccountDiagram } from '../../../components/AccountDiagram'
@@ -26,7 +26,7 @@ Configurable accounts are specified in [TIP-1107](https://tips.sh/1107) and its 
 | `salt` | `bytes32` | Fixed for the account's lifetime |
 | `version` | `uint64` | `0` for the initial configuration, then `+1` per update |
 
-Total owner weight is at most 255. Owners are primitive keys: secp256k1, P-256, WebAuthn, or [logins](#login-signers). A configurable account can't be another account's owner.
+Total owner weight is at most 255. Owners are primitive keys: secp256k1, P-256, or WebAuthn. A configurable account can't be another account's owner, but it can be another account's [access key](/docs/development/account-keychain#access-keys-on-each-account-type).
 
 Tempo stores only a 32-byte hash of the configuration in the account. Every approval carries the full configuration, so keep it: [`client.accounts.getConfig`](#read-the-current-configuration) serves it from a relay.
 
@@ -72,7 +72,6 @@ Owners approve a whole transaction, including every call in a batch. The transac
 | Signatures per approval | 1–8, in ascending owner-address order |
 | Weight | The signers' weights must reach the threshold. Extra signatures after it's reached are rejected. |
 | Replay | Each signature binds the account and configuration version |
-| Login signatures | At most 2 per transaction |
 | Access keys | Never count toward the threshold |
 
 Owners can sign separately and offline. A relay with `Relay.accounts` collects approvals until the threshold is met, then submits.
@@ -131,21 +130,27 @@ import { client } from './client'
 const config = await client.accounts.getConfig({ address: account.address })
 ```
 
-`getConfig` returns the configuration a relay recorded, or `null` if it has none. It needs a client whose transport is a relay with `Relay.accounts`, as in [Run your own salt service](/docs/accounts/authentication/oidc#run-your-own-salt-service). A bare node returns only the hash, through `client.accounts.getConfigCommitment`.
+`getConfig` returns the configuration a relay recorded, or `null` if it has none. A bare node returns only the hash, through `client.accounts.getConfigCommitment`, so point the client at a relay that mounts `Relay.accounts`:
+
+```ts [client.ts]
+import { http } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { createClient, Relay, Store, withRelay } from 'viem/tempo'
+
+// Replace Store.memory() with a persistent Store.Atomic shared by every relay instance.
+const store = Store.memory()
+
+export const client = createClient({
+  chain: tempoModerato,
+  transport: withRelay(http(), {
+    plugins: [Relay.keyAuthorization({ store }), Relay.accounts({ store })],
+  }),
+})
+```
+
+`Relay.accounts` records each account's configuration as it changes and serves `client.accounts.getConfig`. `Relay.keyAuthorization` holds signed access-key authorizations, including a configurable account's once they reach quorum, and attaches each to the key's next transaction. To serve the relay to other clients, pass the same plugins to `Relay.create({ client, plugins })` and serve `relay.fetch`.
 
 <span id="login-signers" />
-
-## Login signers
-
-A login owner approves with a `0x06` ZK signature: a proof that the identity provider signed a recent sign-in, plus a signature from the key that sign-in named. Its owner address is the login's own address. Specification: [TIP-1131](https://tips.sh/1131) (Draft).
-
-| Rule | Value |
-| --- | --- |
-| Proof validity | Up to 10 minutes after sign-in, for OIDC logins |
-| Per transaction | At most 2 ZK signatures |
-| Threshold | If the logins' weights together reach it, two of them must. Wallets and SDKs refuse other configurations. |
-
-Set up login owners: [OIDC logins](/docs/accounts/authentication/oidc).
 
 ## Verify owner approvals in a contract
 
@@ -164,7 +169,7 @@ interface ISignatureVerifier {
 | Reverts `InvalidFormat()` | The encoding or configuration is invalid |
 | Reverts `InvalidSignature()` | The owner approvals are invalid |
 
-An unregistered account verifies against its version-0 configuration, without registering. After an update, signatures for the old version fail. Guide: [Policies](/docs/accounts/security-policies).
+An unregistered account verifies against its version-0 configuration, without registering. After an update, signatures for the old version fail. Guide: [Verify approvals](/docs/accounts/security-policies#verify-approvals).
 
 ## Native multisig precompile
 
@@ -177,4 +182,4 @@ An unregistered account verifies against its version-0 configuration, without re
 | `updateConfig(current, threshold, owners)` | Replaces the owners and threshold |
 | `upgradeAccount(threshold, owners)` | [Upgrades a single-key account](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) |
 
-Account limits: 1–48 owners, total weight at most 255, up to 8 signatures per approval, and up to 2 ZK signatures per transaction.
+Account limits: 1–48 owners, total weight at most 255, and up to 8 signatures per approval.

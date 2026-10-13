@@ -1,6 +1,6 @@
 ---
 title: "Create an account"
-seoTitle: "Create a Tempo Account with Logins, Passkeys, or Keys | Tempo Docs"
+seoTitle: "Create a Tempo Account with a Passkey, Device Key, or Private Key | Tempo Docs"
 description: Create a Tempo account from its first signer, then add signers, set a threshold, and authorize access keys on Tempo devnet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
@@ -15,13 +15,13 @@ An account's address comes from its first signer. Nothing to deploy: the address
 
 <AccountSandbox />
 
-Every step runs on Tempo devnet. Logins use a local auth service and [salt service](/docs/accounts/authentication/oidc#login-services) on `localhost:5173`.
+Every step runs on Tempo devnet: real passkeys, real keys, and real transactions.
 
 <span id="try-a-passkey-account" />
 
 ## How account creation works
 
-- The first signer (a passkey, login, or key) starts at weight 1 and threshold 1.
+- The first signer (a passkey, a device key, or a private key) starts at weight 1 and threshold 1.
 - Later signer, weight, and threshold changes keep the same address and balance.
 - The address can receive stablecoins before its first transaction.
 - The registering transaction is usually a payment that also authorizes the device's [access key](/docs/accounts/access-keys). [Sponsor the fee](/docs/guide/payments/sponsor-user-fees) so a new account needs no balance.
@@ -30,9 +30,8 @@ Every step runs on Tempo devnet. Logins use a local auth service and [salt servi
 
 | Account | First signer | Then add |
 | --- | --- | --- |
-| Embedded wallet | The customer's login in your app: [OIDC](/docs/accounts/authentication/oidc), such as Google, or [Privy](/docs/accounts/authentication/oidc#privy-logins) | A passkey the customer holds, so they can [take the account with them](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet) |
-| Customer | A login or a passkey | A second signer as backup |
-| Company SSO | An SSO login | A passkey or a recovery provider, threshold 2 |
+| Embedded wallet | The customer's passkey | Your [wallet provider's key](/docs/accounts/guides/wallet-provider) and a recovery provider, threshold 2 |
+| Customer | A passkey | A [backup key and a recovery key](/docs/accounts/guides/self-custody#require-multi-factor-approval), threshold 2 |
 | Treasury | One approver's key | The other approvers, then raise the threshold |
 | Backend service | A key in your signing infrastructure | Nothing, or a recovery key |
 
@@ -43,22 +42,18 @@ Every step runs on Tempo devnet. Logins use a local auth service and [salt servi
 
 ::::code-group
 
-```ts [Login]
-import { Account, WebCryptoP256 } from 'viem/tempo'
-import { client } from './client'
-
-declare function signIn(options: { nonce: string }): Promise<string>
-
-const keyPair = await WebCryptoP256.createKeyPair()
-const { credential } = await client.oidc.prove({ getToken: signIn, publicKey: keyPair.publicKey })
-const account = Account.fromConfig({ address: 'infer', owners: [Account.fromZk(credential)] })
-```
-
 ```ts [Passkey]
 import { Account, WebAuthnP256 } from 'viem/tempo'
 
 const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'Acme' }))
 const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
+```
+
+```ts [Device key]
+import { Account, P256 } from 'viem/tempo'
+
+const deviceKey = Account.fromP256(P256.randomPrivateKey()) // or a WebCrypto key the device can't export
+const account = Account.fromConfig({ address: 'infer', owners: [deviceKey] })
 ```
 
 ```ts [Private key]
@@ -75,7 +70,7 @@ cast wallet new
 
 ::::
 
-For a full sign-in with the first payment, see [Enterprise SSO login](/docs/accounts/guides/enterprise-sso#sign-in-with-sso) or [OIDC logins](/docs/accounts/authentication/oidc). Shared setup: [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools).
+To authorize a device key with the account's first payment, see [Device keys](/docs/accounts/authentication/device-keys#how-a-device-key-starts-paying). Shared setup: [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools).
 
 <span id="fund-and-use-the-account" />
 
@@ -87,7 +82,7 @@ On devnet, use **Get test funds** above. On Moderato, use the [faucet](/docs/qui
 
 ## Upgrade an existing account
 
-A single-key account moves to signers and a threshold in one transaction, at the same address, balances, token approvals, and access keys. Only the original secp256k1 key or passkey signs the upgrade. The demo and examples run on Tempo devnet.
+A single-key account (an EOA) moves to signers and a threshold in one transaction, at the same address, balances, token approvals, and access keys. Only the original secp256k1 key or passkey signs the upgrade. The demo and examples run on Tempo devnet.
 
 <UpgradeAccountDemo />
 

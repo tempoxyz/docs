@@ -47,7 +47,6 @@
     "minisearch": "7.2.0",
     "monaco-editor": "^0.55.1",
     "ox": "0.14.54",
-    "ox-zk": "https://pkg.pr.new/ox@95d0516",
     "posthog-js": "^1.393.5",
     "posthog-node": "^5.38.5",
     "prool": "^0.2.4",

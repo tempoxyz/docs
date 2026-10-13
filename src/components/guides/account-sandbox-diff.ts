@@ -1,6 +1,5 @@
 import {
   type AccessKey,
-  accessKeyStatus,
   formatUsd,
   remainingLimit,
   type SandboxAccount,
@@ -17,7 +16,6 @@ export type AccountDiff = {
   threshold?: { from: number; to: number }
   version?: { from: number; to: number }
   balance?: { from: number; to: number }
-  rules?: { from: boolean; to: boolean }
   /** One line per change, in reading order. */
   summary: { tone: 'add' | 'remove' | 'change'; text: string }[]
 }
@@ -26,8 +24,8 @@ function present(signer: Signer | undefined) {
   return Boolean(signer && !signer.revoked)
 }
 
-function keyActive(account: SandboxAccount, key: AccessKey | undefined) {
-  return Boolean(key && accessKeyStatus(account, key) !== 'revoked')
+function keyActive(key: AccessKey | undefined) {
+  return Boolean(key && key.status !== 'revoked')
 }
 
 export function diffAccounts(before: SandboxAccount, after: SandboxAccount): AccountDiff {
@@ -61,10 +59,10 @@ export function diffAccounts(before: SandboxAccount, after: SandboxAccount): Acc
   const beforeKeys = new Map(before.accessKeys.map((key) => [key.id, key]))
   for (const key of after.accessKeys) {
     const previous = beforeKeys.get(key.id)
-    if (keyActive(after, key) && !keyActive(before, previous)) {
+    if (keyActive(key) && !keyActive(previous)) {
       diff.keys[key.id] = { change: 'added' }
       diff.summary.push({ tone: 'add', text: `${key.name} key added` })
-    } else if (!keyActive(after, key) && keyActive(before, previous)) {
+    } else if (!keyActive(key) && keyActive(previous)) {
       diff.keys[key.id] = { change: 'revoked' }
       diff.summary.push({ tone: 'remove', text: `${key.name} key revoked` })
     } else if (previous && key.spent !== previous.spent) {
@@ -81,13 +79,6 @@ export function diffAccounts(before: SandboxAccount, after: SandboxAccount): Acc
     diff.summary.push({
       tone: 'change',
       text: `Threshold ${before.threshold} → ${after.threshold}`,
-    })
-  }
-  if (after.rules.enabled !== before.rules.enabled) {
-    diff.rules = { from: before.rules.enabled, to: after.rules.enabled }
-    diff.summary.push({
-      tone: after.rules.enabled ? 'add' : 'remove',
-      text: after.rules.enabled ? 'Approval rules on' : 'Approval rules off',
     })
   }
   if (after.balance !== before.balance) {
