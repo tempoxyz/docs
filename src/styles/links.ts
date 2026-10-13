@@ -29,6 +29,11 @@ global({
     '--tempo-chevron-travel': '-0.15em',
     transform: 'scaleX(-1)',
   },
+  // Standalone text links ("All setup options") have no tile or title around
+  // them to say they are links, so their chevron shows at rest and still travels.
+  '[data-chevron="visible"] .tempo-chevron': {
+    opacity: 1,
+  },
   ':is(a, button, [data-chevron-trigger]):is(:hover, :focus-visible) .tempo-chevron': {
     opacity: 1,
     translate: 'var(--tempo-chevron-travel) 0',

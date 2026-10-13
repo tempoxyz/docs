@@ -198,7 +198,9 @@ export function DocsHomeAgent() {
         </div>
 
         <div className="tempo-agent-start-footer">
-          <ChevronLink href="/docs/guide/using-tempo-with-ai">All setup options</ChevronLink>
+          <ChevronLink href="/docs/guide/using-tempo-with-ai" data-chevron="visible">
+            All setup options
+          </ChevronLink>
         </div>
       </div>
     </div>
