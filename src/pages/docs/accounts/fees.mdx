@@ -26,6 +26,28 @@ export const config = createConfig({
 
 The endpoint above is the public Moderato testnet fee payer. For production, use the [Fee Payer API](/docs/api/fee-payer) or [run your own](/docs/server/relay-handler) with your own sponsorship policy. Full walkthrough: [Sponsor fees](/docs/guide/payments/sponsor-user-fees).
 
+## Run your own fee payer
+
+Host a fee payer with viem's `Relay` and its `Relay.feePayer` plugin, so new accounts can send their first transaction with no balance, such as right after a customer signs in. Its `validate` option limits what it sponsors:
+
+```ts [fee-payer.ts]
+import { http, type Hex } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { tempoModerato } from 'viem/chains'
+import { createClient, Relay, withRelay } from 'viem/tempo'
+
+export const client = createClient({
+  chain: tempoModerato,
+  transport: withRelay(http(), {
+    plugins: [
+      Relay.feePayer({ account: privateKeyToAccount(process.env.FEE_PAYER_KEY as Hex) }),
+    ],
+  }),
+})
+```
+
+Pass the same plugins to `Relay.create({ client, plugins })` and serve `relay.fetch`. Anyone can run one: you, your wallet provider, or another operator. A fee payer can pay fees, or delay and refuse service. It can't approve transactions or move an account's funds.
+
 ## Set an account's default fee token
 
 Set the stablecoin an account pays its fees in, so its transactions don't pass `feeToken` each time:
