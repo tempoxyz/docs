@@ -1,6 +1,6 @@
 /**
  * Devnet adapter for the account sandbox. It sends the sandbox's actions as real transactions on
- * the internal PR-8211 devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
+ * the internal multisig-1113 devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
  * configurable access keys (TIP-1111).
  *
  * - Only real signing runs on devnet. Passkeys are real WebAuthn passkeys, so creating and signing
@@ -79,7 +79,7 @@ const {
 } = Tempo
 const { getCommitment } = AccountConfig
 
-export const devnetRpcUrl = 'http://devnet-pr-8211-nodes-rpc-service.tail388b2e.ts.net:8545'
+export const devnetRpcUrl = 'http://multisig-1113-nodes-rpc-service.tail388b2e.ts.net:8545'
 export const devnetChainId = 31_318
 const devnetChainIdHex = '0x7a56'
 /** AlphaUSD pays for every payment and every fee. */
