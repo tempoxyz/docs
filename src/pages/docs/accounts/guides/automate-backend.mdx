@@ -16,7 +16,7 @@ Sweep a customer's idle balance into an [Earn](/docs/earn) vault each night. The
 
 ## Sweep idle balances into a vault
 
-The demo authorizes a backend key on Tempo devnet, moves funds with it, then revokes it. The examples use Moderato testnet, the `client` from [OIDC logins](/docs/accounts/authentication/oidc#connect-to-a-salt-service), and a vault from [Vaults](/docs/earn/vaults) that accepts the account's stablecoin.
+The demo authorizes a backend key on Tempo devnet, moves funds with it, then revokes it. The examples use Moderato testnet, a `client` from [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools), and a vault from [Vaults](/docs/earn/vaults) that accepts the account's stablecoin.
 
 <GuideDemo guide="backend-automation" />
 
@@ -55,7 +55,7 @@ await client.accessKey.authorizeSync({
 })
 ```
 
-This runs in the customer's app with their signed-in `account`. Show the daily limit, the vault, and the expiry before they approve. The key can't transfer funds anywhere else.
+This runs in the customer's app, approved by the account's signers, such as the customer's passkey. Show the daily limit, the vault, and the expiry before they approve. The key can't transfer funds anywhere else.
 
 ### Move funds without prompts
 

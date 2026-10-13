@@ -25,7 +25,7 @@ Run embedded wallets with a provider such as Privy or Turnkey, while the custome
 
 ## Make the provider's key one signer
 
-This example uses the [enterprise apps setup](/docs/accounts/security-policies#recommended-signer-setups): the customer's passkey (2), your provider's key (1), and a recovery provider (1), with threshold 2. The customer approves alone; the providers approve only together.
+This example uses the [embedded wallets setup](/docs/accounts/security-policies#recommended-signer-setups): the customer's passkey (2), your provider's key (1), and a recovery provider (1), with threshold 2. The customer approves alone; the providers approve only together.
 
 :::::steps
 
@@ -67,7 +67,7 @@ Swap the provider's key for a signer the customer holds. See [Hand off to a self
 
 :::::
 
-To sign customers in with your existing login and keep no provider key, use an [OIDC login](/docs/accounts/authentication/oidc) or a [Privy login](/docs/accounts/authentication/oidc#privy-logins).
+Your app's own sign-in only decides when to ask for an approval. It never approves on Tempo: only the account's signers do.
 
 ## Build with Privy
 
@@ -82,11 +82,6 @@ Turnkey's [Tempo integration](https://docs.turnkey.com/features/networks/tempo) 
 Start with Turnkey's [Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo) for transaction construction and broadcast, including single calls, batches, and fee sponsorship. For embedded wallet UI, use the [Embedded Wallet Kit](https://docs.turnkey.com/sdks/react/getting-started).
 
 <span id="let-the-provider-run-login-services" />
-
-## Let the provider run login services
-
-With a login signer, Tempo checks each sign-in on chain and the signing key stays on the customer's device. Your wallet provider can run the [salt service and prover](/docs/accounts/authentication/oidc#login-services) for your customers and hold no key for them, so it can't move their funds. If the wallet provider also issues the logins, it can sign in as those customers, so pair each login with a passkey the customer holds.
-
 <span id="integrate-accounts" />
 <span id="connect-tempo-wallet" />
 <span id="use-tempo-wallet-sign-in" />

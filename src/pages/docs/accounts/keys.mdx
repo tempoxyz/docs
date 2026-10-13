@@ -33,7 +33,7 @@ Tempo EVM has two account types, single-key and configurable. Both delegate to a
 | Manages access keys | The root key | The owner quorum |
 | EIP-7702 delegation | Allowed. A delegated account can't upgrade. | Rejected |
 
-Configurable accounts, the upgrade, and login signatures are Draft TIPs that run on Tempo devnet.
+Configurable accounts and the upgrade are Draft TIPs that run on Tempo devnet.
 
 The [Account Keychain](/docs/development/account-keychain) is not a third type. It stores the access keys of both types and checks their limits on every transaction.
 
@@ -48,31 +48,25 @@ The [Account Keychain](/docs/development/account-keychain) is not a third type. 
 | WebAuthn | `0x02` | Passkeys as root keys, owners, or access keys |
 | Keychain | `0x04` | An access key signing for its account |
 | Multisig | `0x05` | Owner approvals, carrying the configuration |
-| ZK | `0x06` | Logins: a sign-in proof plus a bound key's signature |
 
-Encodings: [transaction specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types), [TIP-1114](https://tips.sh/1114) (`0x05`), [TIP-1131](https://tips.sh/1131) (`0x06`).
+Encodings: [transaction specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types), [TIP-1114](https://tips.sh/1114) (`0x05`).
 
 <span id="separate-login-from-transaction-authority" />
 <span id="choose-a-signer" />
 
-## Logins as signers
-
-A login is a signer, not an account type. Its ZK signature proves a recent sign-in with an identity provider and carries a signature from the key that sign-in named.
-
-- **As an owner:** a login approves for a configurable account, up to its weight. See [Login signers](/docs/development/configurable-accounts#login-signers).
-- **On its own:** a login also has its own address, derived from the key publisher, issuer, and a salted subject and client ID. That address is an ordinary account with no code, and it can send transactions directly.
-
-Set up logins: [OIDC logins](/docs/accounts/authentication/oidc).
+<span id="logins-as-signers" />
 
 <span id="sign-transactions" />
 <span id="choose-the-signing-environment" />
 
-## Login, signing, and API credentials
+<span id="login-signing-and-api-credentials" />
+
+## App session, signing, and API credentials
 
 | Credential | Authorizes |
 | --- | --- |
 | Your app's session | Your app and its records |
-| Root key, owner, or login | Account approvals: alone for a root key, up to its weight for an owner |
+| Root key or owner | Account approvals: alone for a root key, up to its weight for an owner |
 | Access key | Transactions within its limits |
 | Tempo API key | Hosted API requests only. Never signing. |
 
