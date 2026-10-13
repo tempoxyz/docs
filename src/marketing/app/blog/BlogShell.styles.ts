@@ -485,10 +485,10 @@ export const tempoBlogArticleBody = style({
       // design-exception: Preserve the optical typography of this specific surface.
       letterSpacing: '-0.45px !custom',
     },
-    // Body text follows TDS Platform B1 (16/22, 0.12px tracking).
+    // Body text takes TDS Platform B1's size and tracking (16px, 0.12px) and keeps
+    // the article's prose leading; B1's 22px line height is set for UI text.
     '& :is(p, li)': {
       fontSize: tokens.fontSize.body,
-      lineHeight: tokens.lineHeight.b1,
       letterSpacing: tokens.letterSpacing.b1,
     },
     '& img': {

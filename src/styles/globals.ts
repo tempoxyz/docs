@@ -1613,9 +1613,12 @@ global({
 // G8: Vocs-owned buttons follow the same rule: gray secondary fill, no outline,
 // smoothed md radius (OpenAPI code-panel actions, the 404 link). G4: the 404
 // icon circle keeps a hairline only where its fill matches the page.
+// The 404 markup carries Vocs utility classes (vocs:bg-surface vocs:border) in
+// this same layer, so its selectors are scoped under [data-v-not-found] to win
+// on specificity.
 global({
   '@layer vocs_utilities': {
-    '[data-v-openapi-action], [data-v-not-found-link]': {
+    '[data-v-openapi-action], [data-v-not-found] > [data-v-not-found-link]': {
       borderWidth: tokens.borderWidth.none,
       '--corner-radius': tokens.radius.md,
       borderRadius: tokens.radius.md,
@@ -1624,23 +1627,25 @@ global({
       transitionDuration: 'var(--tempo-exit)',
       transitionTimingFunction: 'var(--tempo-ease)',
     },
-    '[data-v-openapi-action]:not(:disabled):hover, [data-v-not-found-link]:hover': {
-      backgroundColor: tokens.color.containerStrong,
-      transitionDuration: 'var(--tempo-enter)',
-    },
-    '[data-v-not-found-icon]': {
+    '[data-v-openapi-action]:not(:disabled):hover, [data-v-not-found] > [data-v-not-found-link]:hover':
+      {
+        backgroundColor: tokens.color.containerStrong,
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    '[data-v-not-found] > [data-v-not-found-icon]': {
       borderColor: tokens.color.cardLine,
     },
   },
 })
 
-// Body text follows TDS Platform B1 (16/22, 0.12px tracking) in docs articles.
-// Callouts keep B2 (utilities layer above), and Home keeps its own scale.
+// Body text takes TDS Platform B1's size and tracking (16px, 0.12px) in docs
+// articles. B1's 22px line height is set for UI text; long-form prose keeps the
+// Vocs 26px leading. Card descriptions keep their own 14px size, and callouts
+// keep B2 (utilities layer above). Home keeps its own scale.
 global({
   '@layer vocs_utilities': {
-    'article[data-v-content] :is(p, li)[data-v]': {
+    'article[data-v-content] :is(p, li)[data-v]:not(a *)': {
       fontSize: tokens.fontSize.body,
-      lineHeight: tokens.lineHeight.b1,
       letterSpacing: tokens.letterSpacing.b1,
     },
   },
