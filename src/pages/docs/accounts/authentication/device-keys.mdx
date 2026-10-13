@@ -1,7 +1,7 @@
 ---
 title: Device keys
 seoTitle: Pay Without a Prompt Using Device Keys | Tempo Docs
-description: Create a non-extractable key on the customer's phone, computer, or browser, and authorize it to pay within limits for a Tempo account.
+description: Create a non-extractable P-256 key on the customer's phone, computer, or browser, and authorize it to pay within limits for a Tempo account.
 interactive: true
 ---
 
@@ -9,57 +9,11 @@ import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
 
 # Device keys
 
-A device key pays within limits without a prompt, and it can't leave the customer's device.
+A device key is a P-256 key that the customer's phone, computer, or browser creates and can't export. A signer authorizes it once as an [access key](/docs/accounts/access-keys), and it then pays within limits with no prompt.
 
-<P256KeyDemo />
-
-The demo creates a key in this browser, funds its Moderato test account, and pays with it. Reload the page and the key is still here.
-
-:::::steps
-
-### Create the key on the device
-
-```ts [device-key.ts]
-import { WebCryptoP256 } from 'viem/tempo'
-
-const keyPair = await WebCryptoP256.createKeyPair() // non-extractable by default
-```
-
-Store `keyPair` in IndexedDB. The browser keeps the key itself, not its bytes.
-
-### Authorize it from a signer
-
-```ts [device-key.ts]
-import { Account, Expiry } from 'viem/tempo'
-
-const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
-const keyAuthorization = await client.accessKey.signAuthorization({
-  accessKey: deviceKey,
-  account, // approved by the customer's passkey or login
-  expiry: Expiry.days(30),
-  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
-})
-```
-
-### Pay with it
-
-```ts [device-key.ts]
-await client.token.transferSync({
-  account: deviceKey,
-  amount: parseUnits('5', 6),
-  keyAuthorization, // first payment only
-  to: recipient,
-  token: alphaUsd,
-})
-```
-
-Later payments omit `keyAuthorization`.
-
-:::::
+The key lives in the platform's key store, which signs without revealing it. A device key trusts only that device: whoever unlocks it can pay up to the key's limits until it expires. Use it for everyday payments, with the customer's passkey or login approving the key and anything above its limits.
 
 ## Device key stores by platform
-
-Each device key is a P-256 key held in the platform's key store, which signs without exporting it.
 
 | Platform | Key store |
 | --- | --- |
@@ -71,6 +25,42 @@ Each device key is a P-256 key held in the platform's key store, which signs wit
 
 For keys on servers, use a KMS or HSM. See [Private keys](/docs/accounts/authentication/private-keys).
 
-For a lost device, [revoke its key](/docs/accounts/access-keys#revoke-an-access-key). The customer's signers don't change.
+<span id="create-the-key-on-the-device" />
+<span id="authorize-it-from-a-signer" />
+<span id="pay-with-it" />
 
-For other sign-in methods, see [Authentication](/docs/accounts/authentication).
+## How a device key starts paying
+
+<P256KeyDemo />
+
+The demo creates a key in this browser, funds its Moderato test account, and pays with it. Reload the page and the key is still here.
+
+In code, the device creates the key, a signer authorizes it with limits, and the first payment carries that authorization:
+
+```ts [device-key.ts]
+import { Account, Expiry, WebCryptoP256 } from 'viem/tempo'
+
+const keyPair = await WebCryptoP256.createKeyPair() // non-extractable; store keyPair in IndexedDB
+
+const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
+const keyAuthorization = await client.accessKey.signAuthorization({
+  accessKey: deviceKey,
+  account, // approved by the customer's passkey or login
+  expiry: Expiry.days(30),
+  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
+})
+
+await client.token.transferSync({
+  account: deviceKey,
+  amount: parseUnits('5', 6),
+  keyAuthorization, // first payment only
+  to: recipient,
+  token: alphaUsd,
+})
+```
+
+Later payments omit `keyAuthorization`. A P-256 key can also be a weighted signer, but a signer has no limits, so keep device keys as access keys.
+
+For a lost device, [revoke its key](/docs/accounts/access-keys#revoke-an-access-key). The account's signers don't change.
+
+For a sign-in that authorizes a device key, see [Enterprise SSO login](/docs/accounts/guides/enterprise-sso). For other methods, see [Signing methods](/docs/accounts/authentication).

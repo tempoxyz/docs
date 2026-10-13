@@ -33,8 +33,6 @@ export const sandboxLimits = {
 // Signers
 
 export type SignerKind =
-  | 'email'
-  | 'sms'
   | 'google'
   | 'privy'
   | 'apple'
@@ -60,14 +58,6 @@ type SignerKindInfo = {
 }
 
 export const signerKinds = {
-  email: {
-    label: 'Email login',
-    scheme: 'oidc',
-    holder: 'you',
-    group: 'Logins',
-    loginWord: 'email',
-  },
-  sms: { label: 'SMS login', scheme: 'oidc', holder: 'you', group: 'Logins', loginWord: 'SMS' },
   google: {
     label: 'Google login',
     scheme: 'oidc',
@@ -299,7 +289,7 @@ function together(set: readonly Signer[], all: readonly Signer[]) {
   return `${joinAnd(set.map(listName))} together`
 }
 
-/** Phrase a group of same-size sets as "any 2 of …" or "the passkey plus email or SMS". */
+/** Phrase a group of same-size sets as "any 2 of …" or "the passkey plus Google or Privy". */
 function groupPhrase(group: readonly Signer[][], size: number): string | null {
   if (group.length < 2) return null
   const union = unionOf(group)
@@ -318,7 +308,7 @@ function groupPhrase(group: readonly Signer[][], size: number): string | null {
 }
 
 /**
- * Describe approval sets in a short phrase, such as "the passkey, or email and SMS together".
+ * Describe approval sets in a short phrase, such as "the passkey, or Google and Privy together".
  * Shows at most `maxAlternatives`, then "or N other combinations".
  */
 export function describeApprovalSets(
@@ -671,7 +661,7 @@ export type PresetId =
   | 'add-signers'
   | 'multi-factor'
   | 'rotate-keys'
-  | 'change-email'
+  | 'change-login'
   | 'recover'
   | 'export'
   | 'team-treasury'
@@ -682,7 +672,7 @@ export type PresetId =
 export type GuidedActionId =
   | 'add-passkey'
   | 'rotate-operations'
-  | 'change-email'
+  | 'change-login'
   | 'lose-passkey'
   | 'replace-passkey'
   | 'move-to-tempo-wallet'
@@ -712,12 +702,12 @@ type PresetDefinition = AccountSeed & {
   guided?: GuidedActionId[]
 }
 
-const mayaEmail: SignerSeed = {
-  id: 'email',
-  kind: 'email',
-  name: 'Email login',
+const mayaGoogle: SignerSeed = {
+  id: 'google',
+  kind: 'google',
+  name: 'Google login',
   subject: 'maya@example.com',
-  detail: 'OIDC · maya@example.com',
+  detail: 'OIDC · Google · maya@example.com',
   weight: 1,
 }
 const mayaPasskey: SignerSeed = {
@@ -728,22 +718,13 @@ const mayaPasskey: SignerSeed = {
   detail: 'WebAuthn · Face ID · this iPhone',
   weight: 2,
 }
-const mayaSms: SignerSeed = {
-  id: 'sms',
-  kind: 'sms',
-  name: 'SMS login',
-  subject: '+1 ••• ••• 0142',
-  detail: 'OIDC · +1 ••• ••• 0142',
+const mayaPrivy: SignerSeed = {
+  id: 'privy',
+  kind: 'privy',
+  name: 'Privy login',
+  subject: 'm•••@example.com',
+  detail: 'OIDC · Privy · m•••@example.com',
   weight: 1,
-}
-const mayaGoogle: SignerSeed = {
-  id: 'google',
-  kind: 'google',
-  name: 'Google login · backup',
-  subject: 'maya.backup@example.com',
-  detail: 'OIDC · maya.backup@example.com',
-  weight: 1,
-  phrase: { list: 'Google', solo: 'the Google login' },
 }
 
 const hardwareKey = (id: string, name: string, serial: string): SignerSeed => ({
@@ -774,7 +755,7 @@ const maya: AccountSeed = {
   avatar: 'M',
   balance: 12_480,
   salt: 'maya',
-  genesis: { threshold: 1, owners: [{ id: 'email', weight: 1 }] },
+  genesis: { threshold: 1, owners: [{ id: 'google', weight: 1 }] },
   identity: { local: 'maya', domain: 'example.com' },
 }
 const acme: AccountSeed = {
@@ -811,7 +792,7 @@ const presetDefinitions: PresetDefinition[] = [
     ...maya,
     version: 0,
     threshold: 1,
-    signers: [mayaEmail],
+    signers: [mayaGoogle],
     accessKeys: ['iphone'],
   },
   {
@@ -820,7 +801,7 @@ const presetDefinitions: PresetDefinition[] = [
     ...maya,
     version: 0,
     threshold: 1,
-    signers: [mayaEmail],
+    signers: [mayaGoogle],
     accessKeys: ['iphone'],
     guided: ['add-passkey'],
   },
@@ -830,7 +811,7 @@ const presetDefinitions: PresetDefinition[] = [
     ...maya,
     version: 2,
     threshold: 2,
-    signers: [mayaEmail, mayaPasskey, mayaSms],
+    signers: [mayaGoogle, mayaPasskey, mayaPrivy],
     accessKeys: ['iphone'],
   },
   {
@@ -845,14 +826,14 @@ const presetDefinitions: PresetDefinition[] = [
     guided: ['rotate-operations'],
   },
   {
-    id: 'change-email',
-    label: 'Change email',
+    id: 'change-login',
+    label: 'Change login',
     ...maya,
-    version: 3,
+    version: 2,
     threshold: 2,
-    signers: [mayaEmail, mayaPasskey, mayaSms, mayaGoogle],
+    signers: [mayaGoogle, mayaPasskey, mayaPrivy],
     accessKeys: ['iphone'],
-    guided: ['change-email'],
+    guided: ['change-login'],
   },
   {
     id: 'recover',
@@ -860,7 +841,7 @@ const presetDefinitions: PresetDefinition[] = [
     ...maya,
     version: 2,
     threshold: 2,
-    signers: [mayaEmail, mayaPasskey, mayaSms],
+    signers: [mayaGoogle, mayaPasskey, mayaPrivy],
     accessKeys: ['iphone'],
     guided: ['lose-passkey', 'replace-passkey'],
   },
@@ -946,7 +927,7 @@ const presetDefinitions: PresetDefinition[] = [
       threshold: 2,
       owners: [
         { id: 'passkey', weight: 2 },
-        { id: 'email', weight: 1 },
+        { id: 'google', weight: 1 },
         { id: 'recovery', weight: 1 },
       ],
     },
@@ -956,11 +937,11 @@ const presetDefinitions: PresetDefinition[] = [
     signers: [
       { ...passkeySeed('passkey', 'Passkey', 'Face ID · owner’s iPhone'), weight: 2 },
       {
-        id: 'email',
-        kind: 'email',
-        name: 'Email login',
+        id: 'google',
+        kind: 'google',
+        name: 'Google login',
         subject: 'owner@kite.example',
-        detail: 'OIDC · owner@kite.example',
+        detail: 'OIDC · Google · owner@kite.example',
         weight: 1,
       },
       {
@@ -1545,17 +1526,8 @@ function uniqueName(base: string, names: readonly string[]) {
 }
 
 function newSignerDetails(account: SandboxAccount, kind: SignerKind) {
-  const { local, domain } = account.identity
-  const count = account.signers.filter((signer) => signer.kind === kind).length
+  const { domain } = account.identity
   switch (kind) {
-    case 'email': {
-      const subject = count ? `${local}+${count + 1}@${domain}` : `${local}@${domain}`
-      return { subject, detail: `OIDC · ${subject}` }
-    }
-    case 'sms': {
-      const subject = `+1 ••• ••• ${String(142 + count * 45).padStart(4, '0')}`
-      return { subject, detail: `OIDC · ${subject}` }
-    }
     case 'google':
       return { detail: 'OIDC · Google account' }
     case 'privy':
@@ -1786,14 +1758,14 @@ function replacementDetails(account: SandboxAccount, signer: Signer) {
   const used = new Set(account.signers.map((item) => item.subject))
   const pick = (candidates: string[]) =>
     candidates.find((candidate) => !used.has(candidate)) ?? `${candidates[0]} ${account.serial}`
-  if (signer.kind === 'email') {
+  if (signer.kind === 'google') {
     const { local, domain } = account.identity
     const subject = pick([
       `${local}@work.example`,
       `${local}@home.example`,
       `${local}.new@${domain}`,
     ])
-    return { subject, detail: `OIDC · ${subject}` }
+    return { subject, detail: `OIDC · Google · ${subject}` }
   }
   if (signer.kind === 'hardware') {
     const serial = pick(['serial 8802', 'serial 5127', 'serial 6034']).replace('serial ', '')
@@ -1829,10 +1801,10 @@ export function rotateSigner(account: SandboxAccount, id: string) {
   })
 }
 
-/** Add a new email login and revoke the old one in one update. */
-export function changeEmail(account: SandboxAccount) {
-  const current = configuredSigners(account).find((signer) => signer.kind === 'email')
-  if (!current) return { ...account, notice: 'Add an email login first.' }
+/** Add a new Google login and revoke the old one in one update. */
+export function changeLogin(account: SandboxAccount) {
+  const current = configuredSigners(account).find((signer) => signer.kind === 'google')
+  if (!current) return { ...account, notice: 'Add a Google login first.' }
   return rotateSigner(account, current.id)
 }
 
@@ -1872,7 +1844,7 @@ export function moveToTempoWallet(account: SandboxAccount) {
 const guidedLabels: Record<GuidedActionId, string> = {
   'add-passkey': 'Add a passkey',
   'rotate-operations': 'Rotate the operations key',
-  'change-email': 'Change email',
+  'change-login': 'Change Google login',
   'lose-passkey': 'Lose the passkey',
   'replace-passkey': 'Replace the passkey',
   'move-to-tempo-wallet': 'Move to Tempo Wallet',
@@ -1886,8 +1858,8 @@ function guidedTarget(account: SandboxAccount, id: GuidedActionId): Signer | nul
       return passkey ? undefined : null
     case 'rotate-operations':
       return owners.find((signer) => signer.name === 'Operations key')
-    case 'change-email':
-      return owners.find((signer) => signer.kind === 'email')
+    case 'change-login':
+      return owners.find((signer) => signer.kind === 'google')
     case 'lose-passkey':
       return passkey && !passkey.lost ? passkey : undefined
     case 'replace-passkey':
@@ -2036,7 +2008,7 @@ export type AccountHealth = {
   issues: ConfigIssue[]
   notices: Notice[]
   tiers: ApprovalTier[]
-  /** For the header, such as "Threshold 2: the passkey, or email and SMS together". */
+  /** For the header, such as "Threshold 2: the passkey, or Google and Privy together". */
   summary: string
   /** A recommended preset that is unchanged and raises no warnings. */
   recommended: boolean

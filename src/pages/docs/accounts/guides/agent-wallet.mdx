@@ -43,7 +43,7 @@ const keyAuthorization = await client.accessKey.signAuthorization({
 })
 ```
 
-The authorization travels with the agent's first payment. See [Authorize an access key](/docs/accounts/access-keys#authorize-a-limited-key) for each option.
+The authorization travels with the agent's first payment. See [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key) for each option.
 
 ### Connect the key to the agent's client
 
@@ -56,7 +56,7 @@ const agentClient = createClient({ account: accessKey, chain: tempoModerato, fee
 
 ### Show spending and end access
 
-Show the agent's budget, expiry, allowed calls, and [remaining budget](/docs/accounts/access-keys#read-the-remaining-permission) in your account UI, with a [revoke](/docs/accounts/access-keys#revoke-an-access-key) action the account's signers approve. Show access as removed only after the revocation confirms.
+Show the agent's budget, expiry, allowed calls, and [remaining budget](/docs/accounts/access-keys#read-an-access-key) in your account UI, with a [revoke](/docs/accounts/access-keys#revoke-an-access-key) action the account's signers approve. Show access as removed only after the revocation confirms.
 
 :::::
 
@@ -65,5 +65,5 @@ Show the agent's budget, expiry, allowed calls, and [remaining budget](/docs/acc
 ## Agent budget limits
 
 - The access key's budget caps what the agent spends from the account. Set a separate limit per request: Tempo Wallet CLI uses `--max-spend`.
-- An agent's key can't authorize other keys, change signers, or count toward the threshold.
+- An agent's key can't authorize other keys, change signers, or count toward the threshold. Never give an agent an [admin access key](/docs/accounts/access-keys#admin-access-keys): it has no budget.
 - Give each agent its own key, so you can revoke one without affecting the others.

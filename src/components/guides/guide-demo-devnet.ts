@@ -20,7 +20,8 @@ const keyPublisher: Address = '0x1132000000000000000000000000000000000000'
 const nativeMultisig: Address = '0xAACC000000000000000000000000000000000000'
 /**
  * The local auth app's publisher on devnet 8211 (`PUBLISHER_ID` in its `devnet8211local`
- * environment). It lists Google's keys and the auth app's own email and SMS issuer key.
+ * environment). It lists Google's keys and the auth app's own issuer key, which signs bridged
+ * Privy tokens.
  */
 export const relayPublisherId: Hex =
   '0x5171dc207ef7eb6bc0bba25a9791e38c9abe7e8782dbab9ddda0027361beef38'
@@ -127,7 +128,7 @@ export function createGuideChain(options: { rpcUrl?: string } = {}): GuideChain 
         method: result.method,
         address: result.owner.address,
         email: result.email,
-        phone: result.phone,
+        privy: result.privy,
       })
     },
   }

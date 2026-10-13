@@ -9,7 +9,7 @@
  * - Access keys the reader adds are real: a generated private key (shown once), "This browser" (a
  *   non-extractable WebCrypto key that signs silently), and "This [device]" (a platform passkey
  *   that asks on each payment). Example keys that presets load stay in-memory keys.
- * - Email, Google, and SMS logins are real when the local auth app runs (`account-sandbox-oidc`):
+ * - Google and Privy logins are real when the local auth app runs (`account-sandbox-oidc`):
  *   adding one opens its sign-in, and the login joins the account as a ZK owner. A login's proof
  *   lasts 10 minutes, so approving later asks for a new sign-in. Example accounts' made-up logins
  *   and Apple and SSO logins aren't live, so those accounts can't run (`devnetBlocker`).
@@ -202,8 +202,8 @@ export function loginBlocker(kind: SignerKind): string | null {
 
 /**
  * Why `account` can't run on devnet, or `null` when every signer signs for real there. Callers
- * that can run a sign-in (`requestSignIn`) pass `logins: true`; for them, email, Google, SMS, and
- * Privy logins are live on the reader's own account. Examples' made-up logins can't sign on devnet.
+ * that can run a sign-in (`requestSignIn`) pass `logins: true`; for them, Google and Privy logins
+ * are live on the reader's own account. Examples' made-up logins can't sign on devnet.
  */
 export function devnetBlocker(
   account: Pick<SandboxAccount, 'signers' | 'presetId'>,
@@ -220,28 +220,19 @@ export function devnetBlocker(
   return null
 }
 
-export type DevnetPrompt =
-  | 'create-passkey'
-  | 'approve-passkey'
-  | 'sign-in-email'
-  | 'sign-in-google'
-  | 'sign-in-sms'
-  | 'sign-in-privy'
+export type DevnetPrompt = 'create-passkey' | 'approve-passkey' | 'sign-in-google' | 'sign-in-privy'
 
 export const devnetPromptLabels: Record<DevnetPrompt, string> = {
   'create-passkey': 'Create the passkey in your browser…',
   'approve-passkey': 'Approve with your passkey…',
-  // Local email codes print in the Email codes terminal tab, not an inbox.
-  'sign-in-email': 'Check the Email codes terminal tab for your code…',
   'sign-in-google': Logins.loginPromptLabels.google,
-  'sign-in-sms': Logins.loginPromptLabels.sms,
   'sign-in-privy': Logins.loginPromptLabels.privy,
 }
 
 /** A sign-in the adapter needs: a new login, or a login whose 10-minute proof expired. */
 export type LoginSignInRequest = {
   method: Logins.LoginMethod
-  /** The signer's name, such as "Email login". */
+  /** The signer's name, such as "Google login". */
   signer: string
   reason: 'add' | 'renew'
 }
@@ -588,8 +579,8 @@ type OwnerKey = {
   login?: LoginKey
 }
 
-/** A login and what its last sign-in reported: an email, a number, or a Privy DID. */
-type LoginKey = { owner: Logins.LoginOwner; email?: string; phone?: string; privy?: string }
+/** A login and what its last sign-in reported: a verified email or a Privy DID. */
+type LoginKey = { owner: Logins.LoginOwner; email?: string; privy?: string }
 
 type AccessKeyEntry = {
   spec: string
@@ -762,7 +753,7 @@ export function createDevnetAdapter(
     passkeys?: 'browser' | 'headless'
     /**
      * Replaces the popup sign-in, for scripts and tests only: it signs in some other way (such as
-     * reading the local auth app's email code) and returns the result `Logins.signIn` would.
+     * a scripted relay sign-in) and returns the result `Logins.signIn` would.
      */
     signIn?: (request: LoginSignInRequest) => Promise<Logins.SignInResult>
   } = {},
@@ -839,14 +830,14 @@ export function createDevnetAdapter(
         : undefined
     if (done) {
       usedSignIns.add(done)
-      return { owner: done.owner, email: done.email, phone: done.phone, privy: done.privy }
+      return { owner: done.owner, email: done.email, privy: done.privy }
     }
     const scripted = options.signIn
     if (scripted) {
       const result = await prompted(prompts, `sign-in-${method}` as DevnetPrompt, () =>
         scripted({ method, signer: signer.name, reason }),
       )
-      return { owner: result.owner, email: result.email, phone: result.phone, privy: result.privy }
+      return { owner: result.owner, email: result.email, privy: result.privy }
     }
     let popup = prompts.popup
     prompts.popup = undefined
@@ -859,7 +850,7 @@ export function createDevnetAdapter(
     const result = await prompted(prompts, `sign-in-${method}` as DevnetPrompt, () =>
       Logins.signIn({ method, popup, signal: prompts.signal }),
     )
-    return { owner: result.owner, email: result.email, phone: result.phone, privy: result.privy }
+    return { owner: result.owner, email: result.email, privy: result.privy }
   }
 
   /** A signer's key: the one prepared for it, or a new one. */
@@ -906,7 +897,6 @@ export function createDevnetAdapter(
         key.login = {
           owner: fresh.owner,
           email: fresh.email ?? key.login.email,
-          phone: fresh.phone ?? key.login.phone,
           privy: fresh.privy ?? key.login.privy,
         }
         continue
@@ -921,7 +911,6 @@ export function createDevnetAdapter(
       key.login = {
         owner: renewed.owner,
         email: renewed.email ?? key.login.email,
-        phone: renewed.phone ?? key.login.phone,
         privy: renewed.privy ?? key.login.privy,
       }
     }
@@ -953,7 +942,6 @@ export function createDevnetAdapter(
         method: key.login.owner.method,
         address: key.address,
         email: key.login.email,
-        phone: key.login.phone,
         privy: key.login.privy,
       })
       if (signer.subject === identity.subject && signer.detail === identity.detail) return signer
@@ -1341,7 +1329,7 @@ export function createDevnetAdapter(
       threshold: account.committed.threshold,
     }
     let initial = Account.fromConfig(genesis)
-    // The same owners derive the same address, such as one email login at threshold 1. If an
+    // The same owners derive the same address, such as one Google login at threshold 1. If an
     // earlier run moved that account past this v0 config, start a new account with a random salt.
     const commitment = await client.accounts.getConfigCommitment({ account: initial.address })
     if (isForeignCommitment(commitment, initial.config as ChainConfig))
