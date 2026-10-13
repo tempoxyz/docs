@@ -39,9 +39,28 @@ const { receipt } = await client.accounts.updateConfigSync({
 await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
 ```
 
-`getConfig` reads the signers from a relay that runs `Relay.accounts`, so the client's transport must be that relay. It returns `null` when the relay has no configuration for the account. Removing a departing signer is the same update with its entry dropped.
+`getConfig` reads the signers from a relay that runs `Relay.accounts`, so the client's transport must be that relay. It returns `null` when the relay has no configuration for the account.
 
-The same update covers a provider switch: swap the old provider key for the new one at the same weight. [Rotate an approver's key](/docs/accounts/guides/company-treasury#rotate-an-approvers-key) walks through it.
+Swapping in one update means the account never has the new key and the old key active together, and never has neither. The same update covers a provider switch: swap the old provider key for the new one at the same weight. [Rotate an approver's key](/docs/accounts/guides/company-treasury#rotate-an-approvers-key) walks through it.
+
+<span id="remove-a-signer" />
+
+## Remove a departing signer
+
+Removing a signer is the same update with its entry dropped. Approve with the signers that stay:
+
+```ts [remove-signer.ts]
+const { receipt } = await client.accounts.updateConfigSync({
+  account,
+  nextConfig: {
+    owners: config.owners.filter((entry) => !isAddressEqual(entry.owner, departing)),
+    threshold: config.threshold,
+  },
+  owner: approver, // a signer that stays
+})
+```
+
+If the remaining weights fall below the threshold, lower `threshold` in the same update, or Tempo rejects it. [Remove a departing approver](/docs/accounts/guides/company-treasury#remove-a-departing-approver) walks through offboarding.
 
 ## Rotate a compromised signer
 
@@ -49,11 +68,18 @@ Treat a compromised signer as an attacker who can approve at its weight. Swap it
 
 If the compromised signer can reach the threshold alone, it can also rotate the other signers out first. Keep every signer below the threshold alone, so no single key controls the account.
 
+<span id="revoke-what-the-old-signer-authorized" />
+
+## Revoke what the old signer authorized
+
+Removing or swapping a signer doesn't revoke access keys. After the update lands, revoke each access key the old signer could reach, including any key an attacker authorized. [Access key revocation](/docs/accounts/access-keys/revocation) covers how to find and revoke them.
+
 ## Signer rotation limits
 
 - The approving signers must reach the current threshold. Removing a signer must leave weights that still reach it, or Tempo rejects the update.
+- An account keeps at least one signer.
 - `InvalidConfig` means another signer update landed first. Read the signers again and rebuild the update.
 - After a signer change, `address: 'infer'` derives a different address. Open the account with `Account.fromConfig(address)`.
 - An account holds 1–48 signers, with total weight at most 255.
 
-Specification: [configuration updates](https://tips.sh/1109).
+Specifications: [configuration updates](https://tips.sh/1109), [configurable accounts](https://tips.sh/1107).

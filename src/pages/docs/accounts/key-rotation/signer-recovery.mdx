@@ -41,6 +41,17 @@ Once the update lands, the lost passkey can't approve. Then [revoke the access k
 
 A lost backup or recovery key works the same way: the passkey replaces it alone.
 
+<span id="add-a-recovery-signer" />
+
+## Add a recovery signer before you need it
+
+A recovery signer exists so the account survives losing another signer. Give it enough weight that the remaining signers reach the threshold without any one signer, and no more: it can also approve payments at that weight.
+
+- **Below the threshold:** the signer approves only together with others. Use this for backup and recovery keys, so no single one controls the account.
+- **At or above the threshold:** the signer approves anything alone, including removing every other signer. Use this only for a key you would trust with the whole account.
+
+Adding weight doesn't raise the threshold, so a new signer can make approvals easier to reach. Raise the threshold in the same update if the account should still need the same approvers. Check the setup against the rule in [Plan for recovery](/docs/accounts/key-rotation#plan-for-recovery), and see [Add a backup signer](/docs/accounts/guides/self-custody#add-a-backup-signer) for the update.
+
 ## Recover funds sent on another chain
 
 The account's address is the same on every EVM chain, so someone can send funds to it on a chain where Tempo doesn't run. On supported chains, the account's initial secp256k1 signers, reaching the original threshold, can deploy a recovery wallet at that address and retrieve the funds, even after you remove those signers on Tempo.

@@ -12,15 +12,18 @@ description: Rotate a key, replace a lost passkey, or remove a compromised key w
 
 Rotating a key, replacing a lost one, and removing a compromised one are the same operation: a signer update that the account's other signers approve, at the same address. Tempo has no override, so set up the account to survive losing any one signer before you need to.
 
+<span id="one-signer-update-same-address" />
+
 ## One signer update, same address
 
-A signer update replaces the account's list of signers and its threshold in one transaction. Signers whose weights reach the current threshold approve it, and the address, balances, token approvals, and history stay the same. Once it lands, a removed signer can't approve, and approvals collected for the old configuration stop verifying.
+A signer update replaces the account's list of signers and its threshold in one transaction. Signers whose weights reach the current threshold approve it. The address, balances, token approvals, access keys, and history stay the same.
 
-What changes between situations is who approves. When you rotate a key on schedule, the old key can still sign. When a key is lost or compromised, the other signers must reach the threshold without it.
+Once the update lands, a removed signer can't approve, and approvals collected for the old configuration stop verifying. What differs between situations is who approves: on a scheduled rotation the old key can still sign, and after a loss or compromise the other signers must reach the threshold without it.
 
 <span id="key-replacement" />
 <span id="recovery-situations" />
 <span id="recovery-by-situation" />
+<span id="key-management-by-situation" />
 
 ## Key rotation by situation
 
@@ -58,5 +61,6 @@ For example, give a passkey weight 2, and a backup key and a recovery provider's
 - Signer updates don't touch access keys. A device key on a lost phone keeps paying within its limits until you [revoke it](/docs/accounts/access-keys/revocation).
 - Recovery signers can also approve payments at their weight. Keep each one below the threshold on its own.
 - Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
+- Cross-chain recovery uses only the initial secp256k1 signers at the original threshold.
 
-Specification: [configurable accounts](https://tips.sh/1107).
+Specifications: [configurable accounts](https://tips.sh/1107), [configuration updates](https://tips.sh/1109), [configurable account addresses](https://tips.sh/1110).
