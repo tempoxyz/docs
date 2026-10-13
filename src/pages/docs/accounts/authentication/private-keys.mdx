@@ -1,0 +1,35 @@
+---
+title: Private keys
+seoTitle: Use Wallet, KMS, and HSM Keys as Tempo Account Signers | Tempo Docs
+description: Add keys from CLI, hardware, and browser wallets, or from your KMS or HSM, as weighted signers or limited access keys.
+---
+
+# Private keys
+
+A private key you already hold signs as a weighted signer or as a limited [access key](/docs/accounts/access-keys).
+
+<span id="recommended-roles-for-your-keys" />
+
+## Private key sources
+
+| Source | Examples | Recommended role |
+| --- | --- | --- |
+| CLI wallets | The [Tempo CLI wallet](/docs/cli/wallet), Foundry `cast` | Access key for scripts and agents |
+| Hardware wallets | A treasury approver's hardware wallet | Signer at weight 1, so each approval needs a person and a device |
+| Browser wallets | An operator's browser extension wallet | Signer at weight 1 for operator approvals |
+| Other crypto wallets | Mobile wallets, and [wallet providers](/docs/accounts/guides/wallet-provider) such as Turnkey or Privy | Signer at weight 1. A provider's policies apply before it signs. |
+| KMS or HSM | Keys in your cloud KMS or HSM | Signer for recovery, or [access key](/docs/accounts/guides/automate-backend) for automation |
+
+## Require two treasury signers
+
+```ts [treasury.ts]
+import { Account } from 'viem/tempo'
+
+const finance = Account.fromSecp256k1(process.env.FINANCE_SIGNER_KEY as `0x${string}`)
+const operations = Account.fromSecp256k1(process.env.OPERATIONS_SIGNER_KEY as `0x${string}`)
+const account = Account.fromConfig({ address: 'infer', owners: [finance, operations], threshold: 2 })
+```
+
+To keep a key in its wallet, KMS, HSM, or provider, use that source's Viem account adapter instead.
+
+For other sign-in methods, see [Authentication](/docs/accounts/authentication).

@@ -1197,6 +1197,181 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/accounts/sandbox",
+      "destination": "/developers/docs/accounts/create",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/new-device",
+      "destination": "/developers/docs/accounts/authentication/device-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/admin-keys",
+      "destination": "/developers/docs/accounts/access-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/identity-provider",
+      "destination": "/developers/docs/accounts/guides/enterprise-sso",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/relay",
+      "destination": "/developers/docs/accounts/authentication/login-services",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/p256-keys",
+      "destination": "/developers/docs/accounts/authentication/device-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/email-otp",
+      "destination": "/developers/docs/accounts/authentication/oidc#email-and-sms-codes",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/privy",
+      "destination": "/developers/docs/accounts/authentication/oidc#privy-logins",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/relays",
+      "destination": "/developers/docs/accounts/authentication/login-services",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/add-signers",
+      "destination": "/developers/docs/accounts/guides/self-custody#add-a-backup-signer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/multi-factor",
+      "destination": "/developers/docs/accounts/guides/self-custody#require-multi-factor-approval",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/rotate-keys",
+      "destination": "/developers/docs/accounts/guides/company-treasury#rotate-an-approvers-key",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/replace-keys",
+      "destination": "/developers/docs/accounts/guides/self-custody#recover-from-a-lost-passkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/change-email",
+      "destination": "/developers/docs/accounts/guides/enterprise-sso#handle-an-email-change",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/revoke-keys",
+      "destination": "/developers/docs/accounts/access-keys#revoke-an-access-key",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/export",
+      "destination": "/developers/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/recover",
+      "destination": "/developers/docs/accounts/guides/self-custody#recover-from-a-lost-passkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/upgrade",
+      "destination": "/developers/docs/accounts/create#upgrade-an-existing-account",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/verify-approvals",
+      "destination": "/developers/docs/accounts/security-policies#verify-approvals",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/team-accounts",
+      "destination": "/developers/docs/accounts/security-policies#team-budgets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/approval-rules",
+      "destination": "/developers/docs/accounts/security-policies#approval-escalation-for-larger-payments",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/integration",
+      "destination": "/developers/docs/accounts/how-it-works",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/agents",
+      "destination": "/developers/docs/accounts/guides/agent-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/backend-automation",
+      "destination": "/developers/docs/accounts/guides/automate-backend",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/security",
+      "destination": "/developers/docs/accounts/guides/self-custody",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-management",
+      "destination": "/developers/docs/accounts/recovery",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/approvals",
+      "destination": "/developers/docs/accounts/security-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/team-budgets",
+      "destination": "/developers/docs/accounts/security-policies#team-budgets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/policies",
+      "destination": "/developers/docs/accounts/security-policies#approval-escalation-for-larger-payments",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/private-policies",
+      "destination": "/developers/docs/accounts/security-policies#experimental-private-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/verified-facts",
+      "destination": "/developers/docs/accounts/security-policies#experimental-private-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/integrate",
+      "destination": "/developers/docs/accounts/guides/wallet-provider#connect-tempo-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/balances",
+      "destination": "/developers/docs/guide/payments/accept-a-payment#read-balances",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/examples",
+      "destination": "/developers/docs/guide/payments/send-a-payment/examples#payment-client-setup",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/providers",
+      "destination": "/developers/docs/accounts/guides/wallet-provider",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/guide/use-accounts/fee-sponsorship",
       "destination": "/developers/docs/guide/payments/sponsor-user-fees",
       "permanent": true

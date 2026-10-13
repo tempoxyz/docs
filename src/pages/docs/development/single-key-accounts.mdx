@@ -1,0 +1,125 @@
+---
+title: Single-key accounts
+seoTitle: Tempo Single-Key Accounts, Root Keys, and In-Place Upgrades | Tempo Docs
+description: Derive a Tempo account address from one secp256k1, P-256, or WebAuthn key, delegate to access keys, and upgrade to a configurable account at the same address.
+---
+
+import { AccountDiagram } from '../../../components/AccountDiagram'
+
+# Single-key accounts
+
+A single-key account's address comes from one public key, its root key, and that key approves every transaction. Compare it with configurable accounts in the [account model](/docs/accounts/keys).
+
+<AccountDiagram
+  name="single-key"
+  alt="A root key derives the account's address and authorizes its access keys. The account can upgrade to a configurable account at the same address, starting at configuration version 1."
+/>
+
+## Single-key address derivation
+
+| Root key | Address | Viem account |
+| --- | --- | --- |
+| secp256k1 | Last 20 bytes of `keccak256(x ‖ y)`, as on Ethereum | `Account.fromSecp256k1(privateKey)` |
+| P-256 | Last 20 bytes of `keccak256(x ‖ y)` | `Account.fromP256(privateKey)` |
+| WebAuthn | Same as P-256, from the passkey's public key | `Account.fromWebAuthnP256(credential)` |
+
+The address is fixed by the key, so the root key can't be swapped. A new key is a new address. To change keys at the same address, [upgrade to a configurable account](#upgrade-to-a-configurable-account).
+
+Source: [address derivation](/docs/protocol/transactions/spec-tempo-transaction#address-derivation).
+
+## Compared with an Ethereum EOA
+
+| | Ethereum EOA | Tempo single-key account |
+| --- | --- | --- |
+| Root key types | secp256k1 | secp256k1, P-256, or WebAuthn |
+| Same address as on Ethereum | Yes | For secp256k1 keys |
+| Contract code | None | None |
+| EIP-7702 delegation | secp256k1 authorizations | Authorizations signed by any of the three key types ([comparison](/docs/protocol/transactions/eip-7702)) |
+| Access keys | None | [Account Keychain](/docs/development/account-keychain) |
+| Key rotation | No | Through the upgrade to a configurable account |
+
+## Signing with the root key
+
+The root key signs every transaction directly, with its own [signature type](/docs/accounts/keys#tempo-transaction-signature-types).
+
+```ts [sign.ts]
+import { parseUnits } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const account = Account.fromSecp256k1(process.env.ROOT_KEY as `0x${string}`)
+
+await client.token.transferSync({
+  account,
+  amount: parseUnits('10', 6),
+  to: process.env.RECIPIENT as `0x${string}`,
+  token: alphaUsd,
+})
+```
+
+Set up `client` with the [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools).
+
+## Access keys on a single-key account
+
+The root key authorizes [access keys](/docs/development/account-keychain) in the Account Keychain, either inline with a transaction's `key_authorization` or by calling `authorizeKey`. Each access key then signs alone, as a `0x04` keychain signature, within its limits. The root key keeps full authority and can revoke any key. [Admin access keys](/docs/development/account-keychain#admin-access-keys) can also manage keys.
+
+Guide: [Access keys](/docs/accounts/access-keys).
+
+## Upgrade to a configurable account
+
+`upgradeAccount` installs owners and a threshold at the account's existing address. The upgrade is permanent. Specification: [TIP-1113](https://tips.sh/1113) (Draft).
+
+| Property | Rule |
+| --- | --- |
+| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, `0xAACC000000000000000000000000000000000000` |
+| Signed by | The root key, directly. Access keys can't upgrade. Fee sponsorship is allowed. |
+| Transaction | `upgradeAccount` is its only call, with no `key_authorization` or authorization list |
+| Eligible accounts | No code, no EIP-7702 delegation, and no configuration yet |
+| Installed configuration | Version `1`, salt `keccak256("tempo:multisig:upgrade" ‖ account)` |
+| Kept | Address, balances, contract storage, token approvals, nonce, and access keys with their limits |
+| Root key afterward | Can't approve alone. It approves only if listed as an owner. |
+| Event | `AccountUpgraded(account, commitment, salt, threshold, owners)` |
+
+Viem 2.57.5 has no upgrade action, so call the precompile with `writeContractSync`. The upgrade runs on Tempo devnet.
+
+```ts [upgrade.ts]
+import { concat, keccak256, parseAbi, toHex } from 'viem'
+import { Account, AccountConfig, Addresses } from 'viem/tempo'
+import { client } from './client'
+
+const passkeyAddress = process.env.PASSKEY_ADDRESS as `0x${string}`
+const root = Account.fromSecp256k1(process.env.ROOT_KEY as `0x${string}`)
+
+// Sorts owners by address, as Tempo requires
+const { owners, threshold } = AccountConfig.from({
+  owners: [
+    { owner: root.address, weight: 1 },
+    { owner: passkeyAddress, weight: 1 },
+  ],
+  threshold: 1,
+})
+
+await client.writeContractSync({
+  account: root,
+  address: Addresses.nativeMultisig,
+  abi: parseAbi([
+    'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
+  ]),
+  functionName: 'upgradeAccount',
+  args: [threshold, owners],
+})
+
+// The same address, now approved by its owners at version 1
+const account = Account.fromConfig({
+  address: root.address,
+  owners: [{ owner: root, weight: 1 }, { owner: passkeyAddress, weight: 1 }],
+  salt: keccak256(concat([toHex('tempo:multisig:upgrade'), root.address])),
+  threshold,
+  version: 1,
+})
+```
+
+Revoke unwanted access keys before the upgrade: the upgrade keeps them. Contracts that verify signatures themselves, and other chains, still accept the root key. An upgraded account gets no [cross-chain recovery](/docs/development/configurable-accounts#configurable-account-address).
+
+Guide, with errors and a live demo: [Upgrade an existing account](/docs/accounts/create#upgrade-an-existing-account).

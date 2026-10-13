@@ -1,0 +1,102 @@
+---
+title: Account Keychain
+seoTitle: Tempo Account Keychain Access Keys, Spending Limits, and Scopes | Tempo Docs
+description: Reference for the Account Keychain precompile, covering access key types, TIP-20 spending limits, expiry, call scopes, revocation, admin access keys, and the 0x04 keychain signature.
+---
+
+import { AccountDiagram } from '../../../components/AccountDiagram'
+
+# Account Keychain
+
+The Account Keychain precompile stores each account's access keys and enforces their limits on every transaction they sign. Both [account types](/docs/accounts/keys) use it.
+
+<AccountDiagram
+  name="keychain"
+  alt="An account authorizes an access key, which then signs within a TIP-20 spending limit, an expiry, and call scopes. Revoking a key is permanent."
+/>
+
+**Address:** `0xAAAAAAAA00000000000000000000000000000000` · Full interface: [Account Keychain specification](/docs/protocol/transactions/AccountKeychain)
+
+## Access key types
+
+| Key type | Value | Key ID |
+| --- | --- | --- |
+| secp256k1 | `0` | The key's address |
+| P-256 | `1` | The key's address |
+| WebAuthn | `2` | The passkey's address |
+| Configurable account | `3` | The account's address. Its owners sign. ([TIP-1111](https://tips.sh/1111), Draft) |
+
+## Access key restrictions
+
+| Restriction | Rule |
+| --- | --- |
+| Spending limits | Per TIP-20 token, in base units. `period = 0` is one-time; a positive `period` resets the limit every `period` seconds. |
+| What limits meter | Direct TIP-20 transfers, approval increases, fees the account pays, and token pulls by protocol precompiles. Not native value or `transferFrom`. |
+| Expiry | A Unix timestamp. The key stops working at that second. Omit it for no expiry. |
+| Scopes | Any call, or an allowlist of `(target, selector, recipients)`. An empty allowlist denies every call; a target with no selector rules allows any selector. Checked on top-level calls. |
+| Contract creation | Access-key transactions can't create contracts at the top level. A permitted factory still can. |
+| Key management | Access keys can't authorize, revoke, or change keys, including their own limits |
+
+A failed limit check reverts the transaction with `SpendingLimitExceeded`; a call outside the scopes reverts with `CallNotAllowed`. `updateSpendingLimit` resets the remaining amount to the new limit and keeps the period.
+
+Guide, with limits for common automations: [Access keys](/docs/accounts/access-keys).
+
+## Access keys on each account type
+
+| | [Single-key account](/docs/development/single-key-accounts) | [Configurable account](/docs/development/configurable-accounts) |
+| --- | --- | --- |
+| Authorizes and revokes keys | The root key | The owners, at the account's threshold |
+| Authorization signature | The root key's signature | A `0x05` multisig signature |
+| Can be another account's access key | Yes, by its root key's type | Yes, as key type `3` |
+| Keys after owner changes | Not applicable | Unchanged. Revoke them separately. |
+| Keys after an upgrade | Kept, with their limits | Not applicable |
+
+Access keys never count toward a configurable account's threshold.
+
+<span id="authorizing-an-access-key" />
+
+## Authorize an access key
+
+| Path | Behavior |
+| --- | --- |
+| Transaction `key_authorization` | The account signs the authorization, and the new key can sign the same transaction. The key is stored even if the transaction's calls revert. |
+| `authorizeKey` call | The account calls the precompile directly. The grant rolls back if the transaction reverts. |
+
+An optional `witness` binds the authorization to an offchain challenge. A burned witness can't be used again.
+
+## `0x04` keychain signature
+
+```text
+signature    = 0x04 || account || access_key_signature
+inner_digest = keccak256(0x04 || tx_signature_hash || account)
+```
+
+A primitive access key signs `inner_digest`. A configurable account acting as an access key signs it with its own owners, as a `0x05` signature. Tempo checks that the key is authorized for `account`, unexpired, unrevoked, and of the stored type, then enforces its limits and scopes. The legacy `0x03` format is rejected from T1C.
+
+<span id="revoke-access" />
+
+## Revoke an access key
+
+`revokeKey(keyId)` stops a key from signing. A revoked key ID can never be authorized again for that account. Owner changes and upgrades don't revoke keys.
+
+<span id="admin-access-keys" />
+
+## Admin access keys
+
+An admin access key ([TIP-1049](https://tips.sh/1049), live since T6) has no limits, expiry, or scopes. It can authorize and revoke other keys, including admin keys, and change their limits and scopes. It can't change a configurable account's owners.
+
+## Account Keychain functions
+
+| Function | Purpose | Viem action |
+| --- | --- | --- |
+| `authorizeKey` | Authorize a limited key | `client.accessKey.authorize` |
+| `authorizeAdminKey` | Authorize an admin key | `client.accessKey.authorize` with `admin: true` |
+| `revokeKey` | Revoke a key | `client.accessKey.revoke` |
+| `updateSpendingLimit` | Change one token's limit | `client.accessKey.updateLimit` |
+| `setAllowedCalls`, `removeAllowedCalls` | Replace or remove a target's scope | — |
+| `getKey` | Read a key's type, expiry, and status | `client.accessKey.getMetadata` |
+| `getRemainingLimitWithPeriod` | Read the remaining limit and period end | — |
+| `getAllowedCalls` | Read a key's scopes | — |
+| `getTransactionKey` | Read the key signing the current transaction; `address(0)` is the root key | — |
+
+Mutating functions require the transaction's sender to call them directly, with `msg.sender == tx.origin`. The viem actions also have `Sync` variants, such as `authorizeSync`, that wait for the receipt.

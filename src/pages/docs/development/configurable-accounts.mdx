@@ -1,0 +1,180 @@
+---
+title: Configurable accounts
+seoTitle: Tempo Configurable Accounts, Owners, Thresholds, and Multisig Signatures | Tempo Docs
+description: Reference for Tempo configurable accounts, covering address derivation, owner weights and thresholds, configuration updates, the 0x05 signature, login owners, and onchain verification.
+---
+
+import { AccountDiagram } from '../../../components/AccountDiagram'
+
+# Configurable accounts
+
+A configurable account is approved by owners whose weights reach a threshold, and its address stays fixed as owners change. Compare it with single-key accounts in the [account model](/docs/accounts/keys).
+
+<AccountDiagram
+  name="configurable"
+  alt="The version-0 configuration of owners, threshold, and salt derives the address through CREATE2. To approve, owners sign and the signature carries the configuration; Tempo checks it against the stored hash and executes once the threshold is met."
+/>
+
+Configurable accounts are specified in [TIP-1107](https://tips.sh/1107) and its component TIPs, all Draft. They run on Tempo devnet.
+
+## Account configuration fields
+
+| Field | Type | Rule |
+| --- | --- | --- |
+| `owners` | `(address, uint8 weight)[]` | 1–48 owners, nonzero and unique, sorted by address. Each weight is at least 1. |
+| `threshold` | `uint8` | 1–255, reachable by the eight largest weights |
+| `salt` | `bytes32` | Fixed for the account's lifetime |
+| `version` | `uint64` | `0` for the initial configuration, then `+1` per update |
+
+Total owner weight is at most 255. Owners are primitive keys: secp256k1, P-256, WebAuthn, or [logins](#login-signers). A configurable account can't be another account's owner.
+
+Tempo stores only a 32-byte hash of the configuration in the account. Every approval carries the full configuration, so keep it: [`client.accounts.getConfig`](#read-the-current-configuration) serves it from a relay.
+
+<span id="configurable-account-address" />
+
+## Configurable account address
+
+The address is a CREATE2 address computed from the version-0 owners, weights, threshold, and salt, with no chain ID. Updates never change it. Specification: [TIP-1110](https://tips.sh/1110).
+
+- **Before registration:** the address can receive stablecoins. Nothing is deployed.
+- **On another EVM chain:** the initial secp256k1 owners, at the original threshold, can deploy a recovery wallet at the same address and retrieve funds sent there by mistake. P-256 and WebAuthn owners don't count. See [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).
+- **Code:** the account can't hold contract code or an EIP-7702 delegation.
+
+```ts [account.ts]
+import { Account } from 'viem/tempo'
+
+const env = (name: string) => process.env[name] as `0x${string}`
+const finance = Account.fromSecp256k1(env('FINANCE_KEY'))
+const operations = Account.fromSecp256k1(env('OPERATIONS_KEY'))
+
+// 2 of 3: two local keys and a passkey that approves elsewhere
+const account = Account.fromConfig({
+  address: 'infer',
+  owners: [finance, operations, { owner: env('CONTROLLER_PASSKEY_ADDRESS'), weight: 1 }],
+  threshold: 2,
+})
+```
+
+`address: 'infer'` derives the address from this version-0 configuration. `Account.fromConfig` sorts owners by address and defaults each weight and the threshold to `1`.
+
+## Account registration
+
+The first transaction the account approves registers it: Tempo stores the version-0 hash before any call runs. Registration persists even if the transaction's calls revert. An invalid transaction registers nothing.
+
+An existing single-key account becomes configurable by [upgrading in place](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) instead, starting at version 1.
+
+## Owner approvals
+
+Owners approve a whole transaction, including every call in a batch. The transaction is sent from the account's address, which pays its own fees unless a fee payer sponsors them.
+
+| Rule | Limit |
+| --- | --- |
+| Signatures per approval | 1–8, in ascending owner-address order |
+| Weight | The signers' weights must reach the threshold. Extra signatures after it's reached are rejected. |
+| Replay | Each signature binds the account and configuration version |
+| Login signatures | At most 2 per transaction |
+| Access keys | Never count toward the threshold |
+
+Owners can sign separately and offline. A relay with `Relay.accounts` collects approvals until the threshold is met, then submits.
+
+<span id="multisig-signature-format" />
+
+### `0x05` multisig signature
+
+```text
+signature = 0x05 || rlp([account, config, signatures])
+config    = [salt, version, threshold, owners]
+owner     = [address, weight]
+digest    = keccak256("tempo:multisig:signature" || inner_digest || account || uint64(version))
+```
+
+Each owner signs `digest`. For a transaction, `inner_digest` is the transaction signing hash. Tempo checks the configuration against the stored hash, or derives the address from it before registration, then adds the signers' weights.
+
+The `0x05` signature also approves [access-key grants](/docs/development/account-keychain#access-keys-on-each-account-type). It isn't accepted for fee payers, subblock transactions, or authorization lists. Encoding: [TIP-1114](https://tips.sh/1114).
+
+## Configuration updates
+
+`updateConfig` replaces the owners and threshold. The address, balances, and access keys stay the same.
+
+| Property | Rule |
+| --- | --- |
+| Called by | The account, in a transaction its owners approve at the current threshold. Access keys and contracts can't call it. |
+| Version | Increments by 1, so approvals collected for the old version stop verifying |
+| Salt | Unchanged |
+| Access keys | Unchanged. Revoke them separately. |
+| Batches | Several updates in one transaction must form consecutive versions |
+| Event | `MultisigConfigUpdated(account, salt, version, threshold, owners)` |
+
+```ts [update.ts]
+import { client } from './client'
+
+const { config } = await client.accounts.updateConfigSync({
+  account,
+  nextConfig: {
+    owners: [
+      { owner: finance.address, weight: 1 },
+      { owner: operations.address, weight: 1 },
+      { owner: env('NEW_PASSKEY_ADDRESS'), weight: 1 },
+    ],
+    threshold: 2,
+  },
+})
+```
+
+Viem sorts the new owners and signs with the account's local owners. Use the returned `config`, now at version 1, for later approvals. Specification: [TIP-1109](https://tips.sh/1109). Guide: [Set up self-custody](/docs/accounts/guides/self-custody).
+
+### Read the current configuration
+
+```ts [config.ts]
+import { client } from './client'
+
+const config = await client.accounts.getConfig({ address: account.address })
+```
+
+`getConfig` returns the configuration a relay recorded, or `null` if it has none. It needs a client whose transport is a relay with `Relay.accounts`, as in [Run your own salt service](/docs/accounts/authentication/login-services#run-your-own-salt-service). A bare node returns only the hash, through `client.accounts.getConfigCommitment`.
+
+<span id="login-signers" />
+
+## Login signers
+
+A login owner approves with a `0x06` ZK signature: a proof that the identity provider signed a recent sign-in, plus a signature from the key that sign-in named. Its owner address is the login's own address. Specification: [TIP-1131](https://tips.sh/1131) (Draft).
+
+| Rule | Value |
+| --- | --- |
+| Proof validity | Up to 10 minutes after sign-in, for OIDC logins |
+| Per transaction | At most 2 ZK signatures |
+| Threshold | If the logins' weights together reach it, two of them must. Wallets and SDKs refuse other configurations. |
+
+Set up login owners: [OIDC logins](/docs/accounts/authentication/oidc).
+
+## Verify owner approvals in a contract
+
+The signature verifier precompile at `0x5165300000000000000000000000000000000000` checks a `0x05` signature against the account's current configuration:
+
+```solidity
+interface ISignatureVerifier {
+    function verifyMultisig(address account, bytes32 hash, bytes calldata signature) external view returns (bool);
+}
+```
+
+| Result | When |
+| --- | --- |
+| `true` | Owners at the current version reached the threshold over `multisig_digest(hash, account, version)` |
+| `false` | The configuration doesn't match the stored hash or derive the address, or the account has code |
+| Reverts `InvalidFormat()` | The encoding or configuration is invalid |
+| Reverts `InvalidSignature()` | The owner approvals are invalid |
+
+An unregistered account verifies against its version-0 configuration, without registering. After an update, signatures for the old version fail. Guide: [Policies](/docs/accounts/security-policies).
+
+## Native multisig precompile
+
+`0xAACC000000000000000000000000000000000000`
+
+| Function | Purpose |
+| --- | --- |
+| `deriveAccount(salt, threshold, owners)` | Returns the address for a version-0 configuration |
+| `getConfigCommitment(account)` | Returns the stored hash, or zero before registration |
+| `updateConfig(current, threshold, owners)` | Replaces the owners and threshold |
+| `upgradeAccount(threshold, owners)` | [Upgrades a single-key account](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) |
+
+Account limits: 1–48 owners, total weight at most 255, up to 8 signatures per approval, and up to 2 ZK signatures per transaction.

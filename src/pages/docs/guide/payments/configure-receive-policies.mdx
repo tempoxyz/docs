@@ -60,7 +60,7 @@ For `transferFrom`, the spender's allowance is consumed even when the receiver's
 
 ## Configure the policy
 
-This example accepts only AlphaUSD from any sender on Moderato testnet and lets the receiving account recover blocked payments. Start with a funded test account and the [client setup](/docs/accounts/examples). Use a current Viem version with `client.receivePolicy` support.
+This example accepts only AlphaUSD from any sender on Moderato testnet and lets the receiving account recover blocked payments. Start with a funded test account and the [client setup](/docs/guide/payments/send-a-payment/examples#payment-client-setup). Use a current Viem version with `client.receivePolicy` support.
 
 In TypeScript, `client` is the configured Viem client, `receiver` is the receiving account address, and `alphaUsd` is `0x20c0000000000000000000000000000000000001`. The Wagmi examples run inside a component using the same network and receiving account; invoke write handlers from a button and show pending, confirmation, and error states.
 

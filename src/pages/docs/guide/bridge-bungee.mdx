@@ -131,7 +131,7 @@ const receipt = await publicClient.waitForTransactionReceipt({ hash })
 if (receipt.status !== 'success') throw new Error('Source transaction failed')
 ```
 
-Use a [Tempo client](/docs/accounts/examples) when Tempo is the source. See the [Socket API reference](https://docs.socket.tech/api-reference/swap/get-quotes) for full response types and the [integration guide](https://docs.socket.tech/integrate/integration-guides/socket-api) for approval and execution handling.
+Use a [Tempo client](/docs/guide/payments/send-a-payment/examples#payment-client-setup) when Tempo is the source. See the [Socket API reference](https://docs.socket.tech/api-reference/swap/get-quotes) for full response types and the [integration guide](https://docs.socket.tech/integrate/integration-guides/socket-api) for approval and execution handling.
 
 ## Production checklist
 
