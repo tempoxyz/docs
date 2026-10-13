@@ -70,14 +70,11 @@ test('seven sections expose product tasks and expandable developer chapters', as
       path: '/docs/accounts',
       links: [
         '/docs/accounts/create',
-        '/docs/accounts/integrate',
-        '/docs/accounts/balances',
-        '/docs/guide/payments/send-a-payment',
-        '/docs/guide/payments/accept-a-payment',
-        '/docs/accounts/integration',
-        '/docs/accounts/examples',
-        '/docs/guide/payments/send-a-payment/browser',
-        '/docs/guide/payments/virtual-addresses',
+        '/docs/accounts/security-policies',
+        '/docs/accounts/access-keys',
+        '/docs/accounts/guides/wallet-provider',
+        '/docs/accounts/guides/self-custody',
+        '/docs/accounts/guides/company-treasury',
       ],
     },
     {
@@ -135,10 +132,6 @@ test('seven sections expose product tasks and expandable developer chapters', as
     )
     await expect(utilities.locator('[aria-current]')).toHaveCount(0)
     await expect(page.locator('#related-documentation')).toHaveCount(0)
-    if (section.label === 'Accounts') {
-      for (const label of ['Account setup', 'Send payments', 'Receive payments'])
-        await developerDisclosure(sidebar, label, false).click()
-    }
     for (const href of section.links)
       await expect(sidebar.locator(`a[href="${href}"]`), `${section.label}: ${href}`).toBeVisible()
   }
@@ -166,13 +159,11 @@ for (const section of [
     label: 'Accounts',
     overview: '/docs/accounts',
     paths: [
-      '/docs/build',
-      '/docs/payments',
       '/docs/accounts/create',
-      '/docs/accounts/agents',
-      '/docs/accounts/examples',
-      '/docs/guide/payments/transfer-memos',
-      '/docs/guide/getting-funds',
+      '/docs/accounts/access-keys',
+      '/docs/accounts/security-policies',
+      '/docs/accounts/guides/automate-backend',
+      '/docs/guide/payments/configure-receive-policies',
     ],
   },
   {
@@ -199,6 +190,11 @@ for (const section of [
     overview: '/docs/development',
     paths: [
       '/docs/network/transactions',
+      '/docs/build',
+      '/docs/payments',
+      '/docs/guide/payments/transfer-memos',
+      '/docs/guide/payments/send-a-payment/examples',
+      '/docs/guide/getting-funds',
       '/docs/quickstart/connection-details',
       '/docs/quickstart/wallet-developers',
       '/docs/protocol/rpc',
@@ -692,29 +688,18 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   await page.goto('/docs/accounts')
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-  for (const label of ['Account setup', 'Send payments', 'Receive payments']) {
-    const disclosure = developerDisclosure(drawer, label, true)
-    await expect(disclosure.locator('..')).toHaveJSProperty('open', false)
-    await disclosure.click()
-  }
   for (const href of [
-    '/docs/accounts/integration',
-    '/docs/guide/payments/send-a-payment/browser',
-    '/docs/guide/payments/virtual-addresses',
+    '/docs/accounts/security-policies',
+    '/docs/accounts/access-keys',
+    '/docs/accounts/guides/self-custody',
   ])
     await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
   await expect(drawer.getByText('More guides', { exact: true })).toHaveCount(0)
-  await expect(drawer.getByText('Code examples', { exact: true })).toHaveCount(0)
-  await expect(
-    drawer.locator('a[href="/docs/guide/payments/send-a-payment/examples"]'),
-  ).toHaveCount(0)
-  const clientSetup = drawer.getByRole('link', { name: 'Client setup', exact: true })
-  await expect(clientSetup).toBeVisible()
-  await expect(clientSetup).toHaveAttribute('href', '/docs/accounts/examples')
-  await clientSetup.click()
-  await expect(page).toHaveURL(/\/docs\/accounts\/examples\/?$/)
+  const guide = drawer.getByRole('link', { name: 'Set up self-custody', exact: true })
+  await guide.click()
+  await expect(page).toHaveURL(/\/docs\/accounts\/guides\/self-custody\/?$/)
   await expect(drawer).toBeHidden()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Client setup')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Set up self-custody')
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
 })
 

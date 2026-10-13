@@ -46,44 +46,40 @@ export const docsLinkCards = {
   ],
   accounts: [
     {
-      title: 'Create and fund accounts',
-      description: 'Choose a signer, connect a wallet, and get an account ready to use.',
+      title: 'Create an account',
+      description: 'Build an account from its first signer on devnet.',
       icon: 'wallet',
-      links: [
-        ['Create an account', '/docs/accounts/create'],
-        ['Connect a wallet', '/docs/accounts/integrate'],
-        ['Fund an account', '/docs/guide/getting-funds'],
-      ],
+      links: [['Create an account', '/docs/accounts/create']],
     },
     {
-      title: 'Show balances and activity',
-      description:
-        'Read stablecoin balances and connect onchain activity to your customer records.',
-      icon: 'api',
-      links: [
-        ['Balances and activity', '/docs/accounts/balances'],
-        ['Choose an account model', '/docs/accounts/integration'],
-      ],
-    },
-    {
-      title: 'Send payments',
-      description: 'Build a payment flow and decide who covers transaction fees.',
-      icon: 'code',
-      links: [
-        ['Send payments', '/docs/guide/payments/send-a-payment'],
-        ['Browser payments', '/docs/guide/payments/send-a-payment/browser'],
-        ['Sponsor fees', '/docs/guide/payments/sponsor-user-fees'],
-      ],
-    },
-    {
-      title: 'Receive and reconcile',
-      description:
-        'Accept deposits and identify which customer or invoice each payment belongs to.',
+      title: 'Account setup',
+      description: 'Sign-in, security policies, access keys, and recovery.',
       icon: 'network',
       links: [
+        ['Authentication', '/docs/accounts/authentication'],
+        ['Security policies', '/docs/accounts/security-policies'],
+        ['Access keys', '/docs/accounts/access-keys'],
+        ['Account recovery', '/docs/accounts/guides/self-custody#recover-from-a-lost-passkey'],
+      ],
+    },
+    {
+      title: 'Account guides',
+      description: 'Walk through wallet providers, treasuries, and agents.',
+      icon: 'code',
+      links: [
+        ['Use a wallet provider', '/docs/accounts/guides/wallet-provider'],
+        ['Set up a company treasury wallet', '/docs/accounts/guides/company-treasury'],
+        ['Set up an agent wallet', '/docs/accounts/guides/agent-wallet'],
+      ],
+    },
+    {
+      title: 'Move money',
+      description: 'Balances, sending, and receiving.',
+      icon: 'tokens',
+      links: [
+        ['Read balances', '/docs/guide/payments/accept-a-payment#read-balances'],
+        ['Send payments', '/docs/guide/payments/send-a-payment'],
         ['Receive payments', '/docs/guide/payments/accept-a-payment'],
-        ['Customer deposit addresses', '/docs/guide/payments/virtual-addresses'],
-        ['Payment references', '/docs/guide/payments/transfer-memos'],
       ],
     },
   ],

@@ -1,114 +1,160 @@
 ---
 title: "Create an account"
-seoTitle: "Create an Account with Passkeys or Signing Keys | Tempo Docs"
-description: Decide whether your backend or your customer authorizes transactions, then create an account with a wallet provider, signing key, or passkey.
+seoTitle: "Create a Tempo Account with Logins, Passkeys, or Keys | Tempo Docs"
+description: Create a Tempo account from its first signer, then add signers, set a threshold, and authorize access keys on Tempo devnet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
 ---
 
-import { PasskeyAccountDemo } from '../../../components/guides/PasskeyAccountDemo'
+import { AccountSandbox } from '../../../components/guides/AccountSandbox'
+import { UpgradeAccountDemo } from '../../../components/guides/UpgradeAccountDemo'
 
 # Create an account
 
-Create a Tempo account for your backend or your customers. Choose a signer, derive the account address, and save the public details your application needs.
+An account's address comes from its first signer. Nothing to deploy: the address is ready immediately, and the first approved transaction registers the account.
 
-## Choose a signer
+<AccountSandbox />
 
-| Who authorizes transactions | Start here |
-| --- | --- |
-| Your backend sends payouts or moves business funds | Use a [wallet provider](/docs/accounts/providers) or [backend signing key](#create-an-account-from-a-signing-key). |
-| Customers approve transactions inside your application | Use an [embedded wallet provider](/docs/accounts/providers) or [passkey account](#create-a-passkey-account). |
-| Customers approve transactions in a wallet they already use | [Connect their wallet](/docs/accounts/integrate). |
-
-The account address is derived from its root public key. Store the address against the corresponding customer or business record in your application.
+Every step runs on Tempo devnet. Logins use a local auth service and [salt service](/docs/accounts/authentication/login-services) on `localhost:5173`.
 
 <span id="try-a-passkey-account" />
 
-## Create the account
+## How account creation works
 
-Create a passkey for this site and inspect its account address. Use the [signing-key example](#create-an-account-from-a-signing-key) for backend signing, or the [passkey example](#create-a-passkey-account) to build this browser flow into your application.
+- The first signer (a passkey, login, or key) starts at weight 1 and threshold 1.
+- Later signer, weight, and threshold changes keep the same address and balance.
+- The address can receive stablecoins before its first transaction.
+- The registering transaction is usually a payment that also authorizes the device's [access key](/docs/accounts/access-keys). [Sponsor the fee](/docs/guide/payments/sponsor-user-fees) so a new account needs no balance.
 
-<PasskeyAccountDemo />
+## Choose the first signer
 
-### Create an account from a signing key
+| Account | First signer | Then add |
+| --- | --- | --- |
+| Embedded wallet | The customer's login in your app: [OIDC](/docs/accounts/authentication/oidc), [email](/docs/accounts/authentication/oidc#email-and-sms-codes), or [Privy](/docs/accounts/authentication/oidc#privy-logins) | A passkey the customer holds, so they can [take the account with them](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet) |
+| Customer | A login or a passkey | A second signer as backup |
+| Company SSO | An SSO login | A passkey or a recovery provider, threshold 2 |
+| Treasury | One approver's key | The other approvers, then raise the threshold |
+| Backend service | A key in your signing infrastructure | Nothing, or a recovery key |
 
-Use the [CLI, Viem, and Wagmi setup](/docs/accounts/examples#choose-your-tools) to create a local signer or connect a customer wallet. Python needs `python -m pip install eth-account`:
+<span id="create-an-account-from-a-signing-key" />
+<span id="create-a-passkey-account" />
+
+## Create an account in code
 
 ::::code-group
 
-```ts [Viem]
+```ts [Login]
+import { Account, WebCryptoP256 } from 'viem/tempo'
+import { client } from './client'
+
+declare function signIn(options: { nonce: string }): Promise<string>
+
+const keyPair = await WebCryptoP256.createKeyPair()
+const { credential } = await client.oidc.prove({ getToken: signIn, publicKey: keyPair.publicKey })
+const account = Account.fromConfig({ address: 'infer', owners: [Account.fromZk(credential)] })
+```
+
+```ts [Passkey]
+import { Account, WebAuthnP256 } from 'viem/tempo'
+
+const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'Acme' }))
+const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
+```
+
+```ts [Private key]
 import { generatePrivateKey } from 'viem/accounts'
 import { Account } from 'viem/tempo'
 
-const privateKey = generatePrivateKey()
-const account = Account.fromSecp256k1(privateKey)
-console.log(account.address)
+const key = Account.fromSecp256k1(generatePrivateKey())
+const account = Account.fromConfig({ address: 'infer', owners: [key] })
 ```
 
 ```bash [CLI]
 cast wallet new
 ```
 
-```tsx [Wagmi]
-import { useConnect, useConnectors } from 'wagmi'
-const { mutate: connect } = useConnect()
-const connector = useConnectors().find((item) => item.id === 'xyz.tempo')
-const connectWallet = () => connector && connect({ connector })
-```
-
-```python [Python]
-from eth_account import Account
-
-account = Account.create()
-print(account.address)
-```
-
 ::::
 
-Wagmi uses the configured Tempo Wallet connector: call `connectWallet` from a button inside your React component. The wallet creates or selects the account. CLI and Viem generate a key locally.
-
-Creating a key is a local operation; there is no hosted create-account endpoint. Use a [wallet provider](/docs/accounts/providers) if your application delegates key management.
-
-This example creates a new key each time it runs. To keep the account, save the key in your application's secret storage and load it when constructing the signer.
-
-For a signer that uses raw P-256 keys, use `Account.fromP256` with `P256.randomPrivateKey()` from `viem/tempo`. Choose the method your signing environment supports:
-
-| Signing method | What it means |
-| --- | --- |
-| secp256k1 | The ECDSA curve commonly used by Ethereum wallets. |
-| P-256 | Another ECDSA curve, supported by many device and platform signing systems. |
-| WebAuthn | A passkey authentication ceremony that uses P-256 signatures and additional authentication data. |
-
-ECDSA is the signature algorithm; secp256k1 and P-256 are curves. WebAuthn wraps a P-256 signature with authentication data. See the [signature specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types) for each encoding.
-
-### Create a passkey account
-
-This browser example uses WebAuthn to create a passkey and derives a Tempo account from its public key. It uses the same Viem package.
-
-Run this code from a user action, such as a **Create account** button, on an HTTPS origin or localhost:
-
-```ts [Viem]
-import { Account, WebAuthnP256 } from 'viem/tempo'
-
-const credential = await WebAuthnP256.createCredential({
-  label: 'My Tempo account',
-  userId: crypto.getRandomValues(new Uint8Array(32)),
-})
-const account = Account.fromWebAuthnP256(credential)
-```
-
-The [complete passkey function](/docs/accounts/examples#passkey-creation) returns the account and public credential details. Passkey creation uses browser WebAuthn; CLI requests cannot trigger the user’s authenticator. React applications can call this same Viem function from a button; Wagmi manages the wallet connection rather than creating raw passkeys.
-
-Save the credential ID and public key in the customer's account record. On a later visit, pass them to `Account.fromWebAuthnP256` to reconnect the signer. Signing still requires access to the original passkey and the same WebAuthn relying-party configuration.
-
-The passkey signs Tempo transaction requests; your application handles customer login. For a device or application session, authorize a [limited access key](/docs/accounts/access-keys) with the permissions it needs.
+For a full sign-in with the first payment, see [Email and SMS codes](/docs/accounts/authentication/oidc#email-and-sms-codes) or [OIDC logins](/docs/accounts/authentication/oidc). Shared setup: [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools).
 
 <span id="fund-and-use-the-account" />
 
-## Get its address
+## Fund the account
 
-Read `account.address` from either example and save it against the corresponding customer or business record. Do not store private keys in that record.
+On devnet, use **Get test funds** above. On Moderato, use the [faucet](/docs/quickstart/faucet); on mainnet, a [funding path](/docs/guide/getting-funds). Then [show the balance](/docs/guide/payments/accept-a-payment#read-balances) and [send a payment](/docs/guide/payments/send-a-payment).
 
-Choose the [network](/docs/quickstart/connection-details) before requesting funds. Use the [faucet](/docs/quickstart/faucet) for Moderato testnet, or a [funding path](/docs/guide/getting-funds) for mainnet.
+<span id="legacy-account-upgrade" />
 
-Then [read the balance](/docs/accounts/balances) and [send a payment](/docs/guide/payments/send-a-payment).
+## Upgrade an existing account
+
+A single-key account moves to signers and a threshold in one transaction, at the same address, balances, token approvals, and access keys. Only the original secp256k1 key or passkey signs the upgrade. The demo and examples run on Tempo devnet.
+
+<UpgradeAccountDemo />
+
+:::::steps
+
+### Choose the signers and threshold
+
+```ts [upgrade.ts]
+import { Account, AccountConfig } from 'viem/tempo'
+
+const original = Account.fromSecp256k1(process.env.ACCOUNT_KEY as `0x${string}`)
+const { owners, threshold } = AccountConfig.from({
+  owners: [
+    { owner: original.address, weight: 1 },
+    { owner: passkeyAddress, weight: 1 }, // the customer's new passkey
+  ],
+  threshold: 1,
+})
+```
+
+`AccountConfig.from` sorts the signers by address, as Tempo requires. Before you upgrade, revoke the access keys you don't want while the original key can do it alone.
+
+### Send the upgrade on its own
+
+```ts [upgrade.ts]
+import { parseAbi } from 'viem'
+
+await client.writeContractSync({
+  account: original,
+  address: '0xAACC000000000000000000000000000000000000',
+  abi: parseAbi([
+    'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
+  ]),
+  functionName: 'upgradeAccount',
+  args: [threshold, owners],
+})
+```
+
+The upgrade is permanent and must be the transaction's only call, with no `keyAuthorization` or authorization list.
+
+### Save the account's new configuration
+
+```ts [upgrade.ts]
+import { concat, keccak256, toHex } from 'viem'
+
+const account = Account.fromConfig({
+  address: original.address,
+  owners,
+  salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])),
+  threshold,
+  version: 1,
+})
+```
+
+Tempo stores only a hash of this configuration, and every approval needs it. The original key now approves only as a listed signer: pass `owner: original`.
+
+:::::
+
+<span id="what-the-upgrade-changes" />
+
+| Error | Cause |
+| --- | --- |
+| `UpgradeMustBeOnlyCall` | The upgrade wasn't the transaction's only call |
+| `PrimitiveRootRequired` | An access key signed instead of the original secp256k1 key or passkey |
+| `AccountHasCode` | The account has contract code or an EIP-7702 delegation, so it can't upgrade |
+| `AccountAlreadyConfigurable` | The account already has signers. Change them as in [Add a backup signer](/docs/accounts/guides/self-custody#add-a-backup-signer). |
+| `InvalidConfig` | The signers aren't sorted by address, or the threshold is out of reach |
+| `RootKeyRetired` | The original key signed alone after the upgrade |
+
+Contracts that check signatures themselves, such as Permit2, may still accept the original key, and on other chains it still controls the address. Upgraded accounts can't use [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).

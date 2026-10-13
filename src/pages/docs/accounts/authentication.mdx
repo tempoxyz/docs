@@ -1,0 +1,124 @@
+---
+title: Authentication
+seoTitle: Sign In to Tempo Accounts with Keys, Passkeys, or OIDC Logins | Tempo Docs
+description: Choose how customers, employees, and services approve for a Tempo account, with private keys, device keys, passkeys, or your existing OIDC login.
+---
+
+import { DocsHomeProductIcon } from '../../../components/DocsHomeProductIcon'
+import { docsProductGrid } from '../../../components/DocsProductGrid.styles'
+
+# Authentication
+
+Every approval for a Tempo account comes from a key or a login. Choose the method that matches who approves.
+
+<span id="tempo-account-signer-types" />
+
+## Tempo sign-in methods
+
+| Method | Approves with | On a new device | Use for |
+| --- | --- | --- | --- |
+| [Private keys](/docs/accounts/authentication/private-keys) | A CLI, hardware, or browser wallet, or a KMS or HSM key | Copy the key, or call its service | Treasury approvers, servers, and scripts |
+| [Device keys](/docs/accounts/authentication/device-keys) | A key in the device's secure hardware or browser, with no prompt | A new key per device | Everyday payments within limits |
+| [Passkeys](/docs/accounts/authentication/passkeys) | Face ID, Touch ID, Windows Hello, Android, or a security key | Synced passkeys follow the customer | Customer approvals and signer changes |
+| [OIDC logins](/docs/accounts/authentication/oidc) | An email or SMS code, a social login, enterprise SSO, or Privy | Sign in anywhere | Apps that already sign customers in, and recovery |
+
+OIDC logins depend on [login services](/docs/accounts/authentication/login-services): an identity provider, a salt service, a prover, and a key publisher. The other methods don't.
+
+## Set up a sign-in method
+
+<div className={`docs-product-grid ${docsProductGrid().className}`}>
+<div className="docs-product-group">
+
+<span id="private-keys" />
+
+### <DocsHomeProductIcon product="zones" />[Private keys](/docs/accounts/authentication/private-keys)
+
+Wallet, KMS, and HSM keys as signers or access keys.
+
+- [Private key sources](/docs/accounts/authentication/private-keys#private-key-sources)
+- [Require two treasury signers](/docs/accounts/authentication/private-keys#require-two-treasury-signers)
+- [Automate a backend](/docs/accounts/guides/automate-backend)
+
+</div>
+<div className="docs-product-group">
+
+<span id="p-256-keys" />
+<span id="device-sessions" />
+
+### <DocsHomeProductIcon product="accessKeys" />[Device keys](/docs/accounts/authentication/device-keys)
+
+A key on one device pays within limits, with no prompt.
+
+- [Create a device key](/docs/accounts/authentication/device-keys#create-the-key-on-the-device)
+- [Device key stores by platform](/docs/accounts/authentication/device-keys#device-key-stores-by-platform)
+- [Revoke a key](/docs/accounts/access-keys#revoke-an-access-key)
+
+</div>
+<div className="docs-product-group">
+
+<span id="try-a-passkey-account" />
+
+### <DocsHomeProductIcon product="authentication" />[Passkeys](/docs/accounts/authentication/passkeys)
+
+Customers approve with Face ID, Touch ID, Windows Hello, or a security key.
+
+- [Create a passkey account](/docs/accounts/authentication/passkeys#create-the-passkey)
+- [Passkey authenticators](/docs/accounts/authentication/passkeys#passkey-authenticators)
+- [Passkey signer weights](/docs/accounts/authentication/passkeys#passkey-signer-weights)
+
+</div>
+<div className="docs-product-group">
+
+<span id="add-email-sign-in" />
+<span id="how-login-signers-work" />
+<span id="use-a-hosted-auth-service-as-the-issuer" />
+<span id="restore-the-session-on-a-returning-visit" />
+<span id="publish-your-providers-keys" />
+
+### <DocsHomeProductIcon product="accounts" />[OIDC logins](/docs/accounts/authentication/oidc)
+
+Email and SMS codes, social logins, SSO, and Privy as signers. Pair each with a passkey.
+
+- [Enterprise SSO login](/docs/accounts/guides/enterprise-sso)
+- [Email and SMS codes](/docs/accounts/authentication/oidc#email-and-sms-codes)
+- [Privy logins](/docs/accounts/authentication/oidc#privy-logins)
+
+</div>
+<div className="docs-product-group">
+
+<span id="self-hosted-relay" />
+<span id="run-your-relay" />
+<span id="relay-trust" />
+
+### <DocsHomeProductIcon product="network" />[Login services](/docs/accounts/authentication/login-services)
+
+The identity provider, salt service, prover, and key publisher behind each OIDC login.
+
+- [What each service does](/docs/accounts/authentication/login-services#what-each-service-does)
+- [Run your own salt service](/docs/accounts/authentication/login-services#run-your-own-salt-service)
+- [Who you trust](/docs/accounts/authentication/login-services#what-each-service-can-and-cant-do)
+
+</div>
+</div>
+
+## Who can sign in as a customer
+
+The ID token names the customer's device key, and Tempo checks its proof on chain, so the salt service and prover can't sign for a customer. Two parties can sign in as any customer they cover: the issuer, and the owner of the key publisher that lists its keys. For email, SMS, and Privy logins, your auth service is that issuer. Pair each login with a passkey the customer holds, and use logins from different issuers, so no single issuer approves alone. See [Policies](/docs/accounts/security-policies).
+
+<span id="signer-rules" />
+
+## Authentication limits
+
+| Limit | Value |
+| --- | --- |
+| Login approval lifetime | At most 10 minutes after the token is issued; viem defaults to 9 minutes from the start of sign-in. After that, approvals fail with `ZkCredentialExpiredError`. |
+| Login approvals per transaction | Up to 2 |
+| ID token size | Up to 1,024 bytes |
+| Signers per login | One per issuer and OAuth client ID. The same person through two providers is two signers. |
+| Dropped provider keys | Valid for one hour after removal, so logins in progress still succeed |
+| Passkey prompt | `NotAllowedError` when the customer cancels or the page isn't served over HTTPS |
+| Access keys toward the threshold | Never |
+
+<span id="login-sign-in-in-code" />
+
+Specifications: [OIDC signers](https://tips.sh/1130), [configurable accounts](https://tips.sh/1107), [key publisher](https://tips.sh/1132), [committed access keys](https://tips.sh/1134).

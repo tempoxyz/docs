@@ -1,0 +1,76 @@
+---
+title: Device keys
+seoTitle: Pay Without a Prompt Using Device Keys | Tempo Docs
+description: Create a non-extractable key on the customer's phone, computer, or browser, and authorize it to pay within limits for a Tempo account.
+interactive: true
+---
+
+import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
+
+# Device keys
+
+A device key pays within limits without a prompt, and it can't leave the customer's device.
+
+<P256KeyDemo />
+
+The demo creates a key in this browser, funds its Moderato test account, and pays with it. Reload the page and the key is still here.
+
+:::::steps
+
+### Create the key on the device
+
+```ts [device-key.ts]
+import { WebCryptoP256 } from 'viem/tempo'
+
+const keyPair = await WebCryptoP256.createKeyPair() // non-extractable by default
+```
+
+Store `keyPair` in IndexedDB. The browser keeps the key itself, not its bytes.
+
+### Authorize it from a signer
+
+```ts [device-key.ts]
+import { Account, Expiry } from 'viem/tempo'
+
+const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
+const keyAuthorization = await client.accessKey.signAuthorization({
+  accessKey: deviceKey,
+  account, // approved by the customer's passkey or login
+  expiry: Expiry.days(30),
+  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
+})
+```
+
+### Pay with it
+
+```ts [device-key.ts]
+await client.token.transferSync({
+  account: deviceKey,
+  amount: parseUnits('5', 6),
+  keyAuthorization, // first payment only
+  to: recipient,
+  token: alphaUsd,
+})
+```
+
+Later payments omit `keyAuthorization`.
+
+:::::
+
+## Device key stores by platform
+
+Each device key is a P-256 key held in the platform's key store, which signs without exporting it.
+
+| Platform | Key store |
+| --- | --- |
+| iPhone and iPad | Secure Enclave |
+| Mac | Secure Enclave |
+| Android | Android Keystore, hardware-backed, or StrongBox where available |
+| Windows | TPM, through the Microsoft Platform Crypto Provider |
+| Browsers | WebCrypto non-extractable key, kept in IndexedDB. Gone if the customer clears site data. |
+
+For keys on servers, use a KMS or HSM. See [Private keys](/docs/accounts/authentication/private-keys).
+
+For a lost device, [revoke its key](/docs/accounts/access-keys#revoke-an-access-key). The customer's signers don't change.
+
+For other sign-in methods, see [Authentication](/docs/accounts/authentication).

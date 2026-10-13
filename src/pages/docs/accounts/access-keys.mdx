@@ -1,128 +1,141 @@
 ---
-title: "Access keys"
-seoTitle: "Authorize and Revoke Tempo Access Keys | Tempo Docs"
-description: Delegate account signing with an expiry, per-token spending limits, and allowed calls, then inspect or revoke the access key.
+title: Delegation
+seoTitle: Access Keys with Spending Limits, Scopes, and Expiry on Tempo | Tempo Docs
+description: Authorize keys for devices, backends, and AI agents that pay on their own within spending limits, an expiry, and allowed calls, then read, change, and revoke them.
+interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-access-keys_title-f5_v02.png
 ---
 
-# Access keys
+import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
-Give a backend service, customer session, or agent permission to sign transactions from an existing account. Set an expiry, token budget, and allowed calls for the task it performs.
+# Delegation
 
-The access key acts on the same account and balances. It is a transaction signer, separate from the API credentials your application uses to call the Tempo API.
+Access keys let a device, a backend service, or an AI agent pay from an account on its own, within limits Tempo enforces on every transaction.
 
-## Choose the authority to delegate
+<span id="access-keys" />
+<span id="try-an-access-key" />
+<span id="access-key-controls" />
+<span id="choose-the-authority-to-delegate" />
+<span id="set-limits-that-match-the-task" />
 
-Use a limited access key for payment tasks. It can have an expiry, per-token spending limits, and allowed calls, but cannot manage keys. See [Keys and permissions](/docs/accounts/keys#delegate-only-the-authority-a-task-needs) for the authority model, or [Manage admin keys](/docs/accounts/admin-keys) to delegate key management.
+## Authorize an access key
 
-## Authorize a limited key
+The account's signers approve a key's limits once, and the key then pays alone until it expires or is revoked.
 
-This example uses a funded secp256k1 root account on Moderato testnet. It authorizes a P-256 key for one hour, permits transfers of test AlphaUSD to one recipient, and sets a total budget of 10 AlphaUSD.
+<AccessKeyDemo />
 
-Install Viem with `pnpm add viem`. Set `TEMPO_ROOT_PRIVATE_KEY` in your local environment to the funded test account's key and `TEMPO_RECIPIENT` to your test recipient. Run the code in a server or local script.
+The demo authorizes a key on Moderato testnet, pays with it, shows Tempo rejecting an overspend, then revokes it.
 
-:::::steps
+| Control | Example |
+| --- | --- |
+| **Spending limit** per stablecoin, one-time or renewing | 500 USD a day |
+| **Expiry** | 30 days |
+| **Allowed calls**: contracts, functions, and recipients | Payments to approved recipients only |
 
-### Connect the account's root signer
+<span id="authorize-a-limited-key" />
+
+In this example, a 2-of-3 treasury gives a payout key 10 AlphaUSD for one hour, payable to one recipient:
 
 ```ts [access-keys.ts]
-import { getAddress, parseUnits } from 'viem'
+import { parseUnits } from 'viem'
 import { tempoModerato } from 'viem/chains'
-import { Account, createClient, P256 } from 'viem/tempo'
+import { Account, createClient, Expiry, P256 } from 'viem/tempo'
 
-const privateKey = process.env.TEMPO_ROOT_PRIVATE_KEY
-if (!privateKey || !/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
-  throw new Error('Set TEMPO_ROOT_PRIVATE_KEY to a test account private key')
-}
-const recipientAddress = process.env.TEMPO_RECIPIENT
-if (!recipientAddress) throw new Error('Set TEMPO_RECIPIENT')
-
-const root = Account.fromSecp256k1(privateKey as `0x${string}`)
-const recipient = getAddress(recipientAddress)
+const env = (name: string) => process.env[name] as `0x${string}`
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
-const client = createClient({
-  account: root,
-  chain: tempoModerato,
-  feeToken: alphaUsd,
-})
-```
+const recipient = env('TEMPO_RECIPIENT')
+const client = createClient({ chain: tempoModerato })
 
-The root account pays for the authorization transaction. Use the [faucet](/docs/quickstart/faucet) if it needs test funds.
-
-### Authorize the key's budget and calls
-
-Append this to the same file:
-
-```ts [access-keys.ts]
-const accessKey = Account.fromP256(P256.randomPrivateKey(), {
-  access: root,
+const account = Account.fromConfig({
+  address: 'infer',
+  owners: [
+    Account.fromSecp256k1(env('FINANCE_SIGNER_KEY')),
+    Account.fromSecp256k1(env('OPERATIONS_SIGNER_KEY')),
+    env('CONTROLLER_PASSKEY_ADDRESS'),
+  ],
+  threshold: 2,
 })
 
-const authorization = await client.accessKey.authorizeSync({
+const accessKey = Account.fromP256(P256.randomPrivateKey(), { access: account })
+const keyAuthorization = await client.accessKey.signAuthorization({
   accessKey,
-  expiry: Math.floor(Date.now() / 1000) + 3600,
+  account,
+  expiry: Expiry.hours(1),
   limits: [{ token: alphaUsd, limit: parseUnits('10', 6), period: 0 }],
-  scopes: [{
-    address: alphaUsd,
-    selector: 'transfer(address,uint256)',
-    recipients: [recipient],
-  }],
+  scopes: [{ address: alphaUsd, recipients: [recipient], selector: 'transfer(address,uint256)' }],
 })
 
-console.log(authorization.receipt.transactionHash)
-```
-
-`authorizeSync` waits for the authorization receipt. After it succeeds, the key can sign the allowed transactions for `root.address`. The `access: root` option binds the signer to that account; authorization onchain grants it permission.
-
-To use the key after a restart, retain it in secure storage. Generate a distinct key for each application or device.
-
-### Read the remaining permission
-
-```ts [access-keys.ts]
-const metadata = await client.accessKey.getMetadata({ accessKey })
-const budget = await client.accessKey.getRemainingLimit({
-  accessKey,
+await client.token.transferSync({
+  account: accessKey,
+  amount: parseUnits('2', 6),
+  keyAuthorization, // first payment only
+  to: recipient,
   token: alphaUsd,
 })
-
-console.log({
-  expiry: metadata.expiry,
-  revoked: metadata.isRevoked,
-  remaining: budget.remaining,
-})
 ```
 
-The remaining amount is in the token's base units. A recurring limit also returns `periodEnd`; this example uses `period: 0`, so its budget does not renew.
+<span id="read-the-remaining-permission" />
 
-### Revoke access when the task ends
+Read what's left with `client.accessKey.getRemainingLimit({ account, accessKey, token: alphaUsd })`.
 
-```ts [access-keys.ts]
-await client.accessKey.revokeSync({ accessKey })
+Build it with viem: [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) and [Set permissions and limits](https://viem.sh/tempo/guides/access-keys/permissions), for each control and its options.
 
-const revoked = await client.accessKey.getMetadata({ accessKey })
-console.log(revoked.isRevoked) // true
+<span id="scopes" />
+
+## Scope an access key
+
+Scopes list the contracts, functions, and recipients a key can call. Spending limits cover only direct payments and token approvals, so scope every backend, agent, and card key to the calls its task uses.
+
+| Task | Scope |
+| --- | --- |
+| Payments to approved recipients | `transfer(address,uint256)` on the stablecoin, with `recipients` |
+| Payments with a reference | `transferWithMemo(address,uint256,bytes32)` on the stablecoin |
+| Earn deposits | `approve(address,uint256)` on the stablecoin and `deposit(uint256,address,uint256)` on the vault |
+
+Signers can change a live key's allowed calls with `setAllowedCalls`, or its limit with `updateSpendingLimit`, which resets what's left, without revoking it.
+
+<span id="key-revocation" />
+<span id="key-revocation-by-situation" />
+
+## Revoke an access key
+
+```ts [revoke.ts]
+await client.accessKey.revokeSync({ accessKey: accessKeyAddress, account })
 ```
 
-Revocation must be signed by the root or an active admin key. A revoked key cannot be authorized again for the same account. Create a new key for a new grant.
+The account's signers approve the revocation. A revoked key can't pay and can't be authorized again. Save each key's address with a device or service name when you authorize it, so you can match a lost device or a leaked backend key to its key.
 
-:::::
+<span id="access-key-patterns" />
+<span id="backend-services" />
+<span id="automations" />
+<span id="recommended-limits-for-common-automations" />
+<span id="agents" />
+<span id="ai-agents" />
+<span id="authorize-the-agents-task" />
+<span id="keep-account-and-request-budgets-distinct" />
 
-## Set limits that match the task
+## Access keys by holder
 
-Use all three controls together:
+| Holder | Typical limits | Walkthrough |
+| --- | --- | --- |
+| A customer's device | A daily limit and a 30-day expiry | [Device keys](/docs/accounts/authentication/device-keys) |
+| Your backend | A daily limit, scoped to the calls it automates, and a 90-day expiry | [Automate a backend](/docs/accounts/guides/automate-backend) |
+| An AI agent | A budget, an expiry, and only the calls its payments use | [Set up an agent wallet](/docs/accounts/guides/agent-wallet) |
+| A card program | The card's daily spend limit, to its funding address | [Set up a spending account](/docs/accounts/guides/spending-account) |
+| A team account | A daily budget from a treasury | [Team budgets](/docs/accounts/security-policies#team-budgets) |
 
-- **Expiry:** an absolute Unix timestamp in seconds. A recurring budget does not extend the key's expiry.
-- **Token budget:** `period: 0` is a one-time allowance. A positive `period` sets the renewal interval in seconds.
-- **Call scopes:** limit the target contracts, function selectors, and recipients the key may use.
+<span id="access-key-lifecycle" />
+<span id="troubleshoot-backend-payments" />
 
-Spending limits cover direct TIP-20 `transfer`, `transferWithMemo`, and `approve` calls. `transferFrom` and token movements initiated by another contract fall outside these checks, so pair budgets with call scopes.
+## Access key limits
 
-Access-key-signed transactions cannot contain a top-level contract-creation call. A call to a factory can create contracts internally when the key's call scopes permit that factory call.
+- Authorizing a key costs about $0.003, whatever the limits. The authorization travels with the key's first payment.
+- Access keys can't authorize other keys, change signers, or count toward the threshold.
+- Changing signers doesn't revoke access keys. Revoked keys can't return.
+- Spending limits cover direct payments and token approvals. Pair them with allowed recipients or functions.
+- An account's payments share one sequential nonce by default, so they land in order. Send concurrent payments with expiring nonces or separate nonce keys. See [Parallel payments](/docs/guide/payments/send-parallel-transactions).
+- Access keys can't spend while the account has [approval escalation](/docs/accounts/security-policies#approval-escalation-for-larger-payments) on.
+- To cancel a signed authorization before it lands, bind a witness to it and burn the witness. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses).
+- To check that a signature came from an active access key of an account, see [Verify signatures](https://viem.sh/tempo/guides/access-keys/verify).
 
-The example permits `transfer(address,uint256)`. Add a scope for each additional function your integration needs.
-
-## Change an existing budget
-
-The root or an active admin key can call `client.accessKey.updateLimit` with `accessKey`, `token`, and `limit`. Wait for its transaction receipt before showing the new budget as active. Updating a limit sets both its maximum and remaining amount to the new limit; it preserves the configured period and current period end.
-
-For scope changes and exact enforcement rules, see the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain).
+Specification: [Account Keychain](/docs/protocol/transactions/AccountKeychain).

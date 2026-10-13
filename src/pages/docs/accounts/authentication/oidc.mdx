@@ -1,0 +1,218 @@
+---
+title: OIDC logins
+seoTitle: Sign In to Tempo Accounts with Email, Social, SSO, or Privy Logins | Tempo Docs
+description: Make the email code, social login, enterprise SSO, or Privy sign-in your customers already use a signer on their Tempo accounts, and publish your provider's keys.
+interactive: true
+---
+
+import { GuideDemo } from '../../../../components/guides/GuideDemo'
+
+# OIDC logins
+
+Make the OpenID Connect login your customers or employees already use, from an email code to enterprise SSO, a signer on their account.
+
+:::warning
+OIDC signers (TIP-1130 to TIP-1133) are drafts that run on Tempo devnet only. Devnet uses a development proving key whose trapdoor is public, so anyone can forge proofs there.
+:::
+
+This is how an embedded wallet signs customers in: each customer gets an account under the login they already have, with no separate wallet app. Tempo checks each sign-in on chain, and the signing key stays on the customer's device. See [How it works](/docs/accounts/authentication/login-services#how-a-login-approves).
+
+## OIDC login options
+
+| Login | Issuer | See |
+| --- | --- | --- |
+| Email and SMS one-time codes | Your auth service, which sends the code | [Email and SMS codes](#email-and-sms-codes) |
+| Google, Apple, and other social providers | Your auth service, or the provider | [Enterprise SSO login](/docs/accounts/guides/enterprise-sso), with your provider's sign-in |
+| Enterprise SSO | Your auth service, or your company's identity provider | [Enterprise SSO login](/docs/accounts/guides/enterprise-sso) |
+| Wallet providers such as Privy | Your auth service, which bridges the provider's sign-in | [Privy logins](#privy-logins) |
+
+## OIDC provider requirements
+
+- The issuer signs ID tokens with RS256 and echoes the `nonce`. Google, Apple, Microsoft, Auth0, Clerk, WorkOS, and most enterprise identity providers do.
+- ID tokens stay under 1,024 bytes. Use a login app that adds only the claims you need.
+- Your web and mobile apps share one OAuth client ID. A different client ID reaches a different account.
+- Make your auth service, not each social provider, the issuer. Email, Google, and SSO through it then map to one signer. Your auth service can then sign in as any of those customers.
+
+<span id="sign-customers-in-with-oidc" />
+
+## Connect to a salt service
+
+A [salt service](/docs/accounts/authentication/login-services#what-each-service-does) derives each login's address and requests its proof. Point the client at yours.
+
+```ts [client.ts]
+import { http } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+export const client = createClient({
+  chain: tempoModerato,
+  transport: http('https://salt.example.com/rpc'), // your salt service URL
+})
+```
+
+Mount `Relay.accounts` on the same relay, as in [Run your own salt service](/docs/accounts/authentication/login-services#run-your-own-salt-service). `client.accounts.getConfig` calls `account_getConfig`, which a bare node doesn't serve.
+
+For a full SSO sign-in with the first payment, see [Enterprise SSO login](/docs/accounts/guides/enterprise-sso).
+
+<span id="email-login" />
+<span id="sms-login" />
+
+## Email and SMS codes
+
+Your auth service sends a one-time code by email or SMS, then issues the ID token. The sign-in approves for the customer's account with no key on your servers.
+
+<GuideDemo guide="email-otp" />
+
+The demo runs on Tempo devnet through a local auth service and [salt service](/docs/accounts/authentication/login-services#what-each-service-does). The auth service writes each code to its log instead of sending email.
+
+:::::steps
+
+### Create a key in the browser
+
+```ts [sign-in.ts]
+import { WebCryptoP256 } from 'viem/tempo'
+
+const keyPair = await WebCryptoP256.createKeyPair()
+```
+
+The private key can't leave the browser. It becomes the device's access key.
+
+### Sign in with an email code
+
+Your auth service sends the code and returns an ID token with the `nonce` viem supplies.
+
+```ts [sign-in.ts]
+const { credential } = await client.oidc.prove({
+  getToken: ({ nonce }) => verifyEmailCode({ email, code, nonce }), // your auth service
+  publicKey: keyPair.publicKey,
+})
+```
+
+### Open the account
+
+```ts [sign-in.ts]
+import { Account } from 'viem/tempo'
+
+const login = Account.fromZk(credential)
+const account = Account.fromConfig({ address: 'infer', owners: [login] })
+```
+
+The same email reaches the same address from any device. Save `account.address` with the customer's record.
+
+### Pay with the device key
+
+The first payment carries the device key's authorization, signed by the email login.
+
+```ts [sign-in.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+
+const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+await client.token.transferSync({
+  account: deviceKey,
+  amount: parseUnits('5', 6),
+  keyAuthorization: await client.accessKey.signAuthorization({
+    accessKey: deviceKey,
+    account,
+    expiry: Expiry.days(30),
+    limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
+  }),
+  to: recipient,
+  token: alphaUsd,
+})
+```
+
+Send it within 9 minutes of starting sign-in, viem's default window. The protocol allows at most 10 minutes after the token is issued. After that, `deviceKey` pays up to 500 AlphaUSD a day for 30 days without a code.
+
+:::::
+
+`client` is a Tempo client whose transport is your salt service, as in [Connect to a salt service](#connect-to-a-salt-service).
+
+### How an email code becomes a signer
+
+| Piece | What it does |
+| --- | --- |
+| **Auth service** | The identity provider, or OpenID Connect issuer. It sends the code and signs an RS256 ID token for the email. |
+| **Nonce** | Binds the ID token to the device key, so the token only works for that key. |
+| **Proof** | A zero-knowledge proof that the issuer signed the token, checked against the issuer's published keys. The token never goes onchain. |
+| **10-minute window** | A proof approves for at most 10 minutes after sign-in, 9 by default in viem. The device key then pays on its own. |
+| **One signer per issuer** | Each issuer and OAuth client ID is its own signer, at its own address. |
+
+To send codes from your own auth service, make it the issuer and [publish its keys](#publish-your-providers-keys).
+
+The issuer can sign in as any of its customers, so don't let its login reach the threshold alone. Pair it with the customer's passkey.
+
+<span id="privy-login" />
+
+## Privy logins
+
+If your embedded wallet already signs customers in with Privy, the Privy sign-in becomes the customer's login signer. To use a Privy-held key as a signer instead, see [Use a wallet provider](/docs/accounts/guides/wallet-provider).
+
+<span id="how-the-tempo-relay-bridges-privy-sign-ins" />
+<span id="how-a-relay-bridges-privy-sign-ins" />
+<span id="how-your-auth-service-bridges-privy-sign-ins" />
+
+Privy signs its tokens with ES256, and the proof verifies RS256, so your auth service bridges the two as the [identity provider](/docs/accounts/authentication/login-services#what-each-service-does):
+
+1. The customer signs in on Privy's own screen.
+2. Your auth service checks the Privy token against Privy's published keys, with your Privy app ID as the audience.
+3. Your auth service issues its own RS256 ID token for that Privy user, bound to the device key.
+4. Tempo checks the proof of that token, and the login approves like any other OIDC login.
+
+Each Privy user is one login signer. Your auth service is the issuer, so [publish its keys](#publish-your-providers-keys). Whoever runs it can then sign in as any of these customers, so pair the login with a passkey.
+
+Build it with viem: [Sign in with an identity provider](https://viem-d07zjc3q1-wevm.vercel.app/tempo/guides/oidc/sign-in), [`oidc.prove`](https://viem-d07zjc3q1-wevm.vercel.app/tempo/actions/oidc.prove), and [`Account.fromZk`](https://viem-d07zjc3q1-wevm.vercel.app/tempo/accounts/account.fromZk).
+
+{/* TODO: switch to viem.sh when the OIDC guides publish */}
+
+## Publish your provider's keys
+
+A key publisher is a list of your provider's public signing keys on Tempo, and Tempo checks each login proof against it. Being on chain makes the list public: anyone can read it, and only its owner can change it. The private keys never leave your provider.
+
+The owner can list any key, and so sign in as any customer whose login names the publisher. Run it like a root certificate authority:
+
+- **For your own identity provider,** own its publisher yourself, so the owner is no new party. For a provider such as Google, use a publisher whose owner you trust, or create your own.
+- **Keep the owner offline.** Use a multisig account, and keep its keys out of automated jobs.
+- **Create it once.** Its ID is part of every address it serves, so switching publishers later means changing every customer's signer.
+
+:::::steps
+
+### Read the provider's keys
+
+Fetch the issuer's `/.well-known/openid-configuration`, then its `jwks_uri`, and hash each key with `Oidc.fromJwk(jwk).keyHash`. Skip keys that login proofs don't support, such as EC keys. The viem guide below has this as a `getKeyHashes(iss)` helper.
+
+### Create the publisher from a multisig account
+
+Send it from the account that will own the publisher: a [configurable account](/docs/accounts/security-policies) whose signers are keys in separate teams' HSMs or KMSs, such as 3 of 5.
+
+```ts [create-publisher.ts]
+import { Oidc } from 'viem/tempo'
+
+const iss = 'https://auth.example.com' // your OpenID Connect issuer
+const { publisherId } = await client.keyPublisher.createSync({
+  keys: [{ issuer: Oidc.hashIssuer(iss), keyHashes: await getKeyHashes(iss) }],
+  salt: '0x0000000000000000000000000000000000000000000000000000000000000001',
+})
+```
+
+Pass `publisherId` to [`Relay.oidc`](/docs/accounts/authentication/login-services#run-your-own-salt-service). The same sender and `salt` give the same ID on every chain. To move ownership later, use `client.keyPublisher.transferOwnershipSync({ newOwner, publisherId })`.
+
+<span id="keep-the-keys-current" />
+
+### Publish each new key before your provider signs with it
+
+Add the next key with `client.keyPublisher.setKeysSync` ahead of each rotation, and remove the old key once your provider stops using it. A removed key stays valid for one hour, so sign-ins in progress still succeed. Revoke a compromised key at once with `client.keyPublisher.revokeKeySync`.
+
+### Monitor the list
+
+Compare `client.keyPublisher.getActiveKeys` with your provider's keys on a schedule, and alert on any difference. The job only reads: a key that can change the list can forge any customer's sign-in.
+
+:::::
+
+Build it with viem: [Publish provider keys](https://viem-d07zjc3q1-wevm.vercel.app/tempo/guides/oidc/publish-keys), including the `getKeyHashes` helper, and [`keyPublisher.create`](https://viem-d07zjc3q1-wevm.vercel.app/tempo/actions/keyPublisher.create).
+
+{/* TODO: switch to viem.sh when the OIDC guides publish */}
+
+For other sign-in methods, see [Authentication](/docs/accounts/authentication).
