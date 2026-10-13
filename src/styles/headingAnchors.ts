@@ -3,18 +3,12 @@ import { inherited } from './inherited'
 import { vars as tokens } from './theme'
 
 // G6: heading copy-link anchors in h2–h6 (OpenAPI anchors keep Vocs' styling).
-// The whole heading is the hit area (the anchor's ::before covers it), the link icon fades in and out, and a copy swaps it for a
+// The link icon fades in while the heading is hovered, and a copy swaps it for a
 // check in the content primary color for about 1.2s (HeadingAnchorFeedback.tsx).
+// The icon stays the only hit area, so heading text can still be selected and
+// copied, which matters on pages whose headings are commands or API names.
 global({
   '@layer vocs_utilities': {
-    ':is(h2, h3, h4, h5, h6)[data-v]:has(> .heading-anchor)': {
-      position: 'relative',
-    },
-    // Links inside a heading stay clickable above the heading-wide hit area.
-    ':is(h2, h3, h4, h5, h6)[data-v] > a:not(.heading-anchor)': {
-      position: 'relative',
-      zIndex: tokens.zIndex.raised,
-    },
     ':is(h2, h3, h4, h5, h6)[data-v] > .heading-anchor': {
       display: 'inline-grid',
       placeItems: 'center',
@@ -23,11 +17,6 @@ global({
       transitionProperty: 'opacity',
       transitionDuration: 'var(--tempo-exit)',
       transitionTimingFunction: 'var(--tempo-ease)',
-    },
-    ':is(h2, h3, h4, h5, h6)[data-v] > .heading-anchor::before': {
-      content: '""',
-      position: 'absolute',
-      inset: 0,
     },
     ':is(h2, h3, h4, h5, h6)[data-v]:hover > .heading-anchor, :is(h2, h3, h4, h5, h6)[data-v] > .heading-anchor:focus-visible, :is(h2, h3, h4, h5, h6)[data-v] > .heading-anchor[data-tempo-copied]':
       {
