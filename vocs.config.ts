@@ -1066,6 +1066,10 @@ export default defineConfig({
       text: 'Docs',
       link: '/',
     },
+    {
+      text: 'API',
+      link: '/docs/api',
+    },
 
     { text: 'Blog', link: '/blog' },
   ],
