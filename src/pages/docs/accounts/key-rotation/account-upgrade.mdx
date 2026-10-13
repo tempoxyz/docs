@@ -2,7 +2,10 @@
 title: Account upgrade
 seoTitle: Upgrade a Single-Key Tempo Account to Configurable Signers | Tempo Docs
 description: Turn a single-key (EOA) account into a recoverable configurable account at the same address, keeping its balances, token approvals, and access keys.
+interactive: true
 ---
+
+import { UpgradeAccountDemo } from '../../../../components/guides/UpgradeAccountDemo'
 
 # Account upgrade
 
@@ -12,7 +15,11 @@ description: Turn a single-key (EOA) account into a recoverable configurable acc
 
 An account upgrade turns a single-key (EOA) account into a configurable account at the same address, so losing the key no longer loses the account. It's permanent, only the original key can sign it, and it gives up cross-chain recovery.
 
+<UpgradeAccountDemo />
+
 <span id="make-a-single-key-account-recoverable" />
+<span id="upgrade-an-existing-account" />
+<span id="legacy-account-upgrade" />
 
 ## What an upgrade changes
 
@@ -61,7 +68,7 @@ await client.writeContractSync({
 })
 ```
 
-`AccountConfig.from` sorts the signers by address, as Tempo requires. After the upgrade, open the account with `Account.fromConfig` and its version-1 configuration, since every approval carries it. From then on, [rotate](/docs/accounts/key-rotation/signer-rotation) and [recover](/docs/accounts/key-rotation/signer-recovery) signers like any configurable account. [Upgrade an existing account](/docs/accounts/create#upgrade-an-existing-account) runs the full flow in a live demo, including saving the configuration.
+`AccountConfig.from` sorts the signers by address, as Tempo requires. After the upgrade, open the account with `Account.fromConfig` and its version-1 configuration, since every approval carries it. From then on, [rotate](/docs/accounts/key-rotation/signer-rotation) and [recover](/docs/accounts/key-rotation/signer-recovery) signers like any configurable account. [Upgrade an existing account](/docs/accounts/key-rotation/account-upgrade) runs the full flow in a live demo, including saving the configuration.
 
 ## Account upgrade limits
 

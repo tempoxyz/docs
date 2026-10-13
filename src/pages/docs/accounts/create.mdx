@@ -7,7 +7,6 @@ ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
 ---
 
 import { AccountSandbox } from '../../../components/guides/AccountSandbox'
-import { UpgradeAccountDemo } from '../../../components/guides/UpgradeAccountDemo'
 
 # Create an account
 
@@ -26,15 +25,6 @@ Every step runs on Tempo devnet, with a passkey on this device or a generated pr
 - The address can receive stablecoins before its first transaction.
 - The registering transaction is usually a payment that also authorizes the device's [access key](/docs/accounts/access-keys). [Sponsor the fee](/docs/guide/payments/sponsor-user-fees) so a new account needs no balance.
 
-## Choose the first signer
-
-| Account | First signer | Then add |
-| --- | --- | --- |
-| Embedded wallet | The customer's passkey | Your [wallet provider's key](/docs/accounts/guides/wallet-provider) and a recovery provider, threshold 2 |
-| Customer | A passkey | A [backup key and a recovery key](/docs/accounts/guides/self-custody#require-multi-factor-approval), threshold 2 |
-| Treasury | One approver's key | The other approvers, then raise the threshold |
-| Backend service | A key in your signing infrastructure | Nothing, or a recovery key |
-
 <span id="create-an-account-from-a-signing-key" />
 <span id="create-a-passkey-account" />
 
@@ -42,26 +32,12 @@ Every step runs on Tempo devnet, with a passkey on this device or a generated pr
 
 ::::code-group
 
-```ts [Passkey]
-import { Account, WebAuthnP256 } from 'viem/tempo'
-
-const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'Acme' }))
-const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
-```
-
-```ts [Device key]
-import { Account, P256 } from 'viem/tempo'
-
-const deviceKey = Account.fromP256(P256.randomPrivateKey()) // or a WebCrypto key the device can't export
-const account = Account.fromConfig({ address: 'infer', owners: [deviceKey] })
-```
-
-```ts [Private key]
+```ts [TypeScript]
 import { generatePrivateKey } from 'viem/accounts'
 import { Account } from 'viem/tempo'
 
-const key = Account.fromSecp256k1(generatePrivateKey())
-const account = Account.fromConfig({ address: 'infer', owners: [key] })
+const signer = Account.fromSecp256k1(generatePrivateKey())
+const account = Account.fromConfig({ address: 'infer', owners: [signer] })
 ```
 
 ```bash [CLI]
@@ -70,86 +46,4 @@ cast wallet new
 
 ::::
 
-To authorize a device key with the account's first payment, see [Device keys](/docs/accounts/authentication/device-keys#how-a-device-key-starts-paying). Shared setup: [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools).
-
-<span id="fund-and-use-the-account" />
-
-## Fund the account
-
-On devnet, use **Get test funds** above. On Moderato, use the [faucet](/docs/quickstart/faucet); on mainnet, a [funding path](/docs/guide/getting-funds). Then [show the balance](/docs/guide/payments/accept-a-payment#read-balances) and [send a payment](/docs/guide/payments/send-a-payment).
-
-<span id="legacy-account-upgrade" />
-
-## Upgrade an existing account
-
-A single-key account (an EOA) moves to signers and a threshold in one transaction, at the same address, balances, token approvals, and access keys. Only the original secp256k1 key or passkey signs the upgrade. The demo and examples run on Tempo devnet.
-
-<UpgradeAccountDemo />
-
-:::::steps
-
-### Choose the signers and threshold
-
-```ts [upgrade.ts]
-import { Account, AccountConfig } from 'viem/tempo'
-
-const original = Account.fromSecp256k1(process.env.ACCOUNT_KEY as `0x${string}`)
-const { owners, threshold } = AccountConfig.from({
-  owners: [
-    { owner: original.address, weight: 1 },
-    { owner: passkeyAddress, weight: 1 }, // the customer's new passkey
-  ],
-  threshold: 1,
-})
-```
-
-`AccountConfig.from` sorts the signers by address, as Tempo requires. Before you upgrade, revoke the access keys you don't want while the original key can do it alone.
-
-### Send the upgrade on its own
-
-```ts [upgrade.ts]
-import { parseAbi } from 'viem'
-
-await client.writeContractSync({
-  account: original,
-  address: '0xAACC000000000000000000000000000000000000',
-  abi: parseAbi([
-    'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
-  ]),
-  functionName: 'upgradeAccount',
-  args: [threshold, owners],
-})
-```
-
-The upgrade is permanent and must be the transaction's only call, with no `keyAuthorization` or authorization list.
-
-### Save the account's new configuration
-
-```ts [upgrade.ts]
-import { concat, keccak256, toHex } from 'viem'
-
-const account = Account.fromConfig({
-  address: original.address,
-  owners,
-  salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])),
-  threshold,
-  version: 1,
-})
-```
-
-Tempo stores only a hash of this configuration, and every approval needs it. The original key now approves only as a listed signer: pass `owner: original`.
-
-:::::
-
-<span id="what-the-upgrade-changes" />
-
-| Error | Cause |
-| --- | --- |
-| `UpgradeMustBeOnlyCall` | The upgrade wasn't the transaction's only call |
-| `PrimitiveRootRequired` | An access key signed instead of the original secp256k1 key or passkey |
-| `AccountHasCode` | The account has contract code or an EIP-7702 delegation, so it can't upgrade |
-| `AccountAlreadyConfigurable` | The account already has signers. Change them as in [Add a backup signer](/docs/accounts/guides/self-custody#add-a-backup-signer). |
-| `InvalidConfig` | The signers aren't sorted by address, or the threshold is out of reach |
-| `RootKeyRetired` | The original key signed alone after the upgrade |
-
-Contracts that check signatures themselves, such as Permit2, may still accept the original key, and on other chains it still controls the address. Upgraded accounts can't use [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).
+The CLI creates a private key, whose address is a single-key account. To give it signers and a threshold, [upgrade it](/docs/accounts/key-rotation/account-upgrade). For passkeys and device keys, see [signing methods](/docs/accounts/authentication). Reference: [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) and viem's [configurable accounts guide](https://viem.sh/tempo/guides/configurable-accounts).
