@@ -1496,7 +1496,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/upgrade',
-      destination: '/docs/accounts/create#upgrade-an-existing-account',
+      destination: '/docs/accounts/key-rotation/account-upgrade',
       status: 301,
     },
     {
