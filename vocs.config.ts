@@ -699,11 +699,10 @@ export default defineConfig({
       },
     ]
     const nodeSidebar = {
-      text: 'Run a node',
-      collapsed: true,
+      text: 'Nodes',
       items: [
         {
-          text: 'Overview',
+          text: 'Run a node',
           link: '/docs/guide/node',
         },
         {
@@ -724,6 +723,7 @@ export default defineConfig({
         },
         {
           text: 'Run a validator',
+          collapsed: true,
           items: [
             {
               text: 'Overview',
@@ -771,10 +771,13 @@ export default defineConfig({
           text: 'Upgrade a node',
           link: '/docs/guide/node/upgrade-cadence',
         },
+        {
+          text: 'Operator updates',
+          link: '/docs/guide/node/network-upgrades',
+        },
       ],
     }
     const changelogSidebar = [
-      { text: '← Back to Tempo EVM', link: '/docs/development' },
       {
         text: 'Changelog',
         items: [
@@ -1016,17 +1019,7 @@ export default defineConfig({
               { text: 'TIPs', link: 'https://tips.sh/' },
             ],
           },
-          {
-            text: 'Run a node',
-            collapsed: true,
-            items: nodeSidebar.items.map((item) => ({
-              ...item,
-              ...(item.text === 'Overview' ? { text: 'Introduction' } : {}),
-              ...(item.items ? { collapsed: true } : {}),
-            })),
-          },
           { text: 'All specifications', link: '/docs/protocol' },
-          { ...changelogSidebar[1], collapsed: true },
         ],
       },
     ]
@@ -1039,6 +1032,8 @@ export default defineConfig({
       routes: routesSidebar,
       zones: zonesSidebar,
       developers: developersSidebar,
+      nodes: [nodeSidebar],
+      changelog: changelogSidebar,
       'machine-payments': machinePaymentsSidebar,
       api: [{ text: 'API reference', items: [{ text: 'Introduction', link: '/docs/api' }] }],
       tools: toolsSidebar,

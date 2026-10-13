@@ -7,7 +7,7 @@ import {
 } from './docs-sections'
 
 export const aiDocsDescription =
-  'Build stablecoin products with Accounts, Earn, Routes, Zones, and Machine Payments, or build on Tempo EVM. Find API references, SDKs, CLI tools, and partner integrations.'
+  'Build stablecoin products with Accounts, Earn, Routes, Zones, and Machine Payments, or build on Tempo EVM. Find API references, SDKs, CLI tools, node operations, changelog, and partner integrations.'
 
 const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   overview:
@@ -22,8 +22,12 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   'machine-payments':
     'Pay for APIs, accept API payments, find services, and use MPP (https://mpp.dev).',
   developers:
-    'Build on Tempo EVM: wallets and keys, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.',
+    'Build on Tempo EVM: wallets and keys, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, and protocol specifications.',
   api: 'Tempo API reference: authentication, conventions, endpoints grouped by product, Console management endpoints, JSON-RPC, and the indexer. An API key authenticates API requests; an account signing key authorizes transactions.',
+  nodes:
+    'Run and maintain Tempo RPC, standby, and validator nodes: installation, network identity, security, keys, monitoring, failover, troubleshooting, and required operator updates.',
+  changelog:
+    'Track network upgrades, protocol activation and integration impact, and node software releases. Use Nodes for upgrade procedures and operator guidance.',
   ecosystem:
     'Find wallet providers, bridges, RPC infrastructure, data services, and other third-party integrations.',
 }

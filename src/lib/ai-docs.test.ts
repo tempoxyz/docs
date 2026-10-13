@@ -20,6 +20,10 @@ const input = `# Tempo Docs
 - [Machine Payments](/docs/agents): Pay for APIs.
 - [API reference](/docs/api/reference): REST schemas.
 - [Keys](/docs/accounts/keys): Chain signing permissions.
+- [Install a node](/docs/guide/node/installation): Install the binary.
+- [Operator updates](/docs/guide/node/network-upgrades): Required operator actions.
+- [T12](/docs/protocol/upgrades/t12): Protocol upgrade.
+- [Node releases](/docs/changelog): Software releases.
 - [Home](/index): Site home.
 `
 
@@ -48,6 +52,28 @@ describe('AI documentation navigation', () => {
     expect(output).toContain('Earn is in beta')
     expect(output).toContain('Routes is in beta')
     expect(renderAiIndex(output)).toBe(output)
+  })
+
+  it('groups node operations and release history in their own sections and page context', () => {
+    const sections = new Map(
+      renderAiIndex(input)
+        .split(/^## /m)
+        .slice(1)
+        .map((section) => [section.split('\n')[0], section]),
+    )
+    expect(sections.get('Nodes')).toContain('[Install a node](/docs/guide/node/installation.md)')
+    expect(sections.get('Nodes')).toContain(
+      '[Operator updates](/docs/guide/node/network-upgrades.md)',
+    )
+    expect(sections.get('Changelog')).toContain('[T12](/docs/protocol/upgrades/t12.md)')
+    expect(sections.get('Changelog')).toContain('[Node releases](/docs/changelog.md)')
+    expect(sections.get('Tempo EVM')).not.toMatch(/\[Install a node\]|\[T12\]|\[Node releases\]/)
+    for (const route of ['/docs/guide/node/validator-keys', '/docs/guide/node/network-upgrades'])
+      expect(renderAiPage('# Guide', route)).toContain('> Section: [Nodes](/docs/guide/node.md)')
+    for (const route of ['/docs/protocol/upgrades/t12', '/docs/changelog'])
+      expect(renderAiPage('# Changes', route)).toContain(
+        '> Section: [Changelog](/docs/protocol/upgrades.md)',
+      )
   })
 
   it('fails when a new docs route has no navigation owner', () => {

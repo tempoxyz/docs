@@ -61,7 +61,7 @@ describe('getActiveDocsSection', () => {
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
     expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('api')
     expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
-    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('developers')
+    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('changelog')
     expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Tempo EVM')
   })
 
@@ -138,13 +138,15 @@ describe('getActiveDocsSection', () => {
     ['/docs/protocol/tip403/spec', 'developers'],
     ['/docs/protocol/exchange/spec', 'developers'],
     ['/docs/protocol/blockspace/payment-lane-specification', 'developers'],
-    ['/docs/guide/node/installation', 'developers'],
-    ['/docs/protocol/upgrades', 'developers'],
-    ['/docs/protocol/upgrades/t11', 'developers'],
-    ['/docs/protocol/upgrades/t12', 'developers'],
-    ['/docs/guide/node/upgrade-cadence', 'developers'],
-    ['/docs/guide/node/network-upgrades', 'developers'],
-    ['/docs/changelog', 'developers'],
+    ['/docs/guide/node', 'nodes'],
+    ['/docs/guide/node/installation', 'nodes'],
+    ['/docs/guide/node/validator-keys', 'nodes'],
+    ['/docs/protocol/upgrades', 'changelog'],
+    ['/docs/protocol/upgrades/t11', 'changelog'],
+    ['/docs/protocol/upgrades/t12', 'changelog'],
+    ['/docs/guide/node/upgrade-cadence', 'nodes'],
+    ['/docs/guide/node/network-upgrades', 'nodes'],
+    ['/docs/changelog', 'changelog'],
     ['/docs/api/indexer-api', 'api'],
     ['/docs/protocol/rpc/eth_getBalance', 'developers'],
     ['/docs/sdk/typescript', 'overview'],
