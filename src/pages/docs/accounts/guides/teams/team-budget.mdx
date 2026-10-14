@@ -12,15 +12,21 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 A team budget lets a team pay from the [company treasury](/docs/accounts/guides/teams/company-treasury) up to a daily limit, without asking the treasury's approvers for each payment. The team gets its own account, where any two of its three members approve a payment, and the treasury's approvers authorize that account once as an [access key](/docs/accounts/access-keys). The team account holds no funds: it pays from the treasury's balance, and Tempo rejects any payment over what's left of the limit.
 
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="give-a-team-a-budget" />
 <span id="set-up-a-team-budget" />
 
-The demo creates a treasury with a device key in this browser, gives a team 2,000 AlphaUSD a day, and pays 50 AlphaUSD from that budget. The code continues from the treasury guide's `client`, `treasury`, and `alphaUsd`.
+The demo creates a treasury with a device key in this browser, gives a team 2,000 AlphaUSD a day, and pays 50 AlphaUSD from that budget. The code continues from the treasury guide's `treasury` and `alphaUsd`.
 
 <GuideDemo guide="team-accounts" />
+
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 :::::steps
 
@@ -60,6 +66,8 @@ Treasury approvers [authorize](/docs/accounts/access-keys#authorize-an-access-ke
 To pay, two members sign as the team account, which acts as the treasury's access key, and the payment comes from the treasury's balance. viem 2.57.5 has no helper yet for signing as a team account (draft [TIP-1111](https://tips.sh/1111)), so the demo shows that flow. Reading what's left of the daily limit works as for any access key:
 
 ```ts [budget.ts]
+import { client } from './client'
+
 const { remaining } = await client.accessKey.getRemainingLimit({
   account: treasury.address,
   accessKey: team.address,

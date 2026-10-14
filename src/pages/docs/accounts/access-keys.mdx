@@ -59,7 +59,7 @@ Give each device, service, agent, or team its own key, so you can revoke one wit
 | A customer's browser or phone | A P-256 [device key](/docs/accounts/authentication/device-keys) the device can't export, or a WebAuthn [passkey](/docs/accounts/authentication/passkeys) |
 | Your backend or an [AI agent](/docs/accounts/guides/agents/give-an-agent-a-wallet) | A P-256 key it generates, or a secp256k1 key in your [KMS or HSM](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms) |
 | A wallet | A secp256k1 key |
-| A [team](/docs/accounts/guides/teams/team-budget) | A configurable account, whose own signers and threshold approve as the key. Devnet only, draft [TIP-1111](https://tips.sh/1111). |
+| A [team](/docs/accounts/guides/teams/team-budget) | A configurable account, whose own signers and threshold approve as the key. Tempo Accounts devnet only, draft [TIP-1111](https://tips.sh/1111). |
 
 <span id="authorize-a-limited-key" />
 
@@ -70,21 +70,27 @@ Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-k
 - With the key's first payment: `signAuthorization` returns a `keyAuthorization` that travels with the first transaction the key signs. The key stays authorized even if that transaction's calls revert.
 - On its own: `authorizeSync` sends the authorization in a separate transaction, before the key pays.
 
-This example takes the first path on Moderato testnet: a single-key account gives a payout key 10 AlphaUSD, a test stablecoin, for one hour, payable to one recipient. On Tempo devnet, a configurable account's signers approve the same call.
+This example takes the first path: a new account's signer gives a payout key 10 AlphaUSD, a test stablecoin, for one hour, payable to one recipient. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [access-keys.ts]
 import { parseUnits } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { Account, createClient, Expiry, P256 } from 'viem/tempo'
+import { generatePrivateKey } from 'viem/accounts'
+import { Account, Expiry, P256 } from 'viem/tempo'
+import { client } from './client'
 
-const env = (name: string) => process.env[name] as `0x${string}`
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-const recipient = env('TEMPO_RECIPIENT')
-const client = createClient({ chain: tempoModerato })
+export const alphaUsd = '0x20c0000000000000000000000000000000000001'
+export const recipient = process.env.TEMPO_RECIPIENT as `0x${string}`
 
-const account = Account.fromSecp256k1(env('ACCOUNT_KEY'))
+// An account with one signer, as in Create an account, funded by the devnet faucet
+const signer = Account.fromSecp256k1(generatePrivateKey())
+export const account = Account.fromConfig({ address: 'infer', owners: [signer] })
+await client.faucet.fundSync({ account: account.address })
 
-const accessKey = Account.fromP256(P256.randomPrivateKey(), { access: account })
+export const accessKey = Account.fromP256(P256.randomPrivateKey(), { access: account })
 const keyAuthorization = await client.accessKey.signAuthorization({
   accessKey,
   account,
@@ -102,9 +108,9 @@ await client.token.transferSync({
 })
 ```
 
-The other pages in this section continue from this example's `client`, `account`, `accessKey`, and `alphaUsd`. To confirm the key landed, read it back with `client.accessKey.getMetadata({ account, accessKey })`.
+The other pages in this section import `account`, `accessKey`, `alphaUsd`, and `recipient` from this file. To confirm the key landed, read it back with `client.accessKey.getMetadata({ account, accessKey })`.
 
-Authorizing a key costs about $0.003, whatever its bounds. To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
+Tempo stores each limit and scope with the key, so each one adds to the network fee for authorizing it. This example's authorization and first payment cost under a cent together. To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
 
 <span id="troubleshoot-backend-payments" />
 

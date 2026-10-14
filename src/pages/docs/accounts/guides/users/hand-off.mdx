@@ -12,7 +12,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 Give a user full control of their account by replacing your app's signers with one they hold in their own wallet, such as Tempo Wallet. The account keeps its address and balance, and your app keeps no key.
 
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="account-export" />
@@ -40,12 +40,17 @@ Changing signers leaves access keys active, so revoke each one your app holds fi
 
 Your app's signer approves each revocation. Rebuild the account from the record you saved for this user: its address and its configuration. The configuration lists the signers, each signer's weight, and the threshold, the combined weight that must approve. Attach your app's signer as a key viem can sign with, and leave the other signers as addresses. Tempo stores only a hash of the configuration, so viem builds every approval from your saved copy.
 
-```ts [hand-off.ts]
-import { http, isAddressEqual } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-const client = createClient({ chain: tempoDevnet, transport: http() })
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+```ts [hand-off.ts]
+import { isAddressEqual } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
+
 const appSigner = Account.fromSecp256k1(process.env.APP_SIGNER_KEY as `0x${string}`)
 
 // Your app's signer approves; the other signers stay addresses.

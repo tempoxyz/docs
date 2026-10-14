@@ -9,7 +9,7 @@ description: Give each signer a weight and set the total weight a transaction ne
 A signing threshold decides who controls a Tempo account. Each signer, a key that approves the account's transactions, has a weight, and a transaction runs only when the signers who approve it reach the threshold in total weight. Choose weights so that no outside party can pay alone and losing any one signer doesn't lock the account.
 
 :::warning
-**Not live yet.** Signing thresholds ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Signing thresholds ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="how-approvals-add-up" />
@@ -83,11 +83,8 @@ To let a team spend without lowering the treasury's threshold, the treasury auth
 Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three. Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), a fingerprint it checks approvals against but can't read back. So when your app creates the account, it saves `account.address` and `account.config` with the account record, and rebuilds the account from that copy whenever signers approve:
 
 ```ts [account.ts]
-import { type Address, http, isAddressEqual } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, type AccountConfig, createClient } from 'viem/tempo'
-
-export const client = createClient({ chain: tempoDevnet, transport: http() })
+import { type Address, isAddressEqual } from 'viem'
+import { Account, type AccountConfig } from 'viem/tempo'
 
 /** Rebuilds the account from your app's saved record, with the approving keys on this device attached. */
 export function openAccount(
@@ -108,10 +105,15 @@ export function openAccount(
 
 Rebuild the account from the latest record before each transaction. A signer update raises the configuration's version, and Tempo checks every transaction against the new configuration's hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
-When the keys on one device reach the threshold, attach them and send the transaction as usual. The customer's passkey reaches it alone, so this payment runs in the customer's browser:
+When the keys on one device reach the threshold, attach them and send the transaction as usual. The customer's passkey reaches it alone, so this payment runs in the customer's browser. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [pay.ts]
-import { client, openAccount } from './account'
+import { openAccount } from './account'
+import { client } from './client'
 
 await client.token.transferSync({ account: openAccount(saved, [passkey]), amount, to, token })
 ```
@@ -124,7 +126,8 @@ When no single device holds enough weight, such as when the backup key and the r
 
 ```ts [approve.ts]
 import { Actions } from 'viem/tempo'
-import { client, openAccount } from './account'
+import { openAccount } from './account'
+import { client } from './client'
 
 // 1. Your app: prepare the payment once, from the account with no keys attached.
 const request = await client.prepareTransactionRequest({

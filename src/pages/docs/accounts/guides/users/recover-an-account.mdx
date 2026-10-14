@@ -12,7 +12,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 When a user loses the phone that holds their passkey, the account's other signers (the keys that approve its transactions) swap in a new passkey, and the new passkey revokes the phone's device key. The account keeps its address and balance.
 
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="account-recovery-limits" />
@@ -48,12 +48,15 @@ const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ l
 
 Rebuild the account from `saved`, attaching the keys that approve: the first key, held by your app or wallet provider, and the recovery signer. Signers without an attached key, such as the lost passkey, whose address is `lostPasskey`, stay addresses that can't sign. `openAccount` passes the saved address, not `address: 'infer'`, which derives a different address once signers change. The update swaps the lost passkey for the new one at the same weight, and viem signs it with both attached keys: their weights of 1 each reach the threshold of 2.
 
-```ts [recover.ts]
-import { http, isAddressEqual } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { createClient } from 'viem/tempo'
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-const client = createClient({ chain: tempoDevnet, transport: http() })
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+```ts [recover.ts]
+import { isAddressEqual } from 'viem'
+import { client } from './client'
 
 /** The account that `saved` describes, holding the approvers' keys. */
 function openAccount(approvers: Account.RootAccount[]) {

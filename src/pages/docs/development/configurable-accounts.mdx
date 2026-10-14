@@ -15,7 +15,7 @@ A configurable account is one address controlled by a set of owner keys. Each ow
   alt="The version-0 configuration of owners, threshold, and salt derives the address through CREATE2. To approve, owners sign and the signature carries the configuration; Tempo checks it against the stored hash and executes once the threshold is met."
 />
 
-Configurable accounts run on Tempo devnet. Their specification, [TIP-1107](https://tips.sh/1107) and its component TIPs, is a Draft.
+Configurable accounts run on the Tempo Accounts devnet. Their specification, [TIP-1107](https://tips.sh/1107) and its component TIPs, is a Draft.
 
 ## Account configuration fields
 
@@ -34,14 +34,14 @@ Tempo stores only a 32-byte hash of the configuration, not the owners themselves
 
 ## Configurable account address
 
-The address is a CREATE2 address computed from the version-0 configuration, with no chain ID ([TIP-1110](https://tips.sh/1110)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold contract code or an EIP-7702 delegation.
+The address is a CREATE2 address computed from the version-0 configuration, with no chain ID ([TIP-1110](https://tips.sh/1110)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold contract code or an EIP-7702 delegation. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [account.ts]
-import { http } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
-
-export const client = createClient({ chain: tempoDevnet, transport: http() })
+import { Account } from 'viem/tempo'
 
 export const env = (name: string) => process.env[name] as `0x${string}`
 // Owner keys on this machine, so viem can sign with them
@@ -110,7 +110,8 @@ The `0x05` signature also approves [access-key grants](/docs/development/account
 | Event | `MultisigConfigUpdated(account, salt, version, threshold, owners)` |
 
 ```ts [update.ts]
-import { account, client, env, finance, operations, saved } from './account'
+import { account, env, finance, operations, saved } from './account'
+import { client } from './client'
 
 const { config } = await client.accounts.updateConfigSync({
   account,
@@ -159,7 +160,8 @@ To check that a saved configuration is still current, compare its hash with the 
 
 ```ts [check-config.ts]
 import { AccountConfig } from 'viem/tempo'
-import { client, saved } from './account'
+import { saved } from './account'
+import { client } from './client'
 
 const stored = await client.accounts.getConfigCommitment({ account: saved.address })
 const isCurrent = stored === AccountConfig.getCommitment(saved.config)

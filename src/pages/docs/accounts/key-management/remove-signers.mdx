@@ -6,7 +6,7 @@ description: Remove a departing, lost, or compromised signer, or rotate a key, i
 
 # Remove signers
 
-Removing a signer ends its power to approve when an approver leaves or a key is lost or compromised. The signers that stay approve a new signer list without it, and the account keeps its address, balance, and token approvals. To rotate a key, the same update puts the new key in the old one's place. Signer updates run only on Tempo devnet.
+Removing a signer ends its power to approve when an approver leaves or a key is lost or compromised. The signers that stay approve a new signer list without it, and the account keeps its address, balance, and token approvals. To rotate a key, the same update puts the new key in the old one's place. Signer updates run only on the Tempo Accounts devnet.
 
 ## What removing a signer stops
 
@@ -18,14 +18,16 @@ Once the update lands, the removed signer can't approve anything, and approvals 
 
 ## Remove a signer
 
-Each signer's key stays with whoever holds it, and Tempo stores only a hash of the account's configuration: its signers, weights, threshold, salt, and version. Your app keeps the address and configuration it saved when it created the account or last changed signers, and rebuilds the account from them with the approving signers' keys attached. Drop the departing signer's entry and send the update:
+Each signer's key stays with whoever holds it, and Tempo stores only a hash of the account's configuration: its signers, weights, threshold, salt, and version. Your app keeps the address and configuration it saved when it created the account or last changed signers, and rebuilds the account from them with the approving signers' keys attached. Drop the departing signer's entry and send the update. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [remove-signer.ts]
-import { http, isAddressEqual } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
-
-const client = createClient({ chain: tempoDevnet, transport: http() })
+import { isAddressEqual } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
 
 const { address, config } = await loadAccount(customerId) // your app's storage
 
