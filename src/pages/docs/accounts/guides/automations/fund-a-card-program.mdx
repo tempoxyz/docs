@@ -10,7 +10,7 @@ Your backend tops up a customer's card from their Tempo account without asking t
 
 <span id="fund-a-card-with-a-daily-limit" />
 
-The examples use AlphaUSD, a test stablecoin with no value. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The examples use AlphaUSD, a test stablecoin with no value, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts. On mainnet and testnet, a card-funding key works the same from a single-key account, such as one whose key is the customer's passkey.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]

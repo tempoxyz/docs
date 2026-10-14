@@ -41,13 +41,15 @@ No app server or wallet provider holds the key, but anyone who unlocks the devic
 
 The demo makes the device key its own account on the Tempo Accounts devnet, to show signing without a prompt. Reload the page and the key is still there.
 
-In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 AlphaUSD a day for 30 days, and the first payment carries that authorization. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 AlphaUSD a day for 30 days, and the first payment carries that authorization. This works on mainnet and testnet today when the customer's account is a single-key account whose one key is the passkey.
+
+The example below uses a configurable account with the passkey as its signer. Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects there ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
 ```
 
-In `device-key.ts`, `account` is the customer's funded account with their passkey attached as its signer, as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer), and `recipient` is the payee's address:
+In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer), and `recipient` is the payee's address:
 
 ```ts [device-key.ts]
 import { parseUnits } from 'viem'

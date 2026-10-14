@@ -10,12 +10,14 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 A configurable account is one address controlled by a set of owner keys. Each owner has a weight, and a transaction runs once the owners who sign it reach the account's threshold: with three owners at weight 1 and a threshold of 2, any two can approve. The address never changes, so you can add, remove, or replace owners without moving funds.
 
+:::warning
+**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This includes a configurable account with one owner.
+:::
+
 <AccountDiagram
   name="configurable"
   alt="The version-0 configuration of owners, threshold, and salt derives the address through CREATE2. To approve, owners sign and the signature carries the configuration; Tempo checks it against the stored hash and executes once the threshold is met."
 />
-
-Configurable accounts run on the Tempo Accounts devnet. Their specification, [TIP-1107](https://tips.sh/1107) and its component TIPs, is a Draft.
 
 ## Account configuration fields
 
@@ -65,7 +67,7 @@ export const saved = { address: account.address, config: account.config }
 
 `address: 'infer'` derives the address from this configuration, so creating the account sends nothing. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero. An owner given as a local account, like `finance`, is a key Viem signs with. An owner given as an address, like the controller's passkey, signs on its own device.
 
-On supported EVM chains, the initial secp256k1 owners can deploy a recovery wallet at this address and retrieve funds sent there by mistake, if their weights reach the original threshold. P-256 and WebAuthn owners don't count. See [Recover funds sent on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain).
+The address is the same on other EVM chains, so a sender can pay it on the wrong chain by mistake. TIP-1110 defines a recovery factory contract for those chains: it would let the initial secp256k1 owners deploy a recovery wallet at the address and retrieve the funds, if their weights reach the original threshold. P-256 and WebAuthn owners don't count. No chain has the recovery factory yet, so those funds can't be retrieved today. See [Recover funds sent on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain).
 
 ### Account registration
 
@@ -192,7 +194,7 @@ An unregistered account verifies against its version-0 configuration, and the ch
 
 ## Native multisig precompile
 
-The native multisig precompile is at `0xAACC000000000000000000000000000000000000`. Viem's `updateConfigSync` and `getConfigCommitment` call it for you.
+The native multisig precompile is at `0xAACC000000000000000000000000000000000000` on the Tempo Accounts devnet. Viem's `updateConfigSync` and `getConfigCommitment` call it for you.
 
 | Function | Purpose |
 | --- | --- |

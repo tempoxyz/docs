@@ -12,7 +12,7 @@ Each of your users' existing accounts is a single-key account (EOA), like a stan
 **Account upgrades aren't live yet.** Turning a single-key account into a configurable account at the same address ([TIP-1113](https://tips.sh/1113)) works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.
 :::
 
-After the upgrade, the account has a list of signers, each with a weight, and a threshold: the total weight an approval needs. The original key keeps approving only if you list it. [Account upgrade](/docs/accounts/key-management/account-upgrade) explains the change and runs one in a live demo.
+After the upgrade, the account has a list of signers, each with a weight, and a threshold: the total weight an approval needs. The original key keeps approving only if you list it. [Account upgrade](/docs/accounts/key-management/account-upgrade) explains the change and runs one in your browser.
 
 :::::steps
 
@@ -39,7 +39,7 @@ Access keys, the limited keys that sign payments for the account, carry over wit
 
 ### Upgrade each account in place
 
-Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade): the user's original key signs one transaction whose only call is `upgradeAccount(threshold, owners)`. Set `feeToken` on that call, or on the client, to the stablecoin that pays the fee. Without it, viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor the fee for accounts with no balance.
+Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade): the user's original key signs one transaction whose only call is `upgradeAccount(threshold, owners)`. Set `feeToken` on that call, or on the client, to the stablecoin that pays the fee. Without it, viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor the fee for accounts with no balance. On mainnet or testnet, the same transaction succeeds and charges its fee but changes nothing, so a successful receipt there doesn't mean the account upgraded.
 
 ### Save the configuration
 
@@ -88,7 +88,7 @@ const account = Account.fromConfig({
 await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token })
 ```
 
-From then on, manage signers like any other account, as in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer). After each signer change, save the `config` that `updateConfigSync` returns and rebuild the account from it. An account built from an older configuration no longer matches the hash Tempo stores, and its transactions fail with `multisig configuration commitment mismatch`.
+From then on, manage signers like any other configurable account, as in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer). After each signer change, save the `config` that `updateConfigSync` returns and rebuild the account from it. An account built from an older configuration no longer matches the hash Tempo stores, and its transactions fail with `multisig configuration commitment mismatch`.
 
 :::::
 
