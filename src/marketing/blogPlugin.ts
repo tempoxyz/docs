@@ -116,6 +116,9 @@ const processor = unified()
     defaultColor: false,
     langAlias: { sol: 'solidity' },
     fallbackLanguage: 'plaintext',
+    // Load grammars per fence instead of every bundled language up front.
+    langs: [],
+    lazy: true,
   })
   .use(rehypeStringify)
 

@@ -785,12 +785,11 @@ export default defineConfig({
             items: [
               {
                 text: 'T12',
-                badge: { text: 'Testnet', variant: 'info' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
                 text: 'T11',
-                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t11',
               },
               {

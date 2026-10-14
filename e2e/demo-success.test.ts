@@ -9,7 +9,7 @@ test('accepts a successful demo action', async ({ page }) => {
 test('fails promptly when a demo reports a terminal error', async ({ page }) => {
   test.setTimeout(5_000)
   await page.setContent(
-    '<div data-active data-completed><div role="alert">Socket closed</div></div>',
+    '<div data-active data-completed><div role="alert" class="generated-error">Socket closed</div></div>',
   )
   await expect(
     expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }), 60_000),
