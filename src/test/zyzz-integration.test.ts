@@ -44,7 +44,7 @@ it('excludes documentation fragments without excluding similarly named source di
 
     // The real multi-region documentation source is not one runnable module.
     await expect(compile()).rejects.toThrow()
-    const result = await compile(['snippets'])
+    const result = await compile(['snippets/**'])
     const outputs = (Array.isArray(result) ? result : [result]).flatMap((bundle) =>
       'output' in bundle ? bundle.output : [],
     )
@@ -64,7 +64,7 @@ it('serves server-compiled CSS to the browser without compiling its owner in the
     configFile: false,
     root,
     logLevel: 'silent',
-    plugins: [zyzz({ exclude: ['snippets'], script: false })],
+    plugins: [zyzz({ exclude: ['snippets/**'], script: false })],
     server: { middlewareMode: true },
     optimizeDeps: { noDiscovery: true },
   })
@@ -126,7 +126,7 @@ it('compiles the Tempo contract and rejects off-system declarations', async () =
         configFile: false,
         root,
         logLevel: 'silent',
-        plugins: [zyzz({ exclude: ['snippets'], script: false })],
+        plugins: [zyzz({ exclude: ['snippets/**'], script: false })],
         build: {
           write: false,
           minify: false,
