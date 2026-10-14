@@ -1,20 +1,28 @@
 'use client'
+
 import { useQuery } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Address } from 'viem'
-import { isAddress, pad, parseUnits, stringToHex } from 'viem'
-import { Actions } from 'viem/tempo'
+import { isAddress, parseUnits, toHex } from 'viem'
+import { createClient, custom } from 'viem/tempo'
 import { useConnection, useConnectionEffect, usePublicClient } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { TokenSelector } from '../../../TokenSelector'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd, betaUsd, ousd, thetaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './PayWithFeeToken.recipes'
 
 export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const { stepNumber, last = false } = props
   const { address } = useConnection()
   const publicClient = usePublicClient()
+  const client = React.useMemo(
+    () =>
+      publicClient && createClient({ chain: publicClient.chain, transport: custom(publicClient) }),
+    [publicClient],
+  )
   const [recipient, setRecipient] = React.useState<string>(FAKE_RECIPIENT)
   const [memo, setMemo] = React.useState<string>('')
   const [expanded, setExpanded] = React.useState(false)
@@ -38,16 +46,17 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   })
   // Resolve the current validator's fee token rather than assuming a test token.
   const feeLiquidity = useQuery({
-    queryKey: ['fee-demo-liquidity', publicClient?.chain.id, feeToken],
-    enabled: Boolean(publicClient),
+    queryKey: ['fee-demo-liquidity', client?.chain.id, feeToken],
+    enabled: Boolean(client),
     queryFn: async () => {
-      if (!publicClient) throw new Error('public client not ready')
-      const block = await publicClient.getBlock()
-      const validatorToken = await Actions.fee.getValidatorToken(publicClient, {
+      if (!client) throw new Error('public client not ready')
+      const block = await client.getBlock()
+      const validatorToken = await client.fee.getValidatorToken({
         validator: block.miner,
       })
+      if (!validatorToken) return false
       if (feeToken.toLowerCase() === validatorToken.address.toLowerCase()) return true
-      const pool = await Actions.amm.getPool(publicClient, {
+      const pool = await client.amm.getPool({
         userToken: feeToken,
         validatorToken: validatorToken.address,
       })
@@ -81,7 +90,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
       amount: parseUnits('100', 6),
       to: recipient as `0x${string}`,
       token: alphaUsd,
-      memo: memo ? pad(stringToHex(memo), { size: 32 }) : undefined,
+      memo: memo ? toHex(memo, { size: 32 }) : undefined,
       feeToken,
     })
   }
@@ -106,7 +115,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Cancel
@@ -117,7 +126,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -128,17 +137,19 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'another token'}.`}
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
             {/* Token info display */}
-            <div className="mt-2 mb-3 rounded-lg bg-gray2 p-3 text-[13px] -tracking-[1%]">
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Payment Token: AlphaUSD</span>
-                  <span className="text-gray12">balance: {alphaBalance?.formatted ?? '0'}</span>
+            <div {...ui.payWithFeeTokenLayout3()}>
+              <div {...ui.payWithFeeTokenLayout4()}>
+                <div {...ui.payWithFeeTokenLayout5()}>
+                  <span {...ui.payWithFeeTokenText()}>Payment Token: AlphaUSD</span>
+                  <span {...ui.payWithFeeTokenText2()}>
+                    balance: {alphaBalance?.formatted ?? '0'}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">Fee Token</span>
+                <div {...ui.payWithFeeTokenLayout5()}>
+                  <span {...ui.payWithFeeTokenText()}>Fee Token</span>
                   <TokenSelector
                     tokens={[alphaUsd, betaUsd, thetaUsd, ousd]}
                     value={feeToken}
@@ -146,22 +157,24 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                     name="feeToken"
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray10">
+                <div {...ui.payWithFeeTokenLayout5()}>
+                  <span {...ui.payWithFeeTokenText()}>
                     {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
                   </span>
-                  <span className="text-gray12">balance: {feeTokenBalance?.formatted ?? '0'}</span>
+                  <span {...ui.payWithFeeTokenText2()}>
+                    balance: {feeTokenBalance?.formatted ?? '0'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-2 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="recipient">
+            <div {...form.fieldsRow()}>
+              <div {...form.primaryField()}>
+                <label {...form.label()} htmlFor="recipient">
                   Recipient address
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="recipient"
@@ -171,12 +184,12 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                   placeholder="0x..."
                 />
               </div>
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="memo">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="memo">
                   Memo (optional)
                 </label>
                 <input
-                  className="h-[34px] rounded-[50px] border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...form.input()}
                   data-1p-ignore
                   type="text"
                   id="memo"
@@ -191,7 +204,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 disabled={!active}
                 onClick={handleTransfer}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={form.actionButton().className}
               >
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>

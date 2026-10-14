@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
 import CodePanel from './CodePanel'
+import * as ui from './CodeWindow.recipes'
 
 export type CodeVariant = {
   lang: string
@@ -42,44 +44,43 @@ export default function CodeWindow({
 
   return (
     <div
-      className={`flex min-h-0 ${heightClassName} flex-col overflow-hidden rounded-lg border border-line bg-surface-block shadow-2xl`}
+      className={` ${ui.codeWindowLayout().className} ${heightClassName} ${ui.codeWindowLayout2().className} `}
     >
-      <div className="relative flex items-center gap-2 border-line border-b bg-surface-panel px-4 py-3">
-        <span aria-hidden className="size-3 shrink-0 rounded-full bg-[#FF5F57]" />
-        <span aria-hidden className="size-3 shrink-0 rounded-full bg-[#FEBC2E]" />
-        <span aria-hidden className="size-3 shrink-0 rounded-full bg-[#28C840]" />
-        <span className="pointer-events-none absolute inset-x-0 text-center font-mono text-[12px] text-foreground/35 tracking-[0.02em]">
-          {title}
-        </span>
+      <div {...ui.codeWindowLayout3()}>
+        <span aria-hidden="true" {...ui.codeWindowText()} />
+        <span aria-hidden="true" {...ui.codeWindowText2()} />
+        <span aria-hidden="true" {...ui.codeWindowText3()} />
+        <span {...ui.codeWindowText4()}>{title}</span>
       </div>
       {variants && variants.length > 1 ? (
-        <div className="flex border-line border-b bg-surface-block">
+        <div {...ui.codeWindowLayout4()}>
           {panels.map((panel, index) => (
             <button
               key={panel.lang}
               type="button"
               onClick={() => setActivePanelIndex(index)}
               aria-pressed={active === panel}
-              className={`h-11 border-line border-r px-4 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors last:border-r-0 ${
-                active === panel
-                  ? 'bg-surface-card-elev text-foreground'
-                  : 'text-foreground/40 hover:bg-surface-card hover:text-foreground/70'
-              }`}
+              {...composeStyles(
+                ui.codeWindowButton(),
+                !!(active === panel) && ui.codeWindowButton2(),
+                !(active === panel) && ui.codeWindowButton3(),
+              )}
             >
               {panel.lang}
             </button>
           ))}
         </div>
       ) : null}
-      <div className="grid min-h-0 flex-1">
+      <div {...ui.codeWindowLayout5()}>
         {panels.map((panel, index) => (
           <div
             key={panel.lang}
             inert={active !== panel}
             aria-hidden={active !== panel}
-            className={`flex min-h-0 bg-surface-block [grid-area:1/1] ${
-              index === activePanelIndex ? '' : 'invisible'
-            }`}
+            {...composeStyles(
+              ui.codeWindowLayout6(),
+              !(index === activePanelIndex) && ui.codeWindowLayout7(),
+            )}
           >
             <CodePanel code={panel.code} highlight={panel.highlight} inline bare />
           </div>

@@ -20,7 +20,6 @@ export const config = createConfig({
 
 // [!region withFeePayer]
 import { tempoModerato } from 'viem/chains'
-import { withRelay } from 'viem/tempo'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 

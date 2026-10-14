@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { getDemoStep } from './helpers'
+import { expectDemoSuccess, getDemoStep } from './helpers'
 
 test('use stablecoin for fees', async ({ page }) => {
   test.setTimeout(240000)
@@ -33,9 +33,7 @@ test('use stablecoin for fees', async ({ page }) => {
   await expect(addFundsButton).toBeVisible()
   await addFundsButton.click()
 
-  await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
   // Step 3: Create a token
   // Use label-based selectors to ensure we're filling the right inputs in the demo form
@@ -51,9 +49,7 @@ test('use stablecoin for fees', async ({ page }) => {
   await expect(deployButton).toBeVisible()
   await deployButton.click()
 
-  await expect(page.getByRole('link', { name: 'View receipt' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).first())
 
   // Step 4: Grant issuer role
   const grantStep = getDemoStep(page, 'Grant issuer role on FeeTestUSD.')
@@ -64,9 +60,7 @@ test('use stablecoin for fees', async ({ page }) => {
   const grantButton = grantStep.getByRole('button', { name: 'Grant' })
   await grantButton.click()
 
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(1)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(1))
 
   // Step 5: Mint tokens
   const mintStep = getDemoStep(page, 'Mint 100 FeeTestUSD to yourself.')
@@ -77,18 +71,14 @@ test('use stablecoin for fees', async ({ page }) => {
   const mintButton = mintStep.getByRole('button', { name: 'Mint' })
   await mintButton.click()
 
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(2)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(2))
 
   // Step 6: Add fee AMM liquidity
   const addLiquidityButton = page.getByRole('button', { name: 'Add Liquidity' }).first()
   await expect(addLiquidityButton).toBeVisible()
   await addLiquidityButton.click()
 
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(3)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(3))
 
   // Step 7: Send payment using token as fee
   const payStep = getDemoStep(page, 'Send 100 AlphaUSD and pay fees in FeeTestUSD.')
@@ -100,9 +90,7 @@ test('use stablecoin for fees', async ({ page }) => {
   await expect(sendButton).toBeVisible()
   await sendButton.click()
 
-  await expect(page.getByRole('link', { name: 'View receipt' }).nth(4)).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(4))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

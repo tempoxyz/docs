@@ -1,11 +1,14 @@
 'use client'
+
 import * as React from 'react'
 import { useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, FAKE_RECIPIENT, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './CreateTokenPolicy.recipes'
 
 export function CreateTokenPolicy(props: DemoStepProps) {
   const { stepNumber, flowDependencies = [] } = props
@@ -54,7 +57,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
           <Button
             variant="default"
             onClick={() => setExpanded(false)}
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
             type="button"
           >
             Hide
@@ -65,7 +68,7 @@ export function CreateTokenPolicy(props: DemoStepProps) {
             disabled={!active}
             onClick={() => setExpanded(true)}
             type="button"
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={form.actionButton().className}
           >
             Enter details
           </Button>
@@ -75,31 +78,31 @@ export function CreateTokenPolicy(props: DemoStepProps) {
       title="Create a transfer policy."
     >
       {expanded && (
-        <div className="mx-6 flex flex-col gap-3 pb-4">
-          <div className="border-gray4 border-s-2 ps-5">
-            <div className="mt-2 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
-              <div className="flex flex-1 flex-col">
-                <div className="mb-2 text-[13px] text-gray9 -tracking-[1%]">
+        <div {...form.stepBody()}>
+          <div {...form.stepRail()}>
+            <div {...form.fieldsRow()}>
+              <div {...form.secondaryField()}>
+                <div {...ui.createTokenPolicyLayout5()}>
                   This will create a blacklist policy that blocks {FAKE_RECIPIENT} from sending or
                   receiving tokens.
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 pe-8 md:flex-row md:items-end">
+            <div {...ui.createTokenPolicyLayout6()}>
               <Button
                 variant="accent"
                 onClick={handleCreatePolicy}
                 disabled={isCreating}
                 type="button"
-                className="font-normal text-[14px] -tracking-[2%]"
+                className={form.actionButton().className}
               >
                 {isCreating ? 'Creating...' : 'Create Policy'}
               </Button>
             </div>
 
             {hasError && (
-              <div className="mt-2 text-[13px] text-red-500">
+              <div {...ui.createTokenPolicyLayout7()}>
                 Failed to create policy. Please try again.
               </div>
             )}

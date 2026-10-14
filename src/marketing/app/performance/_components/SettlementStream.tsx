@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
+import { blockIn, settledCell, settleFlash } from '../../../../styles/surfaces.styles'
+import * as ui from './SettlementStream.recipes'
 import { MAX_BLOCKS, useFinalizedBlocks } from './useFinalizedBlocks'
 import useMeasure from './useMeasure'
 
@@ -36,16 +39,28 @@ export default function SettlementStream() {
   const last = shown.length - 1
 
   return (
-    <div ref={ref} className="relative w-full" style={{ height: H }}>
+    <div
+      ref={ref}
+      {...ui.settlementStreamLayoutAppearance({
+        value0: `${H}px`,
+        className: ui.settlementStreamLayout().className,
+      })}
+    >
       {width > 0 ? (
         <div>
           {/* "Now" cursor: the live marker sits over the block being built. */}
           <p
-            className="absolute right-0 flex items-center gap-1.5 font-mono text-[9px] text-foreground/40 tracking-wider"
-            style={{ top: TRACK_TOP - 22 }}
+            {...ui.settlementStreamDescriptionAppearance({
+              value0: `${TRACK_TOP - 22}px`,
+              className: ui.settlementStreamDescription().className,
+            })}
           >
             <span
-              className={`block size-1.5 shrink-0 rounded-full ${isLive ? 'bg-indicator-green' : 'bg-foreground/25'}`}
+              {...composeStyles(
+                ui.settlementStreamText(),
+                !!isLive && ui.settlementStreamText2(),
+                !isLive && ui.settlementStreamText3(),
+              )}
             />
             FINALIZED
           </p>
@@ -54,51 +69,56 @@ export default function SettlementStream() {
               positioned by index-from-newest, so when a block arrives every
               older cell's transform changes and transitions one step left. */}
           <div
-            className="absolute inset-x-0 overflow-hidden"
-            style={{ top: TRACK_TOP, height: TRACK_H }}
+            {...ui.settlementStreamLayoutAppearance2({
+              value0: `${TRACK_TOP}px`,
+              value1: `${TRACK_H}px`,
+              className: ui.settlementStreamLayout2().className,
+            })}
           >
             {shown.map((b, i) => (
               <div
                 key={b.height.toString()}
-                className={`absolute top-0 right-0 ease-out motion-reduce:transition-none ${
-                  reducedMotion ? '' : 'transition-transform duration-300'
-                }`}
-                style={{ transform: `translateX(${-(last - i) * STEP}px)` }}
+                {...ui.settlementStreamLayoutAppearance3({
+                  value0: `translateX(${-(last - i) * STEP}px)`,
+                  className: ` ${ui.settlementStreamLayout3().className} ${
+                    reducedMotion ? '' : ui.settlementStreamLayout4().className
+                  }`,
+                })}
               >
                 <a
                   href={`${TEMPO_EXPLORER_BLOCK_URL}/${b.height.toString()}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Open block ${b.height.toLocaleString('en-US')} in Tempo Explorer`}
-                  className="group block outline-none"
+                  {...ui.settlementStreamLink({ className: 'group' })}
                 >
                   <div
-                    className={`block-in settle-flash flex size-16 items-center justify-center border-line-strong transition-colors group-hover:bg-surface-card group-focus-visible:bg-surface-card ${
-                      i === last ? 'settled-cell' : 'bg-surface-panel'
+                    className={` ${ui.settlementStreamLayout5({ className: `block-in settle-flash ${blockIn().className} ${settleFlash().className}` }).className} ${
+                      i === last
+                        ? `settled-cell ${settledCell().className}`
+                        : ui.settlementStreamLayout6().className
                     }`}
                   >
-                    <span className="font-mono text-[18px] text-indicator-green leading-none">
-                      ✓
-                    </span>
+                    <span {...ui.settlementStreamText4()}>✓</span>
                   </div>
-                  <p className="mt-1.5 text-center font-mono text-[9px] text-foreground/25 tracking-wide transition-colors group-hover:text-foreground/45 group-focus-visible:text-foreground/45">
-                    #{b.height.toLocaleString('en-US')}
-                  </p>
+                  <p {...ui.settlementStreamDescription2()}>#{b.height.toLocaleString('en-US')}</p>
                 </a>
               </div>
             ))}
 
             {shown.length === 0 ? (
               <p
-                className="absolute right-0 font-mono text-[10px] text-foreground/35 tracking-wider"
-                style={{ top: CELL / 2 - 5 }}
+                {...ui.settlementStreamDescriptionAppearance2({
+                  value0: `${CELL / 2 - 5}px`,
+                  className: ui.settlementStreamDescription3().className,
+                })}
               >
                 Waiting for finalized blocks…
               </p>
             ) : null}
 
             {/* Mask the oldest block's exit at the track's left edge. */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-surface-shell to-transparent" />
+            <div {...ui.settlementStreamLayout7()} />
           </div>
 
           {/* Live observed avg block time, bracketing a single block interval,
@@ -106,19 +126,27 @@ export default function SettlementStream() {
           {avgIntervalMs != null ? (
             <>
               <div
-                className="absolute flex items-center"
-                style={{ right: CELL / 2, width: STEP, top: TRACK_TOP + TRACK_H + 6 }}
+                {...ui.settlementStreamLayoutAppearance4({
+                  value0: `${CELL / 2}px`,
+                  value1: `${STEP}px`,
+                  value2: `${TRACK_TOP + TRACK_H + 6}px`,
+                  className: ui.settlementStreamLayout8().className,
+                })}
               >
-                <span className="h-2 w-px bg-foreground/25" />
-                <span className="h-px flex-1 bg-foreground/25" />
-                <span className="h-2 w-px bg-foreground/25" />
+                <span {...ui.settlementStreamText5()} />
+                <span {...ui.settlementStreamText6()} />
+                <span {...ui.settlementStreamText5()} />
               </div>
               <p
-                className="absolute text-center font-mono text-[9px] text-foreground/35 leading-tight"
-                style={{ right: CELL / 2 - 24, width: STEP + 48, top: TRACK_TOP + TRACK_H + 16 }}
+                {...ui.settlementStreamDescriptionAppearance3({
+                  value0: `${CELL / 2 - 24}px`,
+                  value1: `${STEP + 48}px`,
+                  value2: `${TRACK_TOP + TRACK_H + 16}px`,
+                  className: ui.settlementStreamDescription4().className,
+                })}
               >
-                <span className="block text-foreground/30 tracking-wider">AVG BLOCK TIME</span>
-                <span className="text-foreground/45">{avgIntervalMs} MS</span>
+                <span {...ui.settlementStreamText7()}>AVG BLOCK TIME</span>
+                <span {...ui.settlementStreamText8()}>{avgIntervalMs} MS</span>
               </p>
             </>
           ) : null}

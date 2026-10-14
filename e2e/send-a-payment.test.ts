@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
-import { getDemoStep } from './helpers'
+import { expectDemoSuccess, getDemoStep } from './helpers'
 
-test('send a payment', async ({ page }) => {
+test('send a payment from the quickstart', async ({ page }) => {
   test.setTimeout(120000)
 
   // Set up virtual authenticator via CDP
@@ -17,7 +17,7 @@ test('send a payment', async ({ page }) => {
     },
   })
 
-  await page.goto('/docs/guide/payments/send-a-payment')
+  await page.goto('/get-started/quickstart')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()
@@ -35,9 +35,7 @@ test('send a payment', async ({ page }) => {
   await addFundsButton.click()
 
   // Wait for "Add more funds" button (indicates funds were added)
-  await expect(page.getByRole('button', { name: 'Add more funds' }).first()).toBeVisible({
-    timeout: 90000,
-  })
+  await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }).first())
 
   // Step 3: Send payment
   const sendPaymentStep = getDemoStep(page, 'Send 100 AlphaUSD to a recipient.')
@@ -55,7 +53,7 @@ test('send a payment', async ({ page }) => {
   await sendButton.click()
 
   // Wait for transaction receipt link
-  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible({ timeout: 90000 })
+  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

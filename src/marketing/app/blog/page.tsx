@@ -1,13 +1,20 @@
-import Link from 'next/link'
-import Footer from '../_components/Footer'
-import Header from '../_components/Header'
-import Reveal from '../_components/Reveal'
-import { developersPath } from '../_lib/developersPaths'
+import { Link } from 'waku'
+import DocsHeader from '../../../components/DocsHeader'
+import BlogFooter from './_components/BlogFooter'
 import PostByline from './_components/PostByline'
 import PostExplorer from './_components/PostExplorer'
 import PostImage from './_components/PostImage'
 import PostLabels from './_components/PostLabels'
 import { getAllPosts, getFeaturedPost } from './_lib/posts'
+import {
+  tempoBlog,
+  tempoBlogExcerpt,
+  tempoBlogFeatured,
+  tempoBlogFeaturedCopy,
+  tempoBlogFeaturedImage,
+  tempoBlogIndex,
+  tempoBlogIntro,
+} from './BlogShell.styles'
 
 export default function BlogPage() {
   const posts = getAllPosts()
@@ -25,39 +32,36 @@ export default function BlogPage() {
   }))
 
   return (
-    <main className="min-h-screen w-full bg-surface-page">
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col border-line border-x bg-surface-shell">
-        <Header />
+    <div className={`tempo-blog ${tempoBlog().className}`}>
+      <DocsHeader surface="blog" />
+      <main id="blog-content" className={`tempo-blog-index ${tempoBlogIndex().className}`}>
+        <header className={`tempo-blog-intro ${tempoBlogIntro().className}`}>
+          <h1>Blog</h1>
+          <p>Engineering and product updates from Tempo.</p>
+        </header>
 
-        <Reveal className="px-5 pt-8 lg:px-8 lg:pt-10">
+        {featured ? (
           <Link
-            href={developersPath(`/blog/${featured.slug}`)}
-            className="group grid border border-line transition-colors hover:bg-surface-block focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-4 lg:grid-cols-2"
+            to={`/blog/${featured.slug}`}
+            className={`tempo-blog-featured ${tempoBlogFeatured().className}`}
           >
-            <div className="flex items-center overflow-hidden border-line border-b bg-surface-block lg:order-2 lg:border-b-0 lg:border-l">
-              <PostImage post={featured} priority />
-            </div>
-            <div className="flex flex-col justify-center gap-4 p-6 lg:order-1 lg:gap-3 xl:p-8">
+            <div className={`tempo-blog-featured-copy ${tempoBlogFeaturedCopy().className}`}>
               <PostLabels post={featured} />
-              <h1 className="max-w-[480px] font-sans text-[clamp(1.75rem,4vw,2.5rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased lg:text-[28px] xl:text-[40px]">
-                {featured.title}
-              </h1>
-              <p className="max-w-[480px] font-sans text-[15px] text-foreground/60 leading-[1.55] tracking-[0]">
+              <h2>{featured.title}</h2>
+              <p className={`tempo-blog-excerpt ${tempoBlogExcerpt().className}`}>
                 {featured.excerpt}
               </p>
               <PostByline post={featured} />
             </div>
+            <div className={`tempo-blog-featured-image ${tempoBlogFeaturedImage().className}`}>
+              <PostImage post={featured} priority />
+            </div>
           </Link>
-        </Reveal>
+        ) : null}
 
-        <div className="mt-10 lg:mt-16">
-          <PostExplorer posts={postMetas} />
-        </div>
-
-        <div className="mt-auto pt-[140px]">
-          <Footer />
-        </div>
-      </div>
-    </main>
+        <PostExplorer posts={postMetas} />
+      </main>
+      <BlogFooter />
+    </div>
   )
 }

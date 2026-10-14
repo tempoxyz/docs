@@ -8,8 +8,7 @@ import { expect, test } from '@playwright/test'
 // survive Vocs' head dedupe in the *prerendered* output — not just after
 // hydration. These requests use the raw HTTP response, not a browser page.
 //
-// Only meaningful against the built artifact (CI serves `dist/preview.js`);
-// the local dev server serves the marketing SPA shell for these routes.
+// CI serves the built artifact through `dist/preview.js`.
 test.skip(!process.env.CI, 'requires the production build output')
 
 async function fetchHead(request: import('@playwright/test').APIRequestContext, path: string) {
@@ -43,60 +42,54 @@ const cases: {
   ogImageIncludes: string
 }[] = [
   {
-    path: '/',
-    title: 'Tempo Developers: Build on a Payments-First Blockchain',
-    ogTitle: 'Tempo Developers: Build on a Payments-First Blockchain',
-    descriptionIncludes: 'stablecoin-native tokens',
-    ogImageIncludes: '/og-docs.png',
-  },
-  {
     path: '/blog',
     title: 'Blog ⋅ Tempo',
     ogTitle: 'Blog',
     descriptionIncludes: 'Product announcements, engineering deep dives',
-    ogImageIncludes: 'section=BLOG',
+    ogImageIncludes: '/og/2026-q4/og_2026-q4_hub_developers-blog_title-f5_v02.png',
   },
   {
-    path: '/build/tempo-transactions',
-    title: 'Tempo Transactions',
-    ogTitle: 'Tempo Transactions',
-    descriptionIncludes: 'Batch, sponsor, schedule',
-    ogImageIncludes: 'section=BUILD',
-  },
-  {
-    path: '/performance',
-    title: 'Performance ⋅ Tempo',
-    ogTitle: 'Performance',
-    descriptionIncludes: 'Nightly benchmarks',
-    ogImageIncludes: 'section=PERFORMANCE',
-  },
-  {
-    path: '/docs',
+    path: '/',
     title: 'Tempo Developer Docs: APIs, SDKs &amp; Guides',
-    ogTitle: 'Tempo developer documentation',
-    descriptionIncludes: 'Tempo docs for integration paths',
-    ogImageIncludes: '/og-docs.png',
+    ogTitle: 'Documentation',
+    descriptionIncludes: 'Build with Tempo Accounts, Earn, Routes, and Zones',
+    ogImageIncludes: '/og/2026-q4/og_2026-q4_developers_developers_title-f5_v02.png',
+  },
+  {
+    path: '/get-started',
+    title: 'Get Started with Tempo | Tempo Docs',
+    ogTitle: 'Build on Tempo',
+    descriptionIncludes:
+      'Build stablecoin accounts, transfer funds onchain, offer earning balances, and charge for API access on Tempo.',
+    ogImageIncludes: '/og/2026-q4/og_2026-q4_developers_get-started_title-f5_v02.png',
   },
   {
     path: '/docs/guide/payments/send-a-payment',
-    title: 'Send a Stablecoin Payment on Tempo | Docs',
-    ogTitle: 'How to send a stablecoin payment on Tempo',
-    descriptionIncludes: 'stablecoin payments between accounts',
-    ogImageIncludes: 'subsection=PAYMENTS',
+    title: 'Send Stablecoin Payments on Tempo | Tempo Docs',
+    ogTitle: 'Send payments',
+    descriptionIncludes: 'Send stablecoins, batch payments, choose how to pay fees',
+    ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_guide-payments-send-a-payment_title-f5_v02.png',
+  },
+  {
+    path: '/docs/payments',
+    title: 'Stablecoin Payments on Tempo | Tempo Docs',
+    ogTitle: 'Payments',
+    descriptionIncludes: 'Send and receive stablecoins, reconcile customer payments',
+    ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_payments_shape-000_v02.jpg',
   },
   {
     path: '/docs/api',
-    title: 'Start with the Tempo API | Tempo Docs',
-    ogTitle: 'Tempo API',
-    descriptionIncludes: 'official Tempo blockchain API',
-    ogImageIncludes: 'section=API',
+    title: 'Tempo API reference | Tempo Docs',
+    ogTitle: 'API reference',
+    descriptionIncludes: 'Read balances, track payments, configure webhooks',
+    ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_api_linework-000_v02.png',
   },
   {
     path: '/docs/api/console',
-    title: 'How to Use the Tempo API Console | Docs',
-    ogTitle: 'Using the Tempo API Console',
+    title: 'How to Use the Tempo Console | Docs',
+    ogTitle: 'Tempo Console',
     descriptionIncludes: 'create projects and API keys',
-    ogImageIncludes: 'section=API',
+    ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_api-console_title-f5_v02.png',
   },
 ]
 
@@ -113,7 +106,7 @@ for (const c of cases) {
     expect(metaContent(head, 'og:image')).toContain(c.ogImageIncludes)
     expect(metaContent(head, 'twitter:title')).toBe(c.ogTitle)
 
-    if (c.path.startsWith('/docs')) {
+    if (c.path === '/' || c.path === '/get-started' || c.path.startsWith('/docs/')) {
       expect(metaContent(head, 'article:published_time')).toBeUndefined()
       expect(metaContent(head, 'article:modified_time')).toBeUndefined()
     }
@@ -130,7 +123,9 @@ const blogPosts = readdirSync(blogsDir)
   .map((filename) => {
     const source = readFileSync(join(blogsDir, filename), 'utf8')
     const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---/.exec(source)?.[1] ?? ''
-    const imageValue = /^ogImage:[ \t]*(.*)$/m.exec(frontmatter)?.[1].trim() ?? ''
+    const imageValue =
+      (/^shareImage:[ \t]*(.*)$/m.exec(frontmatter) ??
+        /^ogImage:[ \t]*(.*)$/m.exec(frontmatter))?.[1].trim() ?? ''
     const quotedImage = /^(?:"([^"]*)"|'([^']*)')$/.exec(imageValue)
     const ogImage = quotedImage
       ? (quotedImage[1] ?? quotedImage[2])

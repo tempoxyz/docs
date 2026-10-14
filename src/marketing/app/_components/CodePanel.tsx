@@ -1,8 +1,9 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: Copy-state SVGs are decorative inside labelled buttons.
-
 'use client'
 
 import { useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
+import { codeScroll, themePreserveDark } from '../../../styles/surfaces.styles'
+import * as ui from './CodePanel.recipes'
 import DotCanvas from './DotCanvas'
 
 const COLOR = {
@@ -142,16 +143,13 @@ function renderCode(code: string[], highlight?: string[]) {
           const inner = group.toks.map((tok) => (
             <span
               key={`${tok.start}:${tok.text}`}
-              style={tok.color ? { color: tok.color } : undefined}
+              {...ui.renderCodeTextAppearance({ value0: tok.color ?? 'inherit' })}
             >
               {tok.text}
             </span>
           ))
           return group.boxed ? (
-            <span
-              key={groupKey}
-              className="-mx-1 -my-0.5 rounded-[4px] bg-foreground/[0.07] px-1 py-0.5 ring-1 ring-foreground/10"
-            >
+            <span key={groupKey} {...ui.renderCodeText()}>
               {inner}
             </span>
           ) : (
@@ -165,7 +163,7 @@ function renderCode(code: string[], highlight?: string[]) {
 
 function CopyIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <rect
         x="5.25"
         y="5.25"
@@ -187,7 +185,7 @@ function CopyIcon() {
 
 function CheckIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path
         d="M3 8.5L6.5 12L13 4"
         stroke="currentColor"
@@ -213,12 +211,7 @@ function CopyButton({ text }: { text: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      aria-label="Copy code"
-      className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-[6px] border border-line bg-foreground/[0.04] px-2.5 py-1.5 font-mono text-[12px] text-foreground/55 opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-foreground/[0.08] hover:text-foreground group-hover:opacity-100"
-    >
+    <button type="button" onClick={handleCopy} aria-label="Copy code" {...ui.copyButtonButton()}>
       {copied ? <CheckIcon /> : <CopyIcon />}
       {copied ? 'Copied' : 'Copy'}
     </button>
@@ -248,11 +241,12 @@ export default function CodePanel({
   if (inline) {
     return (
       <div
-        className={`code-scroll min-h-0 flex-1 overflow-auto bg-surface-block p-4 ${
-          bare ? '' : 'border border-line'
-        }`}
+        {...composeStyles(
+          ui.codePanelLayout({ className: `code-scroll ${codeScroll().className}` }),
+          !bare && ui.codePanelLayout2(),
+        )}
       >
-        <pre className="w-fit font-mono text-[12px] text-foreground/80 leading-[1.7]">
+        <pre {...ui.pre()}>
           <code>{renderCode(code, highlight)}</code>
         </pre>
       </div>
@@ -260,20 +254,21 @@ export default function CodePanel({
   }
 
   return (
-    <div className="relative flex-1">
+    <div {...ui.codePanelLayout3()}>
       <DotCanvas />
-      <div className="theme-preserve-dark group absolute inset-5 z-10 flex items-center justify-center bg-surface-onyx p-6">
+      <div
+        {...ui.codePanelLayout4({
+          className: `theme-preserve-dark group ${themePreserveDark().className}`,
+        })}
+      >
         <CopyButton text={code.join('\n')} />
-        <div className="grid">
+        <div {...ui.codePanelLayout5()}>
           {sizer !== undefined && (
-            <pre
-              aria-hidden
-              className="invisible h-0 overflow-hidden whitespace-pre font-mono text-[13px] leading-[1.7] [grid-area:1/1]"
-            >
+            <pre aria-hidden="true" {...ui.pre2()}>
               {sizer}
             </pre>
           )}
-          <pre className="font-mono text-[13px] text-foreground/80 leading-[1.7] [grid-area:1/1]">
+          <pre {...ui.pre3()}>
             <code>{renderCode(code, highlight)}</code>
           </pre>
         </div>

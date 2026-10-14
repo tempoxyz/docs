@@ -1,6 +1,7 @@
 'use client'
 
 import DotCanvas from './DotCanvas'
+import * as ui from './HeroDots.recipes'
 import { heroAmbientPattern, heroAmbientPlusPattern } from './heroPattern'
 import PlusCanvas from './PlusCanvas'
 
@@ -11,14 +12,11 @@ export default function HeroDots({ plus = false }: { plus?: boolean }) {
   return (
     <>
       {plus ? (
-        <PlusCanvas className="-z-10" pattern={heroAmbientPlusPattern} />
+        <PlusCanvas className={ui.plusCanvas().className} pattern={heroAmbientPlusPattern} />
       ) : (
-        <DotCanvas className="-z-10" pattern={heroAmbientPattern} />
+        <DotCanvas className={ui.plusCanvas().className} pattern={heroAmbientPattern} />
       )}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[0%] from-surface-shell via-[50%] via-surface-shell/95 to-[100%] to-transparent"
-      />
+      <div aria-hidden="true" {...ui.heroDotsLayout()} />
     </>
   )
 }

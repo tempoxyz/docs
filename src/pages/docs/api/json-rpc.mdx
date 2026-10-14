@@ -1,7 +1,10 @@
 ---
 title: "Tempo JSON-RPC API: Endpoints & Methods"
 description: Connect to Tempo JSON-RPC from Viem, Wagmi, Foundry, or Rust for standard Ethereum methods and Tempo-specific blockchain access.
+ogImage: /og/2026-q4/og_2026-q4_docs_api-json-rpc_title-f5_v02.png
 ---
+
+import * as ui from './json-rpc.recipes'
 
 import { OpenApi, Tabs, Tab } from 'vocs'
 
@@ -9,7 +12,7 @@ import { OpenApi, Tabs, Tab } from 'vocs'
 
 # Tempo JSON-RPC API
 
-The Tempo API exposes a **JSON-RPC entrypoint** for raw, node-level chain access alongside its REST and Indexer surfaces. Through it, Tempo nodes serve all standard [Ethereum JSON-RPC methods](https://ethereum.org/developers/docs/apis/json-rpc/) (`eth_`, `net_`, `web3_`, `txpool_`, `trace_`, `debug_`) plus Tempo-specific namespaces for fork scheduling, consensus data, and node administration.
+The Tempo API exposes a **JSON-RPC entrypoint** for raw, node-level chain access alongside its REST and Indexer surfaces. Use it for [Ethereum-compatible JSON-RPC methods](https://ethereum.org/developers/docs/apis/json-rpc/) and Tempo-specific chain queries. Method availability depends on the endpoint; debug and administration methods may require your own node.
 
 Point any Ethereum-compatible client at the hosted entrypoint, or [run your own node](/docs/guide/node/rpc):
 
@@ -26,7 +29,7 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
   <Tab title="Cast">
     [Cast](https://www.getfoundry.sh/reference/cast/cast) is Foundry's command-line tool that includes tools to call JSON-RPC methods and inspect chain state from a terminal.
 
-    <div className="h-4" />
+    <div className={ui.div().className} />
 
     ```bash [Terminal]
     cast block-number --rpc-url https://api.tempo.xyz/rpc # [!code focus]
@@ -36,7 +39,7 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
   <Tab title="Viem">
     [Viem](https://viem.sh/docs/clients/public) is a TypeScript client for Ethereum-compatible JSON-RPC APIs, useful for server-side scripts and app logic.
 
-    <div className="h-4" />
+    <div className={ui.div().className} />
 
     ```ts [example.ts]
     import { createClient, http } from 'viem/tempo'
@@ -50,16 +53,16 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
   </Tab>
 
   <Tab title="Typed Client">
-    The [Tempo API Typed Client](/docs/api/typed-client) is Tempo's typed API client for TypeScript. Use it when you want one client for Tempo REST endpoints and the JSON-RPC passthrough, with typed route parameters, status narrowing, and Tempo API error envelopes.
+    The [Tempo API client](/docs/sdk/typescript/api-client) is Tempo's typed API client for TypeScript. Use it when you want one client for Tempo REST endpoints and the JSON-RPC passthrough, with typed route parameters, status narrowing, and Tempo API error envelopes.
 
-    <div className="h-4" />
+    <div className={ui.div().className} />
 
     ```ts [example.ts]
     import { Client } from 'tapimo'
 
     const client = Client.create({ apiKey: process.env.TEMPO_API_KEY })
 
-    const response = await client.rpc[':chain{mainnet|testnet|[0-9]+}?'].$post({
+    const response = await client.rpc[':chain{(mainnet|testnet|[0-9]+)}'].$post({
       param: { chain: 'testnet' }, // [!code focus]
       json: { jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] }, // [!code focus]
     })
@@ -71,7 +74,7 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
   <Tab title="Wagmi">
     [Wagmi](https://wagmi.sh/react/api/createConfig) provides React hooks and configuration helpers on top of Viem clients.
 
-    <div className="h-4" />
+    <div className={ui.div().className} />
 
     :::code-group
 
@@ -102,7 +105,7 @@ Use the Tempo JSON-RPC API with command-line tools, TypeScript clients, React ho
   <Tab title="Rust">
     [Alloy](https://docs.rs/alloy-provider) is a Rust toolkit for Ethereum-compatible chains, including providers for JSON-RPC calls.
 
-    <div className="h-4" />
+    <div className={ui.div().className} />
 
     ```rs [example.rs]
     use alloy::providers::{Provider, ProviderBuilder};

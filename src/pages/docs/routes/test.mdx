@@ -1,0 +1,31 @@
+---
+title: "Test a route"
+seoTitle: "Test Tempo Routes | Tempo Docs"
+description: Choose source and destination assets, execute Routes API calls, fund the transfer, and track destination delivery.
+interactive: true
+mipd: true
+accessKey: false
+---
+
+import { RoutesTester } from '../../../components/RoutesTester'
+
+# Test a route
+
+Try out a Tempo Route: Select a source and destination, quote, create, fund, and track a real payment with the Routes API. Use your project key from [API console](https://console.tempo.xyz/?to=/:org/api-keys) with `routes:read` and `routes:write` scopes. This demo moves real funds.
+
+<RoutesTester />
+
+## How each route is funded
+
+| Route | How you fund it |
+| --- | --- |
+| From Tempo | Sign in with Tempo Wallet and approve every call in one transaction. |
+| From another EVM network | Choose a browser wallet, then sign the calls one at a time. |
+| From Tron | Choose a Tron wallet, such as TronLink, then sign the calls one at a time. Each call needs TRX for energy. |
+| From Solana, or when you choose Deposit address | Send the source asset to the generated deposit address with your wallet, or from any wallet. The demo detects the deposit and tracks it. |
+
+Routes that support subsidies offer 1:1 delivery, where the recipient receives the amount sent. Your organization needs subsidy approval; see [Offer 1:1 delivery](/docs/routes/quotes#offer-11-delivery).
+
+Retrying a creation reuses the same request and idempotency key, so it cannot create a duplicate. If a wallet may have sent a transaction, check its history before trying again. See [quotes and fees](/docs/routes/quotes) and [Track delivery](/docs/routes/delivery).
+
+For your integration, use the [Transfers](/docs/api/routes/transfers) and [Deposit addresses and deposits](/docs/api/routes/deposit-addresses) references. Receiving USDY is a token conversion; [Earn vault deposits](/docs/earn) use a separate flow.

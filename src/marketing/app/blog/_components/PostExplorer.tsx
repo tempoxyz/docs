@@ -1,77 +1,95 @@
 'use client'
 
-import Link from 'next/link'
-import { useState } from 'react'
-import Reveal from '../../_components/Reveal'
-import { developersPath } from '../../_lib/developersPaths'
+import { useEffect, useState } from 'react'
+import { Link } from 'waku'
 import { categories, type PostMeta } from '../_lib/categories'
+import {
+  tempoBlogEmpty,
+  tempoBlogExcerpt,
+  tempoBlogExplorer,
+  tempoBlogExplorerHeading,
+  tempoBlogFilters,
+  tempoBlogPostArrow,
+  tempoBlogPostCopy,
+  tempoBlogPostList,
+  tempoBlogPostRow,
+  tempoBlogPostThumbnail,
+} from '../BlogShell.styles'
 import PostByline from './PostByline'
+import * as ui from './PostExplorer.recipes'
 import PostImage from './PostImage'
 import PostLabels from './PostLabels'
 
-const filters = [{ slug: 'all' as const, label: 'All' }, ...categories]
-
+const filters = [{ slug: 'all' as const, label: 'All posts' }, ...categories]
 type Filter = (typeof filters)[number]['slug']
 
 export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
   const [active, setActive] = useState<Filter>('all')
-  const visible = active === 'all' ? posts : posts.filter((p) => p.categories.includes(active))
+  const [mounted, setMounted] = useState(false)
+  const visible =
+    active === 'all' ? posts : posts.filter((post) => post.categories.includes(active))
+
+  useEffect(() => setMounted(true), [])
 
   return (
-    <section>
-      <fieldset className="flex min-w-0 flex-wrap gap-2 px-5 lg:px-8">
-        <legend className="sr-only">Filter posts by category</legend>
+    <section
+      className={`tempo-blog-explorer ${tempoBlogExplorer().className}`}
+      aria-labelledby="latest-posts"
+    >
+      <div className={`tempo-blog-explorer-heading ${tempoBlogExplorerHeading().className}`}>
+        <h2 id="latest-posts">Articles</h2>
+        <span role="status" aria-live="polite">
+          {visible.length} {visible.length === 1 ? 'post' : 'posts'}
+        </span>
+      </div>
+      <fieldset className={`tempo-blog-filters ${tempoBlogFilters().className}`}>
+        <legend {...ui.legend()}>Filter posts by category</legend>
         {filters.map((filter) => (
           <button
             key={filter.slug}
             type="button"
             aria-pressed={active === filter.slug}
             onClick={() => setActive(filter.slug)}
-            className={`min-h-11 whitespace-nowrap border px-4 py-2 font-sans text-[13px] tracking-[0] transition-colors focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-2 ${
-              active === filter.slug
-                ? 'border-foreground bg-foreground text-background'
-                : 'border-line-strong text-foreground/60 hover:border-foreground/40 hover:text-foreground'
-            }`}
+            disabled={!mounted}
           >
             {filter.label}
           </button>
         ))}
       </fieldset>
 
-      <ul className="mt-6 border-line border-t lg:mt-8">
-        {visible.map((post, i) => (
+      <ul className={`tempo-blog-post-list ${tempoBlogPostList().className}`}>
+        {visible.map((post) => (
           <li key={post.slug}>
-            <Reveal delay={Math.min(i, 6) * 40}>
-              <Link
-                href={developersPath(`/blog/${post.slug}`)}
-                className="group flex items-center gap-6 border-line border-b px-5 py-6 transition-colors hover:bg-surface-block focus-visible:outline-2 focus-visible:outline-foreground focus-visible:-outline-offset-2 lg:gap-8 lg:px-8"
+            <Link
+              to={`/blog/${post.slug}`}
+              className={`tempo-blog-post-row ${tempoBlogPostRow().className}`}
+            >
+              <div className={`tempo-blog-post-copy ${tempoBlogPostCopy().className}`}>
+                <PostLabels post={post} />
+                <h3>{post.title}</h3>
+                <p className={`tempo-blog-excerpt ${tempoBlogExcerpt().className}`}>
+                  {post.excerpt}
+                </p>
+                <PostByline post={post} />
+              </div>
+              <span className={`tempo-blog-post-thumbnail ${tempoBlogPostThumbnail().className}`}>
+                <PostImage post={post} />
+              </span>
+              <span
+                className={`tempo-blog-post-arrow ${tempoBlogPostArrow().className}`}
+                aria-hidden="true"
               >
-                <span className="relative hidden w-48 shrink-0 self-stretch md:block lg:w-56">
-                  <PostImage post={post} thumbnail />
-                </span>
-                <div className="flex min-w-0 flex-col gap-2.5 md:gap-1.5">
-                  <PostLabels post={post} />
-                  <h2 className="font-sans text-[18px] text-foreground leading-[1.3] tracking-[-0.01em] antialiased lg:text-[20px]">
-                    {post.title}
-                  </h2>
-                  <p className="max-w-[640px] font-sans text-[15px] text-foreground/60 leading-[1.55] tracking-[0] transition-colors group-hover:text-foreground/70 md:line-clamp-1 lg:line-clamp-2">
-                    {post.excerpt}
-                  </p>
-                  <PostByline post={post} />
-                </div>
-              </Link>
-            </Reveal>
+                ↗
+              </span>
+            </Link>
           </li>
         ))}
       </ul>
-      {visible.length === 0 && (
-        <p
-          role="status"
-          className="border-line border-b px-5 py-12 font-sans text-[15px] text-foreground/60 leading-[1.55] lg:px-8"
-        >
+      {visible.length === 0 ? (
+        <p className={`tempo-blog-empty ${tempoBlogEmpty().className}`}>
           No posts in this category yet. Choose another category or view all posts.
         </p>
-      )}
+      ) : null}
     </section>
   )
 }

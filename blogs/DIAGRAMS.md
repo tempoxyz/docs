@@ -54,7 +54,7 @@ text or connector lines).
 | Height | whatever the content needs, typically 360–420 |
 | Background | full-bleed `<rect class="dgm-bg">` |
 | Margins | 40px on all sides; content starts at `x=40` |
-| Root attrs | `fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace"` |
+| Root attrs | `fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'Tempo JetBrains Mono', ui-monospace, monospace"` |
 
 The site wraps embedded diagrams in a 1px border, so don't draw your own outer
 frame. (The build adds `class="blog-diagram"` and `role="img"` to the root
@@ -116,7 +116,7 @@ Every diagram opens with a title block at the top left:
 ### Bar chart
 
 ```xml
-<svg width="840" height="420" viewBox="0 0 840 420" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
+<svg width="840" height="420" viewBox="0 0 840 420" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'Tempo JetBrains Mono', ui-monospace, monospace">
   <rect class="dgm-bg" width="840" height="420"/>
   <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="currentColor" fill-opacity="0.85">TITLE</text>
   <text x="40" y="64" font-size="11" fill="currentColor" fill-opacity="0.4">QUALIFIER</text>
@@ -142,7 +142,7 @@ Every diagram opens with a title block at the top left:
 ### Box / lane diagram
 
 ```xml
-<svg width="840" height="220" viewBox="0 0 840 220" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'JetBrains Mono', monospace">
+<svg width="840" height="220" viewBox="0 0 840 220" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'Tempo JetBrains Mono', ui-monospace, monospace">
   <rect class="dgm-bg" width="840" height="220"/>
   <text x="40" y="44" font-size="13" letter-spacing="0.04em" fill="currentColor" fill-opacity="0.85">TITLE</text>
   <text x="40" y="64" font-size="11" fill="currentColor" fill-opacity="0.4">QUALIFIER</text>

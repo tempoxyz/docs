@@ -6,6 +6,7 @@ authors: Dan Robinson
 status: Mainnet
 related: TIP-403, TIP-20
 protocolVersion: T2
+ogImage: /og/2026-q4/og_2026-q4_docs_protocol-tips-tip-1015_title-f5_v02.png
 ---
 
 # TIP-1015: Compound Transfer Policies
@@ -323,7 +324,7 @@ function burnBlocked(address from, uint256 amount) external {
 
 #### Cancel Stale Order
 
-The `cancelStaleOrder` function checks sender authorization on the token escrowed by the maker, since if the order is filled, the maker will have to send that token:
+The `cancelStaleOrder` function checks sender authorization on the token locked by the maker for the order, since if the order is filled, the maker will have to send that token:
 
 ```solidity
 function cancelStaleOrder(uint128 orderId) external {
@@ -331,7 +332,7 @@ function cancelStaleOrder(uint128 orderId) external {
     address token = order.isBid() ? book.quote : book.base;
     uint64 policyId = TIP20(token).transferPolicyId();
     
-    // Order is stale if maker can no longer send the escrowed token
+    // Order is stale if maker can no longer send the token locked for the order
     if (TIP403_REGISTRY.isAuthorizedSender(policyId, order.maker())) {
         revert OrderNotStale();
     }

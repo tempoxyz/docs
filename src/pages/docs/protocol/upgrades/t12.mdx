@@ -2,20 +2,25 @@
 title: "T12 Network Upgrade"
 seoTitle: "T12 Network Upgrade | Tempo Docs"
 description: T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, aligns quote and swap calculations, and adds authorized burns for TIP-20 tokens.
+ogImage: /og/2026-q4/og_2026-q4_docs_protocol-upgrades-t12_linework-000_v02.png
 ---
 
 # T12 Network Upgrade
 
 T12 adds configurable nonces for parallel expiring transactions, enables MPP sessions with closed-loop stablecoins, restores compatibility with calldata suffixes, aligns quote and swap calculations, and adds authorized burns for TIP-20 tokens.
 
+:::info[T12 status]
+T12 is active on testnet and mainnet. [v1.16.0](https://github.com/tempoxyz/tempo/releases/tag/v1.16.0) is the required T12 release. See [Node Operator Updates](/docs/guide/node/network-upgrades#node-operator-updates) for current release guidance.
+:::
+
 **Integration note:** If you use fixed gas limits, some calls to Tempo's native contracts may need a small increase after T12. Fees remain based on gas actually used. [See integration guidance](#breaking-changes).
 
 ## Timeline
 
-| Network | Planned activation |
-|---------|--------------------|
-| Testnet | October 8, 2026 — time TBD |
-| Mainnet | October 13, 2026 — time TBD |
+| Network | Activation date (UTC) | Unix timestamp |
+|---------|-----------------------|----------------|
+| Testnet | October 8, 2026 at 14:00 | `1791468000` |
+| Mainnet | October 13, 2026 at 14:00 | `1791900000` |
 
 <span id="t12-upgrade-overview" />
 
@@ -84,11 +89,11 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-10
 
 ## Integration impact
 
-- **Parallel transactions:** if your integration needs to submit otherwise identical expiring transactions in parallel, assign each a distinct `uint64` nonce after T12 activates. For example, use `nonce = 101` and `nonce = 102` for two otherwise identical transactions. Ensure builders and signers preserve the supplied nonce, and remove access-list entries used only to make transactions unique. To retry a transaction, resend its original signed transaction while valid.
-- **MPP integrations:** after T12 activates, you can use closed-loop credits with [MPP sessions](/docs/guide/machine-payments/pay-as-you-go). Existing channels need no migration.
-- **ABI compatibility:** if your integration was affected by [T11's strict ABI validation](/docs/protocol/upgrades/t11), you can restore calldata suffixes after T12 activates on your network.
+- **Parallel transactions:** if your integration needs to submit otherwise identical expiring transactions in parallel, assign each a distinct `uint64` nonce. For example, use `nonce = 101` and `nonce = 102` for two otherwise identical transactions. Ensure builders and signers preserve the supplied nonce, and remove access-list entries used only to make transactions unique. To retry a transaction, resend its original signed transaction while valid.
+- **MPP integrations:** you can use closed-loop credits with [MPP sessions](/docs/guide/machine-payments/pay-as-you-go). Existing channels need no migration.
+- **ABI compatibility:** if your integration was affected by [T11's strict ABI validation](/docs/protocol/upgrades/t11), you can restore calldata suffixes.
 - **DEX integrations:** quote and swap APIs are unchanged. If you read tick liquidity totals directly from storage, switch to `getTickLevel()` or sum the remaining amounts of active orders. Stored tick totals stop updating at T12.
-- **Token issuers:** to use `burnAt` after T12 activates, grant `BURN_AT_ROLE` only to tightly scoped contracts, such as a bridge that burns only amounts users request to bridge out. Existing `ISSUER_ROLE` and `BURN_BLOCKED_ROLE` permissions do not grant access to `burnAt`.
+- **Token issuers:** to use `burnAt`, grant `BURN_AT_ROLE` only to tightly scoped contracts, such as a bridge that burns only amounts users request to bridge out. Existing `ISSUER_ROLE` and `BURN_BLOCKED_ROLE` permissions do not grant access to `burnAt`.
 
 ### Breaking changes
 

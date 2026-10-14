@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 
 const base = process.env.DOCS_ROUTE_GUARD_BASE
@@ -24,6 +25,16 @@ function routeFor(file) {
   return `/${route}`
 }
 
+// A move from page.mdx to page/index.mdx preserves the public route.
+const removedRoutes = deletedFiles
+  .map(routeFor)
+  .filter(
+    (route) =>
+      !['md', 'mdx', 'tsx', 'jsx'].some((extension) =>
+        [`src/pages${route}.${extension}`, `src/pages${route}/index.${extension}`].some(existsSync),
+      ),
+  )
+
 function sourceMatchesRoute(source, route) {
   if (source === route) return true
   if (!source.endsWith('/:path*')) return false
@@ -43,15 +54,13 @@ const redirectSources = [vocsConfig, routeContract].flatMap((config) =>
 const vercelRedirectSources = JSON.parse(vercelConfigText).redirects.map(
   (redirect) => redirect.source,
 )
-const missingAppRedirects = deletedFiles
-  .map(routeFor)
-  .filter((route) => !redirectSources.some((source) => sourceMatchesRoute(source, route)))
-const missingProxyRedirects = deletedFiles
-  .map(routeFor)
-  .filter(
-    (route) =>
-      !vercelRedirectSources.some((source) => sourceMatchesRoute(source, `/developers${route}`)),
-  )
+const missingAppRedirects = removedRoutes.filter(
+  (route) => !redirectSources.some((source) => sourceMatchesRoute(source, route)),
+)
+const missingProxyRedirects = removedRoutes.filter(
+  (route) =>
+    !vercelRedirectSources.some((source) => sourceMatchesRoute(source, `/developers${route}`)),
+)
 const missingRedirects = [
   ...missingAppRedirects.map((route) => `Vocs route: ${route}`),
   ...missingProxyRedirects.map((route) => `Proxy route: /developers${route}`),
