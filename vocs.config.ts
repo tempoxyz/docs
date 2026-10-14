@@ -504,7 +504,11 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/docs/accounts' },
           { text: 'How it works', link: '/docs/accounts/how-it-works' },
-          { text: 'Create an account', link: '/docs/accounts/create' },
+          {
+            text: 'Create an account',
+            link: '/docs/accounts/create',
+            items: [{ text: 'Legacy accounts', link: '/docs/accounts/create/legacy-accounts' }],
+          },
         ],
       },
       {
