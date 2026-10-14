@@ -23,6 +23,8 @@ A signing method is the kind of key that approves a Tempo account's transactions
 | [Device keys](/docs/accounts/authentication/device-keys) | The customer's phone, computer, or browser, which can't export it | Payments within a spending limit, with no prompt | A browser key is gone if the customer clears site data |
 | [Passkeys](/docs/accounts/authentication/passkeys) | Synced across the customer's devices, or on a security key | Customer approvals and signer changes, with Face ID or a fingerprint | Works only on the domain that created it |
 
+Each method works on mainnet and testnet today as the one key of a [single-key account](/docs/accounts/how-it-works#address), like a standard Ethereum account, or as an access key. Several weighted signers on one account need a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+
 <span id="set-up-a-sign-in-method" />
 <span id="private-keys" />
 <span id="p-256-keys" />
@@ -44,7 +46,7 @@ A signing method is the kind of key that approves a Tempo account's transactions
 
 Each key joins the account as a signer or an access key. A signer approves with a weight, and a transaction runs once the approving signers' weights reach the account's [threshold](/docs/accounts/policies/signing-thresholds). An [access key](/docs/accounts/access-keys) pays alone within its limits and never counts toward the threshold. Add device keys and server payout keys as access keys: a signer has no spending limit.
 
-Tempo has no override, so your app or a provider can approve only with the signers it holds. Set weights so no one but the customer reaches the threshold alone: [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts, embedded wallets, and treasuries. Signers and thresholds run only on the Tempo Accounts devnet.
+Tempo has no override, so your app or a provider can approve only with the signers it holds. Set weights so no one but the customer reaches the threshold alone: [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts, embedded wallets, and treasuries.
 
 <span id="login-sign-in-in-code" />
 

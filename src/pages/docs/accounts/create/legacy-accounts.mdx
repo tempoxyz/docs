@@ -43,8 +43,8 @@ From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain.
 | Network fees | Paid by the user | [Sponsored by your app](/docs/accounts/fees/fee-sponsorship), if you choose |
 | Several calls | One call per transaction | Several calls that succeed or fail together |
 
-These features need a [Tempo Transaction](/docs/guide/tempo-transaction), Tempo's own transaction type. Browser wallets like MetaMask send standard Ethereum transactions instead.
+These features need a [Tempo Transaction](/docs/guide/tempo-transaction), Tempo's own transaction type. Browser wallets like MetaMask send standard Ethereum transactions instead. Several signers per account, and replacing a lost key, also need a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet.
 
 ## Move a legacy account to modern signers
 
-Create a [Tempo account](/docs/accounts/create) with a passkey or device key and send the funds to it. To keep the address instead, [upgrade the account in place](/docs/accounts/key-management/account-upgrade): it adds signers, and the original key signs the upgrade as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions. Account upgrade runs only on the Tempo Accounts devnet for now.
+Send the funds to a new account whose key is a passkey or device key: on mainnet or testnet, a [single-key account](/docs/development/single-key-accounts); on the Tempo Accounts devnet, a [Tempo account](/docs/accounts/create) with that key as its first signer. To keep the address instead, [upgrade the account in place](/docs/accounts/key-management/account-upgrade): it adds signers, and the original key signs the upgrade as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions. Upgrades also work only on the devnet.

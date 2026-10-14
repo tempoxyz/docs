@@ -6,7 +6,11 @@ description: Add a passkey, hardware key, or recovery provider to a Tempo accoun
 
 # Add signers
 
-Adding a signer, a key that approves the account's transactions, backs up a key you could lose or lets another person approve. The current signers approve the addition in one signer update, and the address, balance, token approvals, and access keys stay the same. Signer updates run only on the Tempo Accounts devnet.
+Adding a signer, a key that approves the account's transactions, backs up a key you could lose or lets another person approve. The current signers approve the addition in one signer update, and the address, balance, token approvals, and access keys stay the same.
+
+:::warning
+**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding a signer needs one.
+:::
 
 <span id="what-adding-a-signer-does" />
 
@@ -21,7 +25,7 @@ The threshold stays the same unless you change it, so each new signer adds a way
 
 ## Add a recovery signer
 
-A recovery signer lets the remaining signers replace a lost one. Give it enough weight that the account can [lose any one signer](/docs/accounts/key-management#plan-for-recovery) and still reach the threshold, and no more, because it can approve payments at that weight too. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) walks through it in a live demo.
+A recovery signer lets the remaining signers replace a lost one. Give it enough weight that the account can [lose any one signer](/docs/accounts/key-management#plan-for-recovery) and still reach the threshold, and no more, because it can approve payments at that weight too. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) walks through it in a demo that runs in your browser.
 
 <span id="add-a-signer" />
 <span id="add-a-signer-in-code" />

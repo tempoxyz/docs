@@ -24,7 +24,7 @@ export const client = createClient({ chain: tempoModerato, transport: http() })
 
 ### Scope a key to the vault
 
-Create a secp256k1 key in your KMS, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms), then have the customer's signers authorize it from your app:
+Create a secp256k1 key in your KMS, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms), then have the customer authorize it from your app with their account's key:
 
 ```ts [app/approve-sweeps.ts]
 import { parseUnits } from 'viem'
@@ -97,6 +97,6 @@ const { shareBalance, value } = await client.earn.getPosition({ account: address
 const { remaining } = await client.accessKey.getRemainingLimit({ account: address, accessKey: sweepKey, token: pathUsd })
 ```
 
-Show the customer `value`, not `shareBalance`: shares don't map one-to-one to pathUSD, and `value` is what they're worth now, after fees, in pathUSD base units. `remaining` is what the key can still spend today. To show earnings over time, see [Balances and earnings](/docs/earn/balances). To withdraw, use the customer's signers or a separate key, as in [Withdraw](/docs/earn/withdraw).
+Show the customer `value`, not `shareBalance`: shares don't map one-to-one to pathUSD, and `value` is what they're worth now, after fees, in pathUSD base units. `remaining` is what the key can still spend today. To show earnings over time, see [Balances and earnings](/docs/earn/balances). To withdraw, use the customer's own key or a separate key, as in [Withdraw](/docs/earn/withdraw).
 
 :::::

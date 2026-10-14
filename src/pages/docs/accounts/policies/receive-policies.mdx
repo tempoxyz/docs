@@ -71,7 +71,7 @@ The guard records one receipt per held payment. You can't list receipts onchain,
   <ReceivePolicyDemo />
 </Demo.Container>
 
-The demo and the steps below both run on the Tempo Accounts devnet. The steps set the same policy in code: accept only AlphaUSD, from any sender, and let the receiver recover held payments. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Receive policies are live on mainnet and testnet for any account, but the demo and the steps below run on the Tempo Accounts devnet. The steps set the same policy in code: accept only AlphaUSD, from any sender, and let the receiver recover held payments. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
