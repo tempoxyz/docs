@@ -9,7 +9,7 @@ description: Give each signer a weight and set the total weight a transaction ne
 A signing threshold decides who controls a Tempo account. Each signer, a key that approves the account's transactions, has a weight, and a transaction runs only when the signers who approve it reach the threshold in total weight. Choose weights so that no outside party can pay alone and losing any one signer doesn't lock the account.
 
 :::warning
-**Not live yet.** Signing thresholds ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
+**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Weights and thresholds exist only on configurable accounts.
 :::
 
 <span id="how-approvals-add-up" />
