@@ -29,13 +29,21 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   const [feeToken, setFeeToken] = React.useState<Address>(props.feeToken || ousd)
 
   // Balance for the payment token (AlphaUSD)
-  const { data: alphaBalance, refetch: alphaBalanceRefetch } = Hooks.token.useGetBalance({
+  const {
+    data: alphaBalance,
+    error: alphaBalanceError,
+    refetch: alphaBalanceRefetch,
+  } = Hooks.token.useGetBalance({
     account: address,
     token: alphaUsd,
   })
 
   // Balance for the fee token (dynamic based on selection)
-  const { data: feeTokenBalance, refetch: feeTokenBalanceRefetch } = Hooks.token.useGetBalance({
+  const {
+    data: feeTokenBalance,
+    error: feeTokenBalanceError,
+    refetch: feeTokenBalanceRefetch,
+  } = Hooks.token.useGetBalance({
     account: address,
     token: feeToken,
   })
@@ -47,7 +55,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
   // Resolve the current validator's fee token rather than assuming a test token.
   const feeLiquidity = useQuery({
     queryKey: ['fee-demo-liquidity', client?.chain.id, feeToken],
-    enabled: Boolean(client),
+    enabled: Boolean(client && address),
     queryFn: async () => {
       if (!client) throw new Error('public client not ready')
       const block = await client.getBlock()
@@ -82,12 +90,34 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
     },
   })
 
-  const isValidRecipient = recipient && isAddress(recipient)
+  const isValidRecipient = isAddress(recipient)
+  const paymentAmount = parseUnits('100', 6)
+  const feeTokenName = feeTokenMetadata?.name ?? 'the selected fee token'
+  const balanceError = alphaBalanceError ?? feeTokenBalanceError
+  const requirement = (() => {
+    if (!address) return 'Sign in to send a payment.'
+    if (balanceError) return 'Could not check your balances. Retry the checks to continue.'
+    if (!alphaBalance || !feeTokenBalance) return 'Checking your token balances…'
+    if (alphaBalance.amount < paymentAmount)
+      return 'You need at least 100 AlphaUSD to send this payment. Add testnet funds above.'
+    if (feeTokenBalance.amount === 0n)
+      return `You need ${feeTokenName} to pay fees. Choose a token you already have, or add testnet funds above.`
+    if (feeToken.toLowerCase() === alphaUsd.toLowerCase() && alphaBalance.amount === paymentAmount)
+      return 'You need more than 100 AlphaUSD to cover both the payment and its fee, or choose another fee token.'
+    if (feeLiquidity.isError)
+      return 'Could not check whether this token can pay fees. Retry the checks or choose another fee token.'
+    if (feeLiquidity.data === undefined) return 'Checking whether this token can pay fees…'
+    if (!feeLiquidity.data)
+      return `${feeTokenName} currently has no available fee-conversion liquidity. Choose another fee token.`
+    if (!isValidRecipient) return 'Enter a valid recipient address.'
+    return undefined
+  })()
+  const canSend = !requirement && !sendPayment.isPending
 
   const handleTransfer = () => {
-    if (!isValidRecipient) return
+    if (!canSend) return
     sendPayment.mutate({
-      amount: parseUnits('100', 6),
+      amount: paymentAmount,
       to: recipient as `0x${string}`,
       token: alphaUsd,
       memo: memo ? toHex(memo, { size: 32 }) : undefined,
@@ -95,16 +125,8 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
     })
   }
 
-  const active = React.useMemo(() => {
-    return Boolean(
-      address &&
-        alphaBalance &&
-        alphaBalance.amount > 0n &&
-        feeTokenBalance &&
-        feeTokenBalance.amount > 0n &&
-        feeLiquidity.data === true,
-    )
-  }, [address, alphaBalance, feeTokenBalance, feeLiquidity.data])
+  // Opening the form must not depend on the fee token selected inside it.
+  const active = Boolean(address)
 
   return (
     <Step
@@ -132,7 +154,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
           </Button>
         )
       }
-      error={sendPayment.error ?? feeLiquidity.error}
+      error={sendPayment.error}
       number={stepNumber}
       title={`Send 100 AlphaUSD and pay fees in ${feeTokenMetadata ? feeTokenMetadata.name : 'another token'}.`}
     >
@@ -145,7 +167,8 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 <div {...ui.payWithFeeTokenLayout5()}>
                   <span {...ui.payWithFeeTokenText()}>Payment Token: AlphaUSD</span>
                   <span {...ui.payWithFeeTokenText2()}>
-                    balance: {alphaBalance?.formatted ?? '0'}
+                    balance:{' '}
+                    {alphaBalance?.formatted ?? (alphaBalanceError ? 'Unavailable' : 'Loading…')}
                   </span>
                 </div>
                 <div {...ui.payWithFeeTokenLayout5()}>
@@ -162,7 +185,9 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                     {`Fee Token: ${feeTokenMetadata ? feeTokenMetadata.name : ''}`}
                   </span>
                   <span {...ui.payWithFeeTokenText2()}>
-                    balance: {feeTokenBalance?.formatted ?? '0'}
+                    balance:{' '}
+                    {feeTokenBalance?.formatted ??
+                      (feeTokenBalanceError ? 'Unavailable' : 'Loading…')}
                   </span>
                 </div>
               </div>
@@ -200,8 +225,8 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 />
               </div>
               <Button
-                variant={active ? 'accent' : 'default'}
-                disabled={!active}
+                variant={canSend ? 'accent' : 'default'}
+                disabled={!canSend}
                 onClick={handleTransfer}
                 type="button"
                 className={form.actionButton().className}
@@ -209,6 +234,21 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 {sendPayment.isPending ? 'Sending...' : 'Send'}
               </Button>
             </div>
+            {requirement && <p role="status">{requirement}</p>}
+            {(balanceError || feeLiquidity.isError) && (
+              <Button
+                variant="default"
+                type="button"
+                disabled={feeLiquidity.isFetching}
+                onClick={() => {
+                  alphaBalanceRefetch()
+                  feeTokenBalanceRefetch()
+                  feeLiquidity.refetch()
+                }}
+              >
+                Retry checks
+              </Button>
+            )}
             {sendPayment.isSuccess && sendPayment.data && (
               <ExplorerLink hash={sendPayment.data.receipt.transactionHash} />
             )}
