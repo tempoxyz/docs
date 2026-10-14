@@ -175,6 +175,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=4096
           VITE_E2E: "true"
           VITE_USE_HTTP: "true"
+          VITE_RPC_PROXY: "true"
 
       - name: Run Playwright tests
         if: matrix.target == 'e2e'

@@ -13,7 +13,7 @@ test('requires a test account before authorizing or revoking an admin key', asyn
   const writes: string[] = []
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await page.route('https://rpc.moderato.tempo.xyz/**', async (route) => {
+  await page.route(/https:\/\/rpc\.moderato\.tempo\.xyz\/|\/api\/demo-rpc$/, async (route) => {
     const payload = route.request().postDataJSON()
     for (const request of Array.isArray(payload) ? payload : [payload]) {
       if (request?.method && /send|fund/i.test(request.method)) writes.push(request.method)
@@ -69,7 +69,9 @@ test('creates a passkey on localhost with a virtual authenticator', async ({
       automaticPresenceSimulation: true,
     },
   })
-  await page.route('https://rpc.moderato.tempo.xyz/**', (route) => route.abort())
+  await page.route(/https:\/\/rpc\.moderato\.tempo\.xyz\/|\/api\/demo-rpc$/, (route) =>
+    route.abort(),
+  )
   await page.goto(localhostDemo(baseURL))
   const demo = page.getByTestId('admin-key-demo')
   await demo.getByRole('button', { name: 'Create test account', exact: true }).click()

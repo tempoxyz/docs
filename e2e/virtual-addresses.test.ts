@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page, test } from './live'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 
 async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
   let lastError: unknown

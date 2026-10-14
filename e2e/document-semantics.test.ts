@@ -15,8 +15,9 @@ test.skip(!process.env.CI, 'requires the production build output')
 // This sweep checks rendered document metadata, not chain state. Keep background
 // demo queries from competing with the dedicated live-transaction tests.
 test.beforeEach(async ({ page }) => {
-  await page.route(/^https?:\/\/(rpc|sponsor)\.(moderato\.)?tempo\.xyz(?:\/|$)/, (route) =>
-    route.abort(),
+  await page.route(
+    /^https?:\/\/(rpc|sponsor)\.(moderato\.)?tempo\.xyz(?:\/|$)|\/api\/demo-rpc$/,
+    (route) => route.abort(),
   )
   await page.routeWebSocket(/^wss?:\/\/rpc\.(moderato\.)?tempo\.xyz(?:\/|$)/, (socket) =>
     socket.close(),

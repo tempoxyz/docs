@@ -16,15 +16,18 @@ const deployment = {
 
 async function blockAndTrackWrites(page: Page) {
   const writes: string[] = []
-  await page.route(/^https:\/\/(?:rpc|sponsor)(?:\.[\w-]+)?\.tempo\.xyz(?:\/|$)/, async (route) => {
-    const payload = route.request().postDataJSON()
-    for (const request of Array.isArray(payload) ? payload : [payload]) {
-      if (typeof request?.method === 'string' && /send|fund|sign/i.test(request.method))
-        writes.push(request.method)
-    }
-    // Fail-closed UI tests need neither live RPC reads nor a funded account.
-    await route.abort()
-  })
+  await page.route(
+    /^https:\/\/(?:rpc|sponsor)(?:\.[\w-]+)?\.tempo\.xyz(?:\/|$)|\/api\/demo-rpc$/,
+    async (route) => {
+      const payload = route.request().postDataJSON()
+      for (const request of Array.isArray(payload) ? payload : [payload]) {
+        if (typeof request?.method === 'string' && /send|fund|sign/i.test(request.method))
+          writes.push(request.method)
+      }
+      // Fail-closed UI tests need neither live RPC reads nor a funded account.
+      await route.abort()
+    },
+  )
   return writes
 }
 

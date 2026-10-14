@@ -33,17 +33,30 @@ pnpm build          # Build for production
 pnpm preview        # Preview the production build
 ```
 
-## Authenticated RPC for live E2E tests
+## Authenticated RPC for demos and live E2E tests
 
-Add a dedicated Moderato RPC key as the `TEMPO_RPC_API_KEY` repository Actions
-secret in [GitHub settings](https://github.com/tempoxyz/docs/settings/secrets/actions).
-The Verify workflow passes it only to the Playwright runner. Live tests forward
-Moderato HTTP requests through Node with the key and disable anonymous WebSocket
-fallback. Without the secret (including fork PRs), tests use the public RPC.
+Use a dedicated Moderato RPC key in these two places:
 
-For local runs, export `TEMPO_RPC_API_KEY` before `pnpm test:e2e`; Playwright does
-not load `.env` files. Do not use a `VITE_` variable or put the key in browser
-transport configuration. The deployed public demo continues using the public RPC.
+- **CI:** add `TEMPO_RPC_API_KEY` as a repository Actions secret in
+  [GitHub settings](https://github.com/tempoxyz/docs/settings/secrets/actions).
+  Verify enables the proxy in its E2E build and passes the key only to the
+  Playwright runner and its preview server.
+- **Public demo:** add `TEMPO_RPC_API_KEY` as a server environment variable in the
+  [docs Vercel project](https://vercel.com/tempoxyz/tempo-docs/settings/environment-variables),
+  and set `VITE_RPC_PROXY=true` for the same deployment
+  environments (Production and Preview as needed). Redeploy to select the proxy.
+
+The browser calls `/api/demo-rpc` (under `/developers` on the public mount).
+The server forwards only supported demo methods and batches of up to five calls
+with bounded request and response bodies. It keeps the key out of the browser
+bundle, requests, and Playwright traces. The public endpoint shares the docs
+key's gateway quota; same-origin checks restrict browser access, not non-browser
+clients. Give the dedicated gateway client an appropriate quota.
+
+Without a key, the proxy uses the public RPC pool, including on fork PRs. Without
+`VITE_RPC_PROXY=true`, the browser keeps its existing public RPC transports. For
+local proxy testing, set both variables in `.env` and run `pnpm dev`. Never prefix
+the key variable with `VITE_`.
 
 ## OG image review
 

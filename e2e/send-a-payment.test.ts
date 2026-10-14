@@ -1,5 +1,5 @@
+import { expect, test } from '@playwright/test'
 import { expectDemoSuccess, getDemoStep } from './helpers'
-import { expect, test } from './live'
 
 test('send a payment from the quickstart', async ({ page }) => {
   test.setTimeout(120000)
