@@ -1,5 +1,5 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 2a1dd1a139e0e00ff88029366aa64b1ae141102b..b0be958bd82bf1205266e1ea7b42b5d446fbfcb5 100644
+index 2a1dd1a139e0e00ff88029366aa64b1ae141102b..04229121a9103662262ffda6e744f17458b63e59 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -18,3 +18,4 @@ export { ScrollRestoration } from './react/ScrollRestoration.js';
@@ -8,7 +8,7 @@ index 2a1dd1a139e0e00ff88029366aa64b1ae141102b..b0be958bd82bf1205266e1ea7b42b5d4
  //# sourceMappingURL=index.d.ts.map
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
 diff --git a/dist/index.js b/dist/index.js
-index 704383913c9f400e8ee4de07df317bd2c6a29ca6..688bebd8a598081378c790a1bfec16e52b6bae7b 100644
+index 704383913c9f400e8ee4de07df317bd2c6a29ca6..c8a94afd974d5ef0dec8e158ff8a699c9d4e7789 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -18,3 +18,4 @@ export { ScrollRestoration } from './react/ScrollRestoration.js';
@@ -186,6 +186,25 @@ index a1be03042be450bfd09d42b6bef29f3b6c2a8f14..9115c3d8ea2689e50293c8eed8acd3f8
  }
  //# sourceMappingURL=sidebar.js.map
 \ No newline at end of file
+diff --git a/dist/internal/vite-plugins.js b/dist/internal/vite-plugins.js
+index df42ecd26effa9faae50c46992b5af1263098a6d..14ef73a95b73cca8625e49a485631b56e61f4b86 100644
+--- a/dist/internal/vite-plugins.js
++++ b/dist/internal/vite-plugins.js
+@@ -1017,8 +1017,13 @@ export function virtualConfig(config) {
+                 const serializedConfig = mode === 'development' ? { ...currentConfig, baseUrl: undefined } : currentConfig;
+                 // An empty map tells Vite to skip generating one, which for generated data is mostly
+                 // a second copy of the module, retained by every environment.
++                // Browsers get the client-facing subset. Server environments also need
++                // the OpenAPI entries the router registers generated pages from.
++                const value = this.environment?.config.consumer === 'server'
++                    ? { ...ConfigSerializer.forClient(serializedConfig), openapi: serializedConfig.openapi }
++                    : ConfigSerializer.forClient(serializedConfig);
+                 return {
+-                    code: `export const config = ${ConfigSerializer.serialize(ConfigSerializer.forClient(serializedConfig))}`,
++                    code: `export const config = ${ConfigSerializer.serialize(value)}`,
+                     map: { mappings: '' },
+                 };
+             }
 diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
 index 808d57fadd940bd06fdbeacb182a6d55aff67e74..2b6bf2af205ba7bc19df13a16a15acbae4986c9f 100644
 --- a/dist/react/Head.d.ts
@@ -816,6 +835,26 @@ index 0000000000000000000000000000000000000000..6ee138e2014b3d12549c409f800aa24a
 +  }
 +  return copy
 +}
+diff --git a/src/internal/vite-plugins.ts b/src/internal/vite-plugins.ts
+index 7ec0abb98d845c4eb6adca1906b656c985d903c6..5da057326710b766f7a274dbb43bce96e84b29ae 100644
+--- a/src/internal/vite-plugins.ts
++++ b/src/internal/vite-plugins.ts
+@@ -1092,8 +1092,14 @@ export function virtualConfig(config: Config.Config): PluginOption {
+           mode === 'development' ? { ...currentConfig, baseUrl: undefined } : currentConfig
+         // An empty map tells Vite to skip generating one, which for generated data is mostly
+         // a second copy of the module, retained by every environment.
++        // Browsers get the client-facing subset. Server environments also need
++        // the OpenAPI entries the router registers generated pages from.
++        const value =
++          this.environment?.config.consumer === 'server'
++            ? { ...ConfigSerializer.forClient(serializedConfig), openapi: serializedConfig.openapi }
++            : ConfigSerializer.forClient(serializedConfig)
+         return {
+-          code: `export const config = ${ConfigSerializer.serialize(ConfigSerializer.forClient(serializedConfig))}`,
++          code: `export const config = ${ConfigSerializer.serialize(value)}`,
+           map: { mappings: '' },
+         }
+       }
 diff --git a/src/react/Head.tsx b/src/react/Head.tsx
 index e7b51ed6d9642a903399dc0d18253a0f3cc955e8..004c4722f97ab7a9db4f0c876ca19b3fa9b97eab 100644
 --- a/src/react/Head.tsx
