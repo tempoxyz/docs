@@ -1,0 +1,21 @@
+---
+title: Users
+seoTitle: Tempo Account Guides for Consumer and Customer Users | Tempo Docs
+description: Pick a walkthrough to embed wallets with Privy or Turnkey, add recovery, recover lost devices, hand accounts off, and migrate existing wallets.
+---
+
+# Users
+
+These guides give each of your users a Tempo account they can use, recover, and eventually take with them, while the user keeps a key your app never holds. Pick the scenario that matches your product; each guide walks it end to end.
+
+A Tempo account is an address that holds the user's stablecoins. Its signers are the keys allowed to approve payments and changes, each with a weight, and the threshold is the total weight an approval needs. Tempo checks every approval against them, so your app can only do what those signers allow. [How Tempo Accounts work](/docs/accounts/how-it-works) explains the model.
+
+## Choose a guide
+
+| Scenario | Guide |
+| --- | --- |
+| You run embedded wallets with Privy or Turnkey, or want to connect Tempo Wallet | [Embed wallets with a provider](/docs/accounts/guides/users/embed-wallets) |
+| A user has one signer, and losing it would lose the account | [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) |
+| A user lost their phone or passkey | [Recover a user's account](/docs/accounts/guides/users/recover-an-account) |
+| A user wants to hold the account in their own wallet | [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off) |
+| You already run single-key wallets and want them recoverable | [Migrate existing wallets](/docs/accounts/guides/users/migrate-existing-wallets) |

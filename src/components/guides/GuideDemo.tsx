@@ -65,10 +65,9 @@ let loaded: Promise<Modules> | undefined
 
 /** Loaded only on `http:` pages, so the viem previews stay out of production pages. */
 function loadModules() {
-  loaded ??= Promise.all([
-    import('./account-sandbox-devnet'),
-    import('./guide-demo-devnet'),
-  ]).then(([devnet, chain]) => ({ devnet, chain }))
+  loaded ??= Promise.all([import('./account-sandbox-devnet'), import('./guide-demo-devnet')]).then(
+    ([devnet, chain]) => ({ devnet, chain }),
+  )
   return loaded
 }
 
@@ -162,12 +161,7 @@ function Runner(props: {
 }) {
   const { guide, script, environment } = props
   const { modules, live } = environment
-  const firstChoice =
-    script.choices?.find((choice) => !missingNeed(script.needs(choice.id), live))?.id ??
-    script.choices?.[0]?.id
-  const [history, setHistory] = React.useState<Entry[]>(() => [
-    { state: scriptStart(guide, firstChoice) },
-  ])
+  const [history, setHistory] = React.useState<Entry[]>(() => [{ state: scriptStart(guide) }])
   const [busy, setBusy] = React.useState<string | null>(null)
   const [error, setError] = React.useState<{ index: number; message: string } | null>(null)
 
@@ -175,7 +169,7 @@ function Runner(props: {
   const done = history.length - 1
   const state = history[done].state
   const previous = done > 0 ? history[done - 1].state : null
-  const blocker = missingNeed(script.needs(state.choice), live)
+  const blocker = missingNeed(script.needs, live)
   const created = isCreated(state.account)
   const health = React.useMemo(() => analyzeAccount(state.account), [state.account])
   const diff =
@@ -224,14 +218,9 @@ function Runner(props: {
     void run(action, state, done)
   }
 
-  function choose(choice: string) {
-    setError(null)
-    setHistory([{ state: scriptStart(guide, choice) }])
-  }
-
   function startOver() {
     setError(null)
-    setHistory([{ state: scriptStart(guide, state.choice) }])
+    setHistory([{ state: scriptStart(guide) }])
   }
 
   const renderAction = (action: DemoAction, index: number, number: number) => {
@@ -289,30 +278,6 @@ function Runner(props: {
       {...cx(accountSandbox({ className: 'account-sandbox guide-demo' }), guideDemo())}
       aria-busy={Boolean(busy)}
     >
-      {script.choices && done === 0 && (
-        <div className="gd-choice">
-          <span className="as-label">{script.choiceLabel ?? 'Choose'}</span>
-          <fieldset className="as-segmented" disabled={Boolean(busy)}>
-            <legend className="as-hidden">{script.choiceLabel ?? 'Choose'}</legend>
-            {script.choices.map((choice) => {
-              const reason = missingNeed(script.needs(choice.id), live)
-              return (
-                <button
-                  key={choice.id}
-                  type="button"
-                  aria-pressed={state.choice === choice.id}
-                  disabled={Boolean(reason)}
-                  title={reason ?? undefined}
-                  onClick={() => choose(choice.id)}
-                >
-                  {choice.label}
-                </button>
-              )
-            })}
-          </fieldset>
-        </div>
-      )}
-
       {blocker && (
         <p className="as-gate" role="status">
           {blocker}
@@ -376,9 +341,7 @@ function Runner(props: {
               badge={state.account.devnet ? 'On devnet' : undefined}
             />
           ) : (
-            <p className="gd-empty">
-              No account yet. Its address comes from its first signer.
-            </p>
+            <p className="gd-empty">No account yet. Its address comes from its first signer.</p>
           )}
         </section>
       </div>

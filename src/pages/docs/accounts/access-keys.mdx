@@ -54,10 +54,10 @@ An access key never counts toward the [signing threshold](/docs/accounts/policie
 Give each holder its own key, so you can revoke one without affecting the others:
 
 - A customer's device: [Device keys](/docs/accounts/authentication/device-keys)
-- Your backend: [Automate a backend](/docs/accounts/guides/automate-backend), with recommended limits for common automations
-- An AI agent: [Set up an agent wallet](/docs/accounts/guides/agent-wallet)
-- A card program: [Set up a spending account](/docs/accounts/guides/spending-account)
-- A team spending from a treasury: [Give a team a budget](/docs/accounts/guides/company-treasury#give-a-team-a-budget)
+- Your backend: [Automations](/docs/accounts/guides/automations)
+- An AI agent: [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet)
+- A card program: [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program)
+- A team spending from a treasury: [Give a team a budget](/docs/accounts/guides/teams/team-budget)
 
 ## Access key types
 
@@ -66,7 +66,7 @@ Give each holder its own key, so you can revoke one without affecting the others
 | P-256 | A device key that the customer's browser or phone can't export, or a key your backend generates |
 | WebAuthn | A passkey |
 | secp256k1 | A key in your KMS, HSM, or a wallet |
-| Configurable account | A team account with its own signers and threshold, which approve as the key. Specified in [TIP-1111](https://tips.sh/1111), a Draft that runs on Tempo devnet. |
+| Configurable account | A team account with its own signers and threshold, which approve as the key. Specified in [TIP-1111](https://tips.sh/1111), a Draft. |
 
 Keep a key where its holder signs. A device key stays on the device, and a backend key stays in your secret manager.
 

@@ -34,7 +34,7 @@ Tempo Accounts is in early development and runs only on Tempo devnets. These pag
 - **Signers:** private keys, device keys, and passkeys that approve, each with a weight toward a threshold.
 - **Access keys:** keys on devices, servers, and agents that pay on their own within spending limits, an expiry, and scopes.
 
-Already have single-key accounts? [Upgrade them in place](/docs/accounts/key-rotation/account-upgrade), at the same address and balance.
+Already have single-key accounts? [Upgrade them in place](/docs/accounts/key-management/account-upgrade), at the same address and balance.
 
 <span id="tempo-account-use-cases" />
 
@@ -43,65 +43,65 @@ Already have single-key accounts? [Upgrade them in place](/docs/accounts/key-rot
 <div className={`docs-product-grid ${docsProductGrid().className}`}>
 <div className="docs-product-group">
 
-### <DocsHomeProductIcon product="accounts" />[Embedded wallets](/docs/accounts/guides/wallet-provider)
+### <DocsHomeProductIcon product="accounts" />[Embedded wallets](/docs/accounts/guides/users/embed-wallets)
 
 An account for every customer inside your app, with your provider's key as one signer and the customer's passkey as another.
 
-- [Use a wallet provider](/docs/accounts/guides/wallet-provider)
-- [Make the provider's key one signer](/docs/accounts/guides/wallet-provider#make-the-providers-key-one-signer)
-- [Connect Tempo Wallet](/docs/accounts/guides/wallet-provider#connect-tempo-wallet)
+- [Use a wallet provider](/docs/accounts/guides/users/embed-wallets)
+- [Make the provider's key one signer](/docs/accounts/guides/users/embed-wallets#make-the-providers-key-one-signer)
+- [Connect Tempo Wallet](/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet)
 
 </div>
 <div className="docs-product-group">
 
-### <DocsHomeProductIcon product="authentication" />[Consumer self-custody](/docs/accounts/guides/self-custody)
+### <DocsHomeProductIcon product="authentication" />[Consumer self-custody](/docs/accounts/guides/users/add-a-recovery-signer)
 
 Customers approve with their own passkey and recover with a backup signer.
 
-- [Add a backup signer](/docs/accounts/guides/self-custody#add-a-backup-signer)
-- [Recover from a lost passkey](/docs/accounts/guides/self-custody#recover-from-a-lost-passkey)
-- [Hand off to a self-custodial wallet](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet)
+- [Add a backup signer](/docs/accounts/guides/users/add-a-recovery-signer)
+- [Recover from a lost passkey](/docs/accounts/guides/users/recover-an-account)
+- [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off)
 
 </div>
 <div className="docs-product-group">
 
-### <DocsHomeProductIcon product="automations" />[Automations](/docs/accounts/guides/automate-backend)
+### <DocsHomeProductIcon product="automations" />[Automations](/docs/accounts/guides/automations/pay-out-from-a-backend)
 
 Your backend acts within limits: sweep idle balances into a vault, pay out, or pay bills.
 
-- [Automate a backend](/docs/accounts/guides/automate-backend)
-- [Recommended limits](/docs/accounts/guides/automate-backend#recommended-limits-for-backend-automations)
+- [Automate a backend](/docs/accounts/guides/automations/pay-out-from-a-backend)
+- [Recommended limits](/docs/accounts/guides/automations/pay-out-from-a-backend#recommended-limits-for-backend-automations)
 
 </div>
 <div className="docs-product-group">
 
-### <DocsHomeProductIcon product="agents" />[AI agents](/docs/accounts/guides/agent-wallet)
+### <DocsHomeProductIcon product="agents" />[AI agents](/docs/accounts/guides/agents/give-an-agent-a-wallet)
 
 An agent's own key, with a budget, an expiry, and only the calls it needs.
 
-- [Set up an agent wallet](/docs/accounts/guides/agent-wallet)
-- [Agent budget limits](/docs/accounts/guides/agent-wallet#agent-budget-limits)
+- [Set up an agent wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet)
+- [Agent budget limits](/docs/accounts/guides/agents/give-an-agent-a-wallet#agent-budget-limits)
 
 </div>
 <div className="docs-product-group">
 
-### <DocsHomeProductIcon product="card" />[Spending accounts](/docs/accounts/guides/spending-account)
+### <DocsHomeProductIcon product="card" />[Spending accounts](/docs/accounts/guides/automations/fund-a-card-program)
 
 Card payments from an access key with a daily limit that renews.
 
-- [Set up a spending account](/docs/accounts/guides/spending-account)
-- [Fund a card with a daily limit](/docs/accounts/guides/spending-account#fund-a-card-with-a-daily-limit)
+- [Set up a spending account](/docs/accounts/guides/automations/fund-a-card-program)
+- [Fund a card with a daily limit](/docs/accounts/guides/automations/fund-a-card-program#fund-a-card-with-a-daily-limit)
 
 </div>
 <div className="docs-product-group">
 
-### <DocsHomeProductIcon product="approvals" />[Company treasury](/docs/accounts/guides/company-treasury)
+### <DocsHomeProductIcon product="approvals" />[Company treasury](/docs/accounts/guides/teams/company-treasury)
 
 Several approvers, team budgets, and key rotation without moving funds.
 
-- [Create the treasury account](/docs/accounts/guides/company-treasury#create-the-treasury-account)
-- [Give a team a budget](/docs/accounts/guides/company-treasury#give-a-team-a-budget)
-- [Rotate an approver's key](/docs/accounts/guides/company-treasury#rotate-an-approvers-key)
+- [Create the treasury account](/docs/accounts/guides/teams/company-treasury#create-the-treasury)
+- [Give a team a budget](/docs/accounts/guides/teams/team-budget)
+- [Rotate an approver's key](/docs/accounts/guides/teams/offboard-an-approver#rotate-an-approvers-key-instead)
 
 </div>
 </div>
@@ -128,7 +128,7 @@ Several approvers, team budgets, and key rotation without moving funds.
 Build an account from its first signer on Tempo devnet, or upgrade a single-key account in place.
 
 - [Create an account](/docs/accounts/create)
-- [Upgrade an existing account](/docs/accounts/key-rotation/account-upgrade)
+- [Upgrade an existing account](/docs/accounts/key-management/account-upgrade)
 
 </div>
 <div className="docs-product-group">
@@ -166,13 +166,13 @@ Keys for devices, services, and agents that pay within limits.
 </div>
 <div className="docs-product-group">
 
-### <DocsHomeProductIcon product="recovery" />[Key rotation](/docs/accounts/key-rotation)
+### <DocsHomeProductIcon product="recovery" />[Key management](/docs/accounts/key-management)
 
-Replace lost or compromised signers and revoke keys, at the same address and balance.
+Add and remove signers, or upgrade a single-key account, at the same address and balance.
 
-- [Recovery by situation](/docs/accounts/key-rotation#key-rotation-by-situation)
-- [Revoke access keys](/docs/accounts/access-keys/revocation)
-- [Make a single-key account recoverable](/docs/accounts/key-rotation/account-upgrade)
+- [Add signers](/docs/accounts/key-management/add-signers)
+- [Remove signers](/docs/accounts/key-management/remove-signers)
+- [Account upgrade](/docs/accounts/key-management/account-upgrade)
 
 </div>
 <div className="docs-product-group">

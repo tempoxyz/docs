@@ -33,13 +33,13 @@ const accessKeyAddress = accessKey.accessKeyAddress // or the address you saved 
 await client.accessKey.revokeSync({ account, accessKey: accessKeyAddress })
 ```
 
-Save each key's address with a device or service name when you authorize it, so you can match a lost phone or a leaked backend key to the key to revoke. Show a key as removed only after the revocation confirms. For revoke buttons in an app, see [Automate a backend](/docs/accounts/guides/automate-backend) and [Set up an agent wallet](/docs/accounts/guides/agent-wallet).
+Save each key's address with a device or service name when you authorize it, so you can match a lost phone or a leaked backend key to the key to revoke. Show a key as removed only after the revocation confirms. For revoke buttons in an app, see [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) and [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet).
 
 ## Revoke after a signer change
 
-Signer updates don't touch access keys. After you replace a lost or compromised signer, revoke each key its holder could reach, including keys an attacker authorized. See [Signer rotation](/docs/accounts/key-rotation/signer-rotation#rotate-a-compromised-signer) and [Signer recovery](/docs/accounts/key-rotation/signer-recovery).
+Signer updates don't touch access keys. After you replace a lost or compromised signer, revoke each key its holder could reach, including keys an attacker authorized. See [Remove a lost or compromised signer](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer).
 
-When you hand an account to a customer, revoke your app's access keys before you swap out your app's signers, since your app can't approve anything afterward. See [Hand off to a self-custodial wallet](/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet).
+When you hand an account to a customer, revoke your app's access keys before you swap out your app's signers, since your app can't approve anything afterward. See [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off).
 
 ## Revocation limits
 

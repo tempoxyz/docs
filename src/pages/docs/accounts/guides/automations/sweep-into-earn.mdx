@@ -1,0 +1,79 @@
+---
+title: Sweep idle balances into Earn
+seoTitle: Sweep Idle Balances into an Earn Vault with a Scoped Tempo Access Key | Tempo Docs
+description: Authorize an access key that can only approve and deposit into one Earn vault within a daily limit, then sweep a customer's idle balance each night and track the position.
+---
+
+# Sweep idle balances into Earn
+
+Your backend moves a customer's idle stablecoins into an [Earn](/docs/earn) vault each night with an access key the customer's signers approve once. The key can call only `approve` and `deposit` on that vault, up to a daily limit, so it can't send funds anywhere else.
+
+A vault deposit takes two calls. `approve` lets the vault pull an amount from the account, and `deposit` makes the vault pull it and issue vault shares to the account. The examples use Moderato testnet, a Tempo test network whose stablecoins have no value, with pathUSD and a vault from [Vaults](/docs/earn/vaults) that accepts it.
+
+:::::steps
+
+### Scope a key to the vault
+
+Create a secp256k1 key in your KMS and wrap it as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms). Then have the customer's signers authorize its address in your app:
+
+```ts [app/approve-sweeps.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+
+const pathUsd = '0x20c0000000000000000000000000000000000000'
+
+await client.accessKey.authorizeSync({
+  accessKey: { accessKeyAddress: sweepKeyAddress, keyType: 'secp256k1' },
+  account, // the customer's account, signed by its signers
+  expiry: Expiry.days(90),
+  limits: [{ token: pathUsd, limit: parseUnits('5000', 6), period: 86_400 }], // 5,000 pathUSD a day
+  scopes: [
+    { address: pathUsd, selector: 'approve(address,uint256)', recipients: [vault] },
+    { address: vault, selector: 'deposit(uint256,address,uint256)' },
+  ],
+})
+```
+
+Show the vault, the daily limit, and the expiry before the customer approves. Tempo meters approvals against the limit, so the key can't let the vault pull more than 5,000 pathUSD a day. See [Scopes](/docs/accounts/access-keys/scopes) and [Spending limits](/docs/accounts/access-keys/spending-limits).
+
+### Sweep on a schedule
+
+Run the sweep from a nightly job. Keep an operating float in the account for the next day's payments, and deposit the rest:
+
+```ts [backend/sweep.ts]
+import { tempoModerato } from 'viem/chains'
+import { Actions, createClient, EarnShares } from 'viem/tempo'
+
+const backend = createClient({ account: sweepKey, chain: tempoModerato, feeToken: pathUsd })
+
+const balance = await backend.token.getBalance({ account: address, token: pathUsd })
+const assetAmount = balance.amount - operatingFloat
+if (assetAmount > 0n) {
+  await backend.token.approveSync({ amount: assetAmount, spender: vault, token: pathUsd })
+  const { result: quotedShares } = await Actions.earn.deposit.simulate(backend, {
+    assetAmount,
+    shareAmountMin: 1n,
+    vault,
+  })
+  await backend.earn.depositSync({
+    assetAmount,
+    shareAmountMin: EarnShares.minimumOutput(quotedShares, 50), // accept at most 0.5% fewer shares
+    vault,
+  })
+}
+```
+
+The simulation needs the approval in place, so the sweep approves first. Tempo rejects a sweep over today's limit, a call outside the two scopes, or any call after the expiry. See [Deposit](/docs/earn/integrate) for the vault checks to run before enabling deposits.
+
+### Track the position
+
+Read the customer's vault shares and their current value:
+
+```ts [backend/position.ts]
+const { shareBalance, value } = await backend.earn.getPosition({ account: address, vault })
+const { remaining } = await backend.accessKey.getRemainingLimit({ account: address, accessKey: sweepKey, token: pathUsd })
+```
+
+`value` is the shares' asset value after fees, in pathUSD base units. Save each deposit's transaction hash and shares received for reconciliation, and show earnings as described in [Balances and earnings](/docs/earn/balances). Withdrawals need the signers or a separate key; this key can't redeem. See [Withdraw](/docs/earn/withdraw).
+
+:::::

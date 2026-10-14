@@ -141,14 +141,6 @@ export const guideDemo = style({
     '& .gd-secret': {
       marginTop: tokens.spacing['2'],
     },
-    // The reader's choice before the first step, such as the login to sign in with.
-    '& .gd-choice': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      rowGap: tokens.spacing['2'],
-      columnGap: tokens.spacing['3'],
-    },
   },
   '@media (width <= 720px)': {
     selectors: {

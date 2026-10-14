@@ -51,12 +51,12 @@ const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
 
 `account.address` receives stablecoins right away. The first transaction registers the account.
 
-For weights alongside backup and recovery keys, see [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). To add a passkey to an existing account or back it up with other keys, see [Set up self-custody](/docs/accounts/guides/self-custody).
+For weights alongside backup and recovery keys, see [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). To add a passkey to an existing account or back it up with other keys, see [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer).
 
 ## Passkey limits
 
 - A passkey works only on the domain it was created for, its relying party ID. Set `rpId` in `WebAuthnP256.createCredential` to choose it before customers create passkeys.
 - The prompt fails with `NotAllowedError` when the customer cancels or the page isn't served over HTTPS.
-- A passkey on a security key isn't synced. Losing the key loses the signer, so add a second signer for [recovery](/docs/accounts/guides/self-custody#recover-from-a-lost-passkey).
+- A passkey on a security key isn't synced. Losing the key loses the signer, so add a second signer for [recovery](/docs/accounts/guides/users/recover-an-account).
 
 For other methods, see [Signing methods](/docs/accounts/authentication).

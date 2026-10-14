@@ -27,13 +27,12 @@ import {
 } from './guide-demo-scripts'
 
 const pages: Record<GuideId, string> = {
-  'add-signers': 'guides/self-custody',
-  'multi-factor': 'guides/self-custody',
-  'rotate-keys': 'guides/company-treasury',
-  recover: 'guides/self-custody',
-  export: 'guides/self-custody',
-  'backend-automation': 'guides/automate-backend',
-  'team-accounts': 'guides/company-treasury',
+  'add-signers': 'guides/users/add-a-recovery-signer',
+  'rotate-keys': 'guides/teams/offboard-an-approver',
+  recover: 'guides/users/recover-an-account',
+  export: 'guides/users/hand-off',
+  'backend-automation': 'guides/automations/pay-out-from-a-backend',
+  'team-accounts': 'guides/teams/team-budget',
 }
 
 /** The `###` headings in the first `:::::steps` block after a guide's `<GuideDemo>` embed. */
@@ -72,7 +71,8 @@ function fakeContext(): Fake {
     const prepared = options?.prepared?.signer?.(signer)
     let address = prepared?.address ?? next(40)
     if (prepared) preparedUses.push(`${signer.kind}:${signer.name}`)
-    if (signer.privateKey) address = `0x${signer.privateKey.slice(-40)}`
+    if (signer.kind === 'private-key' && signer.privateKey)
+      address = `0x${signer.privateKey.slice(-40)}`
     signerAddresses.set(signer.id, address)
     return address
   }
@@ -164,10 +164,10 @@ function fakeContext(): Fake {
   }
 }
 
-async function run(guide: GuideId, choice?: string, ctx: Fake = fakeContext()) {
+async function run(guide: GuideId, ctx: Fake = fakeContext()) {
   const script = guideScripts[guide]
   const outcomes: StepOutcome[] = []
-  let state: DemoState = scriptStart(guide, choice)
+  let state: DemoState = scriptStart(guide)
   const states = [state]
   for (const action of [...script.setup, ...script.steps]) {
     const outcome = await action.run(state, ctx)
@@ -188,12 +188,6 @@ function changed(before: SandboxAccount, after: SandboxAccount) {
       JSON.stringify(after.accessKeys.map((key) => [key.id, key.status, key.spent]))
   )
 }
-
-const runs = guideDemoIds.flatMap((guide) =>
-  (guideScripts[guide].choices?.map((choice) => choice.id) ?? ['']).map(
-    (choice) => [guide, choice] as const,
-  ),
-)
 
 // ---------------------------------------------------------------------------
 
@@ -217,10 +211,8 @@ describe('GuideDemo scripts', () => {
     )
   })
 
-  it.each(
-    runs,
-  )('%s (%s) runs every action and shows a hash for every change', async (guide, choice) => {
-    const { outcomes, states } = await run(guide, choice || undefined)
+  it.each(guideDemoIds)('%s runs every action and shows a hash for every change', async (guide) => {
+    const { outcomes, states } = await run(guide)
     outcomes.forEach((outcome, index) => {
       expect(outcome.result).not.toBe('')
       expect(outcome.state.account.notice).toBeNull()
@@ -229,51 +221,44 @@ describe('GuideDemo scripts', () => {
     })
   })
 
-  it('adds the passkey made in the first step, approved by the account’s first signer', async () => {
-    for (const choice of ['private-key', 'device']) {
-      const { account, ctx } = await run('add-signers', choice)
-      expect(ctx.preparedUses).toEqual(['passkey:Passkey'])
-      expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
-        [choice, 1],
-        ['passkey', 1],
-      ])
-      expect(recoveryCheck(account).ok).toBe(true)
-    }
-  })
-
-  it('turns on multi-factor in one update with the backup and recovery keys', async () => {
-    const { states } = await run('multi-factor')
-    const before = states[3].account
-    const after = states[4].account
-    expect(after.version).toBe(before.version + 1)
-    expect(after.threshold).toBe(2)
-    expect(
-      configuredSigners(after).map((signer) => [signer.kind, signer.name, signer.weight]),
-    ).toEqual([
-      ['passkey', 'Passkey', 2],
-      ['private-key', 'Backup key', 1],
-      ['recovery-provider', 'Recovery key', 1],
+  it('adds a recovery key, then requires two factors with the prepared passkey', async () => {
+    const { states, account, ctx } = await run('add-signers')
+    const added = states[3].account
+    expect(configuredSigners(added).map((signer) => [signer.name, signer.weight])).toEqual([
+      ['Current key', 1],
+      ['Recovery key', 1],
     ])
-    expect(recoveryCheck(after).ok).toBe(true)
+    expect(added.threshold).toBe(1)
+    expect(recoveryCheck(added).ok).toBe(true)
+    expect(ctx.preparedUses).toEqual(['passkey:Passkey'])
+    expect(account.version).toBe(added.version + 1)
+    expect(account.threshold).toBe(2)
+    expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
+      ['private-key', 1],
+      ['private-key', 1],
+      ['passkey', 2],
+    ])
+    expect(recoveryCheck(account).ok).toBe(true)
   })
 
-  it('rotates Approver key 2 for a new key and revokes the service key', async () => {
+  it('offboards Approver key 2, revokes the service key, and adds a replacement', async () => {
     const { account } = await run('rotate-keys')
     expect(configuredSigners(account).map((signer) => signer.name)).toEqual([
       'Approver key 1',
       'Approver key 3',
       'Approver key 4',
     ])
-    expect(account.version).toBe(2)
+    expect(account.threshold).toBe(2)
+    expect(account.version).toBe(3)
     expect(account.accessKeys.find((key) => key.name === 'Service key')?.status).toBe('revoked')
   })
 
-  it('recovers with the backup and recovery keys, replaces the lost passkey, and revokes the device key', async () => {
+  it('recovers with both keys, replaces the lost passkey, and revokes the device key', async () => {
     const { account, ctx } = await run('recover')
-    expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
-      ['private-key', 1],
-      ['recovery-provider', 1],
-      ['passkey', 2],
+    expect(configuredSigners(account).map((signer) => [signer.name, signer.weight])).toEqual([
+      ['Current key', 1],
+      ['Backup key', 1],
+      ['New passkey', 2],
     ])
     const passkeys = configuredSigners(account).filter((signer) => signer.kind === 'passkey')
     expect(passkeys.map((signer) => [signer.weight, signer.lost])).toEqual([[2, false]])
@@ -287,16 +272,18 @@ describe('GuideDemo scripts', () => {
     expect(account.accessKeys.every((key) => key.status === 'revoked')).toBe(true)
   })
 
-  it('authorizes the backend key with limits, pays with it, and revokes it', async () => {
+  it('authorizes the backend key with limits and pays out with it', async () => {
     const { states, account } = await run('backend-automation')
-    const authorized = states[3].account.accessKeys.find((key) => key.name === 'Backend key')
+    const authorized = states[2].account.accessKeys.find((key) => key.name === 'Backend key')
     expect(authorized).toMatchObject({
       kind: 'private-key',
       limit: 1_000,
       expiresInDays: 90,
       recipients: 'approved',
     })
-    expect(account.accessKeys[0].status).toBe('revoked')
+    const paid = account.accessKeys.find((key) => key.name === 'Backend key')
+    expect(paid?.status).not.toBe('revoked')
+    expect(paid && remainingLimit(paid)).toBe(950)
   })
 
   it('spends the team budget through the treasury with the prepared team account', async () => {
@@ -351,8 +338,8 @@ describe('GuideDemo helpers', () => {
   })
 
   it('says what a demo is missing', () => {
-    expect(missingNeed(['passkey'], new Set(['passkey']))).toBeNull()
     expect(missingNeed([], new Set())).toBeNull()
+    expect(missingNeed(['passkey'], new Set(['passkey']))).toBeNull()
     expect(missingNeed(['passkey'], new Set())).toContain('Touch ID')
   })
 })

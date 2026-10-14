@@ -1,0 +1,75 @@
+---
+title: Key management
+seoTitle: Add, Remove, and Rotate Tempo Account Signers | Tempo Docs
+description: Add a signer, remove one, rotate a key, recover from a lost key, or upgrade a single-key account, with one signer update at the same address.
+---
+
+# Key management
+
+:::warning
+**Not live yet.** Key management ([TIP-1107](https://tips.sh/1107)) is in early development and runs only on Tempo devnet. We're seeking feedback; behavior may change.
+:::
+
+Adding a signer, removing one, and rotating a key are the same operation: one signer update that the account's current signers approve, at the same address. Tempo has no override, so set up the account to survive losing any one signer before you need to.
+
+| Page | Use it to |
+| --- | --- |
+| [Add signers](/docs/accounts/key-management/add-signers) | Add a backup, a recovery signer, or a new approver |
+| [Remove signers](/docs/accounts/key-management/remove-signers) | Rotate a key, remove a departing approver, or replace a lost or compromised signer |
+| [Account upgrade](/docs/accounts/key-management/account-upgrade) | Give a single-key (EOA) account signers it can be recovered with |
+
+<span id="one-signer-update-same-address" />
+
+## Every change is one signer update, at the same address
+
+A signer update replaces the account's list of signers and its threshold in one transaction. Signers whose weights reach the current threshold approve it. The address, balances, token approvals, access keys, and history stay the same.
+
+Once the update lands, a removed signer can't approve, and approvals collected for the old configuration stop verifying. What differs between situations is who approves: on a scheduled rotation the old key can still sign, and after a loss or compromise the other signers must reach the threshold without it.
+
+<span id="key-replacement" />
+<span id="recovery-situations" />
+<span id="recovery-by-situation" />
+<span id="key-rotation-by-situation" />
+
+## Key management by situation
+
+| Situation | Signer update | Approved by | Walkthrough |
+| --- | --- | --- | --- |
+| Rotate a key | Add the new key and remove the old one, at the same weight, in one update | The current signers, including the old key unless it's compromised | [Rotate an approver's key](/docs/accounts/guides/teams/offboard-an-approver#rotate-an-approvers-key-instead) |
+| Recover a lost signer | Replace the lost passkey or key with a new one, then revoke the lost device's access keys | The remaining signers, without the lost one | [Recover a user's account](/docs/accounts/guides/users/recover-an-account) |
+| Offboard an approver | Remove their signer, and lower the threshold if needed | The remaining approvers | [Remove a departing approver](/docs/accounts/guides/teams/offboard-an-approver) |
+| Hand off to the user | Replace your app's signers with one the customer holds | Your app's signers | [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off) |
+
+A single-key account has no second signer to approve any of these, so [upgrade it](/docs/accounts/key-management/account-upgrade) first.
+
+<span id="plan-for-recovery-before-you-need-it" />
+
+## Plan for recovery
+
+Recovery works only when the account can lose any one signer and still reach the threshold with the rest. After a key is lost, only the remaining signers can change the configuration, so set this up when you create the account.
+
+The rule: for every signer, the total weight minus that signer's weight must be at least the threshold.
+
+For example, give a passkey weight 2, and a backup key and a recovery provider's key weight 1 each, at threshold 2. The passkey replaces a lost backup key alone, and the backup and recovery keys together replace a lost passkey. [Signing thresholds](/docs/accounts/policies/signing-thresholds) lists setups that pass, and [Add a recovery signer](/docs/accounts/key-management/add-signers#add-a-recovery-signer) adds one to an existing account.
+
+### Recover funds sent on another chain
+
+The account's address is the same on every EVM chain, so someone can send funds to it on a chain where Tempo doesn't run. On supported chains, the account's initial secp256k1 signers, reaching the original threshold, can deploy a recovery wallet at that address and retrieve the funds, even after you remove those signers on Tempo.
+
+Passkeys and device keys don't count. Accounts created with only passkeys and device keys, and accounts [upgraded in place](/docs/accounts/key-management/account-upgrade), can't recover funds this way. To keep this option, include a secp256k1 key among the signers you create the account with. [Recover funds sent on another chain](/docs/accounts/guides/users/recover-an-account#recover-funds-sent-on-another-chain) covers the steps.
+
+<span id="account-recovery-limits" />
+<span id="recovery-limits" />
+<span id="revoke-a-key" />
+<span id="revoke-access-keys" />
+<span id="key-rotation-limits" />
+
+## Key management limits
+
+- Tempo can't recover an account whose remaining signers can't reach the threshold.
+- Signer updates don't touch access keys. A device key on a lost phone keeps paying within its limits until you [revoke it](/docs/accounts/access-keys/revocation).
+- Recovery signers can also approve payments, so give each one only the weight recovery needs.
+- Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
+- Cross-chain recovery uses only the initial secp256k1 signers at the original threshold.
+
+Specifications: [configurable accounts](https://tips.sh/1107), [configuration updates](https://tips.sh/1109), [configurable account addresses](https://tips.sh/1110).
