@@ -2,14 +2,17 @@
 
 import * as React from 'react'
 import { type Hex, parseUnits } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { Account, createClient, WebCryptoP256 } from 'viem/tempo'
+import { tempoDevnet } from 'viem/chains'
+import { Account, createClient, http, WebCryptoP256 } from 'viem/tempo'
+import LucideCheck from '~icons/lucide/check'
+import LucideCopy from '~icons/lucide/copy'
 import { Container } from '../Container'
 import * as ui from './AccountDemo.recipes'
-import { adminKeyDemoFeeToken } from './admin-key-demo'
-import { Button, FAKE_RECIPIENT, Step, StringFormatter } from './Demo'
+import { shortHash } from './account-sandbox'
+import { devnetRpcUrl, devnetToken } from './account-sandbox-devnet'
+import { Button, FAKE_RECIPIENT, Step, StringFormatter, useCopyToClipboard } from './Demo'
 
-const token = adminKeyDemoFeeToken
+const token = devnetToken
 const payment = parseUnits('1', 6)
 const database = 'tempo-docs-p256-key-demo'
 const store = 'keys'
@@ -21,7 +24,7 @@ type Result = { hash?: Hex; message: string }
 
 /**
  * A non-extractable P-256 key made with WebCrypto and kept in this browser's IndexedDB. The key is
- * the test account's signer on Moderato, so payments sign without a prompt.
+ * the test account's signer on the Tempo Accounts devnet, so payments sign without a prompt.
  */
 export function P256KeyDemo() {
   const [ready, setReady] = React.useState(false)
@@ -39,8 +42,10 @@ export function P256KeyDemo() {
       keyPair &&
       createClient({
         account: Account.fromWebCryptoP256(keyPair),
-        chain: tempoModerato,
+        chain: tempoDevnet,
         feeToken: token,
+        // The docs site's same-origin proxy to the devnet RPC.
+        transport: http(devnetRpcUrl, { retryCount: 0 }),
       }),
     [keyPair],
   )
@@ -69,7 +74,7 @@ export function P256KeyDemo() {
   }, [client])
 
   React.useEffect(() => {
-    refresh().catch(() => setError('Could not read testnet status.'))
+    refresh().catch(() => setError('Could not read devnet status.'))
   }, [refresh])
 
   async function run(action: Action, work: () => Promise<Result | undefined>) {
@@ -129,7 +134,7 @@ export function P256KeyDemo() {
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Try a browser device key</span>}
-      headerRight={<span {...ui.accountDemoMuted()}>Moderato testnet</span>}
+      headerRight={<span {...ui.accountDemoMuted()}>Tempo Accounts devnet</span>}
     >
       <div {...ui.accountDemoSteps()} data-testid="p256-key-demo" aria-busy={pending !== null}>
         <Step
@@ -224,17 +229,35 @@ function ResultLine({ result }: { result: Result | undefined }) {
   if (!result) return null
   return (
     <p {...ui.accountDemoResult()} role="status">
-      {result.message}{' '}
+      {result.message}
       {result.hash && (
-        <a
-          href={`${tempoModerato.blockExplorers.default.url}/tx/${result.hash}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Receipt ↗
-        </a>
+        <>
+          {' '}
+          <TxHash hash={result.hash} />
+        </>
       )}
     </p>
+  )
+}
+
+/** A transaction hash with a copy button. The devnet has no public explorer. */
+function TxHash({ hash }: { hash: Hex }) {
+  const [copied, copy] = useCopyToClipboard()
+  const Icon = copied ? LucideCheck : LucideCopy
+  return (
+    <span {...ui.accountDemoTx()}>
+      <code {...ui.accountDemoTxHash()} title={hash}>
+        {shortHash(hash)}
+      </code>
+      <button
+        type="button"
+        {...ui.accountDemoTxCopy()}
+        aria-label="Copy transaction hash"
+        onClick={() => copy(hash)}
+      >
+        <Icon aria-hidden="true" className={ui.accountDemoTxIcon().className} />
+      </button>
+    </span>
   )
 }
 

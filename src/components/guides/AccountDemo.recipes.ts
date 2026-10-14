@@ -65,3 +65,39 @@ export const accountDemoError = style({
 export const accountDemoHash = style({
   color: tokens.color.gray10,
 })
+
+// A transaction hash with a copy button. The devnet has no public explorer.
+export const accountDemoTx = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: tokens.spacing['0_5'],
+  verticalAlign: 'middle',
+  whiteSpace: 'nowrap',
+  color: tokens.color.gray10,
+})
+export const accountDemoTxHash = style({
+  // Vocs pads inline code; the hash sits flush beside its copy button.
+  paddingInline: tokens.spacing['0'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
+})
+export const accountDemoTxCopy = style({
+  display: 'grid',
+  width: tokens.spacing['5'],
+  height: tokens.spacing['5'],
+  placeItems: 'center',
+  borderRadius: tokens.radius.sm,
+  color: tokens.color.gray10,
+  selectors: {
+    '&:hover': {
+      '@media (hover: hover)': {
+        backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
+        color: tokens.color.gray12,
+      },
+    },
+  },
+})
+export const accountDemoTxIcon = style({
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
+})
