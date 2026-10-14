@@ -1,0 +1,127 @@
+---
+title: Escalation rules
+seoTitle: Require More Approvals for Larger Payments with Escalation Rules | Tempo Docs
+description: Raise a Tempo account's signing threshold above a payment size or balance, so routine payments need one approver and large ones need several.
+---
+
+# Escalation rules
+
+:::warning
+**Not live yet.** Escalation rules ([TIP-1135](https://tips.sh/1135)) are in early development and aren't on any Tempo network yet, including devnet. Behavior may change.
+:::
+
+An escalation rule raises an account's [signing threshold](/docs/accounts/policies/signing-thresholds) when a transaction sends more, or when the account holds more, so large payments need more approvers than routine ones. While any rule is on, access keys and allowances can't spend for the account.
+
+<span id="approval-escalation-for-larger-payments" />
+<span id="approval-rules-beyond-the-threshold" />
+<span id="tiered-approvals" />
+<span id="recommended-rules" />
+<span id="recommended-treasury-policy" />
+<span id="recommended-weights-for-a-passkey-and-two-logins" />
+<span id="require-more-approval-for-larger-payments" />
+<span id="approval-rules-for-larger-payments" />
+
+## What an escalation rule does
+
+An account's rules together form its escalation policy. For a treasury with three approvers of weight 1 each:
+
+| Situation | Required approvals |
+| --- | --- |
+| Payments up to $5,000 in one transaction | 1 of 3 |
+| More than $5,000 in one transaction | 2 of 3 |
+| Balance above $100,000, for any payment | 3 of 3 |
+| Signer changes, new access keys, and every other action | 3 of 3 |
+
+The last row is the administrative threshold. It covers everything that isn't a direct payment a rule names. For a customer account with a passkey (2) and two logins (1 each), require weight 2 up to $5,000, weight 3 above it, and weight 4 for signer changes. Use logins from different providers: weight counts approvals, not independent parties.
+
+<span id="what-approval-rules-measure" />
+<span id="what-account-policies-measure" />
+<span id="what-escalation-rules-measure" />
+
+Each rule measures one stablecoin in one transaction:
+
+| Rule | Measures | Counts | Doesn't count |
+| --- | --- | --- | --- |
+| Outflow | What one transaction sends in one stablecoin | Every call in a batch: two $3,000 payments count as $6,000. The maximum fee, when the account pays its own fees in that stablecoin. | Incoming transfers, refunds, and sponsored fees |
+| Balance | The account's balance before the transaction | Funds received in earlier transactions | Funds received in the same transaction |
+
+- Rules cover USD TIP-20 stablecoins at face value, one stablecoin per rule. Amounts in different stablecoins don't add up.
+- The strictest matching rule wins. Requirements don't add up.
+- An amount equal to the limit stays in the lower tier. A $5,000 payment plus its fee in the same stablecoin goes above it.
+- Rules measure one transaction, not a rolling total. Separate payments under the limit each need only the lower tier.
+
+<span id="actions-that-need-the-administrative-threshold" />
+
+Only direct payments use the payment tiers: every call is `transfer` or `transferWithMemo` on a stablecoin a rule names. Token allowances, contract calls, swaps, signer and rule changes, access-key changes, and transfers of tokens no rule names need the administrative threshold, whatever the amount.
+
+<span id="what-escalation-turns-off" />
+<span id="what-approval-rules-turn-off" />
+<span id="what-account-policies-turn-off" />
+
+## How escalation interacts with access keys
+
+An access key or an allowance would let funds leave without the tiers, so an escalation policy turns them off:
+
+| While a policy is on | Effect |
+| --- | --- |
+| [Access keys](/docs/accounts/access-keys) | Can't spend for the account, including keys authorized earlier and team budgets |
+| Allowances | Third parties can't pull funds, including with allowances granted earlier |
+| Fee sponsorship | The account can't pay fees for other accounts |
+
+Choose between escalation and access keys for each account. Removing the policy turns existing access keys and allowances back on, so revoke the ones you don't want first. A policy doesn't cover funds already held by other contracts, such as open orders.
+
+<span id="install-approval-rules" />
+<span id="install-an-account-policy" />
+<span id="install-an-escalation-policy" />
+<span id="installing-an-escalation-policy" />
+
+## Add an escalation rule
+
+Signers install the policy with `setEscalationPolicy` on the native multisig precompile at `0xAACC000000000000000000000000000000000000`, approved at the new administrative threshold. It must be the transaction's only call, and an access key can't send it. The call takes the policy's current revision and fails if someone changed the policy since you read it. The example follows the proposed interface: `client` is the [devnet client](/docs/accounts/create#connect-to-the-devnet), and `treasury` is the account rebuilt from its saved `config` with the approving keys attached, as in [Remove signers](/docs/accounts/key-management/remove-signers#remove-a-signer).
+
+```ts [rules.ts]
+import { parseAbi, parseUnits } from 'viem'
+
+const abi = parseAbi([
+  'struct Rule { address token; uint8 metric; uint256 limit; uint8 threshold; }',
+  'function getEscalationPolicy(address account) view returns (uint64 revision, bool enabled, uint8 adminThreshold, Rule[] rules)',
+  'function setEscalationPolicy(uint64 expectedRevision, uint8 adminThreshold, Rule[] rules)',
+])
+const multisig = '0xAACC000000000000000000000000000000000000'
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+// metric 0 measures outflow, 1 measures balance. Sort rules by token, metric, then limit.
+// The treasury's base threshold is 1, as in the table above.
+const rules = [
+  { token: alphaUsd, metric: 0, limit: parseUnits('5000', 6), threshold: 2 }, // sends more than $5,000
+  { token: alphaUsd, metric: 1, limit: parseUnits('100000', 6), threshold: 3 }, // holds more than $100,000
+] as const
+
+const [revision] = await client.readContract({
+  abi, address: multisig, functionName: 'getEscalationPolicy', args: [treasury.address],
+})
+await client.writeContractSync({
+  abi, account: treasury, address: multisig, functionName: 'setEscalationPolicy',
+  args: [revision, 3, rules], // administrative threshold: 3
+})
+```
+
+Remove the policy with `removeEscalationPolicy(expectedRevision)`, approved at the administrative threshold. For the treasury itself, see [Set up a company treasury](/docs/accounts/guides/teams/company-treasury).
+
+<span id="approval-rule-limits" />
+<span id="account-policy-limits" />
+
+## Escalation rule limits
+
+| Limit | Value |
+| --- | --- |
+| Rules per account | 1 to 16 |
+| Stablecoins across rules | Up to 8 |
+| Each rule's threshold | Above the base threshold, up to the administrative threshold |
+| Administrative threshold | Reachable with up to 8 approvals |
+
+- Rules measure one transaction, not a daily or rolling total.
+- Rules apply only to USD TIP-20 stablecoins they name. Other tokens need the administrative threshold.
+- While the policy is on, access keys, allowances, and fee sponsorship from the account are off.
+
+Specification: [approval rules](https://tips.sh/1135).

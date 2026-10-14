@@ -1,7 +1,7 @@
 ---
 title: Account model
 seoTitle: Tempo EVM Account Model, Account Types, and Signature Types | Tempo Docs
-description: Tempo EVM accounts are approved by one key or by weighted owners, can hand limited signing power to access keys, and use five signature formats.
+description: Tempo EVM accounts are approved by one key or by weighted owners, can hand limited signing power to access keys, and use six signature formats.
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-keys_title-f5_v02.png
 ---
 
@@ -57,12 +57,17 @@ The account itself authorizes and revokes access keys: its root key, or owners w
 | WebAuthn | `0x02` | A root key, owner, or access key |
 | Keychain | `0x04` | An access key, wrapping its own signature with the account's address |
 | Multisig | `0x05` | A configurable account's owners, bundling their signatures with the account's configuration |
+| ZK | `0x06` | A login owner: a sign-in proof, plus a signature from the key the sign-in named |
 
-Viem's `Account` helpers encode every format. Byte layouts are in the [transaction specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types) and, for `0x05`, [TIP-1114](https://tips.sh/1114).
+Viem's `Account` helpers encode every format. Byte layouts are in the [transaction specification](/docs/protocol/transactions/spec-tempo-transaction#signature-types) and, for `0x05`, [TIP-1114](https://tips.sh/1114), and for `0x06`, [TIP-1131](https://tips.sh/1131).
 
 <span id="separate-login-from-transaction-authority" />
 <span id="choose-a-signer" />
-<span id="logins-as-signers" />
+
+## Logins as signers
+
+A login is an owner, not an account type. Its `0x06` signature proves a recent sign-in with an identity provider and carries a signature from the key that sign-in named. A login also has its own address: an ordinary account with no code, which can send transactions directly. Login signatures ([TIP-1131](https://tips.sh/1131)) are a draft specification and run only on a separate devnet. To set one up, follow [OIDC logins](/docs/accounts/authentication/oidc).
+
 <span id="sign-transactions" />
 <span id="choose-the-signing-environment" />
 <span id="login-signing-and-api-credentials" />

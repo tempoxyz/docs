@@ -3,6 +3,7 @@
  * balances, access-key limits, and generated private keys. Import it dynamically, like the devnet
  * adapter, so it stays out of production bundles.
  */
+import { MultisigConfig } from 'ox-zk/tempo'
 import type { Hex } from 'viem'
 import { generatePrivateKey, privateKeyToAddress } from 'viem/accounts'
 import { readContract } from 'viem/actions'
@@ -47,7 +48,7 @@ export function createGuideChain(options: { rpcUrl?: string } = {}): GuideChain 
     },
 
     configCommitment(config: ChainConfig) {
-      return Tempo.AccountConfig.getCommitment(config)
+      return MultisigConfig.getCommitment(config as never)
     },
 
     inferAddress(config) {

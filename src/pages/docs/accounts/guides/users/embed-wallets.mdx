@@ -1,12 +1,13 @@
 ---
 title: Embed wallets with a provider
 seoTitle: Build Embedded Wallets on Tempo with Privy or Turnkey | Tempo Docs
-description: Add your wallet provider's key as one of three signers on each Tempo account, so only the user's passkey approves alone. Build with Privy or Turnkey, or connect Tempo Wallet.
+description: Add your wallet provider's key as one of three signers on each Tempo account, so only the user's passkey approves alone. Build with Privy or Turnkey, sign users in with Tempo, or connect Tempo Wallet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-providers_title-f5_v02.png
 ---
 
 import * as Demo from '../../../../../components/guides/Demo'
+import { SignInWithTempoDemo } from '../../../../../components/guides/SignInWithTempoDemo'
 import { SignInWithTempo } from '../../../../../components/guides/steps/wallet/SignInWithTempo'
 
 # Embed wallets with a provider
@@ -92,12 +93,72 @@ A signer change, such as replacing a lost passkey or handing the account off, ra
 
 When a user wants full control, [hand off the account](/docs/accounts/guides/users/hand-off): swap the provider's key for a signer the user holds, at the same address.
 
-<span id="let-the-provider-run-login-services" />
-<span id="integrate-accounts" />
-<span id="connect-tempo-wallet" />
+## Let the provider run login services
+
+To sign users in with an email or social login instead of a passkey, make the login a signer: see [OIDC logins](/docs/accounts/authentication/oidc). Your wallet provider can run the [salt service and prover](/docs/accounts/authentication/oidc#login-services) and still hold no key for your users, so it can't move their funds. If it also issues the logins, it can sign in as those users, so keep each login below the threshold and pair it with the passkey. Logins are experimental and run on a separate devnet.
+
 <span id="use-tempo-wallet-sign-in" />
 <span id="use-tempos-hosted-sign-in" />
 <span id="sign-users-in-with-tempo-wallet" />
+
+## Sign users in with Tempo
+
+With Sign in with Tempo, a wallet provider holds each user's Tempo account, and your app holds only a bounded [access key](/docs/accounts/access-keys). The user signs in on Tempo's page with an email code or Google and approves the key's expiry, spending limit, and scopes. Privy holds the account's owner key and signs the key authorization. Tempo checks those bounds on every transaction, so even a leaked key can't spend more than the user approved.
+
+The demo signs you in, shows the key's bounds, funds the account from the faucet, and pays 1 AlphaUSD with the key. It runs on Moderato testnet, whose stablecoins have no value.
+
+<SignInWithTempoDemo />
+
+<span id="request-a-bounded-access-key" />
+
+Install `@tempoxyz/auth`, then send the user to Tempo's sign-in page with the permissions your app needs. In a browser, the library creates the access key as a non-extractable WebCrypto P-256 key.
+
+```bash [Terminal]
+pnpm add @tempoxyz/auth viem
+```
+
+```ts [sign-in.ts]
+import { Actions, Auth } from '@tempoxyz/auth'
+import { tempoModerato } from 'viem/chains'
+import { Expiry, Scopes } from 'viem/tempo'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const auth = Auth.create({ chainId: tempoModerato.id, clientId: '<CLIENT_ID>' })
+
+// The sign-in button: the browser leaves for Tempo's page, where the user approves these bounds.
+await Actions.redirect.start(auth, {
+  permissions: {
+    expiry: Expiry.days(1),
+    limits: [{ limit: 5_000_000n, token: alphaUsd }], // 5 AlphaUSD in total, in base units
+    scopes: [Scopes.tip20(alphaUsd).transfer()],
+  },
+})
+```
+
+Limits in a sign-in request are one-time totals. To grant a fresh budget, sign the user in again.
+
+<span id="pay-with-the-access-key" />
+
+When the browser returns, `Actions.redirect.complete` returns an `Authorization`: an access token for Tempo APIs, and `account`, a viem account that signs with the access key.
+
+```ts [pay.ts]
+import { Actions } from '@tempoxyz/auth'
+import { tempoModerato } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+const authorization = await Actions.redirect.complete(auth)
+if (!authorization) throw new Error('Sign in first.')
+
+const client = createClient({ account: authorization.account, chain: tempoModerato, feeToken: alphaUsd })
+
+// The first transaction carries the key authorization, which registers the key on Tempo.
+const { receipt } = await client.token.transferSync({ amount: 1_000_000n, to: recipient, token: alphaUsd })
+```
+
+Each transaction pays a small network fee in AlphaUSD. To keep the key across page loads, store `authorization.key` in IndexedDB and rebuild the account with `Key.toAccount`. `Actions.signOut` ends the sign-in session; the key stays valid on Tempo until it expires.
+
+<span id="integrate-accounts" />
+<span id="connect-tempo-wallet" />
 
 ## Connect a self-custodial wallet instead
 

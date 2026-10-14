@@ -1,0 +1,62 @@
+---
+title: Private policies
+seoTitle: Hide Approvers and Rules with Private Policies on Tempo | Tempo Docs
+description: Replace a group of signers with one signer whose members and rule stay off chain, while Tempo still verifies a zero-knowledge proof that the rule approved.
+---
+
+# Private policies
+
+:::warning
+**Not live yet.** Private policies ([TIP-1136](https://tips.sh/1136)) are in early development and aren't on any Tempo network yet, including devnet. Behavior may change.
+:::
+
+A private policy is one signer that stands for a hidden rule, such as any 3 of 7 approvers, or a Google login, a Privy login, and a passkey together. Observers see that the policy approved, not who approved, and losing the policy data means the policy can't approve again.
+
+<span id="private-policies" />
+<span id="experimental-private-policies" />
+
+## What a private policy hides
+
+A public [signing threshold](/docs/accounts/policies/signing-thresholds) lists every signer on chain, so anyone can see which logins a customer uses or which approvers a treasury has. A private policy keeps those details with the policy's holders:
+
+| Public | Known only to the policy's holders |
+| --- | --- |
+| The policy signer, its weight, and that it approved | The members, threshold, and roles |
+| The exact transaction or access key it approved | Which members or factors approved |
+| Payments, balances, and timing | The Google account, phone number, and passkey |
+
+<span id="verified-facts-as-approval-factors" />
+
+A policy can include a verified fact as a factor, such as "passkey and KYC passed". Verified facts support your compliance checks; they don't replace your compliance program.
+
+<span id="how-a-private-policy-approves" />
+
+## How Tempo checks a private policy
+
+- The account lists a commitment to the policy, not the policy itself.
+- Each approval is a zero-knowledge proof that the policy approved one exact transaction or access key grant, for this account and its current signers.
+- The policy adds its weight like any signer. The account's other signers and threshold still apply.
+
+<span id="keep-policy-backups" />
+<span id="keep-private-policy-backups" />
+
+## Set a private policy
+
+Installing a private policy is a signer change: the account's current signers add the policy's commitment as a signer, at a weight, in one signer update approved at the current threshold. Changing the policy later is another signer change. It voids pending proofs, but doesn't revoke access keys the policy authorized. The SDK doesn't support private policies yet; [TIP-1136](https://tips.sh/1136) defines the commitment and proof formats.
+
+Without the policy data, the policy can't approve:
+
+- Keep encrypted backups in more than one place, such as two devices and a hosted store. Hosted storage can withhold or lose the data, but can't read it or change the policy.
+- Keep a backup signer outside the policy. A lost policy can't approve its own recovery.
+- Restore a backup of a new policy on another device before you install it.
+
+<span id="private-policy-limits" />
+
+## Private policy limits
+
+- Conditions checked at key grant don't constrain later payments. The key enforces only its public [limits](/docs/accounts/access-keys#access-key-limits). To enforce a hidden vendor list or budget, approve each payment with a proof.
+- The prover sees the evidence it proves with, but can't forge an approval. Prove on the device to keep the evidence there.
+- A login provider can vouch falsely for its own factor, but can't satisfy the other factors.
+- Distinct members aren't necessarily distinct people. To require independent providers, write it into the policy.
+
+Specifications: [private policies](https://tips.sh/1136), [configurable accounts](https://tips.sh/1107), [configurable account access keys](https://tips.sh/1111).

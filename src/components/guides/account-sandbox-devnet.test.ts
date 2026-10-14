@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   type AccessKey,
   type ActionRequest,
@@ -8,8 +8,10 @@ import {
   addAccessKey,
   addSigner,
   loadPreset,
+  removeSigner,
   type Signer,
   type SignerKind,
+  setApprovalRules,
   setThreshold,
   signerKinds,
 } from './account-sandbox'
@@ -17,24 +19,31 @@ import {
   accessKeySpec,
   attachHash,
   authorizationParameters,
+  authorizeKeyCall,
   checkDevnet,
   chooseQuorum,
   createDevnetAdapter,
   DevnetRejection,
+  devnetBlocker,
   devnetKeyType,
   devnetToken,
   isForeignCommitment,
+  loginBlocker,
   mapDevnetError,
+  needsApprovalRules,
   needsFunds,
   rebaseOnto,
+  revokeKeyCall,
   sameConfig,
   sendsTransaction,
   sessionKey,
+  setLiveLogins,
   unitsToUsd,
   upgradeConfig,
   upgradeSalt,
   usdToUnits,
 } from './account-sandbox-devnet'
+import { LoginError, type SignInResult } from './account-sandbox-oidc'
 
 function signer(id: string, kind: SignerKind, weight: number, lost = false): Signer {
   return {
@@ -65,11 +74,15 @@ describe('units', () => {
 })
 
 describe('devnetKeyType', () => {
-  it('uses each signer kind’s scheme', () => {
+  it('uses each signer kind’s scheme, and no key for logins', () => {
     const types = Object.fromEntries(
       (Object.keys(signerKinds) as SignerKind[]).map((kind) => [kind, devnetKeyType(kind)]),
     )
     expect(types).toEqual({
+      google: null,
+      privy: null,
+      apple: null,
+      sso: null,
       'private-key': 'secp256k1',
       passkey: 'webAuthn',
       device: 'p256',
@@ -169,13 +182,105 @@ describe('chooseQuorum', () => {
   })
 })
 
+describe('devnetBlocker', () => {
+  const reason = 'Logins aren’t live on devnet yet.'
+
+  it('blocks accounts with a login signer, applied or draft', () => {
+    expect(devnetBlocker(loadPreset('multi-factor'))).toBe(reason)
+    expect(devnetBlocker(addSigner(loadPreset('from-scratch'), 'google'))).toBe(reason)
+  })
+
+  it('allows accounts whose signers all sign for real', () => {
+    expect(devnetBlocker(loadPreset('from-scratch'))).toBeNull()
+    expect(devnetBlocker(loadPreset('team-treasury'))).toBeNull()
+    expect(devnetBlocker(loadPreset('team-account'))).toBeNull()
+  })
+
+  it('ignores removed logins', () => {
+    const multiFactor = loadPreset('multi-factor')
+    const passkeyOnly = removeSigner(removeSigner(multiFactor, 'google'), 'privy')
+    expect(passkeyOnly.signers.filter((item) => item.revoked).map((item) => item.id)).toEqual([
+      'google',
+      'privy',
+    ])
+    expect(devnetBlocker(passkeyOnly)).toBeNull()
+  })
+})
+
+describe('devnetBlocker with real logins', () => {
+  afterEach(() => setLiveLogins([]))
+  const logins = { logins: true }
+
+  it('runs Privy logins on your own account while the auth app is up', () => {
+    const scratch = loadPreset('from-scratch')
+    // Privy is live only while the relay's config lists it.
+    expect(loginBlocker('privy')).toBe('Start the local auth app to use logins on devnet.')
+    setLiveLogins(['privy'])
+    expect(devnetBlocker(addSigner(scratch, 'privy'), logins)).toBeNull()
+  })
+
+  it('blocks example logins, Google, Apple, and SSO', () => {
+    setLiveLogins(['privy', 'google'])
+    expect(devnetBlocker(loadPreset('multi-factor'), logins)).toBe(
+      'This example’s logins aren’t live on devnet.',
+    )
+    const scratch = loadPreset('from-scratch')
+    expect(devnetBlocker(addSigner(scratch, 'google'), logins)).toBe(
+      'Google logins aren’t live yet.',
+    )
+    expect(devnetBlocker(addSigner(scratch, 'apple'), logins)).toBe('Apple logins aren’t live yet.')
+    expect(devnetBlocker(addSigner(scratch, 'sso'), logins)).toBe('SSO logins aren’t live yet.')
+    expect(loginBlocker('passkey')).toBeNull()
+  })
+
+  it('blocks every login while the auth app is down', () => {
+    setLiveLogins([])
+    expect(loginBlocker('privy')).toBe('Start the local auth app to use logins on devnet.')
+    expect(devnetBlocker(addSigner(loadPreset('from-scratch'), 'privy'), logins)).toBe(
+      'Start the local auth app to use logins on devnet.',
+    )
+  })
+
+  it('creates no devnet account when a sign-in is cancelled', async () => {
+    setLiveLogins(['privy'])
+    const adapter = createDevnetAdapter({ rpcUrl: 'http://127.0.0.1:9', passkeys: 'headless' })
+    const account = addSigner(loadPreset('from-scratch'), 'privy')
+    const requestSignIn = vi.fn(async () => null)
+    await expect(adapter.prepare(account, { requestSignIn })).rejects.toThrow('Sign-in cancelled.')
+    expect(requestSignIn).toHaveBeenCalledWith({
+      method: 'privy',
+      signer: 'Privy login',
+      reason: 'add',
+    })
+    expect(await adapter.inspect('from-scratch')).toBeUndefined()
+  })
+})
+
 describe('devnet adapter refusals', () => {
-  // Nothing here reaches a network: missing WebAuthn and unreachable devnet fail first.
+  // Nothing here reaches a network: blocked accounts and missing WebAuthn fail first.
   const unreachable = 'http://127.0.0.1:9'
   const pay: ActionRequest = {
     action: { type: 'payment', amount: 50 },
     approver: { type: 'signers', signerIds: ['passkey'] },
   }
+
+  it('refuses blocked accounts without creating keys', async () => {
+    const adapter = createDevnetAdapter({ rpcUrl: unreachable, passkeys: 'headless' })
+    const account = loadPreset('multi-factor')
+    await expect(adapter.prepare(account)).rejects.toThrow(DevnetRejection)
+    await expect(adapter.prepare(account)).rejects.toThrow('Logins aren’t live on devnet yet.')
+    const synced = await adapter.sync(account, setThreshold(account, 1))
+    expect(synced.account.notice).toBe('Logins aren’t live on devnet yet.')
+    expect(synced.account.threshold).toBe(account.threshold)
+    expect(synced.hash).toBeUndefined()
+    const submitted = await adapter.submit(account, pay)
+    expect(submitted.result).toEqual({
+      ok: false,
+      code: 'network-error',
+      message: 'Logins aren’t live on devnet yet.',
+    })
+    expect(await adapter.inspect('multi-factor')).toBeUndefined()
+  })
 
   it('fails passkey signers when the browser has no WebAuthn', async () => {
     const adapter = createDevnetAdapter({ rpcUrl: unreachable })
@@ -261,6 +366,23 @@ describe('mapDevnetError', () => {
     expect(mapDevnetError(error)).toEqual({ code, message })
   })
 
+  it('maps login errors and expired proofs', () => {
+    expect(mapDevnetError(new LoginError('cancelled', 'Sign-in cancelled.'))).toEqual({
+      code: 'no-approver',
+      message: 'Sign-in cancelled.',
+    })
+    expect(
+      mapDevnetError(
+        new LoginError('too-many-logins', 'A transaction can carry at most two logins.'),
+      ),
+    ).toMatchObject({ code: 'login-limit' })
+    expect(
+      mapDevnetError(
+        new Error('ZK signature expired at 1791547554, before block timestamp 1791547586'),
+      ),
+    ).toEqual({ code: 'no-approver', message: 'The login expired. Sign in again.' })
+  })
+
   it('maps WebAuthn errors anywhere in the cause chain', () => {
     const dom = (name: string) => Object.assign(new Error(name), { name })
     expect(mapDevnetError(new Error('create failed', { cause: dom('NotAllowedError') }))).toEqual({
@@ -284,6 +406,29 @@ describe('mapDevnetError', () => {
       code: 'network-error',
       message: 'Devnet: primitive root key retired for account 0x52',
     })
+  })
+})
+
+describe('approval rules on devnet', () => {
+  const pay = (amount: number): ActionRequest => ({
+    action: { type: 'payment', amount },
+    approver: { type: 'signers', signerIds: ['finance', 'operations'] },
+  })
+
+  it('finds payments that need an approval-rule tier', () => {
+    const rules = loadPreset('approval-rules')
+    expect(needsApprovalRules(rules, pay(6_000))).toBe(true)
+    expect(needsApprovalRules(rules, pay(5_000))).toBe(false)
+    expect(needsApprovalRules(loadPreset('team-treasury'), pay(6_000))).toBe(false)
+  })
+
+  it('refuses rule changes as not live, without reaching devnet', async () => {
+    const adapter = createDevnetAdapter({ rpcUrl: 'http://127.0.0.1:9', passkeys: 'headless' })
+    const previous = loadPreset('approval-rules')
+    const synced = await adapter.sync(previous, setApprovalRules(previous, false))
+    expect(synced.account.notice).toBe('Approval rules aren’t live on devnet yet.')
+    expect(synced.account.rules.enabled).toBe(true)
+    expect(synced.hash).toBeUndefined()
   })
 })
 
@@ -460,6 +605,24 @@ describe('keys prepared before the step that adds them', () => {
         /^0x[0-9a-fA-F]{40}$/,
       )
   })
+
+  it('adds a login from a completed sign-in instead of asking for one', async () => {
+    setLiveLogins(['privy'])
+    const devnet = adapter()
+    const address = '0x00000000000000000000000000000000000000ee' as const
+    const done = { method: 'privy', email: 'reader@example.com', owner: { address } }
+    const requestSignIn = vi.fn(async () => null)
+    const options = { signIns: [done as unknown as SignInResult], requestSignIn }
+    expect(await devnet.prepareSigner({ kind: 'privy', name: 'Privy login' }, options)).toEqual({
+      address,
+    })
+    expect(requestSignIn).not.toHaveBeenCalled()
+    // Each completed sign-in adds one login.
+    await expect(
+      devnet.prepareSigner({ kind: 'privy', name: 'Privy login' }, options),
+    ).rejects.toThrow('Sign-in cancelled.')
+    expect(requestSignIn).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('test funds', () => {
@@ -502,5 +665,50 @@ describe('upgrading a plain key account', () => {
       threshold: 2,
       version: 1n,
     })
+  })
+})
+
+describe('keychain calls', () => {
+  const token = '0x20C0000000000000000000000000000000000001' as const
+  const keyId = '0x4444444444444444444444444444444444444444' as const
+
+  it('authorizes a scoped, limited key through the keychain', async () => {
+    const { decodeFunctionData } = await import('viem')
+    const Tempo = await import('viem/tempo')
+    const recipient = '0x3333333333333333333333333333333333333333' as const
+    const call = authorizeKeyCall({
+      keyId,
+      keyType: 'p256',
+      expiry: 1_800_000_000,
+      limits: [{ token, limit: 10_000_000n, period: 86_400 }],
+      scopes: [Tempo.Scopes.tip20(token).transfer({ recipients: [recipient] })],
+    })
+    expect(call.to.toLowerCase()).toBe('0xaaaaaaaa00000000000000000000000000000000')
+    const { functionName, args } = decodeFunctionData({
+      abi: Tempo.Abis.accountKeychain,
+      data: call.data,
+    }) as { functionName: string; args: readonly unknown[] }
+    expect(functionName).toBe('authorizeKey')
+    expect(args[0]).toBe(keyId)
+    expect(args[1]).toBe(1)
+    expect(args[2]).toEqual({
+      expiry: 1_800_000_000n,
+      enforceLimits: true,
+      limits: [{ token, amount: 10_000_000n, period: 86_400n }],
+      allowAnyCalls: false,
+      allowedCalls: [
+        { target: token, selectorRules: [{ selector: '0xa9059cbb', recipients: [recipient] }] },
+      ],
+    })
+  })
+
+  it('revokes keys through the keychain', async () => {
+    const { decodeFunctionData } = await import('viem')
+    const Tempo = await import('viem/tempo')
+    const revoke = decodeFunctionData({
+      abi: Tempo.Abis.accountKeychain,
+      data: revokeKeyCall(keyId).data,
+    }) as { functionName: string; args: readonly unknown[] }
+    expect(revoke).toMatchObject({ functionName: 'revokeKey', args: [keyId] })
   })
 })

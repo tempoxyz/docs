@@ -63,6 +63,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.101.1
         version: 5.101.2(react@19.2.7)
+      '@tempoxyz/auth':
+        specifier: 0.0.0-pr-62.sha-5472ae7
+        version: 0.0.0-pr-62.sha-5472ae7(typescript@6.0.3)(viem@2.57.5(typescript@6.0.3)(zod@4.4.3))(zod@4.4.3)
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(react@19.2.7)(vue@3.5.38(typescript@6.0.3))
@@ -93,6 +96,9 @@ importers:
       ox:
         specifier: 0.14.54
         version: 0.14.54(typescript@6.0.3)(zod@4.4.3)
+      ox-zk:
+        specifier: https://pkg.pr.new/ox@95d0516
+        version: ox@https://pkg.pr.new/ox@95d0516(typescript@6.0.3)(zod@4.4.3)
       posthog-js:
         specifier: ^1.393.5
         version: 1.396.4
@@ -2461,6 +2467,11 @@ packages:
     resolution: {integrity: sha512-MWb9tNHjpar3sP34b8+3A4I5j9akveoPXIYqqp7/ipyWd49a/kso+1S1LqEmAVR/+g/k1WWTJC4ktvdCGWgXYQ==}
     peerDependencies:
       vue: ^2.7.0 || ^3.0.0
+
+  '@tempoxyz/auth@0.0.0-pr-62.sha-5472ae7':
+    resolution: {integrity: sha512-edgjF7NqGjcJZ9S4G47F/bJASeo0N8WrOpouOk6q9RMkN3jYAtcoVFHZbJ3cuoAq5E7TBV8WDUz0sS4et8q8bQ==}
+    peerDependencies:
+      viem: '>=2.57.5-0'
 
   '@toon-format/toon@2.3.1':
     resolution: {integrity: sha512-sWqEMeAJGMda9qRrfPKrX3C4c33CO9SJuvJzzrcBEn5sbDB+k6pSLkDsfN0rVnLQwR97MV3sDgVbcxQNsq8xVw==}
@@ -5082,6 +5093,15 @@ packages:
 
   ox@0.14.56:
     resolution: {integrity: sha512-Feinlj+deWEam6RIwurRE+eHZ2N3hoUb3AAjQ10BmxRCYIymfqNkv0eZ+4ln4GkgDmSGLD2rGtTMqsFYSVDC6w==}
+    peerDependencies:
+      typescript: '>=5.4.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  ox@https://pkg.pr.new/ox@95d0516:
+    resolution: {tarball: https://pkg.pr.new/ox@95d0516}
+    version: 0.14.55-ec3b438.0
     peerDependencies:
       typescript: '>=5.4.0'
     peerDependenciesMeta:
@@ -8700,6 +8720,14 @@ snapshots:
       '@tanstack/virtual-core': 3.17.1
       vue: 3.5.38(typescript@6.0.3)
 
+  '@tempoxyz/auth@0.0.0-pr-62.sha-5472ae7(typescript@6.0.3)(viem@2.57.5(typescript@6.0.3)(zod@4.4.3))(zod@4.4.3)':
+    dependencies:
+      ox: 0.14.56(typescript@6.0.3)(zod@4.4.3)
+      viem: 2.57.5(typescript@6.0.3)(zod@4.4.3)
+    transitivePeerDependencies:
+      - typescript
+      - zod
+
   '@toon-format/toon@2.3.1': {}
 
   '@tybys/wasm-util@0.10.3':
@@ -11491,6 +11519,21 @@ snapshots:
       - zod
 
   ox@0.14.56(typescript@6.0.3)(zod@4.4.3):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/ciphers': 1.3.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.2.4(typescript@6.0.3)(zod@4.4.3)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 6.0.3
+    transitivePeerDependencies:
+      - zod
+
+  ox@https://pkg.pr.new/ox@95d0516(typescript@6.0.3)(zod@4.4.3):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/ciphers': 1.3.0

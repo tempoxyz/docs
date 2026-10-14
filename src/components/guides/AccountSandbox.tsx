@@ -6,11 +6,13 @@ import { privateKeyToAddress } from 'viem/accounts'
 import LucideAppWindow from '~icons/lucide/app-window'
 import LucideArrowUpRight from '~icons/lucide/arrow-up-right'
 import LucideBot from '~icons/lucide/bot'
+import LucideBuilding2 from '~icons/lucide/building-2'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronRight from '~icons/lucide/chevron-right'
 import LucideCircleAlert from '~icons/lucide/circle-alert'
 import LucideCircleCheck from '~icons/lucide/circle-check'
 import LucideCircleDot from '~icons/lucide/circle-dot'
+import LucideCircleUserRound from '~icons/lucide/circle-user-round'
 import LucideCircleX from '~icons/lucide/circle-x'
 import LucideCopy from '~icons/lucide/copy'
 import LucideFingerprint from '~icons/lucide/fingerprint'
@@ -20,6 +22,7 @@ import LucideLifeBuoy from '~icons/lucide/life-buoy'
 import LucideMinus from '~icons/lucide/minus'
 import LucidePlus from '~icons/lucide/plus'
 import LucideServer from '~icons/lucide/server'
+import LucideShieldCheck from '~icons/lucide/shield-check'
 import LucideSlidersHorizontal from '~icons/lucide/sliders-horizontal'
 import LucideSmartphone from '~icons/lucide/smartphone'
 import LucideTriangleAlert from '~icons/lucide/triangle-alert'
@@ -35,6 +38,7 @@ import {
   type ActionRequest,
   type ActionResult,
   accessKeyDetail,
+  accessKeyStatus,
   accessKeyTemplateName,
   accessKeyTemplateOptions,
   addAccessKey,
@@ -47,6 +51,7 @@ import {
   formatUsd,
   guidedActions,
   isCreated,
+  isLogin,
   type LogEntry,
   loadPreset,
   type Notice,
@@ -67,11 +72,15 @@ import {
   signerKinds,
   signerStatus,
 } from './account-sandbox'
-import type { DevnetAdapter, DevnetCallOptions } from './account-sandbox-devnet'
+import type { DevnetAdapter, DevnetCallOptions, LoginSignInRequest } from './account-sandbox-devnet'
 import { type AccountDiff, diffAccounts } from './account-sandbox-diff'
 import { thisDevice, thisDevicePasskey } from './this-device'
 
 const signerIcons: Record<SignerKind, typeof LucideFingerprint> = {
+  google: LucideCircleUserRound,
+  privy: LucideCircleUserRound,
+  apple: LucideCircleUserRound,
+  sso: LucideBuilding2,
   'private-key': LucideKeyRound,
   passkey: LucideFingerprint,
   device: LucideSmartphone,
@@ -96,6 +105,7 @@ const logIcons: Record<LogEntry['kind'], typeof LucideFingerprint> = {
   preset: LucideCircleDot,
   event: LucideCircleDot,
   config: LucideSlidersHorizontal,
+  rules: LucideShieldCheck,
   key: LucideKeyRound,
   payment: LucideArrowUpRight,
   approval: LucideCheck,
@@ -158,7 +168,9 @@ type Network = ReturnType<typeof useNetwork>
 
 /**
  * Tempo Accounts devnet, once this page can reach it. Each account is created on devnet with its first
- * signer, then reused by every instance on the page that shows it.
+ * signer, then reused by every instance on the page that shows it. Accounts with signers devnet
+ * can't back, such as Google, Apple, and SSO logins, can't act. Privy logins sign in through a
+ * popup.
  */
 function useNetwork() {
   const [devnet, setDevnet] = React.useState<{
@@ -167,11 +179,27 @@ function useNetwork() {
   } | null>(null)
   const [checking, setChecking] = React.useState(true)
   const [status, setStatus] = React.useState<string | null>(null)
+  /** A sign-in the adapter is waiting for the reader to start. */
+  const [signIn, setSignIn] = React.useState<{
+    request: LoginSignInRequest
+    resolve: (popup: Window | null) => void
+  } | null>(null)
+  /** Whether a sign-in window is open, and how to cancel it. */
+  const [signingIn, setSigningIn] = React.useState(false)
+  const cancel = React.useRef<AbortController | null>(null)
 
   React.useEffect(() => {
     let active = true
     loadDevnet()
       .then(async (module) => {
+        // Logins are live only while the local auth app answers. Their proofs verify on a
+        // separate devnet, so a sandbox that can add them runs there.
+        const logins = await module.probeLogins().catch(() => undefined)
+        if (logins?.size && (await module.probeLoginDevnet())) {
+          if (active) setDevnet({ adapter: module.getLoginDevnetAdapter(), module })
+          return
+        }
+        module.setLiveLogins([])
         if (!(await module.probeDevnet())) return
         if (active) setDevnet({ adapter: module.getDevnetAdapter(), module })
       })
@@ -182,26 +210,51 @@ function useNetwork() {
     }
   }, [])
 
-  /** Show `label` while `run` works, and passkey prompts while they're open. */
+  function blocker(account: SandboxAccount) {
+    return devnet?.module.devnetBlocker(account, { logins: true }) ?? null
+  }
+
+  /** Show `label` while `run` works, and passkey and sign-in prompts while they're open. */
   async function track<T>(
     live: NonNullable<typeof devnet>,
     label: string,
     run: (options: DevnetCallOptions) => Promise<T>,
+    popup?: Window | null,
   ) {
     setStatus(label)
+    const controller = new AbortController()
+    cancel.current = controller
     try {
       return await run({
-        onPrompt: (prompt) => setStatus(prompt ? live.module.devnetPromptLabels[prompt] : label),
+        onPrompt: (prompt) => {
+          setStatus(prompt ? live.module.devnetPromptLabels[prompt] : label)
+          setSigningIn(Boolean(prompt?.startsWith('sign-in-')))
+        },
+        popup,
+        signal: controller.signal,
+        // The sign-in window must open from a click, so the reader starts it from the prompt.
+        requestSignIn: (request) =>
+          new Promise<Window | null>((resolve) => setSignIn({ request, resolve })),
       })
     } finally {
       setStatus(null)
+      setSignIn(null)
+      setSigningIn(false)
+      cancel.current = null
     }
   }
 
-  async function prepare(live: NonNullable<typeof devnet>, account: SandboxAccount) {
+  async function prepare(
+    live: NonNullable<typeof devnet>,
+    account: SandboxAccount,
+    popup?: Window | null,
+  ) {
     if (account.devnet) return account
-    return track(live, 'Creating account on devnet…', (options) =>
-      live.adapter.prepare(account, options),
+    return track(
+      live,
+      'Creating account on devnet…',
+      (options) => live.adapter.prepare(account, options),
+      popup,
     )
   }
 
@@ -213,34 +266,65 @@ function useNetwork() {
     ready: Boolean(devnet),
     checking,
     status,
+    blocker,
+    signIn: signIn?.request ?? null,
+    signingIn,
+    cancelSignIn: () => cancel.current?.abort(),
+    /** Start the requested sign-in (in this click), or cancel it. */
+    answerSignIn(start: boolean) {
+      if (!signIn) return
+      signIn.resolve(start ? (devnet?.module.openSignInWindow() ?? null) : null)
+      setSignIn(null)
+    },
+    /** Why a login of `kind` can't be added on devnet, or `null` when it can. */
+    loginBlocker: (kind: SignerKind) =>
+      devnet ? devnet.module.loginBlocker(kind) : isLogin({ kind }) ? 'Devnet unreachable.' : null,
+    /** Open a sign-in window now, from the click that adds a login. */
+    openSignInWindow: () => devnet?.module.openSignInWindow() ?? null,
     /**
      * Apply an edit on devnet. The first signer creates the account there; later edits send their
-     * updates.
+     * updates. `popup` is a sign-in window the click opened, for an edit that adds a login.
      */
-    async commit(previous: SandboxAccount, next: SandboxAccount) {
-      if (!devnet)
-        return { before: previous, after: { ...previous, notice: 'Devnet unreachable.' } }
+    async commit(previous: SandboxAccount, next: SandboxAccount, popup?: Window | null) {
+      const reason = blocker(previous) ?? blocker(next)
+      if (!devnet || reason) {
+        popup?.close()
+        return {
+          before: previous,
+          after: { ...previous, notice: reason ?? 'Devnet unreachable.' },
+        }
+      }
       const live = devnet
       try {
         if (!isCreated(previous)) {
-          const after = await track(live, 'Creating account on devnet…', (options) =>
-            live.adapter.prepare(next, options),
+          const after = await track(
+            live,
+            'Creating account on devnet…',
+            (options) => live.adapter.prepare(next, options),
+            popup,
           )
           return { before: previous, after }
         }
         const before = await prepare(live, previous)
         const draft = before === previous ? next : live.module.rebaseOnto(previous, next, before)
-        const { account } = await track(live, 'Updating devnet…', (options) =>
-          live.adapter.sync(before, draft, options),
+        const { account } = await track(
+          live,
+          'Updating devnet…',
+          (options) => live.adapter.sync(before, draft, options),
+          popup,
         )
         return { before, after: account }
       } catch (error) {
         return { before: previous, after: { ...previous, notice: failure(live, error) } }
+      } finally {
+        if (popup && !popup.closed) popup.close()
       }
     },
     /** Get test funds from the devnet faucet. Creates the account on devnet first if needed. */
     async fund(account: SandboxAccount) {
-      if (!devnet) return { before: account, after: { ...account, notice: 'Devnet unreachable.' } }
+      const reason = blocker(account)
+      if (!devnet || reason)
+        return { before: account, after: { ...account, notice: reason ?? 'Devnet unreachable.' } }
       const live = devnet
       const { account: after, hash } = await track(live, 'Getting test funds…', (options) =>
         live.adapter.fund(account, options),
@@ -249,7 +333,9 @@ function useNetwork() {
     },
     /** Upgrade a plain key account in place, at the same address. */
     async upgrade(account: SandboxAccount) {
-      if (!devnet) return { before: account, after: { ...account, notice: 'Devnet unreachable.' } }
+      const reason = blocker(account)
+      if (!devnet || reason)
+        return { before: account, after: { ...account, notice: reason ?? 'Devnet unreachable.' } }
       const live = devnet
       const { account: after, hash } = await track(live, 'Upgrading on devnet…', (options) =>
         live.adapter.upgrade(account, options),
@@ -257,11 +343,12 @@ function useNetwork() {
       return { before: account, after, hash }
     },
     async submit(account: SandboxAccount, request: ActionRequest) {
-      if (!devnet) {
+      const reason = blocker(account)
+      if (!devnet || reason) {
         const result: ActionResult = {
           ok: false,
           code: 'network-error',
-          message: 'Devnet unreachable.',
+          message: reason ?? 'Devnet unreachable.',
         }
         return { before: account, account, result }
       }
@@ -286,6 +373,8 @@ function useNetwork() {
 
 function networkBadge(network: Network, account: SandboxAccount) {
   if (!isCreated(account)) return undefined
+  const reason = network.blocker(account)
+  if (reason) return reason.replace(/\.$/, '')
   if (network.status) return network.status
   return account.devnet ? 'Tempo Accounts devnet' : 'Not on devnet yet'
 }
@@ -295,7 +384,7 @@ const browserKeyKinds = new Set<SignerKind>(['hardware', 'wallet-provider', 'rec
 
 /**
  * What a signer is on devnet. Example keys are keys in this browser and example passkeys are real
- * passkeys on this device, whatever the example calls them.
+ * passkeys on this device, whatever the example calls them. Logins show their real sign-in.
  */
 function signerDetail(signer: Signer) {
   // A generated key shows the address it controls: the signer as the account records it.
@@ -393,11 +482,19 @@ type SignerChoice = {
 
 /**
  * Signers the reader can add to their own account: a passkey on this device, a device key in this
- * browser, and a generated private key. The passkey comes first when this browser can make one; it
- * is the only choice that prompts, for Touch ID or similar.
+ * browser, Privy (when the local auth app offers it), and a generated private key. The passkey comes
+ * first when this browser can make one; it is the only choice that prompts, for Touch ID or similar.
  */
-function signerChoices(platform: boolean, options: { first?: boolean } = {}): SignerChoice[] {
+function signerChoices(
+  network: Network,
+  platform: boolean,
+  options: { first?: boolean } = {},
+): SignerChoice[] {
   const { unlock } = thisDevice()
+  const login = (kind: SignerKind) => {
+    if (!network.loginBlocker(kind)) return null
+    return network.checking || network.ready ? 'start the auth app' : 'needs devnet'
+  }
   const choices: SignerChoice[] = [
     {
       kind: 'passkey',
@@ -405,6 +502,7 @@ function signerChoices(platform: boolean, options: { first?: boolean } = {}): Si
       reason: platform ? null : 'No Touch ID or platform authenticator in this browser',
     },
     { kind: 'device', label: 'Device key', reason: null },
+    { kind: 'privy', label: 'Privy login', reason: login('privy') },
     { kind: 'private-key', label: 'Private key', reason: null },
   ]
   if (options.first)
@@ -477,7 +575,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   const receipt = before && lastHash !== before.devnet?.lastHash ? lastHash : undefined
   const created = isCreated(account)
   const platform = usePlatformAuthenticator()
-  const choices = signerChoices(platform)
+  const choices = signerChoices(network, platform)
   /** A generated private-key signer, shown once. */
   const [secret, setSecret] = React.useState<{ id: string; value: string } | null>(null)
   const shownSecret =
@@ -497,21 +595,28 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   const shownTab: Tab = account.legacy ? 'pay' : tab
   const [choosingBackup, setChoosingBackup] = React.useState(false)
 
-  function change(next: SandboxAccount) {
+  function change(next: SandboxAccount, popup?: Window | null) {
     setSecret(null)
     setChoosingBackup(false)
-    void network.commit(account, next).then(({ before, after }) => {
+    void network.commit(account, next, popup).then(({ before, after }) => {
       setBefore(before)
       setAccount(after)
     })
   }
 
+  /** Adding a login opens its sign-in in this click, so the browser allows the window. */
   function addSignerOf(kind: SignerKind) {
     if (kind === 'private-key') {
       void addPrivateKeySigner()
       return
     }
-    change(addSigner(account, kind))
+    const next = addSigner(account, kind)
+    const added = next.signers.at(-1)
+    const applies =
+      added &&
+      !account.signers.some((signer) => signer.id === added.id) &&
+      next.committed.owners.some((owner) => owner.id === added.id)
+    change(next, isLogin({ kind }) && applies ? network.openSignInWindow() : undefined)
   }
 
   /** A single-key account (an EOA), generated in this click: the key's own address, shown once. */
@@ -572,6 +677,22 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
       data-variant={variant}
       aria-busy={Boolean(network.status)}
     >
+      {network.signIn && (
+        <SignInPrompt
+          request={network.signIn}
+          onStart={() => network.answerSignIn(true)}
+          onCancel={() => network.answerSignIn(false)}
+        />
+      )}
+      {network.signingIn && network.status && (
+        <div className="as-signin" role="status">
+          <LucideCircleUserRound aria-hidden="true" />
+          <span>{network.status}</span>
+          <button type="button" className="as-link" onClick={network.cancelSignIn}>
+            Cancel sign-in
+          </button>
+        </div>
+      )}
       <fieldset className="as-lock" disabled={Boolean(network.status)}>
         <legend className="as-hidden">Your account</legend>
 
@@ -609,7 +730,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
           {!created ? (
             <SignerChooser
               label="First signer"
-              choices={signerChoices(platform, { first: true })}
+              choices={signerChoices(network, platform, { first: true })}
               onChoose={(choice) =>
                 choice.legacy ? void addLegacyAccount() : addSignerOf(choice.kind)
               }
@@ -711,7 +832,9 @@ export function AccountState(props: {
   const signers = account.signers.filter(
     (signer) => !signer.revoked || diff?.signers[signer.id]?.change === 'removed',
   )
-  const keys = account.accessKeys.filter((key) => key.status !== 'revoked' || diff?.keys[key.id])
+  const keys = account.accessKeys.filter(
+    (key) => accessKeyStatus(account, key) !== 'revoked' || diff?.keys[key.id],
+  )
   const updates = account.version - account.startVersion
   const genesis = account.genesis?.owners[0]
   const genesisSigner = genesis && account.signers.find((signer) => signer.id === genesis.id)
@@ -750,16 +873,19 @@ export function AccountState(props: {
       {account.address && (
         <div className="as-state-rule">
           <span className="as-label">Approval</span>
-          {health.approval ? (
+          {health.valid ? (
             <ul>
-              <li>
-                <strong data-changed={Boolean(diff?.threshold)}>
-                  {diff?.threshold
-                    ? `weight ${diff.threshold.from} → ${diff.threshold.to}`
-                    : `weight ${health.approval.weight}`}
-                </strong>{' '}
-                · {health.approval.summary}
-              </li>
+              {health.tiers.map((tier) => (
+                <li key={tier.id}>
+                  {health.tiers.length > 1 && <span className="as-muted">{tier.label}: </span>}
+                  <strong data-changed={tier.id === 'base' && Boolean(diff?.threshold)}>
+                    {tier.id === 'base' && diff?.threshold
+                      ? `weight ${diff.threshold.from} → ${diff.threshold.to}`
+                      : `weight ${tier.weight}`}
+                  </strong>{' '}
+                  · {tier.summary}
+                </li>
+              ))}
             </ul>
           ) : (
             <span className="as-bad">Not applied: fix the issue below.</span>
@@ -800,7 +926,12 @@ export function AccountState(props: {
           {keys.length > 0 ? (
             <ul className="as-state-list">
               {keys.map((key) => (
-                <StateKey key={key.id} accessKey={key} change={diff?.keys[key.id]} />
+                <StateKey
+                  key={key.id}
+                  account={account}
+                  accessKey={key}
+                  change={diff?.keys[key.id]}
+                />
               ))}
             </ul>
           ) : (
@@ -861,11 +992,12 @@ function StateSigner(props: {
 }
 
 function StateKey(props: {
+  account: SandboxAccount
   accessKey: AccessKey
   change: AccountDiff['keys'][string] | undefined
 }) {
-  const { accessKey: key, change } = props
-  const status = key.status
+  const { account, accessKey: key, change } = props
+  const status = accessKeyStatus(account, key)
   const Icon = keyIcons[key.kind]
   const left = remainingLimit(key)
   const tag =
@@ -873,9 +1005,11 @@ function StateKey(props: {
       ? 'Added'
       : status === 'revoked'
         ? 'Revoked'
-        : status === 'expired'
-          ? 'Expired'
-          : null
+        : status === 'paused'
+          ? 'Paused'
+          : status === 'expired'
+            ? 'Expired'
+            : null
   return (
     <li className="as-item" data-status={status} data-change={change?.change}>
       <span className="as-icon" aria-hidden="true">
@@ -919,13 +1053,13 @@ function PayPanel(props: {
   const [sent, setSent] = React.useState<{ result: ActionResult; amount: number } | null>(null)
   const [busy, setBusy] = React.useState(false)
   const owners = configuredSigners(account).filter((signer) => !signer.lost)
-  const keys = account.accessKeys.filter((key) => key.status !== 'revoked')
+  const keys = account.accessKeys.filter((key) => accessKeyStatus(account, key) !== 'revoked')
   const payingKey = payer.type === 'key' ? keys.find((key) => key.id === payer.id) : undefined
   // Signers pay $50. A key also offers an amount over its remaining limit, which devnet rejects.
   const amounts = payingKey ? [paymentAmount, overLimitAmount(payingKey)] : [paymentAmount]
   const amount = amounts.includes(chosenAmount) ? chosenAmount : paymentAmount
   const action = { type: 'payment' as const, amount }
-  const required = requiredWeight(account)
+  const required = requiredWeight(account, action)
   const request: ActionRequest | null =
     payer.type === 'signers'
       ? payer.ids.length > 0
@@ -1070,11 +1204,15 @@ function PayPanel(props: {
       ) : (
         <div className="as-outcome" aria-live="polite">
           {payer.type === 'signers' && (
-            <Meter value={weight} target={required} ok={Boolean(result?.ok)} />
+            <Meter value={weight} target={required.weight} ok={Boolean(result?.ok)} />
           )}
           <Outcome
             result={sent?.result ?? result}
-            empty={`Choose signers with weight ${required}, or a key.`}
+            empty={
+              required.weight === account.threshold
+                ? `Choose signers with weight ${required.weight}, or a key.`
+                : `Over $${formatUsd(account.rules.paymentLimit)} needs weight ${required.weight}.`
+            }
           />
           <button
             type="button"
@@ -1090,6 +1228,36 @@ function PayPanel(props: {
   )
 }
 
+/** Signer and threshold changes, one update each, at the same address. */
+const signInButtons: Record<LoginSignInRequest['method'], string> = {
+  privy: 'Sign in with Privy',
+}
+
+/** A sign-in devnet needs before it can continue. The window opens from this click. */
+function SignInPrompt(props: {
+  request: LoginSignInRequest
+  onStart: () => void
+  onCancel: () => void
+}) {
+  const { request, onStart, onCancel } = props
+  const message =
+    request.reason === 'renew'
+      ? `${request.signer} signed in over 10 minutes ago. Sign in again to approve.`
+      : `Sign in to add ${request.signer}.`
+  return (
+    <section className="as-signin" aria-label="Sign in">
+      <LucideCircleUserRound aria-hidden="true" />
+      <span>{message}</span>
+      <button type="button" className="as-button as-button-primary" onClick={onStart}>
+        {signInButtons[request.method]}
+      </button>
+      <button type="button" className="as-link" onClick={onCancel}>
+        Cancel
+      </button>
+    </section>
+  )
+}
+
 function SignersPanel(props: {
   account: SandboxAccount
   /** Signers devnet can back, with why any of them can't be added now. */
@@ -1102,10 +1270,10 @@ function SignersPanel(props: {
 }) {
   const { account, choices, choosingBackup, onCancelBackup, onAdd, onChange } = props
   const owners = configuredSigners(account)
-  // An example's own step, each a real update. Adding a backup is the same as Add signer, and
-  // losing a passkey sends nothing, so neither is offered here.
+  // An example's own step, each a real update. Adding a passkey is the same as Add signer, and
+  // losing one sends nothing, so neither is offered here.
   const steps = guidedActions(account).filter(
-    (item) => item.id !== 'add-backup' && item.id !== 'lose-passkey',
+    (item) => item.id !== 'add-passkey' && item.id !== 'lose-passkey',
   )
   return (
     <div className="as-panel-body">
@@ -1206,7 +1374,7 @@ function KeysPanel(props: {
   onChange: (account: SandboxAccount) => void
 }) {
   const { account, onChange } = props
-  const keys = account.accessKeys.filter((key) => key.status !== 'revoked')
+  const keys = account.accessKeys.filter((key) => accessKeyStatus(account, key) !== 'revoked')
   const [revealed, setRevealed] = React.useState<{ id: string; privateKey: string } | null>(null)
   // Shown once: only while the key it belongs to is on the account and this panel is open.
   const secret = revealed && keys.some((key) => key.id === revealed.id) ? revealed.privateKey : null

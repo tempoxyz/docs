@@ -28,7 +28,7 @@ A configurable account is one address controlled by a set of owner keys. Each ow
 | `salt` | `bytes32` | Any 32 bytes, fixed for the account's lifetime. A different salt gives the same owners a different address. |
 | `version` | `uint64` | `0` at creation, then `+1` per update |
 
-Each owner is the address of one secp256k1 (standard Ethereum), P-256, or WebAuthn (passkey) key. A configurable account can't be another account's owner, but it can be another account's [access key](/docs/development/account-keychain#access-keys-on-each-account-type).
+Each owner is the address of one secp256k1 (standard Ethereum), P-256, or WebAuthn (passkey) key, or of a [login](#login-signers). A configurable account can't be another account's owner, but it can be another account's [access key](/docs/development/account-keychain#access-keys-on-each-account-type).
 
 Tempo stores only a 32-byte hash of the configuration, not the owners themselves. Every approval carries the full configuration, which Tempo checks against that hash, so your app must [keep the configuration](#keep-the-current-configuration).
 
@@ -171,7 +171,17 @@ const isCurrent = stored === AccountConfig.getCommitment(saved.config)
 
 The stored hash is zero before registration. A mismatch means another update landed, and approvals built on the saved configuration fail.
 
-<span id="login-signers" />
+## Login signers
+
+A login owner approves with a `0x06` ZK signature: a proof that an identity provider signed a recent sign-in, plus a signature from the key that sign-in named. The owner address is the login's own address. Login signatures ([TIP-1131](https://tips.sh/1131)) are a draft specification and run only on a separate devnet.
+
+| Rule | Value |
+| --- | --- |
+| Proof lifetime | Up to 10 minutes after sign-in |
+| Per transaction | At most 2 ZK signatures |
+| Threshold | If the logins' weights together reach it, two of them must |
+
+To set up login owners, follow [OIDC logins](/docs/accounts/authentication/oidc).
 
 ## Verify owner approvals in a contract
 

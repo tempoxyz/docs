@@ -519,6 +519,7 @@ export default defineConfig({
               { text: 'Private keys', link: '/docs/accounts/authentication/private-keys' },
               { text: 'Device keys', link: '/docs/accounts/authentication/device-keys' },
               { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
+              { text: 'OIDC logins', link: '/docs/accounts/authentication/oidc' },
             ],
           },
           {
@@ -528,6 +529,8 @@ export default defineConfig({
             items: [
               { text: 'Signing thresholds', link: '/docs/accounts/policies/signing-thresholds' },
               { text: 'Receive policies', link: '/docs/accounts/policies/receive-policies' },
+              { text: 'Escalation rules', link: '/docs/accounts/policies/escalation-rules' },
+              { text: 'Private policies', link: '/docs/accounts/policies/private-policies' },
             ],
           },
           {
@@ -574,6 +577,10 @@ export default defineConfig({
               {
                 text: 'Embed wallets with a provider',
                 link: '/docs/accounts/guides/users/embed-wallets',
+              },
+              {
+                text: 'Sign users in with your login',
+                link: '/docs/accounts/guides/users/sign-in-with-your-login',
               },
               {
                 text: 'Add a recovery signer',
@@ -1450,12 +1457,12 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/identity-provider',
-      destination: '/docs/accounts/guides/users/embed-wallets',
+      destination: '/docs/accounts/guides/users/sign-in-with-your-login',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/relay',
-      destination: '/docs/accounts/authentication',
+      destination: '/docs/accounts/authentication/oidc#login-services',
       status: 301,
     },
     {
@@ -1465,22 +1472,22 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/authentication/email-otp',
-      destination: '/docs/accounts/authentication',
+      destination: '/docs/accounts/authentication/oidc#email-and-sms-codes',
       status: 301,
     },
     {
       source: '/docs/accounts/authentication/privy',
-      destination: '/docs/accounts/guides/users/embed-wallets#build-with-privy',
+      destination: '/docs/accounts/authentication/oidc#privy-logins',
       status: 301,
     },
     {
       source: '/docs/accounts/authentication/login-services',
-      destination: '/docs/accounts/authentication',
+      destination: '/docs/accounts/authentication/oidc#login-services',
       status: 301,
     },
     {
       source: '/docs/accounts/authentication/relays',
-      destination: '/docs/accounts/authentication',
+      destination: '/docs/accounts/authentication/oidc#login-services',
       status: 301,
     },
     {
@@ -1506,7 +1513,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/change-email',
-      destination: '/docs/accounts/key-management/remove-signers',
+      destination: '/docs/accounts/guides/users/sign-in-with-your-login#handle-an-email-change',
       status: 301,
     },
     {
@@ -1542,7 +1549,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/advanced/approval-rules',
-      destination: '/docs/accounts/policies',
+      destination: '/docs/accounts/policies/escalation-rules',
       status: 301,
     },
     {
@@ -1577,7 +1584,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/enterprise-sso',
-      destination: '/docs/accounts/guides/users/embed-wallets',
+      destination: '/docs/accounts/guides/users/sign-in-with-your-login',
       status: 301,
     },
     {
@@ -1626,26 +1633,6 @@ export default defineConfig({
       status: 301,
     },
     {
-      source: '/docs/accounts/authentication/oidc',
-      destination: '/docs/accounts/authentication',
-      status: 301,
-    },
-    {
-      source: '/docs/accounts/guides/users/sign-in-with-your-login',
-      destination: '/docs/accounts/guides/users',
-      status: 301,
-    },
-    {
-      source: '/docs/accounts/policies/escalation-rules',
-      destination: '/docs/accounts/policies',
-      status: 301,
-    },
-    {
-      source: '/docs/accounts/policies/private-policies',
-      destination: '/docs/accounts/policies',
-      status: 301,
-    },
-    {
       source: '/docs/accounts/recovery',
       destination: '/docs/accounts/key-management',
       status: 301,
@@ -1667,12 +1654,12 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/advanced/private-policies',
-      destination: '/docs/accounts/policies',
+      destination: '/docs/accounts/policies/private-policies',
       status: 301,
     },
     {
       source: '/docs/accounts/advanced/verified-facts',
-      destination: '/docs/accounts/policies',
+      destination: '/docs/accounts/policies/private-policies',
       status: 301,
     },
     {

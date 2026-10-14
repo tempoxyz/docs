@@ -38,7 +38,7 @@ A single-key account has one key, like a standard Ethereum account (an EOA), so 
   alt="Three signers with weights: a passkey at 2, and a backup key and a recovery key at 1 each, toward a threshold of 2. The passkey approves alone, or both keys approve together."
 />
 
-Each signer is a [private key](/docs/accounts/authentication/private-keys), a [device key](/docs/accounts/authentication/device-keys), or a [passkey](/docs/accounts/authentication/passkeys), with a weight. A payment, a new access key, or a signer change goes through once the weights of the signers who approve it reach the account's [threshold](/docs/accounts/policies/signing-thresholds).
+Each signer is a [private key](/docs/accounts/authentication/private-keys), a [device key](/docs/accounts/authentication/device-keys), a [passkey](/docs/accounts/authentication/passkeys), or an [OIDC login](/docs/accounts/authentication/oidc), with a weight. A payment, a new access key, or a signer change goes through once the weights of the signers who approve it reach the account's [threshold](/docs/accounts/policies/signing-thresholds).
 
 In the example, the passkey has weight 2, the backup and recovery keys have weight 1 each, and the threshold is 2. The passkey pays alone. Your recovery key alone reaches 1 of 2, so you can't move the customer's funds. If the customer loses their phone, the backup and recovery keys together [replace the passkey](/docs/accounts/guides/users/recover-an-account).
 

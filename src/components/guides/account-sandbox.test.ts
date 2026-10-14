@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   type AccessKey,
   type ActionRequest,
+  type ApprovalRules,
   addAccessKey,
   addSigner,
   analyzeAccount,
   applyAction,
   approvalSets,
+  changeLogin,
   configuredSigners,
   createLegacyAccount,
   deriveAddress,
@@ -14,16 +16,20 @@ import {
   evaluateAction,
   guidedActions,
   isCreated,
+  isLogin,
   loadPreset,
   moveToTempoWallet,
   presets,
   removeSigner,
+  requiredWeight,
   revokeAccessKey,
   rotateSigner,
   runGuidedAction,
   type SandboxAccount,
   type Signer,
   type SignerKind,
+  setApprovalRules,
+  setRuleWeight,
   setSignerLost,
   setSignerWeight,
   setThreshold,
@@ -34,6 +40,13 @@ import {
   upgradeLegacyAccount,
   validateConfig,
 } from './account-sandbox'
+
+const rulesOff: ApprovalRules = {
+  enabled: false,
+  paymentLimit: 5_000,
+  paymentWeight: 2,
+  adminWeight: 2,
+}
 
 function signer(id: string, kind: SignerKind, weight: number, name?: string): Signer {
   return {
@@ -50,12 +63,16 @@ function signer(id: string, kind: SignerKind, weight: number, name?: string): Si
 }
 
 function withSigners(threshold: number, signers: Signer[]): SandboxAccount {
-  const account = loadPreset('add-signers')
+  const account = loadPreset('portable-sign-in')
   return {
     ...account,
     threshold,
     signers,
-    committed: { threshold, owners: signers.map(({ id, weight }) => ({ id, weight })) },
+    committed: {
+      threshold,
+      owners: signers.map(({ id, weight }) => ({ id, weight })),
+      rules: account.rules,
+    },
   }
 }
 
@@ -88,8 +105,8 @@ function ids(sets: Signer[][]) {
 const send6000 = { type: 'payment', amount: 6_000 } as const
 
 describe('configuration limits', () => {
-  const check = (threshold: number, owners: Signer[]) =>
-    validateConfig({ threshold, owners }).map((issue) => issue.code)
+  const check = (threshold: number, owners: Signer[], rules = rulesOff) =>
+    validateConfig({ threshold, owners, rules }).map((issue) => issue.code)
 
   it('requires 1 to 48 owners', () => {
     expect(check(1, [])).toEqual(['no-owners'])
@@ -114,8 +131,11 @@ describe('configuration limits', () => {
       validateConfig({
         threshold: 3,
         owners: [signer('a', 'device', 1), signer('b', 'device', 1)],
+        rules: rulesOff,
       }),
-    ).toEqual([{ code: 'unreachable', message: 'Threshold 3 is above total weight 2.' }])
+    ).toEqual([
+      { code: 'unreachable', tier: 'base', message: 'Threshold 3 is above total weight 2.' },
+    ])
   })
 
   it('requires the threshold to be reachable with eight signatures', () => {
@@ -125,16 +145,50 @@ describe('configuration limits', () => {
     // Weights and thresholds may exceed eight when eight signatures still reach them.
     expect(check(20, [signer('a', 'device', 10), signer('b', 'device', 10)])).toEqual([])
   })
+
+  it('rejects logins that reach the threshold only three or more at a time (TIP-1131)', () => {
+    const logins = [signer('g', 'google', 1), signer('v', 'privy', 1), signer('a', 'apple', 1)]
+    expect(validateConfig({ threshold: 3, owners: logins, rules: rulesOff })).toEqual([
+      {
+        code: 'login-limit',
+        tier: 'base',
+        message:
+          'Viem rejects configurations that need three or more logins to reach the threshold.',
+      },
+    ])
+    expect(check(2, logins)).toEqual([])
+    // A passkey path doesn't make the unusable three-login path acceptable.
+    expect(check(3, [signer('p', 'passkey', 2), ...logins])).toEqual(['login-limit'])
+  })
+
+  it('rejects configurations whose every path needs three or more logins', () => {
+    const owners = [
+      signer('p', 'passkey', 1),
+      signer('g', 'google', 1),
+      signer('v', 'privy', 1),
+      signer('a', 'apple', 1),
+    ]
+    expect(check(4, owners)).toEqual(['no-usable-path'])
+  })
+
+  it('checks approval-rule weights against the threshold and the same limits (TIP-1135)', () => {
+    const owners = [signer('a', 'device', 1), signer('b', 'device', 1), signer('c', 'device', 1)]
+    const rules = { ...rulesOff, enabled: true, paymentWeight: 2, adminWeight: 3 }
+    expect(check(2, owners, rules)).toEqual(['rule-order'])
+    expect(check(1, owners, rules)).toEqual([])
+    expect(check(1, owners, { ...rules, adminWeight: 1 })).toEqual(['rule-order'])
+    expect(check(1, owners, { ...rules, adminWeight: 4 })).toEqual(['unreachable'])
+  })
 })
 
 describe('approval sets', () => {
   it('lists minimal sets, smallest first', () => {
     const sets = approvalSets(configuredSigners(loadPreset('multi-factor')), 2)
-    expect(ids(sets)).toEqual([['passkey'], ['backup', 'recovery']])
+    expect(ids(sets)).toEqual([['passkey'], ['google', 'privy']])
   })
 
   it('never includes a signer the set doesn’t need', () => {
-    const owners = configuredSigners(loadPreset('team-account'))
+    const owners = configuredSigners(loadPreset('change-login'))
     for (const weight of [1, 2, 3, 4, 5])
       for (const set of approvalSets(owners, weight)) {
         const total = set.reduce((sum, item) => sum + item.weight, 0)
@@ -143,35 +197,40 @@ describe('approval sets', () => {
       }
   })
 
-  it('never uses more than eight signatures', () => {
-    const owners = Array.from({ length: 10 }, (_, index) => signer(`k${index}`, 'device', 1))
-    const sets = approvalSets(owners, 8, { limit: 50 })
+  it('never uses more than two logins or eight signatures', () => {
+    const owners = [
+      ...Array.from({ length: 4 }, (_, index) => signer(`l${index}`, 'google', 1)),
+      ...Array.from({ length: 8 }, (_, index) => signer(`k${index}`, 'device', 1)),
+    ]
+    const sets = approvalSets(owners, 8)
     expect(sets.length).toBeGreaterThan(0)
-    for (const set of sets) expect(set.length).toBeLessThanOrEqual(8)
-    expect(approvalSets(owners, 9)).toEqual([])
+    for (const set of sets) {
+      expect(set.filter((item) => item.kind === 'google').length).toBeLessThanOrEqual(2)
+      expect(set.length).toBeLessThanOrEqual(8)
+    }
+    expect(approvalSets(owners, 11)).toEqual([])
   })
 
   it.each([
-    ['add-signers', 'Threshold 1: the passkey'],
-    ['multi-factor', 'Threshold 2: the passkey, or Backup key and recovery provider together'],
+    ['portable-sign-in', 'Threshold 1: the Google login'],
+    ['multi-factor', 'Threshold 2: the passkey, or Google and Privy together'],
+    ['change-login', 'Threshold 2: the passkey, or Google and Privy together'],
     ['export', 'Threshold 1: Harbor’s signer'],
     ['team-treasury', 'Threshold 2: any 2 of Finance key, Operations key, and CFO passkey'],
+    ['approval-rules', 'Threshold 1: the Finance key, the Operations key, or the CFO passkey'],
     [
       'team-account',
       'Threshold 4: any 4 of Finance key, Operations key, CFO passkey, CEO passkey, and Controller key',
     ],
-    [
-      'backend-automation',
-      'Threshold 2: the passkey, or Backup key and recovery provider together',
-    ],
+    ['backend-automation', 'Threshold 2: the passkey, or Google and recovery provider together'],
   ] as const)('summarizes the %s preset', (preset, summary) => {
     expect(analyzeAccount(loadPreset(preset)).summary).toBe(summary)
   })
 
-  it('summarizes higher weights', () => {
+  it('summarizes escalated weights', () => {
     const owners = configuredSigners(loadPreset('multi-factor'))
     expect(describeApprovalSets(approvalSets(owners, 3), owners)).toBe(
-      'the passkey plus Backup key or recovery provider',
+      'the passkey plus Google or Privy',
     )
     expect(describeApprovalSets(approvalSets(owners, 4), owners)).toBe('all 3 signers together')
   })
@@ -194,13 +253,13 @@ describe('approval sets', () => {
 
 describe('stable address', () => {
   it('derives the address from the version-zero configuration', () => {
-    const maya = loadPreset('add-signers')
+    const maya = loadPreset('portable-sign-in')
     expect(maya.address).toMatch(/^0x[0-9a-f]{40}$/)
-    for (const preset of ['multi-factor', 'recover'] as const)
+    for (const preset of ['add-signers', 'multi-factor', 'change-login', 'recover'] as const)
       expect(loadPreset(preset).address).toBe(maya.address)
-    expect(loadPreset('team-treasury').address).toBe(loadPreset('rotate-keys').address)
+    expect(loadPreset('team-treasury').address).toBe(loadPreset('approval-rules').address)
     expect(loadPreset('export').address).not.toBe(maya.address)
-    expect(deriveAddress('maya', { threshold: 1, owners: [{ id: 'passkey', weight: 1 }] })).toBe(
+    expect(deriveAddress('maya', { threshold: 1, owners: [{ id: 'google', weight: 1 }] })).toBe(
       maya.address,
     )
     expect(shortAddress(String(maya.address))).toMatch(/^0x[0-9A-F]{4}…[0-9A-F]{4}$/)
@@ -208,10 +267,10 @@ describe('stable address', () => {
 
   it('never changes the address when signers change', () => {
     const start = loadPreset('multi-factor')
-    let account = addSigner(start, 'device')
-    account = rotateSigner(account, 'backup')
+    let account = addSigner(start, 'apple')
+    account = changeLogin(account)
     account = setThreshold(account, 3)
-    account = removeSigner(account, 'recovery')
+    account = removeSigner(account, 'privy')
     expect(account.address).toBe(start.address)
     const harbor = loadPreset('export')
     expect(moveToTempoWallet(harbor).address).toBe(harbor.address)
@@ -220,16 +279,35 @@ describe('stable address', () => {
 
 describe('configuration updates', () => {
   it('increments the version and logs each applied update', () => {
-    const account = addSigner(loadPreset('multi-factor'), 'device')
+    const account = addSigner(loadPreset('multi-factor'), 'apple')
     expect(account.version).toBe(3)
     expect(account.log[0]).toMatchObject({
       kind: 'config',
-      title: 'Config v3 · Added Device key (W1)',
+      title: 'Config v3 · Added Apple login (W1)',
       detail: 'By the passkey · same address and balance',
     })
     const added = account.signers.at(-1) as Signer
     expect(signerStatus(account, added)).toBe('added')
-    expect(signerStatus(setSignerWeight(account, 'recovery', 2), added)).toBe('active')
+    expect(signerStatus(setSignerWeight(account, 'privy', 2), added)).toBe('active')
+  })
+
+  it('changes an email in one update and keeps access keys', () => {
+    const start = applyAction(loadPreset('change-login'), {
+      action: { type: 'payment', amount: 50 },
+      approver: { type: 'access-key', keyId: 'key-1' },
+    }).account
+    const account = runGuidedAction(start, 'change-login')
+    expect(account.version).toBe(start.version + 1)
+    expect(account.log[0].title).toBe(
+      'Config v3 · Added Google login (maya@work.example, W1), revoked Google login (maya@example.com)',
+    )
+    const emails = account.signers.filter((item) => item.kind === 'google')
+    expect(emails.map((item) => [item.subject, item.revoked])).toEqual([
+      ['maya@example.com', true],
+      ['maya@work.example', false],
+    ])
+    expect(account.accessKeys).toEqual(start.accessKeys)
+    expect(account.balance).toBe(start.balance)
   })
 
   it('moves an account to Tempo Wallet in one update with the same balance', () => {
@@ -256,19 +334,19 @@ describe('configuration updates', () => {
   })
 
   it('leaves an invalid update unapplied until the configuration is valid', () => {
-    const start = loadPreset('add-signers')
+    const start = loadPreset('portable-sign-in')
     const draft = setThreshold(start, 2)
     expect(draft.version).toBe(0)
     expect(draft.log).toEqual(start.log)
     expect(analyzeAccount(draft)).toMatchObject({ valid: false, summary: 'Not applied' })
-    expect(bySigners(draft, ['passkey'])).toMatchObject({
+    expect(bySigners(draft, ['google'])).toMatchObject({
       ok: false,
       code: 'invalid-config',
       message: 'Fix the configuration first.',
     })
-    const applied = addSigner(draft, 'device')
+    const applied = addSigner(draft, 'passkey')
     expect(applied.version).toBe(1)
-    expect(applied.log[0].title).toBe('Config v1 · Added Device key (W1), threshold 1 → 2')
+    expect(applied.log[0].title).toBe('Config v1 · Added Passkey (W1), threshold 1 → 2')
   })
 
   it('applies an add and a revoke together after an empty draft', () => {
@@ -281,16 +359,16 @@ describe('configuration updates', () => {
   })
 
   it('drops a signer that was never applied', () => {
-    const draft = addSigner(setThreshold(loadPreset('add-signers'), 3), 'device')
+    const draft = addSigner(setThreshold(loadPreset('portable-sign-in'), 3), 'passkey')
     const id = (draft.signers.at(-1) as Signer).id
     expect(draft.version).toBe(0)
-    expect(removeSigner(draft, id).signers.map((item) => item.id)).toEqual(['passkey'])
+    expect(removeSigner(draft, id).signers.map((item) => item.id)).toEqual(['google'])
   })
 
   it('blocks updates when lost signers leave no approval path', () => {
-    const lost = setSignerLost(loadPreset('add-signers'), 'passkey', true)
-    expect(lost.log[0]).toMatchObject({ title: 'Passkey lost', detail: 'Config unchanged' })
-    const blocked = addSigner(lost, 'device')
+    const lost = setSignerLost(loadPreset('portable-sign-in'), 'google', true)
+    expect(lost.log[0]).toMatchObject({ title: 'Google login lost', detail: 'Config unchanged' })
+    const blocked = addSigner(lost, 'passkey')
     expect(blocked.version).toBe(0)
     expect(configuredSigners(blocked)).toHaveLength(1)
     expect(blocked.notice).toBe('Locked out: no usable signers reach weight 1.')
@@ -298,8 +376,33 @@ describe('configuration updates', () => {
     expect(revokeAccessKey(lost, 'key-1').accessKeys[0].status).toBe('active')
   })
 
+  it('records approval-rule changes as policy revisions', () => {
+    const account = setApprovalRules(loadPreset('multi-factor'), true)
+    expect(account.rules).toEqual({
+      enabled: true,
+      paymentLimit: 5_000,
+      paymentWeight: 3,
+      adminWeight: 4,
+    })
+    expect(account.version).toBe(2)
+    expect(account.rulesRevision).toBe(1)
+    expect(account.log[0].title).toBe('Rules r1 · on · over $5,000 W3 · changes W4')
+    expect(setRuleWeight(account, 'adminWeight', 3).log[0].title).toBe(
+      'Rules r2 · over $5,000 W3 · changes W3',
+    )
+    expect(setApprovalRules(account, false).log[0].title).toBe('Rules r2 · off')
+  })
+
+  it('rejects a rotation that makes a rule weight unreachable', () => {
+    const draft = removeSigner(loadPreset('approval-rules'), 'cfo')
+    expect(draft.version).toBe(1)
+    expect(analyzeAccount(draft).issues.map((issue) => issue.message)).toEqual([
+      'Change weight 3 is above total weight 2.',
+    ])
+  })
+
   it('logs access-key authorization and revocation without a config version', () => {
-    let account = addAccessKey(loadPreset('add-signers'), 'macbook')
+    let account = addAccessKey(loadPreset('portable-sign-in'), 'macbook')
     expect(account.version).toBe(0)
     expect(account.log[0]).toMatchObject({ kind: 'key', title: 'Authorized MacBook' })
     account = revokeAccessKey(account, 'key-1')
@@ -309,12 +412,12 @@ describe('configuration updates', () => {
 })
 
 describe('guided actions', () => {
-  it('adds a backup key to a single-passkey account', () => {
+  it('adds a passkey to a single-login account', () => {
     const start = loadPreset('add-signers')
-    expect(guidedActions(start)).toEqual([{ id: 'add-backup', label: 'Add a backup key' }])
-    const account = runGuidedAction(start, 'add-backup')
-    expect(account.log[0].title).toBe('Config v1 · Added Backup key (W1)')
-    expect(analyzeAccount(account).summary).toBe('Threshold 1: the passkey, or the Backup key')
+    expect(guidedActions(start)).toEqual([{ id: 'add-passkey', label: 'Add a passkey' }])
+    const account = runGuidedAction(start, 'add-passkey')
+    expect(account.log[0].title).toBe('Config v1 · Added Passkey (W2)')
+    expect(analyzeAccount(account).summary).toBe('Threshold 1: the passkey, or the Google login')
     expect(guidedActions(account)).toEqual([])
   })
 
@@ -333,18 +436,18 @@ describe('guided actions', () => {
     ])
   })
 
-  it('loses and replaces the passkey with the remaining signers', () => {
+  it('loses and replaces the passkey with the remaining logins', () => {
     const start = loadPreset('recover')
     expect(guidedActions(start).map((action) => action.id)).toEqual(['lose-passkey'])
     const lost = runGuidedAction(start, 'lose-passkey')
     expect(analyzeAccount(lost).notices[0].message).toBe(
-      'Recoverable: Backup key and recovery provider together can replace the lost signer.',
+      'Recoverable: Google and Privy together can replace the lost signer.',
     )
     expect(guidedActions(lost).map((action) => action.id)).toEqual(['replace-passkey'])
     const replaced = runGuidedAction(lost, 'replace-passkey')
     expect(replaced.log[0]).toMatchObject({
       title: 'Config v3 · Added Passkey (new iPhone, W2), revoked Passkey (this iPhone)',
-      detail: 'By the Backup key and the recovery provider · same address and balance',
+      detail: 'By the Google login and the Privy login · same address and balance',
     })
     expect(replaced.address).toBe(start.address)
     expect(bySigners(replaced, [(replaced.signers.at(-1) as Signer).id])).toMatchObject({
@@ -353,11 +456,9 @@ describe('guided actions', () => {
   })
 
   it('rotates generic signers through the same update path', () => {
-    const account = rotateSigner(loadPreset('multi-factor'), 'recovery')
+    const account = rotateSigner(loadPreset('multi-factor'), 'privy')
     expect(account.version).toBe(3)
-    expect(
-      configuredSigners(account).filter((item) => item.kind === 'recovery-provider'),
-    ).toHaveLength(1)
+    expect(configuredSigners(account).filter((item) => item.kind === 'privy')).toHaveLength(1)
   })
 })
 
@@ -365,29 +466,46 @@ describe('signer approvals', () => {
   const multiFactor = loadPreset('multi-factor')
 
   it('needs the threshold', () => {
-    expect(bySigners(multiFactor, ['backup'])).toMatchObject({
+    expect(bySigners(multiFactor, ['google'])).toMatchObject({
       ok: false,
       code: 'insufficient-weight',
       message: 'Needs weight 2 · has 1',
       requiredWeight: 2,
       weight: 1,
     })
-    expect(bySigners(multiFactor, ['backup', 'recovery'])).toMatchObject({
+    expect(bySigners(multiFactor, ['google', 'privy'])).toMatchObject({
       ok: true,
-      message: 'The Backup key and the recovery provider · weight 2 of 2',
+      message: 'The Google login and the Privy login · weight 2 of 2',
     })
     expect(bySigners(multiFactor, ['passkey'])).toMatchObject({ ok: true })
   })
 
   it('leaves out signatures the threshold doesn’t need', () => {
-    expect(bySigners(multiFactor, ['backup', 'passkey'])).toMatchObject({
+    expect(bySigners(multiFactor, ['google', 'passkey'])).toMatchObject({
       ok: true,
       signerIds: ['passkey'],
     })
-    expect(bySigners(multiFactor, ['backup', 'recovery', 'passkey'])).toMatchObject({
+    expect(bySigners(loadPreset('change-login'), ['google', 'privy', 'passkey'])).toMatchObject({
       ok: true,
       signerIds: ['passkey'],
     })
+  })
+
+  it('carries at most two login signatures', () => {
+    const account = withSigners(4, [
+      signer('p', 'passkey', 2),
+      signer('d', 'device', 1),
+      signer('g', 'google', 1),
+      signer('v', 'privy', 1),
+      signer('a', 'apple', 1),
+    ])
+    expect(analyzeAccount(account).valid).toBe(true)
+    expect(bySigners(account, ['d', 'g', 'v', 'a'])).toMatchObject({
+      ok: false,
+      code: 'login-limit',
+      message: 'A transaction can carry at most two logins.',
+    })
+    expect(bySigners(account, ['p', 'd', 'g'])).toMatchObject({ ok: true })
   })
 
   it('carries at most eight signatures', () => {
@@ -413,7 +531,7 @@ describe('signer approvals', () => {
       code: 'lost-signer',
       message: 'Lost signers can’t approve.',
     })
-    expect(bySigners(account, ['backup', 'recovery'])).toMatchObject({ ok: true })
+    expect(bySigners(account, ['google', 'privy'])).toMatchObject({ ok: true })
   })
 
   it('reports a payment the balance can’t cover', () => {
@@ -445,8 +563,73 @@ describe('signer approvals', () => {
   })
 })
 
+describe('approval rules', () => {
+  const rules = loadPreset('approval-rules')
+
+  it('escalates payments above the limit, not at it', () => {
+    expect(requiredWeight(rules, { type: 'payment', amount: 5_000 }).weight).toBe(1)
+    expect(requiredWeight(rules, { type: 'payment', amount: 5_000.01 }).weight).toBe(2)
+    expect(bySigners(rules, ['finance'], { type: 'payment', amount: 5_000 })).toMatchObject({
+      ok: true,
+    })
+    expect(bySigners(rules, ['finance'], send6000)).toMatchObject({
+      ok: false,
+      code: 'insufficient-weight',
+      message: 'Over $5,000 needs weight 2 · has 1',
+    })
+    expect(bySigners(rules, ['finance', 'operations'], send6000)).toMatchObject({ ok: true })
+  })
+
+  it('needs the administrative weight for signer changes and new keys', () => {
+    expect(bySigners(rules, ['finance', 'cfo'], { type: 'change-signers' })).toMatchObject({
+      ok: false,
+      message: 'Signer changes need weight 3 · has 2',
+    })
+    expect(bySigners(rules, ['finance', 'cfo'], { type: 'authorize-key' })).toMatchObject({
+      ok: false,
+      message: 'New keys need weight 3 · has 2',
+    })
+    expect(
+      bySigners(rules, ['finance', 'operations', 'cfo'], { type: 'authorize-key' }),
+    ).toMatchObject({ ok: true })
+  })
+
+  it('matches the weighted passkey and login example', () => {
+    const account = setApprovalRules(loadPreset('multi-factor'), true)
+    expect(bySigners(account, ['passkey'], send6000)).toMatchObject({
+      ok: false,
+      message: 'Over $5,000 needs weight 3 · has 2',
+    })
+    expect(bySigners(account, ['passkey', 'privy'], send6000)).toMatchObject({ ok: true })
+    expect(bySigners(account, ['passkey', 'google'], { type: 'change-signers' })).toMatchObject({
+      ok: false,
+      message: 'Signer changes need weight 4 · has 3',
+    })
+  })
+
+  it('stops access keys from spending while rules are on', () => {
+    expect(byKey(rules, 'key-1')).toMatchObject({
+      ok: false,
+      code: 'rules-block-keys',
+      message: 'Access keys can’t spend while approval rules are on.',
+    })
+    const off = setApprovalRules(rules, false)
+    expect(off.log[0].title).toBe('Rules r2 · off')
+    expect(byKey(off, 'key-1')).toMatchObject({ ok: true })
+  })
+
+  it('keeps access keys working while unapplied rules are invalid', () => {
+    const draft = setApprovalRules(loadPreset('portable-sign-in'), true)
+    expect(analyzeAccount(draft).issues[0].message).toBe(
+      'Over-$5,000 weight 2 is above total weight 1.',
+    )
+    expect(draft.rulesRevision).toBe(0)
+    expect(byKey(draft, 'key-1')).toMatchObject({ ok: true })
+  })
+})
+
 describe('access keys', () => {
-  const portable = loadPreset('add-signers')
+  const portable = loadPreset('portable-sign-in')
 
   it('spend within the period limit and reduce what remains', () => {
     const first = applyAction(portable, {
@@ -548,7 +731,7 @@ describe('start from scratch', () => {
     expect(account.balance).toBe(0)
     expect(analyzeAccount(account)).toMatchObject({
       valid: false,
-      approval: null,
+      tiers: [],
       notices: [{ message: 'No signers yet. Add the first one to create the account.' }],
     })
     expect(guidedActions(account)).toEqual([])
@@ -614,17 +797,57 @@ describe('start from scratch', () => {
   })
 })
 
+describe('Privy login', () => {
+  it('is an OIDC login the account holder controls', () => {
+    expect(signerKinds.privy).toEqual({
+      label: 'Privy login',
+      scheme: 'oidc',
+      holder: 'you',
+      group: 'Logins',
+      loginWord: 'Privy',
+    })
+    expect(isLogin({ kind: 'privy' })).toBe(true)
+  })
+
+  it('adds as a backup login at the same address', () => {
+    const created = addSigner(loadPreset('from-scratch'), 'passkey')
+    const backup = addSigner(created, 'privy')
+    const added = backup.signers.at(-1)
+    expect(added).toMatchObject({
+      kind: 'privy',
+      name: 'Privy login',
+      detail: 'OIDC · Privy account',
+      holder: 'you',
+      weight: 1,
+    })
+    expect(backup.address).toBe(created.address)
+    expect(backup.log[0].title).toMatch(/^Config v1 · Added Privy login/)
+  })
+
+  it('counts toward the two-login limit and reads as Privy in approval phrases', () => {
+    const logins = [signer('g', 'google', 1), signer('a', 'apple', 1), signer('v', 'privy', 1)]
+    expect(
+      validateConfig({ threshold: 3, owners: logins, rules: rulesOff }).map((issue) => issue.code),
+    ).toEqual(['login-limit'])
+    const owners = [signer('p', 'passkey', 2), signer('g', 'google', 1), signer('v', 'privy', 1)]
+    expect(describeApprovalSets(approvalSets(owners, 2))).toBe(
+      'the passkey, or Google and Privy together',
+    )
+  })
+})
+
 describe('account health', () => {
   const notices = (account: SandboxAccount) =>
     analyzeAccount(account).notices.map((notice) => notice.message)
 
-  it('flags a missing backup', () => {
-    expect(notices(loadPreset('add-signers'))).toEqual([
+  it('flags logins alone and a missing backup', () => {
+    expect(notices(loadPreset('portable-sign-in'))).toEqual([
+      'Only logins can approve. Add a passkey for large balances.',
       'No backup signer: losing it locks the account.',
     ])
   })
 
-  it('accepts the recommended passkey-or-both-backups setup', () => {
+  it('accepts the recommended passkey-or-both-logins setup', () => {
     expect(notices(loadPreset('multi-factor'))).toEqual([])
   })
 
@@ -634,28 +857,40 @@ describe('account health', () => {
   })
 
   it('flags a signer every approval needs', () => {
-    const both = setThreshold(addSigner(loadPreset('add-signers'), 'device'), 2)
+    expect(notices(loadPreset('approval-rules'))).toEqual([
+      'Changes need every signer: losing one blocks recovery.',
+    ])
+    const both = setThreshold(addSigner(loadPreset('portable-sign-in'), 'passkey'), 2)
     expect(notices(both)).toContain('Every signer must approve: losing one locks the account.')
-    const weighted = setSignerWeight(addSigner(loadPreset('add-signers'), 'device'), 's2', 2)
-    expect(notices(setThreshold(weighted, 2))).toContain('No backup for the device key.')
+    const weighted = setSignerWeight(addSigner(loadPreset('portable-sign-in'), 'passkey'), 's2', 2)
+    expect(notices(setThreshold(weighted, 2))).toContain('No backup for the passkey.')
   })
 
   it.each([
-    ['multi-factor', 'backup', 'Recoverable: the passkey can replace the lost signer.'],
+    ['multi-factor', 'google', 'Recoverable: the passkey can replace the lost signer.'],
     [
       'multi-factor',
       'passkey',
-      'Recoverable: Backup key and recovery provider together can replace the lost signer.',
+      'Recoverable: Google and Privy together can replace the lost signer.',
     ],
-    ['add-signers', 'passkey', 'Locked out: remaining signers can’t reach weight 1.'],
+    [
+      'change-login',
+      'passkey',
+      'Recoverable: Google and Privy together can replace the lost signer.',
+    ],
+    ['portable-sign-in', 'google', 'Locked out: remaining signers can’t reach weight 1.'],
   ] as const)('checks recovery for %s after losing %s', (preset, id, message) => {
     expect(notices(setSignerLost(loadPreset(preset), id, true))[0]).toBe(message)
+  })
+
+  it('checks recovery against the change weight while rules are on', () => {
+    const account = setSignerLost(setApprovalRules(loadPreset('multi-factor'), true), 'privy', true)
+    expect(notices(account)[0]).toBe('Locked out: remaining signers can’t reach weight 4.')
   })
 
   it('labels unchanged recommended presets that raise no warnings', () => {
     const recommended = presets.filter((preset) => preset.recommended).map((preset) => preset.id)
     expect(recommended).toEqual([
-      'multi-factor',
       'rotate-keys',
       'team-treasury',
       'team-account',
@@ -666,7 +901,7 @@ describe('account health', () => {
       expect(health.notices).toEqual([])
       expect(health.recommended).toBe(true)
     }
-    expect(analyzeAccount(loadPreset('add-signers')).recommended).toBe(false)
+    expect(analyzeAccount(loadPreset('multi-factor')).recommended).toBe(false)
     expect(analyzeAccount(setThreshold(loadPreset('team-treasury'), 3)).recommended).toBe(false)
   })
 })

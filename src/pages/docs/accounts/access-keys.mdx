@@ -16,6 +16,8 @@ An access key lets a customer's phone, your backend, or an AI agent pay from an 
 
 <AccessKeyDemo />
 
+To request a key when the user signs in, try [Sign in with Tempo](/docs/accounts/guides/users/embed-wallets#sign-users-in-with-tempo): the user approves the key's limit, scopes, and expiry.
+
 <span id="access-keys" />
 
 ## What an access key is
@@ -34,7 +36,7 @@ An access key isn't a signer. It never counts toward the [signing threshold](/do
 | <span id="set-limits-that-match-the-task" /><span id="access-key-lifecycle" /><span id="read-the-remaining-permission" /><span id="read-an-access-key" /><span id="change-an-access-key" />[Spending limits](/docs/accounts/access-keys/spending-limits) | Caps how much of each TIP-20 token the key can spend, in total or per period |
 | <span id="access-key-expiry" />[Expiry](/docs/accounts/access-keys/expiry) | Sets when the key stops working |
 | <span id="scopes" /><span id="scope-an-access-key" />[Scopes](/docs/accounts/access-keys/scopes) | Limits which contracts and functions the key can call, and whom it can pay |
-| <span id="admin-access-keys" />[Admin access keys](/docs/accounts/access-keys/admin-access-keys) | Removes all three bounds and lets the key manage the account's other keys |
+| <span id="admin-access-keys" />[Admin access keys](/docs/accounts/access-keys/admin-access-keys) | Removes all three bounds and lets the key manage the account's other keys. May be deprecated ([TIP-1137](https://tips.sh/1137)). |
 | <span id="key-revocation" /><span id="key-revocation-by-situation" /><span id="revoke-an-access-key" />[Revocation](/docs/accounts/access-keys/revocation) | Ends the key permanently |
 
 Every bound is optional, and leaving one out removes that check: a key without `scopes` can call any contract. Give a backend, agent, or [card program](/docs/accounts/guides/automations/fund-a-card-program) key all three. Give an admin key only to a party you'd trust with the whole balance.

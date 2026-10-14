@@ -1,0 +1,152 @@
+---
+title: Sign users in with your login
+seoTitle: Sign In to Tempo Accounts with Your OIDC Login or Enterprise SSO | Tempo Docs
+description: Make the login your users already have, such as your company's SSO, a signer on each Tempo account, then authorize a device key with the first payment.
+---
+
+# Sign users in with your login
+
+:::warning
+**Not live yet.** OIDC logins ([TIP-1130](https://tips.sh/1130)) are in early development, and behavior may change. Login examples run on a separate devnet from the other Accounts examples, because the Tempo Accounts devnet doesn't verify login proofs.
+:::
+
+Give each user a Tempo account behind the login they already use, such as your company's SSO, with no separate wallet app. The login becomes a signer on the account, Tempo checks each sign-in onchain, and the key that signs payments stays on the user's device.
+
+<span id="sign-customers-in-with-oidc" />
+<span id="sign-in-with-sso" />
+
+The login approves once at sign-in, which authorizes a key on the user's device. That device key then signs everyday payments within the limits you set. Your identity provider must meet the [OIDC provider requirements](/docs/accounts/authentication/oidc#oidc-provider-requirements).
+
+:::::steps
+
+<span id="check-that-your-providers-keys-are-published" />
+
+### Check your provider's keys
+
+Tempo checks each sign-in against your identity provider's public signing keys, which a key publisher lists onchain. The publisher's owner can list any key, so use a publisher whose owner you trust. For your own identity provider, [publish its keys](/docs/accounts/authentication/oidc#publish-your-providers-keys) and keep them current.
+
+<span id="connect-to-a-relay" />
+
+### Connect to a salt service
+
+A [salt service](/docs/accounts/authentication/oidc#what-each-service-does) derives each login's address and requests the proof Tempo checks. It holds no key. Point your client at yours, in place of the [devnet client](/docs/accounts/create#connect-to-the-devnet):
+
+```ts [client.ts]
+import { http } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+export const client = createClient({
+  chain: tempoDevnet,
+  transport: http('https://salt.example.com/rpc'), // your salt service URL
+})
+```
+
+<span id="create-a-key-on-the-device" />
+<span id="open-the-customers-account" />
+
+### Sign the user in
+
+Create a key on the device, then pass your existing sign-in function. Viem supplies a `nonce` that binds the login to this device key, so the ID token approves only together with a signature from this device. Request the `openid` scope and only the claims you need.
+
+```ts [sign-in.ts]
+import { Account, WebCryptoP256 } from 'viem/tempo'
+
+const keyPair = await WebCryptoP256.createKeyPair()
+
+const { credential } = await client.oidc.prove({
+  getToken: ({ nonce }) => signInWithSso({ nonce }), // your SSO sign-in, returning the ID token
+  publicKey: keyPair.publicKey,
+})
+const login = Account.fromZk(credential)
+const account = Account.fromConfig({ address: 'infer', owners: [login] })
+
+// Save account.address and account.config with the user's record.
+```
+
+The same login reaches the same address on every device. Save `account.address`, `account.config`, and `login.address` with the user's record. To keep your identity provider from approving alone, add a passkey or recovery signer next: see [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer).
+
+### Authorize the device key with the first payment
+
+The first payment carries a key authorization, signed by the login, that registers the device key as an [access key](/docs/accounts/access-keys) with an expiry and a daily limit. Later payments carry only the device's signature.
+
+```ts [sign-in.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+
+const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+await client.token.transferSync({
+  account: deviceKey,
+  amount: parseUnits('5', 6),
+  keyAuthorization: await client.accessKey.signAuthorization({
+    accessKey: deviceKey,
+    account,
+    expiry: Expiry.days(30),
+    limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
+  }),
+  to: recipient,
+  token: alphaUsd,
+})
+```
+
+Each transaction pays a network fee in a stablecoin. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it while the account has no balance yet.
+
+:::::
+
+<span id="restore-the-session-on-a-returning-visit" />
+
+On a returning visit, rebuild the device key from the saved key pair with `Account.fromWebCryptoP256(keyPair, { access: address })`. When the key expires, or on a new device, sign the user in again.
+
+<span id="email-changes" />
+<span id="change-a-customers-email" />
+
+## Handle an email change
+
+A login signer comes from the provider's user ID, not the email. If your identity provider keeps the user ID when the email changes, nothing changes on Tempo. Otherwise, sign the user in with the new email, then swap the old login for the new one at the same weight. Rebuild the account from the address and `config` you saved, with the approving signers' keys attached:
+
+```ts [change-email.ts]
+import { isAddressEqual } from 'viem'
+import { Account } from 'viem/tempo'
+
+const { credential } = await client.oidc.prove({
+  getToken: ({ nonce }) => signInWithSso({ nonce }), // the user signs in with the new email
+  publicKey: keyPair.publicKey,
+})
+const newLogin = Account.fromZk(credential)
+
+const { address, config } = await loadAccount(userId) // your app's storage
+// Attach the approving signers' keys. The other signers stay addresses.
+const owners = config.owners.map(({ owner, weight }) => ({
+  owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+  weight,
+}))
+const account =
+  config.version === 0n // never updated: the first signers derive the address
+    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+    : Account.fromConfig({ ...config, address, owners })
+
+const { config: updated } = await client.accounts.updateConfigSync({
+  account,
+  nextConfig: {
+    owners: config.owners.map((entry) =>
+      isAddressEqual(entry.owner, oldLoginAddress) ? { owner: newLogin.address, weight: entry.weight } : entry,
+    ),
+    threshold: config.threshold,
+  },
+})
+await saveAccount(userId, { address, config: updated }) // the next action rebuilds from this
+```
+
+`approvers` holds signers that reach the current threshold, such as the user's passkey, or the old login signed in with the old email. After the update, `address: 'infer'` with the new login derives a different, empty account, so open the account by its saved address.
+
+## Login signer limits
+
+- A login approves for up to 10 minutes after sign-in, 9 by default in viem. After that, approvals fail with `ZkCredentialExpiredError`.
+- Your web and mobile apps share one OAuth client ID. A different client ID reaches a different account.
+- The identity provider can sign in as anyone it covers. Keep its login below the threshold on its own.
+
+Build it with viem: [Sign in with an identity provider](https://viem-d07zjc3q1-wevm.vercel.app/tempo/guides/oidc/sign-in), [`oidc.prove`](https://viem-d07zjc3q1-wevm.vercel.app/tempo/actions/oidc.prove), and [`Account.fromZk`](https://viem-d07zjc3q1-wevm.vercel.app/tempo/accounts/account.fromZk).
+
+{/* TODO: switch to viem.sh when the OIDC guides publish */}

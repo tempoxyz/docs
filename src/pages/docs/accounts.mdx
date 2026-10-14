@@ -41,7 +41,7 @@ Tempo Accounts is in early development. Configurable accounts, with several sign
 ## What's in a Tempo account
 
 - **Address:** holds the account's stablecoins and never changes, even when you [replace its signers](/docs/accounts/key-management).
-- **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight. A transaction runs once its approvers' weights add up to the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
+- **Signers:** approve payments and changes to the account. Each is a [private key, device key, passkey, or OIDC login](/docs/accounts/authentication) with a weight. A transaction runs once its approvers' weights add up to the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
 - **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the spending limits, expiry, and allowed calls you set. A leaked key still can't spend past them.
 
 Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. On mainnet and testnet today, use a single-key account (EOA), like a standard Ethereum account: one key, such as a passkey, approves its payments and authorizes its access keys. On the Tempo Accounts devnet, a single-key account can also [upgrade in place](/docs/accounts/key-management/account-upgrade) to signers and a threshold, and keep its address and balance.
@@ -69,6 +69,7 @@ Each transaction pays a network fee in a USD stablecoin, not a separate gas toke
 
 <Cards>
   <Card title="Embed wallets with a provider" description="Your wallet provider's key is one signer and the customer's passkey another, so the provider can't pay alone." to="/docs/accounts/guides/users/embed-wallets" />
+  <Card title="Sign users in with your login" description="The login your users already have, such as your company's SSO, becomes a signer, with no separate wallet app." to="/docs/accounts/guides/users/sign-in-with-your-login" />
   <Card title="Add a recovery signer" description="A second signer, so a customer who loses their phone keeps their account." to="/docs/accounts/guides/users/add-a-recovery-signer" />
   <Card title="Pay out from a backend" description="Your backend pays approved payees, up to a daily limit, without prompting the customer." to="/docs/accounts/guides/automations/pay-out-from-a-backend" />
   <Card title="Fund a card program" description="Your backend tops up a customer's card, up to a daily limit, and can pay no one else." to="/docs/accounts/guides/automations/fund-a-card-program" />

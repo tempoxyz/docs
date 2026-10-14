@@ -16,9 +16,9 @@ describe('diffAccounts', () => {
     expect(diffAccounts(account, account).summary).toEqual([])
   })
 
-  it('marks an added backup key and the new config version at the same address', () => {
+  it('marks an added passkey and the new config version at the same address', () => {
     const before = loadPreset('add-signers')
-    const after = runGuidedAction(before, 'add-backup')
+    const after = runGuidedAction(before, 'add-passkey')
     const diff = diffAccounts(before, after)
     const added = Object.values(diff.signers).filter((item) => item.change === 'added')
     expect(added).toHaveLength(1)
@@ -48,7 +48,7 @@ describe('diffAccounts', () => {
   })
 
   it('marks a new access key', () => {
-    const before = loadPreset('add-signers')
+    const before = loadPreset('portable-sign-in')
     const after = addAccessKey(before, 'macbook')
     const diff = diffAccounts(before, after)
     expect(Object.values(diff.keys).map((item) => item.change)).toEqual(['added'])

@@ -196,12 +196,13 @@ describe('GuideDemo scripts', () => {
     expect(guideScripts[guide].steps.map((step) => step.title)).toEqual(stepHeadings(guide))
   })
 
-  it('has no demo for logins or approval rules', () => {
+  it('has no demo for approval rules, which devnet doesn’t run', () => {
     expect(guideDemoIds).not.toContain('approval-rules')
-    expect(guideDemoIds).not.toContain('identity-provider')
-    expect(guideDemoIds).not.toContain('change-email')
-    const source = readFileSync(new URL('./guide-demo-scripts.ts', import.meta.url), 'utf8')
-    expect(source).not.toMatch(/[Ll]ogin|\b[Ss]ign[ -]in\b|OIDC|Privy|Google/)
+    const page = readFileSync(
+      new URL('../../pages/docs/accounts/policies/escalation-rules.mdx', import.meta.url),
+      'utf8',
+    )
+    expect(page).not.toContain('GuideDemo')
   })
 
   it('names no made-up people and simulates nothing', () => {

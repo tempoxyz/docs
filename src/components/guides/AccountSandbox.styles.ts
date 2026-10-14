@@ -804,6 +804,31 @@ export const accountSandbox = style({
       marginInlineStart: tokens.spacing['1_5'],
     },
 
+    // Devnet sign-in prompt: outside the locked controls, so it stays clickable while devnet waits.
+    '& .as-signin': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      rowGap: tokens.spacing['2'],
+      columnGap: tokens.spacing['3'],
+      paddingBlock: tokens.spacing['2_5'],
+      paddingInline: tokens.spacing['3'],
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.lineStrong,
+      // design-exception: The sign-in prompt keeps its original 10px radius between scale steps.
+      borderRadius: '10px !custom',
+      backgroundColor: inherited.color.surfacePanel,
+      fontSize: tokens.fontSize.compact,
+    },
+    '& .as-signin > svg': {
+      flex: 'none',
+      color: tokens.color.muted,
+    },
+    '& .as-signin > span': {
+      flex: '1 1 16rem',
+    },
+
     // A generated private key, shown once.
     '& .as-secret': {
       display: 'grid',

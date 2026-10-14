@@ -1,6 +1,6 @@
 /**
  * Devnet adapter for the account sandbox. It sends the sandbox's actions as real transactions on
- * the internal multisig-1113 devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
+ * the internal PR-8211 devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
  * configurable access keys (TIP-1111).
  *
  * - Only real signing runs on devnet. Passkeys are real WebAuthn passkeys, so creating and signing
@@ -10,12 +10,16 @@
  * - Access keys the reader adds are real: a generated private key (shown once), "This browser" (a
  *   non-extractable WebCrypto key that signs silently), and "This [device]" (a platform passkey
  *   that asks on each payment). Example keys that presets load stay in-memory keys.
+ * - Privy logins are real when the local auth app runs (`account-sandbox-oidc`): adding one opens
+ *   its sign-in, and the login joins the account as a ZK owner. A login's proof lasts 10 minutes,
+ *   so approving later asks for a new sign-in. Example accounts' made-up logins and Google, Apple,
+ *   and SSO logins aren't live, so those accounts can't run (`devnetBlocker`).
  * - Each account gets one funded devnet account per page session, keyed by preset and local
  *   address, so every sandbox showing the same preset shares it. Calls diff the sandbox's applied
  *   configuration against the on-chain state, so any sandbox can act on the shared account. Custom
  *   accounts (not presets) work the same way.
- * - Nothing is simulated: every signer is a private key, a device key, or a passkey that signs
- *   for real.
+ * - Nothing is simulated. Approval rules (TIP-1135) aren't on this devnet, so payments that need
+ *   them and rule changes are refused as not live yet.
  *
  * Pages reach the devnet through the docs site's `/api/devnet-rpc` proxy (see `devnet-network.ts`).
  * Import this module dynamically so it stays out of production bundles; demos that only need the
@@ -45,11 +49,13 @@ import {
   formatBalance,
   formatUsd,
   isCreated,
+  isLogin,
   type LogEntry,
   notCreatedNotice,
   notUpgradedNotice,
   type PresetId,
   remainingLimit,
+  requiredWeight,
   type SandboxAccount,
   type Signer,
   type SignerKind,
@@ -57,6 +63,7 @@ import {
   signerKinds,
   upgradeLegacyAccount,
 } from './account-sandbox'
+import * as Logins from './account-sandbox-oidc'
 import { devnetChainId, devnetRpcUrl, devnetTailnetRpcUrl, devnetToken } from './devnet-network'
 
 // ---------------------------------------------------------------------------
@@ -147,19 +154,76 @@ export function unitsToUsd(units: bigint) {
 
 export type DevnetKeyType = 'secp256k1' | 'p256' | 'webAuthn'
 
-/** The key each signer kind uses on devnet. */
-export function devnetKeyType(kind: SignerKind): DevnetKeyType {
+/** The key each signer kind uses on devnet, or `null` for logins, which aren't live there. */
+export function devnetKeyType(kind: SignerKind): DevnetKeyType | null {
   const { scheme } = signerKinds[kind]
+  if (scheme === 'secp256k1') return 'secp256k1'
   if (scheme === 'webauthn') return 'webAuthn'
   if (scheme === 'p256') return 'p256'
-  return 'secp256k1'
+  return null
 }
 
-export type DevnetPrompt = 'create-passkey' | 'approve-passkey'
+/** Login kinds the local auth app signs in with now. Set by `probeLogins`. */
+let liveLogins = new Set<SignerKind>()
+
+/** Probe the local auth app (once per page) and record which logins are live. */
+export async function probeLogins() {
+  const status = await Logins.probeRelay()
+  liveLogins = new Set(status?.methods ?? [])
+  return liveLogins
+}
+
+/** Opens the sign-in window. Call it synchronously in the click that starts a sign-in. */
+export { openSignInWindow } from './account-sandbox-oidc'
+
+/** Set which login kinds are live, for tests. */
+export function setLiveLogins(kinds: Iterable<SignerKind>) {
+  liveLogins = new Set(kinds)
+}
+
+/** Why signers of `kind` can't sign on devnet, or `null` when they can. */
+export function loginBlocker(kind: SignerKind): string | null {
+  if (!isLogin({ kind })) return null
+  if (kind === 'google' || kind === 'apple' || kind === 'sso')
+    return `${signerKinds[kind].loginWord} logins aren’t live yet.`
+  if (!liveLogins.has(kind)) return 'Start the local auth app to use logins on devnet.'
+  return null
+}
+
+/**
+ * Why `account` can't run on devnet, or `null` when every signer signs for real there. Callers
+ * that can run a sign-in (`requestSignIn`) pass `logins: true`; for them, Privy logins
+ * are live on the reader's own account. Examples' made-up logins can't sign on devnet.
+ */
+export function devnetBlocker(
+  account: Pick<SandboxAccount, 'signers' | 'presetId'>,
+  options: { logins?: boolean } = {},
+): string | null {
+  const logins = account.signers.filter((signer) => !signer.revoked && isLogin(signer))
+  if (logins.length === 0) return null
+  if (!options.logins) return 'Logins aren’t live on devnet yet.'
+  if (account.presetId !== 'from-scratch') return 'This example’s logins aren’t live on devnet.'
+  for (const signer of logins) {
+    const reason = loginBlocker(signer.kind)
+    if (reason) return reason
+  }
+  return null
+}
+
+export type DevnetPrompt = 'create-passkey' | 'approve-passkey' | 'sign-in-privy'
 
 export const devnetPromptLabels: Record<DevnetPrompt, string> = {
   'create-passkey': 'Create the passkey in your browser…',
   'approve-passkey': 'Approve with your passkey…',
+  'sign-in-privy': Logins.loginPromptLabels.privy,
+}
+
+/** A sign-in the adapter needs: a new login, or a login whose 10-minute proof expired. */
+export type LoginSignInRequest = {
+  method: Logins.LoginMethod
+  /** The signer's name, such as "Privy login". */
+  signer: string
+  reason: 'add' | 'renew'
 }
 
 /** A key made before the step that adds it: a signer's address, or an access key's ID. */
@@ -174,8 +238,23 @@ export type DevnetCallOptions = {
     signer?(signer: Signer): PreparedKey | undefined
     accessKey?(key: AccessKey): PreparedKey | undefined
   }
-  /** Fires before each WebAuthn prompt, then with `null` once it settles. */
+  /**
+   * Sign-ins the reader already completed. A new login takes the first unused one of its method
+   * instead of asking for a sign-in; an existing login takes the one with its address in place of
+   * its older proof, even one that hasn't expired.
+   */
+  signIns?: readonly Logins.SignInResult[]
+  /** Fires before each WebAuthn prompt or sign-in, then with `null` once it settles. */
   onPrompt?: (prompt: DevnetPrompt | null) => void
+  /** A sign-in window the click that started this call opened (`Logins.openSignInWindow`). */
+  popup?: Window | null
+  /**
+   * Ask the reader to start a sign-in, and resolve with its window (opened from their click), or
+   * `null` when they cancel. Without it, accounts with logins can't run.
+   */
+  requestSignIn?: (request: LoginSignInRequest) => Promise<Window | null>
+  /** Cancels a sign-in in progress. */
+  signal?: AbortSignal
 }
 
 /** A signer's key slot. Kind is part of it, so two sandboxes can't reuse a key across kinds. */
@@ -247,7 +326,84 @@ export function chooseQuorum(candidates: readonly Signer[], threshold: number) {
   )
 }
 
+/** Payments that depend on approval rules (TIP-1135), which this devnet doesn't run. */
+export function needsApprovalRules(
+  account: Pick<SandboxAccount, 'threshold' | 'rules'>,
+  request: ActionRequest,
+) {
+  return requiredWeight(account, request.action).tier !== 'base'
+}
+
+export const rulesNotLive = 'Approval rules aren’t live on devnet yet.'
+
 export const needsFunds = 'Get test funds first: transactions need fees.'
+
+/** The account keychain precompile (TIP-1111). */
+const accountKeychain: Address = '0xaAAAaaAA00000000000000000000000000000000'
+const signatureTypes = { secp256k1: 0, p256: 1, webAuthn: 2, configurable: 3 } as const
+
+type Scope = { address: Address; selector?: Hex | string; recipients?: readonly Address[] }
+
+/**
+ * Authorize an access key by calling the keychain precompile from the account, so the account's
+ * quorum signs once. A key authorization would need the quorum's signatures twice (the
+ * transaction and the authorization).
+ */
+export function authorizeKeyCall(options: {
+  keyId: Address
+  keyType: keyof typeof signatureTypes
+  expiry?: number
+  limits?: readonly { token: Address; limit: bigint; period?: number }[]
+  scopes?: readonly Scope[]
+}) {
+  const { keyId, keyType, expiry, limits = [], scopes } = options
+  const targets = new Map<
+    string,
+    { target: Address; selectorRules: { selector: Hex; recipients: Address[] }[] }
+  >()
+  for (const scope of scopes ?? []) {
+    const key = scope.address.toLowerCase()
+    const entry = targets.get(key) ?? { target: scope.address, selectorRules: [] }
+    if (scope.selector)
+      entry.selectorRules.push({
+        selector: scope.selector as Hex,
+        recipients: [...(scope.recipients ?? [])],
+      })
+    targets.set(key, entry)
+  }
+  const data = encodeFunctionData({
+    abi: Tempo.Abis.accountKeychain,
+    functionName: 'authorizeKey',
+    args: [
+      keyId,
+      signatureTypes[keyType],
+      {
+        // The precompile rejects 0 as a past expiry; a key that never expires passes u64::MAX.
+        expiry: expiry === undefined ? 2n ** 64n - 1n : BigInt(expiry),
+        enforceLimits: limits.length > 0,
+        limits: limits.map(({ token, limit, period = 0 }) => ({
+          token,
+          amount: limit,
+          period: BigInt(period),
+        })),
+        allowAnyCalls: !scopes?.length,
+        allowedCalls: [...targets.values()],
+      },
+    ],
+  })
+  return { to: accountKeychain, data }
+}
+
+export function revokeKeyCall(keyId: Address) {
+  return {
+    to: accountKeychain,
+    data: encodeFunctionData({
+      abi: Tempo.Abis.accountKeychain,
+      functionName: 'revokeKey',
+      args: [keyId],
+    }),
+  }
+}
 
 /** The native multisig precompile, which also upgrades plain key accounts in place. */
 const nativeMultisig: Address = '0xAACC000000000000000000000000000000000000'
@@ -288,6 +444,11 @@ export function sendsTransaction(previous: SandboxAccount, next: SandboxAccount)
   return state(previous) !== state(next)
 }
 
+/** Whether `next` changes approval rules, which devnet can't apply. */
+export function changesApprovalRules(previous: SandboxAccount, next: SandboxAccount) {
+  return next.rulesRevision !== previous.rulesRevision
+}
+
 export type DevnetFailure = { code: FailureCode; message: string }
 
 /** WebAuthn errors arrive as a DOMException somewhere in the `cause` chain. */
@@ -315,13 +476,34 @@ function errorText(error: unknown) {
   return [details, shortMessage, message].filter(Boolean).join('\n')
 }
 
+const loginFailureCodes: Record<Logins.LoginErrorCode, FailureCode> = {
+  'relay-unavailable': 'network-error',
+  'popup-blocked': 'no-approver',
+  cancelled: 'no-approver',
+  timeout: 'no-approver',
+  'sign-in-failed': 'network-error',
+  'login-expired': 'no-approver',
+  'wrong-identity': 'no-approver',
+  'too-many-logins': 'login-limit',
+  'not-an-owner': 'unknown-signer',
+  'below-threshold': 'insufficient-weight',
+}
+
 /** Map a devnet or viem error to the engine's failure codes. */
 export function mapDevnetError(error: unknown): DevnetFailure {
   if (error instanceof DevnetRejection) return { code: error.code, message: error.message }
+  if (error instanceof Logins.LoginError)
+    return { code: loginFailureCodes[error.code], message: error.message }
   const passkey = webAuthnFailure(error)
   if (passkey) return passkey
   const text = errorText(error)
   const rules: [RegExp, FailureCode, string][] = [
+    [/ZK signature expired/, 'no-approver', 'The login expired. Sign in again.'],
+    [
+      /ZK signature issuer key is not active/,
+      'network-error',
+      'The login’s issuer key isn’t listed on devnet.',
+    ],
     [/SpendingLimitExceeded/, 'key-limit', 'Over its limit on devnet.'],
     [/CallNotAllowed/, 'recipient-not-allowed', 'Not an approved recipient on devnet.'],
     [/KeyAlreadyRevoked/, 'key-revoked', 'Revoked on devnet.'],
@@ -360,6 +542,11 @@ export class DevnetRejection extends Error {
     super(message)
     this.name = 'DevnetRejection'
   }
+}
+
+function blocked(account: SandboxAccount, options: DevnetCallOptions = {}) {
+  const reason = devnetBlocker(account, { logins: Boolean(options.requestSignIn) })
+  return reason ? new DevnetRejection('network-error', reason) : null
 }
 
 /**
@@ -438,14 +625,18 @@ function committedSigners(account: SandboxAccount) {
 // ---------------------------------------------------------------------------
 // Sessions
 
-/** A signer's devnet key, held in this page. */
+/** A signer's devnet key: a key held in this page, or a login (a ZK owner) and its last sign-in. */
 type OwnerKey = {
   id: string
   kind: SignerKind
   name: string
   address: Address
-  account: OwnerAccount
+  account?: OwnerAccount
+  login?: LoginKey
 }
+
+/** A login and what its last sign-in reported: a verified email or a Privy DID. */
+type LoginKey = { owner: Logins.LoginOwner; email?: string; privy?: string }
 
 type AccessKeyEntry = {
   spec: string
@@ -484,21 +675,33 @@ type Session = {
 /** The running call's options. Calls run one at a time per session. */
 type Prompts = {
   current?: DevnetCallOptions['onPrompt']
+  popup?: DevnetCallOptions['popup']
+  requestSignIn?: DevnetCallOptions['requestSignIn']
+  signal?: AbortSignal
   prepared?: DevnetCallOptions['prepared']
+  signIns?: DevnetCallOptions['signIns']
 }
 
 function setPrompts(prompts: Prompts, options: DevnetCallOptions) {
   prompts.current = options.onPrompt
+  prompts.popup = options.popup
+  prompts.requestSignIn = options.requestSignIn
+  prompts.signal = options.signal
   prompts.prepared = options.prepared
+  prompts.signIns = options.signIns
 }
 
 function clearPrompts(prompts: Prompts) {
   prompts.current = undefined
+  prompts.popup = undefined
+  prompts.requestSignIn = undefined
+  prompts.signal = undefined
   prompts.prepared = undefined
+  prompts.signIns = undefined
 }
 
-/** A signer's key: its address and the key held here. */
-type OwnerMaterial = Pick<OwnerKey, 'address' | 'account'> & {
+/** A signer's key: its address, and the key held here or the login and its last sign-in. */
+type OwnerMaterial = Pick<OwnerKey, 'address' | 'account' | 'login'> & {
   /** Where a passkey sends its prompts: the call that's using it now. */
   prompter?: { prompts: Prompts }
 }
@@ -508,71 +711,26 @@ type AccessKeyMaterial =
   | { address: Address; team: NonNullable<AccessKeyEntry['team']> }
   | { address: Address; bind: (parent: Address, prompts: Prompts) => AccessKeyAccount }
 
-/** The accounts that sign for `keys`. */
-const localAccounts = (keys: readonly OwnerKey[]) => keys.map((key) => key.account)
+const hasLoginKey = (key: OwnerKey) => Boolean(key.login)
+const hasLogin = (keys: readonly OwnerKey[]) => keys.some(hasLoginKey)
 
-/** The Account Keychain precompile, and each access key type's `SignatureType`. */
-const accountKeychain: Address = '0xaAAAaaAA00000000000000000000000000000000'
-const signatureTypes = { secp256k1: 0, p256: 1, webAuthn: 2, configurable: 3 } as const
+/** The primitive accounts among `keys`, for viem's own signing. */
+const localAccounts = (keys: readonly OwnerKey[]) =>
+  keys.flatMap((key) => (key.account ? [key.account] : []))
 
-type Scope = { address: Address; selector?: Hex | string; recipients?: readonly Address[] }
-
-/**
- * Authorize an access key by calling the keychain precompile from the account, so the
- * account's signers approve it once, in the transaction itself.
- */
-export function authorizeKeyCall(options: {
-  keyId: Address
-  keyType: keyof typeof signatureTypes
-  expiry?: number
-  limits?: readonly { token: Address; limit: bigint; period?: number }[]
-  scopes?: readonly Scope[]
-}) {
-  const { keyId, keyType, expiry, limits = [], scopes } = options
-  const targets = new Map<
-    string,
-    { target: Address; selectorRules: { selector: Hex; recipients: Address[] }[] }
-  >()
-  for (const scope of scopes ?? []) {
-    const key = scope.address.toLowerCase()
-    const entry = targets.get(key) ?? { target: scope.address, selectorRules: [] }
-    if (scope.selector)
-      entry.selectorRules.push({
-        selector: scope.selector as Hex,
-        recipients: [...(scope.recipients ?? [])],
-      })
-    targets.set(key, entry)
-  }
-  const data = encodeFunctionData({
-    abi: Tempo.Abis.accountKeychain,
-    functionName: 'authorizeKey',
-    args: [
-      keyId,
-      signatureTypes[keyType],
-      {
-        // The precompile rejects 0 as a past expiry; a key that never expires passes u64::MAX.
-        expiry: expiry === undefined ? 2n ** 64n - 1n : BigInt(expiry),
-        enforceLimits: limits.length > 0,
-        limits: limits.map(({ token, limit, period = 0 }) => ({
-          token,
-          amount: limit,
-          period: BigInt(period),
-        })),
-        allowAnyCalls: !scopes?.length,
-        allowedCalls: [...targets.values()],
-      },
-    ],
-  })
-  return { to: accountKeychain, data }
+function approverFor(key: OwnerKey): Logins.Approver {
+  if (key.login) return key.login.owner
+  const account = key.account as OwnerAccount
+  return { address: key.address, sign: (parameters) => account.sign(parameters) }
 }
 
-export function revokeKeyCall(keyId: Address) {
+function transferCall(to: Address, amount: bigint) {
   return {
-    to: accountKeychain,
+    to: devnetToken,
     data: encodeFunctionData({
-      abi: Tempo.Abis.accountKeychain,
-      functionName: 'revokeKey',
-      args: [keyId],
+      abi: Tempo.Abis.tip20,
+      functionName: 'transfer',
+      args: [to, amount],
     }),
   }
 }
@@ -649,6 +807,11 @@ export function createDevnetAdapter(
      * approvals from in-memory P-256 keys, for tests and scripts only.
      */
     passkeys?: 'browser' | 'headless'
+    /**
+     * Replaces the popup sign-in, for scripts and tests only: it signs in some other way (such as
+     * a scripted relay sign-in) and returns the result `Logins.signIn` would.
+     */
+    signIn?: (request: LoginSignInRequest) => Promise<Logins.SignInResult>
   } = {},
 ): DevnetAdapter {
   const { passkeys = 'browser' } = options
@@ -659,6 +822,8 @@ export function createDevnetAdapter(
   /** Keys made with `prepareSigner` and `prepareAccessKey`, by lowercase address. */
   const preparedOwners = new Map<string, OwnerMaterial>()
   const preparedAccessKeys = new Map<string, AccessKeyMaterial>()
+  /** Completed sign-ins a login has taken, so no other login takes them too. */
+  const usedSignIns = new WeakSet<Logins.SignInResult>()
 
   function randomAddress() {
     return Account.fromSecp256k1(generatePrivateKey()).address
@@ -705,6 +870,45 @@ export function createDevnetAdapter(
     return { account, prompter }
   }
 
+  /** A real sign-in for a login signer, in the window the reader's click opened. */
+  async function signInLogin(
+    signer: Pick<Signer, 'kind' | 'name'>,
+    prompts: Prompts,
+    reason: LoginSignInRequest['reason'],
+  ): Promise<LoginKey> {
+    const blocker = loginBlocker(signer.kind)
+    if (blocker) throw new DevnetRejection('network-error', blocker)
+    const method = signer.kind as Logins.LoginMethod
+    // A sign-in the reader already completed for this method.
+    const done =
+      reason === 'add'
+        ? prompts.signIns?.find((result) => result.method === method && !usedSignIns.has(result))
+        : undefined
+    if (done) {
+      usedSignIns.add(done)
+      return { owner: done.owner, email: done.email, privy: done.privy }
+    }
+    const scripted = options.signIn
+    if (scripted) {
+      const result = await prompted(prompts, `sign-in-${method}` as DevnetPrompt, () =>
+        scripted({ method, signer: signer.name, reason }),
+      )
+      return { owner: result.owner, email: result.email, privy: result.privy }
+    }
+    let popup = prompts.popup
+    prompts.popup = undefined
+    if (!popup || popup.closed) {
+      if (!prompts.requestSignIn)
+        throw new DevnetRejection('network-error', 'Logins aren’t live on devnet yet.')
+      popup = await prompts.requestSignIn({ method, signer: signer.name, reason })
+    }
+    if (!popup) throw new DevnetRejection('no-approver', 'Sign-in cancelled.')
+    const result = await prompted(prompts, `sign-in-${method}` as DevnetPrompt, () =>
+      Logins.signIn({ method, popup, signal: prompts.signal }),
+    )
+    return { owner: result.owner, email: result.email, privy: result.privy }
+  }
+
   /** A signer's key: the one prepared for it, or a new one. */
   async function createOwner(signer: Signer, prompts: Prompts): Promise<OwnerMaterial> {
     const prepared = prompts.prepared?.signer?.(signer)
@@ -723,9 +927,8 @@ export function createDevnetAdapter(
   ): Promise<OwnerMaterial> {
     const type = devnetKeyType(signer.kind)
     const held = (account: OwnerAccount) => ({ address: account.address as Address, account })
-    // A secp256k1 signer with a generated key signs with it: the key the reader was shown, or one
-    // a guide demo generated and holds.
-    if (type === 'secp256k1' && signer.privateKey)
+    // A private-key signer signs with the key the reader was shown.
+    if (signer.kind === 'private-key' && signer.privateKey)
       return held(Account.fromSecp256k1(signer.privateKey as Hex))
     if (type === 'secp256k1') return held(Account.fromSecp256k1(generatePrivateKey()))
     // A device key: a non-extractable WebCrypto key where this page can make one (HTTPS and
@@ -734,8 +937,79 @@ export function createDevnetAdapter(
       if (!globalThis.crypto?.subtle) return held(Account.fromP256(P256.randomPrivateKey()))
       return held(Account.fromWebCryptoP256(await WebCryptoP256.createKeyPair()))
     }
-    const { account, prompter } = await createPasskey(signer, prompts)
-    return { ...held(account), prompter }
+    if (type === 'webAuthn') {
+      const { account, prompter } = await createPasskey(signer, prompts)
+      return { ...held(account), prompter }
+    }
+    const login = await signInLogin(signer, prompts, 'add')
+    return { address: login.owner.address, login }
+  }
+
+  /** A login's proof lasts 10 minutes. Sign in again before approving with an expired one. */
+  async function ensureFresh(session: Session, keys: readonly OwnerKey[]) {
+    for (const key of keys) {
+      if (!key.login) continue
+      // A sign-in the reader just completed replaces the older proof, even one still valid.
+      const fresh = session.prompts.signIns?.find(
+        (result) => !usedSignIns.has(result) && isAddressEqual(result.owner.address, key.address),
+      )
+      if (fresh) {
+        usedSignIns.add(fresh)
+        key.login = {
+          owner: fresh.owner,
+          email: fresh.email ?? key.login.email,
+          privy: fresh.privy ?? key.login.privy,
+        }
+        continue
+      }
+      if (!Logins.needsSignIn(key.login.owner, 45)) continue
+      const renewed = await signInLogin(key, session.prompts, 'renew')
+      if (!isAddressEqual(renewed.owner.address, key.address))
+        throw new DevnetRejection(
+          'no-approver',
+          `That’s a different ${Logins.loginAccountNouns[key.login.owner.method]}. Sign in as the one you added.`,
+        )
+      key.login = {
+        owner: renewed.owner,
+        email: renewed.email ?? key.login.email,
+        privy: renewed.privy ?? key.login.privy,
+      }
+    }
+  }
+
+  /** Send `calls` from the account with a quorum that includes a login (one ZK proof each). */
+  async function sendWithLogins(
+    session: Session,
+    keys: readonly OwnerKey[],
+    calls: readonly { to: Address; data: Hex }[],
+  ) {
+    await ensureFresh(session, keys)
+    return Logins.sendFromConfigurable({
+      client,
+      account: signingAccount(session, []),
+      config: session.config,
+      approvers: keys.map(approverFor),
+      calls,
+    })
+  }
+
+  /** Each login signer's real identity from its sign-in, in place of the example's. */
+  function withIdentities(session: Session, account: SandboxAccount): SandboxAccount {
+    let changed = false
+    const signers = account.signers.map((signer) => {
+      const key = session.owners.get(ownerKeyId(signer))
+      if (!key?.login) return signer
+      const identity = Logins.loginIdentity({
+        method: key.login.owner.method,
+        address: key.address,
+        email: key.login.email,
+        privy: key.login.privy,
+      })
+      if (signer.subject === identity.subject && signer.detail === identity.detail) return signer
+      changed = true
+      return { ...signer, ...identity }
+    })
+    return changed ? { ...account, signers } : account
   }
 
   function ownerFor(session: Session, signer: Pick<Signer, 'id' | 'kind'>) {
@@ -749,13 +1023,14 @@ export function createDevnetAdapter(
     const id = ownerKeyId(signer)
     const existing = session.owners.get(id)
     if (existing) return existing
-    const { address, account } = await createOwner(signer, session.prompts)
+    const { address, account, login } = await createOwner(signer, session.prompts)
     const owner: OwnerKey = {
       id: signer.id,
       kind: signer.kind,
       name: signer.name,
       address,
       account,
+      login,
     }
     session.owners.set(id, owner)
     return owner
@@ -955,7 +1230,7 @@ export function createDevnetAdapter(
   function decorate(session: Session, account: SandboxAccount, hash?: string): SandboxAccount {
     const created = `Address ${shortAddress(session.address)}`
     return {
-      ...account,
+      ...withIdentities(session, account),
       address: session.address,
       balance: session.balance,
       devnet: { lastHash: hash ?? account.devnet?.lastHash },
@@ -995,6 +1270,14 @@ export function createDevnetAdapter(
     const next = { owners, threshold: account.committed.threshold }
     if (sameConfig(next, session.config)) return undefined
     const approvers = updateApprovers(session, account)
+    if (hasLogin(approvers)) {
+      const receipt = await sendWithLogins(session, approvers, [
+        Logins.updateConfigCall(session.config, next),
+      ])
+      session.config = Logins.nextConfig(session.config, next) as ChainConfig
+      session.lastUpdate = receipt.transactionHash
+      return receipt.transactionHash
+    }
     const { config, receipt } = await client.accounts.updateConfigSync({
       account: signingAccount(session, localAccounts(approvers)),
       nextConfig: next,
@@ -1004,12 +1287,14 @@ export function createDevnetAdapter(
     return receipt.transactionHash
   }
 
+  /** Authorize new access keys and revoke removed ones. */
   /** Send one keychain call from the account, approved once by `approvers`. */
   async function sendKeychainCall(
     session: Session,
     approvers: readonly OwnerKey[],
     call: { to: Address; data: Hex },
   ) {
+    if (hasLogin(approvers)) return sendWithLogins(session, approvers, [call])
     return client.sendTransactionSync({
       account: signingAccount(session, localAccounts(approvers)),
       calls: [call],
@@ -1027,7 +1312,8 @@ export function createDevnetAdapter(
         if ((current && !entry.revoked) || key.id === deferred) continue
         const created = await createAccessKey(session, key)
         const parameters = authorizationParameters(key, session.recipient)
-        // One call to the keychain from the account: its quorum signs once (one passkey prompt).
+        // One call to the keychain from the account: its quorum signs once (one passkey prompt,
+        // one proof per login). A key authorization would need the quorum's approval twice.
         const receipt = await sendKeychainCall(
           session,
           updateApprovers(session, account),
@@ -1059,18 +1345,21 @@ export function createDevnetAdapter(
     account: SandboxAccount,
     options: DevnetCallOptions,
   ): Promise<Session> {
+    const rejection = blocked(account, options)
+    if (rejection) throw rejection
     const prompts: Prompts = {}
     setPrompts(prompts, options)
-    // Create every key before funding, so a cancelled passkey leaves nothing behind.
+    // Create every key before funding, so a cancelled passkey or sign-in leaves nothing behind.
     const owners = new Map<string, OwnerKey>()
     for (const signer of committedSigners(account)) {
-      const { address, account: held } = await createOwner(signer, prompts)
+      const { address, account: held, login } = await createOwner(signer, prompts)
       owners.set(ownerKeyId(signer), {
         id: signer.id,
         kind: signer.kind,
         name: signer.name,
         address,
         account: held,
+        login,
       })
     }
     if (account.legacy) {
@@ -1101,7 +1390,7 @@ export function createDevnetAdapter(
       threshold: account.committed.threshold,
     }
     let initial = Account.fromConfig(genesis)
-    // The same owners derive the same address, such as one passkey at threshold 1. If an
+    // The same owners derive the same address, such as one private key at threshold 1. If an
     // earlier run moved that account past this v0 config, start a new account with a random salt.
     const commitment = await client.accounts.getConfigCommitment({ account: initial.address })
     if (isForeignCommitment(commitment, initial.config as ChainConfig))
@@ -1158,6 +1447,9 @@ export function createDevnetAdapter(
         const signer = account.signers.find((item) => item.id === id) as Signer
         return ownerFor(session, signer)
       })
+      if (hasLogin(keys))
+        return (await sendWithLogins(session, keys, [transferCall(to as Address, amount)]))
+          .transactionHash
       // A plain key account pays as a single key: no configurable signature.
       const [plainKey] = localAccounts(keys)
       const { receipt } = await client.token.transferSync({
@@ -1200,8 +1492,8 @@ export function createDevnetAdapter(
 
   /**
    * The access key `request` pays with, when its first payment can also authorize it in one
-   * transaction: a key on the account that devnet hasn't authorized yet, with a quorum to sign its
-   * authorization. Team accounts authorize on their own.
+   * transaction: a key on the account that devnet hasn't authorized yet, with a quorum of at most
+   * one login to sign its authorization. Team accounts authorize on their own.
    */
   function firstKeyPayment(session: Session, account: SandboxAccount, request: ActionRequest) {
     const { action, approver } = request
@@ -1211,8 +1503,7 @@ export function createDevnetAdapter(
     const entry = session.keys.get(key.id)
     if (entry && entry.spec === accessKeySpec(key) && !entry.revoked) return undefined
     try {
-      updateApprovers(session, account)
-      return key
+      return updateApprovers(session, account).filter(hasLoginKey).length <= 1 ? key : undefined
     } catch {
       return undefined
     }
@@ -1232,19 +1523,40 @@ export function createDevnetAdapter(
     const parameters = authorizationParameters(key, session.recipient)
     const amount = usdToUnits(request.action.amount)
     const to = request.recipient === 'new' ? randomAddress() : session.recipient
-    const keyAuthorization = await client.accessKey.signAuthorization({
-      account: signingAccount(session, localAccounts(approvers)),
-      accessKey,
-      ...parameters,
-    })
-    const { receipt } = await client.token.transferSync({
-      account: accessKey,
-      amount,
-      to,
-      token: devnetToken,
-      keyAuthorization,
-    })
-    const hash = receipt.transactionHash
+    let hash: string
+    if (hasLogin(approvers)) {
+      await ensureFresh(session, approvers)
+      const receipt = await Logins.sendWithKeyAuthorization({
+        client,
+        account: session.address,
+        config: session.config,
+        approvers: approvers.map(approverFor),
+        accessKey,
+        key: {
+          address: accessKey.accessKeyAddress,
+          type: accessKey.keyType,
+          ...parameters,
+          scopes: parameters.scopes as never,
+        },
+        chainId: devnetChainId,
+        calls: [transferCall(to as Address, amount)],
+      })
+      hash = receipt.transactionHash
+    } else {
+      const keyAuthorization = await client.accessKey.signAuthorization({
+        account: signingAccount(session, localAccounts(approvers)),
+        accessKey,
+        ...parameters,
+      })
+      const { receipt } = await client.token.transferSync({
+        account: accessKey,
+        amount,
+        to,
+        token: devnetToken,
+        keyAuthorization,
+      })
+      hash = receipt.transactionHash
+    }
     session.keys.set(key.id, created)
     session.lastUpdate = hash
     return hash
@@ -1282,7 +1594,7 @@ export function createDevnetAdapter(
 
   const adapter: DevnetAdapter = {
     network: 'Devnet',
-    probe: probeDevnet,
+    probe: options.rpcUrl ? () => checkDevnet({ url: options.rpcUrl }) : probeDevnet,
 
     async upgrade(account, options = {}) {
       if (!account.legacy) return { account }
@@ -1402,6 +1714,8 @@ export function createDevnetAdapter(
 
     async prepare(account, options = {}) {
       if (!isCreated(account)) throw new DevnetRejection('not-created', notCreatedNotice)
+      const rejection = blocked(account, options)
+      if (rejection) throw rejection
       let session: Session
       try {
         session = await ensureSession(account, options)
@@ -1440,6 +1754,12 @@ export function createDevnetAdapter(
           return { account: { ...previous, notice: mapDevnetError(error).message } }
         }
       }
+      const logins = { logins: Boolean(options.requestSignIn) }
+      const reason =
+        devnetBlocker(previous, logins) ??
+        devnetBlocker(next, logins) ??
+        (changesApprovalRules(previous, next) ? rulesNotLive : null)
+      if (reason) return { account: { ...previous, notice: reason } }
       let session: Session
       try {
         session = await ensureSession(previous, options)
@@ -1479,6 +1799,8 @@ export function createDevnetAdapter(
     async submit(account, request, options = {}) {
       if (!isCreated(account))
         return { account, result: { ok: false, code: 'not-created', message: notCreatedNotice } }
+      const reason = devnetBlocker(account, { logins: Boolean(options.requestSignIn) })
+      if (reason) return { account, result: { ok: false, code: 'network-error', message: reason } }
       let session: Session
       try {
         session = await ensureSession(account, options)
@@ -1517,6 +1839,11 @@ export function createDevnetAdapter(
           }
           return { account: decorate(session, account), result: checked }
         }
+        if (needsApprovalRules(account, request))
+          return {
+            account: decorate(session, account),
+            result: { ok: false, code: 'not-live', message: rulesNotLive },
+          }
         // Signer changes and key authorizations are approval checks only; edits apply them.
         if (request.action.type !== 'payment')
           return { account: decorate(session, account), result: checked }
@@ -1561,9 +1888,27 @@ export function createDevnetAdapter(
 }
 
 let shared: DevnetAdapter | undefined
+let sharedLogins: DevnetAdapter | undefined
 
 /** One adapter per page, so every sandbox reuses each preset's devnet account. */
 export function getDevnetAdapter() {
   shared ??= createDevnetAdapter()
   return shared
+}
+
+/**
+ * The adapter for sandboxes that can add logins: on the login devnet (`loginDevnetRpcUrl`), which
+ * verifies their proofs. Use it only once `probeLogins` finds the local auth app.
+ */
+export function getLoginDevnetAdapter() {
+  sharedLogins ??= createDevnetAdapter({ rpcUrl: Logins.loginDevnetRpcUrl })
+  return sharedLogins
+}
+
+let probedLoginDevnet: Promise<boolean> | undefined
+
+/** `checkDevnet` against the login devnet, once per page. */
+export function probeLoginDevnet() {
+  probedLoginDevnet ??= checkDevnet({ url: Logins.loginDevnetRpcUrl })
+  return probedLoginDevnet
 }

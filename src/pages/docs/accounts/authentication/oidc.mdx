@@ -1,0 +1,220 @@
+---
+title: OIDC logins
+seoTitle: Sign In to Tempo Accounts with Social, SSO, or Privy Logins | Tempo Docs
+description: Make the Google, enterprise SSO, or Privy sign-in your customers already use a signer on their Tempo accounts, and see which login services each one trusts.
+---
+
+import { AccountDiagram } from '../../../../components/AccountDiagram'
+
+# OIDC logins
+
+:::warning
+**Not live yet.** OIDC logins ([TIP-1130](https://tips.sh/1130)) are in early development, and behavior may change. Login examples run on a separate devnet from the other Accounts examples, because the Tempo Accounts devnet doesn't verify login proofs.
+:::
+
+An OIDC login makes the sign-in your customers already use, from Google to enterprise SSO, a signer on their Tempo account, with no separate wallet app. The login's issuer can sign in as any customer it covers, so keep each login below the threshold and pair it with a passkey the customer holds.
+
+## What an OIDC login is
+
+An OIDC login is a signer backed by an OpenID Connect ID token. The signing key stays on the customer's device, and the ID token names that key, so the token alone approves nothing. Tempo checks a zero-knowledge proof of the token onchain, and no server holds a key for the customer. Use a login when your app already signs customers in, or to recover a lost passkey.
+
+<span id="oidc-login-options" />
+
+## Login options
+
+| Login | Issuer | See |
+| --- | --- | --- |
+| Google, Apple, and other social providers | Your auth service, or the provider | [Sign users in with your login](/docs/accounts/guides/users/sign-in-with-your-login), with your provider's sign-in |
+| Enterprise SSO | Your auth service, or your company's identity provider | [Sign users in with your login](/docs/accounts/guides/users/sign-in-with-your-login) |
+| Wallet providers such as Privy | Your auth service, which bridges the provider's sign-in | [Privy logins](#privy-logins) |
+
+<span id="email-login" />
+<span id="sms-login" />
+<span id="email-and-sms-codes" />
+<span id="how-an-email-code-becomes-a-signer" />
+
+Email and SMS one-time codes work the same way: your auth service checks the code and issues the ID token, so it's the issuer.
+
+<span id="privy-login" />
+
+### Privy logins
+
+If your embedded wallet already signs customers in with Privy, the Privy sign-in becomes the customer's login signer. To use a Privy-held key as a signer instead, see [Embed wallets with a provider](/docs/accounts/guides/users/embed-wallets).
+
+<span id="how-the-tempo-relay-bridges-privy-sign-ins" />
+<span id="how-a-relay-bridges-privy-sign-ins" />
+<span id="how-your-auth-service-bridges-privy-sign-ins" />
+
+Privy signs its tokens with ES256, and the proof verifies RS256, so your auth service bridges the two as the identity provider:
+
+1. The customer signs in on Privy's own screen.
+2. Your auth service checks the Privy token against Privy's published keys, with your Privy app ID as the audience.
+3. Your auth service issues its own RS256 ID token for that Privy user, bound to the device key.
+4. Tempo checks the proof of that token, and the login approves like any other OIDC login.
+
+Each Privy user is one login signer. Your auth service is the issuer, so [publish its keys](#publish-your-providers-keys). Whoever runs it can then sign in as any of these customers, so pair the login with a passkey.
+
+## How a login approves
+
+<AccountDiagram
+  name="login"
+  alt="The customer's device holds the key. Its ID token becomes a proof, and Tempo checks the proof and the device's signature. Only the device holds a key."
+/>
+
+1. **The customer's device creates a key.** It never leaves the device.
+2. **The identity provider issues an ID token that names that key** in its `nonce`, so the token approves nothing without a signature from the device.
+3. **The salt service and prover turn the token into a zero-knowledge proof.** The token never goes on chain, and the account lists the login by a salted ID that doesn't reveal who the customer is.
+4. **Tempo verifies the proof** against the provider's keys in the key publisher, plus the device's signature.
+
+The first payment carries this approval and also authorizes the device key as an [access key](/docs/accounts/access-keys), so later payments carry only the device's signature. For the full sign-in in code, see [Sign users in with your login](/docs/accounts/guides/users/sign-in-with-your-login).
+
+<span id="relays" />
+<span id="what-a-relay-is" />
+
+## Login services
+
+Four services stand behind each OIDC login: the identity provider, the key publisher, the salt service, and the prover. You, your wallet provider, or another operator can run the salt service, prover, and key publisher. None of them holds a key for the customer, so whoever runs the salt service or prover can't move funds.
+
+### What each service does
+
+| Service | What it does |
+| --- | --- |
+| Identity provider (issuer) | Signs the customer's ID token. For Privy and other sign-ins your auth service bridges, this is your auth service. Otherwise it's the provider, such as Google, Apple, Microsoft, Auth0, or WorkOS. |
+| Key publisher | An onchain registry of the identity provider's signing keys. Tempo checks each proof against it. See [Publish your provider's keys](#publish-your-providers-keys). |
+| Salt service | Checks the ID token, derives the customer's salt from a secret salt key, and requests the proof. The salt fixes the account address and hides who it belongs to. |
+| Prover | Proves the ID token in zero knowledge, so the token never goes on chain. |
+
+<span id="relay-trust" />
+
+### What each service can and can't do
+
+| Service | Can | Can't |
+| --- | --- | --- |
+| Identity provider (issuer) | Sign in as any of its users | Approve alone, if its login's weight is below the threshold |
+| Key publisher | Its owner can list any key, and so sign in as any customer whose login names the publisher | Approve alone, if that login's weight is below the threshold |
+| Salt service | See ID tokens, link logins to account addresses, and delay or refuse service | Sign for a customer, unless it's also the issuer |
+| Prover | See the ID tokens it proves, and delay or refuse service | Sign for a customer |
+
+The salt service and prover can't change or forge an approval, change an access key's limits, or redirect a sign-in to another key: each login commits to the customer's device key. The salt service's operator must keep the salt key secret and backed up. Losing it locks customers out, and leaking it links addresses to identities.
+
+Use logins from different issuers, so no single issuer approves alone. See [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
+
+<span id="run-your-own-relay" />
+
+### Run your own salt service
+
+Host the salt service with viem's `Relay`, a small server helper that mounts the `Relay.oidc` plugin.
+
+```ts [salt-service.ts]
+import { http, type Hex } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { createClient, Relay, withRelay } from 'viem/tempo'
+
+const env = (name: string) => process.env[name] as Hex
+
+export const client = createClient({
+  chain: tempoDevnet,
+  transport: withRelay(http(), {
+    plugins: [
+      Relay.oidc({
+        audiences: ['1234567890-abc.apps.googleusercontent.com'], // your OAuth client IDs
+        issuers: ['https://accounts.google.com'],
+        prover: { apiKey: process.env.PROVER_API_KEY!, url: 'https://prover.example.com' },
+        publisherId: env('PUBLISHER_ID'), // part of every address: never change it
+        saltKey: env('SALT_KEY'),
+      }),
+    ],
+  }),
+})
+```
+
+Pass the same plugins to `Relay.create({ client, plugins })` and serve `relay.fetch`. Create the salt key once with `echo "0x$(openssl rand -hex 32)"` and keep it in a secret manager with a backup: it fixes every customer's address. Keep request bodies out of logs, rate limit `oidc_prove` per client, and allow CORS only from your app's origin.
+
+<span id="sign-customers-in-with-oidc" />
+<span id="connect-to-a-salt-service" />
+
+Point your app's client at the salt service, in place of the [devnet client](/docs/accounts/create#connect-to-the-devnet). The salt service derives each login's address and requests its proof:
+
+```ts [client.ts]
+import { http } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+export const client = createClient({
+  chain: tempoDevnet,
+  transport: http('https://salt.example.com/rpc'), // your salt service URL
+})
+```
+
+Build it with viem: [Run a salt service](https://viem-d07zjc3q1-wevm.vercel.app/tempo/guides/oidc/salt-service) covers the salt service and browser CORS.
+
+{/* TODO: switch to viem.sh when the OIDC guides publish */}
+
+## OIDC provider requirements
+
+- The issuer signs ID tokens with RS256 and echoes the `nonce`. Google, Apple, Microsoft, Auth0, Clerk, WorkOS, and most enterprise identity providers do.
+- ID tokens stay under 1,024 bytes. Use a login app that adds only the claims you need.
+- Your web and mobile apps share one OAuth client ID. A different client ID reaches a different account.
+- Make your auth service, not each social provider, the issuer. Google, Apple, and SSO sign-ins through it then map to one signer. Your auth service can then sign in as any of those customers.
+
+## Publish your provider's keys
+
+A key publisher is a list of your provider's public signing keys on Tempo. Anyone can read it, and only its owner can change it. The private keys never leave your provider.
+
+The owner can list any key, and so sign in as any customer whose login names the publisher. Run it like a root certificate authority:
+
+- **For your own identity provider,** own its publisher yourself, so the owner is no new party. For a provider such as Google, use a publisher whose owner you trust, or create your own.
+- **Keep the owner offline.** Use a multisig account, and keep its keys out of automated jobs.
+- **Create it once.** Its ID is part of every address it serves, so switching publishers later means changing every customer's signer.
+
+:::::steps
+
+### Read the provider's keys
+
+Fetch the issuer's `/.well-known/openid-configuration`, then its `jwks_uri`, and hash each key with `Oidc.fromJwk(jwk).keyHash`. Skip keys that login proofs don't support, such as EC keys. The viem guide below has this as a `getKeyHashes(iss)` helper.
+
+### Create the publisher from a multisig account
+
+Send it from the account that will own the publisher: a [configurable account](/docs/accounts/policies/signing-thresholds) whose signers are keys in separate teams' HSMs or KMSs, such as 3 of 5. Rebuild `owner` from its saved address and `config`, with the approving keys attached, as in [Remove signers](/docs/accounts/key-management/remove-signers#remove-a-signer).
+
+```ts [create-publisher.ts]
+import { Oidc } from 'viem/tempo'
+
+const iss = 'https://auth.example.com' // your OpenID Connect issuer
+const { publisherId } = await client.keyPublisher.createSync({
+  account: owner, // the publisher's owner account
+  keys: [{ issuer: Oidc.hashIssuer(iss), keyHashes: await getKeyHashes(iss) }],
+  salt: '0x0000000000000000000000000000000000000000000000000000000000000001',
+})
+```
+
+Pass `publisherId` to [`Relay.oidc`](#run-your-own-salt-service). The same sender and `salt` give the same ID on every chain. To move ownership later, use `client.keyPublisher.transferOwnershipSync({ newOwner, publisherId })`.
+
+<span id="keep-the-keys-current" />
+
+### Publish each new key before your provider signs with it
+
+Add the next key with `client.keyPublisher.setKeysSync` ahead of each rotation, and remove the old key once your provider stops using it. A removed key stays valid for one hour, so sign-ins in progress still succeed. Revoke a compromised key at once with `client.keyPublisher.revokeKeySync`.
+
+### Monitor the list
+
+Compare `client.keyPublisher.getActiveKeys` with your provider's keys on a schedule, and alert on any difference. The job only reads: a key that can change the list can forge any customer's sign-in.
+
+:::::
+
+Build it with viem: [Publish provider keys](https://viem-d07zjc3q1-wevm.vercel.app/tempo/guides/oidc/publish-keys), including the `getKeyHashes` helper, and [`keyPublisher.create`](https://viem-d07zjc3q1-wevm.vercel.app/tempo/actions/keyPublisher.create).
+
+{/* TODO: switch to viem.sh when the OIDC guides publish */}
+
+## OIDC login limits
+
+| Limit | Value |
+| --- | --- |
+| Login approval lifetime | At most 10 minutes after the token is issued; viem defaults to 9 minutes from the start of sign-in. After that, approvals fail with `ZkCredentialExpiredError`. |
+| Login approvals per transaction | Up to 2. See [Signing threshold limits](/docs/accounts/policies/signing-thresholds#signing-threshold-limits). |
+| ID token size | Up to 1,024 bytes |
+| Signers per login | One per issuer and OAuth client ID. The same person through two providers is two signers. |
+| Removed provider keys | Valid for one hour after removal, so logins in progress still succeed |
+| Devnet proofs | Devnet uses a development proving key whose trapdoor is public, so anyone can forge proofs there. Proofs on devnet aren't a security boundary. |
+
+For other methods, see [Signing methods](/docs/accounts/authentication).

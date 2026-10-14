@@ -31,6 +31,7 @@ const diagrams = {
   keychain: KeychainAuthority,
   treasury: TreasuryApproval,
   'rotate-signer': RotateSigner,
+  login: LoginApproval,
 }
 
 /**
@@ -331,6 +332,24 @@ function ConfigurableAccount() {
           <Chip icon="approved" label="Executes" strong />
         </Then>
       </div>
+    </div>
+  )
+}
+
+/** A login approves with a key on the customer's device; its ID token reaches Tempo as a proof. */
+function LoginApproval() {
+  return (
+    <div className="ad-strip">
+      <Chip icon="device" label="Device key" strong />
+      <Then label="named in">
+        <Chip icon="login" label="ID token" />
+      </Then>
+      <Then label="becomes">
+        <Chip icon="verified" label="Proof" />
+      </Then>
+      <Then label="checked by">
+        <Chip icon="approved" label="Tempo" strong />
+      </Then>
     </div>
   )
 }

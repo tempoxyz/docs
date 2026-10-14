@@ -2,13 +2,17 @@ import { thisDevice, thisDevicePasskey } from './this-device'
 /**
  * Rules engine for the account sandbox. Pure functions only: no React and no network.
  *
- * The rules follow the configurable-account TIPs that run on the Tempo Accounts devnet:
+ * The rules follow the configurable-account TIPs:
  * - TIP-1114: 1–48 owners, weights 1–255, total weight at most 255, threshold 1–255 and
  *   reachable with at most eight owner signatures. Signatures stop at the threshold.
+ * - TIP-1131: a transaction carries at most two ZK (login) signatures, and wallets refuse
+ *   configurations whose logins reach a threshold only three or more at a time.
  * - TIP-1107 and TIP-1109: updates increment the version, keep the address, and keep access keys.
- * - TIP-1111: access keys never count toward the threshold and can't change signers. A
- *   configurable account can be another account's access key. The sandbox doesn't model admin
- *   access keys (TIP-1049).
+ * - TIP-1111 and TIP-1137: access keys never count toward the threshold and can't manage keys
+ *   or signers. Admin access keys don't exist.
+ * - TIP-1135, simplified to one USD outflow rule plus an administrative weight. Equality doesn't
+ *   escalate, non-payment operations need the administrative weight, and access keys can't spend
+ *   while rules are on. The rules model assumes a fee sponsor, so fee reservations add no outflow.
  *
  * `AccountSandboxAdapter.submit` is the boundary a devnet adapter replaces.
  * `account-sandbox-devnet.ts` sends the same actions as real transactions.
@@ -22,16 +26,17 @@ export const sandboxLimits = {
   maxTotalWeight: 255,
   maxThreshold: 255,
   maxSignatures: 8,
+  maxLoginSignatures: 2,
 } as const
 
 // ---------------------------------------------------------------------------
 // Signers
 
-/**
- * Signers are private keys, device keys, and passkeys. Hardware, wallet-provider, and
- * recovery-provider keys are private keys that example accounts name by who holds them.
- */
 export type SignerKind =
+  | 'google'
+  | 'privy'
+  | 'apple'
+  | 'sso'
   | 'private-key'
   | 'passkey'
   | 'device'
@@ -39,19 +44,42 @@ export type SignerKind =
   | 'wallet-provider'
   | 'recovery-provider'
 
-export type SignatureScheme = 'webauthn' | 'p256' | 'secp256k1'
+export type SignatureScheme = 'oidc' | 'webauthn' | 'p256' | 'secp256k1'
 
-/** `you` for keys the account holder controls, `provider` for keys a third party holds. */
+/** `you` for keys and logins the account holder controls, `provider` for keys a third party holds. */
 export type SignerHolder = 'you' | 'provider'
 
 type SignerKindInfo = {
   label: string
   scheme: SignatureScheme
   holder: SignerHolder
-  group: 'Keys' | 'Providers'
+  group: 'Logins' | 'Keys' | 'Providers'
+  loginWord?: string
 }
 
 export const signerKinds = {
+  google: {
+    label: 'Google login',
+    scheme: 'oidc',
+    holder: 'you',
+    group: 'Logins',
+    loginWord: 'Google',
+  },
+  privy: {
+    label: 'Privy login',
+    scheme: 'oidc',
+    holder: 'you',
+    group: 'Logins',
+    loginWord: 'Privy',
+  },
+  apple: {
+    label: 'Apple login',
+    scheme: 'oidc',
+    holder: 'you',
+    group: 'Logins',
+    loginWord: 'Apple',
+  },
+  sso: { label: 'Company SSO', scheme: 'oidc', holder: 'you', group: 'Logins', loginWord: 'SSO' },
   'private-key': { label: 'Private key', scheme: 'secp256k1', holder: 'you', group: 'Keys' },
   passkey: { label: 'Passkey', scheme: 'webauthn', holder: 'you', group: 'Keys' },
   device: { label: 'Device key', scheme: 'p256', holder: 'you', group: 'Keys' },
@@ -73,6 +101,7 @@ export const signerKinds = {
 export const signerKindOrder = Object.keys(signerKinds) as SignerKind[]
 
 export const schemeLabels: Record<SignatureScheme, string> = {
+  oidc: 'OIDC',
   webauthn: 'WebAuthn',
   p256: 'P-256',
   secp256k1: 'secp256k1',
@@ -83,7 +112,7 @@ export type Signer = {
   kind: SignerKind
   name: string
   detail: string
-  /** Where the key lives, such as a device or a serial number, to tell two keys apart. */
+  /** The login identity, used to tell two logins with the same name apart. */
   subject?: string
   weight: number
   holder: SignerHolder
@@ -98,6 +127,10 @@ export type Signer = {
 }
 
 export type SignerStatus = 'active' | 'added' | 'revoked' | 'lost'
+
+export function isLogin(signer: Pick<Signer, 'kind'>) {
+  return signerKinds[signer.kind].scheme === 'oidc'
+}
 
 export function signerStatus(account: SandboxAccount, signer: Signer): SignerStatus {
   if (signer.revoked) return 'revoked'
@@ -138,22 +171,27 @@ function largestWeights(signers: readonly Pick<Signer, 'weight'>[], count: numbe
 
 export type ApprovalSetOptions = {
   maxSignatures?: number
+  maxLogins?: number
   /** Stop after this many sets. */
   limit?: number
 }
 
 /**
- * Every minimal set of `signers` that reaches `weight`: at most eight signatures, and no signer
- * can be dropped without falling below `weight`. Minimal sets also satisfy TIP-1114's rule that
- * no signature may follow the one that reaches the threshold.
- * Sorted by size, then total weight (highest first), then list order.
+ * Every minimal set of `signers` that reaches `weight`: at most eight signatures and two logins,
+ * and no signer can be dropped without falling below `weight`. Minimal sets also satisfy
+ * TIP-1114's rule that no signature may follow the one that reaches the threshold.
+ * Sorted by size, then total weight (highest first), then fewer logins, then list order.
  */
 export function approvalSets(
   signers: readonly Signer[],
   weight: number,
   options: ApprovalSetOptions = {},
 ): Signer[][] {
-  const { maxSignatures = sandboxLimits.maxSignatures, limit = 5_000 } = options
+  const {
+    maxSignatures = sandboxLimits.maxSignatures,
+    maxLogins = sandboxLimits.maxLoginSignatures,
+    limit = 5_000,
+  } = options
   if (weight < 1) return []
   const order = new Map(signers.map((signer, index) => [signer.id, index]))
   // Descending weight: the last signer added to a set is its lightest, so a set is
@@ -167,7 +205,7 @@ export function approvalSets(
 
   const sets: Signer[][] = []
   const current: Signer[] = []
-  function visit(start: number, sum: number) {
+  function visit(start: number, sum: number, logins: number) {
     if (sets.length >= limit) return
     if (sum >= weight) {
       sets.push([...current])
@@ -177,12 +215,14 @@ export function approvalSets(
     for (let index = start; index < candidates.length; index++) {
       if (sum + suffix[index] < weight) return
       const candidate = candidates[index]
+      const login = isLogin(candidate) ? 1 : 0
+      if (logins + login > maxLogins) continue
       current.push(candidate)
-      visit(index + 1, sum + candidate.weight)
+      visit(index + 1, sum + candidate.weight, logins + login)
       current.pop()
     }
   }
-  visit(0, 0)
+  visit(0, 0, 0)
 
   const position = (signer: Signer) => order.get(signer.id) ?? 0
   return sets
@@ -191,6 +231,8 @@ export function approvalSets(
       if (a.length !== b.length) return a.length - b.length
       const weightDifference = totalWeight(b) - totalWeight(a)
       if (weightDifference) return weightDifference
+      const loginDifference = a.filter(isLogin).length - b.filter(isLogin).length
+      if (loginDifference) return loginDifference
       for (let index = 0; index < a.length; index++) {
         const difference = position(a[index]) - position(b[index])
         if (difference) return difference
@@ -204,12 +246,16 @@ function listName(signer: Signer) {
   const info: SignerKindInfo = signerKinds[signer.kind]
   const suffix = signer.name.startsWith(info.label) ? signer.name.slice(info.label.length) : null
   if (suffix === null) return signer.name
+  if (info.loginWord) return `${info.loginWord}${suffix}`
   return `${info.label.charAt(0).toLowerCase()}${info.label.slice(1)}${suffix}`
 }
 
 export function soloName(signer: Signer) {
   if (signer.phrase) return signer.phrase.solo
+  const info: SignerKindInfo = signerKinds[signer.kind]
   if (signer.name.includes('’s ')) return signer.name
+  if (info.loginWord && signer.name.startsWith(info.label))
+    return `the ${info.loginWord} login${signer.name.slice(info.label.length)}`
   return `the ${listName(signer)}`
 }
 
@@ -243,7 +289,7 @@ function together(set: readonly Signer[], all: readonly Signer[]) {
   return `${joinAnd(set.map(listName))} together`
 }
 
-/** Phrase a group of same-size sets as "any 2 of …" or "the passkey plus one of …". */
+/** Phrase a group of same-size sets as "any 2 of …" or "the passkey plus Google or Privy". */
 function groupPhrase(group: readonly Signer[][], size: number): string | null {
   if (group.length < 2) return null
   const union = unionOf(group)
@@ -262,8 +308,7 @@ function groupPhrase(group: readonly Signer[][], size: number): string | null {
 }
 
 /**
- * Describe approval sets in a short phrase, such as "the passkey, or the backup key and the
- * recovery provider together".
+ * Describe approval sets in a short phrase, such as "the passkey, or Google and Privy together".
  * Shows at most `maxAlternatives`, then "or N other combinations".
  */
 export function describeApprovalSets(
@@ -452,12 +497,27 @@ export function accessKeyDetail(key: AccessKey) {
     .join(' · ')
 }
 
+/** Keys stay stored while approval rules are on, but they can't spend. */
+export function accessKeyStatus(account: SandboxAccount, key: AccessKey) {
+  if (key.status !== 'active') return key.status
+  return account.committed.rules.enabled ? 'paused' : 'active'
+}
+
 // ---------------------------------------------------------------------------
 // Account state
 
+export type ApprovalRules = {
+  enabled: boolean
+  /** Payments above this USD amount need `paymentWeight`. Equal amounts don't escalate. */
+  paymentLimit: number
+  paymentWeight: number
+  /** Signer changes, rule changes, and access-key management. */
+  adminWeight: number
+}
+
 export type LogEntry = {
   id: number
-  kind: 'preset' | 'config' | 'key' | 'payment' | 'approval' | 'event'
+  kind: 'preset' | 'config' | 'rules' | 'key' | 'payment' | 'approval' | 'event'
   title: string
   detail?: string
   /** The transaction that applied this entry, on a real network. */
@@ -467,6 +527,7 @@ export type LogEntry = {
 type CommittedState = {
   threshold: number
   owners: { id: string; weight: number }[]
+  rules: ApprovalRules
 }
 
 export type SandboxAccount = {
@@ -496,6 +557,9 @@ export type SandboxAccount = {
   threshold: number
   signers: Signer[]
   accessKeys: AccessKey[]
+  rules: ApprovalRules
+  rulesRevision: number
+  startRulesRevision: number
   /** The preset models a recommended setup. */
   recommended: boolean
   guided: GuidedActionId[]
@@ -519,6 +583,7 @@ function snapshot(account: SandboxAccount): CommittedState {
   return {
     threshold: account.threshold,
     owners: configuredSigners(account).map(({ id, weight }) => ({ id, weight })),
+    rules: { ...account.rules },
   }
 }
 
@@ -592,18 +657,22 @@ export function formatBalance(amount: number) {
 
 export type PresetId =
   | 'from-scratch'
+  | 'portable-sign-in'
   | 'add-signers'
   | 'multi-factor'
   | 'rotate-keys'
+  | 'change-login'
   | 'recover'
   | 'export'
   | 'team-treasury'
+  | 'approval-rules'
   | 'team-account'
   | 'backend-automation'
 
 export type GuidedActionId =
-  | 'add-backup'
+  | 'add-passkey'
   | 'rotate-operations'
+  | 'change-login'
   | 'lose-passkey'
   | 'replace-passkey'
   | 'move-to-tempo-wallet'
@@ -629,9 +698,18 @@ type PresetDefinition = AccountSeed & {
   threshold: number
   signers: SignerSeed[]
   accessKeys: AccessKeyTemplateId[]
+  rules?: Pick<ApprovalRules, 'paymentWeight' | 'adminWeight'>
   guided?: GuidedActionId[]
 }
 
+const mayaGoogle: SignerSeed = {
+  id: 'google',
+  kind: 'google',
+  name: 'Google login',
+  subject: 'maya@example.com',
+  detail: 'OIDC · Google · maya@example.com',
+  weight: 1,
+}
 const mayaPasskey: SignerSeed = {
   id: 'passkey',
   kind: 'passkey',
@@ -640,19 +718,12 @@ const mayaPasskey: SignerSeed = {
   detail: 'WebAuthn · Face ID · this iPhone',
   weight: 2,
 }
-const mayaBackup: SignerSeed = {
-  id: 'backup',
-  kind: 'hardware',
-  name: 'Backup key',
-  subject: 'serial 3318',
-  detail: 'secp256k1 · hardware wallet · 3318',
-  weight: 1,
-}
-const mayaRecovery: SignerSeed = {
-  id: 'recovery',
-  kind: 'recovery-provider',
-  name: 'Recovery provider',
-  detail: 'secp256k1 · held by a recovery service',
+const mayaPrivy: SignerSeed = {
+  id: 'privy',
+  kind: 'privy',
+  name: 'Privy login',
+  subject: 'm•••@example.com',
+  detail: 'OIDC · Privy · m•••@example.com',
   weight: 1,
 }
 
@@ -684,7 +755,7 @@ const maya: AccountSeed = {
   avatar: 'M',
   balance: 12_480,
   salt: 'maya',
-  genesis: { threshold: 1, owners: [{ id: 'passkey', weight: 1 }] },
+  genesis: { threshold: 1, owners: [{ id: 'google', weight: 1 }] },
   identity: { local: 'maya', domain: 'example.com' },
 }
 const acme: AccountSeed = {
@@ -698,7 +769,6 @@ const acme: AccountSeed = {
   },
   identity: { local: 'finance', domain: 'acme.example' },
 }
-const mayaRecommended = [mayaPasskey, mayaBackup, mayaRecovery]
 
 const presetDefinitions: PresetDefinition[] = [
   {
@@ -717,23 +787,31 @@ const presetDefinitions: PresetDefinition[] = [
     accessKeys: [],
   },
   {
+    id: 'portable-sign-in',
+    label: 'Portable sign-in',
+    ...maya,
+    version: 0,
+    threshold: 1,
+    signers: [mayaGoogle],
+    accessKeys: ['iphone'],
+  },
+  {
     id: 'add-signers',
     label: 'Add signers',
     ...maya,
     version: 0,
     threshold: 1,
-    signers: [{ ...mayaPasskey, weight: 1 }],
+    signers: [mayaGoogle],
     accessKeys: ['iphone'],
-    guided: ['add-backup'],
+    guided: ['add-passkey'],
   },
   {
     id: 'multi-factor',
     label: 'Multi-factor',
-    recommended: true,
     ...maya,
     version: 2,
     threshold: 2,
-    signers: mayaRecommended,
+    signers: [mayaGoogle, mayaPasskey, mayaPrivy],
     accessKeys: ['iphone'],
   },
   {
@@ -748,12 +826,22 @@ const presetDefinitions: PresetDefinition[] = [
     guided: ['rotate-operations'],
   },
   {
+    id: 'change-login',
+    label: 'Change login',
+    ...maya,
+    version: 2,
+    threshold: 2,
+    signers: [mayaGoogle, mayaPasskey, mayaPrivy],
+    accessKeys: ['iphone'],
+    guided: ['change-login'],
+  },
+  {
     id: 'recover',
     label: 'Recover',
     ...maya,
     version: 2,
     threshold: 2,
-    signers: mayaRecommended,
+    signers: [mayaGoogle, mayaPasskey, mayaPrivy],
     accessKeys: ['iphone'],
     guided: ['lose-passkey', 'replace-passkey'],
   },
@@ -789,6 +877,16 @@ const presetDefinitions: PresetDefinition[] = [
     threshold: 2,
     signers: acmeSigners,
     accessKeys: ['payout'],
+  },
+  {
+    id: 'approval-rules',
+    label: 'Approval rules',
+    ...acme,
+    version: 1,
+    threshold: 1,
+    signers: acmeSigners,
+    accessKeys: ['payout'],
+    rules: { paymentWeight: 2, adminWeight: 3 },
   },
   {
     id: 'team-account',
@@ -829,7 +927,7 @@ const presetDefinitions: PresetDefinition[] = [
       threshold: 2,
       owners: [
         { id: 'passkey', weight: 2 },
-        { id: 'backup', weight: 1 },
+        { id: 'google', weight: 1 },
         { id: 'recovery', weight: 1 },
       ],
     },
@@ -838,8 +936,21 @@ const presetDefinitions: PresetDefinition[] = [
     threshold: 2,
     signers: [
       { ...passkeySeed('passkey', 'Passkey', 'Face ID · owner’s iPhone'), weight: 2 },
-      hardwareKey('backup', 'Backup key', '5590'),
-      mayaRecovery,
+      {
+        id: 'google',
+        kind: 'google',
+        name: 'Google login',
+        subject: 'owner@kite.example',
+        detail: 'OIDC · Google · owner@kite.example',
+        weight: 1,
+      },
+      {
+        id: 'recovery',
+        kind: 'recovery-provider',
+        name: 'Recovery provider',
+        detail: 'secp256k1 · held by a recovery service',
+        weight: 1,
+      },
     ],
     accessKeys: ['payout'],
   },
@@ -851,6 +962,8 @@ export const presets = presetDefinitions.map(({ id, label, recommended = false }
   recommended,
 }))
 
+const paymentLimit = 5_000
+
 export function loadPreset(id: PresetId): SandboxAccount {
   const preset = presetDefinitions.find((item) => item.id === id)
   if (!preset) throw new Error(`Unknown preset: ${id}`)
@@ -861,6 +974,9 @@ export function loadPreset(id: PresetId): SandboxAccount {
     revoked: false,
     addedIn: 0,
   }))
+  const rules: ApprovalRules = preset.rules
+    ? { enabled: true, paymentLimit, ...preset.rules }
+    : defaultRules(preset.threshold, signers, false)
   const keys = preset.accessKeys.map(
     (template, index): AccessKey => ({
       ...accessKeyTemplates[template],
@@ -870,6 +986,7 @@ export function loadPreset(id: PresetId): SandboxAccount {
     }),
   )
   const address = preset.genesis.owners.length ? deriveAddress(preset.salt, preset.genesis) : null
+  const rulesRevision = rules.enabled ? 1 : 0
   const account: SandboxAccount = {
     presetId: preset.id,
     name: preset.name,
@@ -881,9 +998,12 @@ export function loadPreset(id: PresetId): SandboxAccount {
     threshold: preset.threshold,
     signers,
     accessKeys: keys,
+    rules,
+    rulesRevision,
+    startRulesRevision: rulesRevision,
     recommended: preset.recommended ?? false,
     guided: preset.guided ?? [],
-    committed: { threshold: 0, owners: [] },
+    committed: { threshold: 0, owners: [], rules },
     log: [],
     notice: null,
     serial: keys.length + 1,
@@ -901,8 +1021,20 @@ export function loadPreset(id: PresetId): SandboxAccount {
   )
 }
 
+function defaultRules(threshold: number, owners: readonly Signer[], enabled: boolean) {
+  const paymentWeight = Math.min(threshold + 1, sandboxLimits.maxThreshold)
+  return {
+    enabled,
+    paymentLimit,
+    paymentWeight,
+    adminWeight: Math.max(paymentWeight, Math.min(totalWeight(owners), sandboxLimits.maxThreshold)),
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Validation
+
+export type TierId = 'base' | 'large-payment' | 'admin'
 
 export type ConfigIssue = {
   code:
@@ -913,14 +1045,56 @@ export type ConfigIssue = {
     | 'threshold-range'
     | 'unreachable'
     | 'signature-limit'
+    | 'login-limit'
+    | 'no-usable-path'
+    | 'rule-order'
+  tier?: TierId
   message: string
+}
+
+function tierSubject(tier: TierId, weight: number, rules: ApprovalRules) {
+  if (tier === 'base') return `Threshold ${weight}`
+  if (tier === 'large-payment') return `Over-$${formatUsd(rules.paymentLimit)} weight ${weight}`
+  return `Change weight ${weight}`
+}
+
+function checkTier(
+  owners: readonly Signer[],
+  weight: number,
+  tier: TierId,
+  rules: ApprovalRules,
+): ConfigIssue | null {
+  const subject = tierSubject(tier, weight, rules)
+  const total = totalWeight(owners)
+  if (total < weight)
+    return { code: 'unreachable', tier, message: `${subject} is above total weight ${total}.` }
+  if (largestWeights(owners, sandboxLimits.maxSignatures) < weight)
+    return { code: 'signature-limit', tier, message: `${subject} needs more than 8 signatures.` }
+  const logins = owners
+    .filter(isLogin)
+    .map((signer) => signer.weight)
+    .sort((a, b) => b - a)
+  const loginTotal = logins.reduce((sum, value) => sum + value, 0)
+  const target = tier === 'base' ? 'the threshold' : `weight ${weight}`
+  // TIP-1131: logins that reach the weight together, but never two at a time, form an
+  // approval path no transaction can carry. Wallets and SDKs must refuse these.
+  if (loginTotal >= weight && (logins[0] ?? 0) + (logins[1] ?? 0) < weight)
+    return {
+      code: 'login-limit',
+      tier,
+      message: `Viem rejects configurations that need three or more logins to reach ${target}.`,
+    }
+  if (approvalSets(owners, weight, { limit: 1 }).length === 0)
+    return { code: 'no-usable-path', tier, message: `Every path to ${target} needs 3+ logins.` }
+  return null
 }
 
 export function validateConfig(config: {
   threshold: number
   owners: readonly Signer[]
+  rules: ApprovalRules
 }): ConfigIssue[] {
-  const { threshold, owners } = config
+  const { threshold, owners, rules } = config
   if (owners.length === 0) return [{ code: 'no-owners', message: 'Add at least one signer.' }]
   if (owners.length > sandboxLimits.maxOwners)
     return [{ code: 'too-many-owners', message: 'An account has at most 48 signers.' }]
@@ -938,19 +1112,42 @@ export function validateConfig(config: {
     return [{ code: 'total-weight', message: `Total weight ${total} is above 255.` }]
   if (!Number.isInteger(threshold) || threshold < 1 || threshold > sandboxLimits.maxThreshold)
     return [{ code: 'threshold-range', message: 'Threshold must be 1 to 255.' }]
-  if (total < threshold)
-    return [
-      { code: 'unreachable', message: `Threshold ${threshold} is above total weight ${total}.` },
-    ]
-  if (largestWeights(owners, sandboxLimits.maxSignatures) < threshold)
-    return [
-      { code: 'signature-limit', message: `Threshold ${threshold} needs more than 8 signatures.` },
-    ]
-  return []
+
+  const issues: ConfigIssue[] = []
+  const base = checkTier(owners, threshold, 'base', rules)
+  if (base) issues.push(base)
+  if (rules.enabled) {
+    const limit = `$${formatUsd(rules.paymentLimit)}`
+    if (rules.paymentWeight <= threshold)
+      issues.push({
+        code: 'rule-order',
+        tier: 'large-payment',
+        message: `Over ${limit} must need more than threshold ${threshold}.`,
+      })
+    else {
+      const issue = checkTier(owners, rules.paymentWeight, 'large-payment', rules)
+      if (issue) issues.push(issue)
+    }
+    if (rules.adminWeight < rules.paymentWeight)
+      issues.push({
+        code: 'rule-order',
+        tier: 'admin',
+        message: `Changes must need at least weight ${rules.paymentWeight}.`,
+      })
+    else {
+      const issue = checkTier(owners, rules.adminWeight, 'admin', rules)
+      if (issue) issues.push(issue)
+    }
+  }
+  return issues
 }
 
 export function validateAccount(account: SandboxAccount) {
-  return validateConfig({ threshold: account.threshold, owners: configuredSigners(account) })
+  return validateConfig({
+    threshold: account.threshold,
+    owners: configuredSigners(account),
+    rules: account.rules,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -989,15 +1186,18 @@ export type FailureCode =
   | 'revoked-signer'
   | 'lost-signer'
   | 'insufficient-weight'
+  | 'login-limit'
   | 'signature-limit'
   | 'key-revoked'
   | 'key-expired'
   | 'key-not-allowed'
+  | 'rules-block-keys'
   | 'recipient-not-allowed'
   | 'key-limit'
   | 'insufficient-balance'
   | 'network-error'
   | 'not-created'
+  | 'not-live'
 
 export type ActionResult =
   | {
@@ -1018,9 +1218,17 @@ export type ActionResult =
       weight?: number
     }
 
-/** Every signer action needs the threshold: payments, signer changes, and key management. */
-export function requiredWeight(account: Pick<SandboxAccount, 'threshold'>) {
-  return account.threshold
+export function requiredWeight(
+  account: Pick<SandboxAccount, 'threshold' | 'rules'>,
+  action: SandboxAction,
+): { weight: number; tier: TierId } {
+  const { rules, threshold } = account
+  if (!rules.enabled) return { weight: threshold, tier: 'base' }
+  if (action.type !== 'payment') return { weight: rules.adminWeight, tier: 'admin' }
+  // Equality doesn't escalate: exactly the limit stays in the lower tier.
+  if (action.amount > rules.paymentLimit)
+    return { weight: rules.paymentWeight, tier: 'large-payment' }
+  return { weight: threshold, tier: 'base' }
 }
 
 function fail(
@@ -1029,6 +1237,13 @@ function fail(
   extra: { requiredWeight?: number; weight?: number } = {},
 ): ActionResult {
   return { ok: false, code, message, ...extra }
+}
+
+function weightLabel(account: SandboxAccount, action: SandboxAction, tier: TierId) {
+  if (tier === 'large-payment') return `Over $${formatUsd(account.rules.paymentLimit)} needs`
+  if (tier === 'admin')
+    return action.type === 'authorize-key' ? 'New keys need' : 'Signer changes need'
+  return 'Needs'
 }
 
 function capitalize(text: string) {
@@ -1056,20 +1271,29 @@ export function evaluateAction(account: SandboxAccount, request: ActionRequest):
   if (selected.some((signer) => signer.lost))
     return fail('lost-signer', 'Lost signers can’t approve.')
 
-  const required = requiredWeight(account)
+  const required = requiredWeight(account, action)
   const weight = totalWeight(selected)
-  const extra = { requiredWeight: required, weight }
-  const [used] = approvalSets(selected, required, { limit: 1 })
+  const extra = { requiredWeight: required.weight, weight }
+  const [used] = approvalSets(selected, required.weight, { limit: 1 })
   if (!used) {
-    if (weight < required)
-      return fail('insufficient-weight', `Needs weight ${required} · has ${weight}`, extra)
+    if (weight < required.weight)
+      return fail(
+        'insufficient-weight',
+        `${weightLabel(account, action, required.tier)} weight ${required.weight} · has ${weight}`,
+        extra,
+      )
+    if (
+      approvalSets(selected, required.weight, { maxLogins: Number.POSITIVE_INFINITY, limit: 1 })
+        .length
+    )
+      return fail('login-limit', 'A transaction can carry at most two logins.', extra)
     return fail('signature-limit', 'A transaction can carry at most eight signatures.', extra)
   }
   if (action.type === 'payment' && action.amount > account.balance)
     return fail('insufficient-balance', `Balance is ${formatBalance(account.balance)}.`, extra)
   return {
     ok: true,
-    message: `${capitalize(soloNames(used))} · weight ${totalWeight(used)} of ${required}`,
+    message: `${capitalize(soloNames(used))} · weight ${totalWeight(used)} of ${required.weight}`,
     signerIds: used.map((signer) => signer.id),
     ...extra,
   }
@@ -1094,6 +1318,9 @@ function evaluateAccessKey(
     return fail('key-not-allowed', 'Access keys can’t change signers.')
   if (action.type === 'authorize-key')
     return fail('key-not-allowed', 'Access keys can’t authorize keys.')
+  // Keys depend on the applied policy, not on an unapplied draft.
+  if (account.committed.rules.enabled)
+    return fail('rules-block-keys', 'Access keys can’t spend while approval rules are on.')
   if (key.delegate) {
     // A team account signs as the key with its own quorum (TIP-1111).
     const members = key.delegate.members.filter((member) => memberIds.includes(member.id))
@@ -1199,16 +1426,17 @@ function committedOwners(account: SandboxAccount) {
     .filter((signer): signer is Signer => Boolean(signer))
 }
 
-/** Updates and key management need the applied configuration's threshold. */
+/** Updates and key management need the applied configuration's change weight. */
 function approveUpdate(account: SandboxAccount) {
-  const weight = account.committed.threshold
+  const { rules, threshold } = account.committed
+  const weight = rules.enabled ? rules.adminWeight : threshold
   const [approvers] = approvalSets(usableSigners(committedOwners(account)), weight, { limit: 1 })
   return approvers
     ? { approvers }
     : { reason: `Locked out: no usable signers reach weight ${weight}.` }
 }
 
-/** Name a signer for the log, with where it lives when another signer shares the name. */
+/** Name a signer for the log, with its login identity when another signer shares the name. */
 function logName(account: SandboxAccount, signer: Signer, weight?: number) {
   const duplicate = account.signers.filter((item) => item.name === signer.name).length > 1
   const qualifiers = [
@@ -1239,9 +1467,21 @@ function describeConfigChanges(account: SandboxAccount) {
   return parts
 }
 
+function describeRuleChange(before: ApprovalRules, after: ApprovalRules) {
+  const weights = `over $${formatUsd(after.paymentLimit)} W${after.paymentWeight} · changes W${after.adminWeight}`
+  if (!before.enabled && after.enabled) return `on · ${weights}`
+  if (before.enabled && !after.enabled) return 'off'
+  if (
+    after.enabled &&
+    (before.paymentWeight !== after.paymentWeight || before.adminWeight !== after.adminWeight)
+  )
+    return weights
+  return null
+}
+
 function proposeUpdate(
   account: SandboxAccount,
-  changes: Partial<Pick<SandboxAccount, 'signers' | 'threshold' | 'serial'>>,
+  changes: Partial<Pick<SandboxAccount, 'signers' | 'threshold' | 'rules' | 'serial'>>,
 ): SandboxAccount {
   if (!isCreated(account)) return { ...account, notice: notCreatedNotice }
   if (account.legacy) return { ...account, notice: notUpgradedNotice }
@@ -1252,6 +1492,8 @@ function proposeUpdate(
   if (validateAccount(draft).length > 0) return draft
 
   const configChanges = describeConfigChanges(draft)
+  const ruleChange = describeRuleChange(draft.committed.rules, draft.rules)
+  const approvedBy = `By ${soloNames(approval.approvers)}`
   let next = draft
   if (configChanges.length > 0) {
     const version = draft.version + 1
@@ -1265,8 +1507,15 @@ function proposeUpdate(
     next = addLog(next, {
       kind: 'config',
       title: `Config v${version} · ${capitalize(configChanges.join(', '))}`,
-      detail: `By ${soloNames(approval.approvers)} · same address and balance`,
+      detail: `${approvedBy} · same address and balance`,
     })
+  }
+  if (ruleChange) {
+    const revision = draft.rulesRevision + 1
+    next = addLog(
+      { ...next, rulesRevision: revision },
+      { kind: 'rules', title: `Rules r${revision} · ${ruleChange}`, detail: approvedBy },
+    )
   }
   return { ...next, committed: snapshot(next) }
 }
@@ -1276,8 +1525,17 @@ function uniqueName(base: string, names: readonly string[]) {
   for (let index = 2; ; index++) if (!names.includes(`${base} ${index}`)) return `${base} ${index}`
 }
 
-function newSignerDetails(kind: SignerKind) {
+function newSignerDetails(account: SandboxAccount, kind: SignerKind) {
+  const { domain } = account.identity
   switch (kind) {
+    case 'google':
+      return { detail: 'OIDC · Google account' }
+    case 'privy':
+      return { detail: 'OIDC · Privy account' }
+    case 'apple':
+      return { detail: 'OIDC · Apple Account' }
+    case 'sso':
+      return { detail: `OIDC · ${domain} sign-in` }
     case 'private-key':
       return { detail: 'secp256k1 · generated in this browser' }
     case 'passkey':
@@ -1309,7 +1567,7 @@ export function addSigner(
       info.label,
       account.signers.map((item) => item.name),
     ),
-    ...newSignerDetails(kind),
+    ...newSignerDetails(account, kind),
     weight: 1,
     holder: info.holder,
     lost: false,
@@ -1348,6 +1606,7 @@ function createAccount(account: SandboxAccount, first: Signer): SandboxAccount {
     startVersion: 0,
     threshold: 1,
     signers: [signer],
+    rules: defaultRules(1, [signer], false),
     notice: null,
     serial: account.serial + 1,
   }
@@ -1390,6 +1649,7 @@ export function createLegacyAccount(
     startVersion: 0,
     threshold: 1,
     signers: [signer],
+    rules: defaultRules(1, [signer], false),
     notice: null,
     serial: account.serial + 1,
   }
@@ -1471,10 +1731,42 @@ export function setThreshold(account: SandboxAccount, threshold: number) {
   })
 }
 
+export function setApprovalRules(account: SandboxAccount, enabled: boolean) {
+  if (enabled === account.rules.enabled) return account
+  return proposeUpdate(account, {
+    rules: enabled
+      ? defaultRules(account.threshold, configuredSigners(account), true)
+      : { ...account.rules, enabled: false },
+  })
+}
+
+export function setRuleWeight(
+  account: SandboxAccount,
+  rule: 'paymentWeight' | 'adminWeight',
+  weight: number,
+) {
+  if (!account.rules.enabled) return account
+  return proposeUpdate(account, {
+    rules: {
+      ...account.rules,
+      [rule]: Math.min(sandboxLimits.maxThreshold, Math.max(1, Math.round(weight))),
+    },
+  })
+}
+
 function replacementDetails(account: SandboxAccount, signer: Signer) {
   const used = new Set(account.signers.map((item) => item.subject))
   const pick = (candidates: string[]) =>
     candidates.find((candidate) => !used.has(candidate)) ?? `${candidates[0]} ${account.serial}`
+  if (signer.kind === 'google') {
+    const { local, domain } = account.identity
+    const subject = pick([
+      `${local}@work.example`,
+      `${local}@home.example`,
+      `${local}.new@${domain}`,
+    ])
+    return { subject, detail: `OIDC · Google · ${subject}` }
+  }
   if (signer.kind === 'hardware') {
     const serial = pick(['serial 8802', 'serial 5127', 'serial 6034']).replace('serial ', '')
     return { subject: `serial ${serial}`, detail: `secp256k1 · hardware wallet · ${serial}` }
@@ -1509,13 +1801,20 @@ export function rotateSigner(account: SandboxAccount, id: string) {
   })
 }
 
+/** Add a new Google login and revoke the old one in one update. */
+export function changeLogin(account: SandboxAccount) {
+  const current = configuredSigners(account).find((signer) => signer.kind === 'google')
+  if (!current) return { ...account, notice: 'Add a Google login first.' }
+  return rotateSigner(account, current.id)
+}
+
 function appSigner(account: SandboxAccount) {
   return configuredSigners(account).find(
     (signer) => signer.kind === 'wallet-provider' && signer.holder === 'provider',
   )
 }
 
-/** Hand off: add a Tempo Wallet signer and revoke the app's embedded-wallet signer in one update. */
+/** Export: add a Tempo Wallet signer and revoke the app's embedded-wallet signer in one update. */
 export function moveToTempoWallet(account: SandboxAccount) {
   const app = appSigner(account)
   if (!app) return { ...account, notice: 'No app signer to replace.' }
@@ -1543,8 +1842,9 @@ export function moveToTempoWallet(account: SandboxAccount) {
 }
 
 const guidedLabels: Record<GuidedActionId, string> = {
-  'add-backup': 'Add a backup key',
+  'add-passkey': 'Add a passkey',
   'rotate-operations': 'Rotate the operations key',
+  'change-login': 'Change Google login',
   'lose-passkey': 'Lose the passkey',
   'replace-passkey': 'Replace the passkey',
   'move-to-tempo-wallet': 'Move to Tempo Wallet',
@@ -1554,10 +1854,12 @@ function guidedTarget(account: SandboxAccount, id: GuidedActionId): Signer | nul
   const owners = configuredSigners(account)
   const passkey = owners.find((signer) => signer.kind === 'passkey')
   switch (id) {
-    case 'add-backup':
-      return owners.length === 1 ? null : undefined
+    case 'add-passkey':
+      return passkey ? undefined : null
     case 'rotate-operations':
       return owners.find((signer) => signer.name === 'Operations key')
+    case 'change-login':
+      return owners.find((signer) => signer.kind === 'google')
     case 'lose-passkey':
       return passkey && !passkey.lost ? passkey : undefined
     case 'replace-passkey':
@@ -1578,21 +1880,23 @@ export function runGuidedAction(account: SandboxAccount, id: GuidedActionId): Sa
   const target = guidedTarget(account, id)
   if (target === undefined) return account
   switch (id) {
-    case 'add-backup': {
-      const backup: Signer = {
+    case 'add-passkey': {
+      const passkey: Signer = {
         id: `s${account.serial}`,
-        kind: 'hardware',
-        name: 'Backup key',
-        subject: 'serial 3318',
-        detail: 'secp256k1 · hardware wallet · 3318',
-        weight: 1,
+        kind: 'passkey',
+        name: 'Passkey',
+        // The reader's own account gets a passkey on the reader's device.
+        ...(account.presetId === 'from-scratch'
+          ? thisDevicePasskey()
+          : { subject: 'this iPhone', detail: 'WebAuthn · Face ID · this iPhone' }),
+        weight: 2,
         holder: 'you',
         lost: false,
         revoked: false,
         addedIn: null,
       }
       return proposeUpdate(account, {
-        signers: [...account.signers, backup],
+        signers: [...account.signers, passkey],
         serial: account.serial + 1,
       })
     }
@@ -1656,7 +1960,11 @@ export function addAccessKey(
       serial: account.serial + 1,
       accessKeys: [...account.accessKeys, key],
     },
-    { kind: 'key', title: `Authorized ${key.name}`, detail: `By ${soloNames(approval.approvers)}` },
+    {
+      kind: 'key',
+      title: `Authorized ${key.name}`,
+      detail: `By ${soloNames(approval.approvers)}${account.committed.rules.enabled ? ' · paused by rules' : ''}`,
+    },
   )
 }
 
@@ -1687,8 +1995,9 @@ export type Notice = {
   signerIds?: string[]
 }
 
-/** Who can approve at the threshold: payments, signer changes, and new access keys alike. */
-export type Approval = {
+export type ApprovalTier = {
+  id: TierId
+  label: string
   weight: number
   sets: Signer[][]
   summary: string
@@ -1698,16 +2007,27 @@ export type AccountHealth = {
   valid: boolean
   issues: ConfigIssue[]
   notices: Notice[]
-  approval: Approval | null
-  /** For the header, such as "Threshold 2: the passkey, or …". */
+  tiers: ApprovalTier[]
+  /** For the header, such as "Threshold 2: the passkey, or Google and Privy together". */
   summary: string
   /** A recommended preset that is unchanged and raises no warnings. */
   recommended: boolean
 }
 
-export function approvalAt(account: SandboxAccount, signers: readonly Signer[]): Approval {
-  const sets = approvalSets(signers, account.threshold)
-  return { weight: account.threshold, sets, summary: describeApprovalSets(sets, signers) }
+export function approvalTiers(account: SandboxAccount, signers: readonly Signer[]): ApprovalTier[] {
+  const { rules, threshold } = account
+  const limit = `$${formatUsd(rules.paymentLimit)}`
+  const tiers: Omit<ApprovalTier, 'sets' | 'summary'>[] = rules.enabled
+    ? [
+        { id: 'base', label: `Up to ${limit}`, weight: threshold },
+        { id: 'large-payment', label: `Over ${limit}`, weight: rules.paymentWeight },
+        { id: 'admin', label: 'Changes and new keys', weight: rules.adminWeight },
+      ]
+    : [{ id: 'base', label: 'Payments and changes', weight: threshold }]
+  return tiers.map((tier) => {
+    const sets = approvalSets(signers, tier.weight)
+    return { ...tier, sets, summary: describeApprovalSets(sets, signers) }
+  })
 }
 
 export function analyzeAccount(account: SandboxAccount): AccountHealth {
@@ -1722,29 +2042,29 @@ export function analyzeAccount(account: SandboxAccount): AccountHealth {
           message: 'No signers yet. Add the first one to create the account.',
         },
       ],
-      approval: null,
+      tiers: [],
       summary: 'Not created',
       recommended: false,
     }
   const owners = configuredSigners(account)
   const issues = validateAccount(account)
   const valid = issues.length === 0
+  const tiers = approvalTiers(account, owners)
+  const summary = valid ? `Threshold ${account.threshold}: ${tiers[0].summary}` : 'Not applied'
   const notices: Notice[] = issues.map((issue, index) => ({
     id: `issue-${index}`,
     tone: 'error',
     message: issue.message,
   }))
-  if (!valid)
-    return { valid, issues, notices, approval: null, summary: 'Not applied', recommended: false }
-  const approval = approvalAt(account, owners)
-  const summary = `Threshold ${account.threshold}: ${approval.summary}`
+  if (!valid) return { valid, issues, notices, tiers, summary, recommended: false }
 
-  const { threshold } = account
+  const { rules, threshold } = account
+  const changeWeight = rules.enabled ? rules.adminWeight : threshold
   const lost = owners.filter((signer) => signer.lost)
   let locked = false
   if (lost.length > 0) {
     const usable = usableSigners(owners)
-    const sets = approvalSets(usable, threshold)
+    const sets = approvalSets(usable, changeWeight)
     const what = lost.length === 1 ? 'the lost signer' : 'the lost signers'
     locked = sets.length === 0
     notices.push(
@@ -1752,7 +2072,7 @@ export function analyzeAccount(account: SandboxAccount): AccountHealth {
         ? {
             id: 'recovery',
             tone: 'error',
-            message: `Locked out: remaining signers can’t reach weight ${threshold}.`,
+            message: `Locked out: remaining signers can’t reach weight ${changeWeight}.`,
           }
         : {
             id: 'recovery',
@@ -1762,6 +2082,12 @@ export function analyzeAccount(account: SandboxAccount): AccountHealth {
     )
   }
 
+  if (owners.length > 0 && owners.every(isLogin))
+    notices.push({
+      id: 'logins-alone',
+      tone: 'warning',
+      message: 'Only logins can approve. Add a passkey for large balances.',
+    })
   const outside = owners.filter(
     (signer) => signer.holder === 'provider' && signer.weight >= threshold,
   )
@@ -1773,7 +2099,8 @@ export function analyzeAccount(account: SandboxAccount): AccountHealth {
       signerIds: outside.map((signer) => signer.id),
     })
   if (!locked) {
-    const critical = owners.filter((signer) => approval.sets.every((set) => set.includes(signer)))
+    const changeSets = approvalSets(owners, changeWeight)
+    const critical = owners.filter((signer) => changeSets.every((set) => set.includes(signer)))
     if (owners.length === 1)
       notices.push({
         id: 'no-backup',
@@ -1784,7 +2111,9 @@ export function analyzeAccount(account: SandboxAccount): AccountHealth {
       notices.push({
         id: 'no-backup',
         tone: 'warning',
-        message: 'Every signer must approve: losing one locks the account.',
+        message: rules.enabled
+          ? 'Changes need every signer: losing one blocks recovery.'
+          : 'Every signer must approve: losing one locks the account.',
       })
     else if (critical.length > 0)
       notices.push({
@@ -1795,6 +2124,9 @@ export function analyzeAccount(account: SandboxAccount): AccountHealth {
       })
   }
   const recommended =
-    account.recommended && account.version === account.startVersion && notices.length === 0
-  return { valid, issues, notices, approval, summary, recommended }
+    account.recommended &&
+    account.version === account.startVersion &&
+    account.rulesRevision === account.startRulesRevision &&
+    notices.length === 0
+  return { valid, issues, notices, tiers, summary, recommended }
 }
