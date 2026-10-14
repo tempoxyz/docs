@@ -7,6 +7,7 @@ export function getDemoStep(page: Page, title: string | RegExp): Locator {
 // A failed transaction cannot produce the expected receipt. Surface the UI error
 // immediately instead of burning the entire success timeout before a retry.
 export async function expectDemoSuccess(page: Page, success: Locator, timeout = 90_000) {
+  // Match the step's ARIA role, not its styling classes, which change with design migrations.
   const errors = page
     .locator('[data-active][data-completed] > [role="alert"]')
     .filter({ visible: true })
