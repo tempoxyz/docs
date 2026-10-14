@@ -1,7 +1,7 @@
-import { expect, test } from '@playwright/test'
 import { ZoneRpcAuthentication } from 'ox/tempo'
 import { POST } from '../src/pages/_api/api/zone-rpc'
 import { getDemoStep } from './helpers'
+import { expect, test } from './live'
 
 test('deposit OUSD into Zone A with a passkey', async ({ page }) => {
   const client = await page.context().newCDPSession(page)
