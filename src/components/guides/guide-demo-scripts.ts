@@ -43,7 +43,6 @@ import type {
   DevnetSessionInfo,
   PreparedKey,
 } from './account-sandbox-devnet'
-import { thisDevice } from './this-device'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -132,7 +131,7 @@ export type GuideChain = {
 export type GuideContext = {
   adapter: GuideAdapter
   chain: GuideChain
-  /** Passkey prompts. */
+  /** Prepared keys and prompts for the adapter's calls. */
   options: DevnetCallOptions
 }
 
@@ -154,8 +153,8 @@ export type DemoAction = {
   run: (state: DemoState, ctx: GuideContext) => Promise<StepOutcome>
 }
 
-/** What a demo needs live: devnet always, plus a platform passkey. */
-export type Need = 'passkey'
+/** What a demo needs live: devnet always, plus WebCrypto for a device key that's an access key. */
+export type Need = 'webcrypto'
 
 export type DemoScript = {
   title: string
@@ -169,7 +168,7 @@ export type DemoScript = {
 export function missingNeed(needs: readonly Need[], live: ReadonlySet<Need>): string | null {
   const missing = needs.filter((need) => !live.has(need))
   if (missing.length === 0) return null
-  return 'This demo creates a passkey. Open it in a browser with Touch ID, Face ID, or Windows Hello.'
+  return 'This demo creates a WebCrypto device key. Open it on localhost or an HTTPS page.'
 }
 
 /** A step that can't finish, with a message for the reader. */
@@ -326,7 +325,7 @@ function lowerFirst(text: string) {
   return text.charAt(0).toLowerCase() + text.slice(1)
 }
 
-/** Signer names in a sentence, such as "your passkey and Backup key". */
+/** Signer names in a sentence, such as "your device key and Backup key". */
 export function approverNames(signers: readonly Signer[]) {
   return joinAnd(signers.map(signerPhrase))
 }
@@ -340,7 +339,7 @@ function signerPhrase(signer: Signer) {
   return namedSigner(signer) ? signer.name : `your ${lowerFirst(signer.name)}`
 }
 
-/** The configuration in one line, such as "passkey (2), Backup key (1), threshold 2". */
+/** The configuration in one line, such as "device key (2), Backup key (1), threshold 2". */
 export function describeConfig(account: SandboxAccount) {
   const owners = configuredSigners(account).map(
     (signer) => `${namedSigner(signer) ? signer.name : lowerFirst(signer.name)} (${signer.weight})`,
@@ -467,7 +466,7 @@ async function onChainConfig(ctx: GuideContext, account: SandboxAccount) {
 // ---------------------------------------------------------------------------
 // Shared steps
 
-/** Create the account with its first signer: a passkey or a private key. */
+/** Create the account with its first signer: a device key or a private key. */
 async function createAccount(
   state: DemoState,
   ctx: GuideContext,
@@ -488,34 +487,36 @@ async function createAccount(
   return { state: { ...created.state, account: funded.account }, hash: funded.hash, signer }
 }
 
-/** Create a passkey now, for the update in a later step that adds it as a signer. */
-async function preparePasskey(state: DemoState, ctx: GuideContext, label: string) {
-  const draft = addSigner(state.account, 'passkey')
+/** A device key signer's detail line: a P-256 key this browser holds. */
+const deviceKeyDetail = (status: string) => `P-256 · key in this browser · ${status}`
+
+/** Create a device key now, for the update in a later step that adds it as a signer. */
+async function prepareDeviceKey(state: DemoState, ctx: GuideContext, label: string) {
+  const draft = addSigner(state.account, 'device')
   const signer = addedSigner(state.account, draft)
   const key = await ctx.adapter.prepareSigner(
-    { kind: 'passkey', name: signer.name },
+    { kind: 'device', name: signer.name },
     callOptions(state, ctx),
   )
-  const { unlock } = thisDevice()
   let next = hold(state, {
-    signers: [...state.held.signers, { id: signer.id, kind: 'passkey', key }],
+    signers: [...state.held.signers, { id: signer.id, kind: 'device', key }],
   })
   next = withLocal(next, {
-    id: 'passkey',
-    icon: 'passkey',
+    id: 'device-signer',
+    icon: 'laptop',
     label,
-    detail: `WebAuthn · ${unlock} · ${short(key.address)} · not a signer yet`,
+    detail: deviceKeyDetail(`${short(key.address)} · not a signer yet`),
     status: 'pending',
   })
   return { state: next, key }
 }
 
-/** Add the passkey a previous step created, at `weight`. */
-function addHeldPasskey(account: SandboxAccount, held: Held, weight: number) {
-  const next = checked(addSigner(account, 'passkey'))
+/** Add the device key a previous step created, at `weight`. */
+function addHeldDeviceKey(account: SandboxAccount, held: Held, weight: number) {
+  const next = checked(addSigner(account, 'device'))
   const signer = addedSigner(account, next)
   if (!held.signers.some((item) => item.id === signer.id))
-    throw new DemoError('Create the passkey first.')
+    throw new DemoError('Create the device key first.')
   return {
     account: weight === 1 ? next : checked(setSignerWeight(next, signer.id, weight)),
     signer,
@@ -581,7 +582,7 @@ const keyWithDeviceKey: DemoAction = {
 
 const addSigners: DemoScript = {
   title: 'Add a recovery signer',
-  needs: ['passkey'],
+  needs: ['webcrypto'],
   setup: [keyWithDeviceKey],
   steps: [
     {
@@ -645,21 +646,21 @@ const addSigners: DemoScript = {
     },
     {
       title: 'Require two factors',
-      action: () => 'Create a passkey and send the update',
+      action: () => 'Create a device key and send the update',
       run: async (state, ctx) => {
-        const prepared = await preparePasskey(state, ctx, 'Passkey')
+        const prepared = await prepareDeviceKey(state, ctx, 'Device key')
         const before = prepared.state.account
         const approvers = nextApprovers(before)
-        const withPasskey = addHeldPasskey(before, prepared.state.held, 2).account
-        const next = asOneUpdate(before, checked(setThreshold(withPasskey, 2)))
+        const withDeviceKey = addHeldDeviceKey(before, prepared.state.held, 2).account
+        const next = asOneUpdate(before, checked(setThreshold(withDeviceKey, 2)))
         const sent = await update(prepared.state, ctx, next)
-        const done = updateLocal(sent.state, 'passkey', {
+        const done = updateLocal(sent.state, 'device-signer', {
           status: 'done',
-          detail: `WebAuthn · ${thisDevice().unlock} · signer`,
+          detail: deviceKeyDetail('signer'),
         })
         return {
           state: done,
-          result: `You created a passkey with ${thisDevice().unlock}. ${upperFirst(approverNames(approvers))} approved config v${done.account.version}: ${describeConfig(done.account)}. Current key and Recovery key now approve only together. ${recoveryCheck(done.account).message}`,
+          result: `You created a device key in this browser. ${upperFirst(approverNames(approvers))} approved config v${done.account.version}: ${describeConfig(done.account)}. Current key and Recovery key now approve only together. ${recoveryCheck(done.account).message}`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
@@ -774,53 +775,55 @@ const rotateKeys: DemoScript = {
 }
 
 const recover: DemoScript = {
-  title: 'Recover after losing your passkey',
-  needs: ['passkey'],
+  title: 'Recover after losing your device key',
+  needs: ['webcrypto'],
   setup: [
     keyWithDeviceKey,
     {
-      title: 'Add a backup key and a passkey',
+      title: 'Add a backup key and a device key',
       action: () => 'Add both',
       run: async (state, ctx) => {
         const before = state.account
         const approvers = nextApprovers(before)
-        const withPasskey = checked(addSigner(before, 'passkey'))
-        const passkey = addedSigner(before, withPasskey)
-        const weighted = checked(setSignerWeight(withPasskey, passkey.id, 2))
+        const withDeviceKey = checked(addSigner(before, 'device'))
+        const deviceKey = addedSigner(before, withDeviceKey)
+        const weighted = checked(setSignerWeight(withDeviceKey, deviceKey.id, 2))
         const withBackup = addKeySigner(weighted, ctx, ctx.chain.generatePrivateKey(), 'Backup key')
         const next = asOneUpdate(before, checked(setThreshold(withBackup, 2)))
         const sent = await update(state, ctx, next)
         return {
           state: withLocal(sent.state, {
-            id: 'old-passkey',
-            icon: 'passkey',
-            label: 'Passkey',
-            detail: `WebAuthn · ${thisDevice().unlock} · signer`,
+            id: 'old-device-signer',
+            icon: 'laptop',
+            label: 'Device key',
+            detail: deviceKeyDetail('signer'),
             status: 'done',
           }),
-          result: `Config v${sent.state.account.version}: ${describeConfig(sent.state.account)}. ${upperFirst(approverNames(approvers))} approved it. You created the passkey during the update.`,
+          result: `Config v${sent.state.account.version}: ${describeConfig(sent.state.account)}. ${upperFirst(approverNames(approvers))} approved it. This page created the device key during the update.`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
     },
     {
-      title: 'Treat the passkey as lost',
-      action: () => 'Treat the passkey as lost',
+      title: 'Treat the device key as lost',
+      action: () => 'Treat the device key as lost',
       run: async (state) => {
-        const passkey = configuredSigners(state.account).find((signer) => signer.kind === 'passkey')
-        if (!passkey) throw new DemoError('The account has no passkey.')
+        const deviceKey = configuredSigners(state.account).find(
+          (signer) => signer.kind === 'device',
+        )
+        if (!deviceKey) throw new DemoError('The account has no device key.')
         const next = {
           ...state,
-          account: setSignerLost(state.account, passkey.id, true),
+          account: setSignerLost(state.account, deviceKey.id, true),
         }
         return {
-          state: updateLocal(next, 'old-passkey', {
-            label: 'Lost passkey',
+          state: updateLocal(next, 'old-device-signer', {
+            label: 'Lost device key',
             detail: 'Treated as lost · still a signer on Tempo',
             status: 'gone',
           }),
           result:
-            'From here on the demo treats the passkey as lost: it won’t approve. It stays a signer on Tempo until you replace it.',
+            'From here on the demo treats the device key as lost: it won’t approve. It stays a signer on Tempo until you replace it.',
           hashes: [],
         }
       },
@@ -829,19 +832,19 @@ const recover: DemoScript = {
   steps: [
     {
       title: 'Create the replacement signer',
-      action: () => 'Create passkey',
+      action: () => 'Create device key',
       run: async (state, ctx) => {
-        const { state: next, key } = await preparePasskey(state, ctx, 'Replacement passkey')
+        const { state: next, key } = await prepareDeviceKey(state, ctx, 'Replacement device key')
         return {
           state: next,
-          result: `A new passkey in this browser, standing in for the new device. Its address is ${short(key.address)}. It isn’t a signer yet.`,
+          result: `A new device key in this browser, standing in for the new device. Its address is ${short(key.address)}. It isn’t a signer yet.`,
           hashes: [],
         }
       },
     },
     {
       title: 'Approve with the remaining signers',
-      action: () => 'Replace the passkey',
+      action: () => 'Replace the device key',
       run: async (state, ctx) => {
         const info = await ctx.adapter.inspect(addressOf(state.account))
         if (!info) throw new DemoError('This page didn’t create that account on devnet.')
@@ -852,22 +855,22 @@ const recover: DemoScript = {
         if (weight < state.account.threshold)
           throw new DemoError('The remaining signers don’t reach the threshold.')
         const removed = checked(removeSigner(state.account, lost.id))
-        const { account: added, signer } = addHeldPasskey(removed, state.held, 2)
-        const named = patchSigner(added, signer.id, { name: 'New passkey' })
+        const { account: added, signer } = addHeldDeviceKey(removed, state.held, 2)
+        const named = patchSigner(added, signer.id, { name: 'New device key' })
         const sent = await update(state, ctx, asOneUpdate(state.account, named))
         return {
-          state: updateLocal(sent.state, 'passkey', {
-            detail: `WebAuthn · ${thisDevice().unlock} · signer`,
+          state: updateLocal(sent.state, 'device-signer', {
+            detail: deviceKeyDetail('signer'),
             status: 'done',
           }),
-          result: `${upperFirst(approverNames(approvers))} (weight ${weight}, threshold ${state.account.threshold}) approved config v${sent.state.account.version} together: the new passkey (2) replaces the lost one, which can’t approve anything now.`,
+          result: `${upperFirst(approverNames(approvers))} (weight ${weight}, threshold ${state.account.threshold}) approved config v${sent.state.account.version} together: the new device key (2) replaces the lost one, which can’t approve anything now.`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
     },
     {
       title: 'Revoke the lost device’s keys',
-      action: () => 'Revoke with the new passkey',
+      action: () => 'Revoke with the new device key',
       run: async (state, ctx) => {
         const key = state.account.accessKeys.find(
           (item) => item.name === 'This browser' && item.status === 'active',
@@ -889,8 +892,8 @@ const recover: DemoScript = {
 }
 
 const exportAccount: DemoScript = {
-  title: 'Move your account to your own passkey',
-  needs: ['passkey'],
+  title: 'Move your account to your own device key',
+  needs: [],
   setup: [
     {
       title: 'Create the app’s account',
@@ -925,12 +928,12 @@ const exportAccount: DemoScript = {
   steps: [
     {
       title: 'Get the user’s signer address',
-      action: () => 'Create passkey',
+      action: () => 'Create device key',
       run: async (state, ctx) => {
-        const { state: next, key } = await preparePasskey(state, ctx, 'Your passkey')
+        const { state: next, key } = await prepareDeviceKey(state, ctx, 'Your device key')
         return {
           state: next,
-          result: `You created a passkey with ${thisDevice().unlock}. Its address, ${short(key.address)}, is what you’d send the app. It isn’t a signer yet.`,
+          result: `You created a device key in this browser. Its address, ${short(key.address)}, is what you’d send the app. It isn’t a signer yet.`,
           hashes: [],
         }
       },
@@ -955,17 +958,17 @@ const exportAccount: DemoScript = {
       run: async (state, ctx) => {
         const app = configuredSigners(state.account).find((signer) => signer.name === 'App signer')
         if (!app) throw new DemoError('No app signer to replace.')
-        const { account: added } = addHeldPasskey(state.account, state.held, 1)
+        const { account: added } = addHeldDeviceKey(state.account, state.held, 1)
         const next = asOneUpdate(state.account, checked(removeSigner(added, app.id)))
         const sent = await update(state, ctx, next)
-        let done = updateLocal(sent.state, 'passkey', {
-          detail: `WebAuthn · ${thisDevice().unlock} · the only signer`,
+        let done = updateLocal(sent.state, 'device-signer', {
+          detail: deviceKeyDetail('the only signer'),
           status: 'done',
         })
         done = updateLocal(done, 'app', { detail: 'Can’t approve anything now', status: 'gone' })
         return {
           state: done,
-          result: `The app signer approved its own removal in config v${done.account.version}: your passkey is the only signer now. Same address and balance.`,
+          result: `The app signer approved its own removal in config v${done.account.version}: your device key is the only signer now. Same address and balance.`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
@@ -980,7 +983,7 @@ const exportAccount: DemoScript = {
         return {
           state,
           result:
-            `${short(address)} still holds ${formatBalance(balance)}. ${matches ? 'Tempo’s commitment matches the config with your passkey as the only signer.' : ''}`.trim(),
+            `${short(address)} still holds ${formatBalance(balance)}. ${matches ? 'Tempo’s commitment matches the config with your device key as the only signer.' : ''}`.trim(),
           hashes: [],
         }
       },
@@ -988,19 +991,19 @@ const exportAccount: DemoScript = {
   ],
 }
 
-/** Create the account with a passkey on this device. */
-const passkeyAccount = (title: string, name?: string): DemoAction => ({
+/** Create the account with a device key in this browser. */
+const deviceKeyAccount = (title: string, name?: string): DemoAction => ({
   title,
-  action: () => 'Create with a passkey',
+  action: () => 'Create with a device key',
   run: async (state, ctx) => {
     const created = await createAccount(
       name ? { ...state, account: { ...state.account, name } } : state,
       ctx,
-      'passkey',
+      'device',
     )
     return {
       state: created.state,
-      result: `Created ${short(addressOf(created.state.account))} with your passkey (${thisDevice().unlock}) as its only signer. The devnet faucet funded it.`,
+      result: `Created ${short(addressOf(created.state.account))} with a device key on this browser as its only signer. The devnet faucet funded it.`,
       hashes: hashes(['Faucet', created.hash]),
     }
   },
@@ -1008,12 +1011,12 @@ const passkeyAccount = (title: string, name?: string): DemoAction => ({
 
 const backendAutomation: DemoScript = {
   title: 'Pay out from a backend',
-  needs: ['passkey'],
-  setup: [passkeyAccount('Create your account')],
+  needs: [],
+  setup: [deviceKeyAccount('Create your account')],
   steps: [
     {
       title: 'Authorize a scoped, limited key',
-      action: () => 'Approve with your passkey',
+      action: () => 'Approve with the device key',
       run: async (state, ctx) => {
         const privateKey = ctx.chain.generatePrivateKey()
         const keyId = ctx.chain.addressOf(privateKey)
@@ -1042,7 +1045,7 @@ const backendAutomation: DemoScript = {
             detail: `secp256k1 · ${short(keyId)} · authorized`,
             status: 'done',
           }),
-          result: `Your passkey authorized backend key ${short(keyId)}: up to 1,000 USD a day, to one approved payee, for 90 days.`,
+          result: `The device key authorized backend key ${short(keyId)}: up to 1,000 USD a day, to one approved payee, for 90 days.`,
           hashes: hashes(['Authorize', sent.hash]),
           secret: { label: 'The key you’d keep in your KMS, shown once', value: privateKey },
         }
@@ -1097,8 +1100,8 @@ function teamKey(account: SandboxAccount) {
 
 const teamAccounts: DemoScript = {
   title: 'Give a team its own budget',
-  needs: ['passkey'],
-  setup: [passkeyAccount('Create your treasury', 'Your treasury')],
+  needs: [],
+  setup: [deviceKeyAccount('Create your treasury', 'Your treasury')],
   steps: [
     {
       title: 'Create the team account',
@@ -1134,7 +1137,7 @@ const teamAccounts: DemoScript = {
     },
     {
       title: 'Authorize it from the treasury',
-      action: () => 'Approve with your passkey',
+      action: () => 'Approve with the device key',
       run: async (state, ctx) => {
         const teamId = state.held.accessKeys.find((item) => item.kind === 'account')?.key.address
         if (!teamId) throw new DemoError('Create the team account first.')
@@ -1144,7 +1147,7 @@ const teamAccounts: DemoScript = {
             detail: `Any 2 of Members 1–3 · ${short(teamId)} · authorized`,
             status: 'done',
           }),
-          result: 'Your passkey authorized the team account on the treasury: 2,000 USD a day.',
+          result: 'The device key authorized the team account on the treasury: 2,000 USD a day.',
           hashes: hashes(['Authorize', sent.hash]),
         }
       },

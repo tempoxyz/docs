@@ -22,7 +22,7 @@ Add a second signer to a user's account so that losing their phone or key doesn'
 
 An account starts with the signers you created it with: here one key at weight 1, threshold 1. The threshold is the total signer weight an approval needs, so with one signer, losing it locks the account and nobody, including Tempo, can recover it. The current signers approve adding another in one update, a transaction that changes the account's configuration. The examples use a viem `client` on Tempo devnet, `createClient({ chain: tempoDevnet })` from `viem/tempo`, and the `owners` and `threshold` you saved when you created the account.
 
-The demo creates a devnet account with a private key standing in for the user's first key, adds a recovery key, and then requires two factors with a passkey on this device. Devnet is a test network, so the stablecoins have no value.
+The demo creates a devnet account with a private key standing in for the user's first key, adds a recovery key, and then requires two factors with a device key in this browser. Devnet is a test network, so the stablecoins have no value.
 
 <GuideDemo guide="add-signers" />
 
