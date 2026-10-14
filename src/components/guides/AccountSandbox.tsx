@@ -600,7 +600,9 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
                   Get test funds
                 </button>
               )}
-              <span className="as-note">The devnet faucet sends 1,000,000 test AlphaUSD.</span>
+              <span className="as-note">
+                The devnet faucet sends test AlphaUSD and other test stablecoins.
+              </span>
               {fundHash && <TxHash hash={fundHash} />}
             </div>
           )}
