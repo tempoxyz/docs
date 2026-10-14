@@ -33,6 +33,23 @@ describe('demo RPC traffic', () => {
     ).toEqual(['eth_blockNumber', 'eth_chainId'])
   })
 
+  it('splits bursts into small batches accepted by the RPC', async () => {
+    const sizes: number[] = []
+    vi.stubGlobal('fetch', async (_url: unknown, init: RequestInit) => {
+      const requests = JSON.parse(String(init.body))
+      sizes.push(requests.length)
+      if (requests.length > 5) return new Response('request too large', { status: 413 })
+      return Response.json(
+        requests.map(({ id }: { id: number }) => ({ jsonrpc: '2.0', id, result: '0x1' })),
+      )
+    })
+    const client = getConfig().getClient({ chainId: tempoModerato.id })
+    await expect(
+      Promise.all(Array.from({ length: 12 }, () => client.request({ method: 'eth_blockNumber' }))),
+    ).resolves.toHaveLength(12)
+    expect(sizes).toEqual([5, 5, 2])
+  })
+
   it('bounds event-filter polling while a demo is waiting for funds', async () => {
     vi.useFakeTimers()
     const methods: string[] = []

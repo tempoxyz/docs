@@ -90,7 +90,7 @@ export function getConfig(options: getConfig.Options = {}) {
     transports: {
       [tempoModerato.id]: withRelay(
         fallback([
-          http('https://rpc.moderato.tempo.xyz', { batch: true }),
+          http('https://rpc.moderato.tempo.xyz', { batch: { batchSize: 5 } }),
           webSocket('wss://rpc.moderato.tempo.xyz', {
             keepAlive: { interval: 1_000 },
           }),
