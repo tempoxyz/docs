@@ -4,8 +4,7 @@ import { type ReactNode, useState } from 'react'
 import { type ApiRequest, type ApiResult, requestUrl } from '../lib/routes-execution'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens, variants } from '../styles/theme'
-import { CopyButtonLabel } from './CopyButtonLabel'
-import * as Demo from './guides/Demo'
+import { CopyButton as SharedCopyButton } from './CopyButton'
 
 /** One API call in the log; repeated background reads fold into a single entry. */
 export type ApiCall = {
@@ -53,12 +52,7 @@ function StatusCode({ result }: { result?: ApiResult }) {
 }
 
 export function CopyButton({ text }: { text: string }) {
-  const [copied, copy] = Demo.useCopyToClipboard()
-  return (
-    <button type="button" onClick={() => void copy(text)} {...copyButton()}>
-      <CopyButtonLabel labels={['Copy', 'Copied']}>{copied ? 'Copied' : 'Copy'}</CopyButtonLabel>
-    </button>
-  )
+  return <SharedCopyButton text={text} resetAfter={1500} {...copyButton()} />
 }
 
 /** Every API call the demo makes, newest first, with the selected request or response. */

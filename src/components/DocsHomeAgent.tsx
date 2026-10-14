@@ -9,7 +9,7 @@ import TerminalIcon from '~icons/lucide/terminal'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
-import { CopyButtonLabel } from './CopyButtonLabel'
+import { CopyButton, type CopyButtonState } from './CopyButton'
 import { tempoAgentStart, tempoAgentStartAgents, tempoAgentStartCommand } from './DocsHome.styles'
 
 const agents = [
@@ -56,12 +56,11 @@ const agents = [
 ] as const
 
 type Agent = (typeof agents)[number]['id']
-type CopyState = 'copied' | 'error'
 
 export function DocsHomeAgent() {
   const [mounted, setMounted] = useState(false)
   const [agent, setAgent] = useState<Agent>('codex')
-  const [copyState, setCopyState] = useState<CopyState | null>(null)
+  const [copyState, setCopyState] = useState<CopyButtonState>('idle')
   const activeAgent = agents.find((item) => item.id === agent) ?? agents[0]
   const commands = tempoAgentSetupCommands[agent]
   const multipleCommands = commands.includes('\n')
@@ -69,15 +68,6 @@ export function DocsHomeAgent() {
   const copyLabel = isMcp ? 'Copy URL' : multipleCommands ? 'Copy commands' : 'Copy command'
 
   useEffect(() => setMounted(true), [])
-
-  async function copyCommands() {
-    try {
-      await navigator.clipboard.writeText(commands)
-      setCopyState('copied')
-    } catch {
-      setCopyState('error')
-    }
-  }
 
   return (
     <div className={`tempo-agent-start ${tempoAgentStart().className}`}>
@@ -95,7 +85,7 @@ export function DocsHomeAgent() {
               aria-pressed={agent === id}
               onClick={() => {
                 setAgent(id)
-                setCopyState(null)
+                setCopyState('idle')
               }}
             >
               {Logo ? <Logo aria-hidden="true" /> : null}
@@ -126,22 +116,17 @@ export function DocsHomeAgent() {
               {isMcp ? <PlugIcon aria-hidden="true" /> : <TerminalIcon aria-hidden="true" />}
               {isMcp ? 'MCP server URL' : 'Terminal'}
             </span>
-            <button
-              type="button"
+            <CopyButton
+              key={agent}
+              text={commands}
+              label={copyLabel}
               disabled={!mounted}
               className="tempo-agent-start-copy"
               aria-label={`${copyLabel} for ${activeAgent.label}`}
-              onClick={copyCommands}
-            >
-              {copyState === 'copied' ? (
-                <CheckIcon aria-hidden="true" />
-              ) : (
-                <CopyIcon aria-hidden="true" />
-              )}
-              <CopyButtonLabel labels={[copyLabel, 'Copied']}>
-                {copyState === 'copied' ? 'Copied' : copyLabel}
-              </CopyButtonLabel>
-            </button>
+              icon={<CopyIcon aria-hidden="true" />}
+              copiedIcon={<CheckIcon aria-hidden="true" />}
+              onStateChange={setCopyState}
+            />
           </div>
           <pre>
             <code>{isMcp ? commands : <AgentSetupCommand command={commands} />}</code>
