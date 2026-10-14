@@ -7,6 +7,7 @@ import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
+import { skipReferenceScans } from './scripts/zyzz-build'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
 import { markdownRoute, renderAiFull, renderAiIndex, renderAiPage } from './src/lib/ai-docs'
 import { aiDocsDevMiddleware } from './src/lib/ai-docs-dev'
@@ -31,22 +32,24 @@ export default defineConfig(({ mode }) => {
     plugins: [
       // Example regions are not complete modules. Keep server tooling out of
       // the client discovery graph; Vocs owns the persisted color scheme.
-      zyzz({
-        exclude: [
-          'src/snippets',
-          'src/test',
-          'src/pages/_api',
-          'src/marketing/blogPlugin.ts',
-          'scripts',
-          'e2e',
-          'search-benchmark',
-          'playwright.config.ts',
-          'playwright.zones.config.ts',
-          'playwright.production.config.ts',
-          'vocs.config.ts',
-        ],
-        script: false,
-      }),
+      skipReferenceScans(
+        zyzz({
+          exclude: [
+            'src/snippets',
+            'src/test',
+            'src/pages/_api',
+            'src/marketing/blogPlugin.ts',
+            'scripts',
+            'e2e',
+            'search-benchmark',
+            'playwright.config.ts',
+            'playwright.zones.config.ts',
+            'playwright.production.config.ts',
+            'vocs.config.ts',
+          ],
+          script: false,
+        }),
+      ),
       blogPostsPlugin(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),

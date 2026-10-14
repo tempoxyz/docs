@@ -1,9 +1,17 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import type { Address, BaseError } from 'viem'
+import { type Address, type BaseError, isAddressEqual } from 'viem'
 import { tempoModerato } from 'viem/chains'
-import { useAccount, useConnect, useConnections, useDisconnect } from 'wagmi'
+import { Abis } from 'viem/tempo'
+import {
+  useAccount,
+  useConnect,
+  useConnections,
+  useDisconnect,
+  useReadContract,
+  useWatchContractEvent,
+} from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { cx, type Props as StyleProps } from 'zyzz'
 import LucideCheck from '~icons/lucide/check'
@@ -217,44 +225,20 @@ export function Container(
 
 export namespace Container {
   function BalancesFooterItem(props: { address: Address; token: Address }) {
-    const queryClient = useQueryClient()
     const { address, token } = props
-    const {
-      data: balance,
-      isPending: balanceIsPending,
-      queryKey: balancesKey,
-    } = Hooks.token.useGetBalance({
+    const { data: balance, isPending: balanceIsPending } = Hooks.token.useGetBalance({
       account: address,
       token,
     })
-    const { data: metadata, isPending: metadataIsPending } = Hooks.token.useGetMetadata({
-      token,
+    // The footer shows only the symbol; full token metadata costs one RPC call per field.
+    const { data: symbol, isPending: symbolIsPending } = useReadContract({
+      address: token,
+      abi: Abis.tip20,
+      functionName: 'symbol',
     })
 
-    Hooks.token.useWatchTransfer({
-      token,
-      args: {
-        to: address,
-      },
-      onTransfer: () => {
-        queryClient.invalidateQueries({ queryKey: balancesKey })
-      },
-      enabled: !!address,
-    })
-
-    Hooks.token.useWatchTransfer({
-      token,
-      args: {
-        from: address,
-      },
-      onTransfer: () => {
-        queryClient.invalidateQueries({ queryKey: balancesKey })
-      },
-      enabled: !!address,
-    })
-
-    const isPending = balanceIsPending || metadataIsPending
-    const isUndefined = balance === undefined || metadata === undefined
+    const isPending = balanceIsPending || symbolIsPending
+    const isUndefined = balance === undefined || symbol === undefined
 
     return (
       <div>
@@ -263,16 +247,46 @@ export namespace Container {
         ) : (
           <span {...ui.balancesFooterItemText()}>
             <span {...ui.balancesFooterItemText2()}>{balance.formatted}</span>
-            {metadata.symbol}
+            {symbol}
           </span>
         )}
       </div>
     )
   }
 
+  // One filter per transfer direction covers every token, so a footer with five balances polls
+  // the public RPC as often as one with a single balance and stays under its per-client limit.
+  function useWatchBalanceTransfers(address: Address | undefined, tokens: Address[]) {
+    const queryClient = useQueryClient()
+    const onLogs = (logs: readonly { address: Address }[]) => {
+      for (const token of tokens)
+        if (logs.some((log) => isAddressEqual(log.address, token)))
+          queryClient.invalidateQueries({ queryKey: ['getBalance', { account: address, token }] })
+    }
+
+    useWatchContractEvent({
+      address: tokens,
+      abi: Abis.tip20,
+      eventName: 'Transfer',
+      args: { to: address },
+      enabled: !!address,
+      onLogs,
+    })
+
+    useWatchContractEvent({
+      address: tokens,
+      abi: Abis.tip20,
+      eventName: 'Transfer',
+      args: { from: address },
+      enabled: !!address,
+      onLogs,
+    })
+  }
+
   export function BalancesFooter(props: { address?: string | undefined; tokens: Address[] }) {
     const { address, tokens } = props
     const personalBalanceLabel = tokens.length > 1 ? 'Personal balances' : 'Personal balance'
+    useWatchBalanceTransfers(address as Address | undefined, tokens)
 
     return (
       <div {...ui.balancesFooterLayout()}>
@@ -377,7 +391,7 @@ export function Step(
       {error && (
         <>
           <div {...ui.stepLayout7()} />
-          <div {...ui.stepLayout8()}>
+          <div role="alert" {...ui.stepLayout8()}>
             {'shortMessage' in error ? error.shortMessage : error.message}
           </div>
         </>

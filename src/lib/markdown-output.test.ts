@@ -86,6 +86,22 @@ Read the account's transfer history.
     ).toHaveLength(1)
   })
 
+  test('exports Earn figures as their text alternatives and strategy cards as a list', async () => {
+    const output = await render(`
+<EarnIllustration name="flow" alt="An account deposits into a vault." caption="Strategies are illustrative." />
+
+<EarnStrategyCards>
+  <EarnStrategyCard strategy="treasuries" title="U.S. Treasuries" description="Tokenized Treasury bonds." />
+  <EarnStrategyCard strategy="lending" title="Collateralized lending" description="Onchain lending pools." />
+</EarnStrategyCards>
+`)
+
+    expect(output).toContain('An account deposits into a vault.\n\nStrategies are illustrative.')
+    expect(output).toContain('* **U.S. Treasuries** — Tokenized Treasury bonds.')
+    expect(output).toContain('* **Collateralized lending** — Onchain lending pools.')
+    expect(output).not.toContain('<Earn')
+  })
+
   test('keeps agent setup usable without the interactive homepage', async () => {
     const output = await render('<DocsHomeAgent />')
     expect(output).toContain('codex plugin add docs@tempo')
