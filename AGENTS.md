@@ -291,3 +291,7 @@ Blog-specific instructions live in `blogs/AGENTS.md`. Read that file before edit
 - Confirm renamed headings preserve important anchors.
 - Run the generic-heading scan for touched Markdown/MDX files.
 - Run the most relevant validation command for the change size.
+
+## Generated Markdown
+
+Follow [MARKDOWN.md](./MARKDOWN.md) for component contracts, validation, and overrides. Add renderer tests and run `pnpm check:markdown` after building.

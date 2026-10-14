@@ -26,6 +26,7 @@ onlyBuiltDependencies:
   - vue-demi
 
 overrides:
+  vocs: https://pkg.pr.new/vocs@409d900
   # accounts 0.18.5 was published with unresolved catalog dependencies.
   'tapimo>accounts': 0.18.4
   'baseline-browser-mapping@<2.11.0': 2.11.0

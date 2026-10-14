@@ -13,6 +13,7 @@ import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
+import { renderMermaid } from './src/lib/markdown-renderers'
 import { annotateRoutesAvailability } from './src/lib/routes-openapi'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 
@@ -264,6 +265,16 @@ export default defineConfig({
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
   markdown: {
+    output: {
+      validation: 'fail',
+      // These modules depend on browser styles/hooks. Resolve by module + export
+      // without importing their React implementations during Markdown generation.
+      components: ['MermaidDiagram', 'StaticMermaidDiagram'].map((name) => ({
+        module: `./src/components/${name}.tsx`,
+        export: name,
+        render: renderMermaid,
+      })),
+    },
     rehypePlugins: [rehypeCompactShikiStyles],
     outputRemarkPlugins: [plainMarkdownComponents],
   },
