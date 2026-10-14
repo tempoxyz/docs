@@ -84,9 +84,9 @@ const interactiveDescriptions: Record<string, string> = {
   PasskeyAccountDemo:
     'In the interactive web page, create a passkey account or reconnect an existing passkey, inspect and copy its address, and disconnect. Creating the account does not move or fund stablecoins.',
   P256KeyDemo:
-    'In the interactive web page, create a non-extractable P-256 key with WebCrypto, kept in this browser’s IndexedDB, and see that the browser refuses to export it. Fund its Moderato test account from the faucet, pay 1 AlphaUSD with no prompt, reload to see the key restored, then delete it. Each payment is a real testnet transaction.',
+    'In the interactive web page, create a non-extractable P-256 key with WebCrypto, kept in this browser’s IndexedDB, and see that the browser refuses to export it. Fund its test account on the Tempo Accounts devnet from the faucet, pay 1 AlphaUSD with no prompt, reload to see the key restored, then delete it. Each payment is a real devnet transaction.',
   AccessKeyDemo:
-    'In the interactive web page, create a passkey test account on Moderato testnet, get test AlphaUSD, authorize a non-extractable P-256 browser key as an access key with a 10 AlphaUSD daily limit, a one-hour expiry, and transfers only, pay 2 AlphaUSD with it, attempt a 20 AlphaUSD payment that Tempo rejects, and revoke the key. Each step is a real testnet transaction.',
+    'In the interactive web page, create a test account on the Tempo Accounts devnet whose signer is a non-extractable P-256 key in this browser, fund it with test AlphaUSD from the devnet faucet, authorize a second non-extractable P-256 browser key as an access key with a 10 AlphaUSD daily limit, a one-hour expiry, and transfers only, pay 2 AlphaUSD with it, attempt a 20 AlphaUSD payment that Tempo rejects, and revoke the key. Each step is a real devnet transaction.',
   UpgradeAccountDemo:
     'In the interactive web page, create a private-key account on Tempo devnet, fund it from the faucet, and pay 1 AlphaUSD with it. Then upgrade it in place to a configurable account with the original key and a new backup key as signers and a threshold of 2. A payment signed by the original key alone is rejected, and a payment approved by both signers succeeds. The address and balance stay the same. Each step is a real devnet transaction.',
   AccountSandbox:
@@ -151,7 +151,7 @@ const demoStepLabels: Record<string, string> = {
   QueryOrder: 'Query order',
   RevokeTokenRoles: 'Revoke token roles',
   ReceivePolicyDemo:
-    'Create a temporary Moderato account, accept AlphaUSD, hold BetaUSD, and recover the blocked payment.',
+    'Create a temporary Tempo Accounts devnet account, accept AlphaUSD, hold BetaUSD, and recover the blocked payment.',
   SendParallelPayments: 'Send parallel payments',
   SendPayment: 'Send payment',
   SendPaymentWithMemo: 'Send payment with memo',

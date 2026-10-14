@@ -2,17 +2,26 @@
 
 import * as React from 'react'
 import { type Address, type Hex, parseUnits } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { Account, createClient, WebCryptoP256 } from 'viem/tempo'
+import { tempoDevnet } from 'viem/chains'
+import { Account, createClient, http, WebCryptoP256 } from 'viem/tempo'
+import LucideCheck from '~icons/lucide/check'
+import LucideCopy from '~icons/lucide/copy'
 import { Container } from '../Container'
 import * as ui from './AccountDemo.recipes'
-import { adminKeyDemoFeeToken } from './admin-key-demo'
-import { Button, FAKE_RECIPIENT, Step, StringFormatter } from './Demo'
+import { shortHash } from './account-sandbox'
+import { devnetRpcUrl, devnetToken } from './account-sandbox-devnet'
+import { Button, FAKE_RECIPIENT, Step, StringFormatter, useCopyToClipboard } from './Demo'
 
-const token = adminKeyDemoFeeToken
+const token = devnetToken
 const dailyLimit = parseUnits('10', 6)
 const payment = parseUnits('2', 6)
 const overspend = parseUnits('20', 6)
+/** The Tempo Accounts devnet, reached through the docs site's RPC proxy. */
+const network = {
+  chain: tempoDevnet,
+  feeToken: token,
+  transport: http(devnetRpcUrl, { retryCount: 0 }),
+}
 
 type Action = 'create' | 'fund' | 'authorize' | 'pay' | 'overspend' | 'revoke'
 
@@ -23,7 +32,7 @@ async function createAccessKey(access: Address) {
 type Result = { hash?: Hex; message: string; ok: boolean }
 type KeyPair = Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
 
-/** Authorizes, uses, and revokes a limited access key with real Moderato transactions. */
+/** Authorizes, uses, and revokes a limited access key with real devnet transactions. */
 export function AccessKeyDemo() {
   const [ready, setReady] = React.useState(false)
   /** Why this browser can't make WebCrypto keys, or `null` when it can. */
@@ -44,8 +53,7 @@ export function AccessKeyDemo() {
       signer &&
       createClient({
         account: Account.fromWebCryptoP256(signer),
-        chain: tempoModerato,
-        feeToken: token,
+        ...network,
       }),
     [signer],
   )
@@ -75,7 +83,7 @@ export function AccessKeyDemo() {
   }, [client])
 
   React.useEffect(() => {
-    refresh().catch(() => setError('Could not read testnet status.'))
+    refresh().catch(() => setError('Could not read devnet status.'))
   }, [refresh])
 
   async function run(action: Action, work: () => Promise<Result | undefined>) {
@@ -125,7 +133,7 @@ export function AccessKeyDemo() {
     if (!key) throw new Error('Authorize a key first. Reloading the page discards it.')
     return {
       account: key,
-      client: createClient({ account: key, chain: tempoModerato, feeToken: token }),
+      client: createClient({ account: key, ...network }),
     }
   }
 
@@ -163,7 +171,7 @@ export function AccessKeyDemo() {
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Try an access key</span>}
-      headerRight={<span {...ui.accountDemoMuted()}>Moderato testnet</span>}
+      headerRight={<span {...ui.accountDemoMuted()}>Tempo Accounts devnet</span>}
       footer="A separate test account. Both keys live in this tab’s memory and are gone on reload."
     >
       <div {...ui.accountDemoSteps()} data-testid="access-key-demo" aria-busy={pending !== null}>
@@ -288,17 +296,35 @@ function ResultLine({ result }: { result: Result | undefined }) {
   if (!result) return null
   return (
     <p {...ui.accountDemoResult()} role="status">
-      {result.message}{' '}
+      {result.message}
       {result.hash && (
-        <a
-          href={`${tempoModerato.blockExplorers.default.url}/tx/${result.hash}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Receipt ↗
-        </a>
+        <>
+          {' '}
+          <TxHash hash={result.hash} />
+        </>
       )}
     </p>
+  )
+}
+
+/** A transaction hash with a copy button. The devnet has no public explorer. */
+function TxHash({ hash }: { hash: Hex }) {
+  const [copied, copy] = useCopyToClipboard()
+  const Icon = copied ? LucideCheck : LucideCopy
+  return (
+    <span {...ui.accountDemoTx()}>
+      <code {...ui.accountDemoTxHash()} title={hash}>
+        {shortHash(hash)}
+      </code>
+      <button
+        type="button"
+        {...ui.accountDemoTxCopy()}
+        aria-label="Copy transaction hash"
+        onClick={() => copy(hash)}
+      >
+        <Icon aria-hidden="true" className={ui.accountDemoTxIcon().className} />
+      </button>
+    </span>
   )
 }
 

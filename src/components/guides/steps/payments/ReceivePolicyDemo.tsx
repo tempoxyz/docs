@@ -9,20 +9,26 @@ import {
   type TransactionReceipt,
 } from 'viem'
 import { generatePrivateKey } from 'viem/accounts'
-import { tempoModerato } from 'viem/chains'
-import { Abis, Account, Actions, Addresses, createClient } from 'viem/tempo'
-import { Button, ExplorerAccountLink, ExplorerLink, Step, useHydrated } from '../../Demo'
+import { tempoDevnet } from 'viem/chains'
+import { Abis, Account, Actions, Addresses, createClient, http } from 'viem/tempo'
+import LucideCheck from '~icons/lucide/check'
+import LucideCopy from '~icons/lucide/copy'
+import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from '../../Demo'
 import { alphaUsd, betaUsd } from '../../tokens'
 import * as ui from './ReceivePolicyDemo.recipes'
 
 const amount = 1_000_000n
-const newClient = () =>
-  createClient({
+/** Runs on the Tempo Accounts devnet through the docs' RPC proxy, loaded on first use. */
+async function newClient() {
+  const { devnetRpcUrl } = await import('../../account-sandbox-devnet')
+  return createClient({
     account: Account.fromSecp256k1(generatePrivateKey()),
-    chain: tempoModerato,
+    chain: tempoDevnet,
     feeToken: alphaUsd,
+    transport: http(devnetRpcUrl),
   })
-type DemoClient = ReturnType<typeof newClient>
+}
+type DemoClient = Awaited<ReturnType<typeof newClient>>
 type Task = 'fund' | 'configure' | 'allowed' | 'blocked' | 'claim'
 
 export function findBlockedReceipt(receipt: Pick<TransactionReceipt, 'logs'>, receiver: Hex) {
@@ -124,7 +130,7 @@ export function ReceivePolicyDemo() {
 
   const fund = () =>
     run('fund', async () => {
-      const client = clientRef.current ?? newClient()
+      const client = clientRef.current ?? (await newClient())
       clientRef.current = client
       setAddress(client.account.address)
       await client.faucet.fundSync({ account: client.account.address })
@@ -205,7 +211,7 @@ export function ReceivePolicyDemo() {
   return (
     <div {...ui.receivePolicyDemoLayout()} data-testid="receive-policy-demo">
       <p {...ui.receivePolicyDemoDescription()}>
-        Moderato testnet · temporary account · 1 token per payment. Both payments go to this
+        Tempo Accounts devnet · temporary account · 1 token per payment. Both payments go to this
         account; AlphaUSD stays available, while BetaUSD moves into the guard until recovered.
         Reloading discards this test account's signing key.
       </p>
@@ -226,12 +232,7 @@ export function ReceivePolicyDemo() {
           </Button>
         }
       >
-        {address && (
-          <ExplorerAccountLink
-            address={address}
-            label={`${address.slice(0, 8)}…${address.slice(-6)}`}
-          />
-        )}
+        {address && <CopyValue label="Address" name="address" value={address} />}
       </Step>
       <Step
         number={2}
@@ -253,7 +254,7 @@ export function ReceivePolicyDemo() {
         <p {...ui.receivePolicyDemoDescription2()}>
           Any sender may pay. The receiving account controls recovery.
         </p>
-        {hashes.configure && <ExplorerLink hash={hashes.configure} />}
+        {hashes.configure && <TxHash hash={hashes.configure} />}
       </Step>
       <Step
         number={3}
@@ -276,7 +277,7 @@ export function ReceivePolicyDemo() {
                 AlphaUSD delivered to the test account.
               </p>
             )}
-            {hashes.allowed && <ExplorerLink hash={hashes.allowed} />}
+            {hashes.allowed && <TxHash hash={hashes.allowed} />}
           </div>
           <div>
             <Button
@@ -293,7 +294,7 @@ export function ReceivePolicyDemo() {
                 {claimed ? ' — now recovered' : ''}.
               </p>
             )}
-            {hashes.blocked && <ExplorerLink hash={hashes.blocked} />}
+            {hashes.blocked && <TxHash hash={hashes.blocked} />}
           </div>
         </div>
         {(error?.task === 'allowed' || error?.task === 'blocked') && (
@@ -324,7 +325,7 @@ export function ReceivePolicyDemo() {
             1 BetaUSD returned to the test account. The blocked receipt is consumed.
           </p>
         )}
-        {hashes.claim && <ExplorerLink hash={hashes.claim} />}
+        {hashes.claim && <TxHash hash={hashes.claim} />}
         {blockedReceipt && (
           <details {...ui.receivePolicyDemoDescription3()}>
             <summary>Blocked receipt</summary>
@@ -334,7 +335,7 @@ export function ReceivePolicyDemo() {
       </Step>
       {balanceError && (
         <p role="status" {...ui.receivePolicyDemoDescription()}>
-          Balance refresh unavailable. Use the transaction links to check the result.
+          Balance refresh unavailable. Use the transaction hashes to check the result.
         </p>
       )}
       {balances && (
@@ -343,6 +344,36 @@ export function ReceivePolicyDemo() {
           BetaUSD
         </p>
       )}
+    </div>
+  )
+}
+
+/** A transaction hash with a copy button. This devnet has no public explorer. */
+function TxHash({ hash }: { hash: Hash }) {
+  return <CopyValue label="Transaction" name="transaction hash" value={hash} />
+}
+
+function CopyValue({ label, name, value }: { label: string; name: string; value: string }) {
+  const [copied, copy] = useCopyToClipboard()
+  return (
+    <div {...ui.copyValue()}>
+      <span>{label}</span>
+      <code {...ui.copyValueCode()} title={value}>
+        {StringFormatter.truncate(value)}
+      </code>
+      <button
+        type="button"
+        {...ui.copyValueButton()}
+        onClick={() => copy(value)}
+        aria-label={copied ? `Copied ${name}` : `Copy ${name}`}
+        title={copied ? 'Copied' : `Copy ${name}`}
+      >
+        {copied ? (
+          <LucideCheck aria-hidden="true" className={ui.copyValueIcon().className} />
+        ) : (
+          <LucideCopy aria-hidden="true" className={ui.copyValueIcon().className} />
+        )}
+      </button>
     </div>
   )
 }
