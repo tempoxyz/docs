@@ -37,21 +37,33 @@ Tempo stores only a 32-byte hash of the configuration, not the owners themselves
 The address is a CREATE2 address computed from the version-0 configuration, with no chain ID ([TIP-1110](https://tips.sh/1110)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold contract code or an EIP-7702 delegation.
 
 ```ts [account.ts]
-import { Account } from 'viem/tempo'
+import { http } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { Account, createClient } from 'viem/tempo'
+
+export const client = createClient({ chain: tempoDevnet, transport: http() })
 
 export const env = (name: string) => process.env[name] as `0x${string}`
+// Owner keys on this machine, so viem can sign with them
 export const finance = Account.fromSecp256k1(env('FINANCE_KEY'))
 export const operations = Account.fromSecp256k1(env('OPERATIONS_KEY'))
 
-// 2 of 3: two local keys and a passkey that approves elsewhere
+// 2 of 3: the two local keys and the controller's passkey, which stays on the controller's device
 export const account = Account.fromConfig({
   address: 'infer',
-  owners: [finance, operations, { owner: env('CONTROLLER_PASSKEY_ADDRESS'), weight: 1 }],
+  owners: [
+    { owner: finance, weight: 1 },
+    { owner: operations, weight: 1 },
+    { owner: env('CONTROLLER_PASSKEY_ADDRESS'), weight: 1 },
+  ],
   threshold: 2,
 })
+
+// Save both with the account record: Tempo keeps only a hash of the configuration.
+export const saved = { address: account.address, config: account.config }
 ```
 
-`address: 'infer'` derives the address from this configuration. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero.
+`address: 'infer'` derives the address from this configuration, so creating the account sends nothing. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero. An owner given as a local account, like `finance`, is a key Viem signs with. An owner given as an address, like the controller's passkey, signs on its own device.
 
 On supported EVM chains, the initial secp256k1 owners can deploy a recovery wallet at this address and retrieve funds sent there by mistake, if their weights reach the original threshold. P-256 and WebAuthn owners don't count. See [Recover funds sent on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain).
 
@@ -65,7 +77,9 @@ Owners approve a whole transaction, including every call in a batch. The transac
 
 An approval carries 1–8 owner signatures, sorted by owner address, whose weights must reach the threshold. Tempo rejects any signature after the threshold is reached. Each signature covers the account and the configuration version, so it can't be reused on another account or after an update. Access keys never count toward the threshold.
 
-Owners sign separately, even offline. Your app collects the signatures and submits the transaction once their weights reach the threshold. [Collect approvals](/docs/accounts/policies/signing-thresholds#collect-approvals) shows the code.
+In Viem, a payment is an ordinary action with this account, such as `client.token.transferSync({ account, amount, to, token })`. Viem signs with the local owners, highest weight first, until their weights reach the threshold, so `finance` and `operations` approve it. If the local owners can't reach the threshold, the action throws `Local owners do not meet the threshold.` and sends nothing.
+
+To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 <span id="multisig-signature-format" />
 
@@ -96,8 +110,7 @@ The `0x05` signature also approves [access-key grants](/docs/development/account
 | Event | `MultisigConfigUpdated(account, salt, version, threshold, owners)` |
 
 ```ts [update.ts]
-import { account, env, finance, operations } from './account'
-import { client } from './client'
+import { account, client, env, finance, operations, saved } from './account'
 
 const { config } = await client.accounts.updateConfigSync({
   account,
@@ -110,34 +123,46 @@ const { config } = await client.accounts.updateConfigSync({
     threshold: 2,
   },
 })
+saved.config = config // version 1 replaces version 0 in the account record
 ```
 
-`client` is a Viem client on Tempo devnet. Viem sorts the new owners and signs with the local owners, `finance` and `operations`, whose weights reach the threshold of 2. The returned `config` is version 1. [Add signers](/docs/accounts/key-management/add-signers) walks through a full update.
+Viem sorts the new owners and signs with `finance` and `operations`, whose weights reach the current threshold of 2. The returned `config` is version 1, with the same salt. Save it, then [rebuild the account](#keep-the-current-configuration) from it before the next action. [Add signers](/docs/accounts/key-management/add-signers) walks through a full update.
 
 <span id="read-the-current-configuration" />
 
 ### Keep the current configuration
 
-The stored hash can't be turned back into the owners and threshold, so save `account.address` and `account.config` with the account record when you create the account, and replace the configuration with the returned `config` after each update. Open the account from them. A version-0 configuration derives the address, so pass the saved address only after the first update:
+The stored hash can't be turned back into the owners and threshold, so your app's saved copy is the only record of them. Save the address and configuration when you create the account (`saved` in `account.ts`), and replace the configuration with the returned `config` after each update. The configuration's `version` is a bigint, which `JSON.stringify` can't encode, so store `AccountConfig.toRpc(config)` and read it back with `AccountConfig.fromRpc`.
+
+To act from the account, rebuild it from that record. Attach the keys that approve this time as local accounts, and leave the other owners as addresses. A version-0 configuration derives the address, so pass the saved address only after the first update:
 
 ```ts [config.ts]
+import { isAddressEqual } from 'viem'
 import { Account } from 'viem/tempo'
+import { finance, operations, saved } from './account'
 
-// the saved address and configuration
-const account =
-  config.version === 0n
-    ? Account.fromConfig({ ...config, address: 'infer' })
-    : Account.fromConfig({ address, ...config })
+const { address, config } = saved // the stored account record
+const approvers = [finance, operations] // the keys signing this time
+const owners = config.owners.map(({ owner, weight }) => ({
+  owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+  weight,
+}))
+export const account =
+  config.version === 0n // never updated: the configuration derives the address
+    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+    : Account.fromConfig({ ...config, address, owners })
 ```
+
+Rebuild after every update. An account object carries the configuration it was built from, and Tempo checks that against the stored hash, so an object from before the update fails with `multisig configuration commitment mismatch`.
 
 To check that a saved configuration is still current, compare its hash with the stored one, which any node returns:
 
 ```ts [check-config.ts]
 import { AccountConfig } from 'viem/tempo'
-import { client } from './client'
+import { client, saved } from './account'
 
-const stored = await client.accounts.getConfigCommitment({ account: address })
-const isCurrent = stored === AccountConfig.getCommitment(config)
+const stored = await client.accounts.getConfigCommitment({ account: saved.address })
+const isCurrent = stored === AccountConfig.getCommitment(saved.config)
 ```
 
 The stored hash is zero before registration. A mismatch means another update landed, and approvals built on the saved configuration fail.

@@ -80,30 +80,73 @@ To let a team spend without lowering the treasury's threshold, the treasury auth
 
 ## Collect approvals
 
-Signers sign the same transaction hash, so they approve separately, on their own devices, in any order. Your app holds the approvals until their weights reach the threshold, then submits the transaction. In viem, the `Relay.accounts` plugin on a [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport does both, and approving with `owner` requires it:
+Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three. Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), a fingerprint it checks approvals against but can't read back. So when your app creates the account, it saves `account.address` and `account.config` with the account record, and rebuilds the account from that copy whenever signers approve:
 
-```ts [client.ts]
-import { http } from 'viem'
+```ts [account.ts]
+import { type Address, http, isAddressEqual } from 'viem'
 import { tempoDevnet } from 'viem/chains'
-import { createClient, Relay, Store, withRelay } from 'viem/tempo'
+import { Account, type AccountConfig, createClient } from 'viem/tempo'
 
-export const client = createClient({
-  chain: tempoDevnet,
-  transport: withRelay(http(), { plugins: [Relay.accounts({ store: Store.memory() })] }),
-})
+export const client = createClient({ chain: tempoDevnet, transport: http() })
+
+/** Rebuilds the account from your app's saved record, with the approving keys on this device attached. */
+export function openAccount(
+  saved: { address: Address; config: AccountConfig.Config },
+  approvers: readonly Account.RootAccount[] = [],
+) {
+  const { address, config } = saved
+  const owners = config.owners.map(({ owner, weight }) => ({
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+    weight,
+  }))
+  // Never updated (version 0): the configuration derives the address.
+  if (config.version === 0n)
+    return Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+  return Account.fromConfig({ ...config, address, owners })
+}
 ```
 
-`Store.memory()` works in one process. For signers on different devices, give every signer's client the same persistent store, such as one in your backend. With the account above, the backup and recovery keys approve a payment together:
+Rebuild the account from the latest record before each transaction. A signer update raises the configuration's version, and Tempo checks every transaction against the new configuration's hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
+
+When the keys on one device reach the threshold, attach them and send the transaction as usual. The customer's passkey reaches it alone, so this payment runs in the customer's browser:
+
+```ts [pay.ts]
+import { client, openAccount } from './account'
+
+await client.token.transferSync({ account: openAccount(saved, [passkey]), amount, to, token })
+```
+
+`passkey` is the customer's passkey account, such as `Account.fromWebAuthnP256(credential)`. viem signs with the attached keys, highest weight first, until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing.
+
+### Approvers on separate devices
+
+When no single device holds enough weight, such as when the backup key and the recovery provider's key approve together, your app prepares the transaction once, each approver signs it on their own device, and your app submits it with their approvals:
 
 ```ts [approve.ts]
-// The backup key starts the payment. receipt.status is 'pending' until approvals reach the threshold.
-const { receipt } = await client.token.transferSync({ account, amount, to, token, owner: backup })
+import { Actions } from 'viem/tempo'
+import { client, openAccount } from './account'
 
-// The recovery key approves its hash: 2 of 2, so the payment runs.
-await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: recovery })
+// 1. Your app: prepare the payment once, from the account with no keys attached.
+const request = await client.prepareTransactionRequest({
+  account: openAccount(saved),
+  calls: [Actions.token.transfer.call({ amount, to, token })],
+})
+
+// 2. Each approver, on their own device: sign the same request.
+const backupApproval = await client.signTransaction({ ...request, account: backup }) // backup key's device
+const recoveryApproval = await client.signTransaction({ ...request, account: recovery }) // recovery provider
+
+// 3. Your app: submit the same request with the approvals.
+const receipt = await client.sendTransactionSync({ ...request, signatures: [backupApproval, recoveryApproval] })
 ```
 
-Tempo rejects signatures beyond the threshold. A signer update voids approvals collected under the old signers, so collect them again.
+For a configurable account, `signTransaction` returns the signer's approval rather than a signed transaction. An approval covers the exact transaction, the account, and the configuration version, so send every approver the same `request`, show them what they're approving, such as the recipient and amount, and submit it unchanged. The request contains bigints, so move it between devices in an encoding that keeps them.
+
+Approvals can arrive in any order. Submit only the approvals the threshold needs, with none to spare: the passkey's approval alone, or the backup and recovery approvals together. Tempo adds up approvals in order of signer address and rejects the transaction with `excess multisig owner signatures` when an approval comes after the total already reaches the threshold. Too few fail with `multisig signature weight below threshold`.
+
+An approval also covers the transaction's nonce, its place in the account's sequence of transactions. If another transaction from the account lands first, submitting fails with `nonce too low`, so prepare again and collect new approvals. To keep slow approvals valid while the account keeps paying, pass `prepareTransactionRequest` its own `nonceKey`, a random nonzero number that starts a separate sequence for this transaction.
+
+A signer update works the same way: put `Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig })` in `calls`, collect approvals from the current signers, and once it lands, save `AccountConfig.update(saved.config, nextConfig)` as the account's configuration. An update voids approvals collected under the old configuration, so collect those again.
 
 <span id="verify-approvals" />
 <span id="signature-verification" />

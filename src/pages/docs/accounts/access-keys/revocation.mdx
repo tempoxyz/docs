@@ -62,7 +62,7 @@ Before you [hand an account to a customer](/docs/accounts/guides/users/hand-off)
 ## Revocation limits
 
 - A revoked key's address can never be authorized again for this account. To restore access, authorize a new key.
-- Revoking a key the account hasn't authorized reverts with `KeyNotFound`. That includes a key whose authorization hasn't landed yet: if you bound a [witness](https://viem.sh/tempo/guides/access-keys/witnesses) to it, cancel it with `client.accessKey.burnWitnessSync({ witness })`.
+- Revoking a key the account hasn't authorized reverts with `KeyNotFound`. That includes a key whose authorization hasn't landed yet: if you bound a [witness](https://viem.sh/tempo/guides/access-keys/witnesses) to it, cancel it with `client.accessKey.burnWitnessSync({ account, witness })`.
 - An expired key needs no revocation: Tempo already rejects its transactions.
 
 Specification: [Account Keychain key revocation](/docs/protocol/transactions/AccountKeychain#key-revocation).

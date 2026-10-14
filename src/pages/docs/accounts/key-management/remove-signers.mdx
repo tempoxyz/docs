@@ -18,38 +18,40 @@ Once the update lands, the removed signer can't approve anything, and approvals 
 
 ## Remove a signer
 
-Load the [saved configuration](/docs/accounts/key-management/add-signers#send-the-signer-update), drop the signer's entry, and approve with signers that stay:
+Each signer's key stays with whoever holds it, and Tempo stores only a hash of the account's configuration: its signers, weights, threshold, salt, and version. Your app keeps the address and configuration it saved when it created the account or last changed signers, and rebuilds the account from them with the approving signers' keys attached. Drop the departing signer's entry and send the update:
 
 ```ts [remove-signer.ts]
-import { isAddressEqual } from 'viem'
-import { Account } from 'viem/tempo'
+import { http, isAddressEqual } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { Account, createClient } from 'viem/tempo'
+
+const client = createClient({ chain: tempoDevnet, transport: http() })
 
 const { address, config } = await loadAccount(customerId) // your app's storage
-// Before the first signer update, the configuration is version 0 and derives the address.
-const account =
-  config.version === 0n
-    ? Account.fromConfig({ ...config, address: 'infer' })
-    : Account.fromConfig({ address, ...config })
 
-const { receipt } = await client.accounts.updateConfigSync({
+// Attach the approving signers' keys. The other signers stay addresses.
+const owners = config.owners.map(({ owner, weight }) => ({
+  owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+  weight,
+}))
+const account =
+  config.version === 0n // never updated: the first signers derive the address
+    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+    : Account.fromConfig({ ...config, address, owners })
+
+const { config: updated } = await client.accounts.updateConfigSync({
   account,
   nextConfig: {
-    owners: config.owners.filter((entry) => !isAddressEqual(entry.owner, departing)),
+    owners: config.owners.filter(({ owner }) => !isAddressEqual(owner, departing)),
     threshold: config.threshold,
   },
-  owner: approver, // a signer that stays
 })
-
-// receipt.status is 'pending' until approvals reach the threshold, so a second signer approves
-// only when `approver` alone doesn't reach it.
-if (receipt.status === 'pending')
-  await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
-
-const updated = await client.accounts.getConfig({ address }) // Relay.accounts recorded it
-await saveAccount(customerId, { address, config: updated }) // the next update starts from this
+await saveAccount(customerId, { address, config: updated }) // the next action rebuilds from this
 ```
 
-`client` is a devnet client with `Relay.accounts` on its transport, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals).
+`approvers` holds the keys, on the device running the code, of signers that stay and approve the removal, such as the customer's passkey in their browser. viem signs with them, highest weight first, until their weights reach the current threshold, and throws `Local owners do not meet the threshold.` without sending anything when they fall short. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+
+Save the configuration the update returns, and rebuild from it before the next action. The update raises the configuration's version by one, so an account built from the old copy no longer matches the hash Tempo stores, and its next payment or update fails.
 
 If the remaining weights fall short of the threshold, lower `threshold` in the same update. [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver) walks through removing one from a treasury.
 
@@ -58,19 +60,19 @@ If the remaining weights fall short of the threshold, lower `threshold` in the s
 
 ## Rotate a key by replacing it in one update
 
-Rotate when the holder stays but the key changes: a new hardware wallet, a new device, or a new wallet provider. Put the new key at the old one's weight and keep the threshold, so every group of signers that could approve before still can:
+Rotate when the holder stays but the key changes: a new hardware wallet, a new device, or a new wallet provider. Rebuild the account as above, then put the new key at the old one's weight and keep the threshold, so every group of signers that could approve before still can:
 
 ```ts [rotate-signer.ts]
-const { receipt } = await client.accounts.updateConfigSync({
-  account,
+const rotation = await client.accounts.updateConfigSync({
+  account, // on a scheduled rotation, the old key can be one of the approvers
   nextConfig: {
     owners: config.owners.map((entry) =>
       isAddressEqual(entry.owner, oldSigner) ? { owner: newSigner, weight: entry.weight } : entry,
     ),
     threshold: config.threshold,
   },
-  owner: approver, // on a scheduled rotation, the old key can approve
 })
+await saveAccount(customerId, { address, config: rotation.config })
 ```
 
 One update swaps the keys, so the account never has both keys active, or neither.
@@ -92,9 +94,9 @@ Treat a compromised signer as an attacker and leave it out of the approvers. If 
 
 ## Limits on removing signers
 
-- The approving signers must reach the current threshold, and the remaining weights must reach the new one, or Tempo rejects the update.
+- The approving signers must reach the current threshold, and the remaining weights must reach the new one. viem checks both before sending anything: it throws `Local owners do not meet the threshold.` when the attached keys fall short, and `Invalid account config: threshold exceeds total owner weight.` when the remaining weights do.
 - An account keeps at least one signer.
-- `InvalidConfig` means the configuration you sent doesn't match the one Tempo stores, for example because another signer update landed first. Load the latest saved configuration and rebuild the update.
-- Until the first update, open the account with `address: 'infer'`; after a signer change, open it from its saved address with `Account.fromConfig({ address, ...config })`.
+- `multisig configuration commitment mismatch` means the account was rebuilt from an older configuration than the one Tempo stores, for example because another signer update landed first. Load the latest saved configuration and rebuild the account.
+- Rebuild with `address: 'infer'` only while the configuration is version 0. After a signer update, the current signers no longer derive the address, so pass the saved `address`, as the code does.
 
 Specifications: [configuration updates](https://tips.sh/1109), [configurable accounts](https://tips.sh/1107).

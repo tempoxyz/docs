@@ -20,9 +20,11 @@ A recovery signer is a second key that can approve transactions for a user's acc
 <span id="add-a-signer-in-code" />
 <span id="add-a-backup-signer" />
 
-This guide starts from one signer at weight 1 and a threshold of 1, the total weight an approval needs. In your app, that first key is the key the account was created with, such as a key your app or wallet provider holds for the user.
+This guide starts from one signer at weight 1 and a threshold of 1, the total weight an approval needs. That signer, `currentKey`, is the key the account was created with, such as a key your app or wallet provider holds for the user.
 
-The code uses the devnet `client` with `Relay.accounts` from [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals). The demo runs these steps in this browser: a private key stands in for the user's first key, and a device key for the passkey.
+Your app also keeps `saved`, the record it stored when it created the account: `{ address: account.address, config: account.config }`. The configuration lists the signers, their weights, the threshold, and a version number. Tempo stores only a hash of it, so your saved copy is the source of truth, and your app rebuilds the account from it before each action.
+
+The demo runs these steps in this browser: a private key stands in for the user's first key, and a device key for the passkey.
 
 <GuideDemo guide="add-signers" />
 
@@ -34,26 +36,38 @@ Pick a key the user doesn't lose along with the first one, such as a [recovery p
 
 ### Approve the update
 
-Open the account from its saved configuration (with `address: 'infer'` until its first update, then with its saved address), and append `newSigner` to its signers. `currentKey`, the user's first key, approves alone because its weight of 1 reaches the threshold of 1.
+`openAccount` rebuilds the account from `saved` and attaches the keys you pass it as approvers. Every other signer stays a plain address, which is all the configuration needs. `currentKey` approves alone because its weight of 1 reaches the threshold of 1. The update appends `newSigner` to the saved signers.
 
 ```ts [add-signer.ts]
-import { Account } from 'viem/tempo'
+import { http, isAddressEqual } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { Account, createClient } from 'viem/tempo'
 
-const account =
-  savedConfig.version === 0n
-    ? Account.fromConfig({ ...savedConfig, address: 'infer' })
-    : Account.fromConfig({ address, ...savedConfig })
+const client = createClient({ chain: tempoDevnet, transport: http() })
+
+/** The account that `saved` describes, holding the approvers' keys. */
+function openAccount(approvers: Account.RootAccount[]) {
+  const { address, config } = saved
+  const owners = config.owners.map(({ owner, weight }) => ({
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+    weight,
+  }))
+  return config.version === 0n
+    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+    : Account.fromConfig({ ...config, address, owners })
+}
 
 const { config } = await client.accounts.updateConfigSync({
-  account,
+  account: openAccount([currentKey]),
   nextConfig: {
-    owners: [...savedConfig.owners, { owner: newSigner, weight: 1 }],
-    threshold: savedConfig.threshold,
+    owners: [...saved.config.owners, { owner: newSigner, weight: 1 }],
+    threshold: saved.config.threshold,
   },
-  owner: currentKey,
 })
-// Save `config` in place of `savedConfig`: the next update starts from it.
+saved.config = config // the next openAccount call rebuilds from this
 ```
+
+Save the returned `config` in place of the old one right away. Each signer update raises the version, which changes the hash Tempo stores, so a transaction from an account rebuilt from the old copy fails. `openAccount` reads `saved` on every call, so the next step builds from the new configuration. The address comes from the account's first configuration: at version 0, `address: 'infer'` derives it from the signers, and after an update `openAccount` passes the saved address instead.
 
 ### Confirm the account survives losing one signer
 
@@ -72,7 +86,7 @@ Tempo can't tell whether a signer still holds its key, so have the new signer ap
 
 ### Require two factors
 
-Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To require two factors, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2.
+Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To require two factors, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2. This step reuses `client` and `openAccount` from `add-signer.ts`.
 
 ```ts [multi-factor.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
@@ -80,13 +94,13 @@ import { Account, WebAuthnP256 } from 'viem/tempo'
 const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
 
 const { config: twoFactor } = await client.accounts.updateConfigSync({
-  account: Account.fromConfig({ address, ...config }),
+  account: openAccount([currentKey]), // approves alone at the current threshold of 1
   nextConfig: {
-    owners: [...config.owners, { owner: passkey.address, weight: 2 }],
+    owners: [...saved.config.owners, { owner: passkey.address, weight: 2 }],
     threshold: 2,
   },
-  owner: currentKey, // approves alone at the current threshold of 1
 })
+saved.config = twoFactor
 ```
 
 Now a new device or a signer change needs the passkey on the user's device, or the first key and recovery signer together. Give those two keys [different holders](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects-against), because one party holding both can approve alone. Signer changes don't touch access keys, so the user's existing device key keeps paying within its limits.
@@ -97,8 +111,7 @@ Now a new device or a signer change needs the passkey on the user's device, or t
 
 ## Recovery signer limits
 
-- Only current signers count toward the threshold, not the signer being added. When one can't reach it alone, a second signer approves the same transaction, as in [Add signers](/docs/accounts/key-management/add-signers#send-the-signer-update).
-- `InvalidConfig` means the update didn't start from the account's current configuration, usually because another update landed first. Load the latest saved configuration and rebuild the update.
-- Until the first update, open the account with `address: 'infer'`. After a signer change, `address: 'infer'` derives a different address, so open the account with its saved address.
+- Only current signers count toward the threshold, not the signer being added. When one key can't reach it alone, pass more approving keys to `openAccount`. If the keys you pass still fall short, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+- `multisig configuration commitment mismatch` means the account was rebuilt from an older configuration than the one Tempo stores, usually because another update landed first or the app didn't store the returned `config`. Load the latest saved configuration and rebuild the update.
 
 When the user loses a signer, follow [Recover a user's account](/docs/accounts/guides/users/recover-an-account).
