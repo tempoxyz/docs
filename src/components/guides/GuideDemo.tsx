@@ -83,11 +83,6 @@ async function hasPlatformPasskey() {
 function useEnvironment(): Environment {
   const [environment, setEnvironment] = React.useState<Environment>({ status: 'checking' })
   React.useEffect(() => {
-    // HTTPS pages can't call the plain-HTTP devnet, so don't load it.
-    if (window.location.protocol !== 'http:') {
-      setEnvironment({ status: 'offline' })
-      return
-    }
     let active = true
     loadModules()
       .then(async (modules) => {
