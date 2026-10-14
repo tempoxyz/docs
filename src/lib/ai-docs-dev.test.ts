@@ -197,3 +197,33 @@ describe('development AI Markdown', () => {
     expect(head.res.body()).toBe('')
   })
 })
+
+it('uses Vocs source markers so page preludes and extra headings stay with their page', () => {
+  const source = `# Tempo Docs
+
+<!--
+Sitemap:
+${index}-->
+
+<!-- Source: /docs/earn -->
+
+First prelude.
+
+# Earn
+
+# Another heading within Earn
+
+<!-- Source: /docs/earn/integrate -->
+
+Second prelude.
+
+# Deposit
+
+Second page.
+`
+  const result = renderAiDevFull(source)
+  expect(result.indexOf('First prelude.')).toBeLessThan(result.indexOf('\n# Earn\n'))
+  expect(result.indexOf('Second prelude.')).toBeGreaterThan(result.indexOf('# Another heading'))
+  expect(result).toContain('Second page.')
+  expect(result).not.toContain('<!-- Source:')
+})

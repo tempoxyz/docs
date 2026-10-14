@@ -1,9 +1,10 @@
 # Maintaining generated Markdown
 
 This sample uses the commit-pinned preview `https://pkg.pr.new/vocs@409d900`
-from [Vocs #666](https://github.com/wevm/vocs/pull/666). Replace the preview with
-the published version after that change lands. Do not merge this migration as
-an unrelated production framework upgrade without reviewing the preview.
+from [Vocs #666](https://github.com/wevm/vocs/pull/666). This is an intentional
+preview-package integration for iterating on that PR. To test a new upstream
+commit, update the commit pin and lockfile, then rerun the audit, tests, and build.
+Use a release version when ready to leave the preview channel.
 
 ## Generation and enforcement
 
@@ -92,6 +93,12 @@ and other existing page-context transforms. The artifact checker delegates the
 framework audit to Vocs but retains Tempo-specific MCP guidance, include,
 presentation, and changelog checks. Those content requirements still apply even
 when the framework's validation mode is temporarily `warn`.
+
+Tempo retains its section index, source attribution, and production canonical
+links. Its final build hook revalidates those transformed bytes with the same
+Vocs validation mode, then refreshes the manifest from Vocs' original inventory.
+This avoids stale hashes while preserving Tempo's product-context requirements.
+Do not add any further Markdown rewrite after that finalizer.
 
 The Vocs patch is rebased onto the preview, preserving Tempo's UI, OpenAPI, and
 shared module-loader changes. The preview already includes server OpenAPI config

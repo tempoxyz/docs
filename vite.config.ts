@@ -13,7 +13,9 @@ import { markdownRoute, renderAiFull, renderAiIndex, renderAiPage } from './src/
 import { aiDocsDevMiddleware } from './src/lib/ai-docs-dev'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
+import { finalizeMarkdownManifest } from './src/lib/markdown-manifest'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
+import vocsConfig from './vocs.config'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -156,6 +158,10 @@ function llmsAgentPreamble(): Plugin {
             ),
           )
         }
+        // Tempo owns section/source attribution; validate its final output and
+        // refresh hashes only after every text/canonical-link transform finishes.
+        for (const directory of publicDirectories)
+          await finalizeMarkdownManifest(directory, vocsConfig.markdown?.output?.validation)
       },
     },
   }

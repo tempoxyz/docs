@@ -4,7 +4,7 @@ import path from 'node:path'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import type { Connect } from 'vite'
-import { parseAiIndex, renderAiFull, renderAiIndex, renderAiPage } from './ai-docs'
+import { markdownRoute, parseAiIndex, renderAiFull, renderAiIndex, renderAiPage } from './ai-docs'
 
 const parser = unified().use(remarkParse)
 
@@ -15,6 +15,35 @@ export function renderAiDevFull(content: string) {
   const entries = parseAiIndex(sitemap[1])
   const body = content.slice(sitemap.index + sitemap[0].length)
   const nodes = parser.parse(body).children
+  // New Vocs exports carry explicit page boundaries. Use those instead of H1s:
+  // a page may have multiple H1s, and its prelude belongs to that page.
+  const sources = nodes.flatMap((node) => {
+    const match = node.type === 'html' && /^<!-- Source: (.+) -->$/.exec(node.value.trim())
+    return match && node.position
+      ? [
+          {
+            route: markdownRoute(match[1]),
+            start: node.position.start.offset!,
+            end: node.position.end.offset!,
+          },
+        ]
+      : []
+  })
+  if (sources.length) {
+    if (
+      sources.length !== entries.length ||
+      new Set(sources.map(({ route }) => route)).size !== entries.length
+    )
+      throw new Error('Vocs source markers do not match the Markdown inventory.')
+    const pages = new Map(
+      sources.map((source, index) => [
+        source.route,
+        renderAiPage(body.slice(source.end, sources[index + 1]?.start).trim(), source.route),
+      ]),
+    )
+    return renderAiFull(renderAiIndex(sitemap[1]), pages)
+  }
+
   const starts: number[] = []
   for (let index = 0; index < nodes.length; index++) {
     const node = nodes[index]
