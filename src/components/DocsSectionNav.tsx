@@ -227,8 +227,8 @@ export default function DocsSectionNav() {
                     if (activeSection?.id === item.id) activeLinkRef.current = element
                   }}
                   to={item.href}
-                  unstable_prefetchOnEnter
-                  unstable_prefetchOnView
+                  unstable_prefetchOnEnter={{}}
+                  unstable_prefetchOnView={{}}
                   aria-current={activeSection?.id === item.id ? 'page' : undefined}
                 >
                   {Icon && (
@@ -258,8 +258,8 @@ export default function DocsSectionNav() {
               to={section.href}
               className={`docs-section-utility-link ${docsSectionUtilityLink().className}`}
               aria-current={activeSection?.id === section.id ? 'page' : undefined}
-              unstable_prefetchOnEnter
-              unstable_prefetchOnView
+              unstable_prefetchOnEnter={{}}
+              unstable_prefetchOnView={{}}
             >
               {section.label}
             </Link>

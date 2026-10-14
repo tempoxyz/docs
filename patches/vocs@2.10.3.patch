@@ -1,5 +1,5 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 2a1dd1a139e0e00ff88029366aa64b1ae141102b..b0be958bd82bf1205266e1ea7b42b5d446fbfcb5 100644
+index 2a1dd1a139e0e00ff88029366aa64b1ae141102b..04229121a9103662262ffda6e744f17458b63e59 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -18,3 +18,4 @@ export { ScrollRestoration } from './react/ScrollRestoration.js';
@@ -8,7 +8,7 @@ index 2a1dd1a139e0e00ff88029366aa64b1ae141102b..b0be958bd82bf1205266e1ea7b42b5d4
  //# sourceMappingURL=index.d.ts.map
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
 diff --git a/dist/index.js b/dist/index.js
-index 704383913c9f400e8ee4de07df317bd2c6a29ca6..688bebd8a598081378c790a1bfec16e52b6bae7b 100644
+index 704383913c9f400e8ee4de07df317bd2c6a29ca6..c8a94afd974d5ef0dec8e158ff8a699c9d4e7789 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -18,3 +18,4 @@ export { ScrollRestoration } from './react/ScrollRestoration.js';
@@ -16,76 +16,6 @@ index 704383913c9f400e8ee4de07df317bd2c6a29ca6..688bebd8a598081378c790a1bfec16e5
  export { useConfig } from './react/useConfig.js';
  //# sourceMappingURL=index.js.map
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
-diff --git a/dist/internal/config.js b/dist/internal/config.js
-index 72e3f098c67caa1993f1b666ef49fc5331afb1a1..cf38ecd059f6a55f9375fd70c683114b45f9e698 100644
---- a/dist/internal/config.js
-+++ b/dist/internal/config.js
-@@ -1,5 +1,6 @@
- import * as fs from 'node:fs';
- import * as path from 'node:path';
-+import * as FileVersions from './file-versions.js';
- import * as Langs from './langs.js';
- import { from as resolveOpenApi } from './openapi/openapi.js';
- import * as Retriever from './retriever.js';
-@@ -165,6 +166,8 @@ function resolveDefaultCacheDir(rootDir) {
-         return 'node_modules/.cache/vocs';
-     return '.vocs/cache';
- }
-+// Shared through `globalThis` so every copy of this module reuses the same loads.
-+const loadedConfigs = (globalThis[Symbol.for('vocs.config.loaded')] ??= new Map());
- export async function resolve(options = {}) {
-     const { server, rootDir = process.cwd() } = options;
-     if (server && process.env['NODE_ENV'] === 'production') {
-@@ -175,17 +178,38 @@ export async function resolve(options = {}) {
-     const configFile = getConfigFile({ rootDir });
-     if (!configFile)
-         return define({});
--    // Resolved via a non-literal specifier so bundlers (esbuild/Wrangler) don't
--    // statically pull Vite (and its esbuild/lightningcss/rollup deps) into edge
--    // consumers that only import `Config.define` through `vocs/server`. This branch
--    // only ever runs in Node (dev/CLI/config loading), where the runtime import
--    // resolves normally.
--    const viteSpecifier = 'vite';
--    const vite = await import(/* @vite-ignore */ viteSpecifier);
--    const result = await vite.loadConfigFromFile({ command: 'build', mode: 'development' }, configFile, rootDir);
--    if (!result)
--        return define({ rootDir });
--    return define({ ...result.config, rootDir });
-+    // Dev middleware and server routes resolve the config on every request. Each
-+    // Vite load imports the bundled config as a new ES module, which Node never
-+    // frees, so reuse a load until a file it bundled changes.
-+    const key = `${rootDir}\0${configFile}`;
-+    const loaded = loadedConfigs.get(key);
-+    if (loaded && !FileVersions.changed(loaded.files))
-+        return loaded.config;
-+    // Record versions before loading, so an edit made during the load reloads next time.
-+    const files = new Map([...(loaded?.files.keys() ?? [configFile])].map((file) => [file, FileVersions.version(file)]));
-+    const config = (async () => {
-+        // Resolved via a non-literal specifier so bundlers (esbuild/Wrangler) don't
-+        // statically pull Vite (and its esbuild/lightningcss/rollup deps) into edge
-+        // consumers that only import `Config.define` through `vocs/server`. This branch
-+        // only ever runs in Node (dev/CLI/config loading), where the runtime import
-+        // resolves normally.
-+        const viteSpecifier = 'vite';
-+        const vite = await import(/* @vite-ignore */ viteSpecifier);
-+        const result = await vite.loadConfigFromFile({ command: 'build', mode: 'development' }, configFile, rootDir);
-+        if (!result)
-+            return define({ rootDir });
-+        for (const file of result.dependencies)
-+            if (!files.has(file))
-+                files.set(file, FileVersions.version(file));
-+        return define({ ...result.config, rootDir });
-+    })();
-+    loadedConfigs.set(key, { config, files });
-+    // A failed load (for example, a syntax error mid-edit) retries on the next call.
-+    config.catch(() => {
-+        if (loadedConfigs.get(key)?.config === config)
-+            loadedConfigs.delete(key);
-+    });
-+    return config;
- }
- export let global;
- export function setGlobal(config) {
 diff --git a/dist/internal/file-versions.d.ts b/dist/internal/file-versions.d.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..7fd3f54bfb4290940e427d0b6efe846c0ed06c46
@@ -121,63 +51,6 @@ index 0000000000000000000000000000000000000000..648d3a53376234b8d36f2c7873806351
 +            return true;
 +    return false;
 +}
-diff --git a/dist/internal/git.js b/dist/internal/git.js
-index 73aa6c0f8e2543fc53594b1a168b95a541cfd112..bad6f8472f7d017bae33d065b77283eab19190fa 100644
---- a/dist/internal/git.js
-+++ b/dist/internal/git.js
-@@ -1,14 +1,44 @@
--import { execSync } from 'node:child_process';
--export function getLastModified(filePath) {
-+import { execFileSync } from 'node:child_process';
-+import * as fs from 'node:fs';
-+import * as path from 'node:path';
-+let index;
-+// One history walk replaces a `git log` process per page.
-+function lastModifiedIndex() {
-+    if (index !== undefined)
-+        return index;
-+    index = null;
-     try {
--        const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
-+        const options = {
-             encoding: 'utf-8',
--            stdio: ['pipe', 'pipe', 'pipe'],
--        }).trim();
--        return result || undefined;
-+            maxBuffer: 1024 * 1024 * 1024,
-+            stdio: ['ignore', 'pipe', 'ignore'],
-+        };
-+        const root = execFileSync('git', ['rev-parse', '--show-toplevel'], options).trim();
-+        const log = execFileSync('git', ['-c', 'core.quotePath=false', 'log', '--format=%x00%cI', '--name-only'], options);
-+        const dates = new Map();
-+        for (const entry of log.split('\0')) {
-+            const [date, ...files] = entry.split('\n');
-+            if (!date)
-+                continue;
-+            for (const file of files)
-+                if (file && !dates.has(file))
-+                    dates.set(file, date);
-+        }
-+        index = { dates, root };
-     }
--    catch {
-+    catch { }
-+    return index;
-+}
-+export function getLastModified(filePath) {
-+    const history = lastModifiedIndex();
-+    if (!history)
-         return undefined;
-+    let file = path.resolve(filePath);
-+    try {
-+        file = fs.realpathSync(file);
-     }
-+    catch { }
-+    const relative = path.relative(history.root, file).split(path.sep).join('/');
-+    return history.dates.get(relative);
- }
- //# sourceMappingURL=git.js.map
-\ No newline at end of file
 diff --git a/dist/internal/markdown-components.js b/dist/internal/markdown-components.js
 index 0eadafe1f54bda5eed944210c2bd4b1a1cf0b91a..07b14ec0cd72b935c809487075372879946126d4 100644
 --- a/dist/internal/markdown-components.js
@@ -424,25 +297,29 @@ index a1be03042be450bfd09d42b6bef29f3b6c2a8f14..9115c3d8ea2689e50293c8eed8acd3f8
  //# sourceMappingURL=sidebar.js.map
 \ No newline at end of file
 diff --git a/dist/internal/vite-plugins.js b/dist/internal/vite-plugins.js
-index ba17f7d688e4c4df6da2abe1b7bf875655a83e79..5838377e726db569ff9f0a2e97e49c05049b63d9 100644
+index df42ecd26effa9faae50c46992b5af1263098a6d..14ef73a95b73cca8625e49a485631b56e61f4b86 100644
 --- a/dist/internal/vite-plugins.js
 +++ b/dist/internal/vite-plugins.js
-@@ -218,7 +218,9 @@ export function llms(config) {
-                 next();
-             });
-         },
--        async buildEnd() {
-+        async writeBundle(options) {
-+            if (!options.dir?.endsWith('/public'))
-+                return;
-             const content = await buildLlmsContent();
-             const outDir = path.resolve(viteConfig.root, config.outDir, 'public');
-             await fs.mkdir(outDir, { recursive: true });
+@@ -1017,8 +1017,13 @@ export function virtualConfig(config) {
+                 const serializedConfig = mode === 'development' ? { ...currentConfig, baseUrl: undefined } : currentConfig;
+                 // An empty map tells Vite to skip generating one, which for generated data is mostly
+                 // a second copy of the module, retained by every environment.
++                // Browsers get the client-facing subset. Server environments also need
++                // the OpenAPI entries the router registers generated pages from.
++                const value = this.environment?.config.consumer === 'server'
++                    ? { ...ConfigSerializer.forClient(serializedConfig), openapi: serializedConfig.openapi }
++                    : ConfigSerializer.forClient(serializedConfig);
+                 return {
+-                    code: `export const config = ${ConfigSerializer.serialize(ConfigSerializer.forClient(serializedConfig))}`,
++                    code: `export const config = ${ConfigSerializer.serialize(value)}`,
+                     map: { mappings: '' },
+                 };
+             }
 diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
-index 8ad0e7d1635b9ca6b13ef2fb4ac9dd1ca9b6fbff..ff285db6c14437fdeb866dc985f1f4a93f663a70 100644
+index 808d57fadd940bd06fdbeacb182a6d55aff67e74..2b6bf2af205ba7bc19df13a16a15acbae4986c9f 100644
 --- a/dist/react/Head.d.ts
 +++ b/dist/react/Head.d.ts
-@@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react/jsx-runtime").JSX
+@@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react").JSX.Element;
  export declare namespace Head {
      type Props = {
          includeJsonLd?: boolean | undefined;
@@ -473,7 +350,7 @@ index 9c7425584c057838cf328fcbff9b64005122268a..b82f9bd0ad8185306542fc8a2a6aafa1
                          return (_jsx("meta", { charSet: charSet, httpEquiv: httpEquiv, name: name, property: property, content: content != null ? String(content) : undefined, media: media }, `${name ?? property ?? httpEquiv ?? charSet}-${index}`));
                      }), jsonLd && (_jsx("script", { type: "application/ld+json", 
 diff --git a/dist/react/Layout.d.ts b/dist/react/Layout.d.ts
-index 05018ae8161c97a55f2a20a9d43336d09b743dd1..ccb96643106fc7fa54616fb978403a5ab70861ca 100644
+index 8f4633bf0e44d8bb388118f6e44c94d968ff531a..b3389ce9814aca91ff86c4b1f94d9cb67326b4c4 100644
 --- a/dist/react/Layout.d.ts
 +++ b/dist/react/Layout.d.ts
 @@ -3,6 +3,7 @@ export declare namespace Layout {
@@ -501,7 +378,7 @@ index dd8f3a8162c7c39e4fb39b58cc2cdca86cdfd01b..faea5cb792f26a20dd0b21d4c96b6bd7
  //# sourceMappingURL=Layout.js.map
 \ No newline at end of file
 diff --git a/dist/react/Root.js b/dist/react/Root.js
-index 641cee118919e649fc5d977bcfc3f4e62b003007..6f6e5ac6ba9e5e0f0c10f324410e52e379ee20a6 100644
+index 5f3d0637174afade9b86c31602683c04b333ea07..c58b72a183d02bca921fbaea8408077cdacb9b96 100644
 --- a/dist/react/Root.js
 +++ b/dist/react/Root.js
 @@ -3,13 +3,12 @@ import { config } from 'virtual:vocs/config';
@@ -515,8 +392,8 @@ index 641cee118919e649fc5d977bcfc3f4e62b003007..6f6e5ac6ba9e5e0f0c10f324410e52e3
      const { colorScheme, accentColor } = config;
      return (_jsxs("html", { "data-vocs": true, ...(colorScheme === 'light' || colorScheme === 'dark'
              ? { 'data-vocs-theme': colorScheme }
--            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl }), _jsx(Head, { includeJsonLd: false })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
-+            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
+-            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl }), _jsx(Head, { includeJsonLd: false })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
++            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
  }
  //# sourceMappingURL=Root.js.map
 \ No newline at end of file
@@ -538,10 +415,10 @@ index b189ea50873a5ef76bf044003476bf4660e9e245..f78449ca827a2fd0d97dc45d1cc627e5
  //# sourceMappingURL=NotFound.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/Sidebar.js b/dist/react/internal/Sidebar.js
-index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78523daebb 100644
+index 47ddd879b6365e20032a5dde3194a898732d4683..32c6107472c7132f744cb1e1d5ed3d78523daebb 100644
 --- a/dist/react/internal/Sidebar.js
 +++ b/dist/react/internal/Sidebar.js
-@@ -11,101 +11,25 @@ import * as Sidebar_core from '../../internal/sidebar.js';
+@@ -11,110 +11,25 @@ import * as Sidebar_core from '../../internal/sidebar.js';
  import { Badge } from '../Badge.js';
  import { Link } from '../Link.js';
  import { useSidebar } from '../useSidebar.js';
@@ -550,27 +427,22 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
  /** Active in-page anchor id, for hash-link sidebar items (e.g. OpenAPI). */
  const ActiveAnchorContext = React.createContext(null);
 -/**
-- * The set of in-page anchor ids that the sidebar actually links to (the `#frag`
-- * of every hash-link item). Used so page-level items only defer their active
-- * state to anchors that have a corresponding sidebar item — not to arbitrary
-- * headings on a standalone guide page that happens to live under a section
-- * whose sidebar uses hash links elsewhere.
+- * The set of in-page anchor ids that the sidebar links to on the current page.
+- * Used so page-level items only defer their active state to corresponding
+- * sidebar items — not to arbitrary headings or hash links for another page.
 - */
 -const HashIdsContext = React.createContext(new Set());
--/** Whether any sidebar item links to an in-page anchor. */
--function hasHashLink(items) {
--    return items.some((item) => item.link?.includes('#') || (item.items && hasHashLink(item.items)));
--}
--/** Collects the `#fragment` ids of every hash-link sidebar item. */
--function collectHashIds(items, ids = new Set()) {
+-/** Collects the `#fragment` ids of hash-link sidebar items for the current page. */
+-function collectHashIds(items, path, ids = new Set()) {
+-    const pagePath = path.split('#')[0] ?? path;
 -    for (const item of items) {
--        if (item.link?.includes('#')) {
--            const id = item.link.split('#')[1];
--            if (id)
+-        if (item.link?.includes('#') && !Path.isExternal(item.link)) {
+-            const [itemPath, id] = item.link.split('#');
+-            if (id && (!itemPath || Path.matches(pagePath, itemPath)))
 -                ids.add(id);
 -        }
 -        if (item.items)
--            collectHashIds(item.items, ids);
+-            collectHashIds(item.items, pagePath, ids);
 -    }
 -    return ids;
 -}
@@ -579,19 +451,11 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 - * (used by the OpenAPI section) can show active state. Mirrors the Outline's
 - * IntersectionObserver approach.
 - */
--function useActiveAnchor(enabled, path) {
+-function useActiveAnchor(hashIds, path) {
 -    const [activeId, setActiveId] = React.useState(null);
 -    React.useEffect(() => {
--        if (!enabled || typeof window === 'undefined')
+-        if (hashIds.size === 0 || typeof window === 'undefined')
 -            return;
--        // Reset on every client-side navigation: derive the active section from the
--        // hash of the destination `path` (landing pages like the OpenAPI section
--        // root have none, so they start with no active section). Reading `path`
--        // here — rather than only `window.location` — keeps it a genuine effect
--        // dependency so navigation reliably re-runs this.
--        const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : '';
--        const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '');
--        setActiveId(hash || null);
 -        // OpenAPI pages render inside `article[data-v-content]` too, so the generic
 -        // markdown selector would also match operation sub-headings (Parameters,
 -        // Responses, schema anchors, …) whose ids have no sidebar entry — hijacking
@@ -602,6 +466,25 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 -        const selector = isOpenApi
 -            ? '[data-v-openapi-h1][id], [data-v-openapi-operation-title][id]'
 -            : 'article[data-v-content] :is(h2, h3, h4, h5, h6)[id]';
+-        // Reset on every client-side navigation. If the destination hash belongs
+-        // to a nested heading without a sidebar item, keep its nearest preceding
+-        // sidebar anchor active instead of falling back to the page-level item.
+-        // Reading `path` here — rather than only `window.location` — keeps it a
+-        // genuine effect dependency so navigation reliably re-runs this.
+-        const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : '';
+-        const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '');
+-        let initialId = hashIds.has(hash) ? hash : null;
+-        const target = hash ? document.getElementById(hash) : null;
+-        if (!initialId && target) {
+-            for (const element of document.querySelectorAll(selector)) {
+-                const position = element.compareDocumentPosition(target);
+-                if (element === target || position & Node.DOCUMENT_POSITION_PRECEDING)
+-                    break;
+-                if (hashIds.has(element.id))
+-                    initialId = element.id;
+-            }
+-        }
+-        setActiveId(initialId);
 -        const observer = new IntersectionObserver((entries) => {
 -            for (const entry of entries)
 -                if (entry.isIntersecting) {
@@ -612,6 +495,10 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 -        const observeAll = () => {
 -            observer.disconnect();
 -            for (const element of document.querySelectorAll(selector)) {
+-                // Nested headings without matching sidebar items belong to the current
+-                // section. Observing them would reactivate the page-level item.
+-                if (!hashIds.has(element.id))
+-                    continue;
 -                // Skip changelog release-body headings — they have no sidebar entry and
 -                // would hijack the active section as you scroll through the changelog.
 -                if (element.closest('[data-v-changelog]'))
@@ -629,7 +516,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 -            observer.disconnect();
 -            mutation?.disconnect();
 -        };
--    }, [enabled, path]);
+-    }, [hashIds, path]);
 -    return activeId;
 +/** Flatten links once; the hook filters them to the current page. */
 +function collectLinks(items) {
@@ -642,10 +529,9 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
      const { className, onNavigate, scrollRef } = props;
      const sidebar = useSidebar();
      const condenseSidebar = React.useMemo(() => Sidebar_core.length(sidebar.items, { startDepth: 2 }) > 25, [sidebar.items]);
--    const hashLinks = React.useMemo(() => hasHashLink(sidebar.items), [sidebar.items]);
--    const hashIds = React.useMemo(() => collectHashIds(sidebar.items), [sidebar.items]);
 -    const { path } = useRouter();
--    const activeAnchor = useActiveAnchor(hashLinks, path);
+-    const hashIds = React.useMemo(() => collectHashIds(sidebar.items, path), [sidebar.items, path]);
+-    const activeAnchor = useActiveAnchor(hashIds, path);
 -    return (_jsx(HashIdsContext.Provider, { value: hashIds, children: _jsx(ActiveAnchorContext.Provider, { value: activeAnchor, children: _jsxs("nav", { className: cx("vocs:flex-1 vocs:flex vocs:flex-col vocs:text-sm vocs:font-[450] vocs:[&>*:not(:last-child)[data-collapsed='false']]:mb-4", className), "data-v-sidebar": true, children: [sidebar.backLink && _jsx(BackLink, { onNavigate: onNavigate }), sidebar.items.map((item, i) => (_jsx(Section, { ...item, condensed: condenseSidebar, onNavigate: onNavigate, scrollRef: scrollRef }, `${item.text}-${i}`)))] }) }) }));
 +    const links = React.useMemo(() => collectLinks(sidebar.items), [sidebar.items]);
 +    const { path, hash } = useRouter();
@@ -654,7 +540,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
  }
  function BackLink(props) {
      const { onNavigate } = props;
-@@ -125,31 +49,19 @@ function Item(props) {
+@@ -134,31 +49,19 @@ function Item(props) {
      const { path } = useRouter();
      const isExternal = external ?? Path.isExternal(link);
      const activeAnchor = React.useContext(ActiveAnchorContext);
@@ -695,7 +581,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
      const itemRef = React.useRef(null);
      const prevPath = React.useRef(path);
      React.useEffect(() => {
-@@ -196,7 +108,7 @@ function Item(props) {
+@@ -205,7 +108,7 @@ function Item(props) {
      if (link && !disabled) {
          if (isExternal)
              return (_jsxs("a", { className: Item.className, "data-condensed": condensed && depth > 1, "data-link": true, "data-v-sidebar-item": true, href: link, ref: itemRef, target: "_blank", rel: "noopener noreferrer", onClick: onNavigate, children: [_jsxs("span", { className: "vocs:inline-flex vocs:items-center vocs:gap-1 vocs:min-w-0 vocs:truncate", children: [text, _jsx(LucideArrowUpRight, { className: "vocs:size-3 vocs:shrink-0" })] }), badge && _jsx(ItemBadge, { badge: badge })] }));
@@ -704,7 +590,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
      }
      return (_jsxs("div", { "aria-disabled": disabled, className: Item.className, "data-condensed": condensed && depth > 1, "data-link": link ? true : undefined, "data-v-sidebar-item": true, ref: itemRef, children: [_jsx("span", { className: "vocs:min-w-0 vocs:truncate", children: text }), badge && _jsx(ItemBadge, { badge: badge })] }));
  }
-@@ -252,7 +164,7 @@ function Section(props) {
+@@ -261,7 +164,7 @@ function Section(props) {
      if (items)
          return (_jsxs("section", { "data-collapsed": collapsed, "data-v-sidebar-section": true, children: [(() => {
                      if (text && link)
@@ -713,7 +599,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
                      // Non-link item is a header.
                      if (text)
                          return (_jsxs("div", { className: depth > 0 ? Section.childHeaderClassName : Section.rootHeaderClassName, "data-condensed": condensed && depth > 1, "data-collapsed": collapsed, "data-collapsable": collapsable, "data-v-sidebar-section-header": true, ...(collapsable
-@@ -275,4 +187,3 @@ function Section(props) {
+@@ -284,4 +187,3 @@ function Section(props) {
      Section.headerLinkClassName = 'vocs:flex-1 vocs:min-w-0 vocs:text-inherit vocs:hover:text-inherit';
      Section.rootHeaderClassName = 'vocs:h-[2.5em] vocs:px-3 vocs:-mx-3 vocs:rounded-md vocs:flex vocs:items-center vocs:justify-between vocs:text-heading vocs:font-medium vocs:data-[collapsable=true]:cursor-pointer';
  })(Section || (Section = {}));
@@ -760,7 +646,7 @@ index 06cc466393643245bf0dfcc0c946e013c717a75c..b74f6a618fbfa9785649de41d8548bc4
  //# sourceMappingURL=OpenApiPage.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/Playground.client.d.ts b/dist/react/internal/openapi/Playground.client.d.ts
-index 1d656d2eafda0171ec952be8018e7f2786801e41..0dcf91fa0db1e885a23a88815553e24c66b09cac 100644
+index 1d2726b6d7b2d7cc897c99dd326140aac83d16a7..c27f2b35470939910680d08f566836fbe828645d 100644
 --- a/dist/react/internal/openapi/Playground.client.d.ts
 +++ b/dist/react/internal/openapi/Playground.client.d.ts
 @@ -1,3 +1,4 @@
@@ -841,7 +727,7 @@ index 8b2cf490518a950cabc306795792e8268b0f41e2..08c49715b64adb33d39479317b9c07b6
 -//# sourceMappingURL=Playground.client.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/PlaygroundStandalone.d.ts b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
-index 3e12168d310762629390b37c367b98336ecd3f83..980e4117c47aa3900f86cf714da839897c231bd2 100644
+index fbec302a0515baeb6437e9119047a94eaf9d3bb8..6fb0a3ae28425383596e001ad4866606a7e9a633 100644
 --- a/dist/react/internal/openapi/PlaygroundStandalone.d.ts
 +++ b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
 @@ -50,6 +50,8 @@ export declare namespace Playground {
@@ -1000,92 +886,6 @@ index 14ee6f21906fbcf4d8547dcf10ff29144f66755d..21a1a78835806d382364c7a2af8f5a54
  export { useConfig } from './react/useConfig.js'
 +
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
-diff --git a/src/internal/config.ts b/src/internal/config.ts
-index 8daaa70d45851eb0a1090d1bcdd703de37dbf06d..5b054d304139d091e84015885540721526569336 100644
---- a/src/internal/config.ts
-+++ b/src/internal/config.ts
-@@ -9,6 +9,7 @@ import type { Link, MetaFlat, Script, StringInnerContent, Style } from 'unhead/t
- import type { PluggableList } from 'unified'
- import type * as Changelog from './changelog.js'
- import type * as Feedback from './feedback.js'
-+import * as FileVersions from './file-versions.js'
- import * as Langs from './langs.js'
- import type * as McpSource from './mcp-source.js'
- import type * as Mdx from './mdx.js'
-@@ -1066,6 +1067,17 @@ declare namespace getConfigFile {
-   }
- }
- 
-+type LoadedConfig = {
-+  config: Promise<Config>
-+  /** Versions of the config file and every file bundled into it. */
-+  files: FileVersions.FileVersions
-+}
-+
-+// Shared through `globalThis` so every copy of this module reuses the same loads.
-+const loadedConfigs = ((globalThis as { [key: symbol]: unknown })[
-+  Symbol.for('vocs.config.loaded')
-+] ??= new Map()) as Map<string, LoadedConfig>
-+
- export async function resolve(options: resolve.Options = {}): Promise<Config> {
-   const { server, rootDir = process.cwd() } = options
- 
-@@ -1078,21 +1090,42 @@ export async function resolve(options: resolve.Options = {}): Promise<Config> {
-   const configFile = getConfigFile({ rootDir })
-   if (!configFile) return define({})
- 
--  // Resolved via a non-literal specifier so bundlers (esbuild/Wrangler) don't
--  // statically pull Vite (and its esbuild/lightningcss/rollup deps) into edge
--  // consumers that only import `Config.define` through `vocs/server`. This branch
--  // only ever runs in Node (dev/CLI/config loading), where the runtime import
--  // resolves normally.
--  const viteSpecifier = 'vite'
--  const vite = await import(/* @vite-ignore */ viteSpecifier)
--  const result = await vite.loadConfigFromFile(
--    { command: 'build', mode: 'development' },
--    configFile,
--    rootDir,
-+  // Dev middleware and server routes resolve the config on every request. Each
-+  // Vite load imports the bundled config as a new ES module, which Node never
-+  // frees, so reuse a load until a file it bundled changes.
-+  const key = `${rootDir}\0${configFile}`
-+  const loaded = loadedConfigs.get(key)
-+  if (loaded && !FileVersions.changed(loaded.files)) return loaded.config
-+
-+  // Record versions before loading, so an edit made during the load reloads next time.
-+  const files: FileVersions.FileVersions = new Map(
-+    [...(loaded?.files.keys() ?? [configFile])].map((file) => [file, FileVersions.version(file)]),
-   )
--  if (!result) return define({ rootDir })
-+  const config = (async () => {
-+    // Resolved via a non-literal specifier so bundlers (esbuild/Wrangler) don't
-+    // statically pull Vite (and its esbuild/lightningcss/rollup deps) into edge
-+    // consumers that only import `Config.define` through `vocs/server`. This branch
-+    // only ever runs in Node (dev/CLI/config loading), where the runtime import
-+    // resolves normally.
-+    const viteSpecifier = 'vite'
-+    const vite = await import(/* @vite-ignore */ viteSpecifier)
-+    const result = await vite.loadConfigFromFile(
-+      { command: 'build', mode: 'development' },
-+      configFile,
-+      rootDir,
-+    )
-+    if (!result) return define({ rootDir })
- 
--  return define({ ...result.config, rootDir })
-+    for (const file of result.dependencies as string[])
-+      if (!files.has(file)) files.set(file, FileVersions.version(file))
-+    return define({ ...result.config, rootDir })
-+  })()
-+  loadedConfigs.set(key, { config, files })
-+  // A failed load (for example, a syntax error mid-edit) retries on the next call.
-+  config.catch(() => {
-+    if (loadedConfigs.get(key)?.config === config) loadedConfigs.delete(key)
-+  })
-+  return config
- }
- 
- declare namespace resolve {
 diff --git a/src/internal/file-versions.ts b/src/internal/file-versions.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..65060a5aa6b694b5064fbf75bc3e757b094d1c76
@@ -1111,63 +911,6 @@ index 0000000000000000000000000000000000000000..65060a5aa6b694b5064fbf75bc3e757b
 +  for (const [file, recorded] of versions) if (version(file) !== recorded) return true
 +  return false
 +}
-diff --git a/src/internal/git.ts b/src/internal/git.ts
-index cb1340d24683b77d6daaff5a5e7749d5625ff195..32af0864b03c84f08d9b5a60aa222548ad5fdf06 100644
---- a/src/internal/git.ts
-+++ b/src/internal/git.ts
-@@ -1,13 +1,43 @@
--import { execSync } from 'node:child_process'
-+import { type ExecFileSyncOptionsWithStringEncoding, execFileSync } from 'node:child_process'
-+import * as fs from 'node:fs'
-+import * as path from 'node:path'
- 
--export function getLastModified(filePath: string): string | undefined {
-+let index: { dates: Map<string, string>; root: string } | null | undefined
-+
-+// One history walk replaces a `git log` process per page.
-+function lastModifiedIndex() {
-+  if (index !== undefined) return index
-+  index = null
-   try {
--    const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
-+    const options: ExecFileSyncOptionsWithStringEncoding = {
-       encoding: 'utf-8',
--      stdio: ['pipe', 'pipe', 'pipe'],
--    }).trim()
--    return result || undefined
--  } catch {
--    return undefined
--  }
-+      maxBuffer: 1024 * 1024 * 1024,
-+      stdio: ['ignore', 'pipe', 'ignore'],
-+    }
-+    const root = execFileSync('git', ['rev-parse', '--show-toplevel'], options).trim()
-+    const log = execFileSync(
-+      'git',
-+      ['-c', 'core.quotePath=false', 'log', '--format=%x00%cI', '--name-only'],
-+      options,
-+    )
-+    const dates = new Map<string, string>()
-+    for (const entry of log.split('\0')) {
-+      const [date, ...files] = entry.split('\n')
-+      if (!date) continue
-+      for (const file of files) if (file && !dates.has(file)) dates.set(file, date)
-+    }
-+    index = { dates, root }
-+  } catch {}
-+  return index
-+}
-+
-+export function getLastModified(filePath: string): string | undefined {
-+  const history = lastModifiedIndex()
-+  if (!history) return undefined
-+  let file = path.resolve(filePath)
-+  try {
-+    file = fs.realpathSync(file)
-+  } catch {}
-+  const relative = path.relative(history.root, file).split(path.sep).join('/')
-+  return history.dates.get(relative)
- }
 diff --git a/src/internal/markdown-components.ts b/src/internal/markdown-components.ts
 index 7658f52f5deeadf90c676101ea37b6e08f6d6dd5..7e7389c422c3115a3a08367efd0bcc1a86cf6c64 100644
 --- a/src/internal/markdown-components.ts
@@ -1314,19 +1057,25 @@ index 0000000000000000000000000000000000000000..6ee138e2014b3d12549c409f800aa24a
 +  return copy
 +}
 diff --git a/src/internal/vite-plugins.ts b/src/internal/vite-plugins.ts
-index 2852c38212fde11881cb8fa97328576cee9c5a8c..f9eb59f1b72814aa42d2954897e6671b8b127760 100644
+index 7ec0abb98d845c4eb6adca1906b656c985d903c6..5da057326710b766f7a274dbb43bce96e84b29ae 100644
 --- a/src/internal/vite-plugins.ts
 +++ b/src/internal/vite-plugins.ts
-@@ -230,7 +230,8 @@ export function llms(config: Config.Config): PluginOption {
-         next()
-       })
-     },
--    async buildEnd() {
-+    async writeBundle(options) {
-+      if (!options.dir?.endsWith('/public')) return
-       const content = await buildLlmsContent()
-       const outDir = path.resolve(viteConfig.root, config.outDir, 'public')
-       await fs.mkdir(outDir, { recursive: true })
+@@ -1092,8 +1092,14 @@ export function virtualConfig(config: Config.Config): PluginOption {
+           mode === 'development' ? { ...currentConfig, baseUrl: undefined } : currentConfig
+         // An empty map tells Vite to skip generating one, which for generated data is mostly
+         // a second copy of the module, retained by every environment.
++        // Browsers get the client-facing subset. Server environments also need
++        // the OpenAPI entries the router registers generated pages from.
++        const value =
++          this.environment?.config.consumer === 'server'
++            ? { ...ConfigSerializer.forClient(serializedConfig), openapi: serializedConfig.openapi }
++            : ConfigSerializer.forClient(serializedConfig)
+         return {
+-          code: `export const config = ${ConfigSerializer.serialize(ConfigSerializer.forClient(serializedConfig))}`,
++          code: `export const config = ${ConfigSerializer.serialize(value)}`,
+           map: { mappings: '' },
+         }
+       }
 diff --git a/src/react/Head.tsx b/src/react/Head.tsx
 index e7b51ed6d9642a903399dc0d18253a0f3cc955e8..004c4722f97ab7a9db4f0c876ca19b3fa9b97eab 100644
 --- a/src/react/Head.tsx
@@ -1382,7 +1131,7 @@ index ca77c7aeca381f65af6d7a73f6a79d61890adcb3..4c8fbb9d3ef6566c4c1f7ff1f80cf8d8
    }
  }
 diff --git a/src/react/Root.tsx b/src/react/Root.tsx
-index e65e8dfcd6c18b996166a57fdb896791532a769d..91c84df982fb44c95a337cdb7ca298bbffc7d600 100644
+index 77180d1409e79039d1dcc0e65c218021224b596b..495ce44c4fd6b413e7439efa8b606fa1bc8a8a34 100644
 --- a/src/react/Root.tsx
 +++ b/src/react/Root.tsx
 @@ -2,7 +2,6 @@ import { config } from 'virtual:vocs/config'
@@ -1393,7 +1142,7 @@ index e65e8dfcd6c18b996166a57fdb896791532a769d..91c84df982fb44c95a337cdb7ca298bb
  import { Root_client } from './Root.client.js'
  import { ScrollRestoration } from './ScrollRestoration.js'
  
-@@ -22,7 +21,6 @@ export async function Root({ children }: { children: React.ReactNode }) {
+@@ -24,7 +23,6 @@ export async function Root({ children }: { children: React.ReactNode }) {
          <link rel="stylesheet" href={stylesUrl} />
          {userStylesUrl && <link rel="stylesheet" href={userStylesUrl} />}
          {groupIconsStylesUrl && <link rel="stylesheet" href={groupIconsStylesUrl} />}
@@ -1484,10 +1233,10 @@ index ccbf3ac5dbb4218fb4d6943a87e8bbb5f2a2c3e3..409c67cd99bf6e16588a1fbe5e0ed82a
  }
  
 diff --git a/src/react/internal/Sidebar.tsx b/src/react/internal/Sidebar.tsx
-index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75ec39952b0 100644
+index 12b1355bdf5ca59281e76bd67c18660e2c80b5c3..28d0973af2e0500baefbb941d3d8f75ec39952b0 100644
 --- a/src/react/internal/Sidebar.tsx
 +++ b/src/react/internal/Sidebar.tsx
-@@ -11,103 +11,19 @@ import * as Sidebar_core from '../../internal/sidebar.js'
+@@ -11,114 +11,19 @@ import * as Sidebar_core from '../../internal/sidebar.js'
  import { Badge } from '../Badge.js'
  import { Link } from '../Link.js'
  import { useSidebar } from '../useSidebar.js'
@@ -1499,27 +1248,25 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
  const ActiveAnchorContext = React.createContext<string | null>(null)
  
 -/**
-- * The set of in-page anchor ids that the sidebar actually links to (the `#frag`
-- * of every hash-link item). Used so page-level items only defer their active
-- * state to anchors that have a corresponding sidebar item — not to arbitrary
-- * headings on a standalone guide page that happens to live under a section
-- * whose sidebar uses hash links elsewhere.
+- * The set of in-page anchor ids that the sidebar links to on the current page.
+- * Used so page-level items only defer their active state to corresponding
+- * sidebar items — not to arbitrary headings or hash links for another page.
 - */
 -const HashIdsContext = React.createContext<ReadonlySet<string>>(new Set())
 -
--/** Whether any sidebar item links to an in-page anchor. */
--function hasHashLink(items: Sidebar_core.SidebarItem[]): boolean {
--  return items.some((item) => item.link?.includes('#') || (item.items && hasHashLink(item.items)))
--}
--
--/** Collects the `#fragment` ids of every hash-link sidebar item. */
--function collectHashIds(items: Sidebar_core.SidebarItem[], ids = new Set<string>()): Set<string> {
+-/** Collects the `#fragment` ids of hash-link sidebar items for the current page. */
+-function collectHashIds(
+-  items: Sidebar_core.SidebarItem[],
+-  path: string,
+-  ids = new Set<string>(),
+-): Set<string> {
+-  const pagePath = path.split('#')[0] ?? path
 -  for (const item of items) {
--    if (item.link?.includes('#')) {
--      const id = item.link.split('#')[1]
--      if (id) ids.add(id)
+-    if (item.link?.includes('#') && !Path.isExternal(item.link)) {
+-      const [itemPath, id] = item.link.split('#')
+-      if (id && (!itemPath || Path.matches(pagePath, itemPath))) ids.add(id)
 -    }
--    if (item.items) collectHashIds(item.items, ids)
+-    if (item.items) collectHashIds(item.items, pagePath, ids)
 -  }
 -  return ids
 -}
@@ -1529,20 +1276,11 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 - * (used by the OpenAPI section) can show active state. Mirrors the Outline's
 - * IntersectionObserver approach.
 - */
--function useActiveAnchor(enabled: boolean, path: string): string | null {
+-function useActiveAnchor(hashIds: ReadonlySet<string>, path: string): string | null {
 -  const [activeId, setActiveId] = React.useState<string | null>(null)
 -
 -  React.useEffect(() => {
--    if (!enabled || typeof window === 'undefined') return
--
--    // Reset on every client-side navigation: derive the active section from the
--    // hash of the destination `path` (landing pages like the OpenAPI section
--    // root have none, so they start with no active section). Reading `path`
--    // here — rather than only `window.location` — keeps it a genuine effect
--    // dependency so navigation reliably re-runs this.
--    const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : ''
--    const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '')
--    setActiveId(hash || null)
+-    if (hashIds.size === 0 || typeof window === 'undefined') return
 -
 -    // OpenAPI pages render inside `article[data-v-content]` too, so the generic
 -    // markdown selector would also match operation sub-headings (Parameters,
@@ -1554,6 +1292,25 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 -    const selector = isOpenApi
 -      ? '[data-v-openapi-h1][id], [data-v-openapi-operation-title][id]'
 -      : 'article[data-v-content] :is(h2, h3, h4, h5, h6)[id]'
+-
+-    // Reset on every client-side navigation. If the destination hash belongs
+-    // to a nested heading without a sidebar item, keep its nearest preceding
+-    // sidebar anchor active instead of falling back to the page-level item.
+-    // Reading `path` here — rather than only `window.location` — keeps it a
+-    // genuine effect dependency so navigation reliably re-runs this.
+-    const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : ''
+-    const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '')
+-    let initialId = hashIds.has(hash) ? hash : null
+-    const target = hash ? document.getElementById(hash) : null
+-    if (!initialId && target) {
+-      for (const element of document.querySelectorAll(selector)) {
+-        const position = element.compareDocumentPosition(target)
+-        if (element === target || position & Node.DOCUMENT_POSITION_PRECEDING) break
+-        if (hashIds.has(element.id)) initialId = element.id
+-      }
+-    }
+-    setActiveId(initialId)
+-
 -    const observer = new IntersectionObserver(
 -      (entries) => {
 -        for (const entry of entries)
@@ -1568,6 +1325,9 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 -    const observeAll = () => {
 -      observer.disconnect()
 -      for (const element of document.querySelectorAll(selector)) {
+-        // Nested headings without matching sidebar items belong to the current
+-        // section. Observing them would reactivate the page-level item.
+-        if (!hashIds.has(element.id)) continue
 -        // Skip changelog release-body headings — they have no sidebar entry and
 -        // would hijack the active section as you scroll through the changelog.
 -        if (element.closest('[data-v-changelog]')) continue
@@ -1586,7 +1346,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 -      observer.disconnect()
 -      mutation?.disconnect()
 -    }
--  }, [enabled, path])
+-  }, [hashIds, path])
 -
 -  return activeId
 +/** Flatten links once; the hook filters them to the current page. */
@@ -1598,14 +1358,13 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
  }
  
  export function Sidebar(props: Sidebar.Props) {
-@@ -118,34 +34,31 @@ export function Sidebar(props: Sidebar.Props) {
+@@ -129,33 +34,31 @@ export function Sidebar(props: Sidebar.Props) {
      () => Sidebar_core.length(sidebar.items, { startDepth: 2 }) > 25,
      [sidebar.items],
    )
--  const hashLinks = React.useMemo(() => hasHashLink(sidebar.items), [sidebar.items])
--  const hashIds = React.useMemo(() => collectHashIds(sidebar.items), [sidebar.items])
 -  const { path } = useRouter()
--  const activeAnchor = useActiveAnchor(hashLinks, path)
+-  const hashIds = React.useMemo(() => collectHashIds(sidebar.items, path), [sidebar.items, path])
+-  const activeAnchor = useActiveAnchor(hashIds, path)
 +  const links = React.useMemo(() => collectLinks(sidebar.items), [sidebar.items])
 +  const { path, hash } = useRouter()
 +  const activeAnchor = useActiveSidebarAnchor(links, path, hash)
@@ -1656,7 +1415,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
    )
  }
  
-@@ -214,26 +127,16 @@ function Item(props: Item.Props) {
+@@ -224,26 +127,16 @@ function Item(props: Item.Props) {
    const { path } = useRouter()
    const isExternal = external ?? Path.isExternal(link)
    const activeAnchor = React.useContext(ActiveAnchorContext)
@@ -1691,7 +1450,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
  
    const itemRef = React.useRef<HTMLElement>(null)
    const prevPath = React.useRef(path)
-@@ -314,6 +217,7 @@ function Item(props: Item.Props) {
+@@ -324,6 +217,7 @@ function Item(props: Item.Props) {
          to={link}
          ref={itemRef as never}
          onClick={onNavigate}
@@ -1699,7 +1458,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
          {...(active && { 'data-active': true })}
        >
          <span className="vocs:min-w-0 vocs:truncate">{text}</span>
-@@ -411,7 +315,9 @@ function Section(props: Section.Props) {
+@@ -421,7 +315,9 @@ function Section(props: Section.Props) {
                  data-v-sidebar-section-header
                  {...(groupLinkIsActive && { 'data-active': true })}
                >

@@ -35,7 +35,7 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Keep the API reference to API pages: endpoints, authentication, conventions, and API guides. Client libraries live under Get Started › Tempo SDK; the Tempo API client for TypeScript (`tapimo`) is at `/docs/sdk/typescript/api-client`.
 - A single-tag section renders its operations directly under the section header, so give that tag the section's name as its `x-displayName`.
 - When renaming or merging a tag, set `x-pagePath` to keep the existing URL; the display name otherwise changes the page path.
-- The `introFlat`, `hide`, `groupExtrasByName`, and `sectionExtras` sidebar options are local additions to vocs. Ship them through `patches/vocs@2.8.5.patch`, including their types, or upstream.
+- The `introFlat`, `hide`, `groupExtrasByName`, and `sectionExtras` sidebar options are local additions to vocs. Ship them through `patches/vocs@2.10.3.patch`, including their types, or upstream.
 
 ### Moving, renaming, or removing pages
 
@@ -81,7 +81,7 @@ Use `pnpm`.
 - Adding or deleting a page file also restarts the server, so routes stay current.
 - The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting.
 - Check rendered pages with headless Playwright screenshots against the running server. Wait for React hydration before clicking sidebar controls.
-- Heap use stays flat across MDX edits, repeat page loads, and Markdown requests (`.md` twins, `curl`). Node cannot unload ES modules, so two kinds of edits still keep memory: an edit to `vocs.config.ts` or a file it imports keeps one copy of the config (about 15 MB), and an edit to a component that a page renders standalone (`<Component />`) keeps one copy of the component modules (50–125 MB) once a Markdown request follows. Restart after many of those edits. `patches/vocs@2.8.5.patch` provides the reuse; `src/test/vocs-config-resolve.test.ts` fails if a Vocs upgrade drops it.
+- Heap use stays flat across MDX edits, repeat page loads, and Markdown requests (`.md` twins, `curl`). Node cannot unload ES modules, so two kinds of edits still keep memory: an edit to `vocs.config.ts` or a file it imports keeps one copy of the config (about 15 MB), and an edit to a component that a page renders standalone (`<Component />`) keeps one copy of the component modules (50–125 MB) once a Markdown request follows. Restart after many of those edits. Vocs reuses config loads, and `patches/vocs@2.10.3.patch` shares one Markdown component loader; `src/test/vocs-config-resolve.test.ts` fails if a Vocs upgrade drops the config reuse.
 - Each newly compiled page adds 10–15 MB, so loading about 100 distinct pages passes Node's default heap limit. For broad checks such as crawling the site, start the server with `NODE_OPTIONS=--max-old-space-size=16384`.
 - The changelog fetches GitHub releases at most every 10 minutes and serves the last result when GitHub rate-limits. Set `GITHUB_TOKEN` to raise the limit.
 - Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
