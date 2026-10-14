@@ -24,7 +24,7 @@ A signing method is the kind of key that approves a Tempo account's transactions
 | [Passkeys](/docs/accounts/authentication/passkeys) | Synced across the customer's devices, or on a security key | Customer approvals and signer changes, with Face ID or a fingerprint | Works only on the domain that created it |
 | [OIDC logins](/docs/accounts/authentication/oidc) | The customer's device, named in a sign-in with your identity provider | Apps that already sign customers in, and recovery | The issuer can sign in as any customer it covers. Experimental, on a separate devnet. |
 
-Each method works on mainnet and testnet today as the one key of a [single-key account](/docs/accounts/how-it-works#address), like a standard Ethereum account, or as an access key. Several weighted signers on one account need a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Private keys, device keys, and passkeys work on mainnet and testnet today as the one key of a [single-key account](/docs/accounts/how-it-works#address), like a standard Ethereum account, or as an access key. [OIDC logins](/docs/accounts/authentication/oidc) aren't live yet: they work only on a separate login devnet. Several weighted signers on one account need a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="set-up-a-sign-in-method" />
 <span id="private-keys" />
