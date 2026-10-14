@@ -1,22 +1,22 @@
 ---
 title: Fund a card program
 seoTitle: Fund a Card Program from a Tempo Account with a Daily Limit | Tempo Docs
-description: Authorize an access key that pays only a card program's funding address within a renewing daily limit, fund card spend without prompts, and renew the limit and key.
+description: Authorize an access key that pays only your card program's funding address, up to a daily limit, so your backend tops up a customer's card without asking each time.
 ---
 
 # Fund a card program
 
-Your backend funds a customer's card from their Tempo account with an access key the customer's signers approve once. The key pays only the card program's funding address, up to a daily limit that renews on its own, so card spend needs no prompt and Tempo rejects anything over the limit.
+Your backend tops up a customer's card from their Tempo account without asking them each time. The customer approves one [access key](/docs/accounts/access-keys) for your backend, once, with their account's signers, such as a passkey. Tempo lets that key pay only the card program's funding address, up to a daily limit, so even a leaked key can't send money anywhere else or more than the limit in a day.
 
 <span id="fund-a-card-with-a-daily-limit" />
 
-The examples use Moderato testnet, a Tempo test network whose stablecoins have no value, with AlphaUSD, a test stablecoin.
+The examples run on Moderato testnet with AlphaUSD, a test stablecoin with no value.
 
 :::::steps
 
 ### Authorize a card-funding key
 
-Choose a [card issuing partner](/docs/partners/cards) and get the address that funds the customer's card. Create a secp256k1 key in your KMS and wrap it as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms). Then have the customer's signers authorize its address in your app:
+Get the customer's card funding address (`cardFundingAddress`) from your [card issuing partner](/docs/partners/cards). Create a secp256k1 key in your KMS and wrap it as a viem account (`cardKey`), as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms). Then have the customer authorize its address (`cardKeyAddress`) in your app:
 
 ```ts [app/enable-card.ts]
 import { parseUnits } from 'viem'
@@ -33,7 +33,7 @@ await client.accessKey.authorizeSync({
 })
 ```
 
-Match the limit to the card's daily spend limit. Show the limit, the card program, and the expiry before the customer approves.
+Set the limit to the card's daily spend limit plus a margin for the key's transaction fees, which count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them. Show the customer the card program, the limit, and the expiry before they approve.
 
 ### Fund the program
 
@@ -49,16 +49,26 @@ const backend = createClient({ account: cardKey, chain: tempoModerato, feeToken:
 await backend.token.transferSync({ amount: parseUnits('42.50', 6), to: cardFundingAddress, token: alphaUsd })
 ```
 
-Tempo rejects a transfer over what's left today, to any other address, or after the expiry. Fees for the key's transactions count against the limit.
+Tempo rejects a transfer to any other address, above what's left today, or after the expiry.
 
-### Renew the limit
+<span id="renew-the-limit" />
 
-The limit resets to its full amount every 86,400 seconds. Show what's left next to the card:
+### Manage the limit and the key
+
+The limit resets to its full amount every 24 hours (`period: 86_400`). Next to the card, show what's left and when it resets:
 
 ```ts [app/card-settings.ts]
-const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ account, accessKey: cardKeyAddress, token: alphaUsd })
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
+  account,
+  accessKey: cardKeyAddress,
+  token: alphaUsd,
+})
 ```
 
-To raise or lower the limit, the signers [update it](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) with `client.accessKey.updateLimitSync`. To pause the card, they [revoke the key](/docs/accounts/access-keys/revocation#revoke-an-access-key). An expiry can't be extended, so authorize a new key before the 30 days end. See [Renew an expiring key](/docs/accounts/access-keys/expiry#renew-an-expiring-key).
+The customer's signers control the key:
+
+- To change the limit, they call [`client.accessKey.updateLimitSync`](/docs/accounts/access-keys/spending-limits#change-a-spending-limit). What's left today becomes the new limit.
+- To stop funding, they [revoke the key](/docs/accounts/access-keys/revocation#revoke-an-access-key). A revoked key never works again, so resuming takes a new key.
+- To keep funding past 30 days, they [authorize a new key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before this one expires, since an expiry can't be extended.
 
 :::::

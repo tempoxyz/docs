@@ -1,15 +1,6 @@
 import { style } from '../../styles/scoped'
 import { vars as tokens } from '../../styles/theme'
 
-/** The guide's name in the demo header. */
-export const guideDemoTitle = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: tokens.spacing['2'],
-  fontSize: tokens.fontSize.sm,
-  fontWeight: tokens.fontWeight.medium,
-})
-
 /** The network the demo runs on, in the demo header. */
 export const guideDemoNetwork = style({
   color: tokens.color.muted,
@@ -29,6 +20,13 @@ export const guideDemo = style({
     '& .gd-steps': {
       display: 'grid',
       gap: tokens.spacing['4'],
+    },
+    // The guide's own steps, after the labeled setup that builds the starting account.
+    '& .gd-steps + .gd-steps': {
+      paddingTop: tokens.spacing['6'],
+      borderTopWidth: tokens.borderWidth.hairline,
+      borderTopStyle: 'solid',
+      borderTopColor: tokens.color.line,
     },
     '& .gd-result': {
       display: 'flex',

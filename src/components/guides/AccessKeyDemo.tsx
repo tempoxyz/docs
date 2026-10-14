@@ -164,7 +164,7 @@ export function AccessKeyDemo() {
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Try an access key</span>}
       headerRight={<span {...ui.accountDemoMuted()}>Moderato testnet</span>}
-      footer="Real testnet transactions from a separate test account. Its signer and the access key are non-extractable device keys in this browser, held in memory only."
+      footer="A separate test account. Both keys live in this tab’s memory and are gone on reload."
     >
       <div {...ui.accountDemoSteps()} data-testid="access-key-demo" aria-busy={pending !== null}>
         <Step

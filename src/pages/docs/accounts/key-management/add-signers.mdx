@@ -1,42 +1,46 @@
 ---
 title: Add signers
 seoTitle: Add a Signer or Recovery Signer to a Tempo Account | Tempo Docs
-description: Add a passkey, hardware key, or recovery provider to an account in one signer update, and choose a weight that keeps the account recoverable.
+description: Add a passkey, hardware key, or recovery provider to a Tempo account in one signer update, and pick a weight that keeps the account recoverable.
 ---
 
 # Add signers
 
-Adding a signer gives a new key a weight in the account's approvals, in one update that the current signers approve. The weight you choose decides what the new key can approve alone, so pick it before you send the update.
+Adding a signer, a key that approves the account's transactions, backs up a key you could lose or lets another person approve. The current signers approve the addition in one signer update, and the address, balance, token approvals, and access keys stay the same. Signer updates run only on Tempo devnet.
 
-## What adding a signer does
-
-A signer update writes the account's full list of signers and its threshold. To add a signer, you send the current list plus the new entry. Approving weights must reach the current threshold. Once the update lands, the new signer's weight counts toward the account's approvals, including payments and later signer updates.
-
-The address, balances, token approvals, and access keys don't change. A signer can be a passkey, a device key, a secp256k1 key in a KMS or hardware wallet, or an address a recovery provider gives you.
+<span id="what-adding-a-signer-does" />
 
 ## Choose the new signer's weight
 
-Each signer has a weight of at least 1, and an approval needs signers whose weights add up to the threshold.
+The weight you give the new signer decides what it can approve alone. Every signer has a weight of at least 1, and the signers who approve a payment or a signer update need weights that reach the account's threshold:
 
-- **Below the threshold:** the signer approves only together with others. Use this for backup and recovery signers, so no single one controls the account.
-- **At or above the threshold:** the signer approves anything alone, including removing every other signer. Use this only for a key you would trust with the whole account.
+- Below the threshold, the new signer approves only together with others, so no single backup or recovery signer controls the account.
+- At or above the threshold, it approves anything alone, including removing every other signer. Give this weight only to a key you'd trust with the whole account.
 
-Adding weight doesn't raise the threshold, so a new signer can make approvals easier to reach. Raise the threshold in the same update if the account should still need the same approvers. [Signing thresholds](/docs/accounts/policies/signing-thresholds) lists setups for customer, treasury, and agent accounts.
+The threshold stays the same unless you change it, so each new signer adds a way to reach it. To keep requiring the same approvers, raise the threshold in the same update. [Signing thresholds](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists recommended setups.
 
+## Add a recovery signer
+
+A recovery signer lets the remaining signers replace a lost one. Give it enough weight that the account can [lose any one signer](/docs/accounts/key-management#plan-for-recovery) and still reach the threshold, and no more, because it can approve payments at that weight too. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) walks through it in a live demo.
+
+<span id="add-a-signer" />
 <span id="add-a-signer-in-code" />
 
-## Add a signer
+## Send the signer update
 
-Tempo stores only a hash of the account's configuration, a fingerprint it can check approvals against but can't read back, so your app keeps the configuration itself: its signers, threshold, salt, and version. Save it with the account record when you create the account and after every update. Load it, append the new signer, and approve with enough signers to reach the threshold:
+A signer update replaces the account's whole signer list. Tempo stores only a hash of the configuration, a fingerprint it checks approvals against but can't read back, so your app saves the configuration itself: signers, threshold, salt, and version. Load it, append the new signer, and approve with the current signers:
 
 ```ts [add-signer.ts]
 import { Account } from 'viem/tempo'
 
-// The address and configuration your app saved with the account record
-const { address, config } = await loadAccount(customerId)
-const account = Account.fromConfig({ address, ...config })
+const { address, config } = await loadAccount(customerId) // your app's storage
+// Before the first signer update, the configuration is version 0 and derives the address.
+const account =
+  config.version === 0n
+    ? Account.fromConfig({ ...config, address: 'infer' })
+    : Account.fromConfig({ address, ...config })
 
-const { config: updated, receipt } = await client.accounts.updateConfigSync({
+const { receipt } = await client.accounts.updateConfigSync({
   account,
   nextConfig: {
     owners: [...config.owners, { owner: newSigner, weight: 1 }],
@@ -45,28 +49,25 @@ const { config: updated, receipt } = await client.accounts.updateConfigSync({
   owner: approver, // a current signer
 })
 
-// A second signer approves the same update when the first can't reach the threshold alone.
-await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
+// receipt.status is 'pending' until approvals reach the threshold, so a second signer approves
+// only when `approver` alone doesn't reach it.
+if (receipt.status === 'pending')
+  await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
 
+const updated = await client.accounts.getConfig({ address }) // Relay.accounts recorded it
 await saveAccount(customerId, { address, config: updated }) // the next update starts from this
 ```
 
-`loadAccount` and `saveAccount` stand for your app's own storage. viem sorts the signers by address, as Tempo requires. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) walks through creating each kind of signer and adding it in a live demo.
+`client` is a devnet client with `Relay.accounts` on its transport, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals). `newSigner` is the new key's address: a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. viem sorts the signers by address, as Tempo requires.
 
-## Add a recovery signer
+<span id="add-signer-limits" />
 
-A recovery signer exists so the account survives losing another signer. Give it enough weight that the remaining signers reach the threshold without any one signer, and no more: it can also approve payments at that weight.
+## Limits on adding signers
 
-For a customer account with one passkey at weight 1 and threshold 1, add a backup key or a recovery provider at weight 1. Either key can then replace the other. To require both for payments, set threshold 2, give the passkey weight 2, and add a backup key and a recovery provider at weight 1 each. The passkey replaces a lost backup key alone, and the backup key and recovery provider together replace a lost passkey.
-
-Check the setup against the rule in [Plan for recovery](/docs/accounts/key-management#plan-for-recovery).
-
-## Add signer limits
-
-- An account holds 1–48 signers, with total weight at most 255. The threshold must be reachable by at most 8 signers.
-- The approving signers must reach the current threshold, without the new signer.
+- An account holds 1 to 48 signers, with total weight at most 255. A transaction carries at most 8 approvals, so the 8 largest weights must reach the threshold.
+- The approving signers must reach the current threshold without the new signer.
 - `InvalidConfig` means the configuration you sent doesn't match the one Tempo stores, for example because another signer update landed first. Load the latest saved configuration and rebuild the update.
-- After a signer change, `address: 'infer'` derives a different address. Open the account from its saved address and configuration with `Account.fromConfig({ address, ...config })`.
+- Until the first update, open the account with `address: 'infer'`; after a signer change, open it from its saved address, as the code does.
 - Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
 
 Specification: [configuration updates](https://tips.sh/1109).

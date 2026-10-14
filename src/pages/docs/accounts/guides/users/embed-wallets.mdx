@@ -1,7 +1,7 @@
 ---
 title: Embed wallets with a provider
-seoTitle: Embed Tempo Wallets with Privy, Turnkey, or Tempo Wallet | Tempo Docs
-description: Make your wallet provider's key one signer on each user's Tempo account, build with Privy or Turnkey, and connect Tempo Wallet with the Accounts SDK.
+seoTitle: Build Embedded Wallets on Tempo with Privy or Turnkey | Tempo Docs
+description: Add your wallet provider's key as one of three signers on each Tempo account, so only the user's passkey approves alone. Build with Privy or Turnkey, or connect Tempo Wallet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-providers_title-f5_v02.png
 ---
@@ -11,51 +11,55 @@ import { SignInWithTempo } from '../../../../../components/guides/steps/wallet/S
 
 # Embed wallets with a provider
 
-Run embedded wallets with a provider such as Privy or Turnkey, while each user keeps a signer only they hold. The provider's key is one signer among several, and Tempo enforces the account's threshold and access-key limits on whatever the provider signs.
+Use Privy or Turnkey to run your users' wallets inside your app without letting the provider move their funds alone. Each account has three signers, the keys that approve its transactions: the user's passkey approves alone, and your provider's key approves only together with a separate [recovery provider's](/docs/accounts/policies/signing-thresholds#recovery-provider) key, for example to replace a lost passkey.
+
+:::warning
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+:::
 
 <span id="choose-the-controls-your-application-needs" />
 
-Three parties share the work. Your application signs users in, saves each user's account address, and decides when to request a payment. Your wallet provider holds its signing key and applies its own policies before it signs. Tempo checks every signature against the account's signers and the limits on its access keys, the scoped keys a device or app uses for everyday payments.
-
 :::::steps
-
-<span id="make-the-providers-key-one-signer" />
-
-### Make the provider's key one signer
-
-Create the account with three signers: the user's passkey at weight 2, your provider's key at weight 1, and a recovery provider's key at weight 1, with threshold 2. A passkey is a key the user's device keeps and unlocks with Face ID, Touch ID, or Windows Hello. The user approves alone with it; the two providers approve only together. This is the [embedded wallets setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
-
-```ts [account.ts]
-import { Account, WebAuthnP256 } from 'viem/tempo'
-
-const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
-
-// Keep these: you pass them to every later signer update.
-const owners = [
-  { owner: passkey, weight: 2 },
-  { owner: providerKeyAddress, weight: 1 }, // the address of the key your provider manages
-  { owner: recoveryAddress, weight: 1 }, // the address your recovery provider gives you
-]
-const threshold = 2
-
-const account = Account.fromConfig({ address: 'infer', owners, threshold })
-```
-
-The address comes from these first signers and stays the same when signers change later, so save `account.address` and `account.config` (the signer addresses, weights, and threshold) with the user's record. Accounts with several signers ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, a test network for features in development.
 
 <span id="build-with-privy" />
 <span id="build-with-turnkey" />
 
 ### Connect Privy or Turnkey
 
-To run embedded wallets yourself, use your provider's Tempo integration to sign with the provider's key.
+Your provider approves with its key through its Tempo integration, and only when its own signing policies allow.
 
-- **Privy:** the [Tempo integration](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) signs Tempo transactions from embedded wallets, with batched calls, fee-token selection, fee sponsorship, and validity windows. Start from the [Privy Tempo example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) for wallet creation, sign-in, and payments in a browser app. Keep Privy and your RPC client on the same network.
-- **Turnkey:** the [Tempo integration](https://docs.turnkey.com/features/networks/tempo) covers address derivation, transaction construction, and signing policies. It uses `ADDRESS_TYPE_ETHEREUM` for Tempo addresses and exposes Tempo transaction fields to its policy engine through the `tempo.tx` namespace. Start from the [Turnkey Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo) for single calls, batches, and fee sponsorship, and the [Embedded Wallet Kit](https://docs.turnkey.com/sdks/react/getting-started) for wallet UI.
+- [Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction): start from the [Privy Tempo example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo), which creates wallets and sends payments in a browser app. Keep Privy and your RPC client on the same network.
+- [Turnkey](https://docs.turnkey.com/features/networks/tempo): start from the [Turnkey Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo). Create Tempo addresses with `ADDRESS_TYPE_ETHEREUM`, write signing policies against Tempo transaction fields in the `tempo.tx` namespace, and add the [Embedded Wallet Kit](https://docs.turnkey.com/sdks/react/getting-started) for wallet UI.
+
+Create the user's wallet with your provider, then use the wallet's address as `providerKeyAddress` in the next step.
+
+<span id="make-the-providers-key-one-signer" />
+
+### Make the provider's key one signer
+
+Give the user's passkey weight 2 and each provider's key weight 1, with a [threshold](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) of 2, the total weight an approval needs. A passkey is a key the user's device keeps and unlocks with Face ID, Touch ID, or Windows Hello.
+
+```ts [account.ts]
+import { Account, WebAuthnP256 } from 'viem/tempo'
+
+const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
+
+const account = Account.fromConfig({
+  address: 'infer',
+  owners: [
+    { owner: passkey, weight: 2 },
+    { owner: providerKeyAddress, weight: 1 }, // the key your provider manages for this user
+    { owner: recoveryAddress, weight: 1 }, // the key your recovery provider holds
+  ],
+  threshold: 2,
+})
+```
+
+Save `account.address` and `account.config` with the user's record: you need both to change signers later.
 
 :::::
 
-When a user leaves, swap the provider's key for a signer the user holds: see [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off).
+When a user wants full control, [hand off the account](/docs/accounts/guides/users/hand-off): swap the provider's key for a signer the user holds, at the same address.
 
 <span id="let-the-provider-run-login-services" />
 <span id="integrate-accounts" />
@@ -66,7 +70,7 @@ When a user leaves, swap the provider's key for a signer the user holds: see [Ha
 
 ## Connect a self-custodial wallet instead
 
-If users already hold a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet holds the keys and signs; your application uses the address the user selects. This example uses Moderato testnet.
+If a user already has a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet holds the keys and signs; your app uses the address the user selects. The demo and code run on Moderato testnet, whose stablecoins have no value.
 
 <Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
   <SignInWithTempo stepNumber={1} />
@@ -87,4 +91,4 @@ const [address] = await provider.request({ method: 'eth_requestAccounts' })
 if (!address) throw new Error('No account was selected')
 ```
 
-On `accountsChanged`, update the selected address or clear it when the wallet disconnects. On `chainChanged`, refresh network-dependent state before enabling transactions. Keep this connection separate from your application's signed-in session. The [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup) creates wallet and public clients from this provider, and [wallet partners](/docs/partners/wallets) lists other integrations.
+Track the wallet connection separately from your app's signed-in session. On `accountsChanged`, update the selected address, or clear it when the wallet disconnects; on `chainChanged`, refresh network-dependent state before you enable transactions. To send payments, create wallet and public clients from this provider as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). [Wallet partners](/docs/partners/wallets) lists other wallets you can connect.

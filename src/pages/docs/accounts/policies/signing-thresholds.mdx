@@ -1,60 +1,53 @@
 ---
 title: Signing thresholds
 seoTitle: Signer Weights and Signing Thresholds for Tempo Accounts | Tempo Docs
-description: Give each signer a weight and set the threshold their approvals must reach, so no single party can move funds alone and losing one signer doesn't lock the account.
+description: Give each signer a weight and set the total weight a transaction needs, so no outside party can pay alone and losing one signer doesn't lock the account.
 ---
 
 # Signing thresholds
 
+A signing threshold decides who controls a Tempo account. Each signer, a key that approves the account's transactions, has a weight, and a transaction runs only when the signers who approve it reach the threshold in total weight. Choose weights so that no outside party can pay alone and losing any one signer doesn't lock the account.
+
 :::warning
-**Not live yet.** Signing thresholds ([TIP-1107](https://tips.sh/1107)) is in early development and runs only on Tempo devnet. We're seeking feedback; behavior may change.
+**Not live yet.** Signing thresholds ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
 :::
 
-A Tempo account moves funds only when signers whose weights add up to its threshold approve. The threshold decides custody: whoever holds signers that reach it can pay without anyone else, and nobody below it can.
-
-<span id="signer-weights-and-the-threshold" />
 <span id="how-approvals-add-up" />
 
 ## Signer weights and the threshold
 
-Each signer has a weight of at least 1. Tempo checks every transaction and executes it once the signers that approve it reach the threshold in total weight.
-
-Take a customer account with a passkey of weight 2, a backup key of weight 1, and a recovery provider's key of weight 1, with a threshold of 2. The passkey approves alone. The backup and recovery keys approve together. One of them alone reaches 1 of 2 and can't pay.
-
-One approval covers the whole transaction, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys never count toward it: they pay alone, within limits, instead of approving.
-
-Tempo stores only a hash of the signers and threshold: a 32-byte fingerprint that identifies the current configuration but can't be turned back into it. Your app keeps the signers and threshold itself. Hold on to the ones you created the account with, and pass the full list and threshold to each signer update, approved at the current threshold:
+Take a customer account at threshold 2, with a passkey at weight 2, and a backup key and a recovery provider's key at weight 1 each:
 
 ```ts [threshold.ts]
 import { Account } from 'viem/tempo'
 
-const owners = [
-  { owner: passkey.address, weight: 2 },
-  { owner: backup.address, weight: 1 },
-]
-const threshold = 2
-const account = Account.fromConfig({ address: 'infer', owners, threshold })
-
-// Later: add a recovery signer. List every signer, not only the new one.
-const { config } = await client.accounts.updateConfigSync({
-  account,
-  nextConfig: { owners: [...owners, { owner: recovery.address, weight: 1 }], threshold },
-  owner: passkey, // a signer that reaches the current threshold
+const account = Account.fromConfig({
+  address: 'infer', // derive the address from these first signers
+  owners: [
+    { owner: passkey.address, weight: 2 },
+    { owner: backup.address, weight: 1 },
+    { owner: recovery.address, weight: 1 },
+  ],
+  threshold: 2,
 })
 ```
 
-Save the returned `config` with the account record, so the next update starts from it.
+The passkey approves alone, and the backup and recovery keys approve together. Either of those alone reaches 1 of 2 and can't pay.
+
+Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it: each pays alone within its limits, and an [admin access key](/docs/accounts/access-keys/admin-access-keys) can also authorize other access keys.
+
+To change signers or the threshold, send a [signer update](/docs/accounts/key-management/add-signers), approved at the current threshold.
 
 <span id="what-a-threshold-protects" />
 
 ## What a threshold protects against
 
-Each signer can fail: a phone gets lost, a key leaks, an approver leaves. Set weights so the account survives both kinds of failure:
+A signer can be stolen or lost: a key leaks, a phone breaks, an approver leaves. Choose weights that survive both:
 
-- **Theft:** no single party's signers reach the threshold alone, unless that party is the customer. A compromised signer then can't pay.
-- **Loss:** the remaining signers still reach the threshold after you lose any one. Total weight minus the largest weight must be at least the threshold.
+- **Theft:** no single party reaches the threshold alone, unless that party is the customer.
+- **Loss:** the other signers still reach the threshold without any one of them. [Plan for recovery](/docs/accounts/key-management#plan-for-recovery) gives the rule to check.
 
-Count parties, not signers. Two keys in the same KMS, or a wallet provider's key and a recovery key it also runs, belong to one party: that party can reach their combined weight alone. Keep signers that must be independent with different holders.
+Count parties, not keys. Two keys in the same KMS, or a wallet provider's key and a recovery key it also runs, belong to one party, which can approve with their combined weight.
 
 <span id="recommended-setup" />
 <span id="recommended-weights" />
@@ -63,52 +56,63 @@ Count parties, not signers. Two keys in the same KMS, or a wallet provider's key
 
 ## Recommended signer setups
 
-| For | Signers | Threshold | Who can approve |
+| Setup | Signers (weight) | Threshold | Who can approve |
 | --- | --- | --- | --- |
-| Getting started | Passkey (1), backup key (1) | 1 | Either one |
-| Customer accounts | Passkey (2), backup key (1), recovery provider (1) | 2 | The passkey, or both keys |
-| Embedded wallets | Customer's passkey (2), your provider key (1), recovery provider (1) | 2 | The customer, or both providers |
-| Company treasury | Three approvers (1 each) | 2 | Any two |
+| [Getting started](/docs/accounts/guides/users/add-a-recovery-signer) | Passkey (1), backup key (1) | 1 | Either one |
+| [Customer accounts](/docs/accounts/guides/users/add-a-recovery-signer#multi-factor-approval) | Passkey (2), backup key (1), recovery provider (1) | 2 | The passkey, or both keys |
+| [Embedded wallets](/docs/accounts/guides/users/embed-wallets) | Customer's passkey (2), your wallet provider's key (1), recovery provider (1) | 2 | The customer, or both providers |
+| [Company treasury](/docs/accounts/guides/teams/company-treasury) | Three approvers (1 each) | 2 | Any two |
 
-- **Getting started** survives a lost passkey, but either signer can pay alone, so keep both with the customer. Move customers to the customer accounts setup before they hold large balances.
-- **Customer accounts** is multi-factor approval. Signer changes, new devices, and payments beyond a device key's limits need the passkey, which only the customer's device holds, or both keys together.
-- **Embedded wallets** keeps each provider below the threshold. Neither can pay without the customer or the other provider.
+<span id="recovery-provider" />
 
-Walkthroughs: [user account guides](/docs/accounts/guides/users) and [Set up a company treasury](/docs/accounts/guides/teams/company-treasury).
+A recovery provider is any party other than the customer and your wallet provider that holds one key only to help replace a lost signer, such as a key in your own KMS or a recovery service you contract.
+
+Getting started survives a lost passkey, but either key can pay alone, so keep both with the customer and move to customer accounts before balances grow. In customer accounts, a new device, a signer change, or a payment beyond a device key's limits needs the passkey on the customer's device, or both other keys.
 
 <span id="team-budgets" />
 <span id="set-up-a-team-account" />
 <span id="team-account-limits" />
 
-A treasury can give a team its own budget without lowering its threshold. The treasury authorizes the team's account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/guides/teams/team-budget).
+To let a team spend without lowering the treasury's threshold, the treasury authorizes the team's own account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/guides/teams/team-budget).
 
+<span id="collect-and-verify-approvals" />
 <span id="collect-approvals-from-several-approvers" />
+
+## Collect approvals
+
+Signers sign the same transaction hash, so they approve separately, on their own devices, in any order. Your app holds the approvals until their weights reach the threshold, then submits the transaction. In viem, the `Relay.accounts` plugin on a [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport does both, and approving with `owner` requires it:
+
+```ts [client.ts]
+import { http } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { createClient, Relay, Store, withRelay } from 'viem/tempo'
+
+export const client = createClient({
+  chain: tempoDevnet,
+  transport: withRelay(http(), { plugins: [Relay.accounts({ store: Store.memory() })] }),
+})
+```
+
+`Store.memory()` works in one process. For signers on different devices, give every signer's client the same persistent store, such as one in your backend. With the account above, the backup and recovery keys approve a payment together:
+
+```ts [approve.ts]
+// The backup key starts the payment. receipt.status is 'pending' until approvals reach the threshold.
+const { receipt } = await client.token.transferSync({ account, amount, to, token, owner: backup })
+
+// The recovery key approves its hash: 2 of 2, so the payment runs.
+await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: recovery })
+```
+
+Tempo rejects signatures beyond the threshold. A signer update voids approvals collected under the old signers, so collect them again.
+
 <span id="verify-approvals" />
 <span id="signature-verification" />
 <span id="tempo-approval-verification-methods" />
-
-## Collect and verify approvals
-
-Each approval is a signature over the same transaction hash, so approvers sign separately, on their own devices, in any order. The first approver starts the transaction, and the others approve its hash:
-
-```ts [approve.ts]
-const { receipt } = await client.accounts.updateConfigSync({ account, nextConfig, owner: finance }) // starts a signer update
-await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: operations })
-```
-
-Your app collects each signer's approval, for example in its backend, and submits the transaction once the approving weights reach the threshold. Tempo rejects signatures beyond the threshold, so stop collecting once it's met. A signer change voids approvals collected for the old configuration.
-
-Your contract or backend can check that an account approved a message, against the account's current signers and threshold:
-
-| To check that | Use | Runs |
-| --- | --- | --- |
-| An account's signers reached its threshold | `verifyMultisig` | In a contract |
-| An active access key of an account signed | `verifyKeychain` | In a contract |
-| A passkey or key signed | `verify` | In a contract |
-
 <span id="verify-an-account-approval-in-solidity" />
 
-The [signature verifier precompile](/docs/protocol/tips/tip-1020) at `0x5165300000000000000000000000000000000000` checks that signers reaching the account's current threshold approved `hash`:
+## Verify approvals in a contract
+
+A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`:
 
 ```solidity [ApprovalCheck.sol]
 // SPDX-License-Identifier: MIT
@@ -127,11 +131,9 @@ contract ApprovalCheck {
 }
 ```
 
-- It checks the account's signers at call time, so approvals from removed signers fail.
-- It works for accounts that haven't sent a transaction yet, against their initial signers.
-- It returns `false` when the signers don't match the account, and reverts with `InvalidSignature()` when approvals fall short.
-- Include your chain ID, contract address, and the account in `hash`, so an approval can't be replayed elsewhere.
-- `verifyKeychain` accepts only access keys that sign with a single key. A configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`.
+`verifyMultisig` checks the account's signers at call time, so approvals from removed signers fail, and an account that hasn't sent a transaction yet verifies against its first signers. It returns `false` when the signers don't match the account, and reverts with `InvalidSignature()` when approvals fall short. Include your chain ID, contract address, and the account in `hash`, so an approval can't be replayed elsewhere.
+
+To check a single access key's signature instead, call `verifyKeychain`. It accepts only access keys that sign with one key, so a configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`.
 
 <span id="security-policy-limits" />
 <span id="approval-limits" />
@@ -143,10 +145,6 @@ contract ApprovalCheck {
 | Limit | Value |
 | --- | --- |
 | Signers per account | 1 to 48 |
+| Weight per signer | At least 1 |
 | Total weight | Up to 255 |
 | Approvals per transaction | Up to 8, so the eight largest weights must reach the threshold |
-
-- A signer update voids approvals collected for the old configuration. Approve again.
-- Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
-
-Specifications: [configurable accounts](https://tips.sh/1107), [native multisig accounts](https://tips.sh/1114), [configurable account access keys](https://tips.sh/1111), [signature verifier](/docs/protocol/tips/tip-1020).

@@ -1,7 +1,7 @@
 ---
 title: Add a recovery signer
 seoTitle: Add a Recovery Signer and Require Two Factors on a Tempo Account | Tempo Docs
-description: Add a backup passkey, hardware key, or recovery provider to a user's Tempo account so losing one signer doesn't lose the account, then require two factors.
+description: Give a user's Tempo account a second signer so a lost phone or key doesn't lock them out, then require two factors for new devices and signer changes.
 interactive: true
 ---
 
@@ -9,20 +9,20 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Add a recovery signer
 
-:::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
-:::
+A recovery signer is a second key that can approve transactions for a user's account, so losing their phone or first key doesn't lock them out. With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. Add a recovery signer, then require two factors so whoever holds it can't take over the account alone. The address and balance stay the same.
 
-Add a second signer to a user's account so that losing their phone or key doesn't lose their funds. The account keeps its address and balance, and the user can then require two factors for signer changes and new devices.
+:::warning
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+:::
 
 <span id="adding-signers" />
 <span id="add-a-signer" />
 <span id="add-a-signer-in-code" />
 <span id="add-a-backup-signer" />
 
-An account starts with the signers you created it with: here one key at weight 1, threshold 1. The threshold is the total signer weight an approval needs, so with one signer, losing it locks the account and nobody, including Tempo, can recover it. The current signers approve adding another in one update, a transaction that changes the account's configuration. The examples use a viem `client` on Tempo devnet, `createClient({ chain: tempoDevnet })` from `viem/tempo`, and the `owners` and `threshold` you saved when you created the account.
+This guide starts from one signer at weight 1 and a threshold of 1, the total weight an approval needs. In your app, that first key is the key the account was created with, such as a key your app or wallet provider holds for the user.
 
-The demo creates a devnet account with a private key standing in for the user's first key, adds a recovery key, and then requires two factors with a device key in this browser. Devnet is a test network, so the stablecoins have no value.
+The code uses the devnet `client` with `Relay.accounts` from [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals). The demo runs these steps in this browser: a private key stands in for the user's first key, and a device key for the passkey.
 
 <GuideDemo guide="add-signers" />
 
@@ -30,58 +30,34 @@ The demo creates a devnet account with a private key standing in for the user's 
 
 ### Create the new signer
 
-Pick a signer the user can still reach when they lose the first one: a passkey on another device, a device key, a recovery provider, or a key in a hardware wallet or KMS. You need only its address.
-
-::::code-group
-
-```ts [Passkey]
-import { Account, WebAuthnP256 } from 'viem/tempo'
-
-const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
-const newSigner = passkey.address
-```
-
-```ts [Device key]
-import { Account, WebCryptoP256 } from 'viem/tempo'
-
-const keyPair = await WebCryptoP256.createKeyPair() // non-extractable; store keyPair in IndexedDB
-const newSigner = Account.fromWebCryptoP256(keyPair).address
-```
-
-```ts [Recovery provider]
-const newSigner = '0x…' // the address your recovery provider gives you
-```
-
-```ts [Hardware or KMS key]
-const newSigner = '0x…' // the key's address in your KMS or hardware wallet
-```
-
-::::
+Pick a key the user doesn't lose along with the first one, such as a [recovery provider's](/docs/accounts/policies/signing-thresholds#recovery-provider) key or a backup key in a hardware wallet or KMS. The update needs only its address, `newSigner` in the next step.
 
 ### Approve the update
 
-Pass the next signers and threshold, built from the ones you saved. `currentKey` is the current signer; it approves alone because its weight reaches the threshold.
+Open the account from its saved configuration (with `address: 'infer'` until its first update, then with its saved address), and append `newSigner` to its signers. `currentKey`, the user's first key, approves alone because its weight of 1 reaches the threshold of 1.
 
 ```ts [add-signer.ts]
-const nextOwners = [...owners, { owner: newSigner, weight: 1 }]
+import { Account } from 'viem/tempo'
 
-const { config, receipt } = await client.accounts.updateConfigSync({
+const account =
+  savedConfig.version === 0n
+    ? Account.fromConfig({ ...savedConfig, address: 'infer' })
+    : Account.fromConfig({ address, ...savedConfig })
+
+const { config } = await client.accounts.updateConfigSync({
   account,
-  nextConfig: { owners: nextOwners, threshold },
+  nextConfig: {
+    owners: [...savedConfig.owners, { owner: newSigner, weight: 1 }],
+    threshold: savedConfig.threshold,
+  },
   owner: currentKey,
 })
-// Save `config` with the user's record: the next update starts from it.
-```
-
-When the first signer doesn't reach the threshold on its own, each remaining signer approves the same update:
-
-```ts [add-signer.ts]
-await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
+// Save `config` in place of `savedConfig`: the next update starts from it.
 ```
 
 ### Confirm the account survives losing one signer
 
-Check, from the configuration you saved, that the other signers still reach the threshold whichever one is lost.
+Check that the other signers still reach the threshold, whichever one is lost.
 
 ```ts [add-signer.ts]
 const total = config.owners.reduce((sum, { weight }) => sum + weight, 0)
@@ -96,7 +72,7 @@ Tempo can't tell whether a signer still holds its key, so have the new signer ap
 
 ### Require two factors
 
-With two signers at weight 1 and threshold 1, either one can approve anything alone, including a new device or a signer change. To require two factors, add a passkey at weight 2 and raise the threshold to 2. The passkey then approves alone, and the first key and recovery signer approve only together. This is the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
+Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To require two factors, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2.
 
 ```ts [multi-factor.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
@@ -104,7 +80,7 @@ import { Account, WebAuthnP256 } from 'viem/tempo'
 const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
 
 const { config: twoFactor } = await client.accounts.updateConfigSync({
-  account: Account.fromConfig({ address: account.address, ...config }),
+  account: Account.fromConfig({ address, ...config }),
   nextConfig: {
     owners: [...config.owners, { owner: passkey.address, weight: 2 }],
     threshold: 2,
@@ -113,7 +89,7 @@ const { config: twoFactor } = await client.accounts.updateConfigSync({
 })
 ```
 
-Signer changes don't touch access keys, so the user's device key keeps paying within its limits. A new device key now needs the passkey, or the first key and recovery signer together. Keep those two with different holders: see [What a threshold protects against](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects-against).
+Now a new device or a signer change needs the passkey on the user's device, or the first key and recovery signer together. Give those two keys [different holders](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects-against), because one party holding both can approve alone. Signer changes don't touch access keys, so the user's existing device key keeps paying within its limits.
 
 :::::
 
@@ -121,7 +97,8 @@ Signer changes don't touch access keys, so the user's device key keeps paying wi
 
 ## Recovery signer limits
 
-- `InvalidConfig` means the update didn't start from the account's current configuration, usually because another update landed first. Rebuild it from the configuration that update returned.
-- After a signer change, `address: 'infer'` derives a different address. Open the account with its saved address and configuration.
+- Only current signers count toward the threshold, not the signer being added. When one can't reach it alone, a second signer approves the same transaction, as in [Add signers](/docs/accounts/key-management/add-signers#send-the-signer-update).
+- `InvalidConfig` means the update didn't start from the account's current configuration, usually because another update landed first. Load the latest saved configuration and rebuild the update.
+- Until the first update, open the account with `address: 'infer'`. After a signer change, `address: 'infer'` derives a different address, so open the account with its saved address.
 
-When a signer is lost, use the ones that remain: [Recover a user's account](/docs/accounts/guides/users/recover-an-account).
+When the user loses a signer, follow [Recover a user's account](/docs/accounts/guides/users/recover-an-account).

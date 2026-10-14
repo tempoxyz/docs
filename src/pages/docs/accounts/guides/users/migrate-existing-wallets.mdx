@@ -1,87 +1,54 @@
 ---
 title: Migrate existing wallets
 seoTitle: Migrate Single-Key Wallets to Recoverable Tempo Accounts | Tempo Docs
-description: Upgrade your users' existing single-key Tempo accounts in place to recoverable accounts with several signers, keeping each address, balance, and access key.
+description: Add backup signers to each user's single-key Tempo account at the same address, so a lost key no longer loses the account or its balances.
 ---
 
 # Migrate existing wallets
 
+Each of your users' existing accounts is a single-key account (EOA), like a standard Ethereum account: one private key approves everything, so losing that key loses the account. Upgrade each account in place to add backup signers. The address, balances, and access keys stay the same, and the upgrade is permanent.
+
 :::warning
-**Not live yet.** Account upgrade ([TIP-1113](https://tips.sh/1113)) is in early development and runs only on Tempo devnet. We're seeking feedback; behavior may change.
+**Not live yet.** Account upgrade ([TIP-1113](https://tips.sh/1113)) runs only on Tempo devnet, and behavior may change.
 :::
 
-If your users already have single-key accounts, upgrade each one in place so that losing the key no longer loses the account. Each account keeps its address, balances, and access keys; the upgrade is permanent, and only the account's original key can sign it.
-
-A single-key account, like an Ethereum wallet you may already run, has one private key that approves everything. The upgrade replaces that key's sole authority with a list of signers and a threshold, the total signer weight each approval needs. [Account upgrade](/docs/accounts/key-management/account-upgrade) explains what changes and runs the upgrade in a live demo.
+After the upgrade, the account has a list of signers, each with a weight, and a threshold: the total weight an approval needs. The original key keeps approving only if you list it. [Account upgrade](/docs/accounts/key-management/account-upgrade) explains the change and runs one in a live demo.
 
 :::::steps
 
 ### Choose the new signers
 
-List the original key alongside at least one backup signer the user can reach without it, such as a passkey or a recovery provider. With both at weight 1 and threshold 1, either can approve alone and replace the other later.
+List the original key and at least one backup signer the user can reach without it, such as a passkey or your recovery provider's key. With both at weight 1 and threshold 1, either one approves alone and can replace the other if it's lost.
 
 ```ts [upgrade.ts]
 import { Account, AccountConfig } from 'viem/tempo'
 
 const original = Account.fromSecp256k1(userPrivateKey) // the key your app manages for this user
 
-// Keep these: you pass them to every later signer update.
+// Sorts the signers by address, as Tempo requires
 const { owners, threshold } = AccountConfig.from({
   owners: [
     { owner: original.address, weight: 1 },
-    { owner: backupAddress, weight: 1 }, // the user's passkey or your recovery provider's address
+    { owner: backupAddress, weight: 1 }, // the user's passkey or your recovery provider's key
   ],
   threshold: 1,
 })
 ```
 
-`AccountConfig.from` sorts the signers by address, as Tempo requires. Before you upgrade, [revoke the access keys](/docs/accounts/access-keys/revocation) you don't want: the upgrade keeps every access key and its limits.
+Access keys carry over with their limits, so [revoke](/docs/accounts/access-keys/revocation) any you don't want before you upgrade.
 
 ### Upgrade each account in place
 
-The original key sends a transaction that calls `upgradeAccount` on Tempo's built-in multisig contract, as the transaction's only call. viem 2.57.5 has no upgrade action, so call it with `writeContractSync`:
-
-```ts [upgrade.ts]
-import { parseAbi } from 'viem'
-import { Addresses } from 'viem/tempo'
-
-await client.writeContractSync({
-  account: original,
-  address: Addresses.nativeMultisig,
-  abi: parseAbi([
-    'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
-  ]),
-  functionName: 'upgradeAccount',
-  args: [threshold, owners],
-})
-```
-
-Run this once per account. Each transaction pays a small network fee in a stablecoin, and a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it for accounts without a balance.
+Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade): the user's original key signs one transaction whose only call is `upgradeAccount(threshold, owners)`, on a `client` connected to Tempo devnet. Each upgrade pays a transaction fee in a stablecoin, and a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it for accounts with no balance.
 
 ### Save the configuration
 
-Every later approval carries the account's configuration, so save it with the user's record. An upgraded account starts at version 1, with a salt Tempo derives from its address:
+Save each account's new configuration with the user's record, as the Account upgrade code does: every later approval includes it. An upgraded account starts at version 1, with a salt Tempo derives from its address. Sign through `Account.fromConfig` from now on: a direct signature from the original key fails with `RootKeyRetired`.
 
-```ts [upgrade.ts]
-import { concat, keccak256, toHex } from 'viem'
-
-const config = {
-  owners,
-  salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])),
-  threshold,
-  version: 1n,
-}
-
-const account = Account.fromConfig({ address: original.address, ...config })
-```
-
-From then on, add, rotate, and recover signers like any other account: see [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer).
+From then on, manage signers like any other account, as in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer).
 
 :::::
 
-## Migration limits
+<span id="migration-limits" />
 
-- The upgrade is permanent. Afterward, the original key approves only as a listed signer: a direct signature fails with `RootKeyRetired`.
-- Only the original key signs the upgrade; access keys can't. The upgrade must be the transaction's only call, with no `keyAuthorization`.
-- Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
-- Upgraded accounts can't recover funds sent to the same address on another chain. See [Account upgrade limits](/docs/accounts/key-management/account-upgrade#account-upgrade-limits).
+Before you migrate, check [which accounts can upgrade](/docs/accounts/key-management/account-upgrade#account-upgrade-limits) and what the original key can still do afterward.

@@ -1,20 +1,20 @@
 ---
 title: Let an agent pay for APIs
-seoTitle: Let an AI Agent Pay for APIs with MPP and a Budgeted Tempo Access Key | Tempo Docs
-description: Give an agent an access key with a daily budget, pay for API requests with an MPP client, and watch the agent's receipts and remaining budget.
+seoTitle: Let an AI Agent Pay for APIs with MPP | Tempo Docs
+description: Give an AI agent an access key with a daily budget, pay for API requests with an MPP client, and track each receipt and the budget left.
 ---
 
 # Let an agent pay for APIs
 
-An agent pays for API requests from an account with its own access key and an [MPP](/docs/agents) client. When a service answers `402 Payment Required`, the client pays from the account and retries, and Tempo stops the agent once it spends its daily budget.
+Give your agent its own [access key](/docs/accounts/access-keys) with a daily budget, and it pays for API requests from an account without holding the account's signers. APIs that use the [Machine Payments Protocol (MPP)](/docs/guide/machine-payments) answer `402 Payment Required` with a price; the agent pays and retries, and Tempo rejects any payment past the budget.
 
-The Machine Payments Protocol (MPP) lets a service ask for payment inside an HTTP request. See [How MPP works](/docs/guide/machine-payments) for the request flow. The examples use Moderato testnet, a Tempo test network whose stablecoins have no value, with AlphaUSD, a test stablecoin. Use a service that accepts testnet payments.
+The examples run on Moderato testnet with AlphaUSD, a test stablecoin with no value, so call a service that accepts testnet payments.
 
 :::::steps
 
 ### Give the agent a budget
 
-Authorize the agent's key with a renewing budget and the calls a one-time MPP payment uses. [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) explains each bound.
+The agent holds the key. The account's signers authorize its address with a daily budget and only the calls a one-time MPP payment makes. [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) explains each bound.
 
 ```ts [authorize-agent.ts]
 import { parseUnits } from 'viem'
@@ -34,11 +34,11 @@ await client.accessKey.authorizeSync({
 })
 ```
 
-A one-time payment (`charge`) is a stablecoin transfer to the service, with a memo that ties it to the request. These scopes leave the recipient open, so the agent can pay any service, and the budget bounds the total. A [payment session](/docs/guide/machine-payments/pay-as-you-go) also needs the payment-channel calls it makes.
+A one-time payment (`charge`) is a transfer to the service with a memo that ties it to the request, so these two scopes cover it. They leave the recipient open so the agent can pay any service; the budget bounds the total. For a [payment session](/docs/guide/machine-payments/pay-as-you-go), also scope its payment-channel calls.
 
 ### Pay with MPP
 
-Give the agent's key to the MPP client. `Mppx.create` handles each `402` challenge with `fetch`:
+In the agent, pass the key to the [MPP client](/docs/guide/machine-payments/client). `Mppx.create` patches `fetch` to pay each `402` and retry the request:
 
 ```ts [agent.ts]
 import { Mppx, tempo } from 'mppx/client'
@@ -51,25 +51,31 @@ Mppx.create({ methods: [tempo({ account: agentKey })] })
 const response = await fetch(paidUrl)
 ```
 
-The client signs the payment with the agent's key, from the account's balance. Tempo rejects a payment outside the scopes, over the remaining budget, or after the expiry, and the request fails without paying. For client options, see [Pay for services](/docs/guide/machine-payments/client). For an agent that pays from a terminal, use [`tempo request`](/docs/guide/machine-payments/agent) with `--max-spend` to cap each command.
+Tempo rejects a payment outside the scopes, over the remaining budget, or after the expiry, and the request fails without paying. Find paid APIs in [Find services](/docs/guide/machine-payments/discover-services). A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
 
 ### Watch spending
 
-Read each payment's receipt, and check the budget left today:
+The agent reads each payment's receipt from the response. Your app reads how much of the budget is left:
 
 ```ts [watch-spending.ts]
 import { Receipt } from 'mppx'
 
-const receipt = Receipt.fromResponse(response) // receipt.reference is the payment's transaction hash
-const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ account: address, accessKey: agentKey, token: alphaUsd })
+const receipt = Receipt.fromResponse(response)
+// receipt.reference is the payment's transaction hash
+
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
+  account: address,
+  accessKey: agentKeyAddress,
+  token: alphaUsd,
+})
+// remaining is in base units; periodEnd is when the budget renews
 ```
 
-Log each receipt with the request that paid for it. Alert when `remaining` runs low, and show the agent's spending in your account UI with a [revoke](/docs/accounts/access-keys/revocation#revoke-an-access-key) action.
+Log each receipt with its request, alert when `remaining` runs low, and show the agent's spending in your app next to a [revoke](/docs/accounts/access-keys/revocation#revoke-an-access-key) action.
 
 :::::
 
 ## Agent API payment limits
 
-- The key's budget caps the agent's total spend from the account, not the price of one request. One expensive request can use the day's budget, so in a terminal, preview a price with `tempo request --dry-run` and cap it with `--max-spend`.
-- If the service sponsors fees, they don't count against the budget. Otherwise the key's fees do.
-- Find paid services and their prices in [Find services](/docs/guide/machine-payments/discover-services).
+- The budget caps total spend, not the price of one request, so one expensive request can use the whole day's budget. To cap each request, [handle payments manually](/docs/guide/machine-payments/client#handle-mpp-payments-manually) and check the price before paying, or use `tempo request --max-spend` in a terminal.
+- The key's fees count against the budget unless the service sponsors them.

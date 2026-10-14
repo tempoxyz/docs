@@ -1,43 +1,42 @@
 ---
 title: Fees
 seoTitle: Pay or Sponsor Tempo Account Fees in Stablecoins | Tempo Docs
-description: Pay network fees in a USD stablecoin the account chooses, or have a fee payer sponsor them without gaining any control over the account's funds.
+description: Pay network fees from the USD stablecoins an account already holds, or sponsor them with a fee payer that can't move the account's funds.
 ---
 
 # Fees
 
-Every Tempo transaction pays its network fee in a USD stablecoin, never a gas token. Decide two things per account: which stablecoin pays the fee, and who pays it, the account itself or a fee payer that sponsors it.
-
-| Page | What it covers | Use it when |
-| --- | --- | --- |
-| [Fee tokens](/docs/accounts/fees/fee-tokens) | Which stablecoins can pay fees, the account's default, and per-transaction overrides | The account pays its own fees |
-| [Fee sponsorship](/docs/accounts/fees/fee-sponsorship) | A fee payer that pays another account's fees, and how to run one | Accounts shouldn't need a fee balance, such as a customer's first payment |
-
-<span id="how-an-account-pays-fees" />
-
-## How Tempo account fees work
-
-The fee comes from the transaction's fee payer, which is the account itself unless a fee payer signs. Before execution, Tempo deducts the maximum fee, the gas limit times the gas price, from the fee payer's balance in the fee token, then refunds the unused gas afterward. A standard TIP-20 transfer costs about $0.0006 at the base-fee cap and about $0.00003 at the floor.
-
-The block's validator may want a different stablecoin. The [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the fee token to it, so the fee token needs enough liquidity there. If the balance or the liquidity falls short, the transaction is invalid and isn't included. A transaction that's included and then reverts still pays its fee.
-
-<span id="set-an-accounts-default-fee-token" />
-
-## Fee token precedence
-
-Tempo picks the fee token from the first of these that's set:
-
-1. `feeToken` on the transaction.
-2. The fee payer's default fee token.
-3. The token being transferred, when every call is a `transfer` or `transferWithMemo` on the same USD token and the account pays its own fee.
-4. The input token of a single Stablecoin DEX swap.
-5. pathUSD.
-
-Tempo checks only the first token it finds. If the fee payer lacks the balance or the token lacks liquidity, the transaction is invalid; Tempo doesn't try the next one. Set a default fee token explicitly so the account doesn't fall back to pathUSD: see [Set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token). Full rules: [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).
+Every Tempo transaction pays its network fee in a USD stablecoin, so an account pays fees from the stablecoins it already holds instead of buying a separate gas token. You decide who pays the fee and which stablecoin it's paid in.
 
 <span id="sponsor-an-accounts-fees" />
 <span id="sponsor-fees-with-a-fee-payer" />
 
 ## Who pays the fee
 
-By default, the account pays its own fees from its balance. A fee payer can sponsor a transaction instead by adding its own signature, and then the fee comes from the fee payer's balance in the token it chooses. The fee payer's signature authorizes only the fee: it can't approve the account's calls or move its funds. See [Fee sponsorship](/docs/accounts/fees/fee-sponsorship).
+The account pays its own fees unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them, so your customers can transact without holding a fee balance. A fee payer can't change the account's calls or move its funds.
+
+<span id="how-an-account-pays-fees" />
+<span id="how-tempo-account-fees-work" />
+
+## How Tempo charges a fee
+
+A standard stablecoin transfer costs about $0.00003 when the network is quiet and about $0.0006 at the base fee's cap. Before the transaction runs, Tempo deducts its maximum fee (gas limit times gas price) from the fee payer's balance in the fee token, then refunds the unused part.
+
+If the validator producing the block wants a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm), a set of built-in exchange pools, converts the fee to it. If the fee token fails any of [Tempo's fee token checks](/docs/accounts/fees/fee-tokens#supported-fee-tokens), the transaction is invalid: Tempo never includes it, so it costs nothing. A transaction that's included and then fails still pays its fee.
+
+<span id="set-an-accounts-default-fee-token" />
+<span id="fee-token-precedence" />
+
+## How Tempo picks the fee token
+
+Tempo uses the first of these that applies:
+
+1. `feeToken` on the transaction.
+2. The fee payer's default fee token.
+3. The token being transferred, when every call is a `transfer` or `transferWithMemo` on the same USD token and the account pays its own fee.
+4. The input token of a single Stablecoin DEX swap.
+5. pathUSD, the first stablecoin deployed on Tempo.
+
+Tempo checks only that first token: if the fee payer can't pay in it, the transaction is invalid, even when a later token would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD, which the fee payer may not hold, so [set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token).
+
+Specification: [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).

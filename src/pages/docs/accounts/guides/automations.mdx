@@ -1,21 +1,19 @@
 ---
 title: Automations
 seoTitle: Automate Payouts, Earn Sweeps, and Card Funding from Tempo Accounts | Tempo Docs
-description: Pick a walkthrough to run payouts, sweep idle balances into Earn, or fund a card program from your backend with a scoped, limited access key.
+description: Run payouts, nightly Earn sweeps, or card funding from your backend with an access key the customer approves once, within limits Tempo enforces.
 ---
 
 # Automations
 
-These guides let your backend move a customer's stablecoins on a schedule without asking anyone to approve each payment. The customer's signers approve one access key for your backend once, and Tempo rejects anything outside that key's limit, allowed calls, and expiry, even if the key leaks.
-
-An account's signers are the keys allowed to approve for it, such as the customer's passkey. Every payment is a transaction: a signed request that Tempo checks, records, and charges a small fee for in a stablecoin. An [access key](/docs/accounts/access-keys) signs those transactions for the account within bounds the signers set, so your backend pays without holding a signer.
+These guides let your backend move a customer's stablecoins without asking the customer to approve each payment, within limits Tempo enforces. [Access keys](/docs/accounts/access-keys) explains the model.
 
 ## Choose a guide
 
-| Scenario | Guide |
+| Your backend needs to | Guide |
 | --- | --- |
-| Your backend pays contractors, sellers, or refunds to payees the customer approved | [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) |
-| Your backend moves a customer's idle balance into an Earn vault each night | [Sweep idle balances into Earn](/docs/accounts/guides/automations/sweep-into-earn) |
-| Your backend tops up a card program as the customer spends | [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program) |
+| Send payouts to contractors or sellers the customer approved | [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) |
+| Move a customer's idle balance into an Earn vault each night | [Sweep idle balances into Earn](/docs/accounts/guides/automations/sweep-into-earn) |
+| Top up a card program as the customer spends | [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program) |
 
-For an AI agent that pays on its own, see [Agents](/docs/accounts/guides/agents).
+For an AI agent that decides what to pay, see [Agents](/docs/accounts/guides/agents).

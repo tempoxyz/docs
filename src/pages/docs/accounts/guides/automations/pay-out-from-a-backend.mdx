@@ -9,12 +9,12 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Pay out from a backend
 
-Your backend sends payouts from a customer's Tempo account with its own access key, which the customer's signers approve once. Tempo lets that key pay only the payees it lists, up to a daily limit, until it expires, so a leaked key can't drain the account.
+Your backend can send payouts from a customer's Tempo account without prompting the customer each time. The customer's signers approve an [access key](/docs/accounts/access-keys) for your backend once, and Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry), so a leaked key can't drain the account.
 
 <span id="backend-services" />
 <span id="automations" />
 
-The demo creates an account on Tempo devnet, a test network whose stablecoins have no value, with a device key in this browser as its signer. It authorizes a backend key, checks what Tempo stores about it, and sends a payout. The code examples use Moderato testnet, another test network, with AlphaUSD, a test stablecoin.
+The demo runs on Tempo devnet, a test network whose stablecoins have no value, with a device key in this browser as the customer's signer. The code runs on Moderato testnet with AlphaUSD, a test stablecoin, where `account` is the customer's single-key account, such as their passkey account. On devnet, a configurable account's signers authorize the key the same way.
 
 <GuideDemo guide="backend-automation" />
 
@@ -22,7 +22,7 @@ The demo creates an account on Tempo devnet, a test network whose stablecoins ha
 
 ### Authorize a scoped, limited key
 
-Create a secp256k1 key in your KMS, one per customer. Its address, derived from the public key, is the key's ID on Tempo. Send that address to the customer's app, and have the customer's signers authorize it:
+Create one secp256k1 key per customer in your KMS. Its address, derived from the public key, is the key's ID on Tempo. Send that address to the customer's app, where the customer's signers authorize it:
 
 ```ts [app/approve-payouts.ts]
 import { parseUnits } from 'viem'
@@ -32,7 +32,7 @@ const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
 await client.accessKey.authorizeSync({
   accessKey: { accessKeyAddress: payoutKeyAddress, keyType: 'secp256k1' },
-  account, // the customer's account, signed by its signers
+  account, // the customer's account, approved with their passkey
   expiry: Expiry.days(90),
   limits: [{ token: alphaUsd, limit: parseUnits('1000', 6), period: 86_400 }], // 1,000 AlphaUSD a day
   scopes: [
@@ -42,11 +42,13 @@ await client.accessKey.authorizeSync({
 })
 ```
 
-Authorizing is itself a transaction, so the customer approves it once, for example with their passkey. Show the payees, the daily limit, and the expiry before they do. Amounts are in base units: AlphaUSD has 6 decimals, so `parseUnits('1000', 6)` is 1,000 AlphaUSD. Size the limit to your largest payout day. See [Spending limits](/docs/accounts/access-keys/spending-limits) and [Scopes](/docs/accounts/access-keys/scopes).
+Authorizing is one transaction the customer approves, for example with their passkey. Show them the payees, daily limit, and expiry before they do.
+
+Limits are in base units: AlphaUSD has 6 decimals, so `parseUnits('1000', 6)` is 1,000 AlphaUSD. Size the limit to your largest payout day plus fees, which count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
 ### Keep the key in your KMS
 
-The private key never leaves the KMS. Wrap it in a viem account that asks the KMS for each signature:
+The private key never leaves the KMS, and Tempo stores only the key's address, payees, limit, and expiry. Wrap the key in a viem account that asks the KMS for each signature:
 
 ```ts [backend/payout-key.ts]
 import { PublicKey, Signature } from 'ox'
@@ -62,7 +64,7 @@ const payoutKey = Account.from({
 })
 ```
 
-Tempo stores only the key's address and bounds. Grant signing permission in the KMS to the payout service alone, and log each signing request so you can match it to a payout.
+In your KMS, allow only the payout service to sign with the key, and log each signing request so you can match it to a payout.
 
 ### Send payouts
 
@@ -81,16 +83,17 @@ await backend.token.transferSync({
 })
 ```
 
-No one is prompted. Tempo rejects a payout to an address outside `payees`, one over what's left today, or any payout after the expiry. Fees for the key's transactions count against the daily limit. To pause payouts, have the signers [revoke the key](/docs/accounts/access-keys/revocation#revoke-an-access-key).
+The customer isn't prompted. Tempo rejects a payout to an address outside `payees`, one over what's left of today's limit, or any payout after the key expires. To stop payouts, have the signers [revoke the key](/docs/accounts/access-keys/revocation#revoke-an-access-key).
 
 :::::
 
 <span id="recommended-limits-for-common-automations" />
 <span id="recommended-limits-for-backend-automations" />
 <span id="troubleshoot-backend-payments" />
+<span id="payout-limits" />
 
-## Payout limits
+## Before you go live
 
-- An account's transactions share one sequence number by default, so they land one at a time, in order. Send concurrent payouts with expiring nonces or separate nonce keys. See [Parallel payments](/docs/guide/payments/send-parallel-transactions).
-- Adding a payee needs the signers: they [change the key's allowed calls](/docs/accounts/access-keys/scopes#change-allowed-calls).
-- The key can't be extended past its expiry. Authorize a new key before it ends. See [Renew an expiring key](/docs/accounts/access-keys/expiry#renew-an-expiring-key).
+- Payouts confirm one at a time by default, because an account's transactions share one nonce, a counter that orders them. To send them concurrently, use [expiring nonces or nonce keys](/docs/guide/payments/send-parallel-transactions).
+- To add a payee, the signers or an [admin key](/docs/accounts/access-keys/admin-access-keys) update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls).
+- You can't extend an expiry, so [authorize a replacement key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before it passes.

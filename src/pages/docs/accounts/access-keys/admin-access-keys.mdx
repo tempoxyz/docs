@@ -1,41 +1,35 @@
 ---
 title: Admin access keys
 seoTitle: Admin Access Keys for Key Management on Tempo | Tempo Docs
-description: Let a trusted device or key-management service authorize, change, and revoke an account's other access keys without the signers.
+description: Let a customer's trusted device or your key-management service authorize, change, and revoke an account's other access keys without the signers approving each change.
 ---
 
 # Admin access keys
 
-An admin access key manages an account's other access keys without the signers, and it has no spending limit, expiry, or scopes. Whoever holds one can spend the whole balance, so give one only to a party you'd trust with the account's funds.
+An admin access key manages an account's other access keys, so a customer's trusted device can add their new phone, or your key-management service can rotate keys, without the signers approving each change. It has no spending limit, expiry, or scopes, so whoever holds it can spend the whole balance.
 
 ## What an admin access key can do
 
-An admin key can do what the signers can do with access keys, and pay like an unbounded key:
+An admin key can:
 
-| Action | Admin key |
-| --- | --- |
-| Authorize access keys, including other admin keys | Yes |
-| Change another key's [spending limit](/docs/accounts/access-keys/spending-limits) or [scopes](/docs/accounts/access-keys/scopes) | Yes |
-| [Revoke](/docs/accounts/access-keys/revocation) any access key, including itself | Yes |
-| Pay from the account | Yes, with no limit |
-| Change a configurable account's signers or threshold | No |
-| Count toward the signing threshold | No |
+- Authorize any access key, including another admin key.
+- Change a limited key's [spending limit](/docs/accounts/access-keys/spending-limits) or [scopes](/docs/accounts/access-keys/scopes).
+- [Revoke](/docs/accounts/access-keys/revocation) any access key, including itself.
+- Approve a message that a contract checks with [`verifyKeychainAdmin`](/docs/sdk/foundry/signature-verifier#how-signature-verification-works-in-foundry).
 
-Tempo enforces this on the [Account Keychain](/docs/protocol/transactions/AccountKeychain): its key-management calls accept the account's signers or an active admin key, and revert with `UnauthorizedCaller` for any other key. When an admin key authorizes a key, it signs both the key authorization and the transaction that carries it. Contracts can check that a signature came from an admin key or the signers with `verifyKeychainAdmin`.
+It doesn't count toward the signing threshold, so it can't change the signers or the threshold, or lock the signers out. A key-management call from a limited key reverts with `UnauthorizedCaller`.
 
-## When to avoid admin keys
+<span id="when-to-avoid-admin-keys" />
 
-Use an admin key for a party that already controls the account's keys, such as your own key-management service, or a customer's trusted device that onboards their other devices. Use a limited key for everything else:
+## When to use an admin key
 
-- An AI agent: give it a budget. See [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet).
-- A backend that moves funds: scope it to the task. See [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend).
-- A card program or third-party service: cap its spend. See [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program).
+Give an admin key only to a party you'd trust with the whole balance. Everyone else, including an [AI agent](/docs/accounts/guides/agents/give-an-agent-a-wallet), a [backend that pays out](/docs/accounts/guides/automations/pay-out-from-a-backend), or a [card program](/docs/accounts/guides/automations/fund-a-card-program), gets a limited key.
 
-An admin key can authorize a fresh admin key before you revoke it, so a leaked admin key is an account compromise. Treat it like a signer, and keep it in a KMS or HSM.
+Store an admin key as carefully as a signer: in a KMS or HSM, or as a [device key](/docs/accounts/authentication/device-keys) that can't be exported. A leaked admin key compromises the account, because its holder can authorize a new admin key before you revoke the leaked one.
 
 ## Authorize an admin key
 
-Signers that reach the threshold, or an existing admin key, authorize it with `admin: true`. viem ignores `limits`, `expiry`, and `scopes` on an admin key:
+Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key), with `admin: true`. viem ignores `limits`, `expiry`, and `scopes` on an admin key, and Tempo rejects an admin authorization that carries any of them.
 
 ```ts [admin-key.ts]
 await client.accessKey.authorizeSync({
@@ -44,15 +38,13 @@ await client.accessKey.authorizeSync({
   admin: true,
 })
 
+// true until the key is revoked
 const isAdmin = await client.accessKey.isAdmin({ account, accessKey: env('KMS_KEY_ADDRESS') })
 ```
 
 ## Admin access key limits
 
-- Admin keys need the T6 network upgrade.
-- Tempo rejects an admin authorization that also carries a limit, expiry, or scopes.
-- `updateLimit`, `setAllowedCalls`, and `removeAllowedCalls` revert with `InvalidKeyId` on an admin key, since it has none of those bounds.
-- Revoking an admin key doesn't revoke the keys it authorized. Revoke each of them separately.
-- An admin key can't change the account's signers, so it can't lock the signers out.
+- Changing an admin key's spending limit or scopes reverts with `InvalidKeyId`, because it has neither. To bound its holder, revoke it and authorize a new limited key.
+- Revoking an admin key leaves the keys it authorized in place, so revoke each one separately.
 
-Specification: [Admin access keys (TIP-1049)](https://tips.sh/1049).
+Specifications: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys (TIP-1049)](https://tips.sh/1049).
