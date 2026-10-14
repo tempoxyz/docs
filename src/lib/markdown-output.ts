@@ -88,9 +88,9 @@ const interactiveDescriptions: Record<string, string> = {
   AccessKeyDemo:
     'In the interactive web page, create a test account on the Tempo Accounts devnet whose signer is a non-extractable P-256 key in this browser, fund it with test AlphaUSD from the devnet faucet, authorize a second non-extractable P-256 browser key as an access key with a 10 AlphaUSD daily limit, a one-hour expiry, and transfers only, pay 2 AlphaUSD with it, attempt a 20 AlphaUSD payment that Tempo rejects, and revoke the key. Each step is a real devnet transaction.',
   UpgradeAccountDemo:
-    'In the interactive web page, create a private-key account on Tempo devnet, fund it from the faucet, and pay 1 AlphaUSD with it. Then upgrade it in place to a configurable account with the original key and a new backup key as signers and a threshold of 2. A payment signed by the original key alone is rejected, and a payment approved by both signers succeeds. The address and balance stay the same. Each step is a real devnet transaction.',
+    'In the interactive web page, create a private-key account on the Tempo Accounts devnet, fund it from the faucet, and pay 1 AlphaUSD with it. Then upgrade it in place to a configurable account with the original key and a new backup key as signers and a threshold of 2. A payment signed by the original key alone is rejected, and a payment approved by both signers succeeds. The address and balance stay the same. Each step is a real devnet transaction.',
   AccountSandbox:
-    'In the interactive web page, create a Tempo account on Tempo devnet from its first signer: a passkey or a generated private key. Then get test funds, add signers, set weights and the threshold, authorize access keys with limits, and send payments. Every change is a real devnet transaction, so the page must be able to reach Tempo devnet.',
+    'In the interactive web page, create a Tempo account on the Tempo Accounts devnet from its first signer: a passkey or a generated private key. Then get test funds, add signers, set weights and the threshold, authorize access keys with limits, and send payments. Every change is a real devnet transaction, so the page must be able to reach Tempo Accounts devnet.',
   AdminKeyDemo:
     'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   SupportedRoutesTable:
@@ -103,7 +103,7 @@ const interactiveDescriptions: Record<string, string> = {
     'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   GuideDemo:
-    "In the interactive web page, a demo runs the steps that follow on Tempo devnet with the reader's own signers: a passkey on their device, or keys the page generates. Each step that changes the account sends a devnet transaction and shows its hash, next to what changed in the app and on the account. It runs only where the page can reach Tempo devnet.",
+    "In the interactive web page, a demo runs the steps that follow on the Tempo Accounts devnet with the reader's own signers: a passkey on their device, or keys the page generates. Each step that changes the account sends a devnet transaction and shows its hash, next to what changed in the app and on the account. It runs only where the page can reach Tempo Accounts devnet.",
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',
   TerminalDemo:

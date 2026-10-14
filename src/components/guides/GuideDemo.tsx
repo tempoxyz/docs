@@ -111,7 +111,7 @@ function useEnvironment(): Environment {
 
 type Entry = { state: DemoState; outcome?: StepOutcome }
 
-/** A guide's steps, run on Tempo devnet with your own signers. */
+/** A guide's steps, run on the Tempo Accounts devnet with your own signers. */
 export function GuideDemo({ guide }: { guide: GuideId }) {
   // A page can outlive its demo while it's being replaced.
   const script = guideScripts[guide] as DemoScript | undefined
@@ -124,7 +124,9 @@ function Demo({ guide, script }: { guide: GuideId; script: DemoScript }) {
   return (
     <Container
       headerLeft={
-        <span {...guideDemoNetwork({ className: 'as-network' })}>Runs on Tempo devnet</span>
+        <span {...guideDemoNetwork({ className: 'as-network' })}>
+          Runs on the Tempo Accounts devnet
+        </span>
       }
     >
       {environment.status === 'ready' ? (
@@ -133,8 +135,8 @@ function Demo({ guide, script }: { guide: GuideId; script: DemoScript }) {
         <div {...accountSandbox({ className: 'account-sandbox' })}>
           <p className="as-gate" role="status">
             {environment.status === 'checking'
-              ? 'Connecting to Tempo devnet…'
-              : 'This demo runs on Tempo devnet, which this page can’t reach.'}
+              ? 'Connecting to the Tempo Accounts devnet…'
+              : 'This demo runs on the Tempo Accounts devnet, which this page can’t reach.'}
           </p>
         </div>
       )}

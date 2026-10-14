@@ -118,7 +118,7 @@ export type AccountSandboxProps = {
 }
 
 /**
- * Create the reader's account on Tempo devnet: it starts with no signers, and the first one the
+ * Create the reader's account on the Tempo Accounts devnet: it starts with no signers, and the first one the
  * reader adds creates it. Every signer, key, and payment is real there; nothing is simulated.
  */
 export function AccountSandbox(props: AccountSandboxProps) {
@@ -133,8 +133,8 @@ export function AccountSandbox(props: AccountSandboxProps) {
         <div {...accountSandbox({ className: 'account-sandbox' })} data-variant={variant}>
           <p className="as-gate" role="status">
             {network.checking
-              ? 'Connecting to Tempo devnet…'
-              : 'Creating an account here needs Tempo devnet, which this page can’t reach.'}
+              ? 'Connecting to the Tempo Accounts devnet…'
+              : 'Creating an account here needs the Tempo Accounts devnet, which this page can’t reach.'}
           </p>
         </div>
       )}
@@ -157,7 +157,7 @@ function loadDevnet() {
 type Network = ReturnType<typeof useNetwork>
 
 /**
- * Tempo devnet, once this page can reach it. Each account is created on devnet with its first
+ * Tempo Accounts devnet, once this page can reach it. Each account is created on devnet with its first
  * signer, then reused by every instance on the page that shows it.
  */
 function useNetwork() {
@@ -287,7 +287,7 @@ function useNetwork() {
 function networkBadge(network: Network, account: SandboxAccount) {
   if (!isCreated(account)) return undefined
   if (network.status) return network.status
-  return account.devnet ? 'Tempo devnet' : 'Not on devnet yet'
+  return account.devnet ? 'Tempo Accounts devnet' : 'Not on devnet yet'
 }
 
 /** On devnet, keys described as hardware or held by a provider are keys in this browser. */
