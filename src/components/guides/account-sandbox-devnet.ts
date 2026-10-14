@@ -631,9 +631,9 @@ export type DevnetAdapter = Omit<AccountSandboxAdapter, 'submit'> & {
    */
   prepareAccessKey(key: AccessKey, options?: DevnetCallOptions): Promise<PreparedKey>
   /**
-   * Get test funds from the devnet faucet (`tempo_fundAddress`): 1,000,000 test AlphaUSD. Accounts
-   * start with none, and transactions need fees. Creates the devnet account first if needed.
-   * Never throws.
+   * Get test funds from the devnet faucet (`tempo_fundAddress`): test pathUSD, AlphaUSD, BetaUSD, and
+   * ThetaUSD. Accounts start with none, and transactions need fees. Creates the devnet account first
+   * if needed. Never throws.
    */
   fund(
     account: SandboxAccount,
@@ -1364,7 +1364,7 @@ export function createDevnetAdapter(
           const next = appendLog(prepared, {
             kind: 'event',
             title: `Got test funds · ${formatBalance(session.balance)}`,
-            detail: 'Devnet faucet · 1,000,000 test AlphaUSD',
+            detail: 'Devnet faucet · test stablecoins',
             hash,
           })
           return { account: decorate(session, next), hash }
