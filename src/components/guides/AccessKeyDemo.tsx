@@ -6,18 +6,9 @@ import { tempoModerato } from 'viem/chains'
 import { Account, createClient, WebCryptoP256 } from 'viem/tempo'
 import { Container } from '../Container'
 import * as ui from './AccountDemo.recipes'
-import {
-  type AdminKeyDemoSession,
-  adminKeyCredentialError,
-  adminKeyDemoEnvironment,
-  adminKeyDemoFeeToken,
-  createAdminKeyDemoClient,
-  parseAdminKeyDemoSession,
-  serializeAdminKeyDemoSession,
-} from './admin-key-demo'
+import { adminKeyDemoFeeToken } from './admin-key-demo'
 import { Button, FAKE_RECIPIENT, Step, StringFormatter } from './Demo'
 
-const storageKey = 'tempo-docs:access-key-demo:v1'
 const token = adminKeyDemoFeeToken
 const dailyLimit = parseUnits('10', 6)
 const payment = parseUnits('2', 6)
@@ -30,13 +21,15 @@ async function createAccessKey(access: Address) {
   return Account.fromWebCryptoP256(await WebCryptoP256.createKeyPair(), { access })
 }
 type Result = { hash?: Hex; message: string; ok: boolean }
+type KeyPair = Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
 
 /** Authorizes, uses, and revokes a limited access key with real Moderato transactions. */
 export function AccessKeyDemo() {
   const [ready, setReady] = React.useState(false)
-  const [environment, setEnvironment] =
-    React.useState<ReturnType<typeof adminKeyDemoEnvironment>>(null)
-  const [session, setSession] = React.useState<AdminKeyDemoSession | null>(null)
+  /** Why this browser can't make WebCrypto keys, or `null` when it can. */
+  const [environment, setEnvironment] = React.useState<string | null>(null)
+  // The test account's signer: a device key, non-extractable and held in memory only.
+  const [signer, setSigner] = React.useState<KeyPair | null>(null)
   const [balance, setBalance] = React.useState<string | null>(null)
   const [remaining, setRemaining] = React.useState<bigint | null>(null)
   const [revoked, setRevoked] = React.useState(false)
@@ -46,21 +39,23 @@ export function AccessKeyDemo() {
   // The access key is non-extractable and held in memory only. Reloading the page discards it.
   const keyRef = React.useRef<Awaited<ReturnType<typeof createAccessKey>> | null>(null)
   const busy = React.useRef(false)
-  const client = React.useMemo(() => session && createAdminKeyDemoClient(session), [session])
+  const client = React.useMemo(
+    () =>
+      signer &&
+      createClient({
+        account: Account.fromWebCryptoP256(signer),
+        chain: tempoModerato,
+        feeToken: token,
+      }),
+    [signer],
+  )
 
   React.useEffect(() => {
     setEnvironment(
-      adminKeyDemoEnvironment(
-        location.href,
-        window.isSecureContext,
-        Boolean(window.PublicKeyCredential && navigator.credentials?.create),
-      ),
+      window.isSecureContext && globalThis.crypto?.subtle
+        ? null
+        : 'Device keys need WebCrypto. Open this demo on localhost or an HTTPS hostname.',
     )
-    try {
-      setSession(parseAdminKeyDemoSession(localStorage.getItem(storageKey), location.hostname))
-    } catch {
-      // Storage can be unavailable; the demo still works for this page view.
-    }
     setReady(true)
   }, [])
 
@@ -83,15 +78,6 @@ export function AccessKeyDemo() {
     refresh().catch(() => setError('Could not read testnet status.'))
   }, [refresh])
 
-  function save(next: AdminKeyDemoSession) {
-    try {
-      localStorage.setItem(storageKey, serializeAdminKeyDemoSession(next))
-    } catch {
-      // The demo works without storage; the account won't survive a reload.
-    }
-    setSession(next)
-  }
-
   async function run(action: Action, work: () => Promise<Result | undefined>) {
     if (busy.current) return
     busy.current = true
@@ -110,9 +96,7 @@ export function AccessKeyDemo() {
   }
 
   async function createAccount() {
-    const rpId = location.hostname
-    const credential = await WebAuthnCredential(rpId)
-    save({ credential: { id: credential.id, publicKey: credential.publicKey }, rpId })
+    setSigner(await WebCryptoP256.createKeyPair())
     return undefined
   }
 
@@ -180,7 +164,7 @@ export function AccessKeyDemo() {
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Try an access key</span>}
       headerRight={<span {...ui.accountDemoMuted()}>Moderato testnet</span>}
-      footer="Real testnet transactions from a separate passkey test account. The access key is a non-extractable browser key, held in memory only."
+      footer="Real testnet transactions from a separate test account. Its signer and the access key are non-extractable device keys in this browser, held in memory only."
     >
       <div {...ui.accountDemoSteps()} data-testid="access-key-demo" aria-busy={pending !== null}>
         <Step
@@ -193,10 +177,6 @@ export function AccessKeyDemo() {
               <Button type="button" disabled={disabled || funded} onClick={() => run('fund', fund)}>
                 {pending === 'fund' ? 'Funding…' : funded ? 'Funded' : 'Get test funds'}
               </Button>
-            ) : environment?.localhostUrl ? (
-              <a href={environment.localhostUrl} {...ui.accountDemoLink()}>
-                Open on localhost
-              </a>
             ) : (
               <Button
                 type="button"
@@ -204,7 +184,7 @@ export function AccessKeyDemo() {
                 disabled={disabled || Boolean(environment)}
                 onClick={() => run('create', createAccount)}
               >
-                {pending === 'create' ? 'Create your passkey…' : 'Create test account'}
+                {pending === 'create' ? 'Creating the device key…' : 'Create test account'}
               </Button>
             )
           }
@@ -212,7 +192,7 @@ export function AccessKeyDemo() {
           <p {...ui.accountDemoNote()}>
             {client
               ? `${StringFormatter.truncate(client.account.address)} · ${balance ?? '…'} AlphaUSD`
-              : (environment?.message ?? 'Your passkey is the account’s signer.')}
+              : (environment ?? 'A device key in this browser is the account’s signer.')}
           </p>
         </Step>
 
@@ -228,7 +208,7 @@ export function AccessKeyDemo() {
               disabled={disabled || !funded || authorized}
               onClick={() => run('authorize', authorize)}
             >
-              {pending === 'authorize' ? 'Confirm with your passkey…' : 'Authorize key'}
+              {pending === 'authorize' ? 'Approving with the device key…' : 'Authorize key'}
             </Button>
           }
         >
@@ -287,7 +267,7 @@ export function AccessKeyDemo() {
               disabled={disabled || !authorized}
               onClick={() => run('revoke', revoke)}
             >
-              {pending === 'revoke' ? 'Confirm with your passkey…' : 'Revoke key'}
+              {pending === 'revoke' ? 'Approving with the device key…' : 'Revoke key'}
             </Button>
           }
         >
@@ -320,17 +300,6 @@ function ResultLine({ result }: { result: Result | undefined }) {
       )}
     </p>
   )
-}
-
-async function WebAuthnCredential(rpId: string) {
-  const { WebAuthnP256 } = await import('viem/tempo')
-  return WebAuthnP256.createCredential({
-    label: 'Tempo access-key demo',
-    rpId,
-    userId: crypto.getRandomValues(new Uint8Array(32)),
-  }).catch((cause: unknown) => {
-    throw new Error(adminKeyCredentialError(cause))
-  })
 }
 
 function errorMessage(cause: unknown) {

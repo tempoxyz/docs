@@ -221,7 +221,7 @@ describe('GuideDemo scripts', () => {
     })
   })
 
-  it('adds a recovery key, then requires two factors with the prepared passkey', async () => {
+  it('adds a recovery key, then requires two factors with the prepared device key', async () => {
     const { states, account, ctx } = await run('add-signers')
     const added = states[3].account
     expect(configuredSigners(added).map((signer) => [signer.name, signer.weight])).toEqual([
@@ -230,13 +230,13 @@ describe('GuideDemo scripts', () => {
     ])
     expect(added.threshold).toBe(1)
     expect(recoveryCheck(added).ok).toBe(true)
-    expect(ctx.preparedUses).toEqual(['passkey:Passkey'])
+    expect(ctx.preparedUses).toEqual(['device:Device key'])
     expect(account.version).toBe(added.version + 1)
     expect(account.threshold).toBe(2)
     expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
       ['private-key', 1],
       ['private-key', 1],
-      ['passkey', 2],
+      ['device', 2],
     ])
     expect(recoveryCheck(account).ok).toBe(true)
   })
@@ -253,22 +253,22 @@ describe('GuideDemo scripts', () => {
     expect(account.accessKeys.find((key) => key.name === 'Service key')?.status).toBe('revoked')
   })
 
-  it('recovers with both keys, replaces the lost passkey, and revokes the device key', async () => {
+  it('recovers with both keys, replaces the lost device key, and revokes the device key', async () => {
     const { account, ctx } = await run('recover')
     expect(configuredSigners(account).map((signer) => [signer.name, signer.weight])).toEqual([
       ['Current key', 1],
       ['Backup key', 1],
-      ['New passkey', 2],
+      ['New device key', 2],
     ])
-    const passkeys = configuredSigners(account).filter((signer) => signer.kind === 'passkey')
-    expect(passkeys.map((signer) => [signer.weight, signer.lost])).toEqual([[2, false]])
-    expect(ctx.preparedUses).toEqual(['passkey:New passkey'])
+    const deviceKeys = configuredSigners(account).filter((signer) => signer.kind === 'device')
+    expect(deviceKeys.map((signer) => [signer.weight, signer.lost])).toEqual([[2, false]])
+    expect(ctx.preparedUses).toEqual(['device:New device key'])
     expect(account.accessKeys.find((key) => key.name === 'This browser')?.status).toBe('revoked')
   })
 
-  it('hands the account to the reader’s passkey after revoking the app’s key', async () => {
+  it('hands the account to the reader’s device key after revoking the app’s key', async () => {
     const { account } = await run('export')
-    expect(configuredSigners(account).map((signer) => signer.kind)).toEqual(['passkey'])
+    expect(configuredSigners(account).map((signer) => signer.kind)).toEqual(['device'])
     expect(account.accessKeys.every((key) => key.status === 'revoked')).toBe(true)
   })
 
@@ -339,7 +339,7 @@ describe('GuideDemo helpers', () => {
 
   it('says what a demo is missing', () => {
     expect(missingNeed([], new Set())).toBeNull()
-    expect(missingNeed(['passkey'], new Set(['passkey']))).toBeNull()
-    expect(missingNeed(['passkey'], new Set())).toContain('Touch ID')
+    expect(missingNeed(['webcrypto'], new Set(['webcrypto']))).toBeNull()
+    expect(missingNeed(['webcrypto'], new Set())).toContain('HTTPS')
   })
 })

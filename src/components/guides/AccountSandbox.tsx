@@ -355,33 +355,6 @@ function SecretField({ label, value }: { label: string; value: string }) {
   )
 }
 
-let platformAuthenticator: Promise<boolean> | undefined
-
-/** Whether this browser has a user-verifying platform authenticator, such as Touch ID. */
-function hasPlatformAuthenticator() {
-  platformAuthenticator ??= (async () => {
-    if (!globalThis.isSecureContext || !globalThis.PublicKeyCredential) return false
-    try {
-      return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-    } catch {
-      return false
-    }
-  })()
-  return platformAuthenticator
-}
-
-function usePlatformAuthenticator() {
-  const [available, setAvailable] = React.useState(false)
-  React.useEffect(() => {
-    let active = true
-    void hasPlatformAuthenticator().then((value) => active && setAvailable(value))
-    return () => {
-      active = false
-    }
-  }, [])
-  return available
-}
-
 type SignerChoice = {
   kind: SignerKind
   label: string
@@ -392,17 +365,11 @@ type SignerChoice = {
 }
 
 /**
- * Signers the reader can add to their own account: a passkey on this device, a device key in
- * this browser, and a generated private key.
+ * Signers the reader can add to their own account: a device key in this browser and a generated
+ * private key. Neither prompts, so the demo runs without OS dialogs.
  */
-function signerChoices(platform: boolean, options: { first?: boolean } = {}): SignerChoice[] {
-  const { unlock } = thisDevice()
+function signerChoices(options: { first?: boolean } = {}): SignerChoice[] {
   const choices: SignerChoice[] = [
-    {
-      kind: 'passkey',
-      label: `Passkey (${unlock})`,
-      reason: platform ? null : 'No Touch ID or platform authenticator in this browser',
-    },
     { kind: 'device', label: 'Device key', reason: null },
     { kind: 'private-key', label: 'Private key', reason: null },
   ]
@@ -460,8 +427,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   const lastHash = account.devnet?.lastHash
   const receipt = before && lastHash !== before.devnet?.lastHash ? lastHash : undefined
   const created = isCreated(account)
-  const platform = usePlatformAuthenticator()
-  const choices = signerChoices(platform)
+  const choices = signerChoices()
   /** A generated private-key signer, shown once. */
   const [secret, setSecret] = React.useState<{ id: string; value: string } | null>(null)
   const shownSecret =
@@ -591,7 +557,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
           {!created ? (
             <SignerChooser
               label="First signer"
-              choices={signerChoices(platform, { first: true })}
+              choices={signerChoices({ first: true })}
               onChoose={(choice) =>
                 choice.legacy ? void addLegacyAccount() : addSignerOf(choice.kind)
               }
@@ -1194,7 +1160,6 @@ function KeysPanel(props: {
 }) {
   const { account, onChange } = props
   const keys = account.accessKeys.filter((key) => key.status !== 'revoked')
-  const platform = usePlatformAuthenticator()
   const [revealed, setRevealed] = React.useState<{ id: string; privateKey: string } | null>(null)
   // Shown once: only while the key it belongs to is on the account and this panel is open.
   const secret = revealed && keys.some((key) => key.id === revealed.id) ? revealed.privateKey : null
@@ -1238,17 +1203,10 @@ function KeysPanel(props: {
         groups={[
           {
             label: 'Keys',
-            options: accessKeyTemplateOptions.map((id) => {
-              const name = accessKeyTemplateName(account, id)
-              const unavailable = id === 'device' && !platform
-              return {
-                value: id,
-                label: unavailable
-                  ? 'Passkey (no Touch ID or platform authenticator in this browser)'
-                  : name,
-                disabled: unavailable,
-              }
-            }),
+            // Keys that sign without a prompt: not the passkey template (`device`).
+            options: accessKeyTemplateOptions
+              .filter((id) => id !== 'device')
+              .map((id) => ({ value: id, label: accessKeyTemplateName(account, id) })),
           },
         ]}
         onSelect={(id) => void add(id as AccessKeyTemplateId)}
