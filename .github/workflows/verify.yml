@@ -185,6 +185,7 @@ jobs:
         env:
           E2E_SHARD: ${{ matrix.shard }}
           E2E_SHARDS: 3
+          TEMPO_RPC_API_KEY: ${{ secrets.TEMPO_RPC_API_KEY }}
 
       - name: Upload test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

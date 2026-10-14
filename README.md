@@ -33,6 +33,18 @@ pnpm build          # Build for production
 pnpm preview        # Preview the production build
 ```
 
+## Authenticated RPC for live E2E tests
+
+Add a dedicated Moderato RPC key as the `TEMPO_RPC_API_KEY` repository Actions
+secret in [GitHub settings](https://github.com/tempoxyz/docs/settings/secrets/actions).
+The Verify workflow passes it only to the Playwright runner. Live tests forward
+Moderato HTTP requests through Node with the key and disable anonymous WebSocket
+fallback. Without the secret (including fork PRs), tests use the public RPC.
+
+For local runs, export `TEMPO_RPC_API_KEY` before `pnpm test:e2e`; Playwright does
+not load `.env` files. Do not use a `VITE_` variable or put the key in browser
+transport configuration. The deployed public demo continues using the public RPC.
+
 ## OG image review
 
 Run `pnpm og:goldens:check` to verify social cards against the checked-in images.
