@@ -17,8 +17,9 @@
  * - Nothing is simulated: every signer is a private key, a device key, or a passkey that signs
  *   for real.
  *
- * The devnet is plain HTTP on the tailnet, so only `http:` pages (local dev and preview) can reach
- * it. Import this module dynamically so it stays out of production bundles.
+ * Pages reach the devnet through the docs site's `/api/devnet-rpc` proxy (see `devnet-network.ts`).
+ * Import this module dynamically so it stays out of production bundles; demos that only need the
+ * RPC URL or token import `devnet-network.ts` instead.
  */
 import {
   concat,
@@ -56,6 +57,7 @@ import {
   signerKinds,
   upgradeLegacyAccount,
 } from './account-sandbox'
+import { devnetChainId, devnetRpcUrl, devnetTailnetRpcUrl, devnetToken } from './devnet-network'
 
 // ---------------------------------------------------------------------------
 // viem
@@ -80,19 +82,9 @@ const {
 } = Tempo
 const { getCommitment } = AccountConfig
 
-/** The demo devnet's Tailscale RPC, for Node scripts on the tailnet. */
-export const devnetTailnetRpcUrl = 'http://multisig-1113-nodes-rpc-service.tail388b2e.ts.net:8545'
+export { devnetChainId, devnetRpcUrl, devnetTailnetRpcUrl, devnetToken }
 
-/**
- * Pages reach the devnet through the docs site's same-origin proxy (`/api/devnet-rpc`), which holds
- * the public endpoint's API key and works from HTTPS pages. Outside a browser, use the tailnet RPC.
- */
-export const devnetRpcUrl =
-  typeof window === 'undefined' ? devnetTailnetRpcUrl : `${window.location.origin}/api/devnet-rpc`
-export const devnetChainId = 31_318
 const devnetChainIdHex = '0x7a56'
-/** AlphaUSD pays for every payment and every fee. */
-export const devnetToken: Address = '0x20c0000000000000000000000000000000000001'
 const tokenDecimals = 6
 const unitsPerUsd = 10 ** tokenDecimals
 /** Gas estimation rejects configurable delegates, so team-account keys send a fixed limit. */

@@ -9,8 +9,8 @@ import LucideCopy from '~icons/lucide/copy'
 import { Container } from '../Container'
 import * as ui from './AccountDemo.recipes'
 import { shortHash } from './account-sandbox'
-import { devnetRpcUrl, devnetToken } from './account-sandbox-devnet'
 import { Button, FAKE_RECIPIENT, Step, StringFormatter, useCopyToClipboard } from './Demo'
+import { devnetRpcUrl, devnetToken } from './devnet-network'
 
 const token = devnetToken
 const payment = parseUnits('1', 6)
