@@ -1,0 +1,50 @@
+---
+title: Legacy accounts
+seoTitle: Use MetaMask, Rabby, and Other Browser Wallets with Tempo | Tempo Docs
+description: Connect a browser wallet's standard Ethereum account to Tempo with wagmi's injected connector, and see which features need a modern signing method instead.
+interactive: true
+mipd: true
+---
+
+import { ConnectWallet } from '../../../../components/ConnectWallet.tsx'
+
+# Legacy accounts
+
+A legacy account is a standard Ethereum account, or EOA: one private key, held by a browser wallet such as MetaMask or Rabby. It works on every Tempo network, including mainnet, so people can pay with the wallet they already have. For new accounts, use a [modern signing method](/docs/accounts/authentication) instead.
+
+## Connect a browser wallet
+
+Connect your wallet to add Tempo mainnet to it.
+
+<ConnectWallet network="mainnet" />
+
+In your app, wagmi's `injected` connector connects the browser's wallet. wagmi also finds every other installed wallet that announces itself ([EIP-6963](https://eips.ethereum.org/EIPS/eip-6963)) and lists it in `useConnectors()`.
+
+```ts [wagmi.config.ts]
+import { tempo } from 'viem/chains'
+import { createConfig, http } from 'wagmi'
+import { injected } from 'wagmi/connectors'
+
+export const config = createConfig({
+  chains: [tempo],
+  connectors: [injected()],
+  transports: { [tempo.id]: http() },
+})
+```
+
+From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain. Tempo has no native gas token: the wallet pays each fee in a stablecoin, [by default](/docs/accounts/fees#fee-token-precedence) the one a payment sends and pathUSD for most other calls. A wallet may also show a placeholder native balance, so [show stablecoin balances](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) in your app instead.
+
+## Legacy accounts compared with Tempo accounts
+
+| | Legacy account | Tempo account |
+| --- | --- | --- |
+| Signers | One private key, in the wallet | [Passkeys, device keys, or private keys](/docs/accounts/authentication), several per account |
+| Lost key | Loses the account and its funds | [Another signer replaces it](/docs/accounts/key-management#plan-for-recovery) |
+| Network fees | Paid by the user | [Sponsored by your app](/docs/accounts/fees/fee-sponsorship), if you choose |
+| Several calls | One call per transaction | Several calls that succeed or fail together |
+
+These features need a [Tempo Transaction](/docs/guide/tempo-transaction), Tempo's own transaction type. Browser wallets like MetaMask send standard Ethereum transactions instead.
+
+## Move a legacy account to modern signers
+
+Create a [Tempo account](/docs/accounts/create) with a passkey or device key and send the funds to it. To keep the address instead, [upgrade the account in place](/docs/accounts/key-management/account-upgrade): it adds signers, and the original key signs the upgrade as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions. Account upgrade runs only on Tempo devnet for now.
