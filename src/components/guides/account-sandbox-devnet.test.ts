@@ -343,29 +343,23 @@ describe('checkDevnet', () => {
     vi.fn(async () => ({ ok, json: async () => body }) as Response)
 
   it('is true only for chain ID 31318', async () => {
-    expect(await checkDevnet({ fetch: reply({ result: '0x7a56' }), protocol: 'http:' })).toBe(true)
-    expect(await checkDevnet({ fetch: reply({ result: '0x1' }), protocol: 'http:' })).toBe(false)
-    expect(await checkDevnet({ fetch: reply({}, false), protocol: 'http:' })).toBe(false)
-  })
-
-  it('skips HTTPS pages without a request', async () => {
-    const fetch = reply({ result: '0x7a56' })
-    expect(await checkDevnet({ fetch, protocol: 'https:' })).toBe(false)
-    expect(fetch).not.toHaveBeenCalled()
+    expect(await checkDevnet({ fetch: reply({ result: '0x7a56' }) })).toBe(true)
+    expect(await checkDevnet({ fetch: reply({ result: '0x1' }) })).toBe(false)
+    expect(await checkDevnet({ fetch: reply({}, false) })).toBe(false)
   })
 
   it('is false when the request fails or times out', async () => {
     const failing = vi.fn(async () => {
       throw new TypeError('fetch failed')
     })
-    expect(await checkDevnet({ fetch: failing, protocol: 'http:' })).toBe(false)
+    expect(await checkDevnet({ fetch: failing })).toBe(false)
     const hanging = vi.fn(
       (_url: string | URL | Request, init?: RequestInit) =>
         new Promise<Response>((_, reject) =>
           init?.signal?.addEventListener('abort', () => reject(new Error('aborted'))),
         ),
     )
-    expect(await checkDevnet({ fetch: hanging, protocol: 'http:', timeoutMs: 5 })).toBe(false)
+    expect(await checkDevnet({ fetch: hanging, timeoutMs: 5 })).toBe(false)
   })
 })
 
