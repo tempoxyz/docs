@@ -695,7 +695,7 @@ export function createDevnetAdapter(
 
   /** A passkey signer. Each signature prompts for Touch ID or Face ID, in the call using it. */
   async function createPasskey(signer: Pick<Signer, 'name'>, prompts: Prompts) {
-    const passkey = await makePasskey(`Tempo devnet · ${signer.name}`, prompts)
+    const passkey = await makePasskey(`Tempo Accounts devnet · ${signer.name}`, prompts)
     const prompter = { prompts }
     const account = {
       ...passkey,
@@ -853,7 +853,7 @@ export function createDevnetAdapter(
     if (key.kind === 'device') {
       // `fromWebAuthnP256` makes a root account, so its signature is wrapped in an access key for
       // the account. Each payment asks for Touch ID or Face ID.
-      const root = await makePasskey(`Tempo devnet · ${key.name} access key`, prompts)
+      const root = await makePasskey(`Tempo Accounts devnet · ${key.name} access key`, prompts)
       return {
         address: root.address as Address,
         bind: (parent, use) =>

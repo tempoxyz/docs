@@ -47,7 +47,7 @@ async function loadDemo() {
 
 /**
  * Start with a plain private-key account, fund it, then upgrade it in place to a configurable
- * account with two signers. Every step is a real Tempo devnet transaction.
+ * account with two signers. Every step is a real transaction on the Tempo Accounts devnet.
  */
 export function UpgradeAccountDemo() {
   const [preview, setPreview] = React.useState<Demo | null | undefined>(undefined)
@@ -197,7 +197,7 @@ export function UpgradeAccountDemo() {
     >
       {preview === null ? (
         <p {...ui.accountDemoMuted()} role="status">
-          This demo runs on Tempo devnet, which this page can’t reach.
+          This demo runs on the Tempo Accounts devnet, which this page can’t reach.
         </p>
       ) : (
         <div
