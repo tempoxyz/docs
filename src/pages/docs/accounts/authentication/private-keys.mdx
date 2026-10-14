@@ -22,8 +22,8 @@ A private key is a secp256k1 or P-256 key that you or a provider already hold. T
 | CLI wallets | The [Tempo CLI wallet](/docs/cli/wallet), Foundry `cast` | Access key for scripts and agents |
 | Hardware wallets | A treasury approver's hardware wallet | Signer at weight 1, so each approval needs a person and a device |
 | Browser wallets | An operator's browser extension wallet | Signer at weight 1 for operator approvals |
-| Other crypto wallets | Mobile wallets, and [wallet providers](/docs/accounts/guides/wallet-provider) such as Turnkey or Privy | Signer at weight 1. A provider's policies apply before it signs. |
-| KMS or HSM | Keys in your cloud KMS or HSM | Signer for recovery, or [access key](/docs/accounts/guides/automate-backend) for automation |
+| Other crypto wallets | Mobile wallets, and [wallet providers](/docs/accounts/guides/users/embed-wallets) such as Turnkey or Privy | Signer at weight 1. A provider's policies apply before it signs. |
+| KMS or HSM | Keys in your cloud KMS or HSM | Signer for recovery, or [access key](/docs/accounts/guides/automations/pay-out-from-a-backend) for automation |
 
 ## What a private key trusts
 
@@ -45,12 +45,12 @@ const account = Account.fromConfig({ address: 'infer', owners: [finance, operati
 
 The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, use that source's viem account adapter instead. Use `Account.fromP256` for a raw P-256 key.
 
-For walkthroughs, see [Set up a company treasury wallet](/docs/accounts/guides/company-treasury) and [Automate a backend](/docs/accounts/guides/automate-backend).
+For walkthroughs, see [Set up a company treasury](/docs/accounts/guides/teams/company-treasury) and [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend).
 
 ## Private key limits
 
 - Tempo can't tell whether a key is still held, or held by whom. A leaked key approves at its weight until you remove it.
 - A signer has no spending limit. To bound what a key can pay, add it as an [access key](/docs/accounts/access-keys) instead.
-- Only the account's initial secp256k1 signers, reaching the original threshold, can recover funds sent to the same address on another EVM chain. Signers added later can't. See [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).
+- Only the account's initial secp256k1 signers, reaching the original threshold, can recover funds sent to the same address on another EVM chain. Signers added later can't. See [cross-chain recovery](/docs/accounts/guides/users/recover-an-account#recover-funds-sent-on-another-chain).
 
 For other methods, see [Signing methods](/docs/accounts/authentication).

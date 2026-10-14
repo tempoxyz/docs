@@ -1,0 +1,81 @@
+---
+title: Give an agent a wallet
+seoTitle: Give an AI Agent a Budgeted Tempo Access Key | Tempo Docs
+description: Authorize an AI agent's own access key with a budget, an expiry, and only the calls its payments use, then revoke it when the agent's task ends.
+interactive: true
+---
+
+import { AccessKeyDemo } from '../../../../../components/guides/AccessKeyDemo'
+
+# Give an agent a wallet
+
+An agent's wallet on Tempo is an access key on an account: the agent signs payments with it, and Tempo holds it to a budget, an expiry, and a list of allowed calls. The account's signers stay with the customer or your approvers, so the agent can spend only what they approved.
+
+<span id="agents" />
+<span id="ai-agents" />
+<span id="authorize-the-agents-task" />
+
+:::warning
+Never give an agent an [admin access key](/docs/accounts/access-keys/admin-access-keys). An admin key has no budget, scopes, or expiry, and it can authorize more keys, so an agent holding one can spend the whole balance.
+:::
+
+The demo authorizes a key with a 10 AlphaUSD daily limit on Moderato testnet, a Tempo test network whose stablecoins have no value. It pays with the key, shows Tempo rejecting an overspend, then revokes it.
+
+<AccessKeyDemo />
+
+:::::steps
+
+### Authorize the agent's key
+
+Generate a key where the agent runs, and keep it in that runtime's secret storage. The account's signers authorize its address once:
+
+```ts [authorize-agent.ts]
+import { parseUnits } from 'viem'
+import { Account, Expiry, P256 } from 'viem/tempo'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+const privateKey = P256.randomPrivateKey() // store in the agent runtime's secret storage
+const agentKey = Account.fromP256(privateKey, { access: address }) // the account's address
+
+await client.accessKey.authorizeSync({
+  accessKey: agentKey,
+  account, // the account, signed by its signers
+  expiry: Expiry.days(30),
+  limits: [{ token: alphaUsd, limit: parseUnits('50', 6), period: 86_400 }], // 50 AlphaUSD a day
+  scopes: [{ address: alphaUsd, selector: 'transferWithMemo(address,uint256,bytes32)' }],
+})
+```
+
+Authorizing is a transaction the signers approve, for example with a passkey. Save the key's address, `agentKey.accessKeyAddress`, with the agent's name, so you can find it later.
+
+### Set its budget and scopes
+
+Size each bound to the agent's task:
+
+| Bound | Choose | Example |
+| --- | --- | --- |
+| Budget | A one-time amount (omit `period`) for a single task, or a renewing amount for an ongoing job | 50 AlphaUSD a day |
+| Scopes | Only the contracts and functions its payments call | `transferWithMemo` on AlphaUSD |
+| Expiry | The task's length | 30 days |
+
+Amounts are in base units: AlphaUSD has 6 decimals, so `parseUnits('50', 6)` is 50 AlphaUSD. Tempo meters transfers, approvals, and the key's fees against the budget. To change the budget later, the signers [update the limit](/docs/accounts/access-keys/spending-limits#change-a-spending-limit); to change allowed calls, see [Scopes](/docs/accounts/access-keys/scopes#change-allowed-calls). Show the remaining budget with `client.accessKey.getRemainingLimit`.
+
+### Revoke it
+
+When the task ends or the agent misbehaves, the signers revoke the key:
+
+```ts [revoke-agent.ts]
+await client.accessKey.revokeSync({ account, accessKey: agentKeyAddress })
+```
+
+Revocation is permanent, and Tempo rejects the key's next transaction. Show access as removed only after the revocation confirms. See [Revocation](/docs/accounts/access-keys/revocation).
+
+:::::
+
+<span id="keep-account-and-request-budgets-distinct" />
+
+## Agent budget limits
+
+- An agent's key can't authorize other keys, change signers, or count toward the [signing threshold](/docs/accounts/policies/signing-thresholds).
+- The key's budget caps what the agent spends from the account. Cap each request separately in the agent's client: Tempo Wallet CLI uses `--max-spend`.
+- Give each agent its own key, so revoking one leaves the others working.

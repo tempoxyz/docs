@@ -28,7 +28,7 @@ Configurable accounts are specified in [TIP-1107](https://tips.sh/1107) and its 
 
 Total owner weight is at most 255. Owners are primitive keys: secp256k1, P-256, or WebAuthn. A configurable account can't be another account's owner, but it can be another account's [access key](/docs/development/account-keychain#access-keys-on-each-account-type).
 
-Tempo stores only a 32-byte hash of the configuration in the account. Every approval carries the full configuration, so keep it: [`client.accounts.getConfig`](#read-the-current-configuration) serves it from a relay.
+Tempo stores only a 32-byte hash of the configuration in the account. Every approval carries the full configuration, so your app must [keep the configuration it set](#keep-the-current-configuration).
 
 <span id="configurable-account-address" />
 
@@ -37,7 +37,7 @@ Tempo stores only a 32-byte hash of the configuration in the account. Every appr
 The address is a CREATE2 address computed from the version-0 owners, weights, threshold, and salt, with no chain ID. Updates never change it. Specification: [TIP-1110](https://tips.sh/1110).
 
 - **Before registration:** the address can receive stablecoins. Nothing is deployed.
-- **On another EVM chain:** the initial secp256k1 owners, at the original threshold, can deploy a recovery wallet at the same address and retrieve funds sent there by mistake. P-256 and WebAuthn owners don't count. See [cross-chain recovery](/docs/accounts/guides/self-custody#recover-funds-sent-on-another-chain).
+- **On another EVM chain:** the initial secp256k1 owners, at the original threshold, can deploy a recovery wallet at the same address and retrieve funds sent there by mistake. P-256 and WebAuthn owners don't count. See [cross-chain recovery](/docs/accounts/guides/users/recover-an-account#recover-funds-sent-on-another-chain).
 - **Code:** the account can't hold contract code or an EIP-7702 delegation.
 
 ```ts [account.ts]
@@ -74,7 +74,7 @@ Owners approve a whole transaction, including every call in a batch. The transac
 | Replay | Each signature binds the account and configuration version |
 | Access keys | Never count toward the threshold |
 
-Owners can sign separately and offline. A relay with `Relay.accounts` collects approvals until the threshold is met, then submits.
+Owners can sign separately and offline. Your app collects each owner's approval, for example in its backend, and submits once the approving weights reach the threshold.
 
 <span id="multisig-signature-format" />
 
@@ -120,35 +120,31 @@ const { config } = await client.accounts.updateConfigSync({
 })
 ```
 
-Viem sorts the new owners and signs with the account's local owners. Use the returned `config`, now at version 1, for later approvals. Specification: [TIP-1109](https://tips.sh/1109). Guide: [Set up self-custody](/docs/accounts/guides/self-custody).
+Viem sorts the new owners and signs with the account's local owners. Save the returned `config`, now at version 1, with the account record and use it for later approvals and updates. Specification: [TIP-1109](https://tips.sh/1109). Guide: [user account guides](/docs/accounts/guides/users).
 
-### Read the current configuration
+<span id="read-the-current-configuration" />
+
+### Keep the current configuration
+
+Tempo stores only a hash of the configuration, a fingerprint that can't be turned back into the owners and threshold. Your app must keep the configuration it set: the owners, threshold, salt, and version. Save it with the account record when you create the account and after each update, then open the account from it:
 
 ```ts [config.ts]
+import { Account } from 'viem/tempo'
+
+const account = Account.fromConfig({ address, ...config }) // the saved address and configuration
+```
+
+To check that a saved configuration is still current, compare its hash with the one Tempo stores. `getConfigCommitment` reads the stored hash from the chain, so any node serves it:
+
+```ts [check-config.ts]
+import { AccountConfig } from 'viem/tempo'
 import { client } from './client'
 
-const config = await client.accounts.getConfig({ address: account.address })
+const stored = await client.accounts.getConfigCommitment({ account: address })
+const isCurrent = stored === AccountConfig.getCommitment(config)
 ```
 
-`getConfig` returns the configuration a relay recorded, or `null` if it has none. A bare node returns only the hash, through `client.accounts.getConfigCommitment`, so point the client at a relay that mounts `Relay.accounts`:
-
-```ts [client.ts]
-import { http } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { createClient, Relay, Store, withRelay } from 'viem/tempo'
-
-// Replace Store.memory() with a persistent Store.Atomic shared by every relay instance.
-const store = Store.memory()
-
-export const client = createClient({
-  chain: tempoModerato,
-  transport: withRelay(http(), {
-    plugins: [Relay.keyAuthorization({ store }), Relay.accounts({ store })],
-  }),
-})
-```
-
-`Relay.accounts` records each account's configuration as it changes and serves `client.accounts.getConfig`. `Relay.keyAuthorization` holds signed access-key authorizations, including a configurable account's once they reach quorum, and attaches each to the key's next transaction. To serve the relay to other clients, pass the same plugins to `Relay.create({ client, plugins })` and serve `relay.fetch`.
+The stored hash is zero before the account is registered. A mismatch means another update landed, and approvals built on the saved configuration fail.
 
 <span id="login-signers" />
 
@@ -169,7 +165,7 @@ interface ISignatureVerifier {
 | Reverts `InvalidFormat()` | The encoding or configuration is invalid |
 | Reverts `InvalidSignature()` | The owner approvals are invalid |
 
-An unregistered account verifies against its version-0 configuration, without registering. After an update, signatures for the old version fail. Guide: [Verify approvals](/docs/accounts/policies/signing-thresholds#verify-approvals).
+An unregistered account verifies against its version-0 configuration, without registering. After an update, signatures for the old version fail. Guide: [Signing thresholds](/docs/accounts/policies/signing-thresholds).
 
 ## Native multisig precompile
 

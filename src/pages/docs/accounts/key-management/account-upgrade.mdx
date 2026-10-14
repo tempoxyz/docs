@@ -23,7 +23,7 @@ An account upgrade turns a single-key (EOA) account into a configurable account 
 
 ## What an upgrade changes
 
-A single-key account, like an Ethereum EOA, has no other signer to approve a [signer rotation](/docs/accounts/key-rotation/signer-rotation): if its key is lost, so is the account. The upgrade installs a list of signers and a threshold on the account, and from then on Tempo checks every approval against them.
+A single-key account, like an Ethereum EOA, has no other signer to approve a [signer rotation](/docs/accounts/key-management/remove-signers): if its key is lost, so is the account. The upgrade installs a list of signers and a threshold on the account, and from then on Tempo checks every approval against them.
 
 | Changes | Stays the same |
 | --- | --- |
@@ -36,7 +36,7 @@ Contracts that check signatures themselves, such as Permit2, may still accept th
 
 ## Choose signers and threshold
 
-List the original key alongside at least one backup signer, such as a passkey or a recovery key. With both at weight 1 and threshold 1, either key can replace the other later, and either can also pay alone. To require both for payments, use threshold 2 and add a third signer so the account can still lose one. [Plan for recovery](/docs/accounts/key-rotation#plan-for-recovery) gives the rule to check.
+List the original key alongside at least one backup signer, such as a passkey or a recovery key. With both at weight 1 and threshold 1, either key can replace the other later, and either can also pay alone. To require both for payments, use threshold 2 and add a third signer so the account can still lose one. [Plan for recovery](/docs/accounts/key-management#plan-for-recovery) gives the rule to check.
 
 Before you upgrade, [revoke the access keys](/docs/accounts/access-keys/revocation) you don't want. The upgrade keeps every access key and its limits.
 
@@ -68,7 +68,7 @@ await client.writeContractSync({
 })
 ```
 
-`AccountConfig.from` sorts the signers by address, as Tempo requires. After the upgrade, open the account with `Account.fromConfig` and its version-1 configuration, since every approval carries it. From then on, [rotate](/docs/accounts/key-rotation/signer-rotation) and [recover](/docs/accounts/key-rotation/signer-recovery) signers like any configurable account. [Upgrade an existing account](/docs/accounts/key-rotation/account-upgrade) runs the full flow in a live demo, including saving the configuration.
+`AccountConfig.from` sorts the signers by address, as Tempo requires. After the upgrade, open the account with `Account.fromConfig` and its version-1 configuration, since every approval carries it. From then on, [rotate](/docs/accounts/key-management/remove-signers) and [recover](/docs/accounts/key-management/remove-signers) signers like any configurable account. [Upgrade an existing account](/docs/accounts/key-management/account-upgrade) runs the full flow in a live demo, including saving the configuration.
 
 ## Account upgrade limits
 
@@ -76,6 +76,6 @@ await client.writeContractSync({
 - The upgrade must be the transaction's only call, with no `keyAuthorization` or authorization list.
 - Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
 - The upgrade is permanent. Afterward, the original key approves only as a listed signer: a direct signature fails with `RootKeyRetired`.
-- Upgraded accounts can't use [cross-chain recovery](/docs/accounts/key-rotation/signer-recovery#recover-funds-sent-on-another-chain).
+- Upgraded accounts can't use [cross-chain recovery](/docs/accounts/key-management#recover-funds-sent-on-another-chain).
 
 Reference: [Single-key accounts](/docs/development/single-key-accounts#upgrade-to-a-configurable-account). Specification: [TIP-1113](https://tips.sh/1113).

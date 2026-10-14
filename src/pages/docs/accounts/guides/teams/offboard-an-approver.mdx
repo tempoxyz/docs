@@ -1,0 +1,99 @@
+---
+title: Offboard an approver
+seoTitle: Remove a Departing Approver from a Tempo Treasury | Tempo Docs
+description: Remove a departing approver's signer from a treasury, revoke the access keys they could reach, and restore the threshold, at the same address and balance.
+interactive: true
+---
+
+import { GuideDemo } from '../../../../../components/guides/GuideDemo'
+
+# Offboard an approver
+
+:::warning
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
+:::
+
+When an approver leaves, remove their signer from the [treasury](/docs/accounts/guides/teams/company-treasury), revoke the keys they could use, and add a replacement so the treasury can still lose any one key. The treasury keeps its address, balance, and payment history.
+
+<span id="remove-a-departing-approver" />
+<span id="remove-a-signer" />
+
+Removing a signer is a signer update: one transaction that replaces the treasury's list of signers and its threshold. The current approvers approve it like a payment, with weights that reach the threshold. Once it lands, the departing approver's key can't approve anything, and approvals collected before the update stop counting.
+
+The examples continue from [Set up a company treasury](/docs/accounts/guides/teams/company-treasury): a 2-of-3 treasury whose `owners` and `threshold` you saved, with the controller departing. The demo runs the same steps on Tempo devnet, a test network whose stablecoins have no value, with three approver keys and a service access key that this page generates.
+
+<GuideDemo guide="rotate-keys" />
+
+:::::steps
+
+### Remove their signer
+
+Build the next signer list from the one you saved, without the departing approver, and keep the threshold. The approvers who stay approve it:
+
+```ts [offboard.ts]
+import { isAddressEqual } from 'viem'
+
+const remaining = owners.filter(({ owner }) => !isAddressEqual(owner, controller))
+
+const { config, receipt } = await client.accounts.updateConfigSync({
+  account: treasury,
+  nextConfig: { owners: remaining, threshold },
+  owner: finance,
+})
+await client.sendTransactionSync({ account: treasury, hash: receipt.transactionHash, owner: operations })
+// Save `config` with your treasury record: the next update starts from it.
+```
+
+The weights that remain must still reach the threshold, or Tempo rejects the update. Here two approvers remain at a threshold of 2, so the update lands. A departing approver who is leaving on good terms can be one of the approvers. If their key may be compromised, approve without it.
+
+### Revoke their keys
+
+Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). A backend key or device key the departing approver set up keeps paying within its limits until the remaining approvers revoke it:
+
+```ts [offboard.ts]
+import { Account } from 'viem/tempo'
+
+const current = Account.fromConfig({ address: treasury.address, ...config })
+
+const { receipt: revoked } = await client.accessKey.revokeSync({ account: current, accessKey: serviceKey, owner: finance })
+await client.sendTransactionSync({ account: current, hash: revoked.transactionHash, owner: operations })
+```
+
+`serviceKey` is the address you saved when you authorized the key. Revocation is permanent. [Revocation](/docs/accounts/access-keys/revocation) covers finding every key to revoke.
+
+### Rebalance the threshold
+
+With two approvers left at a threshold of 2, both must approve every payment, and losing either key locks the treasury. Add a replacement approver to return to 2 of 3:
+
+```ts [offboard.ts]
+const replacement = env('NEW_CONTROLLER_PASSKEY_ADDRESS')
+const nextOwners = [...config.owners, { owner: replacement, weight: 1 }]
+
+const { config: rebalanced, receipt: added } = await client.accounts.updateConfigSync({
+  account: current,
+  nextConfig: { owners: nextOwners, threshold: config.threshold },
+  owner: finance,
+})
+await client.sendTransactionSync({ account: current, hash: added.transactionHash, owner: operations })
+// Save `rebalanced` with your treasury record.
+```
+
+If you have no replacement yet, lowering the threshold to 1 keeps the treasury usable, but either remaining approver can then pay alone. To avoid the 2-of-2 interval, swap the departing approver for the replacement in the step 1 update instead. Have the new approver approve once before you rely on them.
+
+:::::
+
+<span id="rotate-an-approvers-key" />
+<span id="rotate-a-key" />
+<span id="key-rotation" />
+<span id="rotate-a-key-in-code" />
+
+## Rotate an approver's key instead
+
+When the approver stays but their key changes, such as a new hardware wallet or a switch of wallet provider, replace the old key with the new one at the same weight in one update. See [Rotate a key by replacing it in one update](/docs/accounts/key-management/remove-signers#rotate-a-key-by-replacing-it-in-one-update).
+
+## Offboarding limits
+
+- The approvers who approve an update must reach the current threshold, and the remaining weights must reach the new one.
+- `InvalidConfig` means the update didn't start from the treasury's current signers, usually because another update landed first. Rebuild it from the configuration that update returned.
+- After a signer change, `address: 'infer'` derives a different address. Open the treasury with its saved address and configuration.
+- A revoked access key can't be authorized again. Authorize a new key instead.

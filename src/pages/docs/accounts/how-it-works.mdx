@@ -26,7 +26,7 @@ The address is the account's public identifier. It holds the account's TIP-20 ba
 
 | Kind | Who approves |
 | --- | --- |
-| Single-key account | One key, as on other EVM chains. [Upgrade it](/docs/accounts/key-rotation/account-upgrade) to a configurable account at the same address. |
+| Single-key account | One key, as on other EVM chains. [Upgrade it](/docs/accounts/key-management/account-upgrade) to a configurable account at the same address. |
 | Configurable account | [Signers](#signers) with weights and a threshold. Its address comes from its first configuration and never changes as signers change. |
 
 The example account is configurable, so the customer keeps the same address when they replace a lost phone or rotate the recovery key. Either kind can have [access keys](#access-keys).
@@ -53,7 +53,7 @@ Each auth type has its own [authentication](/docs/accounts/authentication) guide
 
 Only signers can change signers and the threshold. A change voids approvals collected for the old configuration.
 
-[Signing thresholds](/docs/accounts/policies/signing-thresholds) · [Set up self-custody](/docs/accounts/guides/self-custody) · [Set up a company treasury wallet](/docs/accounts/guides/company-treasury)
+[Signing thresholds](/docs/accounts/policies/signing-thresholds) · [Set up self-custody](/docs/accounts/guides/users/add-a-recovery-signer) · [Set up a company treasury](/docs/accounts/guides/teams/company-treasury)
 
 ## Access keys
 

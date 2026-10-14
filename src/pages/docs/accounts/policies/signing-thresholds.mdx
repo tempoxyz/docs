@@ -23,19 +23,27 @@ Take a customer account with a passkey of weight 2, a backup key of weight 1, an
 
 One approval covers the whole transaction, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys never count toward it: they pay alone, within limits, instead of approving.
 
-Read an account's signers and threshold, then replace them in one signer update approved at the current threshold:
+Tempo stores only a hash of the signers and threshold: a 32-byte fingerprint that identifies the current configuration but can't be turned back into it. Your app keeps the signers and threshold itself. Hold on to the ones you created the account with, and pass the full list and threshold to each signer update, approved at the current threshold:
 
 ```ts [threshold.ts]
-const { owners, threshold } = await client.accounts.getConfig({ address: account.address })
+import { Account } from 'viem/tempo'
 
-await client.accounts.updateConfigSync({
+const owners = [
+  { owner: passkey.address, weight: 2 },
+  { owner: backup.address, weight: 1 },
+]
+const threshold = 2
+const account = Account.fromConfig({ address: 'infer', owners, threshold })
+
+// Later: add a recovery signer. List every signer, not only the new one.
+const { config } = await client.accounts.updateConfigSync({
   account,
-  nextConfig: { owners: [...owners, { owner: backup.address, weight: 1 }], threshold },
+  nextConfig: { owners: [...owners, { owner: recovery.address, weight: 1 }], threshold },
   owner: passkey, // a signer that reaches the current threshold
 })
 ```
 
-`client.accounts.getConfig` needs a relay with `Relay.accounts`. A bare node doesn't serve it.
+Save the returned `config` with the account record, so the next update starts from it.
 
 <span id="what-a-threshold-protects" />
 
@@ -66,13 +74,13 @@ Count parties, not signers. Two keys in the same KMS, or a wallet provider's key
 - **Customer accounts** is multi-factor approval. Signer changes, new devices, and payments beyond a device key's limits need the passkey, which only the customer's device holds, or both keys together.
 - **Embedded wallets** keeps each provider below the threshold. Neither can pay without the customer or the other provider.
 
-Walkthroughs: [Set up self-custody](/docs/accounts/guides/self-custody) and [Set up a company treasury wallet](/docs/accounts/guides/company-treasury).
+Walkthroughs: [user account guides](/docs/accounts/guides/users) and [Set up a company treasury](/docs/accounts/guides/teams/company-treasury).
 
 <span id="team-budgets" />
 <span id="set-up-a-team-account" />
 <span id="team-account-limits" />
 
-A treasury can give a team its own budget without lowering its threshold. The treasury authorizes the team's account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/guides/company-treasury#give-a-team-a-budget).
+A treasury can give a team its own budget without lowering its threshold. The treasury authorizes the team's account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/guides/teams/team-budget).
 
 <span id="collect-approvals-from-several-approvers" />
 <span id="verify-approvals" />
@@ -88,7 +96,7 @@ const { receipt } = await client.accounts.updateConfigSync({ account, nextConfig
 await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: operations })
 ```
 
-A relay with `Relay.accounts` holds the approvals and submits once they reach the threshold. Tempo rejects signatures beyond the threshold, so stop collecting once it's met. A signer change voids approvals collected for the old configuration.
+Your app collects each signer's approval, for example in its backend, and submits the transaction once the approving weights reach the threshold. Tempo rejects signatures beyond the threshold, so stop collecting once it's met. A signer change voids approvals collected for the old configuration.
 
 Your contract or backend can check that an account approved a message, against the account's current signers and threshold:
 

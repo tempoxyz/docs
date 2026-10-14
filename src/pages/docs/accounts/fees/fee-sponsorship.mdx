@@ -63,7 +63,7 @@ export const client = createClient({
 
 Only `true` sponsors the transaction. `false`, or a named reason such as `'spend_limit_exceeded'`, refuses it, and the relay returns the transaction for the account to pay itself. Without `validate`, the fee payer sponsors every request it receives, so add authentication and rate limits before you fund it.
 
-To serve the fee payer to other clients, pass the same plugins to `Relay.create({ client, plugins })` and serve `relay.fetch`. When the relay also runs `Relay.accounts`, list `Relay.accounts` first.
+To serve the fee payer to other clients, pass the same plugins to `Relay.create({ client, plugins })` and serve `relay.fetch`.
 
 ## What a fee payer can and can't do
 

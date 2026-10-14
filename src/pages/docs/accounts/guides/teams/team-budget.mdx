@@ -1,0 +1,86 @@
+---
+title: Give a team a budget
+seoTitle: Give a Team a Daily Spending Budget from a Tempo Treasury | Tempo Docs
+description: Authorize a team's own 2-of-3 account to pay from the company treasury within a daily limit, so the team pays without asking the treasury approvers each time.
+interactive: true
+---
+
+import { GuideDemo } from '../../../../../components/guides/GuideDemo'
+
+# Give a team a budget
+
+:::warning
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
+:::
+
+Let an operations team pay from the [company treasury](/docs/accounts/guides/teams/company-treasury) within a daily limit, without asking the treasury's approvers for each payment. The treasury's approvers authorize the team's own account once, and Tempo enforces the limit on every payment the team makes.
+
+<span id="give-a-team-a-budget" />
+<span id="set-up-a-team-budget" />
+
+The team gets its own account, with the team members as its signers and a threshold of 2, so two members approve each team payment. The treasury then authorizes that account as an [access key](/docs/accounts/access-keys): a key the treasury allows to spend for it within limits it sets, without the treasury's signers approving each transaction. Payments come from the treasury's address and balance, and the team never holds the treasury's funds.
+
+The demo creates a treasury on Tempo devnet with a passkey on this device, authorizes a team account with generated member keys for 2,000 USD a day, and pays from the budget. Devnet is a test network, so the stablecoins have no value.
+
+<GuideDemo guide="team-accounts" />
+
+:::::steps
+
+### Create the team account
+
+Create a Tempo account with the three team members as signers and a threshold of 2, as for the [treasury](/docs/accounts/guides/teams/company-treasury#create-the-treasury). Give each member a key they hold, such as a passkey or a key in your KMS.
+
+```ts [team.ts]
+import { Account } from 'viem/tempo'
+
+const team = Account.fromConfig({
+  address: 'infer',
+  owners: [
+    { owner: member1, weight: 1 },
+    { owner: member2, weight: 1 },
+    { owner: member3, weight: 1 },
+  ],
+  threshold: 2,
+})
+// Save team.address with the team's record. The treasury authorizes this address.
+```
+
+The team account holds no funds of its own. Its address identifies the team to the treasury.
+
+### Authorize it from the treasury
+
+Treasury approvers who reach the treasury's threshold authorize the team account's address as an access key once. Set its bounds to match the team's work:
+
+| Bound | Recommended value |
+| --- | --- |
+| [Spending limit](/docs/accounts/access-keys/spending-limits) | A daily limit per stablecoin, such as 50,000 USD |
+| [Scopes](/docs/accounts/access-keys/scopes) | Transfers to the team's approved recipients only |
+| [Expiry](/docs/accounts/access-keys/expiry) | 90 days, followed by a new authorization |
+
+A team account is a configurable account access key, specified in [TIP-1111](https://tips.sh/1111). [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key) covers the authorization itself.
+
+<span id="pay-as-the-team" />
+
+### Track the budget
+
+To pay, one team member starts a payment from the treasury and a second approves it, as with any [two-approver payment](/docs/accounts/guides/teams/company-treasury#collect-approvals). Tempo deducts each payment from the budget and rejects any payment above what remains. Read what's left today:
+
+```ts [budget.ts]
+const { remaining } = await client.accessKey.getRemainingLimit({
+  account: treasury.address,
+  accessKey: team.address,
+  token: alphaUsd,
+})
+```
+
+`remaining` is in base units: AlphaUSD has 6 decimals, so `1_950_000_000n` is $1,950. When the team no longer needs the budget, the treasury's approvers [revoke](/docs/accounts/access-keys/revocation#revoke-an-access-key) the team account like any other access key.
+
+:::::
+
+<span id="team-budget-rules" />
+
+## Team budget limits
+
+- The budget covers the whole team, not each member. Changing the team's signers keeps the authorization and the spending so far.
+- The team's signers approve its payments directly. The team account's own access keys can't use the treasury's authorization.
+- The team can't authorize keys, change the treasury's signers, or count toward the treasury's threshold.
