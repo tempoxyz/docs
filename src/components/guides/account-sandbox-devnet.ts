@@ -557,7 +557,8 @@ export function authorizeKeyCall(options: {
       keyId,
       signatureTypes[keyType],
       {
-        expiry: BigInt(expiry ?? 0),
+        // The precompile rejects 0 as a past expiry; a key that never expires passes u64::MAX.
+        expiry: expiry === undefined ? 2n ** 64n - 1n : BigInt(expiry),
         enforceLimits: limits.length > 0,
         limits: limits.map(({ token, limit, period = 0 }) => ({
           token,
