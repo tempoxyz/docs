@@ -1,5 +1,5 @@
 /**
- * Guide demos: one script per guide, run on Tempo devnet with the reader's own signers. Each
+ * Guide demos: one script per guide, run on the Tempo Accounts devnet with the reader's own signers. Each
  * step's title matches the guide's step heading. Steps that change the account send real devnet
  * transactions and return their hashes; the others do a real local action (create a key) or
  * read Tempo.

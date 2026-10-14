@@ -2,7 +2,7 @@ import { thisDevice, thisDevicePasskey } from './this-device'
 /**
  * Rules engine for the account sandbox. Pure functions only: no React and no network.
  *
- * The rules follow the configurable-account TIPs that run on Tempo devnet:
+ * The rules follow the configurable-account TIPs that run on the Tempo Accounts devnet:
  * - TIP-1114: 1–48 owners, weights 1–255, total weight at most 255, threshold 1–255 and
  *   reachable with at most eight owner signatures. Signatures stop at the threshold.
  * - TIP-1107 and TIP-1109: updates increment the version, keep the address, and keep access keys.
