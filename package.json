@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.28.1",
   "scripts": {
-    "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
+    "dev": "node --env-file-if-exists=.env --import=tsx --import=./scripts/native-json-imports.mjs node_modules/vite/bin/vite.js",
     "build": "node scripts/guard-vocs-config.mjs && pnpm run \"/^(check:types|build:site)$/\"",
     "build:site": "pnpm run check:styles && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe . && pnpm run check:styles",
