@@ -9,7 +9,7 @@ import { AccountDiagram } from '../../../../components/AccountDiagram'
 # OIDC logins
 
 :::warning
-**Not live yet.** OIDC logins ([TIP-1130](https://tips.sh/1130)) are in early development, and behavior may change. Login examples run on a separate devnet from the other Accounts examples, because the Tempo Accounts devnet doesn't verify login proofs.
+**OIDC logins aren't live yet.** Using a login as a signer ([TIP-1130](https://tips.sh/1130)) works only on a separate login devnet, not on mainnet or testnet, and may still change. The Tempo Accounts devnet doesn't verify login proofs, so the login examples run on that separate devnet.
 :::
 
 An OIDC login makes the sign-in your customers already use, from Google to enterprise SSO, a signer on their Tempo account, with no separate wallet app. The login's issuer can sign in as any customer it covers, so keep each login below the threshold and pair it with a passkey the customer holds.
