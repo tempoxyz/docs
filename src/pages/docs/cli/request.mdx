@@ -48,7 +48,7 @@ tempo request -X POST \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
 ```
 
-Capture headers for an agent-controlled MPP Credits flow:
+Capture headers to spend existing MPP Credits through the [legacy spending flow](/docs/cli/wallet#agent-and-script-mode). MPP Credits can no longer be purchased; use `tempo wallet fund --mach` for new MACH funding:
 
 ```bash [Terminal]
 headers="$(mktemp)"

@@ -9,7 +9,7 @@ import { Cards, Card } from 'vocs'
 
 # `tempo wallet`
 
-`tempo wallet` is the command-line way to use [Tempo Wallet](https://wallet.tempo.xyz) from scripts, terminals, and AI agents. Use it to sign in, manage balances and access keys, discover [MPP](https://mpp.dev/overview) services, fund token or credit balances, and manage payment sessions. Use [`tempo request`](/docs/cli/request) when you want the CLI to make the paid HTTP call.
+`tempo wallet` is the command-line way to use [Tempo Wallet](https://wallet.tempo.xyz) from scripts, terminals, and AI agents. Use it to sign in, manage balances and access keys, discover [MPP](https://mpp.dev/overview) services, fund token balances, and manage payment sessions. Use [`tempo request`](/docs/cli/request) when you want the CLI to make the paid HTTP call.
 
 <span id="download-the-tempo-wallet-cli" />
 
@@ -43,7 +43,7 @@ tempo wallet whoami
 tempo wallet whoami --credits
 ```
 
-`whoami` shows your address, token balances, key state, and optional MPP Credits balance. Credits are separate from token balances and only apply to eligible one-time MPP charges.
+`whoami` shows your address, token balances, key state, and optional MPP Credits balance. MPP Credits are deprecated and can no longer be purchased. Existing credits remain spendable, separate from token balances, on eligible one-time MPP charges.
 
 <span id="manage-access-keys" />
 
@@ -63,11 +63,13 @@ Each wallet can have multiple access keys with independent spending limits. Use 
 
 ```bash [Terminal]
 tempo wallet fund
-tempo wallet fund --credits
+tempo wallet fund --mach
 tempo wallet fund --crypto
 ```
 
-On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--credits` opens MPP Credits purchase for eligible one-time services.
+On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--mach` opens MACH checkout.
+
+MPP Credits purchases have been retired. `tempo wallet fund --credits` returns a deprecation error; use `tempo wallet fund --mach` or [Buy MACH in Tempo Wallet](https://wallet.tempo.xyz/agent) instead. MACH purchases do not top up or convert existing credits.
 
 Transfer tokens to another address:
 
@@ -120,7 +122,7 @@ tempo request -t --dry-run -X POST --json '{"input":"hello"}' <SERVICE_URL>/<END
 tempo request -t --max-spend 1.00 -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 ```
 
-If a service supports MPP Credits, capture the challenge first, then pay with credits:
+If you have existing MPP Credits and the service supports them, capture the challenge first, then pay with credits. `--credits` remains available for legacy spending and prints a deprecation warning:
 
 ```bash [Terminal]
 headers="$(mktemp)"
@@ -196,14 +198,15 @@ See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 | Flag | Description |
 | --- | --- |
 | `--crypto` | Open direct crypto funding. |
-| `--credits` | Buy MPP Credits for eligible one-time services. |
+| `--mach` | Buy MACH for supported services. |
+| `--credits` | Retired. Returns an error directing you to `fund --mach`. |
 
 ### `tempo wallet transfer`
 
 | Flag | Description |
 | --- | --- |
 | `--dry-run` | Preview the transfer without submitting it. |
-| `--credits` | Pay with MPP Credits instead of tokens. |
+| `--credits` | Spend existing MPP Credits on eligible charges, with a deprecation warning. |
 | `--mpp-challenge-file <FILE>` | Pay the MPP challenge in this headers file, captured with `tempo request -D`. |
 
 ### `tempo wallet services`
