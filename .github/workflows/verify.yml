@@ -53,25 +53,25 @@ jobs:
             container:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
               options: --user 1001
-          # Shards stay on GitHub-hosted runners: each has its own IP, and the
-          # Moderato RPC limits connections per IP for the live-transaction tests.
+          # Depot shares egress IPs, which exhaust Moderato's anonymous per-IP
+          # connection limit. Live tests authenticate with TEMPO_RPC_API_KEY.
           - target: e2e
             name: E2E Tests (1/3)
-            runner: ubuntu-24.04-arm
+            runner: depot-ubuntu-latest-8
             shard: 1
             container:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
               options: --user 1001
           - target: e2e
             name: E2E Tests (2/3)
-            runner: ubuntu-24.04-arm
+            runner: depot-ubuntu-latest-8
             shard: 2
             container:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
               options: --user 1001
           - target: e2e
             name: E2E Tests (3/3)
-            runner: ubuntu-24.04-arm
+            runner: depot-ubuntu-latest-8
             shard: 3
             container:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -232,7 +232,7 @@ jobs:
         run: |
           pnpm exec playwright test --list --reporter=./scripts/playwright-shard-reporter.ts > "$RUNNER_TEMP/e2e-tests.txt"
           test -s "$RUNNER_TEMP/e2e-tests.txt"
-          pnpm run test:e2e --workers=4 --test-list "$RUNNER_TEMP/e2e-tests.txt"
+          pnpm run test:e2e --workers=6 --test-list "$RUNNER_TEMP/e2e-tests.txt"
         env:
           E2E_SHARD: ${{ matrix.shard }}
           E2E_SHARDS: 3
