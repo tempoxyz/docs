@@ -1,8 +1,8 @@
-diff --git a/dist/router/client.js b/dist/router/client.js
-index d5edcaa9c1881a316fb60bea64288de07bf8e99f..35608483c1d3559c07801f151b7484c151ac8a00 100644
---- a/dist/router/client.js
-+++ b/dist/router/client.js
-@@ -684,12 +684,9 @@ const scrollToRoute = (route, behavior, scrollTopForMissingHash)=>{
+diff --git a/dist/router/client-utils/scroll.js b/dist/router/client-utils/scroll.js
+index b47ec967b59ae5dda285a4d3decb940debe1c3c0..ea696c31e8eb4584e8696597ffa2f54d746de200 100644
+--- a/dist/router/client-utils/scroll.js
++++ b/dist/router/client-utils/scroll.js
+@@ -41,12 +41,9 @@ export const scrollToHash = (hash, behavior, scrollTopForMissingHash)=>{
              });
              return;
          }

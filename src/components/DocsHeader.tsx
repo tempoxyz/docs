@@ -89,7 +89,7 @@ function Anchor({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnc
     )
   }
   return (
-    <WakuLink {...props} to={href} unstable_prefetchOnEnter unstable_prefetchOnView>
+    <WakuLink {...props} to={href} unstable_prefetchOnEnter={{}} unstable_prefetchOnView={{}}>
       {children}
     </WakuLink>
   )
