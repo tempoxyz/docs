@@ -1,7 +1,7 @@
 ---
 title: Device keys
 seoTitle: Pay Without a Prompt Using Device Keys | Tempo Docs
-description: Create a non-extractable P-256 key on the customer's phone, computer, or browser, and authorize it to pay within limits for a Tempo account.
+description: Create a key the customer's phone, computer, or browser can't export, and authorize it once to pay from a Tempo account within a spending limit and expiry.
 interactive: true
 ---
 
@@ -9,27 +9,26 @@ import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
 
 # Device keys
 
-A device key lets the customer's phone, computer, or browser pay with no prompt, within limits a signer sets once. Add it as an [access key](/docs/accounts/access-keys), not a signer, so a lost or unlocked device can spend only up to those limits until the key expires.
+A device key lets the customer's phone, computer, or browser pay without asking the customer to approve each payment. The customer's passkey authorizes the key once as an [access key](/docs/accounts/access-keys), and Tempo rejects any payment over its spending limit or after it expires.
 
 ## What a device key is
 
-A device key is a P-256 key that the device creates in its platform key store and can't export. The key store signs without revealing the key. The customer's passkey authorizes it once with a spending limit and an expiry, and Tempo checks those limits on every payment it makes.
+A device key is a P-256 key that never leaves the device: the device's key store creates it and signs with it, but won't export it.
 
-## Device key stores by platform
+<span id="device-key-stores-by-platform" />
 
 | Platform | Key store |
 | --- | --- |
-| iPhone and iPad | Secure Enclave |
-| Mac | Secure Enclave |
-| Android | Android Keystore, hardware-backed, or StrongBox where available |
+| iPhone, iPad, and Mac | Secure Enclave |
+| Android | Android Keystore, backed by StrongBox or other secure hardware where available |
 | Windows | TPM, through the Microsoft Platform Crypto Provider |
-| Browsers | WebCrypto non-extractable key, kept in IndexedDB |
+| Browsers | Non-extractable WebCrypto key, kept in IndexedDB |
 
-For keys on servers, use a KMS or HSM. See [Private keys](/docs/accounts/authentication/private-keys).
+On a server, use a [private key](/docs/accounts/authentication/private-keys) in your KMS or HSM instead.
 
-## What a device key trusts
+<span id="what-a-device-key-trusts" />
 
-A device key trusts only the device that holds it. Whoever unlocks the device can pay up to the key's limits until it expires. No app server or wallet provider holds the key or can use it.
+No app server or wallet provider holds the key, but anyone who unlocks the device can pay with it, up to its [spending limit](/docs/accounts/access-keys/spending-limits) and until it [expires](/docs/accounts/access-keys/expiry). That cap is why you add a device key as an access key, not a signer: a signer has no spending limit.
 
 <span id="create-the-key-on-the-device" />
 <span id="authorize-it-from-a-signer" />
@@ -40,14 +39,16 @@ A device key trusts only the device that holds it. Whoever unlocks the device ca
 
 <P256KeyDemo />
 
-The demo creates a key in this browser, funds its Moderato test account, and pays with it. Reload the page and the key is still here.
+The demo makes the device key its own Moderato testnet account, to show signing without a prompt. Reload the page and the key is still there.
 
-In code, the device creates the key, a signer authorizes it with limits, and the first payment carries that authorization:
+In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 AlphaUSD a day for 30 days, and the first payment carries that authorization. In the code, `client` is a viem client on Moderato testnet, `account` is the customer's passkey account, such as `Account.fromWebAuthnP256(credential)`, `alphaUsd` is `0x20c0000000000000000000000000000000000001`, and `recipient` is the payee's address:
 
 ```ts [device-key.ts]
+import { parseUnits } from 'viem'
 import { Account, Expiry, WebCryptoP256 } from 'viem/tempo'
 
-const keyPair = await WebCryptoP256.createKeyPair() // non-extractable; store keyPair in IndexedDB
+// Non-extractable. Save keyPair in IndexedDB so it survives a reload.
+const keyPair = await WebCryptoP256.createKeyPair()
 
 const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
 const keyAuthorization = await client.accessKey.signAuthorization({
@@ -66,14 +67,8 @@ await client.token.transferSync({
 })
 ```
 
-Later payments omit `keyAuthorization`.
-
 ## Device key limits
 
-- A browser key lives in IndexedDB and is gone if the customer clears site data. Sign in again to authorize a new one.
-- A key can't move to a new device. Each device authorizes its own key.
-- A P-256 key can also be a weighted signer, but a signer has no spending limits, so keep device keys as access keys.
-- For a lost device, [revoke its key](/docs/accounts/access-keys/revocation#revoke-an-access-key). The account's signers don't change.
-- Limits, expiry, and scopes work as for any access key: see [Spending limits](/docs/accounts/access-keys/spending-limits), [Expiry](/docs/accounts/access-keys/expiry), and [Scopes](/docs/accounts/access-keys/scopes).
-
-For other methods, see [Signing methods](/docs/accounts/authentication).
+- Each device needs its own key, authorized by the customer's passkey.
+- Clearing site data deletes a browser key. Authorize a new one the same way.
+- If a device is lost, [revoke its key](/docs/accounts/access-keys/revocation#revoke-an-access-key). The account's signers don't change.

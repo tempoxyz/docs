@@ -1,22 +1,20 @@
 ---
 title: Set up a company treasury
 seoTitle: Set Up a Multi-Approver Company Treasury on Tempo | Tempo Docs
-description: Create a treasury account that three approvers control, where any two approve a payment and no one can move funds alone.
+description: Create one Tempo account that three approvers control, where any two approve each payment and no single key can move funds.
 ---
 
 # Set up a company treasury
 
-:::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
-:::
+A company treasury is one Tempo account that three approvers share, where any two must approve each payment. Tempo checks the approvals itself, so neither one stolen key nor your own backend can pay without a second approver.
 
-Create a treasury account that three approvers control, where any two approve each payment and no one can move funds alone. Tempo checks every approval itself, so neither your app nor a single compromised key can pay without a second approver.
+:::warning
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+:::
 
 <span id="treasury-model" />
 
-The treasury is one Tempo account: an address that holds the company's stablecoins. Each approver is a signer, a key allowed to approve for the account, with a weight of 1. The threshold of 2 is the total weight each transaction needs. A transaction is a signed request that Tempo executes, such as a payment, and Tempo rejects any transaction whose approvals don't reach the threshold. Each transaction also pays a small fee, which the treasury pays in a stablecoin from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors it.
-
-The examples run on Tempo devnet, a test network whose stablecoins have no value. They use a viem `client` on Tempo devnet, `createClient({ chain: tempoDevnet })` from `viem/tempo`, and AlphaUSD at `0x20c0000000000000000000000000000000000001`.
+Each approver holds a signer, a key that approves the account's transactions, with a weight of 1. A transaction runs only when its approvers' weights add up to the threshold, here 2. The same threshold covers signer changes, so no single approver can add or remove a signer.
 
 :::::steps
 
@@ -24,7 +22,7 @@ The examples run on Tempo devnet, a test network whose stablecoins have no value
 
 ### Create the treasury
 
-Give each approver a key in a different place, so one breach can't reach two of them: a hardware wallet, a KMS, or an HSM for each team, or the approver's passkey. [Private keys](/docs/accounts/authentication/private-keys) compares key sources.
+Keep each approver's key somewhere different, such as a hardware wallet, a separate KMS per team, or the approver's passkey, so one breach can't reach two of them. [Private keys](/docs/accounts/authentication/private-keys) compares the options.
 
 ```ts [treasury.ts]
 import { Account } from 'viem/tempo'
@@ -43,41 +41,52 @@ const owners = [
 const threshold = 2
 
 const treasury = Account.fromConfig({ address: 'infer', owners, threshold })
-// Save treasury.address, owners, and threshold with your treasury record.
+// Save treasury.address and treasury.config with your treasury record.
 ```
 
-`address: 'infer'` derives the treasury's address from its first signers and threshold, so you know it before the treasury sends anything. Fund it by sending stablecoins to that address. The address stays the same when you change signers later, so save it rather than deriving it again.
+`address: 'infer'` computes the treasury's address from its first signers and threshold, so you have it before the treasury sends anything. [Fund the treasury](/docs/accounts/create#fund-an-account-on-devnet) by sending stablecoins to that address; it pays its transaction fees from the same balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them. The address stays the same when signers change, so save it rather than computing it again.
 
 ### Collect approvals
 
-Each approval is a signature over the same transaction, so approvers sign separately, on their own devices, in any order. The first approver starts the payment, and a second approves its hash:
+Each approver signs the same payment, usually on their own device. The first starts it and gets its hash, and the second approves that hash. This example runs both approvals in one process:
 
 ```ts [pay.ts]
-import { parseUnits } from 'viem'
+import { http, parseUnits } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { createClient, Relay, Store, withRelay } from 'viem/tempo'
 
+const client = createClient({
+  chain: tempoDevnet,
+  transport: withRelay(http(), { plugins: [Relay.accounts({ store: Store.memory() })] }),
+})
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
+// Finance starts the payment: 1 of 2 approvals.
 const { receipt } = await client.token.transferSync({
   account: treasury,
-  amount: parseUnits('1200', 6), // $1,200 in base units: AlphaUSD has 6 decimals
-  owner: finance, // the first approver
-  to: vendor,
+  amount: parseUnits('1200', 6), // 1,200 AlphaUSD in base units (6 decimals)
+  owner: finance,
+  to: vendor, // the recipient's address
   token: alphaUsd,
 })
+// receipt.status is 'pending' until approvals reach the threshold
 
+// Operations approves the same hash: 2 of 2, so the payment runs.
 await client.sendTransactionSync({ account: treasury, hash: receipt.transactionHash, owner: operations })
 ```
 
-The payment goes through once the approvals reach the threshold. Tempo rejects signatures beyond it, so stop collecting once two approvers sign. Your app decides how approvers learn there's a payment to review, such as a notification with the payment's recipient and amount. [Collect and verify approvals](/docs/accounts/policies/signing-thresholds#collect-and-verify-approvals) covers checking approvals in a contract or backend.
+`Relay.accounts` holds each approval until the weights reach the threshold, then submits. `Store.memory()` works in one process. For approvers on different devices, give every approver's client the same persistent store, such as one in your backend.
+
+Your app shows the second approver what they're approving, such as the recipient and amount, and passes them the hash. Stop at two: Tempo rejects signatures beyond the threshold. To collect approvals in a backend or verify them in a contract, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-and-verify-approvals).
 
 :::::
 
 <span id="treasury-limits" />
+<span id="give-a-team-a-budget" />
+<span id="rotate-an-approvers-key" />
 
-## Treasury limits
+## Treasury limits and changes
 
-- An account has 1 to 48 signers, and a transaction carries up to 8 approvals.
-- A changed signer list voids approvals collected for the old one. Collect them again.
-- `InvalidConfig` means the update didn't start from the treasury's current signers, usually because another update landed first.
+A treasury holds 1 to 48 signers, and a transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
 
-When an approver leaves, follow [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver).
+To let a team pay within a daily limit without two treasury approvals per payment, [give it a budget](/docs/accounts/guides/teams/team-budget). When an approver leaves or replaces their key, follow [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver). A signer change voids approvals still waiting, so collect those again.

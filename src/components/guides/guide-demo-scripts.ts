@@ -459,7 +459,7 @@ async function onChainConfig(ctx: GuideContext, account: SandboxAccount) {
   const matches =
     commitment === null ? null : commitment === ctx.chain.configCommitment(info.config)
   if (matches === false)
-    throw new DemoError('The account’s commitment on Tempo doesn’t match this page’s record.')
+    throw new DemoError('The config hash Tempo stores doesn’t match this page’s record.')
   return { info, commitment, matches }
 }
 
@@ -561,7 +561,7 @@ const keyWithDeviceKey: DemoAction = {
   title: 'Create your account',
   action: () => 'Create with a private key',
   run: async (state, ctx) => {
-    const created = await keyAccount(state, ctx, 'Current key')
+    const created = await keyAccount(state, ctx, 'First key')
     const next = addAccessKey(created.state.account, 'browser')
     addedKey(created.state.account, next)
     const authorized = await update(created.state, ctx, next)
@@ -574,7 +574,7 @@ const keyWithDeviceKey: DemoAction = {
     })
     return {
       state: done,
-      result: `Created ${short(addressOf(done.account))} with Current key, a private key this page holds, as its signer. Current key authorized a device key in this browser.`,
+      result: `Created ${short(addressOf(done.account))} with First key, a private key this page holds, as its only signer. First key then authorized a device key in this browser.`,
       hashes: hashes(['Faucet', created.hash], ['Authorize', authorized.hash]),
     }
   },
@@ -612,7 +612,7 @@ const addSigners: DemoScript = {
     },
     {
       title: 'Approve the update',
-      action: () => 'Approve with your current key',
+      action: () => 'Approve with the first key',
       run: async (state, ctx) => {
         const privateKey = state.held.privateKeys.backup
         if (!privateKey) throw new DemoError('Generate the recovery key first.')
@@ -639,7 +639,7 @@ const addSigners: DemoScript = {
         return {
           state,
           result:
-            `${check.message} ${matches ? `Tempo’s commitment matches config v${state.account.version}.` : ''}`.trim(),
+            `${check.message} ${matches ? `The config hash Tempo stores matches config v${state.account.version}.` : ''}`.trim(),
           hashes: [],
         }
       },
@@ -660,7 +660,7 @@ const addSigners: DemoScript = {
         })
         return {
           state: done,
-          result: `You created a device key in this browser. ${upperFirst(approverNames(approvers))} approved config v${done.account.version}: ${describeConfig(done.account)}. Current key and Recovery key now approve only together. ${recoveryCheck(done.account).message}`,
+          result: `You created a device key in this browser. ${upperFirst(approverNames(approvers))} approved config v${done.account.version}: ${describeConfig(done.account)}. First key and Recovery key now approve only together. ${recoveryCheck(done.account).message}`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
@@ -983,7 +983,7 @@ const exportAccount: DemoScript = {
         return {
           state,
           result:
-            `${short(address)} still holds ${formatBalance(balance)}. ${matches ? 'Tempo’s commitment matches the config with your device key as the only signer.' : ''}`.trim(),
+            `${short(address)} still holds ${formatBalance(balance)}. ${matches ? 'The config hash Tempo stores matches your device key as the only signer.' : ''}`.trim(),
           hashes: [],
         }
       },

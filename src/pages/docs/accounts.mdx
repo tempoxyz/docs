@@ -1,188 +1,77 @@
 ---
 title: Accounts
 seoTitle: Self-Custodial Stablecoin Accounts on Tempo | Tempo Docs
-description: Self-custodial stablecoin accounts with passkeys, device keys, and private keys as weighted signers, plus access keys with spending limits, all enforced by Tempo.
+description: Stablecoin accounts with weighted signers and spending-limited access keys that Tempo enforces on every transaction, so your customers hold their own funds.
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 ---
 
-import { DocsHomeProductIcon } from '../../components/DocsHomeProductIcon'
-import { docsProductGrid } from '../../components/DocsProductGrid.styles'
+import { Card, Cards } from 'vocs'
 import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 <span id="build-your-account-integration" />
 
-<DocsProductOverview image="accounts" alt="A Tempo account: an address that holds TIP-20 balances, a passkey and a key as signers with weight 1 each toward a threshold of 2, and a device access key with a daily limit.">
+<DocsProductOverview image="accounts" alt="A Tempo account: an address that holds stablecoin balances, a passkey and a private key as signers with weight 1 each toward a threshold of 2, and an access key with a daily limit.">
 
 # Accounts
 
-A Tempo account is a stablecoin address whose signers, approval rules, and spending limits live in the protocol. Tempo enforces them on every transaction, so your customers hold their own funds.
+A Tempo account is a stablecoin address with its rules built in: which keys approve payments, and how much a server or agent can spend on its own. Tempo checks those rules on every transaction and can't override them, so your customers hold their own funds.
 
 [How it works →](/docs/accounts/how-it-works)
 
 </DocsProductOverview>
 
-:::danger
-Tempo Accounts is in early development and runs only on Tempo devnets. These pages are for demonstration. [Contact Tempo](https://tempo.xyz/contact) if you're interested.
+:::warning
+Tempo Accounts is in early development and runs only on Tempo devnet. [Contact Tempo](https://tempo.xyz/contact) to discuss access.
 :::
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
-
-## Tempo account building blocks
-
-- **Address:** the account's public identifier, which holds its TIP-20 balances and never changes.
-- **Signers:** private keys, device keys, and passkeys that approve, each with a weight toward a threshold.
-- **Access keys:** keys on devices, servers, and agents that pay on their own within spending limits, an expiry, and scopes.
-
-Already have single-key accounts? [Upgrade them in place](/docs/accounts/key-management/account-upgrade), at the same address and balance.
-
-<span id="tempo-account-use-cases" />
-
-## What you can build with Tempo accounts
-
-<div className={`docs-product-grid ${docsProductGrid().className}`}>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="accounts" />[Embedded wallets](/docs/accounts/guides/users/embed-wallets)
-
-An account for every customer inside your app, with your provider's key as one signer and the customer's passkey as another.
-
-- [Use a wallet provider](/docs/accounts/guides/users/embed-wallets)
-- [Make the provider's key one signer](/docs/accounts/guides/users/embed-wallets#make-the-providers-key-one-signer)
-- [Connect Tempo Wallet](/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="authentication" />[Consumer self-custody](/docs/accounts/guides/users/add-a-recovery-signer)
-
-Customers approve with their own passkey and recover with a backup signer.
-
-- [Add a backup signer](/docs/accounts/guides/users/add-a-recovery-signer)
-- [Recover from a lost passkey](/docs/accounts/guides/users/recover-an-account)
-- [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="automations" />[Automations](/docs/accounts/guides/automations/pay-out-from-a-backend)
-
-Your backend acts within limits: sweep idle balances into a vault, pay out, or pay bills.
-
-- [Automate a backend](/docs/accounts/guides/automations/pay-out-from-a-backend)
-- [Recommended limits](/docs/accounts/guides/automations/pay-out-from-a-backend#recommended-limits-for-backend-automations)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="agents" />[AI agents](/docs/accounts/guides/agents/give-an-agent-a-wallet)
-
-An agent's own key, with a budget, an expiry, and only the calls it needs.
-
-- [Set up an agent wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet)
-- [Agent budget limits](/docs/accounts/guides/agents/give-an-agent-a-wallet#agent-budget-limits)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="card" />[Spending accounts](/docs/accounts/guides/automations/fund-a-card-program)
-
-Card payments from an access key with a daily limit that renews.
-
-- [Set up a spending account](/docs/accounts/guides/automations/fund-a-card-program)
-- [Fund a card with a daily limit](/docs/accounts/guides/automations/fund-a-card-program#fund-a-card-with-a-daily-limit)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="approvals" />[Company treasury](/docs/accounts/guides/teams/company-treasury)
-
-Several approvers, team budgets, and key rotation without moving funds.
-
-- [Create the treasury account](/docs/accounts/guides/teams/company-treasury#create-the-treasury)
-- [Give a team a budget](/docs/accounts/guides/teams/team-budget)
-- [Rotate an approver's key](/docs/accounts/guides/teams/offboard-an-approver#rotate-an-approvers-key-instead)
-
-</div>
-</div>
-
-<span id="accounts-and-wallets" />
-<span id="fit-accounts-into-your-application" />
+<span id="tempo-account-building-blocks" />
 <span id="configure-account-controls" />
 <span id="keys-and-permissions" />
 <span id="control-account-access" />
 <span id="control-who-can-use-an-account" />
 <span id="delegate-access-to-applications-and-services" />
+<span id="signing-methods" />
+<span id="signing-thresholds" />
+<span id="access-keys" />
+<span id="key-management" />
+<span id="fee-management" />
+
+## What's in a Tempo account
+
+- **Address:** holds the account's stablecoins and never changes, even when you [replace its signers](/docs/accounts/key-management).
+- **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight. A transaction runs once its approvers' weights add up to the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
+- **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the spending limits, expiry, and allowed calls you set. A leaked key still can't spend past them.
+
+Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. A single-key account (EOA), like a standard Ethereum account, can [upgrade in place](/docs/accounts/key-management/account-upgrade) and keep its address and balance.
+
+<span id="tempo-account-use-cases" />
+<span id="what-you-can-build-with-tempo-accounts" />
+<span id="building-on-accounts" />
+<span id="accounts-and-wallets" />
+<span id="fit-accounts-into-your-application" />
 <span id="fund-accounts-and-reconcile-payments" />
 <span id="put-an-account-to-use" />
 <span id="connect-accounts-to-your-payment-system" />
 <span id="what-do-you-want-to-do" />
+<span id="create-an-account" />
+<span id="embedded-wallets" />
+<span id="consumer-self-custody" />
+<span id="automations" />
+<span id="ai-agents" />
+<span id="spending-accounts" />
+<span id="company-treasury" />
 
-## Building on accounts
+## Start building
 
-<div className={`docs-product-grid ${docsProductGrid().className}`}>
-<div className="docs-product-group">
+[Create an account](/docs/accounts/create) in your browser on devnet, then pick the guide for what you're building.
 
-### <DocsHomeProductIcon product="accounts" />[Create an account](/docs/accounts/create)
-
-Build an account from its first signer on Tempo devnet, or upgrade a single-key account in place.
-
-- [Create an account](/docs/accounts/create)
-- [Upgrade an existing account](/docs/accounts/key-management/account-upgrade)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="authentication" />[Signing methods](/docs/accounts/authentication)
-
-Private keys, device keys, and passkeys that sign for the account.
-
-- [Private keys](/docs/accounts/authentication/private-keys)
-- [Device keys](/docs/accounts/authentication/device-keys)
-- [Passkeys](/docs/accounts/authentication/passkeys)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="approvals" />[Signing thresholds](/docs/accounts/policies/signing-thresholds)
-
-Weighted signers, a threshold, and rules for what an account accepts.
-
-- [Thresholds and weights](/docs/accounts/policies/signing-thresholds#recommended-signer-setups)
-- [Verify approvals](/docs/accounts/policies/signing-thresholds#collect-and-verify-approvals)
-- [Receive policies](/docs/accounts/policies/receive-policies)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="accessKeys" />[Access keys](/docs/accounts/access-keys)
-
-Keys for devices, services, and agents that pay within limits.
-
-- [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key)
-- [Scope an access key](/docs/accounts/access-keys#scope-an-access-key)
-- [Revoke an access key](/docs/accounts/access-keys#revoke-an-access-key)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="recovery" />[Key management](/docs/accounts/key-management)
-
-Add and remove signers, or upgrade a single-key account, at the same address and balance.
-
-- [Add signers](/docs/accounts/key-management/add-signers)
-- [Remove signers](/docs/accounts/key-management/remove-signers)
-- [Account upgrade](/docs/accounts/key-management/account-upgrade)
-
-</div>
-<div className="docs-product-group">
-
-### <DocsHomeProductIcon product="money" />[Fee management](/docs/accounts/fees)
-
-Who pays network fees, and in which stablecoin.
-
-- [Sponsor other accounts' fees](/docs/accounts/fees#sponsor-an-accounts-fees)
-- [Set a default fee token](/docs/accounts/fees#set-an-accounts-default-fee-token)
-
-</div>
-</div>
+<Cards>
+  <Card title="Embed wallets with a provider" description="Your wallet provider's key is one signer and the customer's passkey another, so the provider can't pay alone." to="/docs/accounts/guides/users/embed-wallets" />
+  <Card title="Add a recovery signer" description="A second signer, so a customer who loses their phone keeps their account." to="/docs/accounts/guides/users/add-a-recovery-signer" />
+  <Card title="Pay out from a backend" description="Your backend pays approved payees, up to a daily limit, without prompting the customer." to="/docs/accounts/guides/automations/pay-out-from-a-backend" />
+  <Card title="Fund a card program" description="Your backend tops up a customer's card, up to a daily limit, and can pay no one else." to="/docs/accounts/guides/automations/fund-a-card-program" />
+  <Card title="Give an agent a wallet" description="An AI agent's own key, with a budget, an expiry, and only the calls it needs." to="/docs/accounts/guides/agents/give-an-agent-a-wallet" />
+  <Card title="Set up a company treasury" description="Any two of three approvers sign each payment, so no one moves funds alone." to="/docs/accounts/guides/teams/company-treasury" />
+</Cards>

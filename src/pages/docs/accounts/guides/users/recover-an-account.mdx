@@ -1,7 +1,7 @@
 ---
 title: Recover a user's account
 seoTitle: Recover a Tempo Account After a Lost Passkey or Device | Tempo Docs
-description: Replace a user's lost passkey with the account's remaining signers, then revoke the lost device's access keys, keeping the same address and balance.
+description: Replace a user's lost passkey with the signers they still have, then revoke the lost phone's device key. The account keeps its address and balance.
 interactive: true
 ---
 
@@ -9,21 +9,22 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Recover a user's account
 
+When a user loses the phone that holds their passkey, the account's other signers (the keys that approve its transactions) swap in a new passkey, and the new passkey revokes the phone's device key. The account keeps its address and balance.
+
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
 :::
 
-When a user loses their phone or passkey, the account's remaining signers replace the lost one in one update, and the lost device's keys get revoked. The address and balance stay the same, but only if the remaining signers reach the threshold: Tempo can't override an account's signers.
-
+<span id="account-recovery-limits" />
 <span id="recommended-recovery-setups" />
 <span id="replace-a-lost-signer" />
 <span id="key-replacement" />
 <span id="replace-a-signer" />
 <span id="recover-from-a-lost-passkey" />
 
-This guide starts from the account in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#require-two-factors): a passkey (2), the user's first key (1), and a recovery signer (1), with threshold 2. The user lost the passkey, so the first key and recovery signer approve together. Your app passes the configuration it saved after the last update.
+This guide continues from [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#require-two-factors), with the same devnet `client` and account: a passkey at weight 2, the user's first key and a recovery signer at weight 1 each, and a threshold of 2, the total weight an approval needs. Without the passkey, the other two reach 2 together. Tempo can't override an account's signers, so [check this when you add signers](/docs/accounts/guides/users/add-a-recovery-signer#confirm-the-account-survives-losing-one-signer), not after one is lost.
 
-The demo builds that account on devnet, a test network whose stablecoins have no value, with a device key in this browser standing in for the passkey. It treats that key as lost and recovers with the other two signers.
+In the demo, a device key in this browser stands in for the passkey, and the demo treats it as lost.
 
 <GuideDemo guide="recover" />
 
@@ -31,7 +32,7 @@ The demo builds that account on devnet, a test network whose stablecoins have no
 
 ### Create the replacement signer
 
-The user creates a new passkey on their new device.
+The user creates a new passkey on their new device. It isn't a signer until the next step adds it.
 
 ```ts [recover.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
@@ -43,52 +44,46 @@ const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ l
 
 ### Approve with the remaining signers
 
-Load the remaining signers and the account from the configuration you saved. Build the next signers by swapping the lost passkey for the new one at the same weight. The first signer sends the update; the second approves the same transaction, and the update lands once their weights reach the threshold.
+Open the account from the address and configuration your app saved after its last update. Don't use `address: 'infer'`: once signers change, it derives a different address. Swap the lost passkey for the new one at the same weight. The first key sends the update and the recovery signer approves the same transaction; together they reach the threshold, so it lands.
 
 ```ts [recover.ts]
 import { isAddressEqual } from 'viem'
 
-const firstKey = Account.fromSecp256k1(firstPrivateKey) // the user's first key
+const firstKey = Account.fromSecp256k1(firstPrivateKey)
 const recovery = Account.fromSecp256k1(recoveryPrivateKey) // or your recovery provider's signer
-const account = Account.fromConfig({ address, ...savedConfig }) // the address and config you saved
+const account = Account.fromConfig({ address, ...savedConfig })
 
 const nextOwners = savedConfig.owners.map((entry) =>
   isAddressEqual(entry.owner, lostPasskeyAddress) ? { owner: passkey.address, weight: entry.weight } : entry,
 )
 
-const { config, receipt } = await client.accounts.updateConfigSync({
+const { receipt } = await client.accounts.updateConfigSync({
   account,
   nextConfig: { owners: nextOwners, threshold: savedConfig.threshold },
-  owner: firstKey,
+  owner: firstKey, // 1 of 2: receipt.status is 'pending'
 })
 await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: recovery })
+
+const config = await client.accounts.getConfig({ address }) // Relay.accounts recorded it
 // Save `config` in place of `savedConfig`.
 ```
 
-The lost passkey can't approve anything after the update.
+Once the update lands, the lost passkey can't approve anything.
 
 ### Revoke the lost device's keys
 
-Signer changes don't revoke access keys, so the device key on the lost phone can still pay within its limits until you revoke it.
+Changing signers doesn't revoke access keys, so the device key on the lost phone can still pay within its limits. Reopen the account from the new configuration, then revoke the key with the new passkey, which reaches the threshold alone.
 
 ```ts [recover.ts]
-await client.accessKey.revokeSync({ accessKey: lostDeviceKey, account, owner: passkey })
+const current = Account.fromConfig({ address, ...config }) // the configuration after the update
+
+await client.accessKey.revokeSync({ accessKey: lostDeviceKey, account: current, owner: passkey })
 ```
+
+If you didn't save the lost key's address, [list the keys the account has authorized](/docs/accounts/access-keys/revocation#revoke-when-signers-change). A revoked key can't be authorized again, so authorize a new [device key](/docs/accounts/authentication/device-keys) for the new phone.
 
 :::::
 
-A lost weight-1 signer, such as the first key, works the same way: the passkey approves its replacement alone.
-
 <span id="recover-funds-sent-on-another-chain" />
 
-## Recover funds sent on another chain
-
-The account's address is the same on every EVM chain, so a sender can send funds to it on the wrong chain by mistake. On supported chains, the account's initial secp256k1 signers that reach the original threshold can recover those funds, even after you remove them on Tempo. Passkeys and device keys don't count, so accounts created with only passkeys and device keys, and accounts [upgraded in place](/docs/accounts/key-management/account-upgrade), can't recover funds this way. See [Key management](/docs/accounts/key-management#recover-funds-sent-on-another-chain) for the rule.
-
-<span id="account-recovery-limits" />
-
-## Account recovery limits
-
-- Recovery works only if the remaining signers reach the threshold. Check this when you add signers, not after one is lost.
-- A revoked access key can't be authorized again. Authorize a new key for the new device.
-- After a signer change, `address: 'infer'` derives a different address. Open the account with its saved address and configuration.
+If the user loses the first key or the recovery signer instead, the passkey replaces it alone: its weight of 2 reaches the threshold.

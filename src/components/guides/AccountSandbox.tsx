@@ -392,24 +392,25 @@ type SignerChoice = {
 }
 
 /**
- * Signers the reader can add to their own account: a passkey on this device, a device key in this
- * browser, and a generated private key. Only the passkey prompts, for Touch ID or similar.
+ * Signers the reader can add to their own account: a device key in this browser, a passkey on this
+ * device, and a generated private key. The device key comes first and is the recommended choice,
+ * because it runs without OS dialogs; only the passkey prompts, for Touch ID or similar.
  */
 function signerChoices(platform: boolean, options: { first?: boolean } = {}): SignerChoice[] {
   const { unlock } = thisDevice()
   const choices: SignerChoice[] = [
+    { kind: 'device', label: 'Device key', reason: null },
     {
       kind: 'passkey',
       label: `Passkey (${unlock})`,
       reason: platform ? null : 'No Touch ID or platform authenticator in this browser',
     },
-    { kind: 'device', label: 'Device key', reason: null },
     { kind: 'private-key', label: 'Private key', reason: null },
   ]
   if (options.first)
     choices.push({
       kind: 'private-key',
-      label: 'Existing single-key account',
+      label: 'start from a single-key account (EOA)',
       description: 'An EOA you already have. Upgrade it later, at the same address.',
       reason: null,
       legacy: true,
@@ -417,32 +418,50 @@ function signerChoices(platform: boolean, options: { first?: boolean } = {}): Si
   return choices
 }
 
-/** Real signer options as buttons, for the first signer and for a backup. */
+/**
+ * Real signer options, for the first signer and for a backup. The device key is the recommended
+ * choice, since it never prompts; starting from a single-key account is a different path, so it
+ * reads as a link.
+ */
 function SignerChooser(props: {
   label: string
   choices: SignerChoice[]
   onChoose: (choice: SignerChoice) => void
 }) {
+  const signers = props.choices.filter((choice) => !choice.legacy)
+  const legacy = props.choices.find((choice) => choice.legacy)
+  const primary =
+    signers.find((choice) => choice.kind === 'device' && !choice.reason) ??
+    signers.find((choice) => !choice.reason)
   return (
     <Field label={props.label}>
       <div className="as-choices">
-        {props.choices.map((choice) => {
-          const Icon = signerIcons[choice.kind]
-          return (
+        {signers.map((choice) => (
+          <button
+            key={choice.kind}
+            type="button"
+            className={choice === primary ? 'as-button as-button-primary' : 'as-button'}
+            disabled={Boolean(choice.reason)}
+            title={choice.reason ?? choice.description}
+            onClick={() => props.onChoose(choice)}
+          >
+            {choice.label}
+            {choice.reason && <span className="as-choice-reason">({choice.reason})</span>}
+          </button>
+        ))}
+        {legacy && (
+          <>
+            <span className="as-or">or</span>
             <button
-              key={`${choice.kind}${choice.legacy ? ':legacy' : ''}`}
               type="button"
-              className="as-button as-button-primary"
-              disabled={Boolean(choice.reason)}
-              title={choice.reason ?? choice.description}
-              onClick={() => props.onChoose(choice)}
+              className="as-link"
+              title={legacy.description}
+              onClick={() => props.onChoose(legacy)}
             >
-              <Icon aria-hidden="true" />
-              {choice.label}
-              {choice.reason && <span className="as-choice-reason">({choice.reason})</span>}
+              {legacy.label}
             </button>
-          )
-        })}
+          </>
+        )}
       </div>
     </Field>
   )
@@ -602,13 +621,12 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
               {!funded && <p className="as-note">Get test funds first: transactions need fees.</p>}
               {account.legacy ? (
                 <div className="as-upgrade">
-                  <p className="as-note">
-                    This is a single-key account. Upgrade it to add signers and access keys.
-                  </p>
                   <button type="button" className="as-button as-button-primary" onClick={upgrade}>
                     Upgrade to a configurable account
                   </button>
-                  <span className="as-note">Keeps this address, balance, and token approvals.</span>
+                  <span className="as-note">
+                    Adds signers and access keys. Keeps the address, balance, and token approvals.
+                  </span>
                 </div>
               ) : (
                 <>
@@ -707,9 +725,7 @@ export function AccountState(props: {
             {account.address ? (
               <code>{shortAddress(account.address)}</code>
             ) : (
-              <span className="as-muted">
-                Not created yet · the address comes from your first signer
-              </span>
+              <span className="as-muted">No address yet</span>
             )}
             {badge && (
               <span className="as-badge" data-network={account.devnet ? 'devnet' : undefined}>
@@ -720,10 +736,10 @@ export function AccountState(props: {
           {account.legacy && (
             <span className="as-muted as-genesis">Single-key account · not upgraded</span>
           )}
-          {account.address && genesisSigner && account.genesis && (
+          {/* Once signers change, say where the unchanged address came from. */}
+          {account.address && genesisSigner && updates > 0 && (
             <span className="as-muted as-genesis">
-              Derived from v0: {genesisSigner.name} W{genesis.weight}, threshold{' '}
-              {account.genesis.threshold}
+              Address from the first signer, {genesisSigner.name}
             </span>
           )}
         </div>
@@ -777,7 +793,7 @@ export function AccountState(props: {
               ))}
             </ul>
           ) : (
-            <p className="as-slot">Your first signer goes here</p>
+            <p className="as-slot">No signers</p>
           )}
         </div>
         <div>
@@ -789,11 +805,7 @@ export function AccountState(props: {
               ))}
             </ul>
           ) : (
-            <p className="as-slot">
-              {isCreated(account)
-                ? 'No access keys yet'
-                : 'Access keys come after the account exists'}
-            </p>
+            <p className="as-slot">No access keys</p>
           )}
         </div>
       </div>
@@ -841,7 +853,9 @@ function StateSigner(props: {
         <span className="as-item-detail">{signerDetail(signer)}</span>
       </span>
       <span className="as-weight" data-changed={change?.change === 'weight'}>
-        {change?.change === 'weight' ? `W${change.from} → W${signer.weight}` : `W${signer.weight}`}
+        {change?.change === 'weight'
+          ? `weight ${change.from} → ${signer.weight}`
+          : `weight ${signer.weight}`}
       </span>
     </li>
   )
@@ -985,7 +999,7 @@ function PayPanel(props: {
                 }
               >
                 {signer.name}
-                <span className="as-weight">W{signer.weight}</span>
+                <span className="as-weight">weight {signer.weight}</span>
               </button>
             )
           })}
@@ -1141,7 +1155,7 @@ function SignersPanel(props: {
             <span className="as-edit-name">{signer.name}</span>
             <Stepper
               label={`${signer.name} weight`}
-              prefix="W"
+              prefix="weight "
               value={signer.weight}
               min={1}
               max={sandboxLimits.maxWeight}

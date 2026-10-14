@@ -1,7 +1,7 @@
 ---
 title: Passkeys
 seoTitle: Approve Tempo Account Payments with Passkeys | Tempo Docs
-description: Let customers approve payments and signer changes with Face ID, Touch ID, Windows Hello, Android, or a security key, while the key stays on their authenticator.
+description: Let customers approve payments and signer changes with Face ID, Touch ID, Windows Hello, an Android screen lock, or a security key, using a key only they control.
 interactive: true
 ---
 
@@ -9,26 +9,17 @@ import { PasskeyAccountDemo } from '../../../../components/guides/PasskeyAccount
 
 # Passkeys
 
-A passkey is the signer only the customer holds, so it keeps the account in their control. Give it enough weight to approve alone, and add a second signer so a lost passkey doesn't lock the customer out.
+A passkey lets the customer approve payments and signer changes with Face ID, a fingerprint, or a security key, and no one else can approve with it. Make it a signer that approves alone, and add a second signer so a lost passkey doesn't lock the customer out.
+
+<span id="passkey-authenticators" />
 
 ## What a passkey is
 
-A passkey is a WebAuthn P-256 key that the customer approves with their face, fingerprint, PIN, or security key. The private key never leaves the customer's authenticator, and Tempo checks each WebAuthn signature on chain.
+A passkey is the WebAuthn credential behind passwordless sign-in: a P-256 key that stays on the customer's device or security key and signs only when the customer approves. It works with Face ID and Touch ID, Windows Hello, an Android screen lock, and security keys such as YubiKey. Tempo checks each passkey signature onchain.
 
-## Passkey authenticators
+<span id="what-a-passkey-trusts" />
 
-| Authenticator | How the customer approves |
-| --- | --- |
-| Apple devices | Face ID or Touch ID |
-| Windows | Windows Hello face, fingerprint, or PIN |
-| Android | The device's fingerprint, face, or screen lock |
-| Security keys | A touch on a key such as YubiKey |
-
-Synced passkeys follow the customer to new devices through iCloud Keychain, Google Password Manager, or a password manager. A security key's passkey stays on that key.
-
-## What a passkey trusts
-
-A passkey trusts the customer's device and, for a synced passkey, their passkey provider. No app server or wallet provider is involved, so no one but the customer can approve with it. Use it for customer approvals, signer changes, and recovery of other signers.
+Your servers and wallet providers never hold the passkey. Its security rests on the customer's device and, for a synced passkey, the service that syncs it across their devices: iCloud Keychain, Google Password Manager, or a password manager.
 
 <span id="try-a-passkey-account" />
 <span id="create-the-passkey" />
@@ -40,23 +31,21 @@ A passkey trusts the customer's device and, for a synced passkey, their passkey 
 
 <PasskeyAccountDemo />
 
-The demo creates a passkey on Moderato testnet and shows its account address.
+The demo creates a passkey and shows the Moderato testnet account it signs for. On Tempo devnet, the only network that runs signers and thresholds, make the passkey the account's first signer:
 
 ```ts [passkey.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
 
-const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'Acme' }))
+const credential = await WebAuthnP256.createCredential({ label: 'Acme' })
+const passkey = Account.fromWebAuthnP256(credential)
 const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
 ```
 
-`account.address` receives stablecoins right away. The first transaction registers the account.
-
-For weights alongside backup and recovery keys, see [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). To add a passkey to an existing account or back it up with other keys, see [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer).
+`account.address` receives stablecoins right away, and the account's first transaction registers it onchain. Next, [add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
 
 ## Passkey limits
 
-- A passkey works only on the domain it was created for, its relying party ID. Set `rpId` in `WebAuthnP256.createCredential` to choose it before customers create passkeys.
-- The prompt fails with `NotAllowedError` when the customer cancels or the page isn't served over HTTPS.
-- A passkey on a security key isn't synced. Losing the key loses the signer, so add a second signer for [recovery](/docs/accounts/guides/users/recover-an-account).
-
-For other methods, see [Signing methods](/docs/accounts/authentication).
+- A passkey works only on its domain, the relying party ID (`rpId`), and that domain's subdomains. Pick the `rpId`, such as `acme.com`, before customers create passkeys, and pass it to both `WebAuthnP256.createCredential` and `Account.fromWebAuthnP256`.
+- WebAuthn returns the public key only at creation. Save `credential.id` and `credential.publicKey`, and pass them to `Account.fromWebAuthnP256` when the customer returns.
+- Passkeys work only over HTTPS or on `localhost`. A cancelled or timed-out prompt fails with `NotAllowedError`.
+- A passkey on a security key isn't synced, so losing the key loses the signer.

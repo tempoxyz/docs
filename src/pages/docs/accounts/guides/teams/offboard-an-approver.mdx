@@ -1,7 +1,7 @@
 ---
 title: Offboard an approver
 seoTitle: Remove a Departing Approver from a Tempo Treasury | Tempo Docs
-description: Remove a departing approver's signer from a treasury, revoke the access keys they could reach, and restore the threshold, at the same address and balance.
+description: Remove a departing approver from a Tempo treasury, revoke the access keys they could sign with, and add a replacement, without changing the treasury's address or balance.
 interactive: true
 ---
 
@@ -9,18 +9,16 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Offboard an approver
 
-:::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
-:::
+When an approver leaves, remove their signer from the treasury, revoke any access key they could sign with, and add a replacement so one lost key can't lock the treasury. The treasury keeps its address, balance, and payment history.
 
-When an approver leaves, remove their signer from the [treasury](/docs/accounts/guides/teams/company-treasury), revoke the keys they could use, and add a replacement so the treasury can still lose any one key. The treasury keeps its address, balance, and payment history.
+:::warning
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+:::
 
 <span id="remove-a-departing-approver" />
 <span id="remove-a-signer" />
 
-Removing a signer is a signer update: one transaction that replaces the treasury's list of signers and its threshold. The current approvers approve it like a payment, with weights that reach the threshold. Once it lands, the departing approver's key can't approve anything, and approvals collected before the update stop counting.
-
-The examples continue from [Set up a company treasury](/docs/accounts/guides/teams/company-treasury): a 2-of-3 treasury whose `owners` and `threshold` you saved, with the controller departing. The demo runs the same steps on Tempo devnet, a test network whose stablecoins have no value, with three approver keys and a service access key that this page generates.
+The code continues from [Set up a company treasury](/docs/accounts/guides/teams/company-treasury), with its `client` and the 2-of-3 treasury's saved `owners` and `threshold`. The controller leaves, and finance and operations approve each change. The demo runs the same steps with keys the page generates.
 
 <GuideDemo guide="rotate-keys" />
 
@@ -28,38 +26,41 @@ The examples continue from [Set up a company treasury](/docs/accounts/guides/tea
 
 ### Remove their signer
 
-Build the next signer list from the one you saved, without the departing approver, and keep the threshold. The approvers who stay approve it:
+Drop the departing approver from the saved signer list and keep the threshold:
 
 ```ts [offboard.ts]
 import { isAddressEqual } from 'viem'
 
 const remaining = owners.filter(({ owner }) => !isAddressEqual(owner, controller))
 
-const { config, receipt } = await client.accounts.updateConfigSync({
+const { receipt } = await client.accounts.updateConfigSync({
   account: treasury,
   nextConfig: { owners: remaining, threshold },
-  owner: finance,
+  owner: finance, // 1 of 2: receipt.status is 'pending'
 })
 await client.sendTransactionSync({ account: treasury, hash: receipt.transactionHash, owner: operations })
+
+const config = await client.accounts.getConfig({ address: treasury.address }) // Relay.accounts recorded it
 // Save `config` with your treasury record: the next update starts from it.
 ```
 
-The weights that remain must still reach the threshold, or Tempo rejects the update. Here two approvers remain at a threshold of 2, so the update lands. A departing approver who is leaving on good terms can be one of the approvers. If their key may be compromised, approve without it.
+Tempo rejects the update if the remaining weights can't reach the threshold. Here two approvers of weight 1 remain at a threshold of 2.
 
 ### Revoke their keys
 
-Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). A backend key or device key the departing approver set up keeps paying within its limits until the remaining approvers revoke it:
+Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). Any access key the departing approver could sign with, such as a backend key they managed, keeps paying within its limits until you revoke it:
 
 ```ts [offboard.ts]
 import { Account } from 'viem/tempo'
 
+// Open the treasury at its saved address: `address: 'infer'` would now derive a different one.
 const current = Account.fromConfig({ address: treasury.address, ...config })
 
 const { receipt: revoked } = await client.accessKey.revokeSync({ account: current, accessKey: serviceKey, owner: finance })
 await client.sendTransactionSync({ account: current, hash: revoked.transactionHash, owner: operations })
 ```
 
-`serviceKey` is the address you saved when you authorized the key. Revocation is permanent. [Revocation](/docs/accounts/access-keys/revocation) covers finding every key to revoke.
+`serviceKey` is the address you saved when you authorized the key. Revocation is permanent, so if the service still needs to pay, authorize a new key the departing approver never held. If you didn't save every key's address, [list the keys the treasury has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change).
 
 ### Rebalance the threshold
 
@@ -69,16 +70,18 @@ With two approvers left at a threshold of 2, both must approve every payment, an
 const replacement = env('NEW_CONTROLLER_PASSKEY_ADDRESS')
 const nextOwners = [...config.owners, { owner: replacement, weight: 1 }]
 
-const { config: rebalanced, receipt: added } = await client.accounts.updateConfigSync({
+const { receipt: added } = await client.accounts.updateConfigSync({
   account: current,
   nextConfig: { owners: nextOwners, threshold: config.threshold },
   owner: finance,
 })
 await client.sendTransactionSync({ account: current, hash: added.transactionHash, owner: operations })
+
+const rebalanced = await client.accounts.getConfig({ address: treasury.address })
 // Save `rebalanced` with your treasury record.
 ```
 
-If you have no replacement yet, lowering the threshold to 1 keeps the treasury usable, but either remaining approver can then pay alone. To avoid the 2-of-2 interval, swap the departing approver for the replacement in the step 1 update instead. Have the new approver approve once before you rely on them.
+If you already have the replacement's key, swap it in for the departing approver's in step 1's update and skip the 2-of-2 interval. Without a replacement, lowering the threshold to 1 keeps a lost key from locking the treasury but lets either approver pay alone. Have the new approver approve one transaction before you rely on their key.
 
 :::::
 
@@ -89,11 +92,9 @@ If you have no replacement yet, lowering the threshold to 1 keeps the treasury u
 
 ## Rotate an approver's key instead
 
-When the approver stays but their key changes, such as a new hardware wallet or a switch of wallet provider, replace the old key with the new one at the same weight in one update. See [Rotate a key by replacing it in one update](/docs/accounts/key-management/remove-signers#rotate-a-key-by-replacing-it-in-one-update).
+If the approver stays and only their key changes, such as a new hardware wallet, [replace the old key with the new one in one update](/docs/accounts/key-management/remove-signers#rotate-a-key-by-replacing-it-in-one-update) at the same weight.
 
 ## Offboarding limits
 
-- The approvers who approve an update must reach the current threshold, and the remaining weights must reach the new one.
-- `InvalidConfig` means the update didn't start from the treasury's current signers, usually because another update landed first. Rebuild it from the configuration that update returned.
-- After a signer change, `address: 'infer'` derives a different address. Open the treasury with its saved address and configuration.
-- A revoked access key can't be authorized again. Authorize a new key instead.
+- Approvals collected before a signer update stop counting. Collect them again for any payment still waiting.
+- `InvalidConfig` means the update didn't start from the treasury's current signers, usually because another update landed first. Load the latest saved configuration and rebuild the update.

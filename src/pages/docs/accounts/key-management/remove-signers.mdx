@@ -1,32 +1,37 @@
 ---
 title: Remove signers
 seoTitle: Remove, Rotate, or Replace a Tempo Account Signer | Tempo Docs
-description: Remove a departing, lost, or compromised signer, or rotate a key by replacing it, in one signer update approved by the account's remaining signers.
+description: Remove a departing, lost, or compromised signer, or rotate a key, in one signer update that keeps the account's address and balance.
 ---
 
 # Remove signers
 
-Removing a signer drops it from the account's approvals in one update, and the signers that remain must reach the threshold. Replacing a key and recovering from a lost one are the same update with a new entry in the old one's place.
+Removing a signer ends its power to approve when an approver leaves or a key is lost or compromised. The signers that stay approve a new signer list without it, and the account keeps its address, balance, and token approvals. To rotate a key, the same update puts the new key in the old one's place. Signer updates run only on Tempo devnet.
 
 ## What removing a signer stops
 
-Once the update lands, the removed signer can't approve payments or signer updates, and approvals collected for the old configuration stop verifying. The address, balances, and token approvals stay the same.
+Once the update lands, the removed signer can't approve anything, and approvals collected under the old signer list stop counting.
 
-Removing a signer doesn't revoke access keys. A device key or agent key the removed signer authorized keeps paying within its limits until you [revoke it](#revoke-what-the-old-signer-authorized).
+<span id="revoke-what-the-old-signer-authorized" />
+
+[Access keys](/docs/accounts/access-keys) keep working. A device key or agent key the removed signer authorized keeps paying within its limits, so after the update, [revoke every key](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) its holder could reach, including any an attacker added.
 
 ## Remove a signer
 
-Tempo stores only a hash of the account's configuration, a fingerprint it can check approvals against but can't read back, so your app keeps the configuration itself and saves it with the account record. Load it, drop the entry, and approve with the signers that remain:
+Load the [saved configuration](/docs/accounts/key-management/add-signers#send-the-signer-update), drop the signer's entry, and approve with signers that stay:
 
 ```ts [remove-signer.ts]
 import { isAddressEqual } from 'viem'
 import { Account } from 'viem/tempo'
 
-// The address and configuration your app saved with the account record
-const { address, config } = await loadAccount(customerId)
-const account = Account.fromConfig({ address, ...config })
+const { address, config } = await loadAccount(customerId) // your app's storage
+// Before the first signer update, the configuration is version 0 and derives the address.
+const account =
+  config.version === 0n
+    ? Account.fromConfig({ ...config, address: 'infer' })
+    : Account.fromConfig({ address, ...config })
 
-const { config: updated, receipt } = await client.accounts.updateConfigSync({
+const { receipt } = await client.accounts.updateConfigSync({
   account,
   nextConfig: {
     owners: config.owners.filter((entry) => !isAddressEqual(entry.owner, departing)),
@@ -35,20 +40,25 @@ const { config: updated, receipt } = await client.accounts.updateConfigSync({
   owner: approver, // a signer that stays
 })
 
-// A second signer approves the same update when the first can't reach the threshold alone.
-await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
+// receipt.status is 'pending' until approvals reach the threshold, so a second signer approves
+// only when `approver` alone doesn't reach it.
+if (receipt.status === 'pending')
+  await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: secondSigner })
 
+const updated = await client.accounts.getConfig({ address }) // Relay.accounts recorded it
 await saveAccount(customerId, { address, config: updated }) // the next update starts from this
 ```
 
-`loadAccount` and `saveAccount` stand for your app's own storage. If the remaining weights fall below the threshold, lower `threshold` in the same update, or Tempo rejects it. [Remove a departing approver](/docs/accounts/guides/teams/offboard-an-approver) walks through offboarding.
+`client` is a devnet client with `Relay.accounts` on its transport, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals).
+
+If the remaining weights fall short of the threshold, lower `threshold` in the same update. [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver) walks through removing one from a treasury.
 
 <span id="replace-a-signer" />
 <span id="rotate-a-signer-at-the-same-weight" />
 
 ## Rotate a key by replacing it in one update
 
-A rotation adds the new key and removes the old one in the same update, at the same weight, and keeps the threshold. Any combination of signers that could approve before can approve after, with the new key in the old one's place. On a scheduled rotation, the old key can be one of the approvers.
+Rotate when the holder stays but the key changes: a new hardware wallet, a new device, or a new wallet provider. Put the new key at the old one's weight and keep the threshold, so every group of signers that could approve before still can:
 
 ```ts [rotate-signer.ts]
 const { receipt } = await client.accounts.updateConfigSync({
@@ -63,60 +73,28 @@ const { receipt } = await client.accounts.updateConfigSync({
 })
 ```
 
-Doing both in one update means the account never has the new key and the old key active together, and never has neither. The same update covers a wallet provider switch. [Rotate an approver's key](/docs/accounts/guides/teams/offboard-an-approver#rotate-an-approvers-key-instead) walks through it.
+One update swaps the keys, so the account never has both keys active, or neither.
 
 <span id="rotate-a-compromised-signer" />
 <span id="recover-with-the-remaining-signers" />
 
 ## Remove a lost or compromised signer
 
-When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override, so this works only if their weights still reach the threshold: see [Plan for recovery](/docs/accounts/key-management#plan-for-recovery).
+When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override, so this works only if their weights still reach the threshold. Check that when you create the account, using the rule in [Plan for recovery](/docs/accounts/key-management#plan-for-recovery).
 
-For example, a customer with a passkey at weight 2, and a backup key and a recovery provider's key at weight 1 each, at threshold 2, loses their phone. They create a new passkey on a new device, and the two keys approve the replacement together:
+For example, with a passkey at weight 2 plus a backup key and a recovery provider's key at weight 1 each, at threshold 2, the two keys together approve the [rotation](#rotate-a-key-by-replacing-it-in-one-update) that swaps in a new passkey after the customer loses their phone. [Recover a user's account](/docs/accounts/guides/users/recover-an-account) walks through it.
 
-```ts [recover.ts]
-import { Account } from 'viem/tempo'
-
-const { address, config } = await loadAccount(customerId) // the saved account record
-const account = Account.fromConfig({ address, ...config })
-const backup = Account.fromSecp256k1(process.env.BACKUP_KEY as `0x${string}`)
-const recovery = Account.fromSecp256k1(process.env.RECOVERY_KEY as `0x${string}`)
-
-const { config: updated, receipt } = await client.accounts.updateConfigSync({
-  account,
-  nextConfig: {
-    owners: [
-      { owner: newPasskey.address, weight: 2 },
-      { owner: backup.address, weight: 1 },
-      { owner: recovery.address, weight: 1 },
-    ],
-    threshold: 2,
-  },
-  owner: backup,
-})
-
-await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: recovery })
-await saveAccount(customerId, { address, config: updated })
-```
-
-A lost backup or recovery key works the same way: the passkey replaces it alone. [Recover a user's account](/docs/accounts/guides/users/recover-an-account) walks through the full flow.
-
-Treat a compromised signer as an attacker who can approve at its weight. Leave it out of the approvers, so the update doesn't depend on a key you no longer trust. If it can reach the threshold alone, it can also remove the other signers first, so keep every signer below the threshold alone.
-
-To recover funds someone sent to the account's address on another chain, see [Recover funds sent on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain).
-
-## Revoke what the old signer authorized
-
-After the update lands, revoke each access key the removed signer could reach, including any key an attacker authorized. [Access key revocation](/docs/accounts/access-keys/revocation) covers how to find and revoke them.
+Treat a compromised signer as an attacker and leave it out of the approvers. If its weight reaches the threshold alone, it can remove your other signers first, so give that much weight only to a key you'd trust with the whole account.
 
 <span id="signer-rotation-limits" />
 <span id="signer-recovery-limits" />
+<span id="remove-signer-limits" />
 
-## Remove signer limits
+## Limits on removing signers
 
-- The approving signers must reach the current threshold. The weights that remain must still reach the new threshold, or Tempo rejects the update.
+- The approving signers must reach the current threshold, and the remaining weights must reach the new one, or Tempo rejects the update.
 - An account keeps at least one signer.
 - `InvalidConfig` means the configuration you sent doesn't match the one Tempo stores, for example because another signer update landed first. Load the latest saved configuration and rebuild the update.
-- After a signer change, `address: 'infer'` derives a different address. Open the account from its saved address and configuration with `Account.fromConfig({ address, ...config })`.
+- Until the first update, open the account with `address: 'infer'`; after a signer change, open it from its saved address with `Account.fromConfig({ address, ...config })`.
 
 Specifications: [configuration updates](https://tips.sh/1109), [configurable accounts](https://tips.sh/1107).
