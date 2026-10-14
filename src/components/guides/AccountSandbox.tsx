@@ -355,6 +355,33 @@ function SecretField({ label, value }: { label: string; value: string }) {
   )
 }
 
+let platformAuthenticator: Promise<boolean> | undefined
+
+/** Whether this browser has a user-verifying platform authenticator, such as Touch ID. */
+function hasPlatformAuthenticator() {
+  platformAuthenticator ??= (async () => {
+    if (!globalThis.isSecureContext || !globalThis.PublicKeyCredential) return false
+    try {
+      return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+    } catch {
+      return false
+    }
+  })()
+  return platformAuthenticator
+}
+
+function usePlatformAuthenticator() {
+  const [available, setAvailable] = React.useState(false)
+  React.useEffect(() => {
+    let active = true
+    void hasPlatformAuthenticator().then((value) => active && setAvailable(value))
+    return () => {
+      active = false
+    }
+  }, [])
+  return available
+}
+
 type SignerChoice = {
   kind: SignerKind
   label: string
@@ -365,11 +392,17 @@ type SignerChoice = {
 }
 
 /**
- * Signers the reader can add to their own account: a device key in this browser and a generated
- * private key. Neither prompts, so the demo runs without OS dialogs.
+ * Signers the reader can add to their own account: a passkey on this device, a device key in this
+ * browser, and a generated private key. Only the passkey prompts, for Touch ID or similar.
  */
-function signerChoices(options: { first?: boolean } = {}): SignerChoice[] {
+function signerChoices(platform: boolean, options: { first?: boolean } = {}): SignerChoice[] {
+  const { unlock } = thisDevice()
   const choices: SignerChoice[] = [
+    {
+      kind: 'passkey',
+      label: `Passkey (${unlock})`,
+      reason: platform ? null : 'No Touch ID or platform authenticator in this browser',
+    },
     { kind: 'device', label: 'Device key', reason: null },
     { kind: 'private-key', label: 'Private key', reason: null },
   ]
@@ -427,7 +460,8 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   const lastHash = account.devnet?.lastHash
   const receipt = before && lastHash !== before.devnet?.lastHash ? lastHash : undefined
   const created = isCreated(account)
-  const choices = signerChoices()
+  const platform = usePlatformAuthenticator()
+  const choices = signerChoices(platform)
   /** A generated private-key signer, shown once. */
   const [secret, setSecret] = React.useState<{ id: string; value: string } | null>(null)
   const shownSecret =
@@ -557,7 +591,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
           {!created ? (
             <SignerChooser
               label="First signer"
-              choices={signerChoices({ first: true })}
+              choices={signerChoices(platform, { first: true })}
               onChoose={(choice) =>
                 choice.legacy ? void addLegacyAccount() : addSignerOf(choice.kind)
               }
