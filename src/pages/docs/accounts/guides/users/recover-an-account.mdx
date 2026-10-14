@@ -22,7 +22,9 @@ When a user loses the phone that holds their passkey, the account's other signer
 <span id="replace-a-signer" />
 <span id="recover-from-a-lost-passkey" />
 
-This guide continues from [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#require-two-factors), with the same devnet `client` and account: a passkey at weight 2, the user's first key and a recovery signer at weight 1 each, and a threshold of 2, the total weight an approval needs. Without the passkey, the other two reach 2 together. Tempo can't override an account's signers, so [check this when you add signers](/docs/accounts/guides/users/add-a-recovery-signer#confirm-the-account-survives-losing-one-signer), not after one is lost.
+This guide continues from [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#require-two-factors), with the same account: a passkey at weight 2, the user's first key and a recovery signer at weight 1 each, and a threshold of 2, the total weight an approval needs. Without the passkey, the other two reach 2 together. Tempo can't override an account's signers, so [check this when you add signers](/docs/accounts/guides/users/add-a-recovery-signer#confirm-the-account-survives-losing-one-signer), not after one is lost.
+
+Tempo stores only a hash of the account's configuration (signers, weights, threshold, and version), so your app rebuilds the account from the address and configuration it saved after the last update: `saved.address` and `saved.config` below.
 
 In the demo, a device key in this browser stands in for the passkey, and the demo treats it as lost.
 
@@ -44,40 +46,52 @@ const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ l
 
 ### Approve with the remaining signers
 
-Open the account from the address and configuration your app saved after its last update. Don't use `address: 'infer'`: once signers change, it derives a different address. Swap the lost passkey for the new one at the same weight. The first key sends the update and the recovery signer approves the same transaction; together they reach the threshold, so it lands.
+Rebuild the account from `saved`, attaching the keys that approve: the first key, held by your app or wallet provider, and the recovery signer. Signers without an attached key, such as the lost passkey, whose address is `lostPasskey`, stay addresses that can't sign. `openAccount` passes the saved address, not `address: 'infer'`, which derives a different address once signers change. The update swaps the lost passkey for the new one at the same weight, and viem signs it with both attached keys: their weights of 1 each reach the threshold of 2.
 
 ```ts [recover.ts]
-import { isAddressEqual } from 'viem'
+import { http, isAddressEqual } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { createClient } from 'viem/tempo'
 
-const firstKey = Account.fromSecp256k1(firstPrivateKey)
+const client = createClient({ chain: tempoDevnet, transport: http() })
+
+/** The account that `saved` describes, holding the approvers' keys. */
+function openAccount(approvers: Account.RootAccount[]) {
+  const { address, config } = saved
+  const owners = config.owners.map(({ owner, weight }) => ({
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+    weight,
+  }))
+  return Account.fromConfig({ ...config, address, owners })
+}
+
+const firstKey = Account.fromSecp256k1(firstPrivateKey) // held by your app or wallet provider
 const recovery = Account.fromSecp256k1(recoveryPrivateKey) // or your recovery provider's signer
-const account = Account.fromConfig({ address, ...savedConfig })
 
-const nextOwners = savedConfig.owners.map((entry) =>
-  isAddressEqual(entry.owner, lostPasskeyAddress) ? { owner: passkey.address, weight: entry.weight } : entry,
-)
-
-const { receipt } = await client.accounts.updateConfigSync({
-  account,
-  nextConfig: { owners: nextOwners, threshold: savedConfig.threshold },
-  owner: firstKey, // 1 of 2: receipt.status is 'pending'
+const { config } = await client.accounts.updateConfigSync({
+  account: openAccount([firstKey, recovery]),
+  nextConfig: {
+    owners: saved.config.owners.map(({ owner, weight }) => ({
+      owner: isAddressEqual(owner, lostPasskey) ? passkey.address : owner,
+      weight,
+    })),
+    threshold: saved.config.threshold,
+  },
 })
-await client.sendTransactionSync({ account, hash: receipt.transactionHash, owner: recovery })
-
-const config = await client.accounts.getConfig({ address }) // Relay.accounts recorded it
-// Save `config` in place of `savedConfig`.
+saved.config = config // persist it: the version increments, and the next step builds from it
 ```
 
-Once the update lands, the lost passkey can't approve anything.
+If the attached keys can't reach the threshold, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Once the update lands, the lost passkey can't approve anything.
 
 ### Revoke the lost device's keys
 
-Changing signers doesn't revoke access keys, so the device key on the lost phone can still pay within its limits. Reopen the account from the new configuration, then revoke the key with the new passkey, which reaches the threshold alone.
+The lost phone's device key is an [access key](/docs/accounts/access-keys): it pays from the account within its limits without the signers' approval. Changing signers doesn't revoke it, so revoke it now. `lostDeviceKey` is the address your app saved when it authorized the key. `openAccount` rebuilds the account from the updated `saved.config`; an account built from the old configuration no longer matches the hash Tempo stores and fails with `multisig configuration commitment mismatch`. On the new device, the new passkey approves alone, because its weight of 2 reaches the threshold.
 
 ```ts [recover.ts]
-const current = Account.fromConfig({ address, ...config }) // the configuration after the update
-
-await client.accessKey.revokeSync({ accessKey: lostDeviceKey, account: current, owner: passkey })
+await client.accessKey.revokeSync({
+  account: openAccount([passkey]), // rebuilt from the new `saved.config`
+  accessKey: lostDeviceKey,
+})
 ```
 
 If you didn't save the lost key's address, [list the keys the account has authorized](/docs/accounts/access-keys/revocation#revoke-when-signers-change). A revoked key can't be authorized again, so authorize a new [device key](/docs/accounts/authentication/device-keys) for the new phone.
