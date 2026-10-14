@@ -31,7 +31,11 @@ Because the key fixes the address, you can't replace the root key: a new key is 
 
 ## Signing with the root key
 
-The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type.
+The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [sign.ts]
 import { parseUnits } from 'viem'
@@ -49,8 +53,6 @@ await client.token.transferSync({
 })
 ```
 
-`client` is a [Viem client](/docs/guide/payments/send-a-payment/examples#viem-client) on the Moderato testnet.
-
 Any of the three key types can also sign EIP-7702 authorizations, which let the account run a contract's code as its own ([Tempo and EIP-7702](/docs/protocol/transactions/eip-7702)).
 
 ## Access keys on a single-key account
@@ -59,7 +61,7 @@ The root key can authorize [access keys](/docs/development/account-keychain), ex
 
 ## Upgrade to a configurable account
 
-An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key: each owner has a weight, and an approval needs the owners' weights to reach a threshold. The upgrade is permanent and runs only on Tempo devnet, under a Draft specification, [TIP-1113](https://tips.sh/1113). For a walkthrough with a live demo, follow [Account upgrade](/docs/accounts/key-management/account-upgrade).
+An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key: each owner has a weight, and an approval needs the owners' weights to reach a threshold. The upgrade is permanent and runs only on the Tempo Accounts devnet, under a Draft specification, [TIP-1113](https://tips.sh/1113). For a walkthrough with a live demo, follow [Account upgrade](/docs/accounts/key-management/account-upgrade).
 
 | Property | Rule |
 | --- | --- |

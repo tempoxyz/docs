@@ -9,7 +9,7 @@ description: Add backup signers to each user's single-key Tempo account at the s
 Each of your users' existing accounts is a single-key account (EOA), like a standard Ethereum account: one private key approves everything, so losing that key loses the account. Upgrade each account in place to add backup signers. The address, balances, and access keys stay the same, and the upgrade is permanent.
 
 :::warning
-**Not live yet.** Account upgrade ([TIP-1113](https://tips.sh/1113)) runs only on Tempo devnet, and behavior may change.
+**Not live yet.** Account upgrade ([TIP-1113](https://tips.sh/1113)) runs only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 After the upgrade, the account has a list of signers, each with a weight, and a threshold: the total weight an approval needs. The original key keeps approving only if you list it. [Account upgrade](/docs/accounts/key-management/account-upgrade) explains the change and runs one in a live demo.
@@ -61,14 +61,17 @@ await saveAccount(userId, { // your app's storage
 
 ### Pay through the saved configuration
 
-Wherever your app signs with `original` directly, pass an account rebuilt from the saved record instead: a direct signature from the original key now fails with `RootKeyRetired`. In the rebuilt account, pass `original` itself in its signer entry so it can sign, and keep the other signers as addresses. viem signs with the keys you pass until their weights reach the threshold.
+Wherever your app signs with `original` directly, pass an account rebuilt from the saved record instead: a direct signature from the original key now fails with `RootKeyRetired` (`primitive root key retired`). In the rebuilt account, pass `original` itself in its signer entry so it can sign, and keep the other signers as addresses. viem signs with the keys you pass until their weights reach the threshold. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [pay.ts]
-import { http, isAddressEqual, parseUnits } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
+import { isAddressEqual, parseUnits } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
 
-const client = createClient({ chain: tempoDevnet, transport: http() })
 const token = '0x20c0000000000000000000000000000000000001' // test AlphaUSD
 const original = Account.fromSecp256k1(userPrivateKey) // the key your app holds for this user
 const { address, config } = await loadAccount(userId) // the record saved above

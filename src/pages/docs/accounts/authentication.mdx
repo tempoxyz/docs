@@ -44,7 +44,7 @@ A signing method is the kind of key that approves a Tempo account's transactions
 
 Each key joins the account as a signer or an access key. A signer approves with a weight, and a transaction runs once the approving signers' weights reach the account's [threshold](/docs/accounts/policies/signing-thresholds). An [access key](/docs/accounts/access-keys) pays alone within its limits and never counts toward the threshold. Add device keys and server payout keys as access keys: a signer has no spending limit.
 
-Tempo has no override, so your app or a provider can approve only with the signers it holds. Set weights so no one but the customer reaches the threshold alone: [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts, embedded wallets, and treasuries. Signers and thresholds run only on Tempo devnet.
+Tempo has no override, so your app or a provider can approve only with the signers it holds. Set weights so no one but the customer reaches the threshold alone: [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts, embedded wallets, and treasuries. Signers and thresholds run only on the Tempo Accounts devnet.
 
 <span id="login-sign-in-in-code" />
 

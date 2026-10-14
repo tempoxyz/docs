@@ -6,7 +6,7 @@ description: Add a passkey, hardware key, or recovery provider to a Tempo accoun
 
 # Add signers
 
-Adding a signer, a key that approves the account's transactions, backs up a key you could lose or lets another person approve. The current signers approve the addition in one signer update, and the address, balance, token approvals, and access keys stay the same. Signer updates run only on Tempo devnet.
+Adding a signer, a key that approves the account's transactions, backs up a key you could lose or lets another person approve. The current signers approve the addition in one signer update, and the address, balance, token approvals, and access keys stay the same. Signer updates run only on the Tempo Accounts devnet.
 
 <span id="what-adding-a-signer-does" />
 
@@ -30,14 +30,16 @@ A recovery signer lets the remaining signers replace a lost one. Give it enough 
 
 A signer update replaces the account's whole signer list. Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version), a fingerprint it checks approvals against but can't read back. Your app saves the account's address and configuration with the account record and builds every approval from that copy.
 
-Each signer's key stays with whoever holds it. To send the update, rebuild the account from the saved record with the approving signers' keys attached, and append the new signer:
+Each signer's key stays with whoever holds it. To send the update, rebuild the account from the saved record with the approving signers' keys attached, and append the new signer. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [add-signer.ts]
-import { http, isAddressEqual } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
-
-const client = createClient({ chain: tempoDevnet, transport: http() })
+import { isAddressEqual } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
 
 const { address, config } = await loadAccount(customerId) // your app's storage
 
