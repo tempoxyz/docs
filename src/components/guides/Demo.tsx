@@ -1,5 +1,4 @@
 'use client'
-import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Address, BaseError } from 'viem'
 import { tempoModerato } from 'viem/chains'
@@ -217,12 +216,11 @@ export function Container(
 
 export namespace Container {
   function BalancesFooterItem(props: { address: Address; token: Address }) {
-    const queryClient = useQueryClient()
     const { address, token } = props
     const {
       data: balance,
       isPending: balanceIsPending,
-      queryKey: balancesKey,
+      refetch: balanceRefetch,
     } = Hooks.token.useGetBalance({
       account: address,
       token,
@@ -230,15 +228,16 @@ export namespace Container {
     const { data: metadata, isPending: metadataIsPending } = Hooks.token.useGetMetadata({
       token,
     })
+    const onTransfer = React.useCallback(() => {
+      void balanceRefetch()
+    }, [balanceRefetch])
 
     Hooks.token.useWatchTransfer({
       token,
       args: {
         to: address,
       },
-      onTransfer: () => {
-        queryClient.invalidateQueries({ queryKey: balancesKey })
-      },
+      onTransfer,
       enabled: !!address,
     })
 
@@ -247,9 +246,7 @@ export namespace Container {
       args: {
         from: address,
       },
-      onTransfer: () => {
-        queryClient.invalidateQueries({ queryKey: balancesKey })
-      },
+      onTransfer,
       enabled: !!address,
     })
 
