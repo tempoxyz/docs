@@ -9,7 +9,7 @@ test('accepts a successful demo action', async ({ page }) => {
 test('fails promptly when a demo reports a terminal error', async ({ page }) => {
   test.setTimeout(5_000)
   await page.setContent(
-    '<div data-active data-completed><div class="bg-destructiveTint">Socket closed</div></div>',
+    '<div data-active data-completed><div role="alert" class="generated-error">Socket closed</div></div>',
   )
   await expect(
     expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }), 60_000),
@@ -18,7 +18,7 @@ test('fails promptly when a demo reports a terminal error', async ({ page }) => 
 
 test('rejects a demo error even when a success indicator is also visible', async ({ page }) => {
   await page.setContent(
-    '<button>Add more funds</button><div data-active data-completed><div class="bg-destructiveTint">Socket closed</div></div>',
+    '<button>Add more funds</button><div data-active data-completed><div role="alert">Socket closed</div></div>',
   )
   await expect(
     expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' })),
@@ -27,7 +27,7 @@ test('rejects a demo error even when a success indicator is also visible', async
 
 test('ignores hidden error content when the demo succeeds', async ({ page }) => {
   await page.setContent(
-    '<button>Add more funds</button><div data-active data-completed hidden><div class="bg-destructiveTint">Socket closed</div></div>',
+    '<button>Add more funds</button><div data-active data-completed hidden><div role="alert">Socket closed</div></div>',
   )
   await expectDemoSuccess(page, page.getByRole('button', { name: 'Add more funds' }))
 })

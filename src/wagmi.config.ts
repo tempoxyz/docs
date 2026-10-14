@@ -69,6 +69,8 @@ export function getConfig(options: getConfig.Options = {}) {
     },
   })
   return createConfig({
+    // Demo balance watchers do not need to poll at the chain's subsecond default.
+    pollingInterval: { [tempoModerato.id]: 2_000 },
     batch: {
       multicall: false,
     },
@@ -88,7 +90,7 @@ export function getConfig(options: getConfig.Options = {}) {
     transports: {
       [tempoModerato.id]: withRelay(
         fallback([
-          http('https://rpc.moderato.tempo.xyz'),
+          http('https://rpc.moderato.tempo.xyz', { batch: { batchSize: 5 } }),
           webSocket('wss://rpc.moderato.tempo.xyz', {
             keepAlive: { interval: 1_000 },
           }),
