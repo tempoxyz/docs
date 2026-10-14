@@ -4,6 +4,7 @@ import { type ReactNode, useState } from 'react'
 import { type ApiRequest, type ApiResult, requestUrl } from '../lib/routes-execution'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens, variants } from '../styles/theme'
+import { CopyButtonLabel } from './CopyButtonLabel'
 import * as Demo from './guides/Demo'
 
 /** One API call in the log; repeated background reads fold into a single entry. */
@@ -55,7 +56,7 @@ export function CopyButton({ text }: { text: string }) {
   const [copied, copy] = Demo.useCopyToClipboard()
   return (
     <button type="button" onClick={() => void copy(text)} {...copyButton()}>
-      {copied ? 'Copied' : 'Copy'}
+      <CopyButtonLabel labels={['Copy', 'Copied']}>{copied ? 'Copied' : 'Copy'}</CopyButtonLabel>
     </button>
   )
 }

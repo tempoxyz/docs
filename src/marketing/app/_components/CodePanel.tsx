@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { cx as composeStyles } from 'zyzz'
+import { CopyButtonLabel } from '../../../components/CopyButtonLabel'
 import { codeScroll, themePreserveDark } from '../../../styles/surfaces.styles'
 import * as ui from './CodePanel.recipes'
 import DotCanvas from './DotCanvas'
@@ -213,7 +214,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button type="button" onClick={handleCopy} aria-label="Copy code" {...ui.copyButtonButton()}>
       {copied ? <CheckIcon /> : <CopyIcon />}
-      {copied ? 'Copied' : 'Copy'}
+      <CopyButtonLabel labels={['Copy', 'Copied']}>{copied ? 'Copied' : 'Copy'}</CopyButtonLabel>
     </button>
   )
 }

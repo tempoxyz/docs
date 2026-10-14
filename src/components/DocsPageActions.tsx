@@ -7,6 +7,7 @@ import CopyIcon from '~icons/lucide/copy'
 import DownloadIcon from '~icons/lucide/download'
 import ExternalLinkIcon from '~icons/lucide/external-link'
 import { publicAssetPath } from '../lib/public-asset-path'
+import { CopyButtonLabel } from './CopyButtonLabel'
 import { usePathname } from './DocsHeader'
 import * as ui from './DocsPageActions.recipes'
 import { docsPageActions, docsPageActionsError } from './DocsPageActions.styles'
@@ -94,7 +95,13 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
           >
             <button type="button" onClick={copyPage} disabled={state === 'copying'}>
               <CopyIcon aria-hidden="true" width="14" height="14" />
-              {state === 'copied' ? 'Copied' : state === 'copying' ? 'Copying…' : 'Copy for agent'}
+              <CopyButtonLabel labels={['Copy for agent', 'Copying…', 'Copied']}>
+                {state === 'copied'
+                  ? 'Copied'
+                  : state === 'copying'
+                    ? 'Copying…'
+                    : 'Copy for agent'}
+              </CopyButtonLabel>
             </button>
             <a href={markdownPath} target="_blank" rel="noreferrer" title="View Markdown">
               <ExternalLinkIcon aria-hidden="true" width="14" height="14" />

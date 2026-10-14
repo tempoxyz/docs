@@ -9,6 +9,7 @@ import TerminalIcon from '~icons/lucide/terminal'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
+import { CopyButtonLabel } from './CopyButtonLabel'
 import { tempoAgentStart, tempoAgentStartAgents, tempoAgentStartCommand } from './DocsHome.styles'
 
 const agents = [
@@ -137,7 +138,9 @@ export function DocsHomeAgent() {
               ) : (
                 <CopyIcon aria-hidden="true" />
               )}
-              <span>{copyState === 'copied' ? 'Copied' : copyLabel}</span>
+              <CopyButtonLabel labels={[copyLabel, 'Copied']}>
+                {copyState === 'copied' ? 'Copied' : copyLabel}
+              </CopyButtonLabel>
             </button>
           </div>
           <pre>
