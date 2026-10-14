@@ -392,19 +392,19 @@ type SignerChoice = {
 }
 
 /**
- * Signers the reader can add to their own account: a device key in this browser, a passkey on this
- * device, and a generated private key. The device key comes first and is the recommended choice,
- * because it runs without OS dialogs; only the passkey prompts, for Touch ID or similar.
+ * Signers the reader can add to their own account: a passkey on this device, a device key in this
+ * browser, and a generated private key. The passkey comes first when this browser can make one; it
+ * is the only choice that prompts, for Touch ID or similar.
  */
 function signerChoices(platform: boolean, options: { first?: boolean } = {}): SignerChoice[] {
   const { unlock } = thisDevice()
   const choices: SignerChoice[] = [
-    { kind: 'device', label: 'Device key', reason: null },
     {
       kind: 'passkey',
       label: `Passkey (${unlock})`,
       reason: platform ? null : 'No Touch ID or platform authenticator in this browser',
     },
+    { kind: 'device', label: 'Device key', reason: null },
     { kind: 'private-key', label: 'Private key', reason: null },
   ]
   if (options.first)
@@ -419,9 +419,8 @@ function signerChoices(platform: boolean, options: { first?: boolean } = {}): Si
 }
 
 /**
- * Real signer options, for the first signer and for a backup. The device key is the recommended
- * choice, since it never prompts; starting from a single-key account is a different path, so it
- * reads as a link.
+ * Real signer options, for the first signer and for a backup. The first available choice is the
+ * recommended one; starting from a single-key account is a different path, so it reads as a link.
  */
 function SignerChooser(props: {
   label: string
@@ -430,9 +429,7 @@ function SignerChooser(props: {
 }) {
   const signers = props.choices.filter((choice) => !choice.legacy)
   const legacy = props.choices.find((choice) => choice.legacy)
-  const primary =
-    signers.find((choice) => choice.kind === 'device' && !choice.reason) ??
-    signers.find((choice) => !choice.reason)
+  const primary = signers.find((choice) => !choice.reason)
   return (
     <Field label={props.label}>
       <div className="as-choices">
