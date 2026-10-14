@@ -22,7 +22,7 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
 - API reference (`/docs/api`) is its own top-nav link, matching Console's "API Docs" link. Partners (`/docs/partners`) contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
 - Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
-- `SKILL.md` is the docs site's published skill. The installable plugin's skill lives in `tempoxyz/plugins`; update it separately when routing changes.
+- `SKILL.md` is the canonical Tempo docs skill, published at `/SKILL.md`. The `tempoxyz/plugins` copy is generated from it by that repo's skill sync, so edit only `SKILL.md` here.
 - `src/lib/ai-docs.ts` and the Vite build hook generate `llms.txt`, `llms-full.txt`, Markdown section context, and the published skill from source. Never edit `dist` or `.vercel` copies by hand.
 - After changing navigation or exported components, build and run `pnpm check:markdown` to check content and IA coverage. Keep Markdown exports useful without interactive UI.
 - When a top-nav section is added, renamed, or removed, update its routing description in `src/lib/ai-docs.ts`, the routing table in `SKILL.md`, and the tests that name sections (`DocsHeader.test.ts`, `ai-docs.test.ts`, `ai-docs-dev.test.ts`, `markdown-output.test.ts`).
