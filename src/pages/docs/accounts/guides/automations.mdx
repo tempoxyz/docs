@@ -1,0 +1,21 @@
+---
+title: Automations
+seoTitle: Automate Payouts, Earn Sweeps, and Card Funding from Tempo Accounts | Tempo Docs
+description: Pick a walkthrough to run payouts, sweep idle balances into Earn, or fund a card program from your backend with a scoped, limited access key.
+---
+
+# Automations
+
+These guides let your backend move a customer's stablecoins on a schedule without asking anyone to approve each payment. The customer's signers approve one access key for your backend once, and Tempo rejects anything outside that key's limit, allowed calls, and expiry, even if the key leaks.
+
+An account's signers are the keys allowed to approve for it, such as the customer's passkey. Every payment is a transaction: a signed request that Tempo checks, records, and charges a small fee for in a stablecoin. An [access key](/docs/accounts/access-keys) signs those transactions for the account within bounds the signers set, so your backend pays without holding a signer.
+
+## Choose a guide
+
+| Scenario | Guide |
+| --- | --- |
+| Your backend pays contractors, sellers, or refunds to payees the customer approved | [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) |
+| Your backend moves a customer's idle balance into an Earn vault each night | [Sweep idle balances into Earn](/docs/accounts/guides/automations/sweep-into-earn) |
+| Your backend tops up a card program as the customer spends | [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program) |
+
+For an AI agent that pays on its own, see [Agents](/docs/accounts/guides/agents).

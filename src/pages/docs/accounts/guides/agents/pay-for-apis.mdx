@@ -1,0 +1,75 @@
+---
+title: Let an agent pay for APIs
+seoTitle: Let an AI Agent Pay for APIs with MPP and a Budgeted Tempo Access Key | Tempo Docs
+description: Give an agent an access key with a daily budget, pay for API requests with an MPP client, and watch the agent's receipts and remaining budget.
+---
+
+# Let an agent pay for APIs
+
+An agent pays for API requests from an account with its own access key and an [MPP](/docs/agents) client. When a service answers `402 Payment Required`, the client pays from the account and retries, and Tempo stops the agent once it spends its daily budget.
+
+The Machine Payments Protocol (MPP) lets a service ask for payment inside an HTTP request. See [How MPP works](/docs/guide/machine-payments) for the request flow. The examples use Moderato testnet, a Tempo test network whose stablecoins have no value, with AlphaUSD, a test stablecoin. Use a service that accepts testnet payments.
+
+:::::steps
+
+### Give the agent a budget
+
+Authorize the agent's key with a renewing budget and the calls a one-time MPP payment uses. [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) explains each bound.
+
+```ts [authorize-agent.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+await client.accessKey.authorizeSync({
+  accessKey: { accessKeyAddress: agentKeyAddress, keyType: 'p256' }, // the agent's key
+  account, // the account, signed by its signers
+  expiry: Expiry.days(30),
+  limits: [{ token: alphaUsd, limit: parseUnits('20', 6), period: 86_400 }], // 20 AlphaUSD a day
+  scopes: [
+    { address: alphaUsd, selector: 'transferWithMemo(address,uint256,bytes32)' },
+    { address: alphaUsd, selector: 'transfer(address,uint256)' },
+  ],
+})
+```
+
+A one-time payment (`charge`) is a stablecoin transfer to the service, with a memo that ties it to the request. These scopes leave the recipient open, so the agent can pay any service, and the budget bounds the total. A [payment session](/docs/guide/machine-payments/pay-as-you-go) also needs the payment-channel calls it makes.
+
+### Pay with MPP
+
+Give the agent's key to the MPP client. `Mppx.create` handles each `402` challenge with `fetch`:
+
+```ts [agent.ts]
+import { Mppx, tempo } from 'mppx/client'
+import { Account } from 'viem/tempo'
+
+const agentKey = Account.fromP256(privateKey, { access: address }) // the account's address
+
+Mppx.create({ methods: [tempo({ account: agentKey })] })
+
+const response = await fetch(paidUrl)
+```
+
+The client signs the payment with the agent's key, from the account's balance. Tempo rejects a payment outside the scopes, over the remaining budget, or after the expiry, and the request fails without paying. For client options, see [Pay for services](/docs/guide/machine-payments/client). For an agent that pays from a terminal, use [`tempo request`](/docs/guide/machine-payments/agent) with `--max-spend` to cap each command.
+
+### Watch spending
+
+Read each payment's receipt, and check the budget left today:
+
+```ts [watch-spending.ts]
+import { Receipt } from 'mppx'
+
+const receipt = Receipt.fromResponse(response) // receipt.reference is the payment's transaction hash
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ account: address, accessKey: agentKey, token: alphaUsd })
+```
+
+Log each receipt with the request that paid for it. Alert when `remaining` runs low, and show the agent's spending in your account UI with a [revoke](/docs/accounts/access-keys/revocation#revoke-an-access-key) action.
+
+:::::
+
+## Agent API payment limits
+
+- The key's budget caps the agent's total spend from the account, not the price of one request. One expensive request can use the day's budget, so in a terminal, preview a price with `tempo request --dry-run` and cap it with `--max-spend`.
+- If the service sponsors fees, they don't count against the budget. Otherwise the key's fees do.
+- Find paid services and their prices in [Find services](/docs/guide/machine-payments/discover-services).

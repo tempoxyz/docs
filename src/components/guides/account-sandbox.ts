@@ -52,7 +52,7 @@ type SignerKindInfo = {
 }
 
 export const signerKinds = {
-  'private-key':{ label: 'Private key', scheme: 'secp256k1', holder: 'you', group: 'Keys' },
+  'private-key': { label: 'Private key', scheme: 'secp256k1', holder: 'you', group: 'Keys' },
   passkey: { label: 'Passkey', scheme: 'webauthn', holder: 'you', group: 'Keys' },
   device: { label: 'Device key', scheme: 'p256', holder: 'you', group: 'Keys' },
   hardware: { label: 'Hardware key', scheme: 'secp256k1', holder: 'you', group: 'Keys' },

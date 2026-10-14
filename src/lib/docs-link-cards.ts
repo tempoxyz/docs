@@ -59,7 +59,7 @@ export const docsLinkCards = {
         ['Signing methods', '/docs/accounts/authentication'],
         ['Policies', '/docs/accounts/policies'],
         ['Access keys', '/docs/accounts/access-keys'],
-        ['Account recovery', '/docs/accounts/guides/self-custody#recover-from-a-lost-passkey'],
+        ['Account recovery', '/docs/accounts/guides/users/recover-an-account'],
       ],
     },
     {
@@ -67,9 +67,9 @@ export const docsLinkCards = {
       description: 'Walk through wallet providers, treasuries, and agents.',
       icon: 'code',
       links: [
-        ['Use a wallet provider', '/docs/accounts/guides/wallet-provider'],
-        ['Set up a company treasury wallet', '/docs/accounts/guides/company-treasury'],
-        ['Set up an agent wallet', '/docs/accounts/guides/agent-wallet'],
+        ['Embed wallets with a provider', '/docs/accounts/guides/users/embed-wallets'],
+        ['Set up a company treasury', '/docs/accounts/guides/teams/company-treasury'],
+        ['Give an agent a wallet', '/docs/accounts/guides/agents/give-an-agent-a-wallet'],
       ],
     },
     {

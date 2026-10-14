@@ -560,13 +560,13 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Key rotation',
-            link: '/docs/accounts/key-rotation',
+            text: 'Key management',
+            link: '/docs/accounts/key-management',
             collapsed: true,
             items: [
-              { text: 'Signer rotation', link: '/docs/accounts/key-rotation/signer-rotation' },
-              { text: 'Signer recovery', link: '/docs/accounts/key-rotation/signer-recovery' },
-              { text: 'Account upgrade', link: '/docs/accounts/key-rotation/account-upgrade' },
+              { text: 'Add signers', link: '/docs/accounts/key-management/add-signers' },
+              { text: 'Remove signers', link: '/docs/accounts/key-management/remove-signers' },
+              { text: 'Account upgrade', link: '/docs/accounts/key-management/account-upgrade' },
             ],
           },
           {
@@ -581,29 +581,86 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Users',
-        items: [
-          { text: 'Use a wallet provider', link: '/docs/accounts/guides/wallet-provider' },
-          { text: 'Set up self-custody', link: '/docs/accounts/guides/self-custody' },
-          { text: 'Set up a spending account', link: '/docs/accounts/guides/spending-account' },
-        ],
-      },
-      {
-        text: 'Teams',
+        text: 'Guides',
         items: [
           {
-            text: 'Set up a company treasury wallet',
-            link: '/docs/accounts/guides/company-treasury',
+            text: 'Users',
+            link: '/docs/accounts/guides/users',
+            collapsed: true,
+            items: [
+              {
+                text: 'Embed wallets with a provider',
+                link: '/docs/accounts/guides/users/embed-wallets',
+              },
+              {
+                text: 'Add a recovery signer',
+                link: '/docs/accounts/guides/users/add-a-recovery-signer',
+              },
+              {
+                text: "Recover a user's account",
+                link: '/docs/accounts/guides/users/recover-an-account',
+              },
+              {
+                text: 'Hand off to a self-custodial wallet',
+                link: '/docs/accounts/guides/users/hand-off',
+              },
+              {
+                text: 'Migrate existing wallets',
+                link: '/docs/accounts/guides/users/migrate-existing-wallets',
+              },
+            ],
+          },
+          {
+            text: 'Automations',
+            link: '/docs/accounts/guides/automations',
+            collapsed: true,
+            items: [
+              {
+                text: 'Pay out from a backend',
+                link: '/docs/accounts/guides/automations/pay-out-from-a-backend',
+              },
+              {
+                text: 'Sweep idle balances into Earn',
+                link: '/docs/accounts/guides/automations/sweep-into-earn',
+              },
+              {
+                text: 'Fund a card program',
+                link: '/docs/accounts/guides/automations/fund-a-card-program',
+              },
+            ],
+          },
+          {
+            text: 'Agents',
+            link: '/docs/accounts/guides/agents',
+            collapsed: true,
+            items: [
+              {
+                text: 'Give an agent a wallet',
+                link: '/docs/accounts/guides/agents/give-an-agent-a-wallet',
+              },
+              {
+                text: 'Let an agent pay for APIs',
+                link: '/docs/accounts/guides/agents/pay-for-apis',
+              },
+            ],
+          },
+          {
+            text: 'Teams',
+            link: '/docs/accounts/guides/teams',
+            collapsed: true,
+            items: [
+              {
+                text: 'Set up a company treasury',
+                link: '/docs/accounts/guides/teams/company-treasury',
+              },
+              { text: 'Give a team a budget', link: '/docs/accounts/guides/teams/team-budget' },
+              {
+                text: 'Offboard an approver',
+                link: '/docs/accounts/guides/teams/offboard-an-approver',
+              },
+            ],
           },
         ],
-      },
-      {
-        text: 'Automations',
-        items: [{ text: 'Automate a backend', link: '/docs/accounts/guides/automate-backend' }],
-      },
-      {
-        text: 'Agents',
-        items: [{ text: 'Set up an agent wallet', link: '/docs/accounts/guides/agent-wallet' }],
       },
     ]
     const machinePaymentsSidebar = [
@@ -975,7 +1032,10 @@ export default defineConfig({
             items: [
               { text: 'Payment integration', link: '/docs/guide/payments' },
               { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
-              { text: 'Choose a fee token', link: '/docs/guide/payments/pay-fees-in-any-stablecoin' },
+              {
+                text: 'Choose a fee token',
+                link: '/docs/guide/payments/pay-fees-in-any-stablecoin',
+              },
               { text: 'Fund an account', link: '/docs/guide/getting-funds' },
               {
                 text: 'Send payments',
@@ -1410,18 +1470,8 @@ export default defineConfig({
       status: 301,
     },
     {
-      source: '/docs/accounts/authentication/oidc',
-      destination: '/docs/accounts/authentication',
-      status: 301,
-    },
-    {
-      source: '/docs/accounts/guides/enterprise-sso',
-      destination: '/docs/accounts/guides/wallet-provider',
-      status: 301,
-    },
-    {
       source: '/docs/accounts/guides/identity-provider',
-      destination: '/docs/accounts/guides/wallet-provider',
+      destination: '/docs/accounts/guides/users/embed-wallets',
       status: 301,
     },
     {
@@ -1441,7 +1491,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/authentication/privy',
-      destination: '/docs/accounts/guides/wallet-provider#build-with-privy',
+      destination: '/docs/accounts/guides/users/embed-wallets#build-with-privy',
       status: 301,
     },
     {
@@ -1456,27 +1506,28 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/add-signers',
-      destination: '/docs/accounts/guides/self-custody#add-a-backup-signer',
+      destination: '/docs/accounts/guides/users/add-a-recovery-signer#add-a-backup-signer',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/multi-factor',
-      destination: '/docs/accounts/guides/self-custody#require-multi-factor-approval',
+      destination:
+        '/docs/accounts/guides/users/add-a-recovery-signer#require-multi-factor-approval',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/rotate-keys',
-      destination: '/docs/accounts/guides/company-treasury#rotate-an-approvers-key',
+      destination: '/docs/accounts/guides/teams/company-treasury#rotate-an-approvers-key',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/replace-keys',
-      destination: '/docs/accounts/guides/self-custody#recover-from-a-lost-passkey',
+      destination: '/docs/accounts/guides/users/add-a-recovery-signer#recover-from-a-lost-passkey',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/change-email',
-      destination: '/docs/accounts/key-rotation/signer-rotation',
+      destination: '/docs/accounts/key-management/remove-signers',
       status: 301,
     },
     {
@@ -1486,17 +1537,18 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/export',
-      destination: '/docs/accounts/guides/self-custody#hand-off-to-a-self-custodial-wallet',
+      destination:
+        '/docs/accounts/guides/users/add-a-recovery-signer#hand-off-to-a-self-custodial-wallet',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/recover',
-      destination: '/docs/accounts/guides/self-custody#recover-from-a-lost-passkey',
+      destination: '/docs/accounts/guides/users/add-a-recovery-signer#recover-from-a-lost-passkey',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/upgrade',
-      destination: '/docs/accounts/key-rotation/account-upgrade',
+      destination: '/docs/accounts/key-management/account-upgrade',
       status: 301,
     },
     {
@@ -1506,7 +1558,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/advanced/team-accounts',
-      destination: '/docs/accounts/guides/company-treasury#give-a-team-a-budget',
+      destination: '/docs/accounts/guides/teams/company-treasury#give-a-team-a-budget',
       status: 301,
     },
     {
@@ -1521,17 +1573,17 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/agents',
-      destination: '/docs/accounts/guides/agent-wallet',
+      destination: '/docs/accounts/guides/agents/give-an-agent-a-wallet',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/backend-automation',
-      destination: '/docs/accounts/guides/automate-backend',
+      destination: '/docs/accounts/guides/automations/pay-out-from-a-backend',
       status: 301,
     },
     {
       source: '/docs/accounts/security',
-      destination: '/docs/accounts/guides/self-custody',
+      destination: '/docs/accounts/guides/users/add-a-recovery-signer',
       status: 301,
     },
     {
@@ -1540,13 +1592,68 @@ export default defineConfig({
       status: 301,
     },
     {
-      source: '/docs/accounts/recovery',
-      destination: '/docs/accounts/key-rotation',
+      source: '/docs/accounts/guides/wallet-provider',
+      destination: '/docs/accounts/guides/users/embed-wallets',
       status: 301,
     },
     {
-      source: '/docs/guide/payments/configure-receive-policies',
-      destination: '/docs/accounts/policies/receive-policies',
+      source: '/docs/accounts/guides/enterprise-sso',
+      destination: '/docs/accounts/guides/users/embed-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/self-custody',
+      destination: '/docs/accounts/guides/users/add-a-recovery-signer',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/automate-backend',
+      destination: '/docs/accounts/guides/automations/pay-out-from-a-backend',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/spending-account',
+      destination: '/docs/accounts/guides/automations/fund-a-card-program',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/agent-wallet',
+      destination: '/docs/accounts/guides/agents/give-an-agent-a-wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/company-treasury',
+      destination: '/docs/accounts/guides/teams/company-treasury',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation',
+      destination: '/docs/accounts/key-management',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation/signer-rotation',
+      destination: '/docs/accounts/key-management/remove-signers',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation/signer-recovery',
+      destination: '/docs/accounts/key-management/remove-signers',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation/account-upgrade',
+      destination: '/docs/accounts/key-management/account-upgrade',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/oidc',
+      destination: '/docs/accounts/authentication',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/users/sign-in-with-your-login',
+      destination: '/docs/accounts/guides/users',
       status: 301,
     },
     {
@@ -1560,8 +1667,13 @@ export default defineConfig({
       status: 301,
     },
     {
-      source: '/docs/accounts/key-management',
-      destination: '/docs/accounts/key-rotation',
+      source: '/docs/accounts/recovery',
+      destination: '/docs/accounts/key-management',
+      status: 301,
+    },
+    {
+      source: '/docs/guide/payments/configure-receive-policies',
+      destination: '/docs/accounts/policies/receive-policies',
       status: 301,
     },
     {
@@ -1571,7 +1683,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/team-budgets',
-      destination: '/docs/accounts/guides/company-treasury#give-a-team-a-budget',
+      destination: '/docs/accounts/guides/teams/company-treasury#give-a-team-a-budget',
       status: 301,
     },
     {
@@ -1586,7 +1698,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/integrate',
-      destination: '/docs/accounts/guides/wallet-provider#connect-tempo-wallet',
+      destination: '/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet',
       status: 301,
     },
     {
@@ -1601,7 +1713,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/providers',
-      destination: '/docs/accounts/guides/wallet-provider',
+      destination: '/docs/accounts/guides/users/embed-wallets',
       status: 301,
     },
     {

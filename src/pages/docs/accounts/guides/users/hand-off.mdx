@@ -1,0 +1,79 @@
+---
+title: Hand off to a self-custodial wallet
+seoTitle: Hand Off a Tempo Account to a Self-Custodial Wallet | Tempo Docs
+description: Revoke your app's keys and swap its signers for one the user holds, so they control the same address and balance from their own wallet.
+interactive: true
+---
+
+import { GuideDemo } from '../../../../../components/guides/GuideDemo'
+
+# Hand off to a self-custodial wallet
+
+:::warning
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) are in early development and run only on Tempo devnet. We're seeking feedback; behavior may change.
+:::
+
+Give a user full control of their account by swapping your app's signers for one they hold in their own wallet, such as Tempo Wallet. The address and balance don't change, payments keep arriving, and your app keeps no key.
+
+<span id="account-export" />
+<span id="hand-off-to-the-customer" />
+<span id="hand-off-to-a-self-custodial-wallet" />
+<span id="why-a-signer-handoff-instead-of-a-private-key-export" />
+
+A handoff is safer than exporting a private key. An export leaves your app with a copy and its access keys still active, and passkeys and device keys have no key to export. Swap every signer your app controls, including any key your wallet provider holds for the user.
+
+The demo plays your app: it creates a devnet account whose only signer and access key it holds, then hands the account to a passkey on this device. Devnet is a test network, so the stablecoins have no value.
+
+<GuideDemo guide="export" />
+
+:::::steps
+
+### Get the user's signer address
+
+The user creates a passkey in a self-custodial wallet, such as [Tempo Wallet](https://wallet.tempo.xyz), and sends you its address. Ask them to confirm the address there before you continue, since the next steps remove your access.
+
+### Revoke your app's keys
+
+Revoke each access key your app holds while your signer can still approve.
+
+```ts [hand-off.ts]
+import { Account } from 'viem/tempo'
+
+const appSigner = Account.fromSecp256k1(process.env.APP_SIGNER_KEY as `0x${string}`)
+const account = Account.fromConfig({ address, ...savedConfig }) // the address and config you saved
+
+for (const accessKey of appAccessKeys) {
+  await client.accessKey.revokeSync({ accessKey, account, owner: appSigner })
+}
+```
+
+<span id="swap-the-signers-in-one-update" />
+
+### Swap the signers
+
+Replace all of your app's signers with the user's in one update. Your app approves its own removal.
+
+```ts [hand-off.ts]
+await client.accounts.updateConfigSync({
+  account,
+  nextConfig: {
+    owners: [{ owner: userSigner, weight: 1 }],
+    threshold: 1,
+  },
+  owner: appSigner,
+})
+```
+
+To keep a backup, include a recovery signer the user chooses, as in the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups), where no recovery signer approves alone.
+
+### Send the user to their wallet
+
+The user opens the same address in their wallet. Funds don't move, and payments to the address keep arriving. Your app can still connect to the wallet to request payments, as in [Connect a self-custodial wallet](/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet).
+
+:::::
+
+## Handoff limits
+
+- Revoke access keys before the swap. Afterward your app can't approve anything, including a revocation.
+- A revoked access key can't be authorized again.
+- Tempo can't tell whether the user holds the key behind the address they sent. A wrong address locks the account, so confirm it with the user before the swap.

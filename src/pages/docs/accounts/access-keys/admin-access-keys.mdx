@@ -27,9 +27,9 @@ Tempo enforces this on the [Account Keychain](/docs/protocol/transactions/Accoun
 
 Use an admin key for a party that already controls the account's keys, such as your own key-management service, or a customer's trusted device that onboards their other devices. Use a limited key for everything else:
 
-- An AI agent: give it a budget. See [Set up an agent wallet](/docs/accounts/guides/agent-wallet).
-- A backend that moves funds: scope it to the task. See [Automate a backend](/docs/accounts/guides/automate-backend).
-- A card program or third-party service: cap its spend. See [Set up a spending account](/docs/accounts/guides/spending-account).
+- An AI agent: give it a budget. See [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet).
+- A backend that moves funds: scope it to the task. See [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend).
+- A card program or third-party service: cap its spend. See [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program).
 
 An admin key can authorize a fresh admin key before you revoke it, so a leaked admin key is an account compromise. Treat it like a signer, and keep it in a KMS or HSM.
 

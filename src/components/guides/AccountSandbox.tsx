@@ -223,7 +223,8 @@ function useNetwork() {
      * updates.
      */
     async commit(previous: SandboxAccount, next: SandboxAccount) {
-      if (!devnet) return { before: previous, after: { ...previous, notice: 'Devnet unreachable.' } }
+      if (!devnet)
+        return { before: previous, after: { ...previous, notice: 'Devnet unreachable.' } }
       const live = devnet
       try {
         if (!isCreated(previous)) {
@@ -698,9 +699,7 @@ export function AccountState(props: {
   const signers = account.signers.filter(
     (signer) => !signer.revoked || diff?.signers[signer.id]?.change === 'removed',
   )
-  const keys = account.accessKeys.filter(
-    (key) => key.status !== 'revoked' || diff?.keys[key.id],
-  )
+  const keys = account.accessKeys.filter((key) => key.status !== 'revoked' || diff?.keys[key.id])
   const updates = account.version - account.startVersion
   const genesis = account.genesis?.owners[0]
   const genesisSigner = genesis && account.signers.find((signer) => signer.id === genesis.id)
@@ -791,11 +790,7 @@ export function AccountState(props: {
           {keys.length > 0 ? (
             <ul className="as-state-list">
               {keys.map((key) => (
-                <StateKey
-                  key={key.id}
-                  accessKey={key}
-                  change={diff?.keys[key.id]}
-                />
+                <StateKey key={key.id} accessKey={key} change={diff?.keys[key.id]} />
               ))}
             </ul>
           ) : (

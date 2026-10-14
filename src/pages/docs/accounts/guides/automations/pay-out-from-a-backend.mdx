@@ -1,0 +1,96 @@
+---
+title: Pay out from a backend
+seoTitle: Send Payouts from a Backend with a Scoped Tempo Access Key | Tempo Docs
+description: Authorize a KMS-held access key that pays only approved payees within a daily limit, then send payouts from your backend without prompting the customer.
+interactive: true
+---
+
+import { GuideDemo } from '../../../../../components/guides/GuideDemo'
+
+# Pay out from a backend
+
+Your backend sends payouts from a customer's Tempo account with its own access key, which the customer's signers approve once. Tempo lets that key pay only the payees it lists, up to a daily limit, until it expires, so a leaked key can't drain the account.
+
+<span id="backend-services" />
+<span id="automations" />
+
+The demo creates a passkey account on Tempo devnet, a test network whose stablecoins have no value. It authorizes a backend key, checks what Tempo stores about it, and sends a payout. The code examples use Moderato testnet, another test network, with AlphaUSD, a test stablecoin.
+
+<GuideDemo guide="backend-automation" />
+
+:::::steps
+
+### Authorize a scoped, limited key
+
+Create a secp256k1 key in your KMS, one per customer. Its address, derived from the public key, is the key's ID on Tempo. Send that address to the customer's app, and have the customer's signers authorize it:
+
+```ts [app/approve-payouts.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+await client.accessKey.authorizeSync({
+  accessKey: { accessKeyAddress: payoutKeyAddress, keyType: 'secp256k1' },
+  account, // the customer's account, signed by its signers
+  expiry: Expiry.days(90),
+  limits: [{ token: alphaUsd, limit: parseUnits('1000', 6), period: 86_400 }], // 1,000 AlphaUSD a day
+  scopes: [
+    { address: alphaUsd, selector: 'transfer(address,uint256)', recipients: payees },
+    { address: alphaUsd, selector: 'transferWithMemo(address,uint256,bytes32)', recipients: payees },
+  ],
+})
+```
+
+Authorizing is itself a transaction, so the customer approves it once, for example with their passkey. Show the payees, the daily limit, and the expiry before they do. Amounts are in base units: AlphaUSD has 6 decimals, so `parseUnits('1000', 6)` is 1,000 AlphaUSD. Size the limit to your largest payout day. See [Spending limits](/docs/accounts/access-keys/spending-limits) and [Scopes](/docs/accounts/access-keys/scopes).
+
+### Keep the key in your KMS
+
+The private key never leaves the KMS. Wrap it in a viem account that asks the KMS for each signature:
+
+```ts [backend/payout-key.ts]
+import { PublicKey, Signature } from 'ox'
+import { Account } from 'viem/tempo'
+
+const payoutKey = Account.from({
+  access: address, // the customer's account address
+  keyType: 'secp256k1',
+  publicKey: PublicKey.fromHex(kmsPublicKey), // read once from your KMS
+  async sign({ hash }) {
+    return Signature.toHex(await kms.sign(kmsKeyId, hash)) // your KMS client returns { r, s, yParity }
+  },
+})
+```
+
+Tempo stores only the key's address and bounds. Grant signing permission in the KMS to the payout service alone, and log each signing request so you can match it to a payout.
+
+### Send payouts
+
+```ts [backend/send-payout.ts]
+import { parseUnits, stringToHex } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+const backend = createClient({ account: payoutKey, chain: tempoModerato, feeToken: alphaUsd })
+
+await backend.token.transferSync({
+  amount: parseUnits('250', 6),
+  memo: stringToHex('payout-1042', { size: 32 }), // your payout ID, for reconciliation
+  to: payee,
+  token: alphaUsd,
+})
+```
+
+No one is prompted. Tempo rejects a payout to an address outside `payees`, one over what's left today, or any payout after the expiry. Fees for the key's transactions count against the daily limit. To pause payouts, have the signers [revoke the key](/docs/accounts/access-keys/revocation#revoke-an-access-key).
+
+:::::
+
+<span id="recommended-limits-for-common-automations" />
+<span id="recommended-limits-for-backend-automations" />
+<span id="troubleshoot-backend-payments" />
+
+## Payout limits
+
+- An account's transactions share one sequence number by default, so they land one at a time, in order. Send concurrent payouts with expiring nonces or separate nonce keys. See [Parallel payments](/docs/guide/payments/send-parallel-transactions).
+- Adding a payee needs the signers: they [change the key's allowed calls](/docs/accounts/access-keys/scopes#change-allowed-calls).
+- The key can't be extended past its expiry. Authorize a new key before it ends. See [Renew an expiring key](/docs/accounts/access-keys/expiry#renew-an-expiring-key).

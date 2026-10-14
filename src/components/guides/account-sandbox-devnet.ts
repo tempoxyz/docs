@@ -754,7 +754,13 @@ export function createDevnetAdapter(
     const existing = session.owners.get(id)
     if (existing) return existing
     const { address, account } = await createOwner(signer, session.prompts)
-    const owner: OwnerKey = { id: signer.id, kind: signer.kind, name: signer.name, address, account }
+    const owner: OwnerKey = {
+      id: signer.id,
+      kind: signer.kind,
+      name: signer.name,
+      address,
+      account,
+    }
     session.owners.set(id, owner)
     return owner
   }

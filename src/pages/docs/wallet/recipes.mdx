@@ -28,7 +28,7 @@ Set up your agent with the [prompt on the CLI overview](/docs/cli#set-up-your-ag
 Tempo Wallet uses mainnet for live payments. Check the network and balance before authorizing spending, and set both limits:
 
 - **Per command:** `tempo request --max-spend` caps one command's payment spending.
-- **Per account:** access-key limits apply separately to the signing key. See [Set up an agent wallet](/docs/accounts/guides/agent-wallet) for authorization and revocation.
+- **Per account:** access-key limits apply separately to the signing key. See [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) for authorization and revocation.
 
 Service discovery returns endpoint metadata, and `--dry-run` reads the current payment terms without paying. Neither replaces handling the service's result or errors. For the commands, see [agent and script mode](/docs/cli/wallet#agent-and-script-mode).
 
@@ -101,7 +101,7 @@ For a request schema error, inspect `tempo wallet services <SERVICE_ID>`. For in
   <Card
     title="Give an agent access"
     description="Authorize and revoke an agent's access key"
-    to="/docs/accounts/guides/agent-wallet"
+    to="/docs/accounts/guides/agents/give-an-agent-a-wallet"
     icon="lucide:bot"
   />
 </Cards>
