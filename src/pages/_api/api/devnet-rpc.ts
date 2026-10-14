@@ -49,7 +49,14 @@ export async function POST(request: Request): Promise<Response> {
         'cache-control': 'no-store',
       },
     })
-  } catch {
+  } catch (error) {
+    console.error('devnet-rpc upstream failed', {
+      upstream: apiKey ? 'public' : 'tailnet',
+      error:
+        error instanceof Error
+          ? `${error.name}: ${error.message} ${String((error as { cause?: unknown }).cause ?? '')}`
+          : String(error),
+    })
     return failure(502, 'The demo devnet is unavailable. Try again later.')
   }
 }
