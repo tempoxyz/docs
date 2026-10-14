@@ -22,62 +22,76 @@ Each approver holds a signer, a key that approves the account's transactions, wi
 
 ### Create the treasury
 
-Keep each approver's key somewhere different, such as a hardware wallet, a separate KMS per team, or the approver's passkey, so one breach can't reach two of them. [Private keys](/docs/accounts/authentication/private-keys) compares the options.
+Keep each approver's key somewhere different, such as a hardware wallet, a separate KMS per team, or the approver's passkey, so one breach can't reach two of them. [Private keys](/docs/accounts/authentication/private-keys) compares the options. Here finance and operations sign with private keys, and the controller signs with a passkey on their own device, so your app knows only the controller's address.
 
 ```ts [treasury.ts]
-import { Account } from 'viem/tempo'
+import { http } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { Account, createClient } from 'viem/tempo'
 
+const client = createClient({ chain: tempoDevnet, transport: http() })
 const env = (name: string) => process.env[name] as `0x${string}`
 
 const finance = Account.fromSecp256k1(env('FINANCE_SIGNER_KEY'))
 const operations = Account.fromSecp256k1(env('OPERATIONS_SIGNER_KEY'))
-const controller = env('CONTROLLER_PASSKEY_ADDRESS') // approves on their own device
+const controller = env('CONTROLLER_PASSKEY_ADDRESS') // the key stays on the controller's device
 
-const owners = [
-  { owner: finance.address, weight: 1 },
-  { owner: operations.address, weight: 1 },
-  { owner: controller, weight: 1 },
-]
-const threshold = 2
+const treasury = Account.fromConfig({
+  address: 'infer',
+  owners: [
+    { owner: finance.address, weight: 1 },
+    { owner: operations.address, weight: 1 },
+    { owner: controller, weight: 1 },
+  ],
+  threshold: 2,
+})
 
-const treasury = Account.fromConfig({ address: 'infer', owners, threshold })
-// Save treasury.address and treasury.config with your treasury record.
+// Save with your treasury record.
+const saved = { address: treasury.address, config: treasury.config }
+
+await client.faucet.fundSync({ account: saved.address }) // devnet test stablecoins
 ```
 
-`address: 'infer'` computes the treasury's address from its first signers and threshold, so you have it before the treasury sends anything. [Fund the treasury](/docs/accounts/create#fund-an-account-on-devnet) by sending stablecoins to that address; it pays its transaction fees from the same balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them. The address stays the same when signers change, so save it rather than computing it again.
+`address: 'infer'` computes the address from the first signers and threshold, so creating the treasury sends nothing; Tempo records the treasury with its first transaction. The address can receive stablecoins before then: on devnet, the [faucet](/docs/accounts/create#fund-an-account-on-devnet) sends it test stablecoins. The treasury pays transaction fees from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
-### Collect approvals
+Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version): enough to check approvals, but not to tell your app who the signers are. Save the address and configuration with your treasury record. The address stays the same when signers change, and every approval is built from the saved configuration.
 
-Each approver signs the same payment, usually on their own device. The first starts it and gets its hash, and the second approves that hash. This example runs both approvals in one process:
+<span id="collect-approvals" />
 
-```ts [pay.ts]
-import { http, parseUnits } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { createClient, Relay, Store, withRelay } from 'viem/tempo'
+### Approve a payment
 
-const client = createClient({
-  chain: tempoDevnet,
-  transport: withRelay(http(), { plugins: [Relay.accounts({ store: Store.memory() })] }),
-})
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+To pay, rebuild the treasury from its saved record and attach the keys of the approvers signing this payment. The other signers stay as addresses:
 
-// Finance starts the payment: 1 of 2 approvals.
-const { receipt } = await client.token.transferSync({
-  account: treasury,
+```ts [treasury.ts]
+import { isAddressEqual, parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001' // a devnet test stablecoin
+
+/** Rebuilds the treasury from its saved record, with the approvers' keys attached. */
+function openTreasury(approvers: readonly Account.RootAccount[]) {
+  const { address, config } = saved
+  const owners = config.owners.map(({ owner, weight }) => ({
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner, // other signers stay addresses
+    weight,
+  }))
+  // Never updated (version 0): the address still comes from the first signers.
+  if (config.version === 0n)
+    return Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+  return Account.fromConfig({ ...config, address, owners })
+}
+
+// Finance and operations approve: 1 + 1 reaches the threshold of 2.
+await client.token.transferSync({
+  account: openTreasury([finance, operations]),
   amount: parseUnits('1200', 6), // 1,200 AlphaUSD in base units (6 decimals)
-  owner: finance,
   to: vendor, // the recipient's address
   token: alphaUsd,
 })
-// receipt.status is 'pending' until approvals reach the threshold
-
-// Operations approves the same hash: 2 of 2, so the payment runs.
-await client.sendTransactionSync({ account: treasury, hash: receipt.transactionHash, owner: operations })
 ```
 
-`Relay.accounts` holds each approval until the weights reach the threshold, then submits. `Store.memory()` works in one process. For approvers on different devices, give every approver's client the same persistent store, such as one in your backend.
+viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openTreasury` for every action, not once at startup. A [signer change](/docs/accounts/key-management/add-signers) raises the configuration's version and returns the new `config`. Save it, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.
 
-Your app shows the second approver what they're approving, such as the recipient and amount, and passes them the hash. Stop at two: Tempo rejects signatures beyond the threshold. To collect approvals in a backend or verify them in a contract, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-and-verify-approvals).
+This example holds two approvers' keys in one process, so that process could pay alone. In production, each approver checks the recipient and amount and signs on their own device. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). To check the treasury's approvals in your own contract, see [Verify approvals in a contract](/docs/accounts/policies/signing-thresholds#verify-approvals).
 
 :::::
 
@@ -89,4 +103,4 @@ Your app shows the second approver what they're approving, such as the recipient
 
 A treasury holds 1 to 48 signers, and a transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
 
-To let a team pay within a daily limit without two treasury approvals per payment, [give it a budget](/docs/accounts/guides/teams/team-budget). When an approver leaves or replaces their key, follow [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver). A signer change voids approvals still waiting, so collect those again.
+To let a team pay within a daily limit without two treasury approvals per payment, [give it a budget](/docs/accounts/guides/teams/team-budget). When an approver leaves or replaces their key, follow [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver). A signer change voids approvals collected for a payment that hasn't been sent, so collect them again.
