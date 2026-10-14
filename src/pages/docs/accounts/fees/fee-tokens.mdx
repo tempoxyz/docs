@@ -26,7 +26,7 @@ If any check fails, the transaction is invalid and isn't included. Tempo doesn't
 
 The default covers every transaction the account pays the fee for, including ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence), which can fall back to pathUSD, a stablecoin the account might not hold.
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). In the code, `account` is a funded account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key).
+In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to it ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -70,6 +70,6 @@ await client.token.transferSync({
 
 On a sponsored transaction, the account signs with the fee token blank, and the fee payer chooses it.
 
-[Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) runs a per-transaction fee token in a live demo, and shows both calls in Wagmi, Rust, Python, Go, and Cast.
+[Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) has a browser demo of a per-transaction fee token, and shows both calls in Wagmi, Rust, Python, Go, and Cast.
 
 Specification: [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).

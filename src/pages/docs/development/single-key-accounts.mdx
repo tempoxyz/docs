@@ -8,11 +8,11 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 # Single-key accounts
 
-A single-key account is an address derived from one public key, its root key, and that key has full control of the account. It works like an Ethereum account (an EOA), except the root key can also be a P-256 key or a passkey.
+A single-key account is an address derived from one public key, its root key, and that key has full control of the account. It works like an Ethereum account (an EOA), except the root key can also be a P-256 key or a passkey. Single-key accounts are live on mainnet and testnet.
 
 <AccountDiagram
   name="single-key"
-  alt="A root key derives the account's address and authorizes its access keys. The account can upgrade to a configurable account at the same address, starting at configuration version 1."
+  alt="A root key derives the account's address and authorizes its access keys. On the Tempo Accounts devnet, the account can upgrade to a configurable account at the same address, starting at configuration version 1."
 />
 
 <span id="compared-with-an-ethereum-eoa" />
@@ -27,11 +27,11 @@ The address is the last 20 bytes of `keccak256(x ‖ y)`, the hash of the root k
 | P-256 | `Account.fromP256(privateKey)` |
 | WebAuthn (passkey) | `Account.fromWebAuthnP256(credential)` |
 
-Because the key fixes the address, you can't replace the root key: a new key is a new address. To change keys and keep the address, [upgrade to a configurable account](#upgrade-to-a-configurable-account).
+Because the key fixes the address, you can't replace the root key: a new key is a new address. On the Tempo Accounts devnet, you can [upgrade to a configurable account](#upgrade-to-a-configurable-account) to change keys and keep the address.
 
 ## Signing with the root key
 
-The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet or testnet, connect `client` to that network and pay in its stablecoins.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -61,11 +61,13 @@ The root key can authorize [access keys](/docs/development/account-keychain), ex
 
 ## Upgrade to a configurable account
 
-An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key: each owner has a weight, and an approval needs the owners' weights to reach a threshold. The upgrade is permanent and runs only on the Tempo Accounts devnet, under a Draft specification, [TIP-1113](https://tips.sh/1113). For a walkthrough with a live demo, follow [Account upgrade](/docs/accounts/key-management/account-upgrade).
+An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key: each owner has a weight, and an approval needs the owners' weights to reach a threshold. The upgrade is permanent.
+
+Account upgrades aren't live yet. They work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and their specification, [TIP-1113](https://tips.sh/1113), is a Draft that may still change. Sent on mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/key-management/account-upgrade).
 
 | Property | Rule |
 | --- | --- |
-| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, a contract built into Tempo at `0xAACC000000000000000000000000000000000000` |
+| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, a contract built into the Tempo Accounts devnet at `0xAACC000000000000000000000000000000000000` |
 | Signed by | The root key, directly. Access keys can't upgrade. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it. |
 | Transaction | `upgradeAccount` is its only call, with no `key_authorization` or authorization list |
 | Eligible accounts | No contract code, no EIP-7702 delegation, and no configuration yet |

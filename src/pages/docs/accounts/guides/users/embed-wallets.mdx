@@ -14,7 +14,7 @@ import { SignInWithTempo } from '../../../../../components/guides/steps/wallet/S
 Use Privy or Turnkey to run your users' wallets inside your app without letting the provider move their funds alone. Each account has three signers, the keys that approve its transactions: the user's passkey approves alone, and your provider's key approves only together with a separate [recovery provider's](/docs/accounts/policies/signing-thresholds#recovery-provider) key, for example to replace a lost passkey.
 
 :::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.
+**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. The provider setup below uses one; [connecting a self-custodial wallet](#connect-a-self-custodial-wallet-instead) doesn't.
 :::
 
 <span id="choose-the-controls-your-application-needs" />

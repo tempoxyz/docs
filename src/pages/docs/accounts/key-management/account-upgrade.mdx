@@ -93,6 +93,7 @@ After the upgrade, Tempo stores only a hash of the configuration, a fingerprint 
 - The upgrade must be the transaction's only call, with no `keyAuthorization` and no EIP-7702 authorization list.
 - Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
 - Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
-- Upgraded accounts can't [recover funds sent to their address on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain).
+- On mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the original key still approves alone, and transactions from the configurable account are rejected.
+- Upgraded accounts don't use the [recovery factory](/docs/accounts/key-management#recover-funds-sent-on-another-chain) for funds sent to their address on another chain. The original key still controls the address there.
 
 Reference: [Single-key accounts](/docs/development/single-key-accounts#upgrade-to-a-configurable-account). Specification: [TIP-1113](https://tips.sh/1113).

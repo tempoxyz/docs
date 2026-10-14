@@ -158,7 +158,7 @@ A signer update works the same way: put `Actions.accounts.updateConfig.call({ cu
 
 ## Verify approvals in a contract
 
-A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`:
+A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. `verifyMultisig` exists only on the Tempo Accounts devnet. On mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
 
 ```solidity [ApprovalCheck.sol]
 // SPDX-License-Identifier: MIT
@@ -179,7 +179,7 @@ contract ApprovalCheck {
 
 `verifyMultisig` checks the account's signers at call time, so approvals from removed signers fail, and an account that hasn't sent a transaction yet verifies against its first signers. It returns `false` when the signers don't match the account, and reverts with `InvalidSignature()` when approvals fall short. Include your chain ID, contract address, and the account in `hash`, so an approval can't be replayed elsewhere.
 
-To check a single access key's signature instead, call `verifyKeychain`. It accepts only access keys that sign with one key, so a configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`.
+To check a single access key's signature instead, call `verifyKeychain`, which also works on mainnet and testnet. It accepts only access keys that sign with one key, so a configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`.
 
 <span id="security-policy-limits" />
 <span id="approval-limits" />

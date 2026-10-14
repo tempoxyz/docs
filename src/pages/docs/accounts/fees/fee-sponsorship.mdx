@@ -30,7 +30,7 @@ Your own fee payer is an account whose key stays on your backend, funded with st
 
 ### When your backend signs
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts, so these examples can sponsor a single-key or a configurable account. To sponsor single-key accounts on mainnet or testnet, connect `client` to that network instead.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -119,16 +119,16 @@ await client.token.transferSync({
 })
 ```
 
-`withRelay` sends the transaction to your server for the fee payer's signature and everything else to the devnet. `account` is the customer's account with the keys on this device attached: a single-key account, or a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
+`withRelay` sends the transaction to your server for the fee payer's signature and everything else to the devnet. `account` is the customer's account with the keys on this device attached: a single-key account, or, on the Tempo Accounts devnet, a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
 
 ## Use Tempo's hosted fee payer
 
-Tempo also hosts a fee payer server. The [Fee Payer API](/docs/api/fee-payer) takes your server's place in `withRelay`, with a Tempo API key. It runs on Tempo mainnet and Moderato testnet, not on the Tempo Accounts devnet, so it can't sponsor configurable accounts, which run only on the devnet. Try it in the [Sponsor fees](/docs/guide/payments/sponsor-user-fees) demo.
+Tempo also hosts a fee payer server. The [Fee Payer API](/docs/api/fee-payer) takes your server's place in `withRelay`, with a Tempo API key. It runs on mainnet and the Moderato testnet, not on the Tempo Accounts devnet, so it can't sponsor configurable accounts. Try it in the [Sponsor fees](/docs/guide/payments/sponsor-user-fees) demo.
 
 ## Fee sponsorship limits
 
 - A fee payer that your backend passes as `feePayer` pays in the transaction's `feeToken`, or in its own [default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) when that's blank. A fee payer server pays in its `feeToken` setting, whatever the customer's transaction sets. Fund the fee payer with that [supported fee token](/docs/accounts/fees/fee-tokens#supported-fee-tokens).
-- On the Tempo Accounts devnet, when your backend passes the fee payer as `feePayer`, set `feeToken` to the token a sponsored transfer moves. With another fee token, or none, the transfer can run out of gas. Transfers sponsored through a fee payer server don't need this.
+- When your backend passes the fee payer as `feePayer`, set `feeToken` to the token a sponsored transfer moves. Without a `feeToken`, the transfer can run out of gas, and on the Tempo Accounts devnet, so can another fee token. Transfers sponsored through a fee payer server don't need this.
 - A sponsored transaction that's included and then fails still costs the fee payer its fee.
 
 Specification: [fee payer](/docs/protocol/fees/spec-fee#fee-payer).

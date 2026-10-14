@@ -12,7 +12,9 @@ Revoking an access key shuts it off for good: once the revocation lands, Tempo r
 
 ## Revoke an access key
 
-Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. A limited access key can't revoke any key, including itself. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). `access-keys.ts` is the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key).
+Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. A limited access key can't revoke any key, including itself.
+
+`access-keys.ts` is the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key). It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `revokeSync` works the same on mainnet and testnet.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -42,7 +44,7 @@ Revocation doesn't undo what the key did while it was active:
 
 ## Revoke when signers change
 
-Changing the account's signers doesn't touch its access keys, so revoke them yourself: after a recovery, and before a hand-off.
+Changing a configurable account's signers, which works only on the Tempo Accounts devnet, doesn't touch its access keys, so revoke them yourself: after a recovery, and before a hand-off.
 
 After you [replace a lost or compromised signer](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer), revoke every key that signer's holder could use, including any an attacker authorized. You won't have those addresses saved, so list every key the account has authorized from its `KeyAuthorized` events. The devnet RPC searches at most 100,000 blocks per request, so read the events in pages:
 

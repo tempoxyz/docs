@@ -46,7 +46,7 @@ Assets other than TIP-20 tokens, such as NFTs, don't count, and neither does a `
 
 ## Read the remaining limit
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). `access-keys.ts` is the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key).
+`access-keys.ts` is the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key). It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `getRemainingLimit` and `updateLimitSync` work the same on mainnet and testnet.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]

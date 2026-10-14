@@ -21,7 +21,7 @@ A Tempo account is a stablecoin address with its rules built in: which keys appr
 </DocsProductOverview>
 
 :::warning
-Tempo Accounts is in early development and runs only on Tempo devnet. [Contact Tempo](https://tempo.xyz/contact) to discuss access.
+Tempo Accounts is in early development. Configurable accounts, with several signers and a threshold, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. [Contact Tempo](https://tempo.xyz/contact) to discuss access.
 :::
 
 <span id="choose-an-account-model" />
@@ -44,7 +44,7 @@ Tempo Accounts is in early development and runs only on Tempo devnet. [Contact T
 - **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight. A transaction runs once its approvers' weights add up to the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
 - **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the spending limits, expiry, and allowed calls you set. A leaked key still can't spend past them.
 
-Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. A single-key account (EOA), like a standard Ethereum account, can [upgrade in place](/docs/accounts/key-management/account-upgrade) and keep its address and balance.
+Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. On mainnet and testnet today, use a single-key account (EOA), like a standard Ethereum account: one key, such as a passkey, approves its payments and authorizes its access keys. On the Tempo Accounts devnet, a single-key account can also [upgrade in place](/docs/accounts/key-management/account-upgrade) to signers and a threshold, and keep its address and balance.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />
@@ -65,7 +65,7 @@ Each transaction pays a network fee in a USD stablecoin, not a separate gas toke
 
 ## Start building
 
-[Create an account](/docs/accounts/create) in your browser on devnet, then pick the guide for what you're building.
+[Create an account](/docs/accounts/create) in your browser on the Tempo Accounts devnet, then pick the guide for what you're building.
 
 <Cards>
   <Card title="Embed wallets with a provider" description="Your wallet provider's key is one signer and the customer's passkey another, so the provider can't pay alone." to="/docs/accounts/guides/users/embed-wallets" />
