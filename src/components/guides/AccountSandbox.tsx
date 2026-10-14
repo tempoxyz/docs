@@ -169,11 +169,6 @@ function useNetwork() {
   const [status, setStatus] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    // HTTPS pages can't call the plain-HTTP devnet, so don't load it.
-    if (window.location.protocol !== 'http:') {
-      setChecking(false)
-      return
-    }
     let active = true
     loadDevnet()
       .then(async (module) => {

@@ -79,7 +79,15 @@ const {
 } = Tempo
 const { getCommitment } = AccountConfig
 
-export const devnetRpcUrl = 'http://multisig-1113-nodes-rpc-service.tail388b2e.ts.net:8545'
+/** The demo devnet's Tailscale RPC, for Node scripts on the tailnet. */
+export const devnetTailnetRpcUrl = 'http://multisig-1113-nodes-rpc-service.tail388b2e.ts.net:8545'
+
+/**
+ * Pages reach the devnet through the docs site's same-origin proxy (`/api/devnet-rpc`), which holds
+ * the public endpoint's API key and works from HTTPS pages. Outside a browser, use the tailnet RPC.
+ */
+export const devnetRpcUrl =
+  typeof window === 'undefined' ? devnetTailnetRpcUrl : `${window.location.origin}/api/devnet-rpc`
 export const devnetChainId = 31_318
 const devnetChainIdHex = '0x7a56'
 /** AlphaUSD pays for every payment and every fee. */
@@ -102,21 +110,10 @@ function createDevnetClient(rpcUrl: string) {
 
 /** True when this page can reach the devnet: an `http:` page and chain ID 31318. */
 export async function checkDevnet(
-  options: {
-    url?: string
-    timeoutMs?: number
-    fetch?: typeof globalThis.fetch
-    protocol?: string
-  } = {},
+  options: { url?: string; timeoutMs?: number; fetch?: typeof globalThis.fetch } = {},
 ): Promise<boolean> {
-  const {
-    url = devnetRpcUrl,
-    timeoutMs = 8_000,
-    fetch: fetchFn = globalThis.fetch,
-    protocol = globalThis.location?.protocol,
-  } = options
-  // HTTPS pages can't call a plain-HTTP RPC (mixed content), so don't try.
-  if (protocol === 'https:' || !fetchFn) return false
+  const { url = devnetRpcUrl, timeoutMs = 8_000, fetch: fetchFn = globalThis.fetch } = options
+  if (!fetchFn) return false
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
