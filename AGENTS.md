@@ -79,9 +79,12 @@ Use `pnpm`.
 - Vocs reads `vocs.config.ts` (sidebar, redirects, OpenAPI options) only at startup and does not watch it. Batch config edits, then restart once to check them.
 - Vite restarts the server by itself when a file imported by `vite.config.ts` changes, including `src/lib/ai-docs.ts` and `src/lib/docs-sections.ts`. Make all edits to those files in one pass.
 - Adding or deleting a page file also restarts the server, so routes stay current.
-- The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting. If responses stay slow (20 seconds or more per page) after many edits, one restart clears it.
+- The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting.
 - Check rendered pages with headless Playwright screenshots against the running server. Wait for React hydration before clicking sidebar controls.
-- If the server runs out of memory, start it with `NODE_OPTIONS=--max-old-space-size=16384`. Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
+- Heap use stays flat across MDX edits, repeat page loads, and Markdown requests (`.md` twins, `curl`). Node cannot unload ES modules, so two kinds of edits still keep memory: an edit to `vocs.config.ts` or a file it imports keeps one copy of the config (about 15 MB), and an edit to a component that a page renders standalone (`<Component />`) keeps one copy of the component modules (50–125 MB) once a Markdown request follows. Restart after many of those edits. `patches/vocs@2.8.5.patch` provides the reuse; `src/test/vocs-config-resolve.test.ts` fails if a Vocs upgrade drops it.
+- Each newly compiled page adds 10–15 MB, so loading about 100 distinct pages passes Node's default heap limit. For broad checks such as crawling the site, start the server with `NODE_OPTIONS=--max-old-space-size=16384`.
+- The changelog fetches GitHub releases at most every 10 minutes and serves the last result when GitHub rate-limits. Set `GITHUB_TOKEN` to raise the limit.
+- Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
 
 Before finishing docs-only changes, run at least `pnpm check:types` when practical. Run `pnpm build` for config, component, routing, sidebar, or MDX structure changes. Run targeted tests for changed interactive components.
 

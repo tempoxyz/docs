@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
   developerSurfaceRedirects,
@@ -22,7 +23,11 @@ const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/op
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
-const tempoChangelog = Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' })
+// Page renders, Markdown exports, and builds share one GitHub request per cache window.
+const tempoChangelog = cacheChangelog(
+  Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
+  { name: 'tempoxyz/tempo' },
+)
 
 const changelog = Changelog.from({
   ...tempoChangelog,
