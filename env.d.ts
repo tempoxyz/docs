@@ -1,6 +1,7 @@
 interface EnvironmentVariables {
   readonly NODE_ENV: 'development' | 'production' | 'test'
 
+  readonly VITE_RPC_PROXY: string
   readonly VITE_BASE_URL: string
   readonly VITE_POSTHOG_KEY: string
   readonly VITE_POSTHOG_HOST: string

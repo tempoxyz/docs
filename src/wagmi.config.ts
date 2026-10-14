@@ -23,6 +23,7 @@ import {
   useConnectors,
   webSocket,
 } from 'wagmi'
+import { getDemoRpcTransport } from './lib/demo-rpc'
 import { demoWalletAuthorization } from './lib/demo-wallet-authorization'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 
@@ -89,12 +90,7 @@ export function getConfig(options: getConfig.Options = {}) {
     }),
     transports: {
       [tempoModerato.id]: withRelay(
-        fallback([
-          http('https://rpc.moderato.tempo.xyz', { batch: { batchSize: 5 } }),
-          webSocket('wss://rpc.moderato.tempo.xyz', {
-            keepAlive: { interval: 1_000 },
-          }),
-        ]),
+        getDemoRpcTransport(),
         http('https://sponsor.moderato.tempo.xyz'),
         { policy: 'sign-only' },
       ),

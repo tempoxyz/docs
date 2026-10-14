@@ -1,4 +1,4 @@
-import { expect, test } from './live'
+import { expect, test } from '@playwright/test'
 
 test('fund an address via faucet', async ({ page }) => {
   test.setTimeout(120000)

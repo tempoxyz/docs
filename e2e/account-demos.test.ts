@@ -37,13 +37,16 @@ test('creates and reconnects the same passkey account without funding or sending
   const writes: string[] = []
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await page.route(/https:\/\/(rpc|sponsor)\.moderato\.tempo\.xyz/, async (route) => {
-    const payload = route.request().postDataJSON()
-    for (const request of Array.isArray(payload) ? payload : [payload]) {
-      if (request?.method && /send|fund|sign/i.test(request.method)) writes.push(request.method)
-    }
-    await route.abort()
-  })
+  await page.route(
+    /https:\/\/(rpc|sponsor)\.moderato\.tempo\.xyz|\/api\/demo-rpc$/,
+    async (route) => {
+      const payload = route.request().postDataJSON()
+      for (const request of Array.isArray(payload) ? payload : [payload]) {
+        if (request?.method && /send|fund|sign/i.test(request.method)) writes.push(request.method)
+      }
+      await route.abort()
+    },
+  )
   await page.goto(accountPage(baseURL))
   const demo = page.getByTestId('passkey-account-demo')
   await demo.getByRole('button', { name: 'Create a passkey account', exact: true }).click()
