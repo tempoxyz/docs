@@ -1,32 +1,28 @@
 ---
 title: "Quotes and fees"
 seoTitle: "Quotes and fees | Tempo Docs"
-description: "Read source and destination amounts, quote expiry, and fees before authorizing a Routes transfer."
+description: "Choose the fixed amount, read destination amounts, fees, and expiry, and offer 1:1 delivery before a transfer or deposit."
 ogImage: /og/2026-q4/og_2026-q4_docs_routes-quotes_title-f5_v02.png
 ---
 
-import { OpenApi, Tab, Tabs } from 'vocs'
-
 # Quotes and fees
 
-Quote the exact payment before requesting a signature or showing deposit instructions. The supported route directory identifies possible paths; the quote gives terms for the selected amount and recipient.
+Quote the exact payment before requesting a signature or showing deposit instructions. The route directory identifies possible paths; the quote gives terms for the selected amount and recipient. This page explains how to read those terms. Both flow guides apply them.
 
-## Get a quote
+<span id="get-a-quote" />
 
-Choose a flow, click **Try**, and enter the source asset, destination asset, amount, and recipient where required. Use an API key with access to Routes. Review the returned amounts before creating the transfer or deposit address.
+## Request a quote
 
-<Tabs>
-  <Tab title="Transfer">
-    <OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
-  </Tab>
-  <Tab title="Deposit address">
-    <OpenApi.Playground operationId="quoteRoutesDepositAddress" anchors={false} />
-  </Tab>
-</Tabs>
+Each flow starts with a quote request that needs `routes:read`:
+
+| Flow | Endpoint | Request builder |
+| --- | --- | --- |
+| Deposit address | `GET /v1/routes/deposit-addresses/quote` | [Quote the deposit](/docs/routes/deposits#quote-the-deposit) |
+| Transfer | `GET /v1/routes/transfers/quote` | [Get a quote](/docs/routes/transfers#get-a-quote) |
 
 ## Choose which amount to fix
 
-For a transfer, choose which side determines the quote:
+For a transfer, choose which side the `mode` parameter fixes:
 
 | Your application specifies | Amount mode | `amount` uses |
 | --- | --- | --- |
@@ -49,10 +45,10 @@ A quote does not create or reserve a transfer. Review the terms returned when yo
 
 Where your organization is approved for subsidies, send `subsidize: true` on the quote and the create request. Tempo then guarantees normalized 1:1 delivery: the recipient receives the amount sent, and `destinationAmountRequired` shows that guaranteed amount. Transfers support this for `exactSource` only.
 
-The route directory's `subsidies` field shows which funding methods accept a subsidy on each route. Without approval, the API rejects the request with a `routes_subsidy_*` error code. Try it in the [Routes API demo](/docs/routes/test).
+The route directory's `subsidies` field shows which funding methods accept a subsidy on each route. Without approval, the API rejects the request with a `routes_subsidy_*` error code. [Try a route](/docs/routes/test) with your key to see whether a subsidy applies.
 
 ## Refresh expired quotes
 
-For transfers, read `quote.expiresAt`. If the quote expires before submission, obtain fresh terms rather than signing an expired action. Show changed terms to the user before continuing.
+Read `quote.expiresAt` when it is returned. If the quote expires before submission, obtain fresh terms rather than signing an expired action or showing stale deposit instructions. Show changed terms to the user before continuing.
 
-Continue with [Make a transfer](/docs/routes/transfers) or [Accept deposits](/docs/routes/deposits).
+Continue with [Accept deposits](/docs/routes/deposits) or [Make a transfer](/docs/routes/transfers).

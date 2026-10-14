@@ -1,4 +1,4 @@
-import { developersPath } from '../marketing/app/_lib/developersPaths'
+import { developersApiPath } from '../marketing/app/_lib/developersPaths'
 
 type ZoneTransportConfig = {
   onFetchRequest?: (
@@ -100,7 +100,7 @@ export function getZoneTransportConfig(rpcUrl: string): ZoneTransportConfig | un
 
 export function getZoneRpcHttpUrl(zoneId: number, rpcUrl: string) {
   if (isDemoZoneRpc(zoneId, rpcUrl)) {
-    return developersPath(`/api/zone-rpc?zone=${zoneId}`)
+    return developersApiPath(`/api/zone-rpc?zone=${zoneId}`)
   }
 
   return stripRpcBasicAuth(rpcUrl)

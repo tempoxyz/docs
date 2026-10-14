@@ -1,6 +1,6 @@
 import { formatUnits } from 'viem'
 import { z } from 'zod'
-import { developersPath } from '../marketing/app/_lib/developersPaths'
+import { developersApiPath } from '../marketing/app/_lib/developersPaths'
 import { directorySchema, routeQuoteRequest, type TestRoute } from './routes-test'
 
 export const routesApi = 'https://api.tempo.xyz/v1/routes'
@@ -188,9 +188,22 @@ async function send(
   if (!response.ok) throw new RoutesApiError(result, { docsKey })
   return result
 }
+/** Price a quote with the docs demo key. Its quote-only organization is approved for 1:1 delivery. */
+function quoteWithDocsKey(request: ApiRequest) {
+  // The quote goes in the body, so the reader's addresses stay out of the docs site's URLs.
+  const kind = request.path.match(quotePath)?.[1] ?? ''
+  const query = Object.entries(request.query ?? {}).map(([name, value]) => [name, String(value)])
+  return send(
+    developersApiPath('/api/routes-quote'),
+    { method: 'POST', path: request.path, body: { ...Object.fromEntries(query), kind } },
+    {},
+    { docsKey: true },
+  )
+}
 /**
  * Send a Routes API request. With the reader's key, quotes carry their organization's pricing and
- * policy; without one, only quotes can run, at public pricing.
+ * policy; without one, only quotes can run: 1:1 quotes with the docs demo key, others at public
+ * pricing.
  */
 export async function executeRoutesRequest(
   request: ApiRequest,
@@ -199,20 +212,21 @@ export async function executeRoutesRequest(
   const key = apiKey.trim()
   if (key) return send(requestUrl(request), request, { 'tempo-api-key': key })
   if (!isQuote(request)) throw new Error('Add your project API key to continue.')
+  // 1:1 delivery needs an approved organization, so only the docs key can preview it.
+  if (request.query?.subsidize === true) {
+    try {
+      return await quoteWithDocsKey(request)
+    } catch (e) {
+      if (!(e instanceof RoutesApiError && e.code === 'quote_proxy_unavailable')) throw e
+      request = { ...request, query: { ...request.query, subsidize: false } }
+    }
+  }
   try {
     return await send(requestUrl(request), request, {})
   } catch (e) {
     // Until the API serves public quotes, the docs quote proxy prices them instead.
     if (!(e instanceof RoutesApiError && e.code === 'api_key_missing')) throw e
-    // The quote goes in the body, so the reader's addresses stay out of the docs site's URLs.
-    const kind = request.path.match(quotePath)?.[1] ?? ''
-    const query = Object.entries(request.query ?? {}).map(([name, value]) => [name, String(value)])
-    return send(
-      developersPath('/api/routes-quote'),
-      { method: 'POST', path: request.path, body: { ...Object.fromEntries(query), kind } },
-      {},
-      { docsKey: true },
-    )
+    return quoteWithDocsKey(request)
   }
 }
 export function quoteRequest(
