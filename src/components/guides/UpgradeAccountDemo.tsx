@@ -160,7 +160,10 @@ export function UpgradeAccountDemo() {
           ? `${cause.message} ${String((cause as { details?: unknown }).details ?? '')}`
           : ''
       if (!/root key retired/i.test(reason)) throw cause
-      return { message: 'Rejected by Tempo: the original key no longer signs alone.', ok: true }
+      return {
+        message: 'Rejected by Tempo: the original key can’t sign as a single-key account anymore.',
+        ok: true,
+      }
     }
   }
 
@@ -190,7 +193,6 @@ export function UpgradeAccountDemo() {
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Upgrade a private-key account</span>}
-      headerRight={<span {...ui.accountDemoMuted()}>Tempo devnet</span>}
       footer="Real devnet transactions. The test keys live in this page’s memory only."
     >
       {preview === null ? (
@@ -219,11 +221,8 @@ export function UpgradeAccountDemo() {
               </Button>
             }
           >
-            {original && keys && (
-              <p {...ui.accountDemoAddress()}>
-                {StringFormatter.truncate(original.address)} · devnet test key{' '}
-                <code>{StringFormatter.truncate(keys.original)}</code>
-              </p>
+            {original && (
+              <p {...ui.accountDemoAddress()}>{StringFormatter.truncate(original.address)}</p>
             )}
           </Step>
 

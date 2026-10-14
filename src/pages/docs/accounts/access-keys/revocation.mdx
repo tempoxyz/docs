@@ -1,51 +1,68 @@
 ---
 title: Revocation
 seoTitle: Revoke Access Keys on Tempo | Tempo Docs
-description: End an access key permanently when a device is lost, a backend key leaks, or an account changes hands, and know what revocation leaves in place.
+description: Shut off an access key for good when a device is lost, a backend key leaks, or an account changes hands, then clean up what the key left behind.
 ---
 
 # Revocation
 
-Revoking an access key ends it permanently: Tempo rejects every transaction the key signs after the revocation lands, and the key's address can never be authorized again for that account. Revoke a key as soon as its holder no longer needs it, because changing signers leaves every access key in place.
-
-<span id="key-revocation" />
-
-## What revocation stops
-
-Once the revocation lands, the key can't pay, and it reads as zero remaining limit and no allowed calls. It doesn't undo what the key did while it was active:
-
-| Left in place | What to do |
-| --- | --- |
-| Transactions that already landed | Nothing reverses them |
-| Token approvals the key granted | Set each allowance to zero from the account |
-| Keys an [admin key](/docs/accounts/access-keys/admin-access-keys) authorized | Revoke each of them separately |
-| Signed authorizations that haven't landed | Burn their witness. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) in viem. |
+Revoking an access key shuts it off for good: once the revocation lands, Tempo rejects every transaction the key signs. Revoke a key as soon as its device is lost, its secret leaks, or its holder no longer needs it.
 
 <span id="key-revocation-by-situation" />
 
 ## Revoke an access key
 
-Signers that reach the threshold, or an admin key, approve the revocation:
+Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. A limited access key can't revoke any key, including itself.
 
 ```ts [revoke.ts]
-const accessKeyAddress = accessKey.accessKeyAddress // or the address you saved for the device or service
-
-await client.accessKey.revokeSync({ account, accessKey: accessKeyAddress })
+await client.accessKey.revokeSync({ account, accessKey: accessKey.accessKeyAddress })
 ```
 
-Save each key's address with a device or service name when you authorize it, so you can match a lost phone or a leaked backend key to the key to revoke. Show a key as removed only after the revocation confirms. For revoke buttons in an app, see [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) and [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet).
+When you authorize a key, save its address next to the device or service that holds it, so you know which address to revoke. Show a key as removed only after the revocation confirms.
 
-## Revoke after a signer change
+<span id="key-revocation" />
+<span id="what-revocation-stops" />
 
-Signer updates don't touch access keys. After you replace a lost or compromised signer, revoke each key its holder could reach, including keys an attacker authorized. See [Remove a lost or compromised signer](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer).
+## What revocation leaves in place
 
-When you hand an account to a customer, revoke your app's access keys before you swap out your app's signers, since your app can't approve anything afterward. See [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off).
+Revocation doesn't undo what the key did while it was active:
+
+- Its transactions stay final.
+- Its token approvals stay. A spender it approved can still pull tokens up to the allowance, so set each allowance to zero from the account.
+- If it was an admin key, the keys it authorized stay authorized. Revoke each one.
+
+<span id="revoke-after-a-signer-change" />
+
+## Revoke when signers change
+
+Changing the account's signers doesn't touch its access keys, so revoke them yourself: after a recovery, and before a hand-off.
+
+After you [replace a lost or compromised signer](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer), revoke every key that signer's holder could use, including any an attacker authorized. You won't have those addresses saved, so list every key the account has authorized from its `KeyAuthorized` events:
+
+```ts [find-keys.ts]
+import { Abis, Addresses } from 'viem/tempo'
+
+const events = await client.getContractEvents({
+  abi: Abis.accountKeychain,
+  address: Addresses.accountKeychain,
+  args: { account: account.address },
+  eventName: 'KeyAuthorized',
+  fromBlock: 'earliest',
+  strict: true,
+})
+
+const keys = await Promise.all(
+  events.map(({ args }) => client.accessKey.getMetadata({ account, accessKey: args.publicKey })),
+)
+const unrevoked = keys.filter((key) => !key.isRevoked) // compare with the keys you saved
+```
+
+Before you [hand an account to a customer](/docs/accounts/guides/users/hand-off), revoke your app's access keys, then swap out your app's signers. Once your signers are gone, your app can't approve anything, including a revocation.
 
 ## Revocation limits
 
-- Revocation is permanent. To restore access, authorize a new key.
-- Revoking a key that doesn't exist reverts with `KeyNotFound`.
-- A limited access key can't revoke keys, including itself. An admin key can revoke any key, including itself.
-- Revocation needs a transaction from the account, so the signers or an admin key must be available. A key that's only expired needs no revocation.
+- A revoked key's address can never be authorized again for this account. To restore access, authorize a new key.
+- Revoking a key the account hasn't authorized reverts with `KeyNotFound`. That includes a key whose authorization hasn't landed yet: if you bound a [witness](https://viem.sh/tempo/guides/access-keys/witnesses) to it, cancel it with `client.accessKey.burnWitnessSync({ witness })`.
+- An expired key needs no revocation: Tempo already rejects its transactions.
 
 Specification: [Account Keychain key revocation](/docs/protocol/transactions/AccountKeychain#key-revocation).

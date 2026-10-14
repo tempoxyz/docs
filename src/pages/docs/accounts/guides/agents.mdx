@@ -1,20 +1,17 @@
 ---
 title: Agents
 seoTitle: Give AI Agents Budgeted Tempo Access Keys | Tempo Docs
-description: Pick a walkthrough to give an AI agent its own budgeted access key on a Tempo account, or let it pay for APIs with MPP.
+description: Give an AI agent its own access key with a budget, an expiry, and allowed calls that Tempo enforces, or let it pay per request for APIs with MPP.
 ---
 
 # Agents
 
-These guides let an AI agent pay from an account with its own access key: a key with a budget, an expiry, and only the calls its payments use. The account's signers stay with the customer or your approvers, and Tempo rejects any payment outside the key's bounds, whatever the agent decides to do.
-
-An account's signers are the keys allowed to approve for it. An [access key](/docs/accounts/access-keys) signs transactions for the account without them, within bounds they set once. Give each agent its own key, so you can cut one off without touching the others.
+These guides let an AI agent pay from an account with its own access key, limited to a budget, an expiry, and scopes, the calls it may make. Tempo rejects any transaction outside those bounds, whatever the agent decides to do. [Access keys](/docs/accounts/access-keys) explains the model.
 
 ## Choose a guide
 
-| Scenario | Guide |
+| Your agent needs to | Guide |
 | --- | --- |
-| An agent needs to pay from an account, and you want to cap and revoke its access | [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) |
-| An agent calls paid APIs that charge per request with MPP | [Let an agent pay for APIs](/docs/accounts/guides/agents/pay-for-apis) |
-
-For an agent that pays from a terminal, start with [Tempo Wallet with agents](/docs/wallet/recipes#let-an-agent-pay-for-services).
+| Pay from an account within a budget, until you revoke its key | [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) |
+| Pay per request for APIs that use MPP, the Machine Payments Protocol | [Let an agent pay for APIs](/docs/accounts/guides/agents/pay-for-apis) |
+| Pay for services from a terminal with the Tempo Wallet CLI | [Let an agent pay for services](/docs/wallet/recipes#let-an-agent-pay-for-services) |

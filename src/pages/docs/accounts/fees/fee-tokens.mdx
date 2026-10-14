@@ -6,17 +6,25 @@ description: Set the USD stablecoin an account pays network fees in once, and ov
 
 # Fee tokens
 
-A fee token is the USD stablecoin an account pays network fees in. Set a default once, such as OUSD, so the account never falls back to pathUSD, and override it on any transaction that should pay in another stablecoin.
+A fee token is the USD stablecoin a transaction pays its network fee in, so an account needs no separate token for fees. Set a default fee token once, and override it on any transaction that should pay in another stablecoin.
+
+<span id="fee-token-limits" />
 
 ## Supported fee tokens
 
-Any TIP-20 token whose currency is USD can pay fees, as long as it has enough liquidity on the [Fee AMM](/docs/protocol/fees/spec-fee-amm) against the validator's preferred stablecoin. Tempo checks both before execution: a token that isn't USD, or lacks the liquidity, makes the transaction invalid. For most accounts, the recommended fee token is [OUSD](/docs/guide/ousd).
+For most accounts, use [OUSD](/docs/guide/ousd). Before a transaction runs, Tempo checks its fee token:
+
+- It's a [TIP-20 token](/docs/protocol/tip20/overview), Tempo's token standard, whose currency is USD.
+- The account paying the fee holds enough of it to cover the maximum fee: the gas limit times the gas price.
+- If the block's validator wants its fees in a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm), Tempo's built-in exchange pools, has enough liquidity to convert it.
+
+If any check fails, the transaction is invalid and isn't included. Tempo doesn't try another token.
 
 <span id="set-an-accounts-default-fee-token" />
 
 ## Set a default fee token
 
-An account's default fee token applies to every transaction the account pays for, including the ones it sponsors for other accounts as a fee payer. Without one, Tempo infers the token from the transaction and falls back to pathUSD, as described in [Fee token precedence](/docs/accounts/fees#fee-token-precedence).
+The default covers every transaction the account pays the fee for, including ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence), which can fall back to pathUSD, a stablecoin the account might not hold.
 
 ```ts [set-fee-token.ts]
 const { receipt } = await client.fee.setUserTokenSync({
@@ -24,11 +32,13 @@ const { receipt } = await client.fee.setUserTokenSync({
 })
 ```
 
-`setUserTokenSync` calls `setUserToken` on the FeeManager precompile. Read the current default with `client.fee.getUserToken`.
+This calls `setUserToken` on the FeeManager, Tempo's built-in fee contract. Read the current default with `client.fee.getUserToken()`.
+
+The default outranks the token being transferred. With OUSD as the default, a transfer of another stablecoin still pays its fee in OUSD, and is invalid if the account's OUSD can't cover it.
 
 ## Override the fee token per transaction
 
-Pass `feeToken` on a transaction to pay that one transaction's fee in another stablecoin. It takes precedence over every other preference, for that transaction only:
+Pass `feeToken` to pay one transaction's fee in a different stablecoin. It outranks the default and every other rule, for that transaction only:
 
 ```ts [transfer.ts]
 import { parseUnits } from 'viem'
@@ -41,12 +51,8 @@ await client.token.transferSync({
 })
 ```
 
-[Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) walks through both, with a live demo and examples in each SDK.
+On a sponsored transaction, the account signs with the fee token blank, and the fee payer chooses it.
 
-## Fee token limits
-
-- The fee payer must hold enough of the fee token to cover the gas limit at the transaction's gas price, before execution.
-- Tempo checks only the first fee token it finds. If that one fails, the transaction is invalid; Tempo doesn't try the next.
-- On a sponsored transaction, the account doesn't sign the fee token. The fee payer chooses it.
+[Choose a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin) runs a per-transaction fee token in a live demo, and shows both calls in Wagmi, Rust, Python, Go, and Cast.
 
 Specification: [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).

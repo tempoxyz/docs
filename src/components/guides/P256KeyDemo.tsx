@@ -130,7 +130,6 @@ export function P256KeyDemo() {
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Try a browser device key</span>}
       headerRight={<span {...ui.accountDemoMuted()}>Moderato testnet</span>}
-      footer="Real testnet transactions. The private key is non-extractable and never leaves this browser."
     >
       <div {...ui.accountDemoSteps()} data-testid="p256-key-demo" aria-busy={pending !== null}>
         <Step
@@ -207,8 +206,7 @@ export function P256KeyDemo() {
           }
         >
           <p {...ui.accountDemoNote()}>
-            With no other signer, the account’s funds can’t be reached again. Pair the key with a
-            passkey or login, or use it as an access key.
+            This key is the account’s only signer, so deleting it locks the funds for good.
           </p>
         </Step>
 

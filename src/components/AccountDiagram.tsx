@@ -1,28 +1,25 @@
-import type { ComponentType, ReactNode, SVGProps } from 'react'
+import { type ComponentType, Fragment, type ReactNode, type SVGProps } from 'react'
 import CrownIcon from '~icons/lucide/crown'
-import InfinityIcon from '~icons/lucide/infinity'
-import ReceiptIcon from '~icons/lucide/receipt'
+import KeyIcon from '~icons/lucide/key'
 import SlidersIcon from '~icons/lucide/sliders-horizontal'
 import UserIcon from '~icons/lucide/user-round'
 import WalletIcon from '~icons/lucide/wallet'
-import WeightIcon from '~icons/lucide/weight'
 import { accountDiagram } from './AccountDiagram.styles'
 import { docsIcons } from './DocsIcon'
 
-type IconName = keyof typeof docsIcons
-
-/** Icons the anatomy diagrams need beyond the shared docs set. */
-const anatomyIcons = {
+/**
+ * Icons the diagrams need beyond the shared docs set. `key` is a key the account owns (a root key
+ * or a signer's private key); access keys keep the shared `accessKey` glyph.
+ */
+const extraIcons = {
   crown: CrownIcon,
-  infinity: InfinityIcon,
-  receipt: ReceiptIcon,
+  key: KeyIcon,
   sliders: SlidersIcon,
   user: UserIcon,
   wallet: WalletIcon,
-  weight: WeightIcon,
 }
 
-type Glyph = IconName | keyof typeof anatomyIcons
+type Glyph = keyof typeof docsIcons | keyof typeof extraIcons
 
 const diagrams = {
   address: AccountAddress,
@@ -32,14 +29,15 @@ const diagrams = {
   'single-key': SingleKeyAccount,
   configurable: ConfigurableAccount,
   keychain: KeychainAuthority,
+  treasury: TreasuryApproval,
+  'rotate-signer': RotateSigner,
 }
 
 /**
- * Account diagrams. `address`, `signers`, and `access-keys` are anatomy views: boxes for the parts
- * of each component, with fields, alternatives, and members inside. The rest are compact strips of
- * icon chips. All are drawn in HTML so they wrap at phone width and
- * follow the docs theme. The figure is one image to assistive technology; `alt` carries the full
- * description, and the Markdown export renders `alt` in its place.
+ * Account diagrams, drawn in HTML so they wrap at phone width and follow the docs theme. Icons mark
+ * things (keys, accounts, addresses); attributes and conditions are plain text. The figure is one
+ * image to assistive technology; `alt` carries the full description, and the Markdown export
+ * renders `alt` in its place.
  */
 export function AccountDiagram({ name, alt }: { name: keyof typeof diagrams; alt: string }) {
   const Diagram = diagrams[name]
@@ -57,25 +55,11 @@ export function AccountDiagram({ name, alt }: { name: keyof typeof diagrams; alt
   )
 }
 
-function Icon({ name }: { name: IconName }) {
-  const Svg: ComponentType<SVGProps<SVGSVGElement>> = docsIcons[name]
-  return (
-    <Svg
-      className="ad-icon"
-      aria-hidden="true"
-      focusable="false"
-      width="16"
-      height="16"
-      strokeWidth="1.75"
-    />
-  )
-}
-
-function Mark({ icon }: { icon: Glyph }) {
+function Icon({ name }: { name: Glyph }) {
   const Svg: ComponentType<SVGProps<SVGSVGElement>> =
-    icon in anatomyIcons
-      ? anatomyIcons[icon as keyof typeof anatomyIcons]
-      : docsIcons[icon as IconName]
+    name in extraIcons
+      ? extraIcons[name as keyof typeof extraIcons]
+      : docsIcons[name as keyof typeof docsIcons]
   return (
     <Svg
       className="ad-icon"
@@ -88,20 +72,20 @@ function Mark({ icon }: { icon: Glyph }) {
   )
 }
 
-/** An icon and a one- or two-word label, with an optional trailing value or icon. */
+/** A thing: an icon and a short label, with an optional weight or threshold. */
 function Chip({
   icon,
   label,
   value,
-  tone,
+  strong,
 }: {
-  icon: IconName
+  icon: Glyph
   label: string
-  value?: ReactNode
-  tone?: 'strong' | 'quiet'
+  value?: string
+  strong?: boolean
 }) {
   return (
-    <span className={tone ? `ad-chip ad-chip-${tone}` : 'ad-chip'}>
+    <span className={strong ? 'ad-chip ad-chip-strong' : 'ad-chip'}>
       <Icon name={icon} />
       {label}
       {value !== undefined && <span className="ad-value">{value}</span>}
@@ -110,12 +94,17 @@ function Chip({
 }
 
 /**
- * A joining glyph and the chip after it. They wrap together, so a line never ends on a glyph.
+ * An arrow and the chip it points to, with the verb above the arrow and an optional note below.
+ * They wrap together, so a line never ends on an arrow.
  */
-function Then({ glyph = '→', children }: { glyph?: string; children: ReactNode }) {
+function Then({ label, note, children }: { label?: string; note?: string; children: ReactNode }) {
   return (
     <span className="ad-then">
-      <span className="ad-glyph">{glyph}</span>
+      <span className="ad-arrow">
+        <span className="ad-arrow-label">{label}</span>
+        <span className="ad-arrow-line">→</span>
+        <span className="ad-arrow-label">{note}</span>
+      </span>
       {children}
     </span>
   )
@@ -126,95 +115,78 @@ function Part({
   icon,
   title,
   tone,
-  row,
   children,
 }: {
   icon: Glyph
   title: string
   tone?: 'strong' | 'quiet'
-  /** Lay the fields out in one wrapping line. */
-  row?: boolean
-  children?: ReactNode
+  children: ReactNode
 }) {
-  const className = ['ad-part', tone && `ad-part-${tone}`, row && 'ad-part-row']
   return (
-    <div className={className.filter(Boolean).join(' ')}>
+    <div className={tone ? `ad-part ad-part-${tone}` : 'ad-part'}>
       <div className="ad-part-head">
-        <Mark icon={icon} />
+        <Icon name={icon} />
         {title}
       </div>
-      {children !== undefined && <div className="ad-part-body">{children}</div>}
+      {children}
     </div>
   )
 }
 
-/** One attribute of a part, with its options or members to the right. */
-function Field({ icon, label, children }: { icon: Glyph; label: string; children?: ReactNode }) {
+/** Attribute rows: a label, with an optional detail aligned in a second column. */
+function Fields({ rows }: { rows: ReadonlyArray<readonly [string, string?]> }) {
   return (
-    <div className="ad-field">
-      <span className="ad-field-label">
-        <Mark icon={icon} />
-        {label}
-      </span>
-      {children !== undefined && <span className="ad-field-values">{children}</span>}
-    </div>
-  )
-}
-
-/** Mutually exclusive options, drawn as one segmented pill. */
-function OneOf({ options }: { options: ReadonlyArray<string | [Glyph, string]> }) {
-  return (
-    <span className="ad-oneof">
-      {options.map((option) => {
-        const [icon, label] = typeof option === 'string' ? [undefined, option] : option
-        return (
-          <span className="ad-option" key={label}>
-            {icon && <Mark icon={icon} />}
-            {label}
-          </span>
-        )
-      })}
-    </span>
-  )
-}
-
-/** Members a part has together. */
-function AllOf({ items }: { items: ReadonlyArray<string> }) {
-  return (
-    <span className="ad-allof">
-      {items.map((item) => (
-        <span className="ad-tag" key={item}>
-          {item}
-        </span>
+    <div className="ad-fields">
+      {rows.map(([label, detail]) => (
+        <Fragment key={label}>
+          <span className="ad-field-label">{label}</span>
+          <span className="ad-field-detail">{detail}</span>
+        </Fragment>
       ))}
-    </span>
+    </div>
+  )
+}
+
+/** Signers with their weights, joining into the threshold they must reach. */
+function Quorum({
+  signers,
+  threshold,
+  caption,
+}: {
+  signers: ReadonlyArray<readonly [Glyph, string, string]>
+  threshold: string
+  caption: string
+}) {
+  return (
+    <div className="ad-tree">
+      <div className="ad-strip">
+        {signers.map(([icon, label, weight]) => (
+          <Chip key={label} icon={icon} label={label} value={weight} />
+        ))}
+      </div>
+      <span className="ad-stem" />
+      <Chip icon="threshold" label="Threshold" value={threshold} strong />
+      <span className="ad-caption">{caption}</span>
+    </div>
   )
 }
 
 function AccountAddress() {
   return (
     <Part icon="document" title="Address" tone="strong">
-      <div className="ad-choice">
-        <span className="ad-choice-label">One of</span>
-        <div className="ad-choice-options">
-          <Part icon="user" title="Single-key (EOA)">
-            <Field icon="accessKey" label="Key" />
-          </Part>
-          <Part icon="sliders" title="Configurable">
-            <Field icon="team" label="Signers">
-              <span className="ad-tag">
-                <Mark icon="weight" />
-                Weight
-              </span>
-            </Field>
-            <Field icon="threshold" label="Threshold" />
-          </Part>
-        </div>
+      <div className="ad-pair">
+        <Part icon="user" title="Single-key account">
+          <Fields rows={[['One key']]} />
+        </Part>
+        <span className="ad-or">or</span>
+        <Part icon="sliders" title="Configurable account">
+          <Fields rows={[['Signers, each with a weight'], ['Threshold']]} />
+        </Part>
       </div>
       <div className="ad-shared">
-        <Field icon="wallet" label="TIP-20 balances" />
-        <Field icon="accessKey" label="Access keys" />
-        <Field icon="receipt" label="Fee token" />
+        <span>Stablecoin balances</span>
+        <span>Access keys</span>
+        <span>Fee token</span>
       </div>
     </Part>
   )
@@ -222,31 +194,29 @@ function AccountAddress() {
 
 function SignerApproval() {
   return (
-    <div className="ad-tree">
-      <Part icon="addSigner" title="Signer" tone="strong">
-        <Field icon="weight" label="Weight" />
-        <Field icon="rules" label="Type">
-          <OneOf
-            options={[
-              ['accessKey', 'Private key'],
-              ['device', 'Device key'],
-              ['passkey', 'Passkey'],
-            ]}
-          />
-        </Field>
-      </Part>
-      <span className="ad-stem" />
-      <span className="ad-sum">
-        <span className="ad-tag">
-          <Mark icon="weight" />Σ Weights
-        </span>
-        <span className="ad-glyph">≥</span>
-        <span className="ad-tag ad-tag-strong">
-          <Mark icon="threshold" />
-          Threshold
-        </span>
-      </span>
-    </div>
+    <Quorum
+      signers={[
+        ['passkey', 'Passkey', '2'],
+        ['key', 'Backup key', '1'],
+        ['key', 'Recovery key', '1'],
+      ]}
+      threshold="2"
+      caption="Passkey alone, or both keys"
+    />
+  )
+}
+
+function TreasuryApproval() {
+  return (
+    <Quorum
+      signers={[
+        ['key', 'Finance key', '1'],
+        ['key', 'Operations key', '1'],
+        ['passkey', 'Controller passkey', '1'],
+      ]}
+      threshold="2"
+      caption="Any two approve"
+    />
   )
 }
 
@@ -254,48 +224,69 @@ function AccessKeyBounds() {
   return (
     <div className="ad-variants">
       <Part icon="accessKey" title="Access key" tone="strong">
-        <Field icon="passkey" label="Key type">
-          <OneOf options={['Passkey', 'P-256', 'secp256k1']} />
-        </Field>
-        <Field icon="limit" label="Spending limits">
-          <AllOf items={['Per TIP-20 token']} />
-          <OneOf options={['Once', 'Per period']} />
-        </Field>
-        <Field icon="expiry" label="Expiry" />
-        <Field icon="contract" label="Scopes">
-          <AllOf items={['Contracts', 'Functions', 'Recipients']} />
-        </Field>
+        <Fields
+          rows={[
+            ['Spending limit', 'Per stablecoin, once or per period'],
+            ['Expiry', 'When it stops working'],
+            ['Scopes', 'Contracts, functions, recipients'],
+          ]}
+        />
       </Part>
-      <Part icon="crown" title="Admin access key" tone="quiet" row>
-        <Field icon="infinity" label="No limits" />
-        <Field icon="accessKey" label="Manages access keys" />
+      <Part icon="crown" title="Admin access key" tone="quiet">
+        <span className="ad-detail">No bounds. Manages other access keys.</span>
       </Part>
+    </div>
+  )
+}
+
+/** The lost passkey's weight moves to the new passkey; the two keys that remain approve the swap. */
+function RotateSigner() {
+  return (
+    <div className="ad-ledger">
+      <span className="ad-ledger-name">
+        <Icon name="passkey" />
+        <span className="ad-lost">Passkey</span>
+        <span className="ad-arrow-line">→</span>
+        New passkey
+      </span>
+      <span className="ad-ledger-weight">2</span>
+      <span className="ad-ledger-note" />
+      <span className="ad-ledger-name">
+        <Icon name="key" />
+        Backup key
+      </span>
+      <span className="ad-ledger-weight">1</span>
+      <span className="ad-ledger-note">approves</span>
+      <span className="ad-ledger-name">
+        <Icon name="key" />
+        Recovery key
+      </span>
+      <span className="ad-ledger-weight">1</span>
+      <span className="ad-ledger-note">approves</span>
+      <span className="ad-ledger-rule" />
+      <span className="ad-ledger-name ad-ledger-total">
+        <Icon name="threshold" />
+        Threshold
+      </span>
+      <span className="ad-ledger-weight ad-ledger-total">2</span>
+      <span className="ad-ledger-note" />
     </div>
   )
 }
 
 function AccountTypes() {
   return (
-    <div className="ad-stack">
+    <div className="ad-stack ad-stack-fit">
       <div className="ad-strip">
-        <Chip icon="accessKey" label="Single key" />
-        <Then>
-          <Chip icon="upgrade" label="Upgrade" tone="quiet" />
-        </Then>
-        <Then>
-          <Chip icon="threshold" label="Configurable" />
+        <Chip icon="user" label="Single-key account" />
+        <Then label="upgrade" note="same address">
+          <Chip icon="sliders" label="Configurable account" />
         </Then>
       </div>
-      <div className="ad-strip">
-        <Chip
-          icon="rules"
-          label="Account Keychain"
-          value={<Icon name="accessKey" />}
-          tone="strong"
-        />
-      </div>
-      <div className="ad-strip ad-strip-note">
-        <span className="ad-note">Access keys for both</span>
+      <div className="ad-bar">
+        <Icon name="rules" />
+        <span className="ad-bar-title">Account Keychain</span>
+        <span className="ad-detail">access keys for both</span>
       </div>
     </div>
   )
@@ -304,18 +295,22 @@ function AccountTypes() {
 function SingleKeyAccount() {
   return (
     <div className="ad-stack">
-      <div className="ad-strip">
-        <Chip icon="accessKey" label="Root key" tone="strong" />
-        <Then>
-          <Chip icon="document" label="Address" />
-        </Then>
-        <Then glyph="+">
-          <Chip icon="accessKey" label="Access keys" tone="quiet" />
-        </Then>
+      <div className="ad-fan">
+        <Chip icon="key" label="Root key" strong />
+        <div className="ad-branches">
+          <Then label="derives">
+            <Chip icon="document" label="Address" />
+          </Then>
+          <Then label="authorizes">
+            <Chip icon="accessKey" label="Access keys" />
+          </Then>
+        </div>
       </div>
-      <div className="ad-strip ad-strip-note">
-        <Chip icon="upgrade" label="Upgrade" tone="quiet" />
-        <span className="ad-note">Same address · version 1</span>
+      <div className="ad-strip">
+        <Chip icon="user" label="Single-key account" />
+        <Then label="upgrade" note="same address">
+          <Chip icon="sliders" label="Configurable account" />
+        </Then>
       </div>
     </div>
   )
@@ -325,21 +320,15 @@ function ConfigurableAccount() {
   return (
     <div className="ad-stack">
       <div className="ad-strip">
-        <Chip icon="rules" label="Configuration" value="v0" />
-        <Then>
-          <Chip icon="document" label="Address" tone="strong" />
+        <Chip icon="sliders" label="Owners, threshold, salt" />
+        <Then label="derive">
+          <Chip icon="document" label="Address" strong />
         </Then>
       </div>
       <div className="ad-strip">
         <Chip icon="team" label="Owner signatures" />
-        <Then glyph="+">
-          <Chip icon="rules" label="Configuration" />
-        </Then>
-        <Then>
-          <Chip icon="verified" label="Hash match" tone="quiet" />
-        </Then>
-        <Then>
-          <Chip icon="approved" label="Executes" tone="strong" />
+        <Then label="weights reach threshold">
+          <Chip icon="approved" label="Executes" strong />
         </Then>
       </div>
     </div>
@@ -348,24 +337,18 @@ function ConfigurableAccount() {
 
 function KeychainAuthority() {
   return (
-    <div className="ad-stack">
-      <div className="ad-strip">
-        <Chip icon="team" label="Account" />
-        <Then>
-          <Chip icon="accessKey" label="Access key" tone="strong" />
-        </Then>
-        <Then>
-          <span className="ad-group">
-            <Chip icon="limit" label="Limit" />
-            <Chip icon="expiry" label="Expiry" />
-            <Chip icon="contract" label="Scopes" />
-          </span>
-        </Then>
-      </div>
-      <div className="ad-strip ad-strip-note">
-        <Chip icon="revoke" label="Revoke" tone="quiet" />
-        <span className="ad-note">Permanent per key</span>
-      </div>
+    <div className="ad-strip">
+      <Chip icon="wallet" label="Account" />
+      <Then label="authorizes">
+        <Chip icon="accessKey" label="Access key" strong />
+      </Then>
+      <Then label="signs within">
+        <span className="ad-group">
+          <span className="ad-tag">Spending limits</span>
+          <span className="ad-tag">Expiry</span>
+          <span className="ad-tag">Scopes</span>
+        </span>
+      </Then>
     </div>
   )
 }

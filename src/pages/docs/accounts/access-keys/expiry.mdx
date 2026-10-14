@@ -1,51 +1,37 @@
 ---
 title: Expiry
 seoTitle: Access Key Expiry on Tempo | Tempo Docs
-description: Set the second after which Tempo rejects an access key, and replace keys before they lapse so devices and backends keep paying.
+description: Make an access key stop working at a set time, so a forgotten or leaked key ends on its own, and authorize its replacement before then.
 ---
 
 # Expiry
 
-An expiry is the Unix timestamp at which an access key stops working, and Tempo rejects every transaction the key signs from that second on. Set it to how long the holder needs the key, and authorize a replacement before it passes, because an existing key's expiry can't be extended.
+An expiry makes an access key stop working at a set time, so a forgotten or leaked key ends on its own. You can't extend an expiry, so replace the key before it passes.
 
 <span id="access-key-expiry" />
+<span id="expiry-limits" />
 
 ## How expiry works
 
-Tempo checks the expiry when it validates each transaction the key signs. Once the current block time reaches the expiry, the transaction fails with `KeyExpired` and never executes. An expired key also reads as zero remaining limit and denies every call.
-
-A key with no `expiry` never expires. Admin keys have no expiry.
+Tempo checks the expiry against block time (the current block's timestamp), not your server's clock. Once block time reaches the expiry, Tempo rejects every transaction the key signs with `KeyExpired`. The expired key's remaining limit reads as zero, and changing it with `updateLimit` reverts with `KeyExpired`.
 
 ## Set an expiry
 
-Pass `expiry` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). viem's `Expiry` helpers return a timestamp relative to now, such as `Expiry.hours(1)`, `Expiry.days(30)`, or `Expiry.months(3)`:
+Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). A key without `expiry` never expires, and admin keys can't have one. The `Expiry` helpers in `viem/tempo` return a timestamp relative to now:
 
 ```ts [expiry.ts]
-const keyAuthorization = await client.accessKey.signAuthorization({
-  accessKey,
-  account,
-  expiry: Expiry.days(30),
-  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
-})
+expiry: Expiry.days(30), // or Expiry.hours(1), Expiry.months(3)
 ```
 
-Match the expiry to the holder: hours for a one-off task, 30 days for a device, 90 days for a backend. Read it back with `client.accessKey.getMetadata({ account, accessKey })`, which returns `expiry`.
+Use the shortest window the holder needs: hours for a one-off task, 30 days for a device, 90 days for a backend. An expiry at or before the current block time reverts with `ExpiryInPast`.
 
 ## Renew an expiring key
 
-There's no call to extend an expiry. To keep a holder paying:
+To renew, authorize a new key: Tempo never authorizes the same key address twice for an account. Read the old key's `expiry` with `client.accessKey.getMetadata({ account, accessKey })`, and before that time:
 
 1. Generate a new key where the holder signs.
 2. Have the signers, or an admin key, authorize it with a new expiry.
 3. Switch the holder to the new key.
 4. [Revoke](/docs/accounts/access-keys/revocation) the old key if it hasn't expired yet.
-
-Schedule renewal before the expiry, since the signers have to approve it. For walkthroughs, see [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) and [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program).
-
-## Expiry limits
-
-- A new authorization needs an expiry in the future. A past expiry reverts with `ExpiryInPast`, and `0` counts as past.
-- An expired key's spending limit can't be changed. `updateLimit` reverts with `KeyExpired`.
-- Expiry is checked against block time, not your server's clock.
 
 Specification: [Account Keychain key expiry](/docs/protocol/transactions/AccountKeychain#key-expiry).

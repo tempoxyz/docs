@@ -225,7 +225,7 @@ describe('GuideDemo scripts', () => {
     const { states, account, ctx } = await run('add-signers')
     const added = states[3].account
     expect(configuredSigners(added).map((signer) => [signer.name, signer.weight])).toEqual([
-      ['Current key', 1],
+      ['First key', 1],
       ['Recovery key', 1],
     ])
     expect(added.threshold).toBe(1)
@@ -256,7 +256,7 @@ describe('GuideDemo scripts', () => {
   it('recovers with both keys, replaces the lost device key, and revokes the device key', async () => {
     const { account, ctx } = await run('recover')
     expect(configuredSigners(account).map((signer) => [signer.name, signer.weight])).toEqual([
-      ['Current key', 1],
+      ['First key', 1],
       ['Backup key', 1],
       ['New device key', 2],
     ])

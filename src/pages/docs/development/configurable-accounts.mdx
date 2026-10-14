@@ -1,84 +1,77 @@
 ---
 title: Configurable accounts
 seoTitle: Tempo Configurable Accounts, Owners, Thresholds, and Multisig Signatures | Tempo Docs
-description: Reference for Tempo configurable accounts, covering address derivation, owner weights and thresholds, configuration updates, the 0x05 signature, and onchain verification.
+description: Control one Tempo address with weighted owner keys and a threshold, approve with 0x05 multisig signatures, change owners without moving funds, and verify approvals onchain.
 ---
 
 import { AccountDiagram } from '../../../components/AccountDiagram'
 
 # Configurable accounts
 
-A configurable account is approved by owners whose weights reach a threshold, and its address stays fixed as owners change. Compare it with single-key accounts in the [account model](/docs/accounts/keys).
+A configurable account is one address controlled by a set of owner keys. Each owner has a weight, and a transaction runs once the owners who sign it reach the account's threshold: with three owners at weight 1 and a threshold of 2, any two can approve. The address never changes, so you can add, remove, or replace owners without moving funds.
 
 <AccountDiagram
   name="configurable"
   alt="The version-0 configuration of owners, threshold, and salt derives the address through CREATE2. To approve, owners sign and the signature carries the configuration; Tempo checks it against the stored hash and executes once the threshold is met."
 />
 
-Configurable accounts are specified in [TIP-1107](https://tips.sh/1107) and its component TIPs, all Draft. They run on Tempo devnet.
+Configurable accounts run on Tempo devnet. Their specification, [TIP-1107](https://tips.sh/1107) and its component TIPs, is a Draft.
 
 ## Account configuration fields
 
 | Field | Type | Rule |
 | --- | --- | --- |
-| `owners` | `(address, uint8 weight)[]` | 1–48 owners, nonzero and unique, sorted by address. Each weight is at least 1. |
-| `threshold` | `uint8` | 1–255, reachable by the eight largest weights |
-| `salt` | `bytes32` | Fixed for the account's lifetime |
-| `version` | `uint64` | `0` for the initial configuration, then `+1` per update |
+| `owners` | `(address, uint8 weight)[]` | 1–48 owners with unique, nonzero addresses in ascending order. Each weight is at least 1, and the weights total at most 255. |
+| `threshold` | `uint8` | 1–255, and at most the eight largest weights combined, since an approval carries at most eight signatures |
+| `salt` | `bytes32` | Any 32 bytes, fixed for the account's lifetime. A different salt gives the same owners a different address. |
+| `version` | `uint64` | `0` at creation, then `+1` per update |
 
-Total owner weight is at most 255. Owners are primitive keys: secp256k1, P-256, or WebAuthn. A configurable account can't be another account's owner, but it can be another account's [access key](/docs/development/account-keychain#access-keys-on-each-account-type).
+Each owner is the address of one secp256k1 (standard Ethereum), P-256, or WebAuthn (passkey) key. A configurable account can't be another account's owner, but it can be another account's [access key](/docs/development/account-keychain#access-keys-on-each-account-type).
 
-Tempo stores only a 32-byte hash of the configuration in the account. Every approval carries the full configuration, so your app must [keep the configuration it set](#keep-the-current-configuration).
+Tempo stores only a 32-byte hash of the configuration, not the owners themselves. Every approval carries the full configuration, which Tempo checks against that hash, so your app must [keep the configuration](#keep-the-current-configuration).
 
 <span id="configurable-account-address" />
 
 ## Configurable account address
 
-The address is a CREATE2 address computed from the version-0 owners, weights, threshold, and salt, with no chain ID. Updates never change it. Specification: [TIP-1110](https://tips.sh/1110).
-
-- **Before registration:** the address can receive stablecoins. Nothing is deployed.
-- **On another EVM chain:** the initial secp256k1 owners, at the original threshold, can deploy a recovery wallet at the same address and retrieve funds sent there by mistake. P-256 and WebAuthn owners don't count. See [cross-chain recovery](/docs/accounts/guides/users/recover-an-account#recover-funds-sent-on-another-chain).
-- **Code:** the account can't hold contract code or an EIP-7702 delegation.
+The address is a CREATE2 address computed from the version-0 configuration, with no chain ID ([TIP-1110](https://tips.sh/1110)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold contract code or an EIP-7702 delegation.
 
 ```ts [account.ts]
 import { Account } from 'viem/tempo'
 
-const env = (name: string) => process.env[name] as `0x${string}`
-const finance = Account.fromSecp256k1(env('FINANCE_KEY'))
-const operations = Account.fromSecp256k1(env('OPERATIONS_KEY'))
+export const env = (name: string) => process.env[name] as `0x${string}`
+export const finance = Account.fromSecp256k1(env('FINANCE_KEY'))
+export const operations = Account.fromSecp256k1(env('OPERATIONS_KEY'))
 
 // 2 of 3: two local keys and a passkey that approves elsewhere
-const account = Account.fromConfig({
+export const account = Account.fromConfig({
   address: 'infer',
   owners: [finance, operations, { owner: env('CONTROLLER_PASSKEY_ADDRESS'), weight: 1 }],
   threshold: 2,
 })
 ```
 
-`address: 'infer'` derives the address from this version-0 configuration. `Account.fromConfig` sorts owners by address and defaults each weight and the threshold to `1`.
+`address: 'infer'` derives the address from this configuration. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero.
 
-## Account registration
+On supported EVM chains, the initial secp256k1 owners can deploy a recovery wallet at this address and retrieve funds sent there by mistake, if their weights reach the original threshold. P-256 and WebAuthn owners don't count. See [Recover funds sent on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain).
 
-The first transaction the account approves registers it: Tempo stores the version-0 hash before any call runs. Registration persists even if the transaction's calls revert. An invalid transaction registers nothing.
+### Account registration
 
-An existing single-key account becomes configurable by [upgrading in place](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) instead, starting at version 1.
+The account's first transaction registers it: Tempo stores the version-0 hash before running any call. Registration sticks even if the calls revert, and an invalid transaction registers nothing. An existing single-key account skips this step: it [upgrades in place](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) and starts at version 1.
 
 ## Owner approvals
 
-Owners approve a whole transaction, including every call in a batch. The transaction is sent from the account's address, which pays its own fees unless a fee payer sponsors them.
+Owners approve a whole transaction, including every call in a batch. The transaction comes from the account's address, which pays the fees unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
-| Rule | Limit |
-| --- | --- |
-| Signatures per approval | 1–8, in ascending owner-address order |
-| Weight | The signers' weights must reach the threshold. Extra signatures after it's reached are rejected. |
-| Replay | Each signature binds the account and configuration version |
-| Access keys | Never count toward the threshold |
+An approval carries 1–8 owner signatures, sorted by owner address, whose weights must reach the threshold. Tempo rejects any signature after the threshold is reached. Each signature covers the account and the configuration version, so it can't be reused on another account or after an update. Access keys never count toward the threshold.
 
-Owners can sign separately and offline. Your app collects each owner's approval, for example in its backend, and submits once the approving weights reach the threshold.
+Owners sign separately, even offline. Your app collects the signatures and submits the transaction once their weights reach the threshold. [Collect approvals](/docs/accounts/policies/signing-thresholds#collect-approvals) shows the code.
 
 <span id="multisig-signature-format" />
 
 ### `0x05` multisig signature
+
+Viem builds this signature for you. You need its format ([TIP-1114](https://tips.sh/1114)) only to build or check approvals yourself:
 
 ```text
 signature = 0x05 || rlp([account, config, signatures])
@@ -87,24 +80,23 @@ owner     = [address, weight]
 digest    = keccak256("tempo:multisig:signature" || inner_digest || account || uint64(version))
 ```
 
-Each owner signs `digest`. For a transaction, `inner_digest` is the transaction signing hash. Tempo checks the configuration against the stored hash, or derives the address from it before registration, then adds the signers' weights.
+Each owner signs `digest`. For a transaction, `inner_digest` is the transaction's signing hash; for a contract check, it's the `hash` passed to [`verifyMultisig`](#verify-owner-approvals-in-a-contract). Tempo checks the configuration against the stored hash (before registration, it derives the address from the configuration instead), then adds up the signers' weights.
 
-The `0x05` signature also approves [access-key grants](/docs/development/account-keychain#access-keys-on-each-account-type). It isn't accepted for fee payers, subblock transactions, or authorization lists. Encoding: [TIP-1114](https://tips.sh/1114).
+The `0x05` signature also approves [access-key grants](/docs/development/account-keychain#access-keys-on-each-account-type). It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
 
 ## Configuration updates
 
-`updateConfig` replaces the owners and threshold. The address, balances, and access keys stay the same.
+`updateConfig` ([TIP-1109](https://tips.sh/1109)) replaces the owners and threshold. The address, salt, balances, and access keys stay the same. An update doesn't revoke access keys, so [revoke](/docs/development/account-keychain#revoke-an-access-key) any you no longer want.
 
 | Property | Rule |
 | --- | --- |
 | Called by | The account, in a transaction its owners approve at the current threshold. Access keys and contracts can't call it. |
-| Version | Increments by 1, so approvals collected for the old version stop verifying |
-| Salt | Unchanged |
-| Access keys | Unchanged. Revoke them separately. |
+| Version | Increments by 1, which invalidates approvals collected for the old version |
 | Batches | Several updates in one transaction must form consecutive versions |
 | Event | `MultisigConfigUpdated(account, salt, version, threshold, owners)` |
 
 ```ts [update.ts]
+import { account, env, finance, operations } from './account'
 import { client } from './client'
 
 const { config } = await client.accounts.updateConfigSync({
@@ -120,21 +112,25 @@ const { config } = await client.accounts.updateConfigSync({
 })
 ```
 
-Viem sorts the new owners and signs with the account's local owners. Save the returned `config`, now at version 1, with the account record and use it for later approvals and updates. Specification: [TIP-1109](https://tips.sh/1109). Guide: [user account guides](/docs/accounts/guides/users).
+`client` is a Viem client on Tempo devnet. Viem sorts the new owners and signs with the local owners, `finance` and `operations`, whose weights reach the threshold of 2. The returned `config` is version 1. [Add signers](/docs/accounts/key-management/add-signers) walks through a full update.
 
 <span id="read-the-current-configuration" />
 
 ### Keep the current configuration
 
-Tempo stores only a hash of the configuration, a fingerprint that can't be turned back into the owners and threshold. Your app must keep the configuration it set: the owners, threshold, salt, and version. Save it with the account record when you create the account and after each update, then open the account from it:
+The stored hash can't be turned back into the owners and threshold, so save `account.address` and `account.config` with the account record when you create the account, and replace the configuration with the returned `config` after each update. Open the account from them. A version-0 configuration derives the address, so pass the saved address only after the first update:
 
 ```ts [config.ts]
 import { Account } from 'viem/tempo'
 
-const account = Account.fromConfig({ address, ...config }) // the saved address and configuration
+// the saved address and configuration
+const account =
+  config.version === 0n
+    ? Account.fromConfig({ ...config, address: 'infer' })
+    : Account.fromConfig({ address, ...config })
 ```
 
-To check that a saved configuration is still current, compare its hash with the one Tempo stores. `getConfigCommitment` reads the stored hash from the chain, so any node serves it:
+To check that a saved configuration is still current, compare its hash with the stored one, which any node returns:
 
 ```ts [check-config.ts]
 import { AccountConfig } from 'viem/tempo'
@@ -144,13 +140,13 @@ const stored = await client.accounts.getConfigCommitment({ account: address })
 const isCurrent = stored === AccountConfig.getCommitment(config)
 ```
 
-The stored hash is zero before the account is registered. A mismatch means another update landed, and approvals built on the saved configuration fail.
+The stored hash is zero before registration. A mismatch means another update landed, and approvals built on the saved configuration fail.
 
 <span id="login-signers" />
 
 ## Verify owner approvals in a contract
 
-The signature verifier precompile at `0x5165300000000000000000000000000000000000` checks a `0x05` signature against the account's current configuration:
+A contract checks that an account's owners approved a message with the signature verifier precompile, a contract built into Tempo at `0x5165300000000000000000000000000000000000`:
 
 ```solidity
 interface ISignatureVerifier {
@@ -160,16 +156,16 @@ interface ISignatureVerifier {
 
 | Result | When |
 | --- | --- |
-| `true` | Owners at the current version reached the threshold over `multisig_digest(hash, account, version)` |
+| `true` | Owners at the current version signed the [`0x05` digest](#multisig-signature-format) of `hash`, and their weights reached the threshold |
 | `false` | The configuration doesn't match the stored hash or derive the address, or the account has code |
 | Reverts `InvalidFormat()` | The encoding or configuration is invalid |
 | Reverts `InvalidSignature()` | The owner approvals are invalid |
 
-An unregistered account verifies against its version-0 configuration, without registering. After an update, signatures for the old version fail. Guide: [Signing thresholds](/docs/accounts/policies/signing-thresholds).
+An unregistered account verifies against its version-0 configuration, and the check doesn't register it. Include your chain ID, contract address, and the account in `hash` so an approval can't be replayed elsewhere. [Verify approvals in a contract](/docs/accounts/policies/signing-thresholds#verify-approvals-in-a-contract) has a full contract.
 
 ## Native multisig precompile
 
-`0xAACC000000000000000000000000000000000000`
+The native multisig precompile is at `0xAACC000000000000000000000000000000000000`. Viem's `updateConfigSync` and `getConfigCommitment` call it for you.
 
 | Function | Purpose |
 | --- | --- |
@@ -177,5 +173,3 @@ An unregistered account verifies against its version-0 configuration, without re
 | `getConfigCommitment(account)` | Returns the stored hash, or zero before registration |
 | `updateConfig(current, threshold, owners)` | Replaces the owners and threshold |
 | `upgradeAccount(threshold, owners)` | [Upgrades a single-key account](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) |
-
-Account limits: 1–48 owners, total weight at most 255, and up to 8 signatures per approval.

@@ -1,7 +1,7 @@
 ---
 title: "Create an account"
 seoTitle: "Create a Tempo Account with a Passkey, Device Key, or Private Key | Tempo Docs"
-description: Create a Tempo account from its first signer, then add signers, set a threshold, and authorize access keys on Tempo devnet.
+description: Compute a Tempo account's address from its first signer, with no API call or transaction, then try payments, signers, and access keys on devnet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
 ---
@@ -10,40 +10,46 @@ import { AccountSandbox } from '../../../components/guides/AccountSandbox'
 
 # Create an account
 
-An account's address comes from its first signer. Nothing to deploy: the address is ready immediately, and the first approved transaction registers the account.
+Creating a Tempo account takes no API call and no transaction: your app computes the account's address from its first signer, the key that approves its transactions. Pick a first signer below to create one on Tempo devnet.
 
 <AccountSandbox />
-
-Every step runs on Tempo devnet, with a device key in this browser or a generated private key.
 
 <span id="try-a-passkey-account" />
 
 ## How account creation works
 
-- The first signer (a passkey, a device key, or a private key) starts at weight 1 and threshold 1.
-- Later signer, weight, and threshold changes keep the same address and balance.
-- The address can receive stablecoins before its first transaction.
-- The registering transaction is usually a payment that also authorizes the device's [access key](/docs/accounts/access-keys). [Sponsor the fee](/docs/guide/payments/sponsor-user-fees) so a new account needs no balance.
+1. You choose the first signer: a passkey, a device key, or a private key. It approves alone: its weight is 1, and so is the account's threshold, the total weight an approval needs.
+2. Your app computes the address from that signer. The address can receive stablecoins right away and stays the same when you change signers or add [access keys](/docs/accounts/access-keys).
+3. The account's first transaction, such as a payment, registers it on Tempo devnet, the only network that runs configurable accounts. That transaction pays a network fee in a stablecoin, so fund the address first or [sponsor the fee](/docs/accounts/fees/fee-sponsorship).
 
 <span id="create-an-account-from-a-signing-key" />
 <span id="create-a-passkey-account" />
 
 ## Create an account in code
 
-::::code-group
-
-```ts [TypeScript]
+```ts [account.ts]
 import { generatePrivateKey } from 'viem/accounts'
 import { Account } from 'viem/tempo'
 
-const signer = Account.fromSecp256k1(generatePrivateKey())
+const privateKey = generatePrivateKey() // Keep this secret: it approves the account's transactions.
+const signer = Account.fromSecp256k1(privateKey)
 const account = Account.fromConfig({ address: 'infer', owners: [signer] })
+
+// Save account.address and account.config with your user record.
 ```
 
-```bash [CLI]
-cast wallet new
+`address: 'infer'` tells [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) to compute the address from the signer, which viem calls an owner. You need the saved `account.config` to [add signers](/docs/accounts/key-management/add-signers) later.
+
+<span id="fund-an-account-on-devnet" />
+
+To fund the address on devnet, ask the devnet faucet, which sends 1,000,000 test AlphaUSD:
+
+```ts [fund.ts]
+import { tempoDevnet } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+const client = createClient({ chain: tempoDevnet })
+await client.faucet.fundSync({ account: account.address })
 ```
 
-::::
-
-The CLI creates a private key, whose address is a single-key account. To give it signers and a threshold, [upgrade it](/docs/accounts/key-management/account-upgrade). For passkeys and device keys, see [signing methods](/docs/accounts/authentication). Reference: [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) and viem's [configurable accounts guide](https://viem.sh/tempo/guides/configurable-accounts).
+For a passkey or device key, use that signer instead: [signing methods](/docs/accounts/authentication) shows each one. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account (EOA), like a standard Ethereum account, [upgrade it in place](/docs/accounts/key-management/account-upgrade) to keep its address.

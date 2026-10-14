@@ -7,7 +7,6 @@ import LucideFileCog from '~icons/lucide/file-cog'
 import LucideFingerprint from '~icons/lucide/fingerprint'
 import LucideKeyRound from '~icons/lucide/key-round'
 import LucideLaptop from '~icons/lucide/laptop'
-import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideServer from '~icons/lucide/server'
 import LucideSmartphone from '~icons/lucide/smartphone'
 import LucideUsers from '~icons/lucide/users'
@@ -17,7 +16,7 @@ import { accountSandbox } from './AccountSandbox.styles'
 import { analyzeAccount, isCreated } from './account-sandbox'
 import { diffAccounts } from './account-sandbox-diff'
 import { Button, Step } from './Demo'
-import { guideDemo, guideDemoNetwork, guideDemoTitle } from './GuideDemo.styles'
+import { guideDemo, guideDemoNetwork } from './GuideDemo.styles'
 import {
   type DemoAction,
   type DemoScript,
@@ -121,14 +120,12 @@ export function GuideDemo({ guide }: { guide: GuideId }) {
 
 function Demo({ guide, script }: { guide: GuideId; script: DemoScript }) {
   const environment = useEnvironment()
+  // The page's title already names the guide, so the header only says where the demo runs.
   return (
     <Container
       headerLeft={
-        <div {...guideDemoTitle({ className: 'as-title' })}>
-          <span>{script.title}</span>
-        </div>
+        <span {...guideDemoNetwork({ className: 'as-network' })}>Runs on Tempo devnet</span>
       }
-      headerRight={<span {...guideDemoNetwork({ className: 'as-network' })}>Tempo devnet</span>}
     >
       {environment.status === 'ready' ? (
         <Runner guide={guide} script={script} environment={environment} />
@@ -283,14 +280,12 @@ function Runner(props: {
       )}
 
       <section className="gd-steps" aria-label="Guide steps">
-        {script.setup.length > 0 && <span className="as-label">The guide’s steps</span>}
         {script.steps.map((action, index) =>
           renderAction(action, script.setup.length + index, index + 1),
         )}
         {done === actions.length && (
           <div className="gd-replay">
             <Button type="button" onClick={startOver}>
-              <LucideRotateCcw aria-hidden="true" />
               Start over with a new account
             </Button>
           </div>
@@ -325,14 +320,9 @@ function Runner(props: {
         <section className="gd-chain" aria-label="On Tempo">
           <span className="as-label">On Tempo</span>
           {created ? (
-            <AccountState
-              account={state.account}
-              health={health}
-              diff={diff}
-              badge={state.account.devnet ? 'On devnet' : undefined}
-            />
+            <AccountState account={state.account} health={health} diff={diff} />
           ) : (
-            <p className="gd-empty">No account yet. Its address comes from its first signer.</p>
+            <p className="gd-empty">No account yet</p>
           )}
         </section>
       </div>

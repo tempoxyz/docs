@@ -1,56 +1,53 @@
 ---
 title: Private keys
 seoTitle: Use Wallet, KMS, and HSM Keys as Tempo Account Signers | Tempo Docs
-description: Add keys from CLI, hardware, and browser wallets, or from your KMS or HSM, as weighted signers or limited access keys on a Tempo account.
+description: Sign for a Tempo account with a key you already hold in a wallet, KMS, or HSM, as a weighted signer or as an access key with spending limits.
 ---
 
 # Private keys
 
-A private key from a wallet, KMS, or HSM can approve for a Tempo account as a weighted signer, or pay alone within limits as an [access key](/docs/accounts/access-keys). Whoever holds the key approves at its full weight, so give each key a weight below the threshold unless one holder should pay alone.
+A private key lets you sign for a Tempo account with a key you already hold in a wallet, KMS, or HSM. The key stays there, and Tempo verifies each signature onchain. Tempo accepts secp256k1 keys, the kind Ethereum wallets use, and P-256 keys.
 
-## What a private key is
-
-A private key is a secp256k1 or P-256 key that you or a provider already hold. The account lists only its address or public key. The wallet, KMS, or HSM keeps the key and signs each approval, and Tempo checks that signature on chain.
-
+<span id="what-a-private-key-is" />
+<span id="what-a-private-key-trusts" />
+<span id="where-private-keys-live" />
 <span id="recommended-roles-for-your-keys" />
 <span id="private-key-sources" />
 
-## Where private keys live
+## Choose a role for each key
 
-| Source | Examples | Recommended role |
-| --- | --- | --- |
-| CLI wallets | The [Tempo CLI wallet](/docs/cli/wallet), Foundry `cast` | Access key for scripts and agents |
-| Hardware wallets | A treasury approver's hardware wallet | Signer at weight 1, so each approval needs a person and a device |
-| Browser wallets | An operator's browser extension wallet | Signer at weight 1 for operator approvals |
-| Other crypto wallets | Mobile wallets, and [wallet providers](/docs/accounts/guides/users/embed-wallets) such as Turnkey or Privy | Signer at weight 1. A provider's policies apply before it signs. |
-| KMS or HSM | Keys in your cloud KMS or HSM | Signer for recovery, or [access key](/docs/accounts/guides/automations/pay-out-from-a-backend) for automation |
+Add each key as a signer, which approves toward the account's [threshold](/docs/accounts/policies/signing-thresholds), or as an [access key](/docs/accounts/access-keys), which pays alone within its limits:
 
-## What a private key trusts
-
-A private key trusts whoever controls it and the infrastructure that holds it: the wallet's device, the provider's signing policies, or your cloud's KMS permissions. It depends on no Tempo-side service. Anyone who can make that infrastructure sign approves with the key's weight, so split approvers across separate wallets, teams, or HSMs.
+| Where the key lives | Add it as |
+| --- | --- |
+| CLI wallet, such as the [Tempo CLI wallet](/docs/cli/wallet) or Foundry `cast` | Access key for scripts and agents |
+| Hardware, browser, or mobile wallet | Signer at weight 1, one per approver |
+| [Wallet provider](/docs/accounts/guides/users/embed-wallets), such as Turnkey or Privy | Signer at weight 1. The provider signs only when its own policies allow. |
+| Cloud KMS or HSM | Signer for recovery, or access key for [backend payouts](/docs/accounts/guides/automations/pay-out-from-a-backend) |
 
 <span id="require-two-treasury-signers" />
 
 ## Add a private-key signer
 
-Two keys at weight 1 and a threshold of 2 means neither approver can pay alone:
+Give each key a weight below the threshold, so no single holder can pay alone, and keep each approver's key in its own wallet or HSM. Here both signers must approve:
 
 ```ts [treasury.ts]
 import { Account } from 'viem/tempo'
 
 const finance = Account.fromSecp256k1(process.env.FINANCE_SIGNER_KEY as `0x${string}`)
 const operations = Account.fromSecp256k1(process.env.OPERATIONS_SIGNER_KEY as `0x${string}`)
-const account = Account.fromConfig({ address: 'infer', owners: [finance, operations], threshold: 2 })
+
+const account = Account.fromConfig({
+  address: 'infer', // derive the address from these first signers
+  owners: [finance, operations], // weight 1 each
+  threshold: 2,
+})
 ```
 
-The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, use that source's viem account adapter instead. Use `Account.fromP256` for a raw P-256 key.
-
-For walkthroughs, see [Set up a company treasury](/docs/accounts/guides/teams/company-treasury) and [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend).
+The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the viem account that source provides instead. For a raw P-256 key, use `Account.fromP256`. Signers and thresholds run only on Tempo devnet; [Set up a company treasury](/docs/accounts/guides/teams/company-treasury) walks through the full setup.
 
 ## Private key limits
 
-- Tempo can't tell whether a key is still held, or held by whom. A leaked key approves at its weight until you remove it.
-- A signer has no spending limit. To bound what a key can pay, add it as an [access key](/docs/accounts/access-keys) instead.
-- Only the account's initial secp256k1 signers, reaching the original threshold, can recover funds sent to the same address on another EVM chain. Signers added later can't. See [cross-chain recovery](/docs/accounts/guides/users/recover-an-account#recover-funds-sent-on-another-chain).
-
-For other methods, see [Signing methods](/docs/accounts/authentication).
+- Tempo sees signatures, not people. Anyone who can make the key sign, including anyone with signing access in your KMS, approves at its weight until you [remove it](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer).
+- A signer has no spending limit. To cap what a key can pay, make it an access key instead.
+- Only the secp256k1 signers you create the account with can [recover funds sent on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain).

@@ -1,20 +1,20 @@
 ---
 title: Sweep idle balances into Earn
 seoTitle: Sweep Idle Balances into an Earn Vault with a Scoped Tempo Access Key | Tempo Docs
-description: Authorize an access key that can only approve and deposit into one Earn vault within a daily limit, then sweep a customer's idle balance each night and track the position.
+description: Give your backend an access key that can only deposit into one Earn vault, up to a daily limit, then sweep a customer's idle stablecoins into it each night.
 ---
 
 # Sweep idle balances into Earn
 
-Your backend moves a customer's idle stablecoins into an [Earn](/docs/earn) vault each night with an access key the customer's signers approve once. The key can call only `approve` and `deposit` on that vault, up to a daily limit, so it can't send funds anywhere else.
+A nightly job on your backend deposits a customer's idle stablecoins into an [Earn](/docs/earn) vault, signing with an access key the customer authorizes once. The key can deposit into that one vault, up to a daily limit, and nothing else: it can't send funds elsewhere or withdraw them.
 
-A vault deposit takes two calls. `approve` lets the vault pull an amount from the account, and `deposit` makes the vault pull it and issue vault shares to the account. The examples use Moderato testnet, a Tempo test network whose stablecoins have no value, with pathUSD and a vault from [Vaults](/docs/earn/vaults) that accepts it.
+A deposit takes two calls: `approve` lets the vault pull funds from the account, and `deposit` pulls them and issues vault shares in return. The key gets exactly those two calls. The examples run on Moderato testnet, whose stablecoins have no value, with pathUSD and a pathUSD vault from [Vaults](/docs/earn/vaults). Before you enable sweeps, run the vault checks in [Deposit](/docs/earn/integrate).
 
 :::::steps
 
 ### Scope a key to the vault
 
-Create a secp256k1 key in your KMS and wrap it as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms). Then have the customer's signers authorize its address in your app:
+Create a secp256k1 key in your KMS, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms), then have the customer's signers authorize it from your app:
 
 ```ts [app/approve-sweeps.ts]
 import { parseUnits } from 'viem'
@@ -34,11 +34,11 @@ await client.accessKey.authorizeSync({
 })
 ```
 
-Show the vault, the daily limit, and the expiry before the customer approves. Tempo meters approvals against the limit, so the key can't let the vault pull more than 5,000 pathUSD a day. See [Scopes](/docs/accounts/access-keys/scopes) and [Spending limits](/docs/accounts/access-keys/spending-limits).
+Show the customer the vault, the daily limit, and the expiry before they approve. The [scopes](/docs/accounts/access-keys/scopes) allow only these two calls, and the [spending limit](/docs/accounts/access-keys/spending-limits) counts approvals, so the vault can't pull more than 5,000 pathUSD a day. Fees the account pays count too, so leave headroom above your largest sweep.
 
 ### Sweep on a schedule
 
-Run the sweep from a nightly job. Keep an operating float in the account for the next day's payments, and deposit the rest:
+Each night, keep an operating float for the next day's payments and deposit the rest:
 
 ```ts [backend/sweep.ts]
 import { tempoModerato } from 'viem/chains'
@@ -55,25 +55,24 @@ if (assetAmount > 0n) {
     shareAmountMin: 1n,
     vault,
   })
-  await backend.earn.depositSync({
+  const { receipt, shareAmount } = await backend.earn.depositSync({
     assetAmount,
     shareAmountMin: EarnShares.minimumOutput(quotedShares, 50), // accept at most 0.5% fewer shares
     vault,
   })
+  // record receipt.transactionHash and shareAmount for reconciliation
 }
 ```
 
-The simulation needs the approval in place, so the sweep approves first. Tempo rejects a sweep over today's limit, a call outside the two scopes, or any call after the expiry. See [Deposit](/docs/earn/integrate) for the vault checks to run before enabling deposits.
+Approve first: the simulation that quotes the shares needs the approval in place. Tempo rejects any transaction that exceeds what's left of today's limit, calls outside the two scopes, or arrives after the expiry.
 
 ### Track the position
-
-Read the customer's vault shares and their current value:
 
 ```ts [backend/position.ts]
 const { shareBalance, value } = await backend.earn.getPosition({ account: address, vault })
 const { remaining } = await backend.accessKey.getRemainingLimit({ account: address, accessKey: sweepKey, token: pathUsd })
 ```
 
-`value` is the shares' asset value after fees, in pathUSD base units. Save each deposit's transaction hash and shares received for reconciliation, and show earnings as described in [Balances and earnings](/docs/earn/balances). Withdrawals need the signers or a separate key; this key can't redeem. See [Withdraw](/docs/earn/withdraw).
+Show the customer `value`, not `shareBalance`: shares don't map one-to-one to pathUSD, and `value` is what they're worth now, after fees, in pathUSD base units. `remaining` is what the key can still spend today. To show earnings over time, see [Balances and earnings](/docs/earn/balances). To withdraw, use the customer's signers or a separate key, as in [Withdraw](/docs/earn/withdraw).
 
 :::::
