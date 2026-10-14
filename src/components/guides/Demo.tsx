@@ -377,7 +377,7 @@ export function Step(
       {error && (
         <>
           <div {...ui.stepLayout7()} />
-          <div {...ui.stepLayout8()}>
+          <div role="alert" {...ui.stepLayout8()}>
             {'shortMessage' in error ? error.shortMessage : error.message}
           </div>
         </>
