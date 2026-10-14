@@ -8,7 +8,11 @@ description: Give an AI agent an access key with a daily budget, pay for API req
 
 Give your agent its own [access key](/docs/accounts/access-keys) with a daily budget, and it pays for API requests from an account without holding the account's signers. APIs that use the [Machine Payments Protocol (MPP)](/docs/guide/machine-payments) answer `402 Payment Required` with a price; the agent pays and retries, and Tempo rejects any payment past the budget.
 
-The examples run on Moderato testnet with AlphaUSD, a test stablecoin with no value, so call a service that accepts testnet payments.
+The examples pay in AlphaUSD, a test stablecoin with no value. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 :::::steps
 
@@ -19,6 +23,7 @@ The agent holds the key. The account's signers authorize its address with a dail
 ```ts [authorize-agent.ts]
 import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
+import { client } from './client'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
@@ -38,20 +43,23 @@ A one-time payment (`charge`) is a transfer to the service with a memo that ties
 
 ### Pay with MPP
 
-In the agent, pass the key to the [MPP client](/docs/guide/machine-payments/client). `Mppx.create` patches `fetch` to pay each `402` and retry the request:
+In the agent, pass the key and the devnet `client` to the [MPP client](/docs/guide/machine-payments/client). `Mppx.create` patches `fetch` to pay each `402` and retry the request:
 
 ```ts [agent.ts]
 import { Mppx, tempo } from 'mppx/client'
 import { Account } from 'viem/tempo'
+import { client } from './client'
 
 const agentKey = Account.fromP256(privateKey, { access: address }) // the account's address
 
-Mppx.create({ methods: [tempo({ account: agentKey })] })
+Mppx.create({ methods: [tempo({ account: agentKey, getClient: () => client })] }) // pays on the devnet
 
 const response = await fetch(paidUrl)
 ```
 
-Tempo rejects a payment outside the scopes, over the remaining budget, or after the expiry, and the request fails without paying. Find paid APIs in [Find services](/docs/guide/machine-payments/discover-services). A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
+Without `getClient`, mppx has no RPC for the devnet and the request fails. Tempo rejects a payment outside the scopes, over the remaining budget, or after the expiry, and the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
+
+The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds, so to test, run your own [MPP server](/docs/guide/machine-payments/server) on the devnet: in its `tempo()` method, set `currency` to AlphaUSD's address and pass `chainId: 31318` and `getClient: () => client`.
 
 ### Watch spending
 
@@ -59,6 +67,7 @@ The agent reads each payment's receipt from the response. Your app reads how muc
 
 ```ts [watch-spending.ts]
 import { Receipt } from 'mppx'
+import { client } from './client'
 
 const receipt = Receipt.fromResponse(response)
 // receipt.reference is the payment's transaction hash

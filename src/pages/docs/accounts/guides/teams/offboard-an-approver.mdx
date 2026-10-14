@@ -12,7 +12,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 When an approver leaves, remove their signer from the treasury, revoke any access key they could sign with, and add a replacement so one lost key can't lock the treasury. The treasury keeps its address, balance, and payment history.
 
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="remove-a-departing-approver" />
@@ -20,14 +20,18 @@ When an approver leaves, remove their signer from the treasury, revoke any acces
 
 The code continues from [Set up a company treasury](/docs/accounts/guides/teams/company-treasury): a 2-of-3 treasury, where any two of its three signers approve each transaction, and its controller is leaving. The finance and operations teams each hold a key (`finance` and `operations`), and the controller approves with a passkey on their own device. `saved` is the record your app keeps for the treasury: the `address` and `config` you saved when you created it. Finance and operations approve each change below. This example loads both of their keys in one process. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
 Tempo stores only a hash of the treasury's configuration, not the signer list itself. Before each action, rebuild the treasury from `saved.config` and attach the approvers' keys:
 
 ```ts [offboard.ts]
-import { http, isAddressEqual } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
-
-const client = createClient({ chain: tempoDevnet, transport: http() })
+import { isAddressEqual } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
 
 /** Rebuilds the treasury from its saved record, with the approvers' keys attached. */
 function openTreasury(approvers: readonly Account.RootAccount[]) {

@@ -46,7 +46,16 @@ Assets other than TIP-20 tokens, such as NFTs, don't count, and neither does a `
 
 ## Read the remaining limit
 
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). `access-keys.ts` is the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
 ```ts [remaining.ts]
+import { accessKey, account, alphaUsd } from './access-keys'
+import { client } from './client'
+
 const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
   account,
   accessKey,
@@ -54,7 +63,7 @@ const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
 })
 ```
 
-`remaining` is what the key can spend now, and it reads as the full limit once a period ends. `periodEnd` is when the current period ends, as a Unix timestamp. A missing, revoked, or expired key reads as zero.
+`remaining` is what the key can spend now, and it reads as the full limit once a period ends. `periodEnd` is when the current period ends, as a Unix timestamp, or `0` for a one-time limit. A missing, revoked, or expired key reads as zero.
 
 <span id="change-an-access-key" />
 
@@ -63,6 +72,10 @@ const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's limit without revoking it. A limited access key can't change limits, not even its own.
 
 ```ts [update-limit.ts]
+import { parseUnits } from 'viem'
+import { accessKey, account, alphaUsd } from './access-keys'
+import { client } from './client'
+
 await client.accessKey.updateLimitSync({
   account,
   accessKey,

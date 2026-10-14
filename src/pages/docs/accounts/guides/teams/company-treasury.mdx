@@ -9,12 +9,18 @@ description: Create one Tempo account that three approvers control, where any tw
 A company treasury is one Tempo account that three approvers share, where any two must approve each payment. Tempo checks the approvals itself, so neither one stolen key nor your own backend can pay without a second approver.
 
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="treasury-model" />
 
 Each approver holds a signer, a key that approves the account's transactions, with a weight of 1. A transaction runs only when its approvers' weights add up to the threshold, here 2. The same threshold covers signer changes, so no single approver can add or remove a signer.
+
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 :::::steps
 
@@ -25,11 +31,9 @@ Each approver holds a signer, a key that approves the account's transactions, wi
 Keep each approver's key somewhere different, such as a hardware wallet, a separate KMS per team, or the approver's passkey, so one breach can't reach two of them. [Private keys](/docs/accounts/authentication/private-keys) compares the options. Here finance and operations sign with private keys, and the controller signs with a passkey on their own device, so your app knows only the controller's address.
 
 ```ts [treasury.ts]
-import { http } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
+import { Account } from 'viem/tempo'
+import { client } from './client'
 
-const client = createClient({ chain: tempoDevnet, transport: http() })
 const env = (name: string) => process.env[name] as `0x${string}`
 
 const finance = Account.fromSecp256k1(env('FINANCE_SIGNER_KEY'))
@@ -52,7 +56,7 @@ const saved = { address: treasury.address, config: treasury.config }
 await client.faucet.fundSync({ account: saved.address }) // devnet test stablecoins
 ```
 
-`address: 'infer'` computes the address from the first signers and threshold, so creating the treasury sends nothing; Tempo records the treasury with its first transaction. The address can receive stablecoins before then: on devnet, the [faucet](/docs/accounts/create#fund-an-account-on-devnet) sends it test stablecoins. The treasury pays transaction fees from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
+`address: 'infer'` computes the address from the first signers and threshold, so creating the treasury sends nothing; Tempo records the treasury with its first transaction. The address can receive stablecoins before then: on the devnet, the [faucet](/docs/accounts/create#fund-an-account-on-devnet) sends it test stablecoins. The treasury pays transaction fees from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
 Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version): enough to check approvals, but not to tell your app who the signers are. Save the address and configuration with your treasury record. The address stays the same when signers change, and every approval is built from the saved configuration.
 

@@ -14,7 +14,7 @@ import { SignInWithTempo } from '../../../../../components/guides/steps/wallet/S
 Use Privy or Turnkey to run your users' wallets inside your app without letting the provider move their funds alone. Each account has three signers, the keys that approve its transactions: the user's passkey approves alone, and your provider's key approves only together with a separate [recovery provider's](/docs/accounts/policies/signing-thresholds#recovery-provider) key, for example to replace a lost passkey.
 
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="choose-the-controls-your-application-needs" />
@@ -37,14 +37,17 @@ Create the user's wallet with your provider, then use the wallet's address as `p
 
 ### Make the provider's key one signer
 
-Give the user's passkey weight 2 and each provider's key weight 1, with a [threshold](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) of 2, the total weight an approval needs. A passkey is a key the user's device keeps and unlocks with Face ID, Touch ID, or Windows Hello. Your app signs only with the passkey, which stays on the user's device; each provider keeps its own key, so the account lists those keys by address.
+Give the user's passkey weight 2 and each provider's key weight 1, with a [threshold](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) of 2, the total weight an approval needs. A passkey is a key the user's device keeps and unlocks with Face ID, Touch ID, or Windows Hello. Your app signs only with the passkey, which stays on the user's device; each provider keeps its own key, so the account lists those keys by address. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [account.ts]
-import { http, parseUnits } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient, WebAuthnP256 } from 'viem/tempo'
+import { parseUnits } from 'viem'
+import { Account, WebAuthnP256 } from 'viem/tempo'
+import { client } from './client'
 
-const client = createClient({ chain: tempoDevnet, transport: http() })
 const token = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a test stablecoin
 
 const credential = await WebAuthnP256.createCredential({ label: 'My account' })
@@ -98,7 +101,7 @@ When a user wants full control, [hand off the account](/docs/accounts/guides/use
 
 ## Connect a self-custodial wallet instead
 
-If a user already has a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet holds the keys and signs; your app uses the address the user selects. The demo and code run on Moderato testnet, whose stablecoins have no value.
+If a user already has a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet holds the keys and signs; your app uses the address the user selects. Tempo Wallet sends transactions through its own RPC endpoint, not your devnet client, so the demo and code run on Moderato testnet, whose stablecoins have no value.
 
 <Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
   <SignInWithTempo stepNumber={1} />

@@ -14,9 +14,15 @@ Your backend can send payouts from a customer's Tempo account without prompting 
 <span id="backend-services" />
 <span id="automations" />
 
-The demo runs on Tempo devnet, a test network whose stablecoins have no value, with a device key in this browser as the customer's signer. The code runs on Moderato testnet with AlphaUSD, a test stablecoin, where `account` is the customer's single-key account, such as their passkey account. On devnet, a configurable account's signers authorize the key the same way.
+The demo runs on the Tempo Accounts devnet, a test network whose stablecoins have no value, with a device key in this browser as the customer's signer.
 
 <GuideDemo guide="backend-automation" />
+
+The code pays out AlphaUSD, a test stablecoin. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 :::::steps
 
@@ -27,12 +33,13 @@ Create one secp256k1 key per customer in your KMS. Its address, derived from the
 ```ts [app/approve-payouts.ts]
 import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
+import { client } from '../client'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
 await client.accessKey.authorizeSync({
   accessKey: { accessKeyAddress: payoutKeyAddress, keyType: 'secp256k1' },
-  account, // the customer's account, approved with their passkey
+  account, // the customer's account, signed by its signers, such as a passkey
   expiry: Expiry.days(90),
   limits: [{ token: alphaUsd, limit: parseUnits('1000', 6), period: 86_400 }], // 1,000 AlphaUSD a day
   scopes: [
@@ -54,7 +61,7 @@ The private key never leaves the KMS, and Tempo stores only the key's address, p
 import { PublicKey, Signature } from 'ox'
 import { Account } from 'viem/tempo'
 
-const payoutKey = Account.from({
+export const payoutKey = Account.from({
   access: address, // the customer's account address
   keyType: 'secp256k1',
   publicKey: PublicKey.fromHex(kmsPublicKey), // read once from your KMS
@@ -70,13 +77,15 @@ In your KMS, allow only the payout service to sign with the key, and log each si
 
 ```ts [backend/send-payout.ts]
 import { parseUnits, stringToHex } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { createClient } from 'viem/tempo'
+import { client } from '../client'
+import { payoutKey } from './payout-key'
 
-const backend = createClient({ account: payoutKey, chain: tempoModerato, feeToken: alphaUsd })
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-await backend.token.transferSync({
+await client.token.transferSync({
+  account: payoutKey, // the key signs for the customer's account
   amount: parseUnits('250', 6),
+  feeToken: alphaUsd, // the fee counts against the key's daily limit
   memo: stringToHex('payout-1042', { size: 32 }), // your payout ID, for reconciliation
   to: payee,
   token: alphaUsd,

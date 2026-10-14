@@ -10,7 +10,11 @@ Your backend tops up a customer's card from their Tempo account without asking t
 
 <span id="fund-a-card-with-a-daily-limit" />
 
-The examples run on Moderato testnet with AlphaUSD, a test stablecoin with no value.
+The examples use AlphaUSD, a test stablecoin with no value. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 :::::steps
 
@@ -21,6 +25,7 @@ Get the customer's card funding address (`cardFundingAddress`) from your [card i
 ```ts [app/enable-card.ts]
 import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
+import { client } from '../client'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
@@ -41,12 +46,17 @@ When the card program reports spend, or before it settles, send the amount to th
 
 ```ts [backend/fund-card.ts]
 import { parseUnits } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { createClient } from 'viem/tempo'
+import { client } from '../client'
 
-const backend = createClient({ account: cardKey, chain: tempoModerato, feeToken: alphaUsd })
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
-await backend.token.transferSync({ amount: parseUnits('42.50', 6), to: cardFundingAddress, token: alphaUsd })
+await client.token.transferSync({
+  account: cardKey, // the key signs for the customer's account
+  amount: parseUnits('42.50', 6),
+  feeToken: alphaUsd, // the fee counts against the key's daily limit
+  to: cardFundingAddress,
+  token: alphaUsd,
+})
 ```
 
 Tempo rejects a transfer to any other address, above what's left today, or after the expiry.
@@ -58,6 +68,10 @@ Tempo rejects a transfer to any other address, above what's left today, or after
 The limit resets to its full amount every 24 hours (`period: 86_400`). Next to the card, show what's left and when it resets:
 
 ```ts [app/card-settings.ts]
+import { client } from '../client'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
 const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
   account,
   accessKey: cardKeyAddress,

@@ -41,11 +41,20 @@ No app server or wallet provider holds the key, but anyone who unlocks the devic
 
 The demo makes the device key its own Moderato testnet account, to show signing without a prompt. Reload the page and the key is still there.
 
-In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 AlphaUSD a day for 30 days, and the first payment carries that authorization. In the code, `client` is a viem client on Moderato testnet, `account` is the customer's passkey account, such as `Account.fromWebAuthnP256(credential)`, `alphaUsd` is `0x20c0000000000000000000000000000000000001`, and `recipient` is the payee's address:
+In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 AlphaUSD a day for 30 days, and the first payment carries that authorization. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+In `device-key.ts`, `account` is the customer's funded account with their passkey attached as its signer, as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer), and `recipient` is the payee's address:
 
 ```ts [device-key.ts]
 import { parseUnits } from 'viem'
 import { Account, Expiry, WebCryptoP256 } from 'viem/tempo'
+import { client } from './client'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a devnet test stablecoin
 
 // Non-extractable. Save keyPair in IndexedDB so it survives a reload.
 const keyPair = await WebCryptoP256.createKeyPair()

@@ -15,9 +15,15 @@ On Tempo, an agent's wallet is an access key: a key the agent holds that pays fr
 <span id="ai-agents" />
 <span id="authorize-the-agents-task" />
 
-The demo and code run on Moderato testnet with AlphaUSD, a test stablecoin with no value.
+The demo runs on Moderato testnet, and the code runs on the Tempo Accounts devnet. Both use AlphaUSD, a test stablecoin with no value.
 
 <AccessKeyDemo />
+
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 :::::steps
 
@@ -38,6 +44,7 @@ The signers authorize that address and its bounds in one transaction:
 ```ts [authorize-agent.ts]
 import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
+import { client } from './client'
 
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
@@ -66,6 +73,7 @@ The agent signs with its key and pays from the account's balance. The signers do
 
 ```ts [agent-pay.ts]
 import { parseUnits, stringToHex } from 'viem'
+import { client } from './client'
 
 await client.token.transferSync({
   account: agentKey,
@@ -85,6 +93,8 @@ Tempo rejects any payment over the remaining budget, outside the scopes, or afte
 When the task ends or the agent misbehaves, the signers revoke the key by its saved address:
 
 ```ts [revoke-agent.ts]
+import { client } from './client'
+
 await client.accessKey.revokeSync({ account, accessKey: agentKeyAddress })
 ```
 

@@ -12,7 +12,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 A recovery signer is a second key that can approve transactions for a user's account, so losing their phone or first key doesn't lock them out. With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. Add a recovery signer, then require two factors so whoever holds it can't take over the account alone. The address and balance stay the same.
 
 :::warning
-**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on Tempo devnet, and behavior may change.
+**Not live yet.** Configurable accounts ([TIP-1107](https://tips.sh/1107)) run only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <span id="adding-signers" />
@@ -38,12 +38,16 @@ Pick a key the user doesn't lose along with the first one, such as a [recovery p
 
 `openAccount` rebuilds the account from `saved` and attaches the keys you pass it as approvers. Every other signer stays a plain address, which is all the configuration needs. `currentKey` approves alone because its weight of 1 reaches the threshold of 1. The update appends `newSigner` to the saved signers.
 
-```ts [add-signer.ts]
-import { http, isAddressEqual } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-const client = createClient({ chain: tempoDevnet, transport: http() })
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+```ts [add-signer.ts]
+import { isAddressEqual } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
 
 /** The account that `saved` describes, holding the approvers' keys. */
 function openAccount(approvers: Account.RootAccount[]) {
@@ -86,10 +90,11 @@ Tempo can't tell whether a signer still holds its key, so have the new signer ap
 
 ### Require two factors
 
-Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To require two factors, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2. This step reuses `client` and `openAccount` from `add-signer.ts`.
+Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To require two factors, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2. This step reuses `openAccount` from `add-signer.ts`.
 
 ```ts [multi-factor.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
+import { client } from './client'
 
 const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
 

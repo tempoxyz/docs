@@ -12,7 +12,7 @@ import { UpgradeAccountDemo } from '../../../../components/guides/UpgradeAccount
 An account upgrade adds backup signers to a single-key account, like a standard Ethereum account (an EOA), without changing its address, so a lost key no longer means a lost account. The upgrade is permanent.
 
 :::warning
-**Not live yet.** Account upgrade ([TIP-1113](https://tips.sh/1113)) runs only on Tempo devnet, and behavior may change.
+**Not live yet.** Account upgrade ([TIP-1113](https://tips.sh/1113)) runs only on the Tempo Accounts devnet, and behavior may change.
 :::
 
 <UpgradeAccountDemo />
@@ -35,14 +35,17 @@ Access keys carry over with their limits, so [revoke](/docs/accounts/access-keys
 
 ## Send the upgrade
 
-The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. viem 2.57.5 has no upgrade action, so call the contract with `writeContractSync`. Set `feeToken` to the stablecoin that pays the fee: without it, viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`.
+The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. viem 2.57.5 has no upgrade action, so call the contract with `writeContractSync`. Set `feeToken` to the stablecoin that pays the fee: without it, viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
 ```ts [upgrade.ts]
-import { concat, http, keccak256, parseAbi, parseUnits, toHex } from 'viem'
-import { tempoDevnet } from 'viem/chains'
-import { Account, Addresses, createClient } from 'viem/tempo'
+import { concat, keccak256, parseAbi, parseUnits, toHex } from 'viem'
+import { Account, Addresses } from 'viem/tempo'
+import { client } from './client'
 
-const client = createClient({ chain: tempoDevnet, transport: http() })
 const token = '0x20c0000000000000000000000000000000000001' // test AlphaUSD
 
 // The key that controls the account today
