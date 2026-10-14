@@ -54,7 +54,8 @@ jobs:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
               options: --user 1001
           # Depot shares egress IPs, which exhaust Moderato's anonymous per-IP
-          # connection limit. Live tests authenticate with TEMPO_RPC_API_KEY.
+          # connection limit. Live tests send Moderato RPC through the Tempo API
+          # with TEMPO_RPC_API_KEY, which reaches the RPC as an authenticated client.
           - target: e2e
             name: E2E Tests (1/3)
             runner: depot-ubuntu-latest-8
@@ -236,9 +237,7 @@ jobs:
         env:
           E2E_SHARD: ${{ matrix.shard }}
           E2E_SHARDS: 3
-          # TEMPO_RPC_API_KEY is configured, but reads through the keyed Moderato
-          # relay stay stale after transactions: receipts never confirm and
-          # balances stay at 0. Pass it again once the relay serves fresh reads.
+          TEMPO_RPC_API_KEY: ${{ secrets.TEMPO_RPC_API_KEY }}
 
       - name: Upload test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -1,7 +1,8 @@
 import type { BrowserContext } from '@playwright/test'
+import { tempoModerato } from 'viem/chains'
 
-// The page keeps its public RPC URL. Only Node sees the authenticated URL;
-// Playwright's request client would record that URL in uploaded traces.
+// The page keeps its public RPC URL. Only Node sees the key;
+// Playwright's request client would record it in uploaded traces.
 export async function installAuthenticatedRpc(
   context: Pick<BrowserContext, 'route' | 'routeWebSocket'>,
   key: string,
@@ -23,9 +24,11 @@ export async function installAuthenticatedRpc(
     }
 
     try {
-      const response = await fetch(`https://rpc.moderato.tempo.xyz/${encodeURIComponent(key)}`, {
+      // The Tempo API proxies keyed RPC to Moderato as an authenticated client,
+      // which the per-IP connection limit on anonymous traffic does not apply to.
+      const response = await fetch(`https://api.tempo.xyz/rpc/${tempoModerato.id}`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
         body: request.postData(),
         signal: AbortSignal.timeout(30_000),
         redirect: 'error',
@@ -42,8 +45,8 @@ export async function installAuthenticatedRpc(
         body,
       })
     } catch {
-      // Fetch errors can include the credential-bearing URL. Do not log or
-      // surface them to Playwright, which persists failures in CI artifacts.
+      // Fetch errors can include request details. Do not log or surface them to
+      // Playwright, which persists failures in CI artifacts.
       await route.abort('failed')
     }
   })

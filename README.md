@@ -35,11 +35,13 @@ pnpm preview        # Preview the production build
 
 ## Authenticated RPC for live E2E tests
 
-Add a dedicated Moderato RPC key as the `TEMPO_RPC_API_KEY` repository Actions
-secret in [GitHub settings](https://github.com/tempoxyz/docs/settings/secrets/actions).
+Add a Tempo API key with the `data:read` scope as the `TEMPO_RPC_API_KEY`
+repository Actions secret in [GitHub settings](https://github.com/tempoxyz/docs/settings/secrets/actions).
 The Verify workflow passes it only to the Playwright runner. Live tests forward
-Moderato HTTP requests through Node with the key and disable anonymous WebSocket
-fallback. Without the secret (including fork PRs), tests use the public RPC.
+Moderato HTTP requests through Node to `https://api.tempo.xyz/rpc/42431` with the
+key and disable anonymous WebSocket fallback. The API reaches Moderato as an
+authenticated client, so shared CI egress IPs do not hit the anonymous per-IP
+connection limit. Without the secret (including fork PRs), tests use the public RPC.
 
 For local runs, export `TEMPO_RPC_API_KEY` before `pnpm test:e2e`; Playwright does
 not load `.env` files. Do not use a `VITE_` variable or put the key in browser
