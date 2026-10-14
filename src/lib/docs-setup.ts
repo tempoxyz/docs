@@ -13,7 +13,8 @@ export const docsSetupChoices = [
     description: 'Use Viem or Wagmi for TypeScript and React, or choose another SDK or the CLI.',
     icon: 'code',
     links: [
-      ['SDKs and CLI', '/docs/tools'],
+      ['SDKs', '/docs/sdk'],
+      ['CLI', '/docs/cli'],
       ['Explore Tempo EVM', '/docs/development'],
     ],
   },

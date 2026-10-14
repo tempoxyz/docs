@@ -91,31 +91,99 @@ function boostSearchDocument(
   return priority * (1 / Math.max(depth, 1)) * docsBoost
 }
 
-const apiConsoleSidebar = {
-  text: 'Tempo Console',
-  collapsed: true,
-  items: [
-    {
-      text: 'Overview',
-      link: '/docs/api/console',
-    },
-    {
-      text: 'Projects and environments',
-      link: '/docs/api/console/projects-and-environments',
-    },
-    {
-      text: 'API keys',
-      link: '/docs/api/console/api-keys',
-    },
-    {
-      text: 'Usage and billing',
-      link: '/docs/api/console/usage-and-billing',
-    },
-    {
-      text: 'Teams and access',
-      link: '/docs/api/console/team',
-    },
-  ],
+// Proposed API reference grouping (IA comp). Product sections are named
+// "<Product> API", chain reads sit in Data API, and the Console section follows
+// the console.tempo.xyz sidebar.
+const apiTagGroups = [
+  { name: 'Accounts', tags: ['Balances', 'Activities', 'Transactions', 'Transfers', 'Fee payer'] },
+  { name: 'Earn API', tags: ['Earn'] },
+  { name: 'Routes API', tags: ['Routes', 'Deposit Addresses', 'Route Transfers', 'Exchange'] },
+  { name: 'Zones API', tags: ['Zones'] },
+  {
+    name: 'Data API',
+    tags: [
+      'Webhooks',
+      'Tokens',
+      'Verified Tokens',
+      'Blocks',
+      'Indexer',
+      'RPC',
+      'Fee AMM',
+      'CoinGecko',
+    ],
+  },
+  {
+    name: 'Console',
+    tags: [
+      'API Keys',
+      'Faucet',
+      'Projects',
+      'Team',
+      'Billing',
+      'Verified Token Requests',
+      'Organization',
+      'Authentication',
+    ],
+  },
+  { name: 'MPP', tags: ['MPP'] },
+]
+// Single-tag sections render their operations directly under the section header,
+// so those tags carry the section name as their display name.
+const apiFlattenedGroups = ['Earn API', 'Zones API', 'MPP']
+const apiTagMerges: Record<string, string> = {
+  Members: 'Team',
+  Invitations: 'Team',
+  'Invite Links': 'Team',
+  Usage: 'Billing',
+  Organizations: 'Organization',
+  Users: 'Organization',
+}
+// Fee payer usage moves from Usage to its own Console entry.
+const apiOperationTags: Record<string, string> = {
+  getFeePayerUsage: 'Fee payer',
+  getSponsorshipUsage: 'Fee payer',
+}
+const apiTags: Record<string, { displayName?: string; pagePath?: string }> = {
+  Earn: { displayName: 'Earn API', pagePath: 'earn' },
+  Zones: { displayName: 'Zones API', pagePath: 'zones' },
+  MPP: { displayName: 'MPP', pagePath: 'mpp' },
+  Routes: { displayName: 'Supported routes' },
+  'Deposit Addresses': { displayName: 'Deposits' },
+  'Route Transfers': { displayName: 'Transfers' },
+  RPC: { displayName: 'JSON-RPC', pagePath: 'rpc' },
+  'Verified Tokens': { displayName: 'Verified tokens', pagePath: 'verified-tokens' },
+  'API Keys': { displayName: 'API keys', pagePath: 'api-keys' },
+  'Fee payer': { pagePath: 'fee-payer-usage' },
+  Billing: { displayName: 'Billing and usage', pagePath: 'billing' },
+  'Verified Token Requests': { displayName: 'Token requests', pagePath: 'verified-token-requests' },
+  Team: { pagePath: 'team' },
+  Organization: { pagePath: 'organizations' },
+  Authentication: { displayName: 'Sign-in', pagePath: 'console/authentication' },
+}
+
+function regroupApiTags(spec: Record<string, unknown>) {
+  const paths = (spec.paths ?? {}) as Record<
+    string,
+    Record<string, { tags?: string[]; operationId?: string }>
+  >
+  for (const ops of Object.values(paths))
+    for (const op of Object.values(ops)) {
+      if (!op || typeof op !== 'object' || !Array.isArray(op.tags)) continue
+      const moved = op.operationId ? apiOperationTags[op.operationId] : undefined
+      op.tags = moved ? [moved] : op.tags.map((tag) => apiTagMerges[tag] ?? tag)
+    }
+  const tags = ((spec.tags ?? []) as { name: string; [key: string]: unknown }[]).filter(
+    (tag) => !apiTagMerges[tag.name],
+  )
+  tags.push({ name: 'Fee payer' }, { name: 'Team' }, { name: 'Organization' })
+  for (const tag of tags) {
+    const meta = apiTags[tag.name]
+    if (meta?.displayName) tag['x-displayName'] = meta.displayName
+    if (meta?.pagePath && !tag['x-pagePath']) tag['x-pagePath'] = meta.pagePath
+  }
+  spec.tags = tags
+  spec['x-tagGroups'] = apiTagGroups
+  return spec
 }
 
 export default defineConfig({
@@ -288,67 +356,53 @@ export default defineConfig({
   openapi: [
     {
       path: '/docs/api',
-      spec: async () => annotateRoutesAvailability(await loadTempoOpenApi(openApiSpecUrl)),
+      spec: async () =>
+        regroupApiTags(annotateRoutesAvailability(await loadTempoOpenApi(openApiSpecUrl))),
       sidebar: {
         backLink: false,
         collapsed: true,
-        top: [
-          { text: '← APIs & SDKs', link: '/docs/tools' },
-          { text: 'API reference', link: '/docs/api' },
-        ],
+        introFlat: true,
+        hide: ['MCP'],
+        // Each guide sits inside the endpoint group it explains.
+        groupExtrasByName: {
+          'JSON-RPC': [{ text: 'Guide', link: '/docs/api/json-rpc' }],
+          Indexer: [{ text: 'Guide', link: '/docs/api/indexer-api' }],
+          'API keys': [{ text: 'Guide', link: '/docs/api/console/api-keys' }],
+          'Fee payer': [{ text: 'Guide', link: '/docs/api/fee-payer' }],
+          Projects: [{ text: 'Guide', link: '/docs/api/console/projects-and-environments' }],
+          Team: [{ text: 'Guide', link: '/docs/api/console/team' }],
+          'Billing and usage': [{ text: 'Guide', link: '/docs/api/console/usage-and-billing' }],
+        },
+        sectionExtras: {
+          Accounts: [
+            { text: 'Transactions and transfers', link: '/docs/api/transactions-and-transfers' },
+          ],
+          'Routes API': [{ text: 'API setup', link: '/docs/routes/api-setup' }],
+          Console: [{ text: 'About Tempo Console', link: '/docs/api/console' }],
+        },
+        flatten: apiFlattenedGroups,
         intro: [
-          apiConsoleSidebar,
           {
-            text: 'Authentication',
-            link: '/docs/api/authentication',
-          },
-          {
-            text: 'Conventions',
-            link: '/docs/api/conventions',
-          },
-          {
-            text: 'Transactions and transfers',
-            link: '/docs/api/transactions-and-transfers',
-          },
-          {
-            text: 'JSON-RPC API',
-            link: '/docs/api/json-rpc',
-          },
-          {
-            text: 'Fee payer API',
-            link: '/docs/api/fee-payer',
-          },
-          {
-            text: 'Indexer API',
-            link: '/docs/api/indexer-api',
-          },
-          {
-            text: 'Pagination',
-            link: '/docs/api/pagination',
-          },
-          {
-            text: 'Rate limits',
-            link: '/docs/api/rate-limits',
-          },
-          {
-            text: 'Errors',
-            link: '/docs/api/errors',
-          },
-          {
-            text: 'Versioning policy',
-            link: '/docs/api/versioning-policy',
-          },
-          {
-            text: 'TypeScript',
-            link: '/docs/api/typed-client',
-          },
-          {
-            text: 'FAQ',
-            link: '/docs/api/faq',
-          },
-          {
-            text: 'Reference',
-            link: '/docs/api/reference',
+            text: 'API reference',
+            collapsed: true,
+            items: [
+              { text: 'Overview', link: '/docs/api' },
+              { text: 'Authentication', link: '/docs/api/authentication' },
+              {
+                text: 'Conventions',
+                collapsed: true,
+                items: [
+                  { text: 'Overview', link: '/docs/api/conventions' },
+                  { text: 'Pagination', link: '/docs/api/pagination' },
+                  { text: 'Errors', link: '/docs/api/errors' },
+                  { text: 'Rate limits', link: '/docs/api/rate-limits' },
+                  { text: 'Versioning policy', link: '/docs/api/versioning-policy' },
+                ],
+              },
+              { text: 'MCP server', link: '/docs/api/mcp' },
+              { text: 'All endpoints', link: '/docs/api/reference' },
+              { text: 'FAQ', link: '/docs/api/faq' },
+            ],
           },
         ],
         tagGroupsCollapsed: true,
@@ -386,6 +440,61 @@ export default defineConfig({
           { text: 'Build with AI', link: '/docs/guide/using-tempo-with-ai' },
           { text: 'Stablecoins on Tempo', link: '/get-started/stablecoins' },
           { text: 'Use cases', link: '/get-started/use-cases' },
+        ],
+      },
+      {
+        text: 'Tempo CLI',
+        items: [
+          { text: 'Overview', link: '/docs/cli' },
+          { text: 'API', link: '/docs/cli/api' },
+          {
+            text: 'Wallet',
+            collapsed: true,
+            items: [
+              { text: 'Overview', link: '/docs/cli/wallet' },
+              { text: 'Recipes', link: '/docs/wallet/recipes' },
+            ],
+          },
+          { text: 'Request', link: '/docs/cli/request' },
+          { text: 'Download', link: '/docs/cli/download' },
+          { text: 'Node', link: '/docs/cli/node' },
+        ],
+      },
+      {
+        text: 'Tempo SDK',
+        items: [
+          { text: 'Overview', link: '/docs/sdk' },
+          {
+            text: 'TypeScript',
+            collapsed: true,
+            items: [
+              { text: 'Overview', link: '/docs/sdk/typescript' },
+              { text: 'Tempo API client', link: '/docs/sdk/typescript/api-client' },
+              { text: 'Local testing with Prool', link: '/docs/sdk/typescript/prool/setup' },
+              { text: 'Viem reference', link: 'https://viem.sh/tempo' },
+              { text: 'Wagmi reference', link: 'https://wagmi.sh/tempo' },
+            ],
+          },
+          { text: 'Rust', link: '/docs/sdk/rust' },
+          { text: 'Go', link: '/docs/sdk/go' },
+          { text: 'Python', link: '/docs/sdk/python' },
+          {
+            text: 'Foundry',
+            collapsed: true,
+            items: [
+              { text: 'Overview', link: '/docs/sdk/foundry' },
+              { text: 'Use MPP with Foundry', link: '/docs/sdk/foundry/mpp' },
+              { text: 'Signature verification', link: '/docs/sdk/foundry/signature-verifier' },
+            ],
+          },
+          {
+            text: 'Server handlers',
+            collapsed: true,
+            items: [
+              { text: 'Overview', link: '/docs/server' },
+              { text: 'Relay and fee payer handler', link: '/docs/server/relay-handler' },
+            ],
+          },
         ],
       },
     ]
@@ -676,12 +785,11 @@ export default defineConfig({
             items: [
               {
                 text: 'T12',
-                badge: { text: 'Testnet', variant: 'info' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
                 text: 'T11',
-                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t11',
               },
               {
@@ -729,140 +837,62 @@ export default defineConfig({
     ]
     const developerToolsSidebar = [
       {
-        text: 'APIs & SDKs',
+        text: 'SDKs & CLI',
         items: [
           {
             text: 'Overview',
-            link: '/docs/tools',
-          },
-          {
-            text: 'CLI',
-            collapsed: false,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/cli',
-              },
-              {
-                text: 'Wallet',
-                link: '/docs/cli/wallet',
-              },
-              {
-                text: 'Request',
-                link: '/docs/cli/request',
-              },
-              {
-                text: 'Download',
-                link: '/docs/cli/download',
-              },
-              {
-                text: 'Node',
-                link: '/docs/cli/node',
-              },
-            ],
-          },
-          {
-            text: 'Wallet',
-            collapsed: false,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/wallet',
-              },
-              {
-                text: 'Recipes',
-                link: '/docs/wallet/recipes',
-              },
-              {
-                text: 'Reference',
-                link: '/docs/wallet/reference',
-              },
-              {
-                text: 'Use with agents',
-                link: '/docs/wallet/use-with-agents',
-              },
-            ],
-          },
-          {
-            text: 'Server tools',
-            collapsed: false,
-            items: [
-              {
-                text: 'Overview',
-                link: '/docs/server',
-              },
-              {
-                text: 'Relay and fee payer handler',
-                link: '/docs/server/relay-handler',
-              },
-            ],
-          },
-          {
-            text: 'RPC reference',
-            link: '/docs/protocol/rpc',
+            link: '/docs/sdk',
           },
           {
             text: 'SDKs',
             collapsed: false,
             items: [
-              {
-                text: 'Overview',
-                link: '/docs/sdk',
-              },
+              { text: 'Overview', link: '/docs/sdk' },
               {
                 text: 'TypeScript',
                 collapsed: false,
                 items: [
-                  {
-                    text: 'Overview',
-                    link: '/docs/sdk/typescript',
-                  },
-                  {
-                    text: 'Local testing with Prool',
-                    link: '/docs/sdk/typescript/prool/setup',
-                  },
-                  {
-                    text: 'Viem reference',
-                    link: 'https://viem.sh/tempo',
-                  },
-                  {
-                    text: 'Wagmi reference',
-                    link: 'https://wagmi.sh/tempo',
-                  },
+                  { text: 'Overview', link: '/docs/sdk/typescript' },
+                  { text: 'Local testing with Prool', link: '/docs/sdk/typescript/prool/setup' },
+                  { text: 'Viem reference', link: 'https://viem.sh/tempo' },
+                  { text: 'Wagmi reference', link: 'https://wagmi.sh/tempo' },
                 ],
               },
-              {
-                text: 'Go',
-                link: '/docs/sdk/go',
-              },
+              { text: 'Rust', link: '/docs/sdk/rust' },
+              { text: 'Go', link: '/docs/sdk/go' },
+              { text: 'Python', link: '/docs/sdk/python' },
               {
                 text: 'Foundry',
                 collapsed: false,
                 items: [
-                  {
-                    text: 'Overview',
-                    link: '/docs/sdk/foundry',
-                  },
-                  {
-                    text: 'Use MPP with Foundry',
-                    link: '/docs/sdk/foundry/mpp',
-                  },
-                  {
-                    text: 'Signature verification',
-                    link: '/docs/sdk/foundry/signature-verifier',
-                  },
+                  { text: 'Overview', link: '/docs/sdk/foundry' },
+                  { text: 'Use MPP with Foundry', link: '/docs/sdk/foundry/mpp' },
+                  { text: 'Signature verification', link: '/docs/sdk/foundry/signature-verifier' },
                 ],
-              },
-              {
-                text: 'Python',
-                link: '/docs/sdk/python',
-              },
-              {
-                text: 'Rust',
-                link: '/docs/sdk/rust',
               },
             ],
           },
+          {
+            text: 'CLI',
+            collapsed: false,
+            items: [
+              { text: 'Overview', link: '/docs/cli' },
+              { text: 'Wallet', link: '/docs/cli/wallet' },
+              { text: 'Wallet recipes', link: '/docs/wallet/recipes' },
+              { text: 'Request', link: '/docs/cli/request' },
+              { text: 'Download', link: '/docs/cli/download' },
+              { text: 'Node', link: '/docs/cli/node' },
+            ],
+          },
+          {
+            text: 'Server handlers',
+            collapsed: false,
+            items: [
+              { text: 'Overview', link: '/docs/server' },
+              { text: 'Relay and fee payer handler', link: '/docs/server/relay-handler' },
+            ],
+          },
+          { text: 'Explorer', link: 'https://explore.tempo.xyz' },
         ],
       },
     ]
@@ -999,20 +1029,7 @@ export default defineConfig({
         ],
       },
     ]
-    const toolsSidebar = [
-      {
-        text: 'APIs & SDKs',
-        items: [
-          { text: 'Introduction', link: '/docs/tools' },
-          { text: 'API reference', link: '/docs/api' },
-          { text: 'Authentication', link: '/docs/api/authentication' },
-          { text: 'API keys', link: '/docs/api/console/api-keys' },
-          ...developerToolsSidebar[0].items
-            .filter((item) => item.text !== 'Overview' && item.text !== 'RPC reference')
-            .map((item) => ({ ...item, collapsed: true })),
-        ],
-      },
-    ]
+    const toolsSidebar = developerToolsSidebar
     const partnerResourcesSidebar = [...ecosystemSidebar]
     const productSidebars = {
       overview: getStartedSidebar,
@@ -1189,6 +1206,56 @@ export default defineConfig({
     {
       source: '/docs/protocol/exchange/pathUSD',
       destination: '/docs/protocol/exchange/quote-tokens#pathusd',
+      status: 301,
+    },
+    {
+      source: '/docs/api/members',
+      destination: '/docs/api/team',
+      status: 301,
+    },
+    {
+      source: '/docs/api/invitations',
+      destination: '/docs/api/team',
+      status: 301,
+    },
+    {
+      source: '/docs/api/invite-links',
+      destination: '/docs/api/team',
+      status: 301,
+    },
+    {
+      source: '/docs/api/usage',
+      destination: '/docs/api/billing',
+      status: 301,
+    },
+    {
+      source: '/docs/api/users',
+      destination: '/docs/api/organizations',
+      status: 301,
+    },
+    {
+      source: '/docs/api/typed-client',
+      destination: '/docs/sdk/typescript/api-client',
+      status: 301,
+    },
+    {
+      source: '/docs/tools',
+      destination: '/docs/sdk',
+      status: 301,
+    },
+    {
+      source: '/docs/wallet',
+      destination: '/docs/cli/wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/wallet/use-with-agents',
+      destination: '/docs/wallet/recipes#let-an-agent-pay-for-services',
+      status: 301,
+    },
+    {
+      source: '/docs/wallet/reference',
+      destination: '/docs/cli/wallet#tempo-wallet-cli-command-reference',
       status: 301,
     },
     {

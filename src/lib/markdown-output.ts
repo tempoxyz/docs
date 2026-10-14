@@ -295,7 +295,27 @@ function rewriteNode(
   if (node.name === 'Demo.Container') return renderDemo(node)
   if (node.name === 'MermaidDiagram' || node.name === 'StaticMermaidDiagram')
     return renderMermaid(node)
-  if (node.name === 'ZoneDiagram') {
+  if (node.name === 'EarnStrategyCards')
+    return [
+      {
+        type: 'list',
+        ordered: false,
+        spread: false,
+        children: (node.children ?? [])
+          .filter((child) => child.name === 'EarnStrategyCard')
+          .map((card) => ({
+            type: 'listItem',
+            spread: false,
+            children: [
+              paragraph([
+                strong(requiredStringAttribute(card, 'title')),
+                text(` — ${requiredStringAttribute(card, 'description')}`),
+              ]),
+            ],
+          })),
+      },
+    ]
+  if (node.name === 'ZoneDiagram' || node.name === 'EarnIllustration') {
     const alt = requiredStringAttribute(node, 'alt')
     const caption = optionalStaticStringAttribute(node, 'caption')
     return [paragraph([text(alt)]), ...(caption ? [paragraph([text(caption)])] : [])]

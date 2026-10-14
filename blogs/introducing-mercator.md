@@ -11,7 +11,7 @@ shareImage: /og/2026-q4/og_2026-q4_devblog_introducing-mercator_linework-000_v02
 
 Mercator is a tool router for multi-step agentic workflows. Think of it as a new effort option for your agent: alongside choosing a model and reasoning level, you can give it access to paid tools that help it complete more of the task. A smaller model can use those tools to close part of the gap to a larger one.
 
-Instead of choosing and configuring every tool ahead of time, your agent describes what it needs. Mercator searches a catalog of services powered by the Machine Payments Protocol ([MPP](https://mpp.dev)) and [x402](https://x402.org), ranks them by fit, reliability, and cost, and executes the selected workflow.
+Instead of choosing and configuring every tool ahead of time, your agent describes what it needs. Mercator searches a catalog of services powered by the [Machine Payments Protocol](https://mpp.dev) (MPP) and [x402](https://x402.org), ranks them by fit, reliability, and cost, and executes the selected workflow.
 
 Mercator is powered by MACH, a Tempo-native credit you can buy with Apple Pay. You can pay for downstream tools without setting up an account and API key with each provider. [Get started at mercator.sh](https://mercator.sh).
 

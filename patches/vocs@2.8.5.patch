@@ -16,6 +16,81 @@ index 704383913c9f400e8ee4de07df317bd2c6a29ca6..688bebd8a598081378c790a1bfec16e5
  export { useConfig } from './react/useConfig.js';
  //# sourceMappingURL=index.js.map
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
+diff --git a/dist/internal/git.js b/dist/internal/git.js
+index 73aa6c0f8e2543fc53594b1a168b95a541cfd112..58f7278e1ef91b839a6a0831876861d4e741cdeb 100644
+--- a/dist/internal/git.js
++++ b/dist/internal/git.js
+@@ -1,14 +1,44 @@
+-import { execSync } from 'node:child_process';
+-export function getLastModified(filePath) {
++import { execFileSync } from 'node:child_process';
++import * as fs from 'node:fs';
++import * as path from 'node:path';
++let index;
++// One history walk replaces a `git log` process per page.
++function lastModifiedIndex() {
++    if (index !== undefined)
++        return index;
++    index = null;
+     try {
+-        const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
++        const options = {
+             encoding: 'utf-8',
+-            stdio: ['pipe', 'pipe', 'pipe'],
+-        }).trim();
+-        return result || undefined;
++            maxBuffer: 1024 * 1024 * 1024,
++            stdio: ['ignore', 'pipe', 'ignore'],
++        };
++        const root = execFileSync('git', ['rev-parse', '--show-toplevel'], options).trim();
++        const log = execFileSync('git', ['-c', 'core.quotePath=false', 'log', '--format=%x00%cI', '--name-only'], options);
++        const dates = new Map();
++        for (const entry of log.split('\0')) {
++            const [date, ...files] = entry.split('\n');
++            if (!date)
++                continue;
++            for (const file of files)
++                if (file && !dates.has(file))
++                    dates.set(file, date);
++        }
++        index = { dates, root };
+     }
+-    catch {
++    catch { }
++    return index;
++}
++export function getLastModified(filePath) {
++    const history = lastModifiedIndex();
++    if (!history)
+         return undefined;
++    let file = path.resolve(filePath);
++    try {
++        file = fs.realpathSync(file);
+     }
++    catch { }
++    const relative = path.relative(history.root, file).split(path.sep).join('/');
++    return history.dates.get(relative);
+ }
+ //# sourceMappingURL=git.js.map
+diff --git a/dist/internal/openapi/openapi.d.ts b/dist/internal/openapi/openapi.d.ts
+index bf6269830df4524317016cc59aa28007c62adc58..09bb5fb12357cdc89443e32840a009eaadadcb99 100644
+--- a/dist/internal/openapi/openapi.d.ts
++++ b/dist/internal/openapi/openapi.d.ts
+@@ -65,6 +65,14 @@ export type SidebarExtras = {
+      * @default true
+      */
+     backLink?: boolean | undefined;
++    /** Spread `intro` items at the top level instead of nesting them under "Introduction". */
++    introFlat?: boolean | undefined;
++    /** Hide generated groups by display name or id. */
++    hide?: readonly string[] | undefined;
++    /** Extra items inside a generated group, keyed by group display name. */
++    groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
++    /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
++    sectionExtras?: Record<string, SidebarItem[]> | undefined;
+     /**
+      * Names of `x-tagGroups` sections to flatten: their categories render as
+      * top-level sidebar items (as without tag groups) instead of nesting under
 diff --git a/dist/internal/openapi/query-presets.d.ts b/dist/internal/openapi/query-presets.d.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..6198c7fedbb1eb5981674e850926e9e93504f09a
@@ -71,6 +146,102 @@ index 0000000000000000000000000000000000000000..39cecdb10217c149f860d32afd6bab43
 +    }
 +    return copy;
 +}
+diff --git a/dist/internal/openapi/registry.js b/dist/internal/openapi/registry.js
+index 3f67f4177e14d8b606671500951d1c127fe2a187..9380eae380c99924cab9c6b5bd738a34f9530a65 100644
+--- a/dist/internal/openapi/registry.js
++++ b/dist/internal/openapi/registry.js
+@@ -48,7 +48,7 @@ export function sidebars(config) {
+         const backLink = entry?.sidebar?.backLink ?? true;
+         result[path] = {
+             backLink,
+-            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed }),
++            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed, introFlat: entry?.sidebar?.introFlat, hide: entry?.sidebar?.hide, groupExtrasByName: entry?.sidebar?.groupExtrasByName, sectionExtras: entry?.sidebar?.sectionExtras }),
+         };
+     }
+     return result;
+diff --git a/dist/internal/openapi/sidebar.d.ts b/dist/internal/openapi/sidebar.d.ts
+index 635da1b1493af34d714bed3c066b65b80d31e0e5..ef423db52f9d246d0d062c7edef09e98cad6ef6d 100644
+--- a/dist/internal/openapi/sidebar.d.ts
++++ b/dist/internal/openapi/sidebar.d.ts
+@@ -34,6 +34,14 @@ export declare namespace toSidebar {
+         flatten?: readonly string[] | undefined;
+         /** Collapse `x-tagGroups` sections independently. @default collapsed */
+         tagGroupsCollapsed?: boolean | undefined;
++        /** Spread `intro` items at the top level instead of nesting them under `Introduction`. */
++        introFlat?: boolean | undefined;
++        /** Generated groups to omit, by display name or id. */
++        hide?: readonly string[] | undefined;
++        /** Extra items inside a generated group, after its `Overview`, keyed by group display name. */
++        groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
++        /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
++        sectionExtras?: Record<string, SidebarItem[]> | undefined;
+     };
+ }
+ //# sourceMappingURL=sidebar.d.ts.map
+\ No newline at end of file
+diff --git a/dist/internal/openapi/sidebar.js b/dist/internal/openapi/sidebar.js
+index a1be03042be450bfd09d42b6bef29f3b6c2a8f14..9115c3d8ea2689e50293c8eed8acd3f88630a0bf 100644
+--- a/dist/internal/openapi/sidebar.js
++++ b/dist/internal/openapi/sidebar.js
+@@ -38,6 +38,10 @@ export function toSidebar(ir, options = {}) {
+     // collapsible group: an "Overview" link to the landing page followed by the
+     // extra items (e.g. authentication/versioning guide pages).
+     const intro = options.intro ?? [];
++    // `introFlat` spreads intro items at the top level instead of nesting them
++    // under a generated "Introduction" group. `hide` drops generated groups.
++    const introItems = options.introFlat ? intro : null;
++    const hidden = new Set(options.hide ?? []);
+     const introduction = intro.length > 0
+         ? {
+             text: 'Introduction',
+@@ -48,6 +52,9 @@ export function toSidebar(ir, options = {}) {
+     // Extra items (e.g. `x-parent` guide pages) injected into a group, keyed by
+     // group id, rendered after the group's "Overview" link.
+     const groupExtras = options.groupExtras ?? new Map();
++    // Extra items keyed by group display name or `x-tagGroups` section name.
++    const groupExtrasByName = options.groupExtrasByName ?? {};
++    const sectionExtras = options.sectionExtras ?? {};
+     // Generated categories inherit `collapsed`. Tag-group sections can override
+     // that default independently. Active groups still auto-expand at render.
+     const groupCollapsed = options.collapsed ?? false;
+@@ -60,6 +67,7 @@ export function toSidebar(ir, options = {}) {
+             // is a non-link header so its label doesn't compete with the operations.
+             { text: 'Overview', link: groupLink(group) },
+             ...(groupExtras.get(group.id) ?? []),
++            ...(groupExtrasByName[group.name] ?? []),
+             ...group.operations.map((operation) => ({
+                 text: operation.summary || `${operation.method} ${operation.path}`,
+                 link: operationLink(operation, group),
+@@ -73,7 +81,7 @@ export function toSidebar(ir, options = {}) {
+     });
+     const tagGroups = ir.tagGroups ?? [];
+     if (tagGroups.length === 0)
+-        return [introduction, ...ir.groups.map(groupItem)];
++        return [...(introItems ?? [introduction]), ...ir.groups.filter((g) => !(hidden.has(g.name) || hidden.has(g.id))).map(groupItem)];
+     // `x-tagGroups` sections render as collapsible headers. Sections named in
+     // `flatten` spread their categories in place instead.
+     const flatten = new Set(options.flatten ?? []);
+@@ -84,14 +92,15 @@ export function toSidebar(ir, options = {}) {
+             const group = groupById.get(id);
+             return group ? [groupItem(group)] : [];
+         });
++        const extras = sectionExtras[tagGroup.name] ?? [];
+         if (flatten.has(tagGroup.name))
+-            return items;
+-        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items }];
++            return items.map((item) => ({ ...item, items: [item.items[0], ...extras, ...item.items.slice(1)] }));
++        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items: [...extras, ...items] }];
+     });
+     return [
+-        introduction,
++        ...(introItems ?? [introduction]),
+         ...sections,
+-        ...ir.groups.filter((group) => !claimed.has(group.id)).map(groupItem),
++        ...ir.groups.filter((group) => !claimed.has(group.id) && !(hidden.has(group.name) || hidden.has(group.id))).map(groupItem),
+     ];
+ }
+ //# sourceMappingURL=sidebar.js.map
+\ No newline at end of file
 diff --git a/dist/internal/vite-plugins.js b/dist/internal/vite-plugins.js
 index ba17f7d688e4c4df6da2abe1b7bf875655a83e79..5838377e726db569ff9f0a2e97e49c05049b63d9 100644
 --- a/dist/internal/vite-plugins.js
@@ -648,6 +819,63 @@ index 14ee6f21906fbcf4d8547dcf10ff29144f66755d..21a1a78835806d382364c7a2af8f5a54
  export { useConfig } from './react/useConfig.js'
 +
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
+diff --git a/src/internal/git.ts b/src/internal/git.ts
+index cb1340d24683b77d6daaff5a5e7749d5625ff195..32af0864b03c84f08d9b5a60aa222548ad5fdf06 100644
+--- a/src/internal/git.ts
++++ b/src/internal/git.ts
+@@ -1,13 +1,43 @@
+-import { execSync } from 'node:child_process'
++import { type ExecFileSyncOptionsWithStringEncoding, execFileSync } from 'node:child_process'
++import * as fs from 'node:fs'
++import * as path from 'node:path'
+ 
+-export function getLastModified(filePath: string): string | undefined {
++let index: { dates: Map<string, string>; root: string } | null | undefined
++
++// One history walk replaces a `git log` process per page.
++function lastModifiedIndex() {
++  if (index !== undefined) return index
++  index = null
+   try {
+-    const result = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
++    const options: ExecFileSyncOptionsWithStringEncoding = {
+       encoding: 'utf-8',
+-      stdio: ['pipe', 'pipe', 'pipe'],
+-    }).trim()
+-    return result || undefined
+-  } catch {
+-    return undefined
+-  }
++      maxBuffer: 1024 * 1024 * 1024,
++      stdio: ['ignore', 'pipe', 'ignore'],
++    }
++    const root = execFileSync('git', ['rev-parse', '--show-toplevel'], options).trim()
++    const log = execFileSync(
++      'git',
++      ['-c', 'core.quotePath=false', 'log', '--format=%x00%cI', '--name-only'],
++      options,
++    )
++    const dates = new Map<string, string>()
++    for (const entry of log.split('\0')) {
++      const [date, ...files] = entry.split('\n')
++      if (!date) continue
++      for (const file of files) if (file && !dates.has(file)) dates.set(file, date)
++    }
++    index = { dates, root }
++  } catch {}
++  return index
++}
++
++export function getLastModified(filePath: string): string | undefined {
++  const history = lastModifiedIndex()
++  if (!history) return undefined
++  let file = path.resolve(filePath)
++  try {
++    file = fs.realpathSync(file)
++  } catch {}
++  const relative = path.relative(history.root, file).split(path.sep).join('/')
++  return history.dates.get(relative)
+ }
 diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..6ee138e2014b3d12549c409f800aa24aab92e5a4

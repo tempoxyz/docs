@@ -1,71 +1,29 @@
 ---
-title: "tempo node: CLI command reference"
+title: "tempo node"
 seoTitle: "tempo node: CLI Reference | Tempo Docs"
-description: Command reference for running a Tempo node.
+description: Run and configure a Tempo RPC or validator node from the command line.
 ogImage: /og/2026-q4/og_2026-q4_docs_cli-node_title-f5_v02.png
 ---
 
 import { Cards, Card } from 'vocs'
 
-# `tempo node`: CLI command reference
+# `tempo node`
 
-Run a Tempo node. For faster initial sync, first download a snapshot with [`tempo download`](/docs/cli/download). For operational setup guides — system requirements, systemd configs, monitoring, validator onboarding — see [Run a Tempo Node](/docs/guide/node).
+Run a Tempo node. For faster initial sync, first download a snapshot with [`tempo download`](/docs/cli/download). For system requirements, systemd configs, monitoring, and validator onboarding, see [Run a Tempo node](/docs/guide/node).
 
-Flags grouped by function:
+## Usage
 
-### Network
+```bash [Terminal]
+tempo node [FLAGS]
+```
 
-| Flag | Description |
-| --- | --- |
-| `--follow` | Run as a full node following a trusted RPC endpoint |
-| `--chain <network>` | Target network (`mainnet`, `moderato`) |
-| `--datadir <path>` | Data directory for chain state |
-| `--trusted-peers <enodes>` | Comma-separated enode URLs or ENRs to add as trusted execution P2P peers |
-| `--trusted-only` | Connect to and accept execution P2P connections from trusted peers only |
-| `--disable-discovery` | Disable DNS, discv4, and discv5 peer discovery |
+<span id="tempo-node-examples" />
 
-### RPC server
-
-| Flag | Description |
-| --- | --- |
-| `--http` | Enable the JSON-RPC HTTP server |
-| `--http.port <port>` | JSON-RPC port (default: `8545`) |
-| `--http.addr <addr>` | JSON-RPC bind address |
-| `--http.api <apis>` | Enabled API namespaces (e.g., `eth,net,web3,txpool,trace`) |
-
-### Consensus (validators)
-
-| Flag | Description |
-| --- | --- |
-| `--consensus.signing-key <path>` | Path to validator signing key |
-| `--consensus.secret <path>` | Path to the secret used to decrypt an encrypted validator signing key. Prefer a named pipe (FIFO) or shell process substitution. |
-| `--consensus.datadir <path>` | Separate volume for consensus data |
-
-:::warning
-`--consensus.fee-recipient` was removed in `v1.7.0`. Remove it from startup commands and [update the fee recipient on-chain](/docs/guide/node/validator-lifecycle#update-the-fee-recipient).
-:::
-
-### Transaction pool
-
-| Flag | Description |
-| --- | --- |
-| `--txpool.filter <ADDRESSES_OR_FILE>` | Optional address filter, available since v1.14.0. Accepts comma-separated addresses or a plain-text file with comma/newline-separated addresses. Rejects transactions matching the sender or any direct call target at pool admission. |
-
-See [Transaction address filtering](/docs/guide/node/validator-setup#transaction-address-filtering) for examples, file reload behavior, and the limits of this local policy.
-
-### Observability
-
-| Flag | Description |
-| --- | --- |
-| `--telemetry-url <url>` | Unified metrics and logs export endpoint |
-| `--telemetry-metrics-interval <dur>` | Metrics push interval (default: `10s`) |
-| `--metrics <port>` | Enable Prometheus metrics on this port |
-
-## `tempo node` examples
+## Examples
 
 After downloading a snapshot, start an RPC node:
 
-```bash
+```bash [Terminal]
 tempo node \
   --follow \
   --http --http.port 8545 \
@@ -74,14 +32,66 @@ tempo node \
 
 Start a validator:
 
-```bash
+```bash [Terminal]
 tempo node --datadir /data/tempo \
   --chain mainnet \
   --consensus.signing-key /etc/tempo/key \
   --consensus.secret /run/tempo/consensus-secret
 ```
 
-## Learn more about Tempo node operations
+## Flags
+
+### Network
+
+| Flag | Description |
+| --- | --- |
+| `--follow` | Run as a full node following a trusted RPC endpoint. |
+| `--chain <NETWORK>` | Target network: `mainnet` or `moderato`. |
+| `--datadir <PATH>` | Data directory for chain state. |
+| `--trusted-peers <ENODES>` | Comma-separated enode URLs or ENRs to add as trusted execution P2P peers. |
+| `--trusted-only` | Connect to and accept execution P2P connections from trusted peers only. |
+| `--disable-discovery` | Disable DNS, discv4, and discv5 peer discovery. |
+
+### RPC server
+
+| Flag | Description |
+| --- | --- |
+| `--http` | Enable the JSON-RPC HTTP server. |
+| `--http.port <PORT>` | JSON-RPC port. Defaults to `8545`. |
+| `--http.addr <ADDRESS>` | JSON-RPC bind address. |
+| `--http.api <APIS>` | Enabled API namespaces, such as `eth,net,web3,txpool,trace`. |
+
+### Consensus (validators)
+
+| Flag | Description |
+| --- | --- |
+| `--consensus.signing-key <PATH>` | Path to the validator signing key. |
+| `--consensus.secret <PATH>` | Path to the secret that decrypts an encrypted validator signing key. Prefer a named pipe (FIFO) or shell process substitution. |
+| `--consensus.datadir <PATH>` | Separate volume for consensus data. |
+
+:::warning
+`--consensus.fee-recipient` was removed in `v1.7.0`. Remove it from startup commands and [update the fee recipient onchain](/docs/guide/node/validator-lifecycle#update-the-fee-recipient).
+:::
+
+### Transaction pool
+
+| Flag | Description |
+| --- | --- |
+| `--txpool.filter <ADDRESSES_OR_FILE>` | Optional address filter, available since `v1.14.0`. Accepts comma-separated addresses or a plain-text file with comma- or newline-separated addresses. Rejects transactions whose sender or direct call target matches, at pool admission. |
+
+See [Transaction address filtering](/docs/guide/node/validator-setup#transaction-address-filtering) for examples, file reload behavior, and the limits of this local policy.
+
+### Observability
+
+| Flag | Description |
+| --- | --- |
+| `--telemetry-url <URL>` | Unified metrics and logs export endpoint. |
+| `--telemetry-metrics-interval <DURATION>` | Metrics push interval. Defaults to `10s`. |
+| `--metrics <PORT>` | Enable Prometheus metrics on this port. |
+
+<span id="learn-more-about-tempo-node-operations" />
+
+## Related
 
 <Cards>
   <Card
@@ -91,7 +101,7 @@ tempo node --datadir /data/tempo \
     icon="lucide:download"
   />
   <Card
-    title="Run a Tempo Node"
+    title="Run a Tempo node"
     description="System requirements, systemd, monitoring"
     to="/docs/guide/node"
     icon="lucide:book-open"

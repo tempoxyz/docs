@@ -1,3 +1,72 @@
+diff --git a/dist/compiler/Graph.js b/dist/compiler/Graph.js
+index 60cd88b028580e9733e494d8be4892a9d1a9d282..57b18e38417bf67c550184c194f31f1d5d0af8d5 100644
+--- a/dist/compiler/Graph.js
++++ b/dist/compiler/Graph.js
+@@ -38,6 +38,23 @@ export function create() {
+         },
+     });
+ }
++// Extraction reuse keeps contribution and theme objects stable across compiles.
++const contributionStyles = new WeakMap();
++function contributionCss(contribution, themes) {
++    const names = Object.keys(themes);
++    const cached = contributionStyles.get(contribution);
++    if (cached &&
++        cached.names.length === names.length &&
++        cached.names.every((name, index) => name === names[index] && cached.themes[name] === themes[name]))
++        return cached.css;
++    const css = Css.compile({
++        styles: { styles: [] },
++        vars: themes,
++        contributions: [contribution],
++    }).contributionCss ?? '';
++    contributionStyles.set(contribution, { css, names, themes });
++    return css;
++}
+ function build(options, cache) {
+     if (!!cache?.native !== !!options.native ||
+         cache?.native?.[Edits.runtime] !== options.native?.[Edits.runtime] ||
+@@ -933,11 +950,7 @@ function build(options, cache) {
+             key: String(index),
+             css: contribution.kind === 'layers'
+                 ? ''
+-                : (Css.compile({
+-                    styles: { styles: [] },
+-                    vars: sharedThemes,
+-                    contributions: [contribution],
+-                }).contributionCss ?? ''),
++                : contributionCss(contribution, sharedThemes),
+             layers: contribution.kind === 'layers' ? [contribution.names] : [],
+             content: options.modules[id],
+             start: extractedModule.contributionStarts?.[index] ?? 0,
+@@ -1322,6 +1335,7 @@ function build(options, cache) {
+         ])
+         : contributions;
+     const sharedCss = shared.css;
++    let publishedContracts;
+     function publishedRules(id, visited = new Set()) {
+         if (visited.has(id))
+             return {};
+@@ -1412,7 +1426,8 @@ function build(options, cache) {
+                     sharedAssetOwners: shared.owners,
+                 }
+                 : {}),
+-            contracts: Object.freeze(Object.fromEntries((options[Stylesheets.entry] === undefined ? ids : [])
++            get contracts() {
++                return (publishedContracts ??= Object.freeze(Object.fromEntries((options[Stylesheets.entry] === undefined ? ids : [])
+                 .filter((id) => Object.keys(extracted.get(id).themeExports ?? {}).length ||
+                 reachable(id).length ||
+                 configurations(id).length)
+@@ -1426,7 +1441,8 @@ function build(options, cache) {
+                         : undefined,
+                     source: Stylesheets.relative(section.owner ?? id, section.source),
+                 })), id, configurations(id), publishedRules(id)),
+-            ]))),
++            ]))));
++            },
+             dependencies: Object.freeze(dependencies),
+             modules: Object.freeze(Object.fromEntries(ids.map((id) => [id, modules[id]]))),
+         }),
 diff --git a/dist/vite/index.d.ts b/dist/vite/index.d.ts
 index ad5de1ad177684d7c8e7134b862984e3da472d8f..53552aeb5b0b92a5eb5f05c03c31cde793649eed 100644
 --- a/dist/vite/index.d.ts
@@ -12,10 +81,56 @@ index ad5de1ad177684d7c8e7134b862984e3da472d8f..53552aeb5b0b92a5eb5f05c03c31cde7
          readonly native?: Graph.compile.Options['native'];
          /** Include the CSS reset. Defaults to false. */
 diff --git a/dist/vite/index.js b/dist/vite/index.js
-index 27d151823db83a014703f72d7718a8fe93a70774..d3f375ee3612a4c5c109543ece7bca028d04674c 100644
+index 27d151823db83a014703f72d7718a8fe93a70774..ee0d69ca04e19431304c2d85975cb43851a4c17f 100644
 --- a/dist/vite/index.js
 +++ b/dist/vite/index.js
-@@ -65,6 +65,7 @@ export function zyzz(options = {}) {
+@@ -57,6 +57,45 @@ export function zyzz(options = {}) {
+     const contributionFiles = new WeakMap();
+     const assets = new Map();
+     const catalogs = new Map();
++    // Packed contracts are immutable strings shared by every module compile.
++    // Parse each one once instead of once per module and stylesheet.
++    const resolutions = new WeakMap();
++    function resolver(context) {
++        const environment = context.environment;
++        if (environment.mode !== 'build')
++            return (source, importer) => context.resolve(source, importer);
++        let cache = resolutions.get(environment);
++        if (!cache) {
++            cache = new Map();
++            resolutions.set(environment, cache);
++        }
++        return (source, importer) => {
++            const key = `${importer}\0${source}`;
++            let result = cache.get(key);
++            if (!result) {
++                result = context.resolve(source, importer);
++                cache.set(key, result);
++            }
++            return result;
++        };
++    }
++    const parsedContracts = new Map();
++    function parsed(contract, read) {
++        let value = parsedContracts.get(contract);
++        if (!value) {
++            if (parsedContracts.size > 4096)
++                parsedContracts.clear();
++            value = { catalogs: undefined, metadata: undefined };
++            parsedContracts.set(contract, value);
++        }
++        return read(value);
++    }
++    function readCatalogs(contract) {
++        return parsed(contract, (value) => (value.catalogs ??= Catalogs.read(contract)));
++    }
++    function readMetadata(contract) {
++        return parsed(contract, (value) => (value.metadata ??= JSON.parse(contract)));
++    }
+     const edges = new Map();
+     const graphs = new Map();
+     const initializers = new WeakMap();
+@@ -65,6 +104,7 @@ export function zyzz(options = {}) {
      const lazyImports = new WeakMap();
      let directories;
      let root;
@@ -23,24 +138,89 @@ index 27d151823db83a014703f72d7718a8fe93a70774..d3f375ee3612a4c5c109543ece7bca02
      function snapshot(environment) {
          let value = snapshots.get(environment);
          if (!value) {
-@@ -117,6 +118,16 @@ export function zyzz(options = {}) {
+@@ -116,7 +156,28 @@ export function zyzz(options = {}) {
+     function normalize(id) {
          return resource(id) ? id : id.split('?')[0];
      }
++    const exclusions = new Map();
++    let excludedDirectories;
++    function excluded(id) {
++        const file = normalize(id);
++        let value = exclusions.get(file);
++        if (value === undefined) {
++            excludedDirectories ??= (options.exclude ?? []).map((entry) => Path.resolve(root, entry));
++            value = excludedDirectories.some((directory) => {
++                const relative = Path.relative(directory, file);
++                return relative === '' || (relative !== '..' &&
++                    !relative.startsWith(`..${Path.sep}`) &&
++                    !Path.isAbsolute(relative));
++            });
++            exclusions.set(file, value);
++        }
++        return value;
++    }
      function eligible(id) {
 +        // Source trees may contain documentation fragments that are not modules.
-+        if (options.exclude?.some((entry) => {
-+          const relative = Path.relative(Path.resolve(root, entry), normalize(id))
-+          return relative === '' || (
-+            relative !== '..' &&
-+            !relative.startsWith(`..${Path.sep}`) &&
-+            !Path.isAbsolute(relative)
-+          )
-+        })) return false
++        if (options.exclude?.length && excluded(id))
++            return false;
 +
          if (sourceEntrypoints.has(normalize(id)))
              return true;
          // Ids carrying foreign queries are Vite resources such as inline-module proxies, not source.
-@@ -944,6 +955,7 @@ export function zyzz(options = {}) {
+@@ -127,7 +188,15 @@ export function zyzz(options = {}) {
+             /\.[cm]?[jt]sx?$/.test(id) &&
+             !/\.(?:d|test|test-d|bench|bench-d)\.[cm]?[jt]sx?$/.test(id));
+     }
++    const sourceRoots = new Map();
+     function sourceRoot(file) {
++        if (sourceRoots.has(file))
++            return sourceRoots.get(file);
++        const value = findSourceRoot(file);
++        sourceRoots.set(file, value);
++        return value;
++    }
++    function findSourceRoot(file) {
+         return directories.find((directory) => {
+             const relative = Path.relative(directory, file);
+             return (relative !== '..' &&
+@@ -528,7 +597,7 @@ export function zyzz(options = {}) {
+             loaded.add(id);
+             const metadata = (() => {
+                 try {
+-                    return JSON.parse(contracts[id]);
++                    return readMetadata(contracts[id]);
+                 }
+                 catch (error) {
+                     Graph.compile({ modules: {}, contracts: { [id]: contracts[id] } });
+@@ -610,7 +679,9 @@ export function zyzz(options = {}) {
+         for (const [id, targets] of staged)
+             edges.set(id, targets);
+         // Packed dependencies contribute catalogs beside the modules compiled here.
+-        const compiled = { ...contracts, ...result.contracts };
++        const compiled = options.script === false
++            ? contracts
++            : { ...contracts, ...result.contracts };
+         // A module owns its catalog keys; recompiling it replaces every
+         // configuration it had, including a module that no longer emits a contract.
+         for (const id of new Set([
+@@ -622,7 +693,7 @@ export function zyzz(options = {}) {
+                     catalogs.delete(key);
+         const configurations = new Map();
+         for (const [id, contract] of Object.entries(compiled))
+-            for (const configuration of Catalogs.read(contract)) {
++            for (const configuration of readCatalogs(contract)) {
+                 const key = `${id}\0${configuration.identity}`;
+                 catalogs.set(key, configuration);
+                 configurations.set(key, configuration);
+@@ -911,6 +982,7 @@ export function zyzz(options = {}) {
+     return {
+         buildStart() {
+             reads.delete(this.environment);
++            resolutions.delete(this.environment);
+         },
+         config: {
+             order: 'post',
+@@ -944,6 +1016,7 @@ export function zyzz(options = {}) {
              },
          },
          configureServer(server) {
@@ -48,7 +228,7 @@ index 27d151823db83a014703f72d7718a8fe93a70774..d3f375ee3612a4c5c109543ece7bca02
              // Directory watches belong to the server, not module import dependencies.
              server.watcher.add(directories.slice(1));
              server.middlewares.use((request, response, next) => {
-@@ -1036,6 +1048,24 @@ export function zyzz(options = {}) {
+@@ -1036,6 +1109,24 @@ export function zyzz(options = {}) {
              await updateDiscovery(this.environment, file, change.event);
          },
          async hotUpdate({ file, modules, timestamp, type, server }) {
@@ -73,7 +253,7 @@ index 27d151823db83a014703f72d7718a8fe93a70774..d3f375ee3612a4c5c109543ece7bca02
              const state = entries(this.environment);
              const previous = [...state.values()].map((entry) => ({
                  code: entry.code,
-@@ -1113,16 +1143,29 @@ export function zyzz(options = {}) {
+@@ -1113,16 +1204,32 @@ export function zyzz(options = {}) {
              const file = id === sharedId
                  ? undefined
                  : decodeURIComponent(id.slice(prefix.length, -4));
@@ -96,16 +276,38 @@ index 27d151823db83a014703f72d7718a8fe93a70774..d3f375ee3612a4c5c109543ece7bca02
                  return '';
              if (!entry)
                  throw new Error(`Unknown Zyzz stylesheet: ${file}`);
-+            const owner = entry.environment;
-             const output = await compile(entry, {
+-            const output = await compile(entry, {
 -                resolve: (source, importer) => this.resolve(source, importer),
++            const owner = entry.environment;
++            // A build compiles each module once; its stylesheet comes from that result.
++            const output = file !== undefined && owner.mode === 'build' && entry.output
++                ? entry.output
++                : await compile(entry, {
 +                resolve: (source, importer) => owner.mode === 'dev'
 +                    ? owner.pluginContainer.resolveId(source, importer)
-+                    : this.resolve(source, importer),
++                    : resolver(this)(source, importer),
                  watch: (file) => this.addWatchFile(file),
                  asset: async (file) => {
                      const reference = this.emitFile({
-@@ -1228,8 +1271,15 @@ export function zyzz(options = {}) {
+@@ -1166,7 +1273,7 @@ export function zyzz(options = {}) {
+                 removed.get(this.environment)?.delete(id);
+             }
+             const output = await compile(entry, {
+-                resolve: (source, importer) => this.resolve(source, importer),
++                resolve: resolver(this),
+                 watch: (file) => this.addWatchFile(file),
+                 asset: async (file) => {
+                     const reference = this.emitFile({
+@@ -1180,6 +1287,8 @@ export function zyzz(options = {}) {
+             }, code);
+             entry.imports = JSON.stringify(output.imports[sourceId(entry.file)]);
+             entry.code = output.code;
++            if (this.environment.mode === 'build')
++                entry.output = output;
+             if (native)
+                 return { code: output.code, map: JSON.stringify(output.map) };
+             // Keep the CSS dependency even when the current graph has no live rules.
+@@ -1228,8 +1337,15 @@ export function zyzz(options = {}) {
              for (const [index, source] of output.map.sources.entries())
                  if (source !== null)
                      Mapping.setSourceContent(shifted, source, output.map.sourcesContent?.[index] ?? null);

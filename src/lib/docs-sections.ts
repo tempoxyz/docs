@@ -21,7 +21,18 @@ export const docsSections: DocsSection[] = [
     id: 'overview',
     label: 'Get Started',
     href: '/get-started',
-    matches: ['/get-started', '/docs/quickstart/faucet', '/docs/guide/using-tempo-with-ai'],
+    matches: [
+      '/get-started',
+      '/docs/quickstart/faucet',
+      '/docs/guide/using-tempo-with-ai',
+      '/docs/tools',
+      '/docs/developer-tools',
+      '/docs/quickstart/developer-tools',
+      '/docs/sdk',
+      '/docs/cli',
+      '/docs/wallet',
+      '/docs/server',
+    ],
   },
   {
     id: 'accounts',
@@ -74,19 +85,10 @@ export const docsSections: DocsSection[] = [
 
 export const docsUtilitySections: DocsSection[] = [
   {
-    id: 'tools',
-    label: 'APIs & SDKs',
-    href: '/docs/tools',
-    matches: [
-      '/docs/api',
-      '/docs/tools',
-      '/docs/developer-tools',
-      '/docs/quickstart/developer-tools',
-      '/docs/cli',
-      '/docs/sdk',
-      '/docs/wallet',
-      '/docs/server',
-    ],
+    id: 'api',
+    label: 'API reference',
+    href: '/docs/api',
+    matches: ['/docs/api'],
   },
   {
     id: 'ecosystem',

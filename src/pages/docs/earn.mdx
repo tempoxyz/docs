@@ -14,7 +14,7 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Tempo Earn
 
-Add an earning balance to your app. Customers deposit stablecoins into a vault, see their earnings, and withdraw funds.
+Put stablecoin balances to work in your app. Customers deposit stablecoins into a vault, see their earnings, and withdraw funds.
 
 [Try a testnet deposit →](/docs/earn/integrate#try-a-deposit)
 
@@ -23,6 +23,17 @@ Add an earning balance to your app. Customers deposit stablecoins into a vault, 
 :::warning
 Earn is in beta. [Contact Tempo](https://tempo.xyz/contact) to discuss access and the right integration for your application.
 :::
+
+## Earn capabilities
+
+| Capability | What it does |
+| --- | --- |
+| **Earning balances** | Customer stablecoins earn in a vault until they withdraw them to spend or send. |
+| **Strategies** | [Vaults](/docs/earn/vaults#where-yield-comes-from) earn from U.S. Treasuries, institutional credit, or collateralized lending. |
+| **Revenue share** | A vault can pay your platform a [share of returns](/docs/earn/how-it-works#fees-and-revenue-share), never principal. |
+| **Withdrawals** | Immediate or queued, depending on the vault's liquidity. |
+| **Access controls** | A vault's share token is open or allowlisted to approved holders. |
+| **Private positions** | Zone-routed vaults keep positions and activity [private](/docs/earn/integrate#track-private-earn-activity). |
 
 <span id="how-earning-balances-work" />
 
@@ -33,7 +44,7 @@ A vault accepts stablecoin deposits and issues shares representing an account's 
 <span id="liquidity-and-withdrawals" />
 <span id="track-deposits-and-withdrawals" />
 
-Choose a vault by its accepted asset, eligibility, strategy, and withdrawal behavior. Position value and the amount immediately available to withdraw can differ. [How Earn works](/docs/earn/how-it-works) explains the vault and share model.
+Design your program around its target return, liquidity needs, and customer eligibility, then choose vaults by accepted asset, access rules, strategy, and withdrawal behavior. Position value and the amount immediately available to withdraw can differ. [How Earn works](/docs/earn/how-it-works) explains the vault and share model.
 
 <span id="choose-the-vault-integration" />
 <span id="choose-a-yield-source" />

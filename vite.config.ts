@@ -7,6 +7,7 @@ import { defineConfig, type Environment, loadEnv, type Plugin, type ResolvedConf
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
+import { skipReferenceScans } from './scripts/zyzz-build'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
 import { markdownRoute, renderAiFull, renderAiIndex, renderAiPage } from './src/lib/ai-docs'
 import { aiDocsDevMiddleware } from './src/lib/ai-docs-dev'
@@ -32,7 +33,7 @@ export default defineConfig(({ mode }) => {
       deferAiIndexDuringRscScan(),
       // Example regions are not complete modules. Keep server tooling out of
       // the client discovery graph; Vocs owns the persisted color scheme.
-      skipDuringRscScan(
+      skipReferenceScans(
         zyzz({
           exclude: [
             'src/snippets',
@@ -81,24 +82,10 @@ export default defineConfig(({ mode }) => {
   }
 })
 
-// The RSC plugin first runs unwritten rsc and ssr builds that only discover
-// client and server references; it reduces every module to its imports.
+// plugin-rsc analyzes client and server references with two unwritten builds
+// that keep only each module's imports.
 function isRscScanBuild(environment: Environment) {
-  return environment.config.command === 'build' && environment.config.build.write === false
-}
-
-// Zyzz compiles each module's whole style graph, which dominates every build
-// pass. It only adds stylesheet imports and erases authoring imports, so the
-// uncompiled source exposes the same client and server references.
-function skipDuringRscScan(plugin: Plugin): Plugin {
-  const transform = plugin.transform
-  if (typeof transform !== 'function')
-    throw new Error('Zyzz changed its transform hook; update the RSC scan bypass')
-  plugin.transform = function (code, id, options) {
-    if (isRscScanBuild(this.environment)) return
-    return transform.call(this, code, id, options)
-  }
-  return plugin
+  return environment.mode === 'build' && environment.config.build.write === false
 }
 
 function deferAiIndexDuringRscScan(): Plugin {

@@ -814,14 +814,6 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   const destinations = (
     <div className={`docs-header-destinations ${docsHeaderDestinations().className}`}>
       <WakuLink
-        to="/"
-        onClick={close}
-        aria-current={surface === 'docs' ? 'page' : undefined}
-        className={`docs-header-wordmark ${docsHeaderWordmark().className}`}
-      >
-        Docs
-      </WakuLink>
-      <WakuLink
         to="/blog"
         onClick={close}
         aria-current={surface === 'blog' ? 'page' : undefined}
