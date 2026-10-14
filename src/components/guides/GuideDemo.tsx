@@ -44,7 +44,7 @@ const localIcons: Record<LocalIcon, typeof LucideSmartphone> = {
 }
 
 // ---------------------------------------------------------------------------
-// Environment: devnet and a platform passkey
+// Environment: devnet and WebCrypto
 
 type Modules = {
   devnet: typeof import('./account-sandbox-devnet')
@@ -71,13 +71,9 @@ function loadModules() {
   return loaded
 }
 
-async function hasPlatformPasskey() {
-  if (!globalThis.isSecureContext || !globalThis.PublicKeyCredential) return false
-  try {
-    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-  } catch {
-    return false
-  }
+/** WebCrypto keys need a secure context: HTTPS or localhost. */
+function hasWebCrypto() {
+  return Boolean(globalThis.isSecureContext && globalThis.crypto?.subtle)
 }
 
 function useEnvironment(): Environment {
@@ -91,7 +87,7 @@ function useEnvironment(): Environment {
           return
         }
         const live = new Set<Need>()
-        if (await hasPlatformPasskey()) live.add('passkey')
+        if (hasWebCrypto()) live.add('webcrypto')
         if (active)
           setEnvironment({
             status: 'ready',

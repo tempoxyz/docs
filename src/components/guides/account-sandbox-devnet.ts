@@ -4,8 +4,9 @@
  * configurable access keys (TIP-1111).
  *
  * - Only real signing runs on devnet. Passkeys are real WebAuthn passkeys, so creating and signing
- *   with one prompts for Touch ID or Face ID. Other keys are generated in this browser and held in
- *   memory for this page session.
+ *   with one prompts for Touch ID or Face ID. Device keys are non-extractable WebCrypto P-256 keys
+ *   where the page can make them (HTTPS and localhost), and sign without a prompt. Other keys are
+ *   generated in this browser and held in memory for this page session.
  * - Access keys the reader adds are real: a generated private key (shown once), "This browser" (a
  *   non-extractable WebCrypto key that signs silently), and "This [device]" (a platform passkey
  *   that asks on each payment). Example keys that presets load stay in-memory keys.
@@ -735,7 +736,12 @@ export function createDevnetAdapter(
     if (type === 'secp256k1' && signer.privateKey)
       return held(Account.fromSecp256k1(signer.privateKey as Hex))
     if (type === 'secp256k1') return held(Account.fromSecp256k1(generatePrivateKey()))
-    if (type === 'p256') return held(Account.fromP256(P256.randomPrivateKey()))
+    // A device key: a non-extractable WebCrypto key where this page can make one (HTTPS and
+    // localhost), or an in-memory P-256 key. Neither prompts.
+    if (type === 'p256') {
+      if (!globalThis.crypto?.subtle) return held(Account.fromP256(P256.randomPrivateKey()))
+      return held(Account.fromWebCryptoP256(await WebCryptoP256.createKeyPair()))
+    }
     const { account, prompter } = await createPasskey(signer, prompts)
     return { ...held(account), prompter }
   }

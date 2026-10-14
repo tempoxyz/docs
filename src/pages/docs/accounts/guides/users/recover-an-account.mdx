@@ -23,7 +23,7 @@ When a user loses their phone or passkey, the account's remaining signers replac
 
 This guide starts from the account in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#require-two-factors): a passkey (2), the user's first key (1), and a recovery signer (1), with threshold 2. The user lost the passkey, so the first key and recovery signer approve together. Your app passes the configuration it saved after the last update.
 
-The demo builds that account on devnet, a test network whose stablecoins have no value, treats the passkey as lost, and recovers with the other two signers.
+The demo builds that account on devnet, a test network whose stablecoins have no value, with a device key in this browser standing in for the passkey. It treats that key as lost and recovers with the other two signers.
 
 <GuideDemo guide="recover" />
 
