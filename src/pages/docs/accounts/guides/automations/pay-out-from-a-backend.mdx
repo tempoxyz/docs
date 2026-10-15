@@ -22,15 +22,13 @@ The demo's customer account is a configurable account whose one signer is a devi
 
 The code pays out a test stablecoin. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
 :::::steps
 
 ### Authorize a scoped, limited key
 
 Create one secp256k1 key per customer in your KMS. Its address, derived from the public key, is the key's ID on Tempo. Send that address to the customer's app, where the customer's signers authorize it:
+
+::::code-group
 
 ```ts [app/approve-payouts.ts]
 import { parseUnits } from 'viem'
@@ -52,6 +50,12 @@ await client.accessKey.authorizeSync({
   ], // [!code hl]
 })
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 Authorizing is one transaction the customer approves, for example with their passkey. Show them the payees, daily limit, and expiry before they do.
 

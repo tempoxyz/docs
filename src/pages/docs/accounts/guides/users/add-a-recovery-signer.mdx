@@ -42,9 +42,7 @@ Pick a key the user doesn't lose along with the first one, such as a [recovery p
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [add-signer.ts]
 import { isAddressEqual } from 'viem'
@@ -73,6 +71,12 @@ const { config } = await client.accounts.updateConfigSync({ // [!code hl]
 // the next openAccount call rebuilds from this
 saved.config = config // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 Save the returned `config` in place of the old one right away. Each signer update raises the version, which changes the hash Tempo stores, so a transaction from an account rebuilt from the old copy fails. `openAccount` reads `saved` on every call, so the next step builds from the new configuration. The address comes from the account's first configuration: at version 0, `address: 'infer'` derives it from the signers, and after an update `openAccount` passes the saved address instead.
 

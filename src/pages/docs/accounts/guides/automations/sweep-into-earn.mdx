@@ -14,19 +14,13 @@ A deposit takes two calls: `approve` lets the vault pull funds from the account,
 
 Earn vaults aren't on the Tempo Accounts devnet, so this page runs on Moderato testnet, whose stablecoins have no value and whose RPC needs no key. It uses pathUSD, a pathUSD vault from [Vaults](/docs/earn/vaults), and a single-key account as `account`, since Moderato doesn't run configurable accounts.
 
-```ts [client.ts]
-import { http } from 'viem'
-import { tempoModerato } from 'viem/chains'
-import { createClient } from 'viem/tempo'
-
-export const client = createClient({ chain: tempoModerato, transport: http() }) // [!code hl]
-```
-
 :::::steps
 
 ### Scope a key to the vault
 
 Create a secp256k1 key in your KMS, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms), then have the customer authorize it from your app with their account's key:
+
+::::code-group
 
 ```ts [app/approve-sweeps.ts]
 import { parseUnits } from 'viem'
@@ -47,6 +41,16 @@ await client.accessKey.authorizeSync({
   ], // [!code hl]
 })
 ```
+
+```ts [client.ts]
+import { http } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+export const client = createClient({ chain: tempoModerato, transport: http() }) // [!code hl]
+```
+
+::::
 
 Show the customer the vault, the daily limit, and the expiry before they approve. The [scopes](/docs/accounts/access-keys/scopes) allow only these two calls, and the [spending limit](/docs/accounts/access-keys/spending-limits) counts approvals, so the vault can't pull more than 5,000 pathUSD a day. Fees the account pays count too, so leave headroom above your largest sweep.
 

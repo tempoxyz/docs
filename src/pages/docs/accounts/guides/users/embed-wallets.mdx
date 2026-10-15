@@ -41,9 +41,7 @@ Create the user's wallet with your provider, then use the wallet's address as `p
 
 Give the user's passkey weight 2 and each provider's key weight 1, with a [threshold](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) of 2, the total weight an approval needs. A passkey is a key the user's device keeps and unlocks with Face ID, Touch ID, or Windows Hello. Your app signs only with the passkey, which stays on the user's device; each provider keeps its own key, so the account lists those keys by address. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [account.ts]
 import { parseUnits } from 'viem'
@@ -73,6 +71,12 @@ await client.faucet.fundSync({ account: account.address }) // devnet test stable
 // The passkey's weight of 2 reaches the threshold, so it approves this payment alone.
 await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token })
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 Creating the account sends nothing: the address can receive stablecoins right away, and the account's first transaction registers it onchain. Save `account.address`, `account.config` (the signers, weights, threshold, and version), and the passkey's [`credential.id` and `credential.publicKey`](/docs/accounts/authentication/passkeys#passkey-limits) with the user's record. Tempo stores only a hash of the configuration, so when the user returns, your app rebuilds the account from this saved copy, with the passkey attached:
 

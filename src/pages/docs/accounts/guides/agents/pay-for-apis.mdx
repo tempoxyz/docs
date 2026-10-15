@@ -12,15 +12,13 @@ Give your agent its own [access key](/docs/accounts/access-keys) with a daily bu
 
 The examples pay in a test stablecoin, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet and testnet, an agent key works the same from a single-key account; on the devnet, a configurable account can authorize one too.
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
 :::::steps
 
 ### Give the agent a budget
 
 The agent holds the key. The account's signers authorize its address with a daily budget and only the calls a one-time MPP payment makes. [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) explains each bound.
+
+::::code-group
 
 ```ts [authorize-agent.ts]
 import { parseUnits } from 'viem'
@@ -42,6 +40,12 @@ await client.accessKey.authorizeSync({
   ], // [!code hl]
 })
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 A one-time payment (`charge`) is a transfer to the service with a memo that ties it to the request, so these two scopes cover it. They leave the recipient open so the agent can pay any service; the budget bounds the total. For a [payment session](/docs/guide/machine-payments/pay-as-you-go), also scope its payment-channel calls.
 

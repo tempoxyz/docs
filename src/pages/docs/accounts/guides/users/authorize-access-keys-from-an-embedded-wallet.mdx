@@ -24,10 +24,6 @@ Each party holds a different key, so no party can do more than its key allows. E
 
 The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
 
-```ts [client.ts]
-// [!include ~/snippets/viem.moderato.public.ts:setup]
-```
-
 :::::steps
 
 ### Wrap the provider's signing as an account
@@ -38,6 +34,8 @@ Tempo needs the account key to sign a 32-byte hash as is, with no message prefix
 - Turnkey: `sign_raw_payload` with `HASH_FUNCTION_NO_OP` and `PAYLOAD_ENCODING_HEXADECIMAL`. The account that [`@turnkey/viem`](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo)'s `createAccount` returns already signs hashes this way.
 
 Put that call behind a `signHash` function, then build a Tempo account that signs only through it. The account needs the key's public key, so recover it once from a signature if your provider doesn't return it:
+
+::::code-group
 
 ```ts [provider-account.ts]
 import { isAddressEqual, keccak256, recoverPublicKey, toHex } from 'viem'
@@ -56,6 +54,12 @@ export const providerAccount = Account.from({ // [!code hl]
 }) // [!code hl]
 if (!isAddressEqual(providerAccount.address, walletAddress)) throw new Error('Wrong public key')
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/viem.moderato.public.ts:setup]
+```
+
+::::
 
 `providerAccount.address` is the user's account address. To fund it on Moderato, call `client.faucet.fundSync({ account: providerAccount.address })`.
 

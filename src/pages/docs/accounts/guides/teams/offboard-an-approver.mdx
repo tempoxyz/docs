@@ -24,11 +24,9 @@ The code continues from [Set up a company treasury](/docs/accounts/guides/teams/
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
 Tempo stores only a hash of the treasury's configuration, not the signer list itself. Before each action, rebuild the treasury from `saved.config` and attach the approvers' keys:
+
+::::code-group
 
 ```ts [offboard.ts]
 import { isAddressEqual } from 'viem'
@@ -49,6 +47,12 @@ function openTreasury(approvers: readonly Account.RootAccount[]) {
   return Account.fromConfig({ address: saved.address, owners, salt, threshold, version }) // [!code hl]
 }
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 viem signs with the attached keys and throws `Local owners do not meet the threshold.` before sending anything if their weights fall short. The demo runs the same steps with keys the page generates.
 

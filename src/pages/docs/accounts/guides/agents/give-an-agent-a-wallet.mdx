@@ -23,15 +23,13 @@ The demo and the code run on the Tempo Accounts devnet and pay in a test stablec
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
 :::::steps
 
 ### Authorize the agent's key
 
 Give each agent its own key, generated where it runs, so you can revoke one without stopping the others. Only the key's address leaves the agent:
+
+::::code-group
 
 ```ts [agent-key.ts]
 import { Account, P256 } from 'viem/tempo'
@@ -43,6 +41,12 @@ const agentKey = Account.fromP256(privateKey, { access: address }) // [!code hl]
 // send to the signers; save it with the agent's name
 const agentKeyAddress = agentKey.accessKeyAddress // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 The signers authorize that address and its bounds in one transaction:
 
