@@ -1,6 +1,6 @@
 # Maintaining generated Markdown
 
-This sample uses the commit-pinned preview `https://pkg.pr.new/vocs@409d900`
+This sample uses the commit-pinned preview `https://pkg.pr.new/vocs@d1097b9`
 from [Vocs #666](https://github.com/wevm/vocs/pull/666). This is an intentional
 preview-package integration for iterating on that PR. To test a new upstream
 commit, update the commit pin and lockfile, then rerun the audit, tests, and build.
@@ -95,13 +95,14 @@ presentation, and changelog checks. Those content requirements still apply even
 when the framework's validation mode is temporarily `warn`.
 
 Tempo retains its section index, source attribution, and production canonical
-links. Its final build hook revalidates those transformed bytes with the same
-Vocs validation mode, then refreshes the manifest from Vocs' original inventory.
-This avoids stale hashes while preserving Tempo's product-context requirements.
-Do not add any further Markdown rewrite after that finalizer.
+links. `markdown.output.transform` adds this context before Vocs assembles the full
+export, validates the final text, and hashes the artifacts. The same hook runs
+in development and the CLI audit. Do not rewrite generated Markdown afterward.
+`public/SKILL.md` is the published static asset. The root `SKILL.md` links to it,
+so repository tooling and the website use the same source.
 
 The Vocs patch is rebased onto the preview, preserving Tempo's UI, OpenAPI, and
-shared module-loader changes. The preview already includes server OpenAPI config
-serialization, so that patch hunk is no longer necessary. A dependency override
+other site-specific changes. The preview already includes shared component
+loading and server OpenAPI config serialization, so those patch hunks are no longer necessary. A dependency override
 keeps transitive Vocs copies on the same preview; replace it along with the root
 pin when upgrading to the release, and rebase the patch again.

@@ -1,21 +1,14 @@
-import fs from 'node:fs/promises'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
 import Icons from 'unplugin-icons/vite'
-import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
 import { skipReferenceScans } from './scripts/zyzz-build'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
-import { markdownRoute, renderAiFull, renderAiIndex, renderAiPage } from './src/lib/ai-docs'
-import { aiDocsDevMiddleware } from './src/lib/ai-docs-dev'
-import { resolveBaseUrl } from './src/lib/base-url'
-import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
-import { finalizeMarkdownManifest } from './src/lib/markdown-manifest'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
-import vocsConfig from './vocs.config'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -60,7 +53,6 @@ export default defineConfig(({ mode }) => {
       react(),
       ...(useHttp ? [] : [mkcert()]),
       tempoNode(),
-      llmsAgentPreamble(),
     ],
     resolve: {
       alias: [
@@ -112,113 +104,6 @@ function developersProxyBasePath(): Plugin {
         },
       }
     },
-  }
-}
-
-function llmsAgentPreamble(): Plugin {
-  let viteConfig: ResolvedConfig
-
-  return {
-    name: 'tempo-ai-docs',
-    enforce: 'pre',
-    configResolved(config) {
-      viteConfig = config
-    },
-    configureServer(server) {
-      server.middlewares.use(aiDocsDevMiddleware(server.config.root))
-    },
-    // Waku writes static HTML and RSC payloads during buildApp, after the
-    // environment closeBundle hooks have already finished.
-    buildApp: {
-      order: 'post',
-      async handler() {
-        const publicDir = path.resolve(viteConfig.root, viteConfig.build.outDir, 'public')
-        // Vocs copies static output before this hook. Update both artifacts,
-        // including preview deployments, rather than only the source directory.
-        const publicDirectories = [
-          publicDir,
-          ...(process.env.VERCEL ? [path.resolve(viteConfig.root, '.vercel/output/static')] : []),
-        ]
-        for (const directory of publicDirectories)
-          await writeAiDocumentation(directory, viteConfig.root)
-        if (process.env.VERCEL_ENV === 'production') {
-          const publicDevelopersUrl = `${resolveBaseUrl()}/docs`
-          const generatedFiles = (
-            await Promise.all(
-              publicDirectories.map(async (directory) => [
-                path.join(directory, 'llms.txt'),
-                path.join(directory, 'llms-full.txt'),
-                ...(await markdownFiles(path.join(directory, 'assets/md'))),
-              ]),
-            )
-          ).flat()
-          await Promise.all(
-            [...new Set(generatedFiles)].map((filePath) =>
-              canonicalizeGeneratedLinksInFile(filePath, publicDevelopersUrl),
-            ),
-          )
-        }
-        // Tempo owns section/source attribution; validate its final output and
-        // refresh hashes only after every text/canonical-link transform finishes.
-        for (const directory of publicDirectories)
-          await finalizeMarkdownManifest(directory, vocsConfig.markdown?.output?.validation)
-      },
-    },
-  }
-}
-
-async function markdownFiles(directory: string): Promise<string[]> {
-  try {
-    const entries = await fs.readdir(directory, { withFileTypes: true })
-    const files = await Promise.all(
-      entries.map(async (entry) => {
-        const entryPath = path.join(directory, entry.name)
-        if (entry.isDirectory()) return markdownFiles(entryPath)
-        if (entry.isFile() && entry.name.endsWith('.md')) return [entryPath]
-        return []
-      }),
-    )
-    return files.flat()
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
-    throw error
-  }
-}
-
-async function writeAiDocumentation(directory: string, root: string) {
-  let rawIndex: string
-  try {
-    rawIndex = await fs.readFile(path.join(directory, 'llms.txt'), 'utf8')
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
-    throw error
-  }
-  const markdownDir = path.join(directory, 'assets/md')
-  const pages = new Map<string, string>()
-  await Promise.all(
-    (await markdownFiles(markdownDir)).map(async (file) => {
-      const route = markdownRoute(`/${path.relative(markdownDir, file)}`)
-      const content = renderAiPage(await fs.readFile(file, 'utf8'), route)
-      pages.set(route, content)
-      await fs.writeFile(file, content, 'utf8')
-    }),
-  )
-  const index = renderAiIndex(rawIndex)
-  await Promise.all([
-    fs.writeFile(path.join(directory, 'llms.txt'), index, 'utf8'),
-    fs.writeFile(path.join(directory, 'llms-full.txt'), renderAiFull(index, pages), 'utf8'),
-    fs.copyFile(path.join(root, 'SKILL.md'), path.join(directory, 'SKILL.md')),
-  ])
-}
-
-async function canonicalizeGeneratedLinksInFile(filePath: string, publicDevelopersUrl: string) {
-  try {
-    const content = await fs.readFile(filePath, 'utf-8')
-    const canonical = canonicalizeGeneratedDeveloperLinks(content, publicDevelopersUrl)
-    if (canonical !== content) await fs.writeFile(filePath, canonical, 'utf-8')
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
-    throw error
   }
 }
 
