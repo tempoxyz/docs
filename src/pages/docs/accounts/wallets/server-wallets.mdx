@@ -1,0 +1,30 @@
+---
+title: Server wallets
+seoTitle: Use KMS Keys and Server Wallets with Tempo Accounts | Tempo Docs
+description: Backends that sign with a KMS key or a Privy or Turnkey server wallet work on Tempo as they are. Give the backend an access key with limits so a compromised server can only pay within them.
+---
+
+# Server wallets
+
+Backends that move money on their own, such as a payout service, a card program, or an agent, sign with a key in a KMS or HSM, or with a server wallet from a provider such as Privy or Turnkey. These work on Tempo as they are: a key that signs Ethereum transactions can send stablecoins here, on mainnet and testnet today.
+
+## Give the backend an access key, not the account key
+
+Keep the account's own key with the user, and give your backend an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits), a list of [recipients](/docs/accounts/access-keys/scopes), and an [expiry](/docs/accounts/access-keys/expiry). The backend then pays on its own, without asking the user each time, and a compromised server can still pay only within those bounds. [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) walks through it.
+
+## Sign with a KMS key
+
+Access keys sign [Tempo Transactions](/docs/guide/tempo-transaction), so the key signs a 32-byte digest. AWS KMS and Google Cloud KMS both sign digests with secp256k1 and P-256 keys, and both curves work as access keys. The private key never leaves the KMS: wrap its signing call as a viem account, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
+
+## Sign with a server wallet
+
+| Provider | How it signs on Tempo |
+| --- | --- |
+| [Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) server wallets | Sends Tempo Transactions through its wallet API, or signs raw hashes with `raw_sign` |
+| [Turnkey](https://docs.turnkey.com/features/networks/overview) | Signs Tempo Transactions with `sign_transaction`, which its policies can inspect, or raw hashes with `sign_raw_payload` |
+
+Checked against each provider's docs in October 2026. To use a server wallet as an access key, wrap its raw-hash signing as a viem account, as in [Embedded wallets](/docs/accounts/wallets/embedded-wallets#wrap-the-providers-signing-as-an-account).
+
+## Rotate and revoke backend keys
+
+Save each access key's address with the service that holds it. To rotate, authorize a new key, switch the service to it, then [revoke](/docs/accounts/access-keys/revocation) the old one. A key can't be extended past its expiry, so [renew it](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before then.

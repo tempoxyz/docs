@@ -1387,6 +1387,11 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/accounts/create/legacy-accounts",
+      "destination": "/developers/docs/accounts/wallets/browser-wallets",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/accounts/authentication/oidc",
       "destination": "/developers/docs/accounts/authentication",
       "permanent": true
