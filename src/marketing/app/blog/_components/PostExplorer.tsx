@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Link } from 'waku'
+import { ChevronText } from '../../../../components/ChevronLink'
+import { Tabs } from '../../../../components/Tabs'
 import { categories, type PostMeta } from '../_lib/categories'
 import {
   tempoBlogEmpty,
@@ -9,10 +11,9 @@ import {
   tempoBlogExplorer,
   tempoBlogExplorerHeading,
   tempoBlogFilters,
-  tempoBlogPostArrow,
+  tempoBlogPostCard,
   tempoBlogPostCopy,
   tempoBlogPostList,
-  tempoBlogPostRow,
   tempoBlogPostThumbnail,
 } from '../BlogShell.styles'
 import PostByline from './PostByline'
@@ -22,6 +23,7 @@ import PostLabels from './PostLabels'
 
 const filters = [{ slug: 'all' as const, label: 'All posts' }, ...categories]
 type Filter = (typeof filters)[number]['slug']
+const filterTabs = filters.map((filter) => ({ label: filter.label, value: filter.slug }))
 
 export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
   const [active, setActive] = useState<Filter>('all')
@@ -42,54 +44,56 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
           {visible.length} {visible.length === 1 ? 'post' : 'posts'}
         </span>
       </div>
-      <fieldset className={`tempo-blog-filters ${tempoBlogFilters().className}`}>
+      {/* The fieldset disables the tabs until hydration, so they never look usable early. */}
+      <fieldset
+        disabled={!mounted}
+        className={`tempo-blog-filters ${tempoBlogFilters().className}`}
+      >
         <legend {...ui.legend()}>Filter posts by category</legend>
-        {filters.map((filter) => (
-          <button
-            key={filter.slug}
-            type="button"
-            aria-pressed={active === filter.slug}
-            onClick={() => setActive(filter.slug)}
-            disabled={!mounted}
-          >
-            {filter.label}
-          </button>
-        ))}
+        <Tabs
+          aria-label="Post categories"
+          controls="blog-posts"
+          items={filterTabs}
+          value={active}
+          onValueChange={setActive}
+        />
       </fieldset>
 
-      <ul className={`tempo-blog-post-list ${tempoBlogPostList().className}`}>
-        {visible.map((post) => (
-          <li key={post.slug}>
-            <Link
-              to={`/blog/${post.slug}`}
-              className={`tempo-blog-post-row ${tempoBlogPostRow().className}`}
-            >
-              <div className={`tempo-blog-post-copy ${tempoBlogPostCopy().className}`}>
-                <PostLabels post={post} />
-                <h3>{post.title}</h3>
-                <p className={`tempo-blog-excerpt ${tempoBlogExcerpt().className}`}>
-                  {post.excerpt}
-                </p>
-                <PostByline post={post} />
-              </div>
-              <span className={`tempo-blog-post-thumbnail ${tempoBlogPostThumbnail().className}`}>
-                <PostImage post={post} />
-              </span>
-              <span
-                className={`tempo-blog-post-arrow ${tempoBlogPostArrow().className}`}
-                aria-hidden="true"
+      <div
+        id="blog-posts"
+        role="tabpanel"
+        aria-label={filters.find((filter) => filter.slug === active)?.label}
+      >
+        <ul className={`tempo-blog-post-list ${tempoBlogPostList().className}`}>
+          {visible.map((post) => (
+            <li key={post.slug}>
+              <Link
+                to={`/blog/${post.slug}`}
+                className={`tempo-blog-post-card ${tempoBlogPostCard().className}`}
               >
-                ↗
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {visible.length === 0 ? (
-        <p className={`tempo-blog-empty ${tempoBlogEmpty().className}`}>
-          No posts in this category yet. Choose another category or view all posts.
-        </p>
-      ) : null}
+                <span className={`tempo-blog-post-thumbnail ${tempoBlogPostThumbnail().className}`}>
+                  <PostImage post={post} />
+                </span>
+                <div className={`tempo-blog-post-copy ${tempoBlogPostCopy().className}`}>
+                  <PostLabels post={post} />
+                  <h3>
+                    <ChevronText>{post.title}</ChevronText>
+                  </h3>
+                  <p className={`tempo-blog-excerpt ${tempoBlogExcerpt().className}`}>
+                    {post.excerpt}
+                  </p>
+                  <PostByline post={post} />
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {visible.length === 0 ? (
+          <p className={`tempo-blog-empty ${tempoBlogEmpty().className}`}>
+            No posts in this category yet. Choose another category or view all posts.
+          </p>
+        ) : null}
+      </div>
     </section>
   )
 }

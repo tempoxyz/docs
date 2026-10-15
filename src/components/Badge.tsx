@@ -1,5 +1,4 @@
 import type { Props } from 'zyzz'
-import { inherited } from '../styles/inherited'
 import { vars as tokens, variants } from '../styles/theme'
 
 export function Badge({
@@ -28,25 +27,42 @@ const badge = variants({
   defaultVariants: { variant: 'gray' },
   variants: {
     variant: {
-      red: { backgroundColor: tokens.color.red3, color: tokens.color.red11 },
+      // Feedback tones use the TDS Platform tones (Core accents); blue is Alert's tip.
+      red: { backgroundColor: tokens.color.negativeContainer, color: tokens.color.negative },
       amber: {
-        backgroundColor: tokens.color.amber3,
-        color: tokens.color.amber11,
+        backgroundColor: tokens.color.warningContainer,
+        color: tokens.color.warning,
       },
       green: {
-        backgroundColor: tokens.color.green3,
-        color: tokens.color.green11,
+        backgroundColor: tokens.color.positiveContainer,
+        color: tokens.color.positive,
       },
       blue: {
-        backgroundColor: inherited.color.backgroundColorAccentTint,
+        backgroundColor: tokens.color.infoContainer,
 
-        color: inherited.color.textColorAccent,
+        color: tokens.color.info,
       },
       violet: {
         backgroundColor: tokens.color.violet3,
         color: tokens.color.violet11,
       },
-      gray: { backgroundColor: tokens.color.gray3, color: tokens.color.gray11 },
+      gray: { backgroundColor: tokens.color.container, color: tokens.color.muted },
+      // TDS Platform Badge variant="outline", small scale: no fill, a subtle line.
+      outline: {
+        minWidth: '80px',
+        minHeight: '28px',
+        paddingInline: tokens.spacing['2'],
+        // design-exception: TDS Badge small radius (6px), between the 4px and 8px steps.
+        borderRadius: '6px !custom',
+        '--corner-radius': '6px',
+        boxSizing: 'border-box',
+        // A real border (not TDS's overlay) so the smooth-corner fallback can stroke it.
+        borderWidth: tokens.borderWidth.hairline,
+        borderStyle: 'solid',
+        borderColor: tokens.color.hairline,
+        color: tokens.color.foreground,
+        fontWeight: tokens.fontWeight.normal,
+      },
     },
   },
 })

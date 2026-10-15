@@ -20,7 +20,7 @@ global({
 // Vocs pagination links share the card markup, so they are excluded explicitly.
 global({
   ':root': {
-    '--tempo-card-radius': '24px',
+    '--tempo-card-radius': tokens.radius.panel,
     '--tempo-card-padding': '28px',
   },
   '@media (width < 700px)': {
@@ -42,6 +42,7 @@ global({
       border: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
+      '--corner-radius': 'var(--tempo-card-radius)',
       backgroundColor: tokens.color.panel,
 
       color: inherited.color.vocsTextColorPrimary,
@@ -90,11 +91,6 @@ global({
       color: inherited.color.vocsTextColorSecondary,
       fontSize: tokens.fontSize.sm,
       lineHeight: tokens.lineHeight.relaxed,
-    },
-  ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):hover > [class~="vocs:text-heading"]':
-    {
-      textDecoration: 'underline',
-      textUnderlineOffset: '4px',
     },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):focus-visible':
     {

@@ -1,4 +1,5 @@
 import { Link } from 'waku'
+import { ChevronText } from '../../../components/ChevronLink'
 import DocsHeader from '../../../components/DocsHeader'
 import BlogFooter from './_components/BlogFooter'
 import PostByline from './_components/PostByline'
@@ -47,7 +48,9 @@ export default function BlogPage() {
           >
             <div className={`tempo-blog-featured-copy ${tempoBlogFeaturedCopy().className}`}>
               <PostLabels post={featured} />
-              <h2>{featured.title}</h2>
+              <h2>
+                <ChevronText>{featured.title}</ChevronText>
+              </h2>
               <p className={`tempo-blog-excerpt ${tempoBlogExcerpt().className}`}>
                 {featured.excerpt}
               </p>
