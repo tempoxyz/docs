@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
-import { describe, expect, it } from 'vitest'
-import { prepareTempoOpenApi } from './tempo-openapi'
+import { describe, expect, it, vi } from 'vitest'
+import { loadTempoOpenApi, prepareTempoOpenApi } from './tempo-openapi'
 
 describe('Tempo authentication documentation routes', () => {
   it('keeps Console operations separate from the API-key guide in routes and agent exports', async () => {
@@ -339,4 +339,15 @@ describe('Tempo OpenAPI examples', () => {
     expect(result.paths['/rpc'].post['x-openrpc']).toBe('https://api.tempo.xyz/openrpc.json')
     expect(result.paths['/inline']).toEqual(spec.paths['/inline'])
   })
+})
+
+it.each([null, [], 'invalid'])('rejects non-object OpenAPI responses: %j', async (body) => {
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json(body))
+  try {
+    await expect(loadTempoOpenApi('https://example.test/openapi.json')).rejects.toThrow(
+      'JSON object',
+    )
+  } finally {
+    fetcher.mockRestore()
+  }
 })

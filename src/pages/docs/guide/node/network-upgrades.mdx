@@ -20,11 +20,13 @@ Follow/RPC nodes and validators verify consensus finalization certificates, incl
 <Tabs>
 <Tab title="Mainnet">
 
-**Network identity, from epoch 0:**
+**Network identity, from epoch 2042:**
 
 ```text
 // [!include ~/snippets/network-identities.txt:mainnet-identity]
 ```
+
+Mainnet nodes on v1.16.0 or earlier that do not already have this identity in their persisted DKG state need the [network identity override](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
 
 </Tab>
 <Tab title="Testnet">

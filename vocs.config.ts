@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
   developerSurfaceRedirects,
@@ -12,6 +13,8 @@ import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
+import { transformMarkdownOutput } from './src/lib/markdown-output-transform'
+import { renderMermaid } from './src/lib/markdown-renderers'
 import { annotateRoutesAvailability } from './src/lib/routes-openapi'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 
@@ -22,7 +25,11 @@ const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/op
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
-const tempoChangelog = Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' })
+// Page renders, Markdown exports, and builds share one GitHub request per cache window.
+const tempoChangelog = cacheChangelog(
+  Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
+  { name: 'tempoxyz/tempo' },
+)
 
 const changelog = Changelog.from({
   ...tempoChangelog,
@@ -259,6 +266,17 @@ export default defineConfig({
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
   markdown: {
+    output: {
+      validation: 'fail',
+      transform: transformMarkdownOutput,
+      // These modules depend on browser styles/hooks. Resolve by module + export
+      // without importing their React implementations during Markdown generation.
+      components: ['MermaidDiagram', 'StaticMermaidDiagram'].map((name) => ({
+        module: `./src/components/${name}.tsx`,
+        export: name,
+        render: renderMermaid,
+      })),
+    },
     rehypePlugins: [rehypeCompactShikiStyles],
     outputRemarkPlugins: [plainMarkdownComponents],
   },
