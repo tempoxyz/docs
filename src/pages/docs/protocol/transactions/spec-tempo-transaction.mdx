@@ -855,7 +855,7 @@ Applications can query key information and spending limits:
 ```typescript
 // Check if key is authorized and get info
 const keyInfo = await precompile.getKey(account, keyId);
-// Returns: { signatureType, keyId, expiry, enforceLimits, isRevoked, isAdmin }
+// Returns: { signatureType, keyId, expiry, enforceLimits, isRevoked }
 
 // Check remaining spending limit and current period end for a token
 const { remaining, periodEnd } = await precompile.getRemainingLimitWithPeriod(
