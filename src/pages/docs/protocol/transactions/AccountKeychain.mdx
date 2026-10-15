@@ -129,6 +129,8 @@ interface IAccountKeychain {
 
     event KeyAuthorized(address indexed account, address indexed publicKey, uint8 signatureType, uint64 expiry);
     event AdminKeyAuthorized(address indexed account, address indexed publicKey);
+    event KeyAuthorizationWitness(address indexed account, bytes32 indexed witness);
+    event KeyAuthorizationWitnessBurned(address indexed account, bytes32 indexed witness);
     event KeyRevoked(address indexed account, address indexed publicKey);
     event SpendingLimitUpdated(address indexed account, address indexed publicKey, address indexed token, uint256 newLimit);
     event AccessKeySpend(address indexed account, address indexed publicKey, address indexed token, uint256 amount, uint256 remainingLimit);
@@ -147,6 +149,7 @@ interface IAccountKeychain {
     error CallNotAllowed();
     error InvalidCallScope();
     error InvalidKeyId();
+    error KeyAuthorizationWitnessAlreadyBurned();
     error LegacyAuthorizeKeySelectorChanged(bytes4 newSelector);
 
     function authorizeKey(
@@ -161,6 +164,11 @@ interface IAccountKeychain {
         KeyRestrictions calldata config,
         bytes32 witness
     ) external;
+
+    function burnKeyAuthorizationWitness(bytes32 witness) external;
+
+    function isKeyAuthorizationWitnessBurned(address account, bytes32 witness)
+        external view returns (bool);
 
     function revokeKey(address keyId) external;
 
@@ -251,6 +259,12 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - `keyId` MUST NOT already be authorized (reverts with `KeyAlreadyExists`).
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked`).
 - `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn) (reverts with `InvalidSignatureType`).
+
+### Witness revocation
+
+The Root Key or an active admin access key can call `burnKeyAuthorizationWitness(witness)` to permanently invalidate future key authorizations carrying that witness for the account. The call requires `msg.sender == tx.origin` and emits `KeyAuthorizationWitnessBurned`. `isKeyAuthorizationWitnessBurned(account, witness)` queries this state. Witness-bearing access-key and admin-key authorization MUST revert with `KeyAuthorizationWitnessAlreadyBurned` when that account/witness pair is burned.
+
+Burning a witness does not revoke keys already authorized with it; use `revokeKey` to revoke those keys. Successful authorization emits `KeyAuthorizationWitness` without changing the burned-witness set.
 
 ### Key Revocation
 
