@@ -6,7 +6,9 @@ description: Give your backend an access key that can only deposit into one Earn
 
 # Sweep idle balances into Earn
 
-A nightly job on your backend deposits a customer's idle stablecoins into an [Earn](/docs/earn) vault, signing with an access key the customer authorizes once. The key can deposit into that one vault, up to a daily limit, and nothing else: it can't send funds elsewhere or withdraw them.
+A nightly job on your backend deposits a customer's idle stablecoins into an [Earn](/docs/earn) vault.
+
+The job signs with an access key the customer authorizes once. The key can deposit into that one vault, up to a daily limit, and nothing else: it can't send funds elsewhere or withdraw them.
 
 A deposit takes two calls: `approve` lets the vault pull funds from the account, and `deposit` pulls them and issues vault shares in return. The key gets exactly those two calls. Before you enable sweeps, run the vault checks in [Deposit](/docs/earn/integrate).
 

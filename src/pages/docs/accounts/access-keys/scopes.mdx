@@ -6,7 +6,9 @@ description: Restrict an access key to the contracts, functions, and recipients 
 
 # Scopes
 
-Scopes are an access key's allowlist: the contracts it may call, the functions on them, and the addresses it may pay. Tempo reverts any other call the key signs, so a leaked payout key can still pay only your payees. A [spending limit](/docs/accounts/access-keys/spending-limits) caps how much the key spends and scopes decide where it goes, so give every backend, agent, and card key both.
+Scopes are an access key's allowlist of the contracts, functions, and addresses it may call or pay.
+
+Tempo reverts any other call the key signs, so a leaked payout key can still pay only your payees. A [spending limit](/docs/accounts/access-keys/spending-limits) caps how much the key spends and scopes decide where it goes, so give every backend, agent, and card key both.
 
 <span id="scopes" />
 <span id="scope-an-access-key" />

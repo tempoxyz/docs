@@ -6,14 +6,16 @@ description: Embedded wallets from Privy, Turnkey, and Dynamic work on Tempo as 
 
 # Embedded wallets
 
-Embedded wallet providers such as Privy, Turnkey, and Dynamic hold your users' keys inside your app. They work on Tempo as they are: each user's wallet is a [single-key account](/docs/accounts/how-it-works#address), on mainnet and testnet today.
+Embedded wallets from Privy, Turnkey, and Dynamic work on Tempo as they are, on mainnet and testnet today.
+
+Each provider holds your users' keys inside your app, and each user's wallet is a [single-key account](/docs/accounts/how-it-works#address). All three also send [Tempo Transactions](/docs/guide/tempo-transaction), so your app gets fees in any stablecoin, batched payments, fee sponsorship, and access keys. The one thing to set up is an [access key](/docs/accounts/access-keys): the user's wallet signs it once, and your card backend or an agent then pays within its limits without the wallet signing each payment.
 
 <span id="custody-test" />
 <span id="which-tempo-features-does-my-setup-support" />
 
 ## What your provider supports on Tempo
 
-Any provider that signs Ethereum transactions can hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). [Tempo Transactions](/docs/guide/tempo-transaction) add fees in any stablecoin, batched payments, fee sponsorship, and access keys. A provider supports them by sending Tempo Transactions itself, or by signing a transaction's raw hash so your app can send it to a Tempo RPC:
+Privy, Turnkey, and Dynamic each send Tempo Transactions and sign raw hashes, so you can use every Tempo Transaction feature with any of them. Any other provider that signs Ethereum transactions can still hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). It supports Tempo Transaction features only if it sends Tempo Transactions itself, or signs a transaction's raw hash so your app can send it to a Tempo RPC:
 
 | Provider | Sends Tempo Transactions | Signs raw hashes |
 | --- | --- | --- |
@@ -30,9 +32,9 @@ All three use secp256k1 keys for the account, so the account's own key can't be 
 
 ## Let your backend or an agent spend from a user's wallet
 
-Your card program needs to pull the purchase amount from a user's balance on every swipe, and an agent needs to pay for things on the user's behalf. Neither should ask the embedded wallet to sign each payment, and neither should hold the user's key. Instead, the user's wallet signs one [access key](/docs/accounts/access-keys) for them, with a spending limit, a list of recipients, and an expiry. Tempo enforces those bounds on every payment the key signs.
+Give your backend or agent an access key that the user's wallet signs, never the user's key. The access key carries a spending limit, a list of recipients, and an expiry, and Tempo enforces those bounds on every payment the key signs. Your card program can then pull each purchase from the user's balance on every swipe, and an agent can pay on the user's behalf, without the embedded wallet signing each payment.
 
-The user's wallet only needs to sign once, through the provider's raw-hash call or the [Accounts SDK](https://accounts.tempo.xyz/docs). [Authorize access keys from an embedded wallet](/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet) walks through it with Privy or Turnkey.
+The user's wallet signs once, through the provider's raw-hash call or the [Accounts SDK](https://accounts.tempo.xyz/docs). [Authorize access keys from an embedded wallet](/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet) walks through it with Privy or Turnkey.
 
 <span id="what-the-providers-policy-engine-can-enforce" />
 

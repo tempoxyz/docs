@@ -9,7 +9,9 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Give a team a budget
 
-A team budget lets a team pay from the [company treasury](/docs/accounts/guides/teams/company-treasury) up to a daily limit, without asking the treasury's approvers for each payment. The team gets its own account, where any two of its three members approve a payment, and the treasury's approvers authorize that account once as an [access key](/docs/accounts/access-keys). The team account holds no funds: it pays from the treasury's balance, and Tempo rejects any payment over what's left of the limit.
+Let a team pay from the [company treasury](/docs/accounts/guides/teams/company-treasury) up to a daily limit, without asking the treasury's approvers each time.
+
+The team gets its own account, where any two of its three members approve a payment, and the treasury's approvers authorize that account once as an [access key](/docs/accounts/access-keys). The team account holds no funds: it pays from the treasury's balance, and Tempo rejects any payment over what's left of the limit.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses two: the treasury and the team account.

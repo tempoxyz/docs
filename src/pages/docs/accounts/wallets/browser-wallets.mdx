@@ -12,7 +12,9 @@ import { ConnectWallet } from '../../../../components/ConnectWallet.tsx'
 
 <span id="legacy-accounts" />
 
-Browser wallets such as MetaMask and Rabby work on Tempo as they are, on every network including mainnet, so people can pay with the wallet they already have. Each one holds a [single-key account](/docs/accounts/how-it-works#address): one private key, like a standard Ethereum account. For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication).
+Browser wallets such as MetaMask and Rabby work on Tempo as they are, on every network including mainnet.
+
+People can pay with the wallet they already have: connect it in your app with wagmi's `injected` connector. Each browser wallet holds a [single-key account](/docs/accounts/how-it-works#address), one private key like a standard Ethereum account, and sends standard Ethereum transactions, so it can't use sponsored fees, batched calls, or extra signers. For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication).
 
 ## Connect a browser wallet
 
@@ -40,6 +42,8 @@ From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain.
 
 ## What a browser wallet's account can't do
 
+A browser wallet's account has one key and sends standard Ethereum transactions, so it misses these Tempo account features:
+
 | | Browser wallet account | Tempo account |
 | --- | --- | --- |
 | Signers | One private key, in the wallet | [Passkeys, device keys, or private keys](/docs/accounts/authentication), several per account |
@@ -47,7 +51,7 @@ From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain.
 | Network fees | Paid by the user | [Sponsored by your app](/docs/accounts/fees/fee-sponsorship), if you choose |
 | Several calls | One call per transaction | Several calls that succeed or fail together |
 
-These features need a [Tempo Transaction](/docs/guide/tempo-transaction), Tempo's own transaction type. Browser wallets like MetaMask send standard Ethereum transactions instead. Several signers per account, and replacing a lost key, also need a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet.
+Each of these needs a [Tempo Transaction](/docs/guide/tempo-transaction), Tempo's own transaction type. Several signers per account, and replacing a lost key, also need a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet.
 
 <span id="move-a-legacy-account-to-modern-signers" />
 

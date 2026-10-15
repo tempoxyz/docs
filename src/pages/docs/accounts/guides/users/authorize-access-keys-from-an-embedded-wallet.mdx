@@ -6,11 +6,13 @@ description: Have a user's Privy or Turnkey wallet sign a limited access key for
 
 # Authorize access keys from an embedded wallet
 
-When a wallet provider such as Privy or Turnkey holds a user's account key, that key can sign an [access key](/docs/accounts/access-keys) for another party: your card backend, an agent, or a partner. The other party then pays on its own, within the limits you set, and never touches the account key.
+Have a user's Privy or Turnkey wallet sign one access key, so your card backend pays within limits on its own.
+
+By the end of this guide, your card backend holds its own [access key](/docs/accounts/access-keys) that can send up to 100 OUSD a day to your card program's funding address for 30 days. The user's account key stays with their wallet provider, Privy or Turnkey, which signs the authorization once. After that, the card backend signs every payment with its own key, within those limits, and never touches the account key. An agent or a partner can hold an access key the same way.
 
 ## Who holds which key
 
-Say your app offers a debit card, and a wallet provider manages each user's account key. Every time the user swipes the card, your card program's backend has to pull the purchase amount from the user's balance, in seconds, without asking the provider to sign each swipe. So the account key signs one access key for the card backend: up to 100 OUSD a day, payable only to the card program's funding address, for 30 days. The same pattern lets an AI agent spend on a user's behalf within a budget.
+Each party holds a different key, so no party can do more than its key allows. Every time the user swipes the card, your card backend has to pull the purchase amount from the user's balance in seconds, without asking the wallet provider to sign each swipe. The access key lets it do that while capping amount, recipient, and duration:
 
 | Party | Holds | Can do on its own |
 | --- | --- | --- |
@@ -85,7 +87,7 @@ import { KeyAuthorization } from 'ox/tempo'
 import { client } from './client'
 import { providerAccount } from './provider-account'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 export const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl]
@@ -117,7 +119,7 @@ const { receipt } = await client.token.transferSync({
   // first payment only
   keyAuthorization: KeyAuthorization.fromRpc(JSON.parse(message)), // [!code hl]
   to: cardFunding,
-  token: '0x20c0000000000000000000000000000000000001', // a test stablecoin on the devnet
+  token: '0x20c0000000000000000000000000000000000001', // a test stablecoin on testnet
 })
 ```
 
@@ -184,7 +186,7 @@ import { privy } from 'accounts/react/privy'
 import { tempoModerato } from 'viem/chains'
 import { Expiry } from 'viem/tempo'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 const provider = Provider.create({ adapter: privy(), chains: [tempoModerato], testnet: true }) // [!code hl]

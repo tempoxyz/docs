@@ -6,7 +6,9 @@ description: Give every customer their own deposit address while all stablecoins
 
 # Virtual addresses
 
-Run one omnibus account and give each customer their own deposit address. A payment to a customer's virtual address lands directly in your account, and its transfer events name the customer, so you credit the right customer without sweeping funds between wallets.
+Give each customer their own deposit address while every payment lands in one Tempo account.
+
+A payment to a customer's virtual address lands directly in your account, and its transfer events name the customer, so you credit the right customer with no per-customer wallets and no sweeps. You register your account once, then derive as many addresses as you need offchain. Send only TIP-20 tokens to them: other token contracts leave the funds stuck at the virtual address.
 
 For the live demo and full walkthrough, see [Customer deposit addresses](/docs/guide/payments/virtual-addresses).
 
@@ -50,7 +52,7 @@ Tempo doesn't interpret the `userTag`; any 6-byte value works, including all zer
 
 ## Attribute each deposit
 
-A deposit to a virtual address emits two `Transfer` events: `Transfer(sender, virtualAddress, amount)`, then `Transfer(virtualAddress, yourAccount, amount)`. A transfer with a memo adds `TransferWithMemo` between them. Treat the sequence as one deposit, read the `userTag` from the last 6 bytes of the virtual address, and credit that customer.
+Each deposit emits two `Transfer` events that you treat as one deposit: `Transfer(sender, virtualAddress, amount)`, then `Transfer(virtualAddress, yourAccount, amount)`. A transfer with a memo adds `TransferWithMemo` between them. Read the `userTag` from the last 6 bytes of the virtual address and credit that customer.
 
 Check the recipient before you credit. Your account's [receive policy](/docs/accounts/policies/receive-policies#virtual-address-behavior) applies to every deposit to its virtual addresses, and a held payment goes to `ReceivePolicyGuard` instead of your account. If your account sends to one of its own virtual addresses, both events still emit but the balance doesn't change, so don't count it as a deposit.
 

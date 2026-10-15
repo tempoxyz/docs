@@ -9,7 +9,9 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Offboard an approver
 
-When an approver leaves, remove their signer from the treasury, revoke any access key they could sign with, and add a replacement so one lost key can't lock the treasury. The treasury keeps its address, balance, and payment history.
+Remove a departing approver while the treasury keeps its address, balance, and payment history.
+
+When an approver leaves, remove their signer from the treasury, revoke any access key they could sign with, and add a replacement so one lost key can't lock the treasury.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.
