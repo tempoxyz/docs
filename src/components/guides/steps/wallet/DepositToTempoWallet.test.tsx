@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { numberToHex } from 'viem'
-import { tempo } from 'viem/chains'
+import { tempo, tempoModerato } from 'viem/chains'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { DepositToTempoWallet } from './DepositToTempoWallet'
 
@@ -10,12 +10,18 @@ const state = vi.hoisted(() => ({
     connector: { id: 'xyz.tempo' },
     status: 'connected',
   },
+  chainId: 4217 as number,
   request: vi.fn(),
+  switchChainAsync: vi.fn(),
   getProvider: vi.fn(),
   operation: Promise.resolve() as Promise<unknown>,
 }))
 
-vi.mock('wagmi', () => ({ useConnection: () => state.connection }))
+vi.mock('wagmi', () => ({
+  useChainId: () => state.chainId,
+  useConnection: () => state.connection,
+  useSwitchChain: () => ({ switchChainAsync: state.switchChainAsync }),
+}))
 vi.mock('../../../../wagmi.config', () => ({
   useTempoWalletConnector: () => ({ id: 'xyz.tempo', getProvider: state.getProvider }),
 }))
@@ -36,6 +42,8 @@ beforeEach(() => {
   state.connection.connector.id = 'xyz.tempo'
   state.getProvider.mockResolvedValue({ request: state.request })
   state.request.mockResolvedValue({})
+  state.switchChainAsync.mockResolvedValue({})
+  state.chainId = tempo.id
 })
 
 function renderStep() {
@@ -54,6 +62,20 @@ test('opens funding through the live connector when the saved connection has no 
     method: 'wallet_deposit',
     params: [{ address: state.connection.address, chainId: numberToHex(tempo.id) }],
   })
+})
+
+test('funds on mainnet and switches back to the chain the guides use', async () => {
+  state.chainId = tempoModerato.id
+  const order: string[] = []
+  state.switchChainAsync.mockImplementation(async ({ chainId }: { chainId: number }) => {
+    order.push(`switch:${chainId}`)
+  })
+  state.request.mockImplementation(async () => {
+    order.push('deposit')
+  })
+  renderStep().actions.props.onClick()
+  await state.operation
+  expect(order).toEqual([`switch:${tempo.id}`, 'deposit', `switch:${tempoModerato.id}`])
 })
 
 test.each([
