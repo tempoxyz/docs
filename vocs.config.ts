@@ -602,6 +602,10 @@ export default defineConfig({
                 link: '/docs/accounts/guides/users/embed-wallets',
               },
               {
+                text: 'Authorize access keys from an embedded wallet',
+                link: '/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet',
+              },
+              {
                 text: 'Add a recovery signer',
                 link: '/docs/accounts/guides/users/add-a-recovery-signer',
               },
