@@ -52,11 +52,9 @@ import {
   canSubsidize,
   demoMethods,
   linkedRoute,
-  popularRoutes,
   quoteCosts,
   type RoutePick,
   routeChoices,
-  routeLabel,
   routeQuoteRequest,
   routeTestRequest,
   subsidizedDelivery,
@@ -195,12 +193,6 @@ export function RoutesTester() {
       return next
     })
   }
-  // A popular route picks all four fields at once, as the supported routes table links do.
-  const choosePopular = (route: TestRoute) => {
-    setNotice('')
-    setPick(pickOf(route))
-  }
-  const popular = popularRoutes(routes)
   const field = (key: keyof RoutePick, options: { value: string; label: string }[]) => ({
     value: choices.pick[key],
     options,
@@ -249,23 +241,6 @@ export function RoutesTester() {
           completed={!!(selected && usable)}
         >
           <div {...stepBody()}>
-            {popular.length > 0 && (
-              <fieldset aria-label="Popular routes" {...cx(chipRow(), popularRow())}>
-                <span {...noteStyle()}>Popular</span>
-                {popular.map((route) => (
-                  <button
-                    key={route.id}
-                    type="button"
-                    aria-pressed={!!selected && routeKey(selected) === routeKey(route)}
-                    disabled={loading || locked}
-                    onClick={() => choosePopular(route)}
-                    {...chip()}
-                  >
-                    {routeLabel(route)}
-                  </button>
-                ))}
-              </fieldset>
-            )}
             <RouteCanvas
               source={{
                 network: field('sourceChain', choices.options.sourceChains),
@@ -1948,7 +1923,6 @@ const stepList = style({
 })
 const stepColumn = style({ minWidth: 0 })
 const stepBody = style({ marginBlockStart: tokens.spacing['3'] })
-const popularRow = style({ marginBlockEnd: tokens.spacing['3'] })
 const stepForm = style({
   marginBlockStart: tokens.spacing['3'],
   selectors: {

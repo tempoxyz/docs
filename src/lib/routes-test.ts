@@ -155,22 +155,6 @@ export function demoMethods(route: TestRoute): TestMethod[] {
   return methods
 }
 
-/**
- * Routes the demo offers as one-click picks, most common first. Only those the loaded directory
- * lists are shown, so a key's access policy or a retired route never leaves a dead chip.
- */
-const popularRouteIds = [
-  'eip155:8453/usdc-eip155:4217/ousd',
-  'eip155:1/usdc-eip155:4217/usdce',
-  'eip155:4217/ousd-eip155:8453/usdc',
-  'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp/usdc-eip155:4217/usdce',
-]
-export function popularRoutes(routes: TestRoute[]) {
-  return popularRouteIds.flatMap((id) => routes.find((route) => route.id === id) ?? [])
-}
-export const routeLabel = (route: TestRoute) =>
-  `${route.sourceChain.name} ${route.sourceToken.symbol} → ${route.destinationChain.name} ${route.destinationToken.symbol}`
-
 /** A link that opens the demo with this route selected. Only the route ID goes in the URL. */
 export function routeDemoHref(route: TestRoute) {
   return `/docs/routes/test?${new URLSearchParams({ route: route.id })}`

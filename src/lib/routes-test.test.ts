@@ -4,7 +4,6 @@ import {
   demoMethods,
   directorySchema,
   linkedRoute,
-  popularRoutes,
   quoteCosts,
   routeChoices,
   routeDemoHref,
@@ -172,12 +171,6 @@ describe('route test requests', () => {
     expect(quoteCosts({ ...base, fees: [{ amount: usd('1', 'ETH') }] }, 6)).toEqual({
       total: 10_000n,
     })
-  })
-  it('offers one-click picks only for popular routes the directory lists', () => {
-    const base = { ...route, id: 'eip155:8453/usdc-eip155:4217/ousd' }
-    const other = { ...route, id: 'eip155:1/usdt-eip155:4217/usdt0' }
-    expect(popularRoutes([other, base])).toEqual([base])
-    expect(popularRoutes([other])).toEqual([])
   })
   it('offers wallet transfers for EVM and Tron sources, and deposits everywhere', () => {
     expect(demoMethods(route)).toEqual(['transfer', 'depositAddress'])
