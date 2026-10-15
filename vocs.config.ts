@@ -529,7 +529,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Account features',
+        text: 'Features',
         items: [
           {
             text: 'Signing methods',
