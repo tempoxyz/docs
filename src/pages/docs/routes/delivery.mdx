@@ -5,23 +5,23 @@ description: "Distinguish source submission, destination delivery, and refunds w
 ogImage: /og/2026-q4/og_2026-q4_docs_routes-delivery_title-f5_v02.png
 ---
 
-import { OpenApi } from 'vocs'
-
 # Track delivery
 
 A successful source-chain transaction starts a route; it does not establish that the destination received funds. Keep the Routes object ID with your payment record and follow its status through delivery or refund.
 
 <span id="read-the-transfer-or-deposit" />
+<span id="check-status" />
 
-## Check status
+## Read the status
 
-For a transfer your application authorizes, use `GET /v1/routes/transfers/{id}`. Register the submitted source transaction hashes as described in [Make a transfer](/docs/routes/transfers).
+Read status with a key that has `routes:read`:
 
-For a deposit-address flow, list deposits with `GET /v1/routes/deposits`, filtering by `depositAddress`, then read each deposit with `GET /v1/routes/deposits/{id}`. The address being `active` says it can receive deposits; it does not describe a particular deposit's progress.
+| Flow | Read | Request builder |
+| --- | --- | --- |
+| Deposit address | `GET /v1/routes/deposits?depositAddress=…`, then `GET /v1/routes/deposits/{id}` for each deposit | [Track deposits](/docs/routes/deposits#track-deposits) |
+| Transfer | `GET /v1/routes/transfers/{id}`, after you register the source transaction hashes | [Confirm the transfer](/docs/routes/transfers#confirm-the-transfer) |
 
-Use the API key from [API setup](/docs/routes/api-setup) and enter the transfer `id` returned when you created it.
-
-<OpenApi.Playground operationId="getRoutesTransfer" anchors={false} />
+A deposit address being `active` says it can receive deposits; it does not describe a particular deposit's progress.
 
 <span id="keep-delivery-and-refund-states-distinct" />
 
@@ -47,10 +47,11 @@ Use the full [transfer](/docs/api/routes/transfers) or [deposit](/docs/api/route
 Keep `refunding` separate from `refunded`. Reconcile the returned refund amount and transaction references before updating the customer's balance. A refund and a successful delivery are different outcomes for the original payment.
 
 <span id="retry-a-create-request-safely" />
+<span id="retry-a-create-request" />
 
-### Retry a create request
+## Retry without duplicates
 
-Reuse the same `idempotency-key` for the same create request. Changing the input while keeping the key conflicts. If a response is lost, follow the endpoint's retry behavior before creating a replacement; a missing response does not prove that creation failed.
+A missing create response does not prove that creation failed. Retry with the same [idempotency key](/docs/routes/api-setup#set-idempotency-keys) and unchanged inputs to receive the original result before creating a replacement.
 
 ## Use funds after delivery
 

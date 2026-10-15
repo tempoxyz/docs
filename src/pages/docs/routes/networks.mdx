@@ -16,19 +16,19 @@ Read the route directory before offering a network or asset in your application.
 
 ## Available routes
 
-Every route in the live directory, with its funding methods and whether fee coverage is available. Your organization's access policy can narrow the routes your API key can use; the [Routes API demo](/docs/routes/test) lists them for your key.
+Every route in the live directory, with its funding methods and whether fee coverage is available. Choose **Try** to open a route in the [Routes demo](/docs/routes/test). Your organization's access policy can narrow the routes your API key can use; the demo lists them for your key.
 
 <SupportedRoutesTable />
 
-<span id="read-the-route-directory" />
+<span id="networks-and-tokens" />
 
-## Networks and tokens
+## Read the route directory
 
-Click **Try** to read the live directory. Filter by source or destination network and token to narrow the results. This request lists supported routes; it does not create a transfer or request a signature.
+Send the request below to read the directory your application builds its choices from. Filter by source or destination network and token to narrow the results. This request lists supported routes; it does not create a transfer or request a signature.
 
 <OpenApi.Playground operationId="listRoutes" anchors={false} />
 
-Public requests use the API's [public rate limit](/docs/api/rate-limits). For authenticated access, see [Routes API access](/docs/routes/transfers#set-up-routes-api-access).
+Requests without a key use the [public rate limit](/docs/api/rate-limits). To read the routes your organization can use, send a key with `data:read`; see [Set up API access](/docs/routes/api-setup).
 
 Use the returned source and destination chain/token pairs, funding methods, and amount modes to build the choices in your application. Pass `nextCursor` as `cursor` to read subsequent pages. Match tokens by network and contract address, not by symbol alone.
 
@@ -40,6 +40,6 @@ Use the returned source and destination chain/token pairs, funding methods, and 
 
 Once the user chooses a pair and amount, [request a quote](/docs/routes/quotes). Availability depends on those inputs and the funding method. Refresh the quote when the user changes them.
 
-Use [transfers](/docs/routes/transfers) when your app can authorize source transactions, or [deposit addresses](/docs/routes/deposits) when the sender pays independently.
+Use [deposit addresses](/docs/routes/deposits) when the sender pays independently, or [transfers](/docs/routes/transfers) when your app can authorize source transactions.
 
 For current request and response fields, see the [route directory reference](/docs/api/routes/routes). To integrate a bridge directly, see [bridge providers](/docs/partners/bridges).

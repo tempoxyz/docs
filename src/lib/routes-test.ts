@@ -130,6 +130,17 @@ export function demoMethods(route: TestRoute): TestMethod[] {
   return methods
 }
 
+/** A link that opens the demo with this route selected. Only the route ID goes in the URL. */
+export function routeDemoHref(route: TestRoute) {
+  return `/docs/routes/test?${new URLSearchParams({ route: route.id })}`
+}
+
+/** The route a demo link selects, if the directory still lists it. */
+export function linkedRoute(routes: TestRoute[], search: string) {
+  const id = new URLSearchParams(search).get('route')
+  return id ? routes.find((route) => route.id === id) : undefined
+}
+
 /** Subsidized 1:1 delivery applies to deposit addresses and exact-source transfers only. */
 export function canSubsidize(route: TestRoute, method: TestMethod, mode: TestMode) {
   return method === 'transfer'
@@ -176,8 +187,12 @@ function pricing(route: TestRoute, input: RouteInput) {
  * Quote parameters. Transfer quotes need the sender and recipient; deposit-address quotes price
  * the route alone, so their recipient and refund address are only asked for at creation.
  */
+/**
+ * Quotes use the creation inputs. The API lists a deposit quote's recipient and refund address as
+ * optional, but several deposit routes (Ethereum, Polygon, BNB, Tron) only quote with them.
+ */
 export function routeQuoteRequest(route: TestRoute, input: RouteInput) {
-  return input.method === 'transfer' ? routeTestRequest(route, input) : pricing(route, input)
+  return routeTestRequest(route, input)
 }
 
 /** The creation request body. */

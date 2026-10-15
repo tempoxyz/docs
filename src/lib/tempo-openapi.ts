@@ -140,7 +140,9 @@ export async function loadTempoOpenApi(source = canonicalSpecUrl) {
   if (remote) {
     const response = await fetch(source)
     if (!response.ok) throw new Error(`Failed to fetch Tempo OpenAPI: ${response.status}`)
-    spec = await response.json()
+    const body: unknown = await response.json()
+    if (!isObject(body)) throw new TypeError('Tempo OpenAPI must be a JSON object.')
+    spec = body
   } else spec = JSON.parse(await readFile(source, 'utf8'))
   return prepareTempoOpenApi(spec, remote ? source : canonicalSpecUrl)
 }

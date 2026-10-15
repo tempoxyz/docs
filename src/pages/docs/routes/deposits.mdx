@@ -13,11 +13,17 @@ Give customers a reusable address to fund from an external wallet. Each address 
 
 For payments already on Tempo, use [Receive payments](/docs/guide/payments/accept-a-payment). [Virtual addresses](/docs/guide/payments/virtual-addresses) attribute those payments to a shared Tempo balance; they are different from Routes deposit addresses.
 
-## Set up Routes API access
+<span id="set-up-routes-api-access" />
 
-Create a key with `routes:read` and `routes:write` using [API setup](/docs/routes/api-setup). Choose a route with deposit-address support from [Supported routes](/docs/routes/networks). Use the request builders below to try each operation and copy its generated code.
+## Prepare a deposit route
 
-The [complete cURL example](/docs/routes/examples/deposits) defines every input. Keep your API key on the backend; show only the returned funding instructions to customers.
+Before the first step, have:
+
+- A backend key with `routes:read` and `routes:write` from [Set up API access](/docs/routes/api-setup). Keep the key on the backend; show customers only the returned funding instructions.
+- A route with deposit-address support from [Supported routes](/docs/routes/networks).
+- A Tempo recipient, and a refund address on the source network.
+
+Each step below has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test) and choose **Deposit address**. The [cURL example](/docs/routes/examples/deposits) runs every step from a terminal.
 
 <span id="create-and-monitor-a-deposit-address" />
 
@@ -29,13 +35,15 @@ The [complete cURL example](/docs/routes/examples/deposits) defines every input.
 
 <OpenApi.Playground operationId="quoteRoutesDepositAddress" anchors={false} />
 
-Review the net destination amount, route deductions, and any separately listed fees before the sender authorizes funding. Check `quote.expiresAt` when returned and refresh expired terms. A quote prices the supplied amount; it does not establish receipt of funds. See [Quotes and fees](/docs/routes/quotes).
+Include the `recipient` and `refundAddress` you create the address with. Some routes, including those from Ethereum, Polygon, BNB Smart Chain, and Tron, return `quote_not_available` without them.
+
+Show the destination amount and fees as described in [Quotes and fees](/docs/routes/quotes), and refresh expired terms. A quote prices the supplied amount; it does not establish receipt of funds.
 
 <span id="create-a-reusable-address" />
 
 ### Create a deposit address
 
-Set a unique `idempotency-key` for the address creation and reuse it for retries with unchanged inputs.
+Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stored for this customer's address.
 
 <OpenApi.Playground operationId="createRoutesDepositAddress" anchors={false} />
 
@@ -55,12 +63,12 @@ Set `depositAddress` to the returned source-chain address, not its `rda_…` obj
 
 <OpenApi.Playground operationId="listRoutesDeposits" anchors={false} />
 
-The response lists deposits in `data`. Follow `nextCursor` for subsequent pages. Read each deposit with `GET /v1/routes/deposits/{id}` and reconcile its delivered amount and destination transaction references separately.
+The response lists deposits in `data`. Follow `nextCursor` for subsequent pages. Read each deposit with `GET /v1/routes/deposits/{id}`.
 
 :::::
 
 ## Reconcile delivery and refunds
 
-Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits. An active address can receive funds; a completed deposit confirms delivery to Tempo. Follow [Track delivery](/docs/routes/delivery) before crediting a balance or treating a refund as complete.
+Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits, so reconcile each deposit's delivered amount and destination transaction references separately. An active address can receive funds; only a completed deposit confirms delivery to Tempo.
 
-See the [Deposit addresses API reference](/docs/api/routes/deposit-addresses) for the full lifecycle.
+Continue with [Track delivery](/docs/routes/delivery) before crediting a balance or treating a refund as complete. See the [Deposit addresses API reference](/docs/api/routes/deposit-addresses) for the full lifecycle.

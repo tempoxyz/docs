@@ -1,15 +1,25 @@
 ---
-title: Routes API setup
+title: Set up API access
 seoTitle: Routes API Setup | Tempo Docs
-description: Configure API authentication and route request data for TypeScript, Python, and cURL examples.
+description: Create a Routes API key with the right scopes, configure your backend client, and set idempotency keys for create requests.
 ogImage: /og/2026-q4/og_2026-q4_docs_routes-api-setup_title-f5_v02.png
 ---
 
-# Routes API setup
+<span id="routes-api-setup" />
 
-Configure your backend to quote and create Routes transfers or deposit addresses. Confirm [beta access](/docs/routes), create a key in [Tempo Console](/docs/api/console), and keep the key out of browser code.
+# Set up API access
 
-Use `routes:read` for quotes and status and `routes:write` for create and registration requests. Authenticated route-directory reads require `data:read`.
+Configure your backend to call the Routes API. Confirm [beta access](/docs/routes), create a key in [Tempo Console](/docs/api/console), and keep the key out of browser code. Every Routes guide after this page assumes this setup.
+
+## Routes API key scopes
+
+| Scope | Allows |
+| --- | --- |
+| `routes:read` | Quotes, and transfer and deposit status reads |
+| `routes:write` | Creating transfers and deposit addresses, and registering source transactions |
+| `data:read` | Reading the [route directory](/docs/routes/networks) with your key, which applies your organization's access policy |
+
+The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it does not sign blockchain transactions.
 
 ## Configure the client
 
@@ -44,42 +54,24 @@ curl --fail-with-body 'https://api.tempo.xyz/v1/routes' \
 
 ::::
 
-Choose one of the request flows below. Continue its TypeScript or Python guide in the same file so it shares `api`, `headers`, and request variables. The transfer and deposit-address setup blocks are alternatives; do not paste both into one file.
+Each request builder in the flow guides generates cURL and TypeScript for its endpoint with these headers.
 
-## Prepare a transfer request
+<span id="prepare-a-transfer-request" />
+<span id="prepare-a-deposit-address-request" />
 
-Choose a live pair from [Supported routes](/docs/routes/networks). Save these fields in `route-request.json`, replacing the sample addresses with the accounts you intend to use. Check that the route supports `exactSource`; `amount` is in source-token base units. The sample illustrates a request shape, not a guarantee that this pair or amount is currently available.
+## Set idempotency keys
 
-```json
-{
-  "sourceChain": "base",
-  "sourceToken": "usdc",
-  "destinationChain": "tempo",
-  "destinationToken": "usdce",
-  "sender": "0x2222222222222222222222222222222222222222",
-  "recipient": "0x1111111111111111111111111111111111111111",
-  "amount": "1000000",
-  "mode": "exactSource"
-}
-```
-
-Load the request and assign one idempotency key for the create operation. Keep that key when retrying the same request; use a new key for a new operation.
+Create requests require an `idempotency-key` header. Assign one key per operation, such as one payment or one customer's deposit address, and store it with that record before sending the request:
 
 ::::code-group
 
 ```ts [TypeScript (fetch)]
-import { readFileSync } from 'node:fs'
-
-const transferRequest = JSON.parse(readFileSync('route-request.json', 'utf8'))
 const requestKey = crypto.randomUUID() // Persist with your payment record.
 ```
 
 ```python [Python (requests)]
-import json
 import uuid
 
-with open("route-request.json") as file:
-    transferRequest = json.load(file)
 requestKey = str(uuid.uuid4())  # Persist with your payment record.
 ```
 
@@ -90,47 +82,6 @@ ROUTE_REQUEST_KEY="my-payment-001"
 
 ::::
 
-Use the same request inputs for the [quote and create steps](/docs/routes/transfers). For source signing, use the account and network you selected; the API key does not sign blockchain transactions. See the [complete cURL example](/docs/routes/examples/transfers) to build the payload from environment variables.
+Reuse the key when you retry the same request with unchanged inputs. Matching requests replay the successful response for 24 hours; a request with changed inputs conflicts. Use a new key for a new operation.
 
-## Prepare a deposit-address request
-
-Choose a route with deposit-address support and save its details in `deposit-address-request.json`. The recipient is on Tempo; the refund address is on the source network. Replace the sample addresses and check the live route before using it.
-
-```json
-{
-  "sourceChain": "tron",
-  "sourceToken": "usdt",
-  "destinationToken": "usdt0",
-  "recipient": "0x1111111111111111111111111111111111111111",
-  "refundAddress": "TJRabPrwbZy45sbavfcjinPJC18kjpRTv8",
-  "amount": "1000000"
-}
-```
-
-Load that file as `depositRequest` and assign a separate `requestKey` for the address creation:
-
-::::code-group
-
-```ts [TypeScript (fetch)]
-import { readFileSync } from 'node:fs'
-
-const depositRequest = JSON.parse(readFileSync('deposit-address-request.json', 'utf8'))
-const requestKey = crypto.randomUUID() // Persist with your customer record.
-```
-
-```python [Python (requests)]
-import json
-import uuid
-
-with open("deposit-address-request.json") as file:
-    depositRequest = json.load(file)
-requestKey = str(uuid.uuid4())  # Persist with your customer record.
-```
-
-```bash [cURL (API)]
-ROUTE_REQUEST_KEY="my-deposit-address-001"
-```
-
-::::
-
-The transfer and deposit-address examples are separate flows; choose the matching request file and variables. Follow [Accept deposits](/docs/routes/deposits) or the [complete cURL example](/docs/routes/examples/deposits).
+Continue with [Supported routes](/docs/routes/networks) to choose a pair, then [Quotes and fees](/docs/routes/quotes).

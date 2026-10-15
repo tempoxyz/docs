@@ -16,7 +16,7 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
     'Create accounts, connect wallets, read balances, send and receive payments, and reconcile deposits.',
   earn: 'Choose a vault, deposit stablecoins, read positions, and withdraw. Earn is in beta; see the introduction for access.',
   routes:
-    'Accept cross-network deposits, quote transfers, and track delivery. Routes is in beta; see the introduction for access.',
+    'Move stablecoins between Tempo and other networks: try a route, set up API access, choose a supported route, quote it, accept deposits or make a transfer, and track delivery. Routes is in beta; see the introduction for access.',
   zones:
     'Connect to a Zone and work with private balances, deposits, and withdrawals. Zones is in limited preview; see the introduction for access. Earlier testnet sandbox guides describe a separate integration.',
   'machine-payments':
