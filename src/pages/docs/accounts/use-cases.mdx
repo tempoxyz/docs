@@ -1,0 +1,27 @@
+---
+title: Use cases
+seoTitle: What You Can Build with Tempo Accounts | Tempo Docs
+description: Consumer wallets, company treasuries, automated payments, and agent wallets, each with the keys its holders keep and the limits Tempo enforces.
+---
+
+# Use cases
+
+Each use case below gives a different party a different key, and Tempo enforces what each key can do on every transaction.
+
+## Consumer wallets
+
+The customer's passkey approves payments alone, and your wallet provider's key and a recovery provider's key approve only together, such as to replace the passkey when the customer loses their phone. Tempo rejects any payment the provider's key signs alone, so neither you nor the provider can move the customer's funds. See [Embed wallets with a provider](/docs/accounts/guides/users/embed-wallets), [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer), [Recover a user's account](/docs/accounts/guides/users/recover-an-account), and the other [Users guides](/docs/accounts/guides/users).
+
+## Business accounts and treasuries
+
+Each approver holds their own signer, and any two of three approve each payment, so no one moves the company's stablecoins alone. A team pays from its own budget, an access key with a daily limit, without asking the approvers each time, and an approver who leaves is removed without moving the funds. See [Set up a company treasury](/docs/accounts/guides/teams/company-treasury), [Give a team a budget](/docs/accounts/guides/teams/team-budget), and [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver).
+
+## Automated payments
+
+Your backend pays from a customer's account without prompting them: funding each card swipe, charging a subscription, sweeping idle balances into Earn, or sending scheduled transfers. The customer approves an access key for your backend once, and Tempo holds it to its spending limit, recipients, and expiry, so a leaked backend key can't drain the account. See [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program), [Sweep idle balances into Earn](/docs/accounts/guides/automations/sweep-into-earn), and [Pay approved recipients from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend).
+
+## Agent wallets
+
+An AI agent holds its own access key, with a budget, an expiry, and scopes that list the calls it may make. Tempo rejects any transaction outside those bounds, whatever the agent decides, and you revoke the key to stop it. See [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) and [Let an agent pay for APIs](/docs/accounts/guides/agents/pay-for-apis).
+
+Automated payments and agent wallets run on mainnet and testnet with a single-key account. Consumer wallets with several signers, and treasuries, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).

@@ -1,0 +1,37 @@
+---
+title: "Add funds"
+seoTitle: "Add Funds to a Tempo Account | Tempo Docs"
+description: Receive stablecoins from another account, add funds through Tempo Wallet or an onramp, bring them from another chain, and give each customer a deposit address.
+---
+
+# Add funds
+
+A Tempo account holds stablecoins at its address. Choose how money reaches that address: from another Tempo account, a card or bank, or another chain.
+
+## Receive from another Tempo account
+
+A sender needs only the account's address. Share it, then [verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
+
+## Add funds with Tempo Wallet
+
+[Tempo Wallet](/docs/guide/getting-funds#tempo-wallet) has a built-in onramp and funding from other chains. To open it from your app, add a funding button with the Accounts SDK, which requests [`wallet_deposit`](/docs/guide/getting-funds#open-funding-with-the-accounts-sdk) for the connected account.
+
+## Pay by card or bank
+
+Onramp partners turn a card or bank payment into stablecoins sent to the account. [MoonPay](/docs/partners/payments-and-ramps#moonpay) and [Mt Pelerin](/docs/partners/payments-and-ramps#mt-pelerin) embed a hosted buy flow, and [Bridge](/docs/partners/payments-and-ramps#bridge) offers virtual bank accounts for incoming funds; businesses on [Stripe](/docs/partners/payments-and-ramps#stripe) can receive and hold stablecoins with Stripe Treasury. See [Payments & ramps](/docs/partners/payments-and-ramps) for the full list.
+
+## Bring funds from another chain
+
+[Tempo Routes](/docs/routes) moves stablecoins from supported networks to a Tempo account. Make a [transfer](/docs/routes/transfers) your app authorizes, or give customers a [Routes deposit address](/docs/routes/deposits) to fund from an external wallet.
+
+## Accept only what you want
+
+A [receive policy](/docs/accounts/policies/receive-policies) sets which stablecoins and senders can pay the account. Tempo holds anything else instead of crediting it, so check the recipient before you credit a payment.
+
+## Give each customer a deposit address
+
+If you run one omnibus account for many customers, give each customer a [virtual address](/docs/accounts/virtual-addresses). Every deposit lands in your account, and its transfer events name the customer it belongs to.
+
+## Get test funds
+
+For development, the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) has a faucet that sends test stablecoins, including pathUSD, to any address. On testnet, use the [Tempo Faucet](/docs/guide/getting-funds#testnet-funds) for OUSD and other test stablecoins.

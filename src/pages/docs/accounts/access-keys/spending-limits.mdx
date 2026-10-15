@@ -2,7 +2,10 @@
 title: Spending limits
 seoTitle: TIP-20 Spending Limits for Access Keys on Tempo | Tempo Docs
 description: Cap how much of each TIP-20 token an access key can spend, once or per period, then read what's left or change the limit without revoking the key.
+interactive: true
 ---
+
+import { TidxQuery } from '../../../../components/TidxQuery'
 
 # Spending limits
 
@@ -43,6 +46,19 @@ Assets other than TIP-20 tokens, such as NFTs, don't count, and neither does a `
 Read what a key can still spend with viem's [`accessKey.getRemainingLimit`](https://viem.sh/tempo/actions/accessKey.getRemainingLimit). It returns `remaining` and `periodEnd`.
 
 `remaining` is what the key can spend now, and it reads as the full limit once a period ends. `periodEnd` is when the current period ends, as a Unix timestamp, or `0` for a one-time limit. A missing, revoked, or expired key reads as zero.
+
+Each payment an access key signs emits an `AccessKeySpend` event with the amount spent and the limit left, both in base units, so the indexer shows the spend history behind one key; replace the account and key addresses with yours.
+
+<TidxQuery
+  network="mainnet"
+  signature="AccessKeySpend(address indexed account, address indexed publicKey, address indexed token, uint256 amount, uint256 remainingLimit)"
+  sql={`SELECT token, amount, remainingLimit, block_num, tx_hash
+FROM AccessKeySpend
+WHERE account = '0x1e0c78105f12079899f7165eb1f74891d4d0f57f'
+  AND publicKey = '0xb9f81dd7e629d2ec01e363c7a174c0f4ebe723e3'
+ORDER BY block_num DESC
+LIMIT 10`}
+/>
 
 <span id="change-an-access-key" />
 
