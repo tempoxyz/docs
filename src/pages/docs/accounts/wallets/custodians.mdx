@@ -1,0 +1,27 @@
+---
+title: Custodians
+seoTitle: Use Fireblocks and Other Custodians with Tempo Accounts | Tempo Docs
+description: Custodians such as Fireblocks send stablecoins on Tempo like on any EVM chain. See which Tempo features they support, how to set fee tokens on custody addresses, and how to attribute deposits in an omnibus wallet.
+---
+
+# Custodians
+
+Custodians such as Fireblocks and Anchorage hold keys for institutions, often in an omnibus wallet that holds many clients' funds. A custodian that supports Tempo sends stablecoins here like on any EVM chain. Which [Tempo Transaction](/docs/guide/tempo-transaction) features you also get depends on the custodian.
+
+## What custodians support on Tempo
+
+[Fireblocks](https://developers.fireblocks.com) sends Tempo Transactions with a fee token you choose. Its Tempo transfer API, in beta, also offers parallel and expiring nonces, fee sponsorship from another vault in the same workspace, and memos. A vault can authorize an [access key](/docs/accounts/access-keys) with a contract call to the [Account Keychain](/docs/protocol/transactions/AccountKeychain), and [raw signing](https://developers.fireblocks.com/docs/raw-signing) covers the rest, behind a policy rule that allows it.
+
+Other custodians may support only withdrawals of listed stablecoins, and pick the fee token themselves. Ask yours whether it sends Tempo Transactions or signs raw hashes. [Partners](/docs/partners/wallets#custodial--institutional) lists custodians that support Tempo.
+
+## Choose the fee token for custody addresses
+
+Tempo has no gas token: every transaction pays its fee in a USD stablecoin. Set a [default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each custody address, usually the stablecoin it holds, such as OUSD. Without one, a stablecoin transfer pays its fee in the stablecoin it sends, and other calls pay in pathUSD ([fee token precedence](/docs/accounts/fees#fee-token-precedence)).
+
+## Attribute deposits in an omnibus wallet
+
+Give each client a [deposit address](/docs/guide/payments/virtual-addresses) that forwards to the omnibus wallet, so each deposit's transfer event names the client it belongs to. For payments out, add a memo with your internal reference.
+
+## Control what arrives
+
+A [receive policy](/docs/accounts/policies/receive-policies) lets a custody address accept only the stablecoins and senders you allow. Tempo holds anything else for recovery instead of crediting it.

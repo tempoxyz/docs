@@ -523,11 +523,10 @@ export default defineConfig({
           { text: 'Overview', link: '/docs/accounts' },
           { text: 'How it works', link: '/docs/accounts/how-it-works' },
           { text: 'Create an account', link: '/docs/accounts/create' },
-          { text: 'Legacy accounts', link: '/docs/accounts/create/legacy-accounts' },
         ],
       },
       {
-        text: 'Setup',
+        text: 'Account features',
         items: [
           {
             text: 'Signing methods',
@@ -579,6 +578,15 @@ export default defineConfig({
               { text: 'Fee sponsorship', link: '/docs/accounts/fees/fee-sponsorship' },
             ],
           },
+        ],
+      },
+      {
+        text: 'Wallets',
+        items: [
+          { text: 'Browser wallets', link: '/docs/accounts/wallets/browser-wallets' },
+          { text: 'Embedded wallets', link: '/docs/accounts/wallets/embedded-wallets' },
+          { text: 'Server wallets', link: '/docs/accounts/wallets/server-wallets' },
+          { text: 'Custodians', link: '/docs/accounts/wallets/custodians' },
         ],
       },
       {
@@ -1468,6 +1476,11 @@ export default defineConfig({
     {
       source: '/docs/accounts/admin-keys',
       destination: '/docs/accounts/access-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/create/legacy-accounts',
+      destination: '/docs/accounts/wallets/browser-wallets',
       status: 301,
     },
     {
