@@ -8,31 +8,34 @@ description: Configurable accounts separate an account's address from its keys, 
 
 A Tempo account can change the keys behind its address, so a switch to quantum-safe signatures doesn't mean moving funds.
 
-A large enough quantum computer could break the signatures that protect most crypto accounts today, including the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys. Tempo doesn't accept quantum-safe signatures yet. What Tempo accounts do today is remove the hardest part of that switch: on a [configurable account](/docs/development/configurable-accounts), the address doesn't come from any one key, so you can replace every key behind it and keep the same address, balances, and integrations.
+Crypto accounts today are protected by signatures that a large enough quantum computer could forge, including the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys. On most chains, replacing those keys means moving every account to a new address. A [configurable Tempo account](/docs/development/configurable-accounts) keeps its address while its keys change, so when quantum-safe signatures are available, the account switches keys and keeps its address, balances, and integrations.
 
-## Why the address matters
+## What a new key costs on most chains
 
-On most chains, including Ethereum, an account's address is computed from its public key. A new key means a new address, so moving to a new kind of key means moving everything: balances, token approvals, addresses that counterparties have allowlisted, and every record that stores the address. Across a whole network, that migration depends on every user and every integration finishing in time.
+Take a payroll company that holds stablecoins at one address. Its bank, its exchange, and hundreds of contractors have that address on allowlists and in their records, and its payment providers hold token approvals from it.
 
-A [single-key Tempo account](/docs/development/single-key-accounts#single-key-address-derivation) works the same way: its key fixes its address. A configurable account's address is computed from the account's first configuration instead ([configurable account address](/docs/development/configurable-accounts#configurable-account-address)). After that, the account changes its signers through configuration updates, and the address stays the same.
+On Ethereum, an address is computed from its public key, so a new key is a new address. To move to a quantum-safe key, the company would create a new address, move every balance to it, grant every token approval again, and ask each counterparty to update its allowlists and records. Every account on the network would have to do the same, and all of it before quantum computers can break the old keys.
 
-So for a configurable account, a future move to quantum-safe keys is a key change, not a move to a new address.
+## How a Tempo account keeps its address
 
-## What Tempo accounts already let you do
+A configurable account's address is computed from the account's first configuration, not from any one key ([configurable account address](/docs/development/configurable-accounts#configurable-account-address)). Its signers are a list the account can change through configuration updates, and the address stays the same through every change.
 
-These are the same steps a move to quantum-safe keys would use, once Tempo supports them:
+A [single-key Tempo account](/docs/development/single-key-accounts#single-key-address-derivation) works like an Ethereum account: its key fixes its address. It can [upgrade in place](/docs/accounts/key-management/account-upgrade) to a configurable account at the same address.
 
-- **Replace keys and keep the address.** [Add a signer](/docs/accounts/key-management/add-signers) and [remove the old one](/docs/accounts/key-management/remove-signers), or swap one for the other in a single update.
-- **Retire an existing key without moving funds.** [Upgrade a single-key account](/docs/accounts/key-management/account-upgrade) in place to a configurable account. Its original key then approves only if you list it as a signer.
-- **Keep everyday keys bounded and replaceable.** [Access keys](/docs/accounts/access-keys) pay within limits and expire, and you can revoke and reissue them without touching the account's signers.
+## Switching the payroll company's keys
 
-## What isn't built yet
+Here's how the payroll company would move to quantum-safe keys on Tempo:
 
-Tempo accounts accept secp256k1, P-256, and passkey signatures today, and a large enough quantum computer could break all three. Adding a quantum-safe key type is a separate protocol change.
+1. **It upgrades its account in place.** The company's original key signs one upgrade, and the account becomes a configurable account at the same address. From then on, the original key approves only if the company lists it as a signer.
+2. **It adds a quantum-safe signer.** Once Tempo supports a quantum-safe key type, the company [adds a signer](/docs/accounts/key-management/add-signers) with that key type.
+3. **It removes the old keys in the same update.** The old keys approve that one update, which adds the new signer and [removes the old ones](/docs/accounts/key-management/remove-signers) together, so there's no point afterward when an old key still controls the account. The address, balances, and token approvals don't change, and the company's counterparties don't have to do anything.
+4. **It replaces its backend's keys.** The company's payroll backend pays with an [access key](/docs/accounts/access-keys) that has its own limits and expiry. The company revokes it and authorizes a replacement without touching the account's signers.
 
-## What you need to do early
+Steps 1, 3, and 4 use features Tempo accounts already have. Step 2 needs a quantum-safe key type, which Tempo doesn't support yet: Tempo accounts accept secp256k1, P-256, and passkey signatures today, and a large enough quantum computer could break all three. Adding a quantum-safe key type is a separate protocol change.
 
-Changing keys only helps while the old keys are still safe. Once an attacker can work out a key from its public key, the attacker and the real owner look the same to Tempo, and nothing can tell them apart. Accounts need to move to new keys before old signatures can be broken, not after.
+## Why the switch has to happen early
+
+Changing keys only protects an account while its old keys are still safe. Once an attacker can work out a private key from its public key, the attacker and the real owner look the same to Tempo, and nothing can tell them apart. So the company needs to retire its old keys before they can be broken, not after.
 
 A retired key can also still act outside the account's own rules:
 
