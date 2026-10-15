@@ -1,11 +1,14 @@
 ---
 name: tempo-docs
-description: Find and explain official Tempo documentation for stablecoin accounts and payments, Earn vaults, Routes, Zones, Machine Payments, Tempo EVM, APIs, SDKs, CLI tools, and ecosystem integrations. Use for Tempo integration questions, code examples, protocol behavior, and documentation lookup.
+description: Find and explain official Tempo documentation for stablecoin accounts and payments, passkeys, fee sponsorship, TIP-20 issuance, the Stablecoin DEX, Earn, Routes, Zones, Machine Payments (MPP), Tempo EVM contracts, nodes and network upgrades, the Tempo API and indexer, SDKs, CLI tools, and partner integrations. Use when building on Tempo, integrating or reviewing Tempo code, or answering Tempo developer and protocol questions.
+license: MIT OR Apache-2.0
 ---
 
 # Tempo Docs
 
-Use the documentation for the reader's task. Start with a product guide, then read the API, SDK, or protocol reference needed to implement it.
+Use the documentation for the reader's task. Start with a product guide, then read the API, SDK, or protocol reference needed to implement it. Do not guess RPC or service URLs, contract addresses, chain IDs, fee tokens, package APIs, or protocol details; verify them from the docs before answering or writing code.
+
+This skill is read-only. It may retrieve and explain documentation, but it must not install software, authenticate or fund wallets, change keys or credentials, call paid services, sign messages or transactions, or submit transactions. Those actions require a separate tool or plugin. To set up the Tempo CLI and Tempo Wallet, fund a wallet, or make paid requests, switch to the Tempo CLI skill at `https://tempo.xyz/SKILL.md`, which performs that setup. For other actions, link the relevant documentation and name the tool that performs them, such as the paid tools in [Build with AI](https://tempo.xyz/developers/docs/guide/using-tempo-with-ai.md).
 
 ## Choose the documentation section
 
@@ -25,11 +28,13 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 
 Accounts covers application payment workflows; Tempo EVM covers the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.
 
+Within Tempo EVM, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
+
 Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in the limited preview.
 
 ## Find and read the evidence
 
-Use the hosted MCP server at `https://mcp.tempo.xyz` when available:
+Prefer the hosted MCP server at `https://mcp.tempo.xyz` when available:
 
 | Tool | Use it to… |
 | --- | --- |
@@ -38,7 +43,7 @@ Use the hosted MCP server at `https://mcp.tempo.xyz` when available:
 | `read_page` | Read a documentation page using its returned source and path or URL. |
 | `code` | Combine multiple documentation lookups. |
 
-Read the relevant pages before answering. The hosted MCP index can lag a branch or deployment: if a section is missing or the result uses older navigation, fetch the documentation directly from the site being reviewed. A missing search result does not mean a product is unavailable.
+Read the relevant pages before answering or changing code. If MCP is unavailable, read pages from `https://tempo.xyz/developers` directly. The hosted MCP index can lag a branch or deployment: if a section is missing or the result uses older navigation, fetch the documentation from the site being reviewed. A missing search result does not mean a product is unavailable.
 
 - [Documentation index](https://tempo.xyz/developers/llms.txt): every page grouped by the current navigation.
 - [Full documentation](https://tempo.xyz/developers/llms-full.txt): all exported pages with their section and source URL. Prefer individual pages for focused questions.
@@ -49,10 +54,13 @@ For MPP behavior, cross-check [MPP documentation](https://mpp.dev/llms.txt). For
 ## Keep answers grounded
 
 - Check network, availability, authentication, supported operations, and response shapes on the relevant page. A product plan or earlier sandbox example is not evidence of current availability.
-- Tempo Mainnet uses chain ID `4217`. Moderato is Tempo Testnet, with chain ID `42431`. Faucet-issued `pathUSD` is testnet money; do not confuse it with a mainnet balance or asset.
+- Tempo Mainnet uses chain ID `4217`. Moderato is Tempo Testnet, with chain ID `42431`. Read RPC and explorer URLs from [Network details](https://tempo.xyz/developers/docs/quickstart/connection-details.md). Use Mainnet for production examples and Testnet only when the reader asks or the workflow requires it; when the network is unclear, name the one you chose.
+- `pathUSD` is live on Tempo Mainnet. Faucet-issued `pathUSD` on Tempo Testnet shares its address but is testnet money; do not confuse it with a mainnet balance or asset.
 - An API key authenticates API requests. Account signing keys and access keys authorize onchain transactions. They are not interchangeable.
-- Prefer the short Viem example on a task page; use CLI, Wagmi, or runnable API examples when they fit the reader's environment. Follow its linked client setup instead of inventing missing configuration.
+- Keep access-key expiry, spending limits, and call scopes as narrow as the task allows. Access keys cannot sign a top-level contract creation.
+- Transfer memos are 32 bytes, not 32 characters. Use them for short reconciliation references such as invoice or order IDs.
+- Prefer the short Viem example on a task page; use CLI, Wagmi, Foundry, or runnable API examples when they fit the reader's environment, and match the reader's existing code patterns. Follow the linked client setup instead of inventing missing configuration.
 - Interactive walkthroughs run on the web page. Markdown exports describe the steps and link to references; they do not execute transactions.
 - Keep explanations concise. Link the pages supporting the answer and state any unverified behavior.
 
-This skill guides documentation lookup. It does not authorize transactions, credential changes, or sending feedback. Send sanitized documentation feedback only when the user asks, using `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and relevant `toolName` or `relatedResource`.
+The only write this skill supports is documentation feedback, and only when the user asks: send sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, `message`, and relevant `toolName` or `relatedResource`.
