@@ -522,7 +522,14 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/docs/accounts' },
           { text: 'How it works', link: '/docs/accounts/how-it-works' },
-          { text: 'Security', link: '/docs/accounts/security' },
+          {
+            text: 'Security',
+            link: '/docs/accounts/security',
+            collapsed: true,
+            items: [
+              { text: 'Post-quantum accounts', link: '/docs/accounts/security/post-quantum' },
+            ],
+          },
           { text: 'Use cases', link: '/docs/accounts/use-cases' },
           { text: 'Create an account', link: '/docs/accounts/create' },
           { text: 'Add funds', link: '/docs/accounts/fund' },
@@ -1601,11 +1608,6 @@ export default defineConfig({
     {
       source: '/docs/accounts/guides/backend-automation',
       destination: '/docs/accounts/guides/automations/pay-out-from-a-backend',
-      status: 301,
-    },
-    {
-      source: '/docs/accounts/security',
-      destination: '/docs/accounts/guides/users/add-a-recovery-signer',
       status: 301,
     },
     {

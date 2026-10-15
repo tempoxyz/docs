@@ -1,0 +1,49 @@
+---
+title: Post-quantum accounts
+seoTitle: Post-Quantum Readiness for Tempo Accounts | Tempo Docs
+description: Configurable accounts separate an account's address from its keys, so switching to quantum-safe signatures later means changing keys, not moving every balance to a new address.
+---
+
+# Post-quantum accounts
+
+A Tempo account can change the keys behind its address, so a switch to quantum-safe signatures doesn't mean moving funds.
+
+A large enough quantum computer could break the signatures that protect most crypto accounts today, including the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys. Tempo doesn't accept quantum-safe signatures yet. What Tempo accounts do today is remove the hardest part of that switch: on a [configurable account](/docs/development/configurable-accounts), the address doesn't come from any one key, so you can replace every key behind it and keep the same address, balances, and integrations.
+
+## Why the address matters
+
+On most chains, including Ethereum, an account's address is computed from its public key. A new key means a new address, so moving to a new kind of key means moving everything: balances, token approvals, addresses that counterparties have allowlisted, and every record that stores the address. Across a whole network, that migration depends on every user and every integration finishing in time.
+
+A [single-key Tempo account](/docs/development/single-key-accounts#single-key-address-derivation) works the same way: its key fixes its address. A configurable account's address is computed from the account's first configuration instead ([configurable account address](/docs/development/configurable-accounts#configurable-account-address)). After that, the account changes its signers through configuration updates, and the address stays the same.
+
+So for a configurable account, a future move to quantum-safe keys is a key change, not a move to a new address.
+
+## What Tempo accounts already let you do
+
+These are the same steps a move to quantum-safe keys would use, once Tempo supports them:
+
+- **Replace keys and keep the address.** [Add a signer](/docs/accounts/key-management/add-signers) and [remove the old one](/docs/accounts/key-management/remove-signers), or swap one for the other in a single update.
+- **Retire an existing key without moving funds.** [Upgrade a single-key account](/docs/accounts/key-management/account-upgrade) in place to a configurable account. Its original key then approves only if you list it as a signer.
+- **Keep everyday keys bounded and replaceable.** [Access keys](/docs/accounts/access-keys) pay within limits and expire, and you can revoke and reissue them without touching the account's signers.
+
+## What isn't built yet
+
+- **No quantum-safe signature type.** Tempo accounts accept secp256k1, P-256, and passkey signatures today, and all three are breakable by a large enough quantum computer. Adding a quantum-safe key type is a separate protocol change.
+- **Configurable accounts aren't on mainnet.** They run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), and their specifications are drafts.
+
+## What you need to do early
+
+Changing keys only helps while the old keys are still safe. Once an attacker can work out a key from its public key, the attacker and the real owner look the same to Tempo, and nothing can tell them apart. Accounts need to move to new keys before old signatures can be broken, not after.
+
+A retired key can also still act outside the account's own rules:
+
+- **On other chains.** A secp256k1 key controls the same address on other EVM chains, whatever happens to it on Tempo.
+- **In contracts that check signatures themselves.** Contracts such as Permit2 verify signatures on their own, so they may still accept the original key ([what an upgrade changes](/docs/accounts/key-management/account-upgrade#what-an-upgrade-changes)).
+
+## Post-quantum account specifications
+
+- [TIP-1107](https://tips.sh/1107): configurable accounts
+- [TIP-1109](https://tips.sh/1109): configuration updates
+- [TIP-1110](https://tips.sh/1110): configurable account addresses
+- [TIP-1113](https://tips.sh/1113): upgrading a single-key account in place
+- [Configurable accounts](/docs/development/configurable-accounts) and [single-key accounts](/docs/development/single-key-accounts) in Tempo EVM

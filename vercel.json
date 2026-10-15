@@ -1322,11 +1322,6 @@
       "permanent": true
     },
     {
-      "source": "/developers/docs/accounts/security",
-      "destination": "/developers/docs/accounts/guides/users/add-a-recovery-signer",
-      "permanent": true
-    },
-    {
       "source": "/developers/docs/accounts/security-policies",
       "destination": "/developers/docs/accounts/policies/signing-thresholds",
       "permanent": true
