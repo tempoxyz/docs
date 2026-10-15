@@ -5,6 +5,7 @@ description: Receive stablecoins from another account, add funds through Tempo W
 interactive: true
 ---
 
+import { DocsLinkCards } from '../../../components/DocsLinkCards'
 import * as Demo from '../../../components/guides/Demo.tsx'
 import { DepositToTempoWallet } from '../../../components/guides/steps/wallet/DepositToTempoWallet.tsx'
 import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo.tsx'
@@ -13,21 +14,19 @@ import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInW
 
 Stablecoins reach a Tempo account at its address, from another Tempo account, a card or bank, or another chain.
 
-Pick the path that matches where the money starts: another Tempo account, Tempo Wallet, a card or bank, or another chain. Whichever path you use, confirm the transfer reached the account before you credit the payment, because a [receive policy](/docs/accounts/policies/receive-policies) can hold funds instead of crediting them.
+Whichever path you use, confirm the transfer reached the account before you credit the payment, because a [receive policy](/docs/accounts/policies/receive-policies) can hold funds instead of crediting them.
 
-## Get test funds
+## Choose a funding path
 
-For development, the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) has a [faucet](/docs/accounts/create#fund-an-account-on-devnet) that sends test stablecoins, including pathUSD, to any address. On Moderato testnet, use the [Tempo Faucet](/docs/guide/getting-funds#testnet-funds) for OUSD and other test stablecoins. The rest of this page covers real funds.
+<DocsLinkCards collection="funding" />
 
-## Receive from another Tempo account
+<span id="add-funds-with-tempo-wallet" />
 
-A sender needs only the account's address. Share it, then [verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
+## Add money with Tempo Wallet
 
-## Add funds with Tempo Wallet
+[Tempo Wallet](https://wallet.tempo.xyz) includes a fiat onramp and funding from other chains. Select **Connect Tempo Wallet** below, then **Add funds**, and choose a funding method in the wallet. The wallet shows the available methods, amount, and any fees before you confirm.
 
-[Tempo Wallet](https://wallet.tempo.xyz) lets the user fund the account through its built-in onramp or from other chains. Select **Connect Tempo Wallet** below, then **Add funds** to open the wallet's funding popup and choose a method. The wallet shows the amount and any fees before you confirm.
-
-This demo uses **Tempo Mainnet** and real funds.
+This demo opens the funding flow for **Tempo Mainnet**, using real funds.
 
 <Demo.Container name="Add Funds" showBadge={false}>
   <SignInWithTempo stepNumber={1} />
@@ -35,6 +34,38 @@ This demo uses **Tempo Mainnet** and real funds.
 </Demo.Container>
 
 To add the same button to your app, request [`wallet_deposit`](/docs/guide/getting-funds#open-funding-with-the-accounts-sdk) with the Accounts SDK. A resolved request doesn't mean the account is funded yet, so [verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
+
+### With the CLI
+
+After [setting up Tempo Wallet in the CLI](/docs/cli/wallet), run:
+
+```bash
+tempo wallet fund
+```
+
+### With an agent
+
+Paste this into your agent to set up Tempo Wallet and add funds:
+
+:::code-group
+```bash [Claude Code]
+claude -p "Read https://tempo.xyz/skills/wallet/SKILL.md and fund my Tempo Wallet"
+```
+```bash [Amp]
+amp --execute "Read https://tempo.xyz/skills/wallet/SKILL.md and fund my Tempo Wallet"
+```
+```bash [Codex CLI]
+codex exec "Read https://tempo.xyz/skills/wallet/SKILL.md and fund my Tempo Wallet"
+```
+:::
+
+## Get test funds
+
+For development, the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) has a [faucet](/docs/accounts/create#fund-an-account-on-devnet) that sends test stablecoins, including pathUSD, to any address. On Moderato testnet, use the [Tempo Faucet](/docs/guide/getting-funds#testnet-funds) for OUSD and other test stablecoins.
+
+## Receive from another Tempo account
+
+A sender needs only the account's address. Share it, then [verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
 
 ## Pay by card or bank
 
