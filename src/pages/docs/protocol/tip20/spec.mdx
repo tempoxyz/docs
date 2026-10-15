@@ -128,6 +128,9 @@ interface ITIP20 {
     /// @param from The address to burn tokens from (must be unauthorized by transfer policy)
     /// @param amount The amount of tokens to burn
     function burnBlocked(address from, uint256 amount) external;
+
+    /// @notice Burns from any unprotected account (requires BURN_AT_ROLE)
+    function burnAt(address from, uint256 amount) external;
     
     /// @notice Returns the quote token used for DEX pairing
     /// @return The quote token address
@@ -200,6 +203,9 @@ interface ITIP20 {
     /// @notice Returns the BURN_BLOCKED_ROLE constant
     /// @return keccak256("BURN_BLOCKED_ROLE")
     function BURN_BLOCKED_ROLE() external view returns (bytes32);
+
+    /// @notice Returns keccak256("BURN_AT_ROLE")
+    function BURN_AT_ROLE() external view returns (bytes32);
     
     /// @notice Returns the ISSUER_ROLE constant
     /// @return keccak256("ISSUER_ROLE")
@@ -284,6 +290,8 @@ interface ITIP20 {
     /// @param from The blocked address whose tokens were burned
     /// @param amount The amount of tokens that were burned
     event BurnBlocked(address indexed from, uint256 amount);
+
+    event BurnAt(address indexed burner, address indexed from, uint256 indexed amount);
 
     /// @notice Emitted when new tokens are minted to an address
     /// @param to The address receiving the minted tokens
@@ -436,7 +444,7 @@ Memo functions `transferWithMemo`, `transferFromWithMemo`, `mintWithMemo`, and `
 ## TIP-403 Transfer Policies
 Transfers and memo transfers require the source to pass `isAuthorizedSender` and the resolved destination to pass `isAuthorizedRecipient`. Minting checks `isAuthorizedMintRecipient` for the resolved destination, in addition to issuer-role, pause, and supply-cap checks. A failed policy check reverts with `PolicyForbids`.
 
-`burn` and `burnWithMemo` burn the issuer's own balance without a TIP-403 policy check. `burnBlocked` requires the source to fail the sender-policy check. T12 adds privileged `burnAt`, which ignores transfer-policy authorization but retains its role, pause, balance, and protected-address checks; see [T12](/docs/protocol/upgrades/t12).
+`burn` and `burnWithMemo` burn the issuer's own balance without a TIP-403 policy check. `burnBlocked` requires the source to fail the sender-policy check. `burnAt(from, amount)` MUST require `BURN_AT_ROLE` and an unpaused token. It ignores transfer-policy authorization, debits `from`, reduces total supply, and emits both `Transfer(from, address(0), amount)` and `BurnAt(msg.sender, from, amount)`. Insufficient balance and protected sources revert. If `from == tx.origin`, the burn also consumes the transaction access key's spending limit, including when a contract invokes the burn.
 
 ### Receiver-policy holds
 
@@ -490,7 +498,8 @@ Pause controls `pause` and `unpause` govern token movement. When paused, transfe
 TIP-20 uses a role-based authorization system. The main roles are:
 - `ISSUER_ROLE`: controls minting and burning.  
 - `PAUSE_ROLE` / `UNPAUSE_ROLE`: controls the token’s paused state.  
-- `BURN_BLOCKED_ROLE`: allows burning balances belonging to addresses that fail TIP-403 authorization.  
+- `BURN_BLOCKED_ROLE`: allows burning unprotected balances belonging to addresses that fail the TIP-403 sender check.
+- `BURN_AT_ROLE`: allows burning any unprotected balance without TIP-403 authorization.
 
 Roles are assigned and managed through `grantRole`, `revokeRole`, `renounceRole`, and `setRoleAdmin`, via the contract admin.
 
