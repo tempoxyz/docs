@@ -169,7 +169,7 @@ Allows anyone to trigger distribution of accumulated fees for a specific token t
 function collectedFees(address validator, address token) external view returns (uint256)
 ```
 
-Returns the amount of accumulated fees for a validator and specific token that can be claimed via `distributeFees(validator, token)`.
+Returns the amount of accumulated fees for a validator and specific token. Distribution through `distributeFees(validator, token)` is subject to the token-transfer rules below.
 
 ### Swap Mechanisms
 
@@ -209,6 +209,12 @@ Returns the amount of accumulated fees for a validator and specific token that c
 
 3. **Fee Distribution**:
    - Validators (or anyone) can call `distributeFees(validator, token)` at any time to transfer accumulated fees to the validator
+
+### Fee-policy authorization
+
+Before fee collection, the fee token MUST authorize the fee payer as sender. FeeManager's recipient authorization is not required for this protocol fee deposit. Refunds of unused fees to the original payer skip issuer recipient-policy and receive-policy evaluation, including when the transaction has paused the token. These exemptions apply only to the internal fee lifecycle, not public liquidity operations or fee distribution.
+
+A nonzero `distributeFees` transfer MUST check FeeManager as sender and the resolved validator as recipient, with ordinary pause and receive-policy behavior. A receiver-policy rejection holds the distribution in ReceivePolicyGuard. If issuer policy blocks FeeManager as sender, distribution MUST revert even when collecting same-token fees succeeded. `collectedFees` records an accounting entitlement, not a guarantee that current token policy permits payout.
 
 ### Events
 
