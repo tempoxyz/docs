@@ -551,7 +551,7 @@ interface ITIP20Factory {
     /// @dev
     ///  - Computes the TIP-20 deployment address as TIP20_PREFIX || lowerBytes,
     ///    where lowerBytes is the highest 64 bits of keccak256(msg.sender, salt)
-    ///  - Reverts with AddressReserved if lowerBytes < 1000
+    ///  - Reverts with AddressReserved if lowerBytes < 1024
     ///  - Ensures the provided quote token is itself a valid TIP-20
     ///  - Enforces USD-denomination rules (USD tokens must use USD quote tokens)
     ///  - Initializes the token with default settings:
