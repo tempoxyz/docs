@@ -241,7 +241,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 
 - Creates a new key entry with `is_admin = true`.
 - Emits the existing `KeyAuthorized` event and the additional `AdminKeyAuthorized` event.
-- Burns the provided `witness` for replay protection. `bytes32(0)` is valid.
+- Checks that the account has not burned the provided `witness` and emits `KeyAuthorizationWitness`. `bytes32(0)` is valid. Successful authorization MUST NOT burn the witness; it remains usable for other authorizations until explicitly burned.
 - Admin keys can authorize and revoke keys, including other admin keys.
 - Admin keys cannot carry expiry, spending limits, or call scopes.
 
