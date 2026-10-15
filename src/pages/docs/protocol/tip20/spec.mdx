@@ -435,14 +435,20 @@ Transfers and memo transfers require the source to pass `isAuthorizedSender` and
 
 `burn` and `burnWithMemo` burn the issuer's own balance without a TIP-403 policy check. `burnBlocked` requires the source to fail the sender-policy check. T12 adds privileged `burnAt`, which ignores transfer-policy authorization but retains its role, pause, balance, and protected-address checks; see [T12](/docs/protocol/upgrades/t12).
 
+### Receiver-policy holds
+
+After issuer-policy authorization succeeds, transfers and mints MUST evaluate the resolved recipient's [receive policy](/docs/protocol/tip403/spec#receive-policies). A receiver-policy rejection MUST NOT itself revert the inbound operation. Instead, the token credits ReceivePolicyGuard at `0xb10c000000000000000000000000000000000000` and records a receipt for that amount. The resolved recipient receives no balance credit. This applies to ordinary and virtual recipients, with or without a memo. Other failures, including issuer-policy, pause, balance, and supply-cap failures, still revert.
+
+The guard emits `TransferBlocked` with the addressed recipient preserved in the encoded receipt.
+
 ## Invalid Recipient Protection
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
 
 ## Virtual Address Recipients
-Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [virtual addresses](/docs/protocol/tip20/virtual-addresses) before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and authorization, balance updates, and event emission target that master wallet.
+Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [virtual addresses](/docs/protocol/tip20/virtual-addresses) before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and issuer and receiver authorization use that master wallet. An allowed inbound credits the master; a receiver-policy rejection holds the funds in ReceivePolicyGuard instead.
 
-Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
+Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Allowed forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
 
 ## Currencies and Quote Tokens
 Each TIP-20 token declares a [currency identifier](/docs/protocol/tip20/overview#currency-declaration) and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. The currency is set at token creation and **cannot be changed afterward**. **Only tokens with `currency == "USD"` are eligible for paying transaction fees.** Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
