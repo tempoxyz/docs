@@ -16,11 +16,71 @@ A sender needs only the account's address. Share it, then [verify the incoming t
 
 ## Add funds with Tempo Wallet
 
-[Tempo Wallet](/docs/guide/getting-funds#tempo-wallet) lets the user fund the account through its built-in onramp or from other chains. To open it from your app, add a funding button with the Accounts SDK, which requests [`wallet_deposit`](/docs/guide/getting-funds#open-funding-with-the-accounts-sdk) for the connected account.
+[Tempo Wallet](/docs/guide/getting-funds#tempo-wallet) lets the user fund the account through its built-in onramp or from other chains. Open it from an **Add funds** button with the Accounts SDK: your app connects the account and requests `wallet_deposit`, and the wallet runs the funding flow.
+
+:::::steps
+
+### Install the Accounts SDK
+
+```bash
+pnpm add --save-exact accounts@0.18.4 viem
+```
+
+### Add a funding button
+
+This React example connects Tempo Wallet and opens funding for the selected account on mainnet:
+
+```tsx [AddFundsButton.tsx]
+import { Provider } from 'accounts'
+import { useState } from 'react'
+import { numberToHex } from 'viem'
+import { tempo } from 'viem/chains'
+
+const provider = Provider.create({ chains: [tempo] })
+
+export function AddFundsButton() {
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string>()
+
+  async function addFunds() {
+    setPending(true)
+    setError(undefined)
+    try {
+      const [address] = await provider.request({ method: 'eth_requestAccounts' })
+      if (!address) throw new Error('Connect a Tempo Wallet account first.')
+      await provider.request({
+        method: 'wallet_deposit',
+        params: [{ address, chainId: numberToHex(tempo.id) }],
+      })
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not open funding.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <div>
+      <button type="button" disabled={pending} onClick={addFunds}>
+        {pending ? 'Check Tempo Wallet…' : 'Add funds'}
+      </button>
+      {error && <p role="alert">{error}</p>}
+    </div>
+  )
+}
+```
+
+Omit `intent` to let the user choose a funding method. Add `intent: 'applePay'` to the parameter object to prefer Apple Pay where available, or `intent: 'crypto'` to prefer crypto. These are preferences; not every method is available to every user. You can also prefill `amount` as a human-readable string, such as `'50'`, and `token` as a token symbol or contract address. The user reviews and confirms the request in the wallet.
+
+### Confirm the funds arrived
+
+A resolved `wallet_deposit` request doesn't mean the account is funded: card and bank funding can complete later, and the response may not include `receipts`. [Verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
+
+:::::
 
 ## Pay by card or bank
 
-Onramp partners turn a card or bank payment into stablecoins sent to the account. [MoonPay](/docs/partners/payments-and-ramps#moonpay) and [Mt Pelerin](/docs/partners/payments-and-ramps#mt-pelerin) embed a hosted buy flow, and [Bridge](/docs/partners/payments-and-ramps#bridge) offers virtual bank accounts for incoming funds; businesses on [Stripe](/docs/partners/payments-and-ramps#stripe) can receive and hold stablecoins with Stripe Treasury. See [Payments & ramps](/docs/partners/payments-and-ramps) for the full list.
+Onramp partners turn a card or bank payment into stablecoins sent to the account. [Stripe Crypto Onramp](/docs/partners/payments-and-ramps#stripe), [MoonPay](/docs/partners/payments-and-ramps#moonpay) and [Mt Pelerin](/docs/partners/payments-and-ramps#mt-pelerin) each offer a buy flow you embed in your app or link to, and [Bridge](/docs/partners/payments-and-ramps#bridge) offers virtual bank accounts for incoming funds. Businesses on Stripe can also hold stablecoin balances with Stripe Treasury. See [Payments & ramps](/docs/partners/payments-and-ramps) for the full list.
 
 ## Bring funds from another chain
 
