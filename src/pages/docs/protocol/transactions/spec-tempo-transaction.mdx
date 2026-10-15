@@ -68,7 +68,7 @@ pub struct Call {
 // Key authorization for provisioning access keys
 // RLP encoding: [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]
 pub struct KeyAuthorization {
-    chain_id: u64,                              // Chain ID for replay protection (0 = valid on any chain)
+    chain_id: u64,                              // Chain ID for replay protection (must match the executing chain)
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
     expiry: Option<NonZeroU64>,                 // Unix timestamp when key expires (omit / None for never expires)
@@ -525,7 +525,7 @@ be able to sign transactions on the sender's behalf without inducing another pas
 More information about Access Keys can be found in the [Account Keychain Specification](./AccountKeychain).
 
 A sender can authorize a key by signing over a "key authorization" item that contains the following information:
-- **Chain ID** for replay protection (0 = valid on any chain)
+- **Chain ID** for replay protection (MUST equal the executing chain ID; zero is not a wildcard)
 - **Key type** (Secp256k1, P256, or WebAuthn)
 - **Key ID** (address derived from the public key)
 - **Expiration** timestamp of when the key should expire (optional - None means never expires)
@@ -551,7 +551,7 @@ The root key or an active admin access key signs over the keccak256 hash of the 
 ```
 key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))
 
-chain_id = u64 (0 = valid on any chain)
+chain_id = u64 (MUST equal the executing chain ID; zero is not a wildcard)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
 expiry = Option<NonZeroU64> (nonzero unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
