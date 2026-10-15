@@ -2,7 +2,12 @@
 title: "Add funds"
 seoTitle: "Add Funds to a Tempo Account | Tempo Docs"
 description: Receive stablecoins from another account, add funds through Tempo Wallet or an onramp, bring them from another chain, and give each customer a deposit address.
+interactive: true
 ---
+
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { DepositToTempoWallet } from '../../../components/guides/steps/wallet/DepositToTempoWallet.tsx'
+import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo.tsx'
 
 # Add funds
 
@@ -16,67 +21,16 @@ A sender needs only the account's address. Share it, then [verify the incoming t
 
 ## Add funds with Tempo Wallet
 
-[Tempo Wallet](/docs/guide/getting-funds#tempo-wallet) lets the user fund the account through its built-in onramp or from other chains. Open it from an **Add funds** button with the Accounts SDK: your app connects the account and requests `wallet_deposit`, and the wallet runs the funding flow.
+[Tempo Wallet](https://wallet.tempo.xyz) lets the user fund the account through its built-in onramp or from other chains. Select **Connect Tempo Wallet** below, then **Add funds** to open the wallet's funding popup and choose a method. The wallet shows the amount and any fees before you confirm.
 
-:::::steps
+This demo uses **Tempo Mainnet** and real funds.
 
-### Install the Accounts SDK
+<Demo.Container name="Add Funds" showBadge={false}>
+  <SignInWithTempo stepNumber={1} />
+  <DepositToTempoWallet stepNumber={2} last />
+</Demo.Container>
 
-```bash
-pnpm add --save-exact accounts@0.18.4 viem
-```
-
-### Add a funding button
-
-This React example connects Tempo Wallet and opens funding for the selected account on mainnet:
-
-```tsx [AddFundsButton.tsx]
-import { Provider } from 'accounts'
-import { useState } from 'react'
-import { numberToHex } from 'viem'
-import { tempo } from 'viem/chains'
-
-const provider = Provider.create({ chains: [tempo] })
-
-export function AddFundsButton() {
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string>()
-
-  async function addFunds() {
-    setPending(true)
-    setError(undefined)
-    try {
-      const [address] = await provider.request({ method: 'eth_requestAccounts' })
-      if (!address) throw new Error('Connect a Tempo Wallet account first.')
-      await provider.request({
-        method: 'wallet_deposit',
-        params: [{ address, chainId: numberToHex(tempo.id) }],
-      })
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not open funding.')
-    } finally {
-      setPending(false)
-    }
-  }
-
-  return (
-    <div>
-      <button type="button" disabled={pending} onClick={addFunds}>
-        {pending ? 'Check Tempo Wallet…' : 'Add funds'}
-      </button>
-      {error && <p role="alert">{error}</p>}
-    </div>
-  )
-}
-```
-
-Omit `intent` to let the user choose a funding method. Add `intent: 'applePay'` to the parameter object to prefer Apple Pay where available, or `intent: 'crypto'` to prefer crypto. These are preferences; not every method is available to every user. You can also prefill `amount` as a human-readable string, such as `'50'`, and `token` as a token symbol or contract address. The user reviews and confirms the request in the wallet.
-
-### Confirm the funds arrived
-
-A resolved `wallet_deposit` request doesn't mean the account is funded: card and bank funding can complete later, and the response may not include `receipts`. [Verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
-
-:::::
+To add the same button to your app, request [`wallet_deposit`](/docs/guide/getting-funds#open-funding-with-the-accounts-sdk) with the Accounts SDK. A resolved request doesn't mean the account is funded yet, so [verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
 
 ## Pay by card or bank
 
