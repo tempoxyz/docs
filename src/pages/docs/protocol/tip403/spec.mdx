@@ -237,11 +237,13 @@ interface ITIP403Registry {
 
 ### Usage with TIP-20 Tokens
 
-TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. Transfers check `isAuthorizedSender()` for the source and `isAuthorizedRecipient()` for the resolved destination. Mints check `isAuthorizedMintRecipient()` for the resolved destination. The policy to use for the token can only be set by the admin of the token.
+The registry's `tokenTransferPolicyId(token)` returns `(isSet, policyId)`. When `isSet` is true, that binding is authoritative for the token's transfer policy. `TIP20.transferPolicyId()` returns the effective policy ID. Transfers check `isAuthorizedSender()` for the source and `isAuthorizedRecipient()` for the resolved destination. Mints check `isAuthorizedMintRecipient()` for the resolved destination. The policy to use for the token can only be set by the admin of the token.
 
-**Default Policy:** New tokens start with `transferPolicyId = 1` (always-allow policy).
+**Default Policy:** Token creation registers a binding with `isSet = true` and `policyId = 1` (always-allow).
 
-**Policy Changes:** When a token's transfer policy is changed via `changeTransferPolicyId()`, all future transfers are immediately subject to the new policy.
+**Policy Changes:** The token admin's `changeTransferPolicyId()` updates the registry binding. All subsequent policy checks use the new policy. The binding is an internal protocol write; ordinary callers cannot set an arbitrary token's binding.
+
+**Unset bindings:** If `isSet` is false, both `tokenTransferPolicyId(token).policyId` and the token's `transferPolicyId()` getter return the token-local policy value. `migrateTransferPolicyIds(tokens)` permissionlessly registers that same effective value and clears the token-local slot, skipping invalid or already-registered tokens and returning the number registered. It MUST NOT change transfer authorization.
 
 **Virtual addresses:** Policy-configuration functions that accept literal member addresses (`createPolicyWithAccounts`, `modifyPolicyWhitelist`, `modifyPolicyBlacklist`) reject [virtual addresses](/docs/protocol/tip20/virtual-addresses). TIP-20 policy checks for transfers and mints to a virtual address run against the resolved master wallet rather than the forwarding alias, so policy membership must be configured on the master address.
 
