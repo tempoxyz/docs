@@ -8,7 +8,7 @@ description: Tempo's validators enforce each account's signers, thresholds, and 
 
 No one, including Tempo, can move an account's funds without the account's keys.
 
-Tempo's validators check every transaction against the account's signers, threshold, and access key limits. If your app, your backend, or a wallet provider is breached, the attacker gets only the keys that party holds, and only within those keys' bounds. Your security decision is who holds which keys.
+Tempo's validators check every transaction against the sending account's signers, signing threshold, and access key limits. If your app, your backend, or a wallet provider is breached, the attacker gets only the keys that party holds, and only within those keys' bounds. Your security decision is who holds which keys.
 
 ## How Tempo enforces an account's rules
 

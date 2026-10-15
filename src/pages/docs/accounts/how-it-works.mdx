@@ -10,12 +10,12 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 A Tempo account holds stablecoins, and only the account's own keys can move them.
 
-The account has two kinds of keys:
+Every Tempo account has two kinds of keys, and Tempo checks what each kind can do on every transaction:
 
 - **Signers** own the account. They approve payments and any change to the account's keys.
 - **Access keys** make payments on their own, but only within the limits you set, such as a daily amount or a single recipient.
 
-Tempo enforces these rules on every transaction. No one, including Tempo, can move the funds any other way.
+No one, including Tempo, can move an account's funds any other way.
 
 For example, say you run a payments app and give each customer a Tempo account. The customer's passkey can approve anything on its own. If they lose their phone, a backup key they keep and a recovery key your app keeps can approve together to replace it. Your app's server holds an access key that pays the customer's scheduled bills, up to 500 OUSD a day.
 

@@ -8,7 +8,7 @@ description: Remove a departing, lost, or compromised signer, or rotate a key, i
 
 Removing a signer ends its power to approve when an approver leaves or a key is lost or compromised.
 
-The signers that stay approve a new signer list without it, and the account keeps its address, balance, and token approvals. To rotate a key, the same update puts the new key in the old one's place.
+Removing a signer from a configurable account is a [signer update](/docs/accounts/key-management#every-change-is-one-signer-update): the signers that stay approve a new signer list without the removed one, and the account keeps its address, balance, and token approvals. To rotate a key, the same update puts the new key in the old one's place. Access keys survive the removal, so revoke any that the removed signer's holder could use.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Removing, rotating, and replacing signers all need one.

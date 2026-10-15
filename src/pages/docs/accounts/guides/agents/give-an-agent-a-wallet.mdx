@@ -11,13 +11,13 @@ import { AccessKeyDemo } from '../../../../../components/guides/AccessKeyDemo'
 
 Give an agent a key that pays from an account, but only within the bounds you set.
 
-On Tempo, an agent's wallet is an access key the agent holds. Its bounds are a budget, an expiry, and scopes, the calls it may make. The account's signers, the keys the customer or your approvers hold, set those bounds when they authorize the key, and Tempo enforces them on every transaction, whatever the agent decides to do.
+On Tempo, an agent's wallet is an access key the agent generates and holds. In this guide, the account's signers, the keys the customer or your approvers hold, authorize that key with a budget of 50 OUSD a day, a 30-day expiry, and scopes, the calls it may make: here, only sending the stablecoin with a memo. Tempo enforces those bounds on every transaction, whatever the agent decides to do. The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin.
 
 <span id="agents" />
 <span id="ai-agents" />
 <span id="authorize-the-agents-task" />
 
-The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin. The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key.
+The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key.
 
 <AccessKeyDemo />
 

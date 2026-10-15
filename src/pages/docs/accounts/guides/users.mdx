@@ -8,15 +8,16 @@ description: Embed wallets with Privy or Turnkey, add a recovery signer, recover
 
 Give each user a Tempo account that survives a lost phone and can move to their own wallet.
 
-The account keeps the same address when it moves. [How it works](/docs/accounts/how-it-works) explains signers and thresholds. [Use cases](/docs/accounts/use-cases) compares the setups.
+Each guide here covers one stage of a user's account: embedding a wallet, adding a recovery signer before a key is lost, recovering after one is, handing the account to the user's own wallet, or upgrading existing single-key wallets. At each stage the signers change, the keys your app, a wallet provider, a recovery provider, or the user holds to approve transactions, while the account keeps the same address, including when it moves to the user's own wallet. Changing signers needs a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. [Connecting a wallet the user already has](/docs/accounts/guides/users/embed-wallets#connect-a-self-custodial-wallet-instead), such as Tempo Wallet, and [authorizing access keys from an embedded wallet](/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet) don't need one.
 
-Every guide here uses a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. [Connecting a wallet the user already has](/docs/accounts/guides/users/embed-wallets#connect-a-self-custodial-wallet-instead), such as Tempo Wallet, doesn't need one.
+[How it works](/docs/accounts/how-it-works) explains signers and thresholds. [Use cases](/docs/accounts/use-cases) compares the setups.
 
 ## Choose a guide
 
 | Scenario | Guide |
 | --- | --- |
 | You embed wallets with Privy or Turnkey, or let users connect Tempo Wallet | [Embed wallets with a provider](/docs/accounts/guides/users/embed-wallets) |
+| Your backend or an agent needs to pay from a user's Privy or Turnkey wallet | [Authorize access keys from an embedded wallet](/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet) |
 | A user has one signer, so losing it locks the account | [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) |
 | A user lost their phone or passkey | [Recover a user's account](/docs/accounts/guides/users/recover-an-account) |
 | A user wants to hold the account in their own wallet | [Hand off to a self-custodial wallet](/docs/accounts/guides/users/hand-off) |

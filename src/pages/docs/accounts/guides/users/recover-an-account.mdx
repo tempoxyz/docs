@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Swap in a new passkey when a user loses their phone, keeping the account's address and balance.
 
-When a user loses the phone that holds their passkey, the account's other signers (the keys that approve its transactions) swap in a new passkey, and the new passkey revokes the phone's device key.
+In this guide, a user loses the phone that holds their passkey, and the account's other two signers (keys that approve its transactions), the user's first key and a recovery signer, together swap in a new passkey from the user's new device. The new passkey then revokes the lost phone's device key. The account keeps its address and balance, and the guide runs on the Tempo Accounts devnet.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Replacing a lost signer needs one.

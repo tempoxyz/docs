@@ -8,7 +8,7 @@ description: Shut off an access key for good when a device is lost, a backend ke
 
 Revoking an access key shuts it off for good: once the revocation lands, Tempo rejects every transaction the key signs.
 
-Revoke a key as soon as its device is lost, its secret leaks, or its holder no longer needs it.
+Revocation ends an [access key](/docs/accounts/access-keys) on demand, without waiting for its [expiry](/docs/accounts/access-keys/expiry). Revoke a key as soon as its device is lost, its secret leaks, or its holder no longer needs it. Revocation stops only new transactions: what the key already did, including its token approvals, stays in place.
 
 <span id="key-revocation-by-situation" />
 

@@ -11,7 +11,7 @@ import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
 
 A device key lets the customer's phone, computer, or browser pay without asking the customer to approve each payment.
 
-The customer's passkey authorizes the key once as an [access key](/docs/accounts/access-keys), and Tempo rejects any payment over its spending limit or after it expires.
+A device key is a P-256 key held in the device's own key store, which won't export it. The customer's passkey authorizes the device key once as an [access key](/docs/accounts/access-keys), and Tempo rejects any payment the device key signs over its spending limit or after it expires.
 
 ## What a device key is
 

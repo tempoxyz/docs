@@ -12,9 +12,9 @@ import { ConnectWallet } from '../../../../components/ConnectWallet.tsx'
 
 <span id="legacy-accounts" />
 
-Browser wallets such as MetaMask and Rabby work on Tempo as they are, on every network including mainnet.
+If your users connect MetaMask or another browser wallet, they bring a single-key account they already control.
 
-People can pay with the wallet they already have: connect it in your app with wagmi's `injected` connector. Each browser wallet holds a [single-key account](/docs/accounts/how-it-works#address), one private key like a standard Ethereum account, and sends standard Ethereum transactions, so it can't use sponsored fees, batched calls, or extra signers. For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication).
+A browser wallet such as MetaMask or Rabby holds one private key, like a standard Ethereum account, and the user approves every transaction in the wallet. Each one is a [single-key account](/docs/accounts/how-it-works#address) and works on Tempo as it is, on every network including mainnet: connect it with wagmi's `injected` connector. Because browser wallets send standard Ethereum transactions, not [Tempo Transactions](/docs/guide/tempo-transaction), these accounts can't use sponsored fees, batched calls, or extra signers.
 
 ## Connect a browser wallet
 
@@ -53,8 +53,19 @@ A browser wallet's account has one key and sends standard Ethereum transactions,
 
 Each of these needs a [Tempo Transaction](/docs/guide/tempo-transaction), Tempo's own transaction type. Several signers per account, and replacing a lost key, also need a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet.
 
+## What we recommend
+
+### Support browser wallets for users who have one
+
+People can pay with the wallet they already have, so keep the `injected` connector in your app for them.
+
 <span id="move-a-legacy-account-to-modern-signers" />
+<span id="move-to-a-passkey-or-device-key" />
 
-## Move to a passkey or device key
+### Create new accounts with a passkey or device key
 
-Send the funds to a new account whose key is a passkey or device key: on mainnet or testnet, a [single-key account](/docs/development/single-key-accounts); on the Tempo Accounts devnet, a [Tempo account](/docs/accounts/create) with that key as its first signer. To keep the address instead, [upgrade the account in place](/docs/accounts/key-management/account-upgrade): it adds signers, and the original key signs the upgrade as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions. Upgrades also work only on the devnet.
+For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication). A user moving off a browser wallet sends the funds to a new account whose key is a passkey or device key: on mainnet or testnet, a [single-key account](/docs/development/single-key-accounts); on the Tempo Accounts devnet, a [Tempo account](/docs/accounts/create) with that key as its first signer.
+
+### Upgrade an existing address in place
+
+To keep the address instead, [upgrade the account in place](/docs/accounts/key-management/account-upgrade): it adds signers, and the original key signs the upgrade as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions. Upgrades work only on the devnet.

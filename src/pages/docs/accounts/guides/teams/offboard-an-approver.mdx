@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Remove a departing approver while the treasury keeps its address, balance, and payment history.
 
-When an approver leaves, remove their signer from the treasury, revoke any access key they could sign with, and add a replacement so one lost key can't lock the treasury.
+In this guide, a controller leaves a company treasury on the Tempo Accounts devnet where any two of three approvers sign each transaction. The two who remain, finance and operations, remove the controller's signer, revoke any access key the controller could sign with, and add a replacement signer so one lost key can't lock the treasury.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.

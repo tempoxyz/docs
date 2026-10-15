@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Give a user full control of their account through a signer in their own wallet.
 
-You replace your app's signers with one the user holds in their own wallet, such as Tempo Wallet. The account keeps its address and balance, and your app keeps no key.
+In this guide, your app removes its own signers and access keys from a user's account on the Tempo Accounts devnet and replaces them with one signer the user holds in their own wallet, such as Tempo Wallet. The account keeps its address and balance, and your app keeps no key.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.
