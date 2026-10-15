@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { MarkdownExports } from 'vocs/server/markdown'
 import { transformMarkdownOutput } from './markdown-output-transform'
 
 afterEach(() => vi.unstubAllEnvs())
@@ -26,4 +27,18 @@ describe('final Markdown transform', () => {
     expect(result.index).toContain('https://tempo.xyz/developers/docs/earn.md')
     expect(result.pages['/docs/earn']).toContain('https://tempo.xyz/developers/docs/earn/integrate')
   })
+})
+
+it('keeps canonical production links throughout the full Vocs export', async () => {
+  vi.stubEnv('VERCEL_ENV', 'production')
+  const result = await MarkdownExports.buildLlmsContent({
+    title: 'Tempo',
+    pages: [{ path: '/docs/earn', title: 'Earn', content: '# Earn' }],
+    remarkPlugins: [],
+    rehypePlugins: [],
+    transform: transformMarkdownOutput,
+  })
+  expect(result.full).toContain('](https://tempo.xyz/developers/docs/earn.md)')
+  expect(result.full).not.toContain('](/docs/')
+  expect(result.report.diagnostics).toEqual([])
 })

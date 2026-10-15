@@ -1,7 +1,8 @@
 # Maintaining generated Markdown
 
-This sample uses the commit-pinned preview `https://pkg.pr.new/vocs@b518f6a`
-from [Vocs #666](https://github.com/wevm/vocs/pull/666). This is an intentional
+This sample uses the commit-pinned preview `https://pkg.pr.new/vocs@a9fbc37`
+from [Vocs #667](https://github.com/wevm/vocs/pull/667), which fixes transformed
+index links on top of the merged [Vocs #666](https://github.com/wevm/vocs/pull/666). This is an intentional
 preview-package integration for iterating on that PR. To test a new upstream
 commit, update the commit pin and lockfile, then rerun the audit, tests, and build.
 Use a release version when ready to leave the preview channel.
