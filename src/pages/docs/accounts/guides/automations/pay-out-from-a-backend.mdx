@@ -18,7 +18,7 @@ The demo's customer account is a configurable account whose one signer is a devi
 
 <GuideDemo guide="backend-automation" />
 
-The code pays out AlphaUSD, a test stablecoin. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The code pays out a test stablecoin. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -35,23 +35,25 @@ import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
 import { client } from '../client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 await client.accessKey.authorizeSync({
   accessKey: { accessKeyAddress: payoutKeyAddress, keyType: 'secp256k1' },
   account, // the customer's account, signed by its signers, such as a passkey
-  expiry: Expiry.days(90),
-  limits: [{ token: alphaUsd, limit: parseUnits('1000', 6), period: 86_400 }], // 1,000 AlphaUSD a day
-  scopes: [
-    { address: alphaUsd, selector: 'transfer(address,uint256)', recipients: payees },
-    { address: alphaUsd, selector: 'transferWithMemo(address,uint256,bytes32)', recipients: payees },
-  ],
+  expiry: Expiry.days(90), // [!code hl]
+  // 1,000 of the stablecoin a day
+  limits: [{ token: stablecoin, limit: parseUnits('1000', 6), period: 86_400 }], // [!code hl]
+  scopes: [ // [!code hl]
+    { address: stablecoin, selector: 'transfer(address,uint256)', recipients: payees }, // [!code hl]
+    { address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)', recipients: payees }, // [!code hl]
+  ], // [!code hl]
 })
 ```
 
 Authorizing is one transaction the customer approves, for example with their passkey. Show them the payees, daily limit, and expiry before they do.
 
-Limits are in base units: AlphaUSD has 6 decimals, so `parseUnits('1000', 6)` is 1,000 AlphaUSD. Size the limit to your largest payout day plus fees, which count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
+Limits are in base units: the stablecoin has 6 decimals, so `parseUnits('1000', 6)` is 1,000 OUSD. Size the limit to your largest payout day plus fees, which count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
 ### Keep the key in your KMS
 
@@ -61,14 +63,15 @@ The private key never leaves the KMS, and Tempo stores only the key's address, p
 import { PublicKey, Signature } from 'ox'
 import { Account } from 'viem/tempo'
 
-export const payoutKey = Account.from({
+export const payoutKey = Account.from({ // [!code hl]
   access: address, // the customer's account address
   keyType: 'secp256k1',
   publicKey: PublicKey.fromHex(kmsPublicKey), // read once from your KMS
-  async sign({ hash }) {
-    return Signature.toHex(await kms.sign(kmsKeyId, hash)) // your KMS client returns { r, s, yParity }
-  },
-})
+  async sign({ hash }) { // [!code hl]
+    // your KMS client returns { r, s, yParity }
+    return Signature.toHex(await kms.sign(kmsKeyId, hash)) // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
 ```
 
 In your KMS, allow only the payout service to sign with the key, and log each signing request so you can match it to a payout.
@@ -80,16 +83,20 @@ import { parseUnits, stringToHex } from 'viem'
 import { client } from '../client'
 import { payoutKey } from './payout-key'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
-await client.token.transferSync({
-  account: payoutKey, // the key signs for the customer's account
-  amount: parseUnits('250', 6),
-  feeToken: alphaUsd, // the fee counts against the key's daily limit
-  memo: stringToHex('payout-1042', { size: 32 }), // your payout ID, for reconciliation
-  to: payee,
-  token: alphaUsd,
-})
+await client.token.transferSync({ // [!code hl]
+  // the key signs for the customer's account
+  account: payoutKey, // [!code hl]
+  amount: parseUnits('250', 6), // [!code hl]
+  // the fee counts against the key's daily limit
+  feeToken: stablecoin, // [!code hl]
+  // your payout ID, for reconciliation
+  memo: stringToHex('payout-1042', { size: 32 }), // [!code hl]
+  to: payee, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
 The customer isn't prompted. Tempo rejects a payout to an address outside `payees`, one over what's left of today's limit, or any payout after the key expires. To stop payouts, have the signers [revoke the key](/docs/accounts/access-keys/revocation#revoke-an-access-key).

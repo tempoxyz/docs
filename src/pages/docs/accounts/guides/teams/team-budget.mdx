@@ -18,7 +18,7 @@ A team budget lets a team pay from the [company treasury](/docs/accounts/guides/
 <span id="give-a-team-a-budget" />
 <span id="set-up-a-team-budget" />
 
-The demo creates a treasury with a device key in this browser, gives a team 2,000 AlphaUSD a day, and pays 50 AlphaUSD from that budget. The code continues from the treasury guide's `treasury` and `alphaUsd`.
+The demo creates a treasury with a device key in this browser, gives a team 2,000 OUSD a day, and pays 50 OUSD from that budget. The code continues from the treasury guide's `treasury` and `stablecoin`.
 
 <GuideDemo guide="team-accounts" />
 
@@ -37,15 +37,15 @@ Create it [like the treasury](/docs/accounts/guides/teams/company-treasury#creat
 ```ts [team.ts]
 import { Account } from 'viem/tempo'
 
-const team = Account.fromConfig({
-  address: 'infer',
-  owners: [
-    { owner: member1, weight: 1 },
-    { owner: member2, weight: 1 },
-    { owner: member3, weight: 1 },
-  ],
-  threshold: 2,
-})
+const team = Account.fromConfig({ // [!code hl]
+  address: 'infer', // [!code hl]
+  owners: [ // [!code hl]
+    { owner: member1, weight: 1 }, // [!code hl]
+    { owner: member2, weight: 1 }, // [!code hl]
+    { owner: member3, weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
+}) // [!code hl]
 // Save team.address with the team's record. The treasury authorizes this address.
 ```
 
@@ -55,7 +55,7 @@ Treasury approvers [authorize](/docs/accounts/access-keys#authorize-an-access-ke
 
 | Bound | Recommended value |
 | --- | --- |
-| [Spending limit](/docs/accounts/access-keys/spending-limits) | A daily limit per stablecoin, such as 50,000 AlphaUSD |
+| [Spending limit](/docs/accounts/access-keys/spending-limits) | A daily limit per stablecoin, such as 50,000 OUSD |
 | [Scopes](/docs/accounts/access-keys/scopes) | Transfers to the team's approved recipients only |
 | [Expiry](/docs/accounts/access-keys/expiry) | 90 days, then authorize the team again |
 
@@ -68,14 +68,14 @@ To pay, two members sign as the team account, which acts as the treasury's acces
 ```ts [budget.ts]
 import { client } from './client'
 
-const { remaining } = await client.accessKey.getRemainingLimit({
-  account: treasury.address,
-  accessKey: team.address,
-  token: alphaUsd,
-})
+const { remaining } = await client.accessKey.getRemainingLimit({ // [!code hl]
+  account: treasury.address, // [!code hl]
+  accessKey: team.address, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
-`remaining` is in base units: AlphaUSD has 6 decimals, so `1_950_000_000n` is 1,950 AlphaUSD. To end the budget, the treasury's approvers [revoke](/docs/accounts/access-keys/revocation#revoke-an-access-key) the team account.
+`remaining` is in base units: the stablecoin has 6 decimals, so `1_950_000_000n` is 1,950 OUSD. To end the budget, the treasury's approvers [revoke](/docs/accounts/access-keys/revocation#revoke-an-access-key) the team account.
 
 :::::
 

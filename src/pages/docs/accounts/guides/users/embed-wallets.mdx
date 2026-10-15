@@ -48,19 +48,23 @@ import { parseUnits } from 'viem'
 import { Account, WebAuthnP256 } from 'viem/tempo'
 import { client } from './client'
 
-const token = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a test stablecoin
+// A test stablecoin on the devnet
+const token = '0x20c0000000000000000000000000000000000001'
 
 const credential = await WebAuthnP256.createCredential({ label: 'My account' })
 const passkey = Account.fromWebAuthnP256(credential)
 
 const account = Account.fromConfig({
   address: 'infer', // derive the address from these first signers
-  owners: [
-    { owner: passkey, weight: 2 }, // the key on this device, so it approves here
-    { owner: providerKeyAddress, weight: 1 }, // the key your provider manages for this user
-    { owner: recoveryAddress, weight: 1 }, // the key your recovery provider holds
-  ],
-  threshold: 2,
+  owners: [ // [!code hl]
+    // the key on this device, so it approves here
+    { owner: passkey, weight: 2 }, // [!code hl]
+    // the key your provider manages for this user
+    { owner: providerKeyAddress, weight: 1 }, // [!code hl]
+    // the key your recovery provider holds
+    { owner: recoveryAddress, weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
 })
 
 await client.faucet.fundSync({ account: account.address }) // devnet test stablecoins
@@ -75,11 +79,12 @@ import { isAddressEqual } from 'viem'
 import { Account } from 'viem/tempo'
 
 const { address, config, credential } = await loadAccount(userId) // your app's storage
-const passkey = Account.fromWebAuthnP256(credential)
-const owners = config.owners.map(({ owner, weight }) => ({
-  owner: isAddressEqual(owner, passkey.address) ? passkey : owner, // the provider keys stay addresses
-  weight,
-}))
+const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
+const owners = config.owners.map(({ owner, weight }) => ({ // [!code hl]
+  // the provider keys stay addresses
+  owner: isAddressEqual(owner, passkey.address) ? passkey : owner, // [!code hl]
+  weight, // [!code hl]
+})) // [!code hl]
 const account =
   config.version === 0n // never updated: the configuration derives the address
     ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
@@ -117,8 +122,8 @@ pnpm add --save-exact accounts@0.18.4 viem
 import { Provider } from 'accounts'
 import { tempoModerato } from 'viem/chains'
 
-const provider = Provider.create({ chains: [tempoModerato], testnet: true })
-const [address] = await provider.request({ method: 'eth_requestAccounts' })
+const provider = Provider.create({ chains: [tempoModerato], testnet: true }) // [!code hl]
+const [address] = await provider.request({ method: 'eth_requestAccounts' }) // [!code hl]
 if (!address) throw new Error('No account was selected')
 ```
 

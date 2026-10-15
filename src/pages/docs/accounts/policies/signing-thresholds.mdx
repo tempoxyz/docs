@@ -23,12 +23,12 @@ import { Account } from 'viem/tempo'
 
 const account = Account.fromConfig({
   address: 'infer', // derive the address from these first signers
-  owners: [
-    { owner: passkey.address, weight: 2 },
-    { owner: backup.address, weight: 1 },
-    { owner: recovery.address, weight: 1 },
-  ],
-  threshold: 2,
+  owners: [ // [!code hl]
+    { owner: passkey.address, weight: 2 }, // [!code hl]
+    { owner: backup.address, weight: 1 }, // [!code hl]
+    { owner: recovery.address, weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
 })
 ```
 
@@ -80,43 +80,25 @@ To let a team spend without lowering the treasury's threshold, the treasury auth
 
 ## Collect approvals
 
-Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three. Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), a fingerprint it checks approvals against but can't read back. So when your app creates the account, it saves `account.address` and `account.config` with the account record, and rebuilds the account from that copy whenever signers approve:
-
-```ts [account.ts]
-import { type Address, isAddressEqual } from 'viem'
-import { Account, type AccountConfig } from 'viem/tempo'
-
-/** Rebuilds the account from your app's saved record, with the approving keys on this device attached. */
-export function openAccount(
-  saved: { address: Address; config: AccountConfig.Config },
-  approvers: readonly Account.RootAccount[] = [],
-) {
-  const { address, config } = saved
-  const owners = config.owners.map(({ owner, weight }) => ({
-    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
-    weight,
-  }))
-  // Never updated (version 0): the configuration derives the address.
-  if (config.version === 0n)
-    return Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
-  return Account.fromConfig({ ...config, address, owners })
-}
-```
+Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three. Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), a fingerprint it checks approvals against but can't read back. So when your app creates the account, it saves `account.address` and `account.config` with the account record, `saved`, and rebuilds the account from that copy whenever signers approve. The examples call that helper `openAccount`: it passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first signer update, then the saved address. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#approve-the-update) shows it in full.
 
 Rebuild the account from the latest record before each transaction. A signer update raises the configuration's version, and Tempo checks every transaction against the new configuration's hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
 When the keys on one device reach the threshold, attach them and send the transaction as usual. The customer's passkey reaches it alone, so this payment runs in the customer's browser. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
+::::code-group
+
+```ts [pay.ts]
+import { client } from './client'
+
+await client.token.transferSync({ account: openAccount([passkey]), amount, to, token }) // [!code hl]
+```
+
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
 ```
 
-```ts [pay.ts]
-import { openAccount } from './account'
-import { client } from './client'
-
-await client.token.transferSync({ account: openAccount(saved, [passkey]), amount, to, token })
-```
+::::
 
 `passkey` is the customer's passkey account, such as `Account.fromWebAuthnP256(credential)`. viem signs with the attached keys, highest weight first, until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing.
 
@@ -126,21 +108,20 @@ When no single device holds enough weight, such as when the backup key and the r
 
 ```ts [approve.ts]
 import { Actions } from 'viem/tempo'
-import { openAccount } from './account'
 import { client } from './client'
 
 // 1. Your app: prepare the payment once, from the account with no keys attached.
-const request = await client.prepareTransactionRequest({
-  account: openAccount(saved),
-  calls: [Actions.token.transfer.call({ amount, to, token })],
-})
+const request = await client.prepareTransactionRequest({ // [!code hl]
+  account: openAccount([]), // [!code hl]
+  calls: [Actions.token.transfer.call({ amount, to, token })], // [!code hl]
+}) // [!code hl]
 
-// 2. Each approver, on their own device: sign the same request.
-const backupApproval = await client.signTransaction({ ...request, account: backup }) // backup key's device
-const recoveryApproval = await client.signTransaction({ ...request, account: recovery }) // recovery provider
+// 2. Each approver signs the same request on their own device: the backup key, then the recovery provider.
+const backupApproval = await client.signTransaction({ ...request, account: backup }) // [!code hl]
+const recoveryApproval = await client.signTransaction({ ...request, account: recovery }) // [!code hl]
 
 // 3. Your app: submit the same request with the approvals.
-const receipt = await client.sendTransactionSync({ ...request, signatures: [backupApproval, recoveryApproval] })
+const receipt = await client.sendTransactionSync({ ...request, signatures: [backupApproval, recoveryApproval] }) // [!code hl]
 ```
 
 For a configurable account, `signTransaction` returns the signer's approval rather than a signed transaction. An approval covers the exact transaction, the account, and the configuration version, so send every approver the same `request`, show them what they're approving, such as the recipient and amount, and submit it unchanged. The request contains bigints, so move it between devices in an encoding that keeps them.
@@ -172,7 +153,7 @@ contract ApprovalCheck {
     ISignatureVerifier constant VERIFIER = ISignatureVerifier(0x5165300000000000000000000000000000000000);
 
     function isApproved(address account, bytes32 hash, bytes calldata signature) external view returns (bool) {
-        return VERIFIER.verifyMultisig(account, hash, signature);
+        return VERIFIER.verifyMultisig(account, hash, signature); // [!code hl]
     }
 }
 ```

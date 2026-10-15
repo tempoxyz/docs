@@ -920,7 +920,7 @@ global({
     '--vocs-background-color-surfaceMuted': 'var(--surface-panel)',
     '--vocs-background-color-surfaceTint': 'var(--surface-block)',
     '--vocs-background-color-code-block': 'var(--surface-block)',
-    '--vocs-background-color-code-highlighted': 'var(--surface-panel)',
+    '--vocs-background-color-code-highlighted': 'color-mix(in srgb, var(--foreground) 8%, var(--surface-block))',
     '--vocs-background-color-inline-code': 'var(--surface-block)',
     '--vocs-text-color-primary': 'var(--foreground)',
     '--vocs-text-color-secondary': 'var(--foreground-secondary)',

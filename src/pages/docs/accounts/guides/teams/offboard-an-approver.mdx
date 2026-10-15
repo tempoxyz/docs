@@ -38,13 +38,13 @@ function openTreasury(approvers: readonly Account.RootAccount[]) {
   const { salt, threshold, version } = saved.config
   // Attach the approvers' keys. The other signers stay as addresses.
   const owners = saved.config.owners.map(({ owner, weight }) => ({
-    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner, // [!code hl]
     weight,
   }))
   // Never updated (version 0): derive the address from the first signers.
   if (version === 0n) return Account.fromConfig({ address: 'infer', owners, salt, threshold })
   // After an update, deriving gives a different address, so pass the saved one.
-  return Account.fromConfig({ address: saved.address, owners, salt, threshold, version })
+  return Account.fromConfig({ address: saved.address, owners, salt, threshold, version }) // [!code hl]
 }
 ```
 
@@ -59,14 +59,15 @@ viem signs with the attached keys and throws `Local owners do not meet the thres
 Build the next signer list from the saved one without the departing approver, and keep the threshold. Finance and operations approve it:
 
 ```ts [offboard.ts]
-const removed = await client.accounts.updateConfigSync({
-  account: openTreasury([finance, operations]),
-  nextConfig: {
-    owners: saved.config.owners.filter(({ owner }) => !isAddressEqual(owner, controller)),
-    threshold: saved.config.threshold,
-  },
-})
-saved.config = removed.config // persist it with the treasury record
+const removed = await client.accounts.updateConfigSync({ // [!code hl]
+  account: openTreasury([finance, operations]), // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: saved.config.owners.filter(({ owner }) => !isAddressEqual(owner, controller)), // [!code hl]
+    threshold: saved.config.threshold, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+// persist it with the treasury record
+saved.config = removed.config // [!code hl]
 ```
 
 Each signer update raises `config.version` by one and changes the hash Tempo stores, so save the `config` it returns. `openTreasury` reads `saved` on every call, so the next steps build the treasury from the new configuration. An account built from the old configuration fails with `multisig configuration commitment mismatch`, and the controller's passkey can no longer approve anything. If the remaining weights couldn't reach the threshold, viem would throw `Invalid account config: threshold exceeds total owner weight.` and send nothing. Here two signers of weight 1 remain at a threshold of 2.
@@ -76,10 +77,10 @@ Each signer update raises `config.version` by one and changes the hash Tempo sto
 Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). Any access key the departing approver could sign with, such as a backend key they managed, keeps paying within its limits until you revoke it:
 
 ```ts [offboard.ts]
-await client.accessKey.revokeSync({
-  account: openTreasury([finance, operations]),
-  accessKey: serviceKey,
-})
+await client.accessKey.revokeSync({ // [!code hl]
+  account: openTreasury([finance, operations]), // [!code hl]
+  accessKey: serviceKey, // [!code hl]
+}) // [!code hl]
 ```
 
 `serviceKey` is the address you saved when you authorized the key. Revocation is permanent, so if the service still needs to pay, authorize a new key the departing approver never held. If you didn't save every key's address, [list the keys the treasury has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change).
@@ -91,13 +92,13 @@ With two approvers left at a threshold of 2, both must approve every payment, an
 ```ts [offboard.ts]
 const replacement = env('NEW_CONTROLLER_PASSKEY_ADDRESS') // the new approver's passkey, on their device
 
-const added = await client.accounts.updateConfigSync({
-  account: openTreasury([finance, operations]),
-  nextConfig: {
-    owners: [...saved.config.owners, { owner: replacement, weight: 1 }],
-    threshold: saved.config.threshold,
-  },
-})
+const added = await client.accounts.updateConfigSync({ // [!code hl]
+  account: openTreasury([finance, operations]), // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: [...saved.config.owners, { owner: replacement, weight: 1 }], // [!code hl]
+    threshold: saved.config.threshold, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
 saved.config = added.config
 ```
 

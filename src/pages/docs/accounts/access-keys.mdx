@@ -70,45 +70,46 @@ Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-k
 - With the key's first payment: `signAuthorization` returns a `keyAuthorization` that travels with the first transaction the key signs. The key stays authorized even if that transaction's calls revert.
 - On its own: `authorizeSync` sends the authorization in a separate transaction, before the key pays.
 
-This example takes the first path: a new account's signer gives a payout key 10 AlphaUSD, a test stablecoin, for one hour, payable to one recipient. The account is a configurable account with one signer, as in [Create an account](/docs/accounts/create), so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). To run it on testnet with a single-key account instead, set `account` to `signer` and connect `client` to [testnet](/docs/quickstart/connection-details#testnet).
+This example takes the first path: a new account's signer gives a payout key 10 OUSD for one hour, payable to one recipient. `account.ts` is the configurable account with one signer from [Create an account](/docs/accounts/create#create-an-account-in-code), funded by the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet), so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). To run it on testnet with a single-key account instead, set `account` to that signer and connect `client` to [testnet](/docs/quickstart/connection-details#testnet).
+
+::::code-group
+
+```ts [access-keys.ts]
+import { parseUnits } from 'viem'
+import { Account, Expiry, P256 } from 'viem/tempo'
+import { account } from './account'
+import { client } from './client'
+
+export { account }
+// A test stablecoin on the devnet
+export const stablecoin = '0x20c0000000000000000000000000000000000001'
+export const recipient = process.env.TEMPO_RECIPIENT as `0x${string}`
+
+export const accessKey = Account.fromP256(P256.randomPrivateKey(), { access: account }) // [!code hl]
+const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl]
+  accessKey, // [!code hl]
+  account, // [!code hl]
+  expiry: Expiry.hours(1), // [!code hl]
+  limits: [{ token: stablecoin, limit: parseUnits('10', 6), period: 0 }], // [!code hl]
+  scopes: [{ address: stablecoin, recipients: [recipient], selector: 'transfer(address,uint256)' }], // [!code hl]
+}) // [!code hl]
+
+await client.token.transferSync({
+  account: accessKey,
+  amount: parseUnits('2', 6),
+  keyAuthorization, // [!code hl]
+  to: recipient,
+  token: stablecoin,
+})
+```
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
 ```
 
-```ts [access-keys.ts]
-import { parseUnits } from 'viem'
-import { generatePrivateKey } from 'viem/accounts'
-import { Account, Expiry, P256 } from 'viem/tempo'
-import { client } from './client'
+::::
 
-export const alphaUsd = '0x20c0000000000000000000000000000000000001'
-export const recipient = process.env.TEMPO_RECIPIENT as `0x${string}`
-
-// An account with one signer, as in Create an account, funded by the devnet faucet
-const signer = Account.fromSecp256k1(generatePrivateKey())
-export const account = Account.fromConfig({ address: 'infer', owners: [signer] })
-await client.faucet.fundSync({ account: account.address })
-
-export const accessKey = Account.fromP256(P256.randomPrivateKey(), { access: account })
-const keyAuthorization = await client.accessKey.signAuthorization({
-  accessKey,
-  account,
-  expiry: Expiry.hours(1),
-  limits: [{ token: alphaUsd, limit: parseUnits('10', 6), period: 0 }],
-  scopes: [{ address: alphaUsd, recipients: [recipient], selector: 'transfer(address,uint256)' }],
-})
-
-await client.token.transferSync({
-  account: accessKey,
-  amount: parseUnits('2', 6),
-  keyAuthorization, // first payment only
-  to: recipient,
-  token: alphaUsd,
-})
-```
-
-The other pages in this section import `account`, `accessKey`, `alphaUsd`, and `recipient` from this file. To confirm the key landed, read it back with `client.accessKey.getMetadata({ account, accessKey })`.
+The other pages in this section import `account`, `accessKey`, `stablecoin`, and `recipient` from this file. To confirm the key landed, read it back with `client.accessKey.getMetadata({ account, accessKey })`.
 
 Tempo stores each limit and scope with the key, so each one adds to the network fee for authorizing it. This example's authorization and first payment cost under a cent together. To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
 

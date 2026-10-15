@@ -8,7 +8,7 @@ description: Give an AI agent an access key with a daily budget, pay for API req
 
 Give your agent its own [access key](/docs/accounts/access-keys) with a daily budget, and it pays for API requests from an account without holding the account's signers. APIs that use the [Machine Payments Protocol (MPP)](/docs/guide/machine-payments) answer `402 Payment Required` with a price; the agent pays and retries, and Tempo rejects any payment past the budget.
 
-The examples pay in AlphaUSD, a test stablecoin with no value, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet and testnet, an agent key works the same from a single-key account; on the devnet, a configurable account can authorize one too.
+The examples pay in a test stablecoin, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet and testnet, an agent key works the same from a single-key account; on the devnet, a configurable account can authorize one too.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -25,17 +25,19 @@ import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
 import { client } from './client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 await client.accessKey.authorizeSync({
   accessKey: { accessKeyAddress: agentKeyAddress, keyType: 'p256' }, // the agent's key
   account, // the account, signed by its signers
   expiry: Expiry.days(30),
-  limits: [{ token: alphaUsd, limit: parseUnits('20', 6), period: 86_400 }], // 20 AlphaUSD a day
-  scopes: [
-    { address: alphaUsd, selector: 'transferWithMemo(address,uint256,bytes32)' },
-    { address: alphaUsd, selector: 'transfer(address,uint256)' },
-  ],
+  // 20 of the stablecoin a day
+  limits: [{ token: stablecoin, limit: parseUnits('20', 6), period: 86_400 }], // [!code hl]
+  scopes: [ // [!code hl]
+    { address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)' }, // [!code hl]
+    { address: stablecoin, selector: 'transfer(address,uint256)' }, // [!code hl]
+  ], // [!code hl]
 })
 ```
 
@@ -52,14 +54,15 @@ import { client } from './client'
 
 const agentKey = Account.fromP256(privateKey, { access: address }) // the account's address
 
-Mppx.create({ methods: [tempo({ account: agentKey, getClient: () => client })] }) // pays on the devnet
+// pays on the devnet
+Mppx.create({ methods: [tempo({ account: agentKey, getClient: () => client })] }) // [!code hl]
 
-const response = await fetch(paidUrl)
+const response = await fetch(paidUrl) // [!code hl]
 ```
 
 Without `getClient`, mppx has no RPC for the devnet and the request fails. Tempo rejects a payment outside the scopes, over the remaining budget, or after the expiry, and the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
 
-The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds, so to test, run your own [MPP server](/docs/guide/machine-payments/server) on the devnet: in its `tempo()` method, set `currency` to AlphaUSD's address and pass `chainId: 31318` and `getClient: () => client`.
+The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds, so to test, run your own [MPP server](/docs/guide/machine-payments/server) on the devnet: in its `tempo()` method, set `currency` to the `stablecoin` address and pass `chainId: 31318` and `getClient: () => client`.
 
 ### Watch spending
 
@@ -69,14 +72,14 @@ The agent reads each payment's receipt from the response. Your app reads how muc
 import { Receipt } from 'mppx'
 import { client } from './client'
 
-const receipt = Receipt.fromResponse(response)
+const receipt = Receipt.fromResponse(response) // [!code hl]
 // receipt.reference is the payment's transaction hash
 
-const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
-  account: address,
-  accessKey: agentKeyAddress,
-  token: alphaUsd,
-})
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ // [!code hl]
+  account: address, // [!code hl]
+  accessKey: agentKeyAddress, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 // remaining is in base units; periodEnd is when the budget renews
 ```
 

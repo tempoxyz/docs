@@ -51,18 +51,18 @@ export const finance = Account.fromSecp256k1(env('FINANCE_KEY'))
 export const operations = Account.fromSecp256k1(env('OPERATIONS_KEY'))
 
 // 2 of 3: the two local keys and the controller's passkey, which stays on the controller's device
-export const account = Account.fromConfig({
-  address: 'infer',
-  owners: [
-    { owner: finance, weight: 1 },
-    { owner: operations, weight: 1 },
-    { owner: env('CONTROLLER_PASSKEY_ADDRESS'), weight: 1 },
-  ],
-  threshold: 2,
-})
+export const account = Account.fromConfig({ // [!code hl]
+  address: 'infer', // [!code hl]
+  owners: [ // [!code hl]
+    { owner: finance, weight: 1 }, // [!code hl]
+    { owner: operations, weight: 1 }, // [!code hl]
+    { owner: env('CONTROLLER_PASSKEY_ADDRESS'), weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
+}) // [!code hl]
 
 // Save both with the account record: Tempo keeps only a hash of the configuration.
-export const saved = { address: account.address, config: account.config }
+export const saved = { address: account.address, config: account.config } // [!code hl]
 ```
 
 `address: 'infer'` derives the address from this configuration, so creating the account sends nothing. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero. An owner given as a local account, like `finance`, is a key Viem signs with. An owner given as an address, like the controller's passkey, signs on its own device.
@@ -115,18 +115,19 @@ The `0x05` signature also approves [access-key grants](/docs/development/account
 import { account, env, finance, operations, saved } from './account'
 import { client } from './client'
 
-const { config } = await client.accounts.updateConfigSync({
-  account,
-  nextConfig: {
-    owners: [
-      { owner: finance.address, weight: 1 },
-      { owner: operations.address, weight: 1 },
-      { owner: env('NEW_PASSKEY_ADDRESS'), weight: 1 },
-    ],
-    threshold: 2,
-  },
-})
-saved.config = config // version 1 replaces version 0 in the account record
+const { config } = await client.accounts.updateConfigSync({ // [!code hl]
+  account, // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: [ // [!code hl]
+      { owner: finance.address, weight: 1 }, // [!code hl]
+      { owner: operations.address, weight: 1 }, // [!code hl]
+      { owner: env('NEW_PASSKEY_ADDRESS'), weight: 1 }, // [!code hl]
+    ], // [!code hl]
+    threshold: 2, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+// version 1 replaces version 0 in the account record
+saved.config = config // [!code hl]
 ```
 
 Viem sorts the new owners and signs with `finance` and `operations`, whose weights reach the current threshold of 2. The returned `config` is version 1, with the same salt. Save it, then [rebuild the account](#keep-the-current-configuration) from it before the next action. [Add signers](/docs/accounts/key-management/add-signers) walks through a full update.
@@ -146,14 +147,15 @@ import { finance, operations, saved } from './account'
 
 const { address, config } = saved // the stored account record
 const approvers = [finance, operations] // the keys signing this time
-const owners = config.owners.map(({ owner, weight }) => ({
-  owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
-  weight,
-}))
-export const account =
-  config.version === 0n // never updated: the configuration derives the address
-    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
-    : Account.fromConfig({ ...config, address, owners })
+const owners = config.owners.map(({ owner, weight }) => ({ // [!code hl]
+  owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner, // [!code hl]
+  weight, // [!code hl]
+})) // [!code hl]
+// never updated: the configuration derives the address
+export const account = // [!code hl]
+  config.version === 0n // [!code hl]
+    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold }) // [!code hl]
+    : Account.fromConfig({ ...config, address, owners }) // [!code hl]
 ```
 
 Rebuild after every update. An account object carries the configuration it was built from, and Tempo checks that against the stored hash, so an object from before the update fails with `multisig configuration commitment mismatch`.
@@ -165,8 +167,8 @@ import { AccountConfig } from 'viem/tempo'
 import { saved } from './account'
 import { client } from './client'
 
-const stored = await client.accounts.getConfigCommitment({ account: saved.address })
-const isCurrent = stored === AccountConfig.getCommitment(saved.config)
+const stored = await client.accounts.getConfigCommitment({ account: saved.address }) // [!code hl]
+const isCurrent = stored === AccountConfig.getCommitment(saved.config) // [!code hl]
 ```
 
 The stored hash is zero before registration. A mismatch means another update landed, and approvals built on the saved configuration fail.
@@ -179,7 +181,7 @@ A contract checks that an account's owners approved a message with the signature
 
 ```solidity
 interface ISignatureVerifier {
-    function verifyMultisig(address account, bytes32 hash, bytes calldata signature) external view returns (bool);
+    function verifyMultisig(address account, bytes32 hash, bytes calldata signature) external view returns (bool); // [!code hl]
 }
 ```
 

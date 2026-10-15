@@ -39,7 +39,7 @@ The user creates a new passkey on their new device. It isn't a signer until the 
 ```ts [recover.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
 
-const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
+const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' })) // [!code hl]
 ```
 
 <span id="sign-in-with-the-remaining-signers" />
@@ -71,17 +71,18 @@ function openAccount(approvers: Account.RootAccount[]) {
 const firstKey = Account.fromSecp256k1(firstPrivateKey) // held by your app or wallet provider
 const recovery = Account.fromSecp256k1(recoveryPrivateKey) // or your recovery provider's signer
 
-const { config } = await client.accounts.updateConfigSync({
-  account: openAccount([firstKey, recovery]),
-  nextConfig: {
-    owners: saved.config.owners.map(({ owner, weight }) => ({
-      owner: isAddressEqual(owner, lostPasskey) ? passkey.address : owner,
-      weight,
-    })),
-    threshold: saved.config.threshold,
-  },
-})
-saved.config = config // persist it: the version increments, and the next step builds from it
+const { config } = await client.accounts.updateConfigSync({ // [!code hl]
+  account: openAccount([firstKey, recovery]), // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: saved.config.owners.map(({ owner, weight }) => ({ // [!code hl]
+      owner: isAddressEqual(owner, lostPasskey) ? passkey.address : owner, // [!code hl]
+      weight, // [!code hl]
+    })), // [!code hl]
+    threshold: saved.config.threshold, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+// persist it: the version increments, and the next step builds from it
+saved.config = config // [!code hl]
 ```
 
 If the attached keys can't reach the threshold, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Once the update lands, the lost passkey can't approve anything.
@@ -91,10 +92,11 @@ If the attached keys can't reach the threshold, viem throws `Local owners do not
 The lost phone's device key is an [access key](/docs/accounts/access-keys): it pays from the account within its limits without the signers' approval. Changing signers doesn't revoke it, so revoke it now. `lostDeviceKey` is the address your app saved when it authorized the key. `openAccount` rebuilds the account from the updated `saved.config`; an account built from the old configuration no longer matches the hash Tempo stores and fails with `multisig configuration commitment mismatch`. On the new device, the new passkey approves alone, because its weight of 2 reaches the threshold.
 
 ```ts [recover.ts]
-await client.accessKey.revokeSync({
-  account: openAccount([passkey]), // rebuilt from the new `saved.config`
-  accessKey: lostDeviceKey,
-})
+await client.accessKey.revokeSync({ // [!code hl]
+  // rebuilt from the new `saved.config`
+  account: openAccount([passkey]), // [!code hl]
+  accessKey: lostDeviceKey, // [!code hl]
+}) // [!code hl]
 ```
 
 If you didn't save the lost key's address, [list the keys the account has authorized](/docs/accounts/access-keys/revocation#revoke-when-signers-change). A revoked key can't be authorized again, so authorize a new [device key](/docs/accounts/authentication/device-keys) for the new phone.

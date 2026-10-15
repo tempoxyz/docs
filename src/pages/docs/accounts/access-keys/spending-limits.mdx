@@ -6,7 +6,7 @@ description: Cap how much of each TIP-20 token an access key can spend, once or 
 
 # Spending limits
 
-A spending limit caps how much of one TIP-20 token an access key can spend, such as 500 AlphaUSD a day, and Tempo reverts any transaction that would go over it. It caps how much, not where: [scopes](/docs/accounts/access-keys/scopes) decide where the money goes.
+A spending limit caps how much of one TIP-20 token an access key can spend, such as 500 OUSD a day, and Tempo reverts any transaction that would go over it. It caps how much, not where: [scopes](/docs/accounts/access-keys/scopes) decide where the money goes.
 
 <span id="tip-20-spending-limits" />
 <span id="per-token-spending-limits" />
@@ -14,13 +14,7 @@ A spending limit caps how much of one TIP-20 token an access key can spend, such
 
 ## Set a spending limit
 
-Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key), with one entry per token and the amount in base units (AlphaUSD has 6 decimals). A key without `limits` can spend any amount.
-
-```ts [limits.ts]
-limits: [
-  { token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }, // 500 AlphaUSD a day
-],
-```
+Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry covers one token, with the amount in base units (most USD stablecoins have 6 decimals). For example, `{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }` allows 500 OUSD a day. A key without `limits` can spend any amount.
 
 `period` decides whether the limit renews:
 
@@ -39,29 +33,14 @@ In a transaction the key signs, each of these counts against the limit for its t
 - Tokens that Tempo's built-in contracts (precompiles) pull from the account
 - Since T12, tokens burned from the account with `burnAt`
 
-Assets other than TIP-20 tokens, such as NFTs, don't count, and neither does a `transferFrom` that spends an allowance the account already granted. A transaction that would go over the remaining limit reverts entirely with `SpendingLimitExceeded`.
+Assets other than TIP-20 tokens, such as NFTs, don't count, and neither does a `transferFrom` that spends an allowance the account already granted. A transaction that would go over the remaining limit reverts entirely with [`SpendingLimitExceeded`](/docs/protocol/transactions/AccountKeychain#error-spendinglimitexceeded).
 
 <span id="read-an-access-key" />
 <span id="read-the-remaining-permission" />
 
 ## Read the remaining limit
 
-`access-keys.ts` is the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key). It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `getRemainingLimit` and `updateLimitSync` work the same on mainnet and testnet.
-
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
-```ts [remaining.ts]
-import { accessKey, account, alphaUsd } from './access-keys'
-import { client } from './client'
-
-const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
-  account,
-  accessKey,
-  token: alphaUsd,
-})
-```
+Read what a key can still spend with viem's [`accessKey.getRemainingLimit`](https://viem.sh/tempo/actions/accessKey.getRemainingLimit). It returns `remaining` and `periodEnd`.
 
 `remaining` is what the key can spend now, and it reads as the full limit once a period ends. `periodEnd` is when the current period ends, as a Unix timestamp, or `0` for a one-time limit. A missing, revoked, or expired key reads as zero.
 
@@ -71,19 +50,8 @@ const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
 
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's limit without revoking it. A limited access key can't change limits, not even its own.
 
-```ts [update-limit.ts]
-import { parseUnits } from 'viem'
-import { accessKey, account, alphaUsd } from './access-keys'
-import { client } from './client'
+Set the new limit with viem's [`accessKey.updateLimit`](https://viem.sh/tempo/actions/accessKey.updateLimit).
 
-await client.accessKey.updateLimitSync({
-  account,
-  accessKey,
-  limit: parseUnits('50', 6),
-  token: alphaUsd,
-})
-```
-
-The update sets both the limit and what's left of it to the new value, so a key that already spent 400 of its 500 AlphaUSD today can spend 50 more. The period and the current period's end stay the same. On a key with no limits, the update turns limits on. It reverts on a revoked key (`KeyAlreadyRevoked`), an expired key (`KeyExpired`), or an admin key (`InvalidKeyId`), since admin keys have no limits.
+The update sets both the limit and what's left of it to the new value, so a key that already spent 400 of its 500 OUSD today can spend 50 more. The period and the current period's end stay the same. On a key with no limits, the update turns limits on. It reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)), an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)), or an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits.
 
 Specification: [Account Keychain spending limits](/docs/protocol/transactions/AccountKeychain#spending-limit-enforcement).

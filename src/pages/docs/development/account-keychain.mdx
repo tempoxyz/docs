@@ -35,7 +35,7 @@ The Account Keychain holds each account's access keys, extra keys that sign for 
 | Contract creation | A key can't deploy a contract directly, but it can call a permitted factory that does. |
 | Key management | Limited keys can't authorize, change, or revoke keys, including themselves. |
 
-Tempo rejects an expired key with `KeyExpired`, a transaction over a limit with `SpendingLimitExceeded`, and a call outside the scopes with `CallNotAllowed`.
+Tempo rejects an expired key with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired), a transaction over a limit with [`SpendingLimitExceeded`](/docs/protocol/transactions/AccountKeychain#error-spendinglimitexceeded), and a call outside the scopes with [`CallNotAllowed`](/docs/protocol/transactions/AccountKeychain#error-callnotallowed).
 
 ## Access keys on each account type
 

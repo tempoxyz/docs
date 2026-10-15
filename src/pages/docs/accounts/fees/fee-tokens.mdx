@@ -12,7 +12,7 @@ A fee token is the USD stablecoin a transaction pays its network fee in, so an a
 
 ## Supported fee tokens
 
-On mainnet, use [OUSD](/docs/guide/ousd) for most accounts. The examples on this page run on the Tempo Accounts devnet, which has no OUSD, so they use AlphaUSD and BetaUSD, test stablecoins from the devnet faucet. Before a transaction runs, Tempo checks its fee token:
+On mainnet, use [OUSD](/docs/guide/ousd) for most accounts. The examples on this page run on the Tempo Accounts devnet, which has no OUSD, so they use test stablecoins from the devnet faucet. Before a transaction runs, Tempo checks its fee token:
 
 - It's a [TIP-20 token](/docs/protocol/tip20/overview), Tempo's token standard, whose currency is USD.
 - The account paying the fee holds enough of it to cover the maximum fee: the gas limit times the gas price.
@@ -28,43 +28,52 @@ The default covers every transaction the account pays the fee for, including one
 
 In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to it ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [set-fee-token.ts]
 import { client } from './client'
 
-const betaUsd = '0x20c0000000000000000000000000000000000002' // BetaUSD, a devnet test stablecoin
+// A test stablecoin on the devnet
+const otherStablecoin = '0x20c0000000000000000000000000000000000002'
 
-const { receipt } = await client.fee.setUserTokenSync({
-  account,
-  feeToken: betaUsd, // pays this transaction's own fee in BetaUSD too
-  token: betaUsd,
-})
+const { receipt } = await client.fee.setUserTokenSync({ // [!code hl]
+  account, // [!code hl]
+  token: otherStablecoin, // [!code hl]
+  // pays this transaction's own fee in the same stablecoin // [!code hl]
+  feeToken: otherStablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
-This calls `setUserToken` on the FeeManager, Tempo's built-in fee contract. Pass `feeToken` as well: before the default exists, this transaction's own fee can otherwise fall back to pathUSD. Read the current default with `client.fee.getUserToken({ account: account.address })`, which returns `null` until one is set.
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
 
-The default outranks the token being transferred. With BetaUSD as the default, an AlphaUSD transfer still pays its fee in BetaUSD, and is invalid if the account's BetaUSD can't cover it.
+::::
+
+This calls `setUserToken` on the FeeManager, Tempo's built-in fee contract. Pass `feeToken` as well: before the default exists, this transaction's own fee can otherwise fall back to pathUSD. Read the current default with `client.fee.getUserToken({ account: account.address })`, which returns `null` until one is set. [`fee.setUserToken`](https://viem.sh/tempo/actions/fee.setUserToken) lists the action's other options.
+
+The default outranks the token being transferred. With OUSD as the default, a transfer of another stablecoin still pays its fee in OUSD, and is invalid if the account's OUSD can't cover it.
 
 ## Override the fee token per transaction
 
-Pass `feeToken` to pay one transaction's fee in a different stablecoin. It outranks the default and every other rule, for that transaction only. Here the account sends BetaUSD to `recipient`, the payee's address, and pays the fee in AlphaUSD:
+Pass `feeToken` to pay one transaction's fee in a different stablecoin. It outranks the default and every other rule, for that transaction only. Here the account sends one stablecoin to `recipient`, the payee's address, and pays the fee in another stablecoin:
 
 ```ts [transfer.ts]
 import { parseUnits } from 'viem'
 import { client } from './client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a devnet test stablecoin
-const betaUsd = '0x20c0000000000000000000000000000000000002' // BetaUSD, a devnet test stablecoin
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const otherStablecoin = '0x20c0000000000000000000000000000000000002'
 
 await client.token.transferSync({
   account,
   amount: parseUnits('25', 6),
-  feeToken: alphaUsd, // this transaction's fee token
+  // this transaction's fee token
+  feeToken: stablecoin, // [!code hl]
   to: recipient,
-  token: betaUsd,
+  token: otherStablecoin,
 })
 ```
 
