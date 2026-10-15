@@ -290,7 +290,8 @@ Optional `valid_before`, `valid_after`, and key-authorization `expiry` values MU
 #### Fee Payer Validation (if present)
 1. Verify fee payer signature (K1 only initially)
 2. Recover payer address via `ecrecover`
-3. Deduct fees from payer instead of sender
+3. Reject the transaction if the recovered payer equals the transaction sender
+4. Deduct fees from payer instead of sender
 
 ### Fee Payer Signature Details
 
@@ -391,6 +392,7 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
 - If `fee_payer_signature` present:
   - MUST be recoverable via secp256k1 (only secp256k1 supported for fee payers)
   - Recovery MUST succeed, otherwise transaction is invalid
+  - The recovered payer MUST differ from the transaction sender, even when the signature is valid and the account has sufficient balance
 - If `fee_payer_signature` absent:
   - Fee payer defaults to sender address (self-paid transaction)
 

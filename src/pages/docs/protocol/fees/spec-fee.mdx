@@ -99,6 +99,7 @@ The network validates both signatures and executes the transaction.
 
 When `feePayerSignature` is present:
 * Both sender and fee payer signatures must be valid
+* Recovered fee payer must differ from the transaction sender; self-payment requires an absent `feePayerSignature`
 * Fee payer must have sufficient balance in the fee token
 * Transaction is rejected if either signature fails or fee payer's balance is insufficient
 
