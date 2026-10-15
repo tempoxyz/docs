@@ -9,6 +9,7 @@ import { webAuthnRpId } from '../../wagmi.config'
 import { Container } from '../Container'
 import * as ui from './AccountDemo.recipes'
 import { Button, FAKE_RECIPIENT, Step, StringFormatter } from './Demo'
+import { thisDevice } from './this-device'
 import { alphaUsd } from './tokens'
 
 const token = alphaUsd
@@ -47,6 +48,8 @@ export function SingleKeyAccountDemo() {
   const [pending, setPending] = React.useState<Action | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const busy = React.useRef(false)
+  const [unlock, setUnlock] = React.useState('passkey')
+  React.useEffect(() => setUnlock(thisDevice().unlock), [])
 
   const client = React.useMemo(
     () =>
@@ -133,17 +136,25 @@ export function SingleKeyAccountDemo() {
           title="Pick the account's key"
           active
           completed={Boolean(account)}
-          actions={keyTypes.map((item) => (
-            <Button
-              key={item.type}
-              type="button"
-              variant={account ? 'default' : 'accent'}
-              disabled={disabled}
-              onClick={() => run(item.type, () => create(item.type))}
-            >
-              {pending === item.type ? 'Creating…' : item.label}
-            </Button>
-          ))}
+          actions={
+            <div {...ui.accountDemoChoices()}>
+              {keyTypes.map((item) => (
+                <Button
+                  key={item.type}
+                  type="button"
+                  variant={item.type === 'passkey' && !account ? 'accent' : 'default'}
+                  disabled={disabled}
+                  onClick={() => run(item.type, () => create(item.type))}
+                >
+                  {pending === item.type
+                    ? 'Creating…'
+                    : item.type === 'passkey'
+                      ? `Passkey (${unlock})`
+                      : item.label}
+                </Button>
+              ))}
+            </div>
+          }
         >
           {account && chosen && (
             <p {...ui.accountDemoNote()}>

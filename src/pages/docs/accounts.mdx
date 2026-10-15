@@ -6,6 +6,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 ---
 
 import { Card, Cards } from 'vocs'
+import { DocsLinkCards } from '../../components/DocsLinkCards'
 import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 <span id="build-your-account-integration" />
@@ -80,14 +81,6 @@ To build on mainnet today, [create a single-key account](/docs/accounts/create#c
   <Card title="Set up a company treasury" description="Any two of three approvers sign each payment, so no one moves funds alone." to="/docs/accounts/guides/teams/company-treasury" />
 </Cards>
 
-## What's live today
+## Account features
 
-| Feature | Where it runs |
-| --- | --- |
-| [Single-key accounts](/docs/development/single-key-accounts), including [passkeys](/docs/accounts/authentication/passkeys) | Mainnet and testnet |
-| [Access keys](/docs/accounts/access-keys) | Mainnet and testnet |
-| [Fee tokens](/docs/accounts/fees/fee-tokens) and [fee sponsorship](/docs/accounts/fees/fee-sponsorship) | Mainnet and testnet |
-| [Receive policies](/docs/accounts/policies/receive-policies) | Mainnet and testnet |
-| [Virtual addresses](/docs/accounts/virtual-addresses) | Mainnet and testnet |
-| [Configurable accounts](/docs/development/configurable-accounts): several signers, a threshold, and [signer changes](/docs/accounts/key-management) | Tempo Accounts devnet only |
-| [Account upgrade](/docs/accounts/key-management/account-upgrade) of a single-key account | Tempo Accounts devnet only |
+<DocsLinkCards collection="accountFeatures" />

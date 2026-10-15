@@ -101,3 +101,9 @@ export const accountDemoTxIcon = style({
   width: tokens.spacing['3'],
   height: tokens.spacing['3'],
 })
+export const accountDemoChoices = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'flex-end',
+  gap: tokens.spacing['2'],
+})
