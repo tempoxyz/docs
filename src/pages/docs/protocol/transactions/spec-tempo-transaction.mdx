@@ -52,8 +52,8 @@ pub struct TempoTransaction {
     // Optional features
     fee_token: Option<Address>,                 // Optional fee token preference
     fee_payer_signature: Option<Signature>,     // Sponsored transactions (secp256k1 only)
-    valid_before: Option<u64>,                  // Transaction expiration timestamp (seconds)
-    valid_after: Option<u64>,                   // Transaction can only be included after this timestamp (seconds)
+    valid_before: Option<NonZeroU64>,           // Transaction expiration timestamp (seconds)
+    valid_after: Option<NonZeroU64>,            // Transaction can only be included after this timestamp (seconds)
     key_authorization: Option<SignedKeyAuthorization>, // Access key authorization (optional)
     aa_authorization_list: Vec<TempoSignedAuthorization>, // EIP-7702 style authorizations with AA signatures
 }
@@ -71,7 +71,7 @@ pub struct KeyAuthorization {
     chain_id: u64,                              // Chain ID for replay protection (0 = valid on any chain)
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
-    expiry: Option<u64>,                        // Unix timestamp when key expires (omit / None for never expires)
+    expiry: Option<NonZeroU64>,                 // Unix timestamp when key expires (omit / None for never expires)
     limits: Option<Vec<TokenLimit>>,            // TIP20 spending limits (None = unlimited spending)
     allowed_calls: Option<Vec<CallScope>>,      // Call-scope allowlist (None = unrestricted; Some(empty) = scoped deny-all)
     witness: Option<B256>,                      // App-defined witness digest for replay protection
@@ -279,6 +279,8 @@ Existing nonce streams and new nonce streams have different costs. New streams c
    - P256: P256 curve verification with provided public key (sha256 pre-hash if flag set)
    - WebAuthn: Parse clientDataJSON, verify challenge and type, then P256 verify
    - Keychain: Verify inner signature, then validate access key authorization via AccountKeychain precompile
+
+Optional `valid_before`, `valid_after`, and key-authorization `expiry` values MUST be nonzero when present. JSON-RPC requests with an explicit zero timestamp MUST be rejected during deserialization. An absent transaction bound is unconstrained on that side; an absent key expiry means non-expiring. The transaction timestamp MUST be strictly less than `valid_before` and greater than or equal to `valid_after` when those bounds are present.
 
 #### Nonce Validation
 1. Fetch sequence for given nonce key
@@ -550,7 +552,7 @@ key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, l
 chain_id = u64 (0 = valid on any chain)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
-expiry = Option<u64> (unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
+expiry = Option<NonZeroU64> (nonzero unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
 limits = Option<Vec<[token, limit, period]>> (None = unlimited spending; period = 0 means one-time)
 allowed_calls = Option<Vec<[target, [[selector, [recipient, ...]], ...]]>> (None = unrestricted; Some([]) = scoped deny-all)
 witness = Option<bytes32> (app-defined witness digest)
