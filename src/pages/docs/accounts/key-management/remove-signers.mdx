@@ -8,7 +8,7 @@ description: Remove a departing, lost, or compromised signer, or rotate a key, i
 
 Removing a signer ends its power to approve when an approver leaves or a key is lost or compromised.
 
-Removing a signer from a configurable account is a [signer update](/docs/accounts/key-management#every-change-is-one-signer-update): the signers that stay approve a new signer list without the removed one, and the account keeps its address, balance, and token approvals. To rotate a key, the same update puts the new key in the old one's place. Access keys survive the removal, so revoke any that the removed signer's holder could use.
+Removing a signer from a configurable account is a [signer update](/docs/accounts/key-management#every-change-is-one-signer-update): the signers that stay approve a new signer list without the removed one, and the account keeps its address, balance, and token approvals. To rotate a key, the same update puts the new key in the old one's place.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Removing, rotating, and replacing signers all need one.
@@ -24,7 +24,7 @@ Once the update lands, the removed signer can't approve anything, and approvals 
 
 ## Remove a signer
 
-Each signer's key stays with whoever holds it, and Tempo stores only a hash of the account's configuration: its signers, weights, threshold, salt, and version. Your app keeps the address and configuration it saved when it created the account or last changed signers, and rebuilds the account from them with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals). Drop the departing signer's entry and send the update. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Each signer's key stays with whoever holds it, and Tempo stores only a hash of the account's configuration: its signers, weights, threshold, salt, and version. Your app rebuilds the account from the address and configuration it last saved, with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals). Drop the departing signer's entry and send the update. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -47,7 +47,7 @@ const { config: updated } = await client.accounts.updateConfigSync({
 
 ::::
 
-`account` is the rebuilt account, and `config` is the saved configuration it came from. Attach the keys, on the device running the code, of signers that stay and approve the removal, such as the customer's passkey in their browser. viem signs with them, highest weight first, until their weights reach the current threshold, and throws `Local owners do not meet the threshold.` without sending anything when they fall short. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+`account` is the rebuilt account, and `config` is the saved configuration it came from. Attach the keys, on the device running the code, of signers that stay and approve the removal, such as the customer's passkey in their browser. viem signs with them, highest weight first, until their weights reach the current threshold. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 Save the configuration the update returns, and rebuild from it before the next action. The update raises the configuration's version by one, so an account built from the old copy no longer matches the hash Tempo stores, and its next payment or update fails.
 
@@ -73,9 +73,7 @@ const rotation = await client.accounts.updateConfigSync({
 })
 ```
 
-Save `rotation.config` with the account record, as after a removal.
-
-One update swaps the keys, so the account never has both keys active, or neither.
+Save `rotation.config` with the account record, as after a removal. Because one update swaps the keys, the account never has both keys active, or neither.
 
 <span id="rotate-a-compromised-signer" />
 <span id="recover-with-the-remaining-signers" />

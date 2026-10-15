@@ -11,12 +11,12 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Your backend sends payouts from a customer's Tempo account without prompting the customer each time.
 
-In this guide, the customer's signers approve an [access key](/docs/accounts/access-keys) once, and your backend keeps it in its KMS to send payouts. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees. The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value.
+In this guide, the customer's signers approve an [access key](/docs/accounts/access-keys) once, and your backend keeps it in its KMS to send payouts. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees.
 
 <span id="backend-services" />
 <span id="automations" />
 
-The demo runs on the devnet because its customer account is a configurable account whose one signer is a device key in this browser. On mainnet and testnet, a payout key works the same from a single-key account, such as one whose key is the customer's passkey.
+The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value. The demo's customer account is a configurable account whose one signer is a device key in this browser. On mainnet and testnet, a payout key works the same from a single-key account, such as one whose key is the customer's passkey.
 
 <GuideDemo guide="backend-automation" />
 

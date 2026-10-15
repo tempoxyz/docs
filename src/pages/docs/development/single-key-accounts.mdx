@@ -21,7 +21,7 @@ Single-key accounts are live on mainnet and testnet. They work like an Ethereum 
 
 ## Single-key address derivation
 
-The address is the last 20 bytes of `keccak256(x ‖ y)`, the hash of the root key's public key coordinates ([specification](/docs/protocol/transactions/spec-tempo-transaction#address-derivation)). Ethereum uses the same rule, so a secp256k1 key has the same address on both chains.
+The address is the last 20 bytes of `keccak256(x ‖ y)`, the hash of the root key's public key coordinates, the same rule Ethereum uses ([specification](/docs/protocol/transactions/spec-tempo-transaction#address-derivation)).
 
 | Root key | Viem account |
 | --- | --- |
@@ -33,7 +33,9 @@ Because the key fixes the address, you can't replace the root key: a new key is 
 
 ## Signing with the root key
 
-The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet or Moderato testnet, which need no key, use `createClient({ chain: tempo })` or `createClient({ chain: tempoModerato })` instead, with the chain from `viem/chains`, and pay in that network's stablecoins: [Network details](/docs/quickstart/connection-details) lists both.
+The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+On mainnet or Moderato testnet, which need no key, use `createClient({ chain: tempo })` or `createClient({ chain: tempoModerato })` instead, with the chain from `viem/chains`, and pay in that network's stablecoins: [Network details](/docs/quickstart/connection-details) lists both.
 
 ::::code-group
 
@@ -68,7 +70,7 @@ The root key can authorize [access keys](/docs/development/account-keychain), ex
 
 ## Upgrade to a configurable account
 
-An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key: each owner has a weight, and an approval needs the owners' weights to reach a threshold. The upgrade is permanent.
+An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key, with weights that must reach a threshold. The upgrade is permanent.
 
 Account upgrades aren't live yet. They work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and their specification, [TIP-1113](https://tips.sh/1113), is a Draft that may still change. Sent on mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/key-management/account-upgrade).
 

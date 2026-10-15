@@ -42,12 +42,12 @@ From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain.
 
 ## What a browser wallet's account can't do
 
-A browser wallet's account has one key, and the wallet sends standard Ethereum transactions. Here's what that changes compared with [Tempo Transactions](/docs/guide/tempo-transaction), Tempo's own transaction type:
+Here's what a browser wallet's standard Ethereum transactions can't do compared with [Tempo Transactions](/docs/guide/tempo-transaction), Tempo's own transaction type:
 
 | | Standard Ethereum transactions (browser wallet) | Tempo Transactions |
 | --- | --- | --- |
-| Signers | One private key, in the wallet | [Passkeys, device keys, or private keys](/docs/accounts/authentication); several per account only on the devnet |
-| Lost key | Loses the account and its funds | Devnet only: [another signer replaces it](/docs/accounts/key-management#plan-for-recovery). On mainnet and testnet, losing the key loses the account. |
+| Signers | One private key, in the wallet | [Passkeys, device keys, or private keys](/docs/accounts/authentication); several per configurable account |
+| Lost key | Loses the account and its funds | On a configurable account, [another signer replaces it](/docs/accounts/key-management#plan-for-recovery). On a single-key account, losing the key loses the account. |
 | Network fees | Paid by the user | [Sponsored by your app](/docs/accounts/fees/fee-sponsorship), if you choose |
 | Several calls | One call per transaction | Several calls that succeed or fail together |
 | [Access keys](/docs/accounts/access-keys) | The wallet authorizes one with an `authorizeKey` call to the [Account Keychain](/docs/development/account-keychain#authorize-an-access-key). The access key then signs its own Tempo Transactions in your app. | Authorized in the transaction that first uses the key |
@@ -65,7 +65,7 @@ People can pay with the wallet they already have, so keep the `injected` connect
 
 ### Create new accounts with a passkey or device key
 
-For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication). A user moving off a browser wallet sends the funds to a new account whose key is a passkey or device key: on mainnet or testnet, a [single-key account](/docs/development/single-key-accounts); on the Tempo Accounts devnet, a [Tempo account](/docs/accounts/create) with that key as its first signer.
+For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication). A user moving off a browser wallet sends the funds to a new account whose key is a passkey or device key: on mainnet or testnet, a [single-key account](/docs/development/single-key-accounts); on the Tempo Accounts devnet, a [configurable account](/docs/accounts/create) with that key as its first signer.
 
 ### Upgrade an existing address in place
 

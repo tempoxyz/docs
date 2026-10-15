@@ -8,11 +8,11 @@ description: Have a user's Privy or Turnkey wallet sign a limited access key for
 
 Have a user's Privy or Turnkey wallet sign one access key, so your card backend pays within limits on its own.
 
-By the end of this guide, your card backend holds its own [access key](/docs/accounts/access-keys) that can send up to 100 OUSD a day to your card program's funding address for 30 days. The user's account key stays with their wallet provider, Privy or Turnkey, which signs the authorization once; after that, the card backend signs every payment with its own key, within those limits, and never touches the account key. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
+Your card backend ends up with its own [access key](/docs/accounts/access-keys) that can send up to 100 OUSD a day to your card program's funding address for 30 days. The user's account key stays with their wallet provider, Privy or Turnkey, which signs the authorization once. After that, the card backend signs every payment with its own key, within those limits, and never touches the account key. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
 
 ## Who holds which key
 
-Each party holds a different key, so no party can do more than its key allows. Every time the user swipes the card, your card backend has to pull the purchase amount from the user's balance in seconds, without asking the wallet provider to sign each swipe. The access key lets it do that while capping amount, recipient, and duration:
+Each party holds a different key, so no party can do more than its key allows. On each card swipe, your card backend pulls the purchase amount from the user's balance in seconds, without asking the wallet provider to sign. The access key caps the amount, recipient, and duration:
 
 | Party | Holds | Can do on its own |
 | --- | --- | --- |
@@ -105,7 +105,7 @@ const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl
 export const message = JSON.stringify(KeyAuthorization.toRpc(keyAuthorization)) // send to the holder
 ```
 
-The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so your app has to decide what it asks the provider to sign. See [What the provider's policy engine can enforce](/docs/accounts/wallets/embedded-wallets#who-can-move-the-funds).
+The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so your app has to decide what it asks the provider to sign. See [Route raw signing through one backend](/docs/accounts/wallets/embedded-wallets#who-can-move-the-funds).
 
 ### Send it with the holder's first payment
 
@@ -114,6 +114,7 @@ The holder parses the app's `message` and attaches the authorization to its firs
 ```ts [first-payment.ts]
 import { parseUnits } from 'viem'
 import { KeyAuthorization } from 'ox/tempo'
+import { message, stablecoin } from './authorize' // message: received from the app
 import { client } from './client'
 import { holderKey } from './holder-key'
 
@@ -123,7 +124,7 @@ const { receipt } = await client.token.transferSync({
   // first payment only
   keyAuthorization: KeyAuthorization.fromRpc(JSON.parse(message)), // [!code hl]
   to: cardFunding,
-  token: '0x20c0000000000000000000000000000000000001', // a test stablecoin on testnet
+  token: stablecoin,
 })
 ```
 

@@ -8,7 +8,7 @@ description: Add, remove, or rotate a Tempo account's signers in one update that
 
 Key management lets you add, remove, or replace an account's signers without changing its address.
 
-A Tempo account's signers are the keys that approve its transactions, and key management is how a configurable account changes them. Because the address stays the same, the balance and history survive a lost phone or a departing approver. Only the current signers can approve a change, and Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
+A Tempo account's signers are the keys that approve its transactions. A configurable account changes them at the same address, so its balance and history survive a lost phone or a departing approver. Only the current signers can approve a change, and Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding, removing, and replacing signers all need one.
@@ -45,7 +45,7 @@ A single-key account (EOA), like a standard Ethereum account, has no signer list
 
 ## Watch signer changes
 
-Each signer update emits `MultisigConfigUpdated` with the account, its new version, threshold, and signer list. Configurable accounts run only on the Tempo Accounts devnet, which the public indexer doesn't cover, so read the event with viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
+Each signer update emits `MultisigConfigUpdated` with the account, its new version, threshold, and signer list. The public indexer doesn't cover the Tempo Accounts devnet, so read the event with viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
 
 ```ts [watch-signers.ts]
 import { Abis, Addresses } from 'viem/tempo'
@@ -83,7 +83,7 @@ A recovery signer can approve payments at its weight too, so give it no more wei
 
 ### Recover funds sent on another chain
 
-The account has the same address on other EVM chains, so a sender can pay it on the wrong chain by mistake. The specification for configurable account addresses defines a way back: a recovery factory contract on that chain would let the secp256k1 signers (standard Ethereum keys, such as KMS or hardware wallet keys) you created the account with deploy a recovery wallet at the address and retrieve the funds, if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet, so funds sent to the address on another chain can't be retrieved today.
+The account has the same address on other EVM chains, so a sender can pay it on the wrong chain by mistake. The specification for configurable account addresses defines a way back: a recovery factory contract on that chain. It would let the secp256k1 signers (standard Ethereum keys, such as KMS or hardware wallet keys) you created the account with deploy a recovery wallet at the address and retrieve the funds, if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet, so funds sent to the address on another chain can't be retrieved today.
 
 Passkeys and device keys don't count. Accounts [upgraded in place](/docs/accounts/key-management/account-upgrade) don't use the factory: on other chains, the original key still controls the address. To keep the option open, create the account with secp256k1 signers whose weights reach the threshold on their own.
 

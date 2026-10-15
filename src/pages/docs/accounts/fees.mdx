@@ -8,14 +8,14 @@ description: Pay network fees from the USD stablecoins an account already holds,
 
 Every Tempo transaction pays its network fee in a USD stablecoin, so accounts need no separate gas token.
 
-A Tempo account pays its network fees from the stablecoins it already holds. You decide two things: who pays the fee, the account or a [fee payer](/docs/accounts/fees/fee-sponsorship), and which [fee token](/docs/accounts/fees/fee-tokens) it's paid in. Fee tokens and fee sponsorship work on mainnet and testnet today, and the same fee rules apply to configurable accounts on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+For each transaction, you decide who pays the fee, the account or a [fee payer](/docs/accounts/fees/fee-sponsorship), and which [fee token](/docs/accounts/fees/fee-tokens) it's paid in. Fee tokens and fee sponsorship work on mainnet and testnet today, and the same fee rules apply to configurable accounts on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="sponsor-an-accounts-fees" />
 <span id="sponsor-fees-with-a-fee-payer" />
 
 ## Who pays the fee
 
-The account pays its own fees unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them, so your customers can transact without holding a fee balance. A fee payer can't change the account's calls or move its funds.
+The account pays its own fees unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them, which lets your customers transact without holding a fee balance. A fee payer can't change the account's calls or move its funds.
 
 <span id="how-an-account-pays-fees" />
 <span id="how-tempo-account-fees-work" />

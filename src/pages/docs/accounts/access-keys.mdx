@@ -23,7 +23,7 @@ The account's signers authorize an access key once, and from then on it signs tr
 
 ## What an access key is
 
-An account's signers are the keys that approve its transactions. They authorize an access key once. From then on, the key signs transactions from the account's address and pays from the account's balance by itself. The key holds no funds, and the account stores only the key's address, type, and bounds, never its private key.
+An account's signers are the keys that approve its transactions. An access key signs from the account's address and pays from the account's balance, but holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
 
 <span id="access-keys-and-signers" />
 <span id="choose-the-authority-to-delegate" />
@@ -73,7 +73,7 @@ Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-k
 - With the key's first payment: `signAuthorization` returns a `keyAuthorization` that travels with the first transaction the key signs. The key stays authorized even if that transaction's calls revert.
 - On its own: `authorizeSync` sends the authorization in a separate transaction, before the key pays.
 
-This example takes the first path: a new account's signer gives a payout key 10 OUSD for one hour, payable to one recipient. `account.ts` is the configurable account with one signer from [Create an account](/docs/accounts/create#create-an-account-in-code), funded by the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet), so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). To run it on testnet with a single-key account instead, set `account` to that signer and connect `client` to [testnet](/docs/quickstart/connection-details#testnet).
+This example takes the first path: a new account's signer gives a payout key 10 OUSD for one hour, payable to one recipient. `account.ts` is the configurable account with one signer from [Create an account](/docs/accounts/create#create-an-account-in-code), funded by the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet). `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). To run it on testnet with a single-key account, set `account` to that signer and connect `client` to [testnet](/docs/quickstart/connection-details#testnet).
 
 ::::code-group
 
@@ -114,7 +114,9 @@ await client.token.transferSync({
 
 The other pages in this section import `account`, `accessKey`, `stablecoin`, and `recipient` from this file. To confirm the key landed, read it back with `client.accessKey.getMetadata({ account, accessKey })`.
 
-Tempo stores each limit and scope with the key, so each one adds to the network fee for authorizing it. This example's authorization and first payment cost under a cent together. To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
+Tempo stores each limit and scope with the key, so each one adds to the network fee for authorizing it. This example's authorization and first payment cost under a cent together.
+
+To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
 
 ## See an account's keys
 

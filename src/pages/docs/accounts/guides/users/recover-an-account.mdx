@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Swap in a new passkey when a user loses their phone, keeping the account's address and balance.
 
-In this guide, a user loses the phone that holds their passkey, and the account's other two signers (keys that approve its transactions), the user's first key and a recovery signer, together swap in a new passkey from the user's new device. The new passkey then revokes the lost phone's device key. The account keeps its address and balance, and the guide runs on the Tempo Accounts devnet.
+When a user loses the phone that holds their passkey, the account's other two signers (keys that approve its transactions), the user's first key and a recovery signer, together swap in a new passkey from the user's new device. The new passkey then revokes the lost phone's device key.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Replacing a lost signer needs one.
@@ -26,7 +26,7 @@ In this guide, a user loses the phone that holds their passkey, and the account'
 
 This guide continues from [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#require-two-factors), with the same account: a passkey at weight 2, the user's first key and a recovery signer at weight 1 each, and a threshold of 2, the total weight an approval needs. Without the passkey, the other two reach 2 together. Tempo can't override an account's signers, so [check this when you add signers](/docs/accounts/guides/users/add-a-recovery-signer#confirm-the-account-survives-losing-one-signer), not after one is lost.
 
-Tempo stores only a hash of the account's configuration (signers, weights, threshold, and version), so your app rebuilds the account from the address and configuration it saved after the last update: `saved.address` and `saved.config` below.
+Tempo stores only a hash of the account's configuration, so your app rebuilds the account from the address and configuration it saved after the last update: `saved.address` and `saved.config` below.
 
 In the demo, a device key in this browser stands in for the passkey, and the demo treats it as lost.
 
@@ -48,7 +48,7 @@ const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ l
 
 ### Approve with the remaining signers
 
-Rebuild the account from `saved`, attaching the keys that approve: the first key, held by your app or wallet provider, and the recovery signer. Signers without an attached key, such as the lost passkey, whose address is `lostPasskey`, stay addresses that can't sign. `openAccount` passes the saved address, not `address: 'infer'`, which derives a different address once signers change. The update swaps the lost passkey for the new one at the same weight, and viem signs it with both attached keys: their weights of 1 each reach the threshold of 2.
+Rebuild the account from `saved`, attaching the keys that approve: the first key, held by your app or wallet provider, and the recovery signer. Signers without an attached key, such as the lost passkey at `lostPasskey`, stay addresses that can't sign. `openAccount` passes the saved address, because `address: 'infer'` derives a different one once signers change. The update swaps the lost passkey for the new one at the same weight. viem signs it with both attached keys, whose weights of 1 each reach the threshold of 2.
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -95,7 +95,7 @@ If the attached keys can't reach the threshold, viem throws `Local owners do not
 
 ### Revoke the lost device's keys
 
-The lost phone's device key is an [access key](/docs/accounts/access-keys): it pays from the account within its limits without the signers' approval. Changing signers doesn't revoke it, so revoke it now. `lostDeviceKey` is the address your app saved when it authorized the key. `openAccount` rebuilds the account from the updated `saved.config`; an account built from the old configuration no longer matches the hash Tempo stores and fails with `multisig configuration commitment mismatch`. On the new device, the new passkey approves alone, because its weight of 2 reaches the threshold.
+The lost phone's device key is an [access key](/docs/accounts/access-keys): it pays from the account within its limits without the signers' approval. Changing signers doesn't revoke it, so revoke it now. `lostDeviceKey` is the address your app saved when it authorized the key. Build from the updated `saved.config`: an account built from the old configuration fails with `multisig configuration commitment mismatch`. On the new device, the new passkey approves alone, because its weight of 2 reaches the threshold.
 
 ```ts [recover.ts]
 await client.accessKey.revokeSync({ // [!code hl]

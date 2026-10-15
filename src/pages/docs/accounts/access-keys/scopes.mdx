@@ -34,7 +34,9 @@ A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)
 
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's scopes without revoking it; the key itself can't. Call `setAllowedCalls` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain), Tempo's built-in contract that stores access keys. For each contract you pass, it replaces that contract's rules and leaves the others alone, so list every rule you want to keep.
 
-This code adds a second recipient to the key from `access-keys.ts`, the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key), and also allows `transferWithMemo`. The call replaces the stablecoin's rules, so it lists every function the key keeps. It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `setAllowedCalls` works the same on mainnet and testnet.
+This code adds a second recipient to the key from `access-keys.ts`, the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key), and also allows `transferWithMemo`. It lists both functions because the call replaces the stablecoin's rules. It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `setAllowedCalls` works the same on mainnet and testnet.
+
+::::code-group
 
 ```ts [set-allowed-calls.ts]
 import { toFunctionSelector } from 'viem'
@@ -67,6 +69,12 @@ await client.writeContractSync({
   ],
 })
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 An entry with `selectorRules: []` allows every function on that contract, and `removeAllowedCalls(keyId, target)` removes one contract from the key's scopes. `setAllowedCalls` reverts with [`InvalidCallScope`](/docs/protocol/transactions/AccountKeychain#error-invalidcallscope) when its list of contracts is empty, or on a zero address or a duplicate entry. Both functions revert with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid) on an admin key, which has no scopes.
 

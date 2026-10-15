@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Give a user full control of their account through a signer in their own wallet.
 
-In this guide, your app removes its own signers and access keys from a user's account on the Tempo Accounts devnet and replaces them with one signer the user holds in their own wallet, such as Tempo Wallet. The account keeps its address and balance, and your app keeps no key.
+Your app removes its own signers and access keys from a user's account and replaces them with one signer the user holds in their own wallet, such as Tempo Wallet. The account keeps its address and balance, and your app keeps no key.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.
@@ -40,7 +40,7 @@ The user creates a passkey in a self-custodial wallet, such as [Tempo Wallet](ht
 
 Changing signers leaves access keys active, so revoke each one your app holds first, while your app's signer can still approve. [Revoked](/docs/accounts/access-keys/revocation) keys can't be authorized on this account again.
 
-Your app's signer approves each revocation. Rebuild the account from the record you saved for this user: its address and its configuration. The configuration lists the signers, each signer's weight, and the threshold, the combined weight that must approve. Attach your app's signer as a key viem can sign with, and leave the other signers as addresses. Tempo stores only a hash of the configuration, so viem builds every approval from your saved copy.
+Your app's signer approves each revocation. Rebuild the account from the address and configuration you saved for this user, since Tempo stores only a hash of the configuration. Attach your app's signer as a key viem can sign with, and leave the other signers as addresses.
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -95,12 +95,12 @@ const { config: handedOff } = await client.accounts.updateConfigSync({ // [!code
 await saveAccount(userId, { address, config: handedOff }) // [!code hl]
 ```
 
-`handedOff` is the new configuration, one version higher. Tempo now checks every approval against its hash, so an account built from the old configuration fails, and the user's wallet needs `handedOff` to approve.
+`handedOff` is the new configuration, one version higher. An account built from the old configuration now fails, and the user's wallet needs `handedOff` to approve.
 
 If the user loses their only signer, nobody, including Tempo, can recover the account. To leave them a backup, send the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) in this update instead: the user's passkey approves alone, and two backup signers they choose approve only together.
 
 ### Send the user to their wallet
 
-The user's signer now controls the account at `address`, and the balance is already there. Send the user `address` and `handedOff`: Tempo keeps only the configuration's hash, so their wallet can't read the configuration back from Tempo. To request payments from them later, [connect your app to their wallet](/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet).
+The user's signer now controls the account at `address`, and the balance is already there. Send the user `address` and `handedOff`, because their wallet can't read the configuration back from Tempo. To request payments from them later, [connect your app to their wallet](/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet).
 
 :::::

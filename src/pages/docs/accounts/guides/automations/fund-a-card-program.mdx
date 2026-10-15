@@ -8,11 +8,11 @@ description: Authorize an access key that pays only your card program's funding 
 
 Your backend tops up a customer's card from their Tempo account without asking them each time.
 
-In this guide, the customer approves one [access key](/docs/accounts/access-keys) for your backend, once, with their account's signers, such as a passkey, and your backend keeps that key in its KMS to fund the card program as the customer spends. Tempo lets the key pay only the card program's funding address, up to a daily limit, so even a leaked key can't send money anywhere else or more than the limit in a day. The examples run on the Tempo Accounts devnet and use a test stablecoin.
+In this guide, the customer's signers, such as a passkey, approve one [access key](/docs/accounts/access-keys) for your backend, once. Your backend keeps the key in its KMS and funds the card program as the customer spends. Tempo lets the key pay only the card program's funding address, up to a daily limit, so even a leaked key can't send money anywhere else or more than the limit in a day.
 
 <span id="fund-a-card-with-a-daily-limit" />
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts. On mainnet and testnet, a card-funding key works the same from a single-key account, such as one whose key is the customer's passkey.
+The examples use a test stablecoin, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts. On mainnet and testnet, a card-funding key works the same from a single-key account, such as one whose key is the customer's passkey.
 
 :::::steps
 
