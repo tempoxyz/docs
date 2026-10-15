@@ -145,7 +145,7 @@ The `FeeManager` is a singleton contract that implements all the functions of th
 function setUserToken(address token) external
 ```
 
-Sets the default fee token preference for the caller (user). Requires token to be a USD TIP-20 token. Emits `UserTokenSet` event. Access: Direct calls only (not via delegatecall).
+Sets the default fee token preference for the caller (user). Requires token to be a USD TIP-20 token. If the token equals the stored user preference, returns without a storage write or event. Otherwise updates the preference and emits `UserTokenSet`. Access: Direct calls only (not via delegatecall).
 
 ```solidity
 function setValidatorToken(address token) external
