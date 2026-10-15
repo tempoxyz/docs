@@ -46,14 +46,14 @@ pub struct TempoTransaction {
     access_list: AccessList,                    // EIP-2930 access list
 
     // nonce-related fields
-    nonce_key: U256,                            // 2D nonce key (0 = protocol nonce, >0 = user nonces)
+    nonce_key: U256,                            // 0 = protocol nonce; uint256.max = expiring nonce; other keys = sequences
     nonce: u64,                                 // Current nonce value for the nonce key
 
     // Optional features
     fee_token: Option<Address>,                 // Optional fee token preference
     fee_payer_signature: Option<Signature>,     // Sponsored transactions (secp256k1 only)
-    valid_before: Option<u64>,                  // Transaction expiration timestamp (seconds)
-    valid_after: Option<u64>,                   // Transaction can only be included after this timestamp (seconds)
+    valid_before: Option<NonZeroU64>,           // Transaction expiration timestamp (seconds)
+    valid_after: Option<NonZeroU64>,            // Transaction can only be included after this timestamp (seconds)
     key_authorization: Option<SignedKeyAuthorization>, // Access key authorization (optional)
     aa_authorization_list: Vec<TempoSignedAuthorization>, // EIP-7702 style authorizations with AA signatures
 }
@@ -68,10 +68,10 @@ pub struct Call {
 // Key authorization for provisioning access keys
 // RLP encoding: [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]
 pub struct KeyAuthorization {
-    chain_id: u64,                              // Chain ID for replay protection (0 = valid on any chain)
+    chain_id: u64,                              // Chain ID for replay protection (must match the executing chain)
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
-    expiry: Option<u64>,                        // Unix timestamp when key expires (omit / None for never expires)
+    expiry: Option<NonZeroU64>,                 // Unix timestamp when key expires (omit / None for never expires)
     limits: Option<Vec<TokenLimit>>,            // TIP20 spending limits (None = unlimited spending)
     allowed_calls: Option<Vec<CallScope>>,      // Call-scope allowlist (None = unrestricted; Some(empty) = scoped deny-all)
     witness: Option<B256>,                      // App-defined witness digest for replay protection
@@ -205,7 +205,8 @@ Each authorization in the list:
 ### Parallelizable Nonces
 
 - **Protocol nonce (key 0)**: Existing account nonce, incremented for regular txs, 7702 authorization, or `CREATE`
-- **User nonces (keys 1-N)**: Enable parallel execution with special gas schedule
+- **User nonce sequences**: Nonzero keys other than `uint256.max` select independent sequential nonces, subject to the reserved-key restriction below.
+- **Expiring nonces (`uint256.max`)**: Use a sender-scoped replay hash and a required expiry, rather than a nonce sequence. The `nonce` field is an arbitrary `uint64` discriminator.
 - **Reserved sequence keys**: Nonce sequence keys with the most significant byte `0x5b` are reserved for protocol-managed validator sequencing.
 
 #### Account State Changes
@@ -280,15 +281,22 @@ Existing nonce streams and new nonce streams have different costs. New streams c
    - WebAuthn: Parse clientDataJSON, verify challenge and type, then P256 verify
    - Keychain: Verify inner signature, then validate access key authorization via AccountKeychain precompile
 
+Optional `valid_before`, `valid_after`, and key-authorization `expiry` values MUST be nonzero when present. JSON-RPC requests with an explicit zero timestamp MUST be rejected during deserialization. An absent transaction bound is unconstrained on that side; an absent key expiry means non-expiring. The transaction timestamp MUST be strictly less than `valid_before` and greater than or equal to `valid_after` when those bounds are present.
+
 #### Nonce Validation
-1. Fetch sequence for given nonce key
-2. Verify sequence matches transaction
-3. Increment sequence
+Validation MUST branch on `nonce_key`:
+
+1. **Protocol nonce (`0`)**: The transaction nonce MUST equal the sender's account nonce. Increment that account nonce.
+2. **Sequential 2D nonce**: For an allowed nonzero key other than `uint256.max`, the transaction nonce MUST equal that account/key sequence. Increment only that sequence.
+3. **Expiring nonce (`uint256.max`)**: `valid_before` MUST be present and satisfy `block.timestamp < valid_before <= block.timestamp + 300` seconds. `nonce` MAY be any `uint64`, including `uint64.max`; it is committed to by the signing and replay hashes. MUST NOT compare or increment a sequential nonce for this mode.
+
+Expiring replay protection uses `keccak256(encode_for_signing(transaction) || sender)`, recorded in the nonce manager's replay set. A replay hash already in the set MUST be rejected. Changing only the fee-payer signature MUST NOT bypass replay protection. Successful validation records the replay hash with its expiry; the bounded ring evicts expired entries. This state persists even if application execution reverts, just as a consumed sequential nonce does.
 
 #### Fee Payer Validation (if present)
 1. Verify fee payer signature (K1 only initially)
 2. Recover payer address via `ecrecover`
-3. Deduct fees from payer instead of sender
+3. Reject the transaction if the recovered payer equals the transaction sender
+4. Deduct fees from payer instead of sender
 
 ### Fee Payer Signature Details
 
@@ -389,6 +397,7 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
 - If `fee_payer_signature` present:
   - MUST be recoverable via secp256k1 (only secp256k1 supported for fee payers)
   - Recovery MUST succeed, otherwise transaction is invalid
+  - The recovered payer MUST differ from the transaction sender, even when the signature is valid and the account has sufficient balance
 - If `fee_payer_signature` absent:
   - Fee payer defaults to sender address (self-paid transaction)
 
@@ -521,7 +530,7 @@ be able to sign transactions on the sender's behalf without inducing another pas
 More information about Access Keys can be found in the [Account Keychain Specification](./AccountKeychain).
 
 A sender can authorize a key by signing over a "key authorization" item that contains the following information:
-- **Chain ID** for replay protection (0 = valid on any chain)
+- **Chain ID** for replay protection (MUST equal the executing chain ID; zero is not a wildcard)
 - **Key type** (Secp256k1, P256, or WebAuthn)
 - **Key ID** (address derived from the public key)
 - **Expiration** timestamp of when the key should expire (optional - None means never expires)
@@ -547,10 +556,10 @@ The root key or an active admin access key signs over the keccak256 hash of the 
 ```
 key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))
 
-chain_id = u64 (0 = valid on any chain)
+chain_id = u64 (MUST equal the executing chain ID; zero is not a wildcard)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
-expiry = Option<u64> (unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
+expiry = Option<NonZeroU64> (nonzero unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
 limits = Option<Vec<[token, limit, period]>> (None = unlimited spending; period = 0 means one-time)
 allowed_calls = Option<Vec<[target, [[selector, [recipient, ...]], ...]]>> (None = unrestricted; Some([]) = scoped deny-all)
 witness = Option<bytes32> (app-defined witness digest)
@@ -855,7 +864,7 @@ Applications can query key information and spending limits:
 ```typescript
 // Check if key is authorized and get info
 const keyInfo = await precompile.getKey(account, keyId);
-// Returns: { signatureType, keyId, expiry, enforceLimits, isRevoked, isAdmin }
+// Returns: { signatureType, keyId, expiry, enforceLimits, isRevoked }
 
 // Check remaining spending limit and current period end for a token
 const { remaining, periodEnd } = await precompile.getRemainingLimitWithPeriod(

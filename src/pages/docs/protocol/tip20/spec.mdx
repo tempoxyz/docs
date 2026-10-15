@@ -128,6 +128,9 @@ interface ITIP20 {
     /// @param from The address to burn tokens from (must be unauthorized by transfer policy)
     /// @param amount The amount of tokens to burn
     function burnBlocked(address from, uint256 amount) external;
+
+    /// @notice Burns from any unprotected account (requires BURN_AT_ROLE)
+    function burnAt(address from, uint256 amount) external;
     
     /// @notice Returns the quote token used for DEX pairing
     /// @return The quote token address
@@ -200,6 +203,9 @@ interface ITIP20 {
     /// @notice Returns the BURN_BLOCKED_ROLE constant
     /// @return keccak256("BURN_BLOCKED_ROLE")
     function BURN_BLOCKED_ROLE() external view returns (bytes32);
+
+    /// @notice Returns keccak256("BURN_AT_ROLE")
+    function BURN_AT_ROLE() external view returns (bytes32);
     
     /// @notice Returns the ISSUER_ROLE constant
     /// @return keccak256("ISSUER_ROLE")
@@ -284,6 +290,8 @@ interface ITIP20 {
     /// @param from The blocked address whose tokens were burned
     /// @param amount The amount of tokens that were burned
     event BurnBlocked(address indexed from, uint256 amount);
+
+    event BurnAt(address indexed burner, address indexed from, uint256 indexed amount);
 
     /// @notice Emitted when new tokens are minted to an address
     /// @param to The address receiving the minted tokens
@@ -412,6 +420,9 @@ interface ITIP20 {
     /// @notice The caller does not have the required role or permission for this operation
     error Unauthorized();
 
+    /// @notice A privileged burn targets protected protocol custody
+    error ProtectedAddress();
+
     /// @notice The provided logoURI exceeds the 256-byte cap
     error LogoURITooLong();
 
@@ -433,16 +444,26 @@ Memo functions `transferWithMemo`, `transferFromWithMemo`, `mintWithMemo`, and `
 ## TIP-403 Transfer Policies
 Transfers and memo transfers require the source to pass `isAuthorizedSender` and the resolved destination to pass `isAuthorizedRecipient`. Minting checks `isAuthorizedMintRecipient` for the resolved destination, in addition to issuer-role, pause, and supply-cap checks. A failed policy check reverts with `PolicyForbids`.
 
-`burn` and `burnWithMemo` burn the issuer's own balance without a TIP-403 policy check. `burnBlocked` requires the source to fail the sender-policy check. T12 adds privileged `burnAt`, which ignores transfer-policy authorization but retains its role, pause, balance, and protected-address checks; see [T12](/docs/protocol/upgrades/t12).
+`burn` and `burnWithMemo` burn the issuer's own balance without a TIP-403 policy check. `burnBlocked` requires the source to fail the sender-policy check. `burnAt(from, amount)` MUST require `BURN_AT_ROLE` and an unpaused token. It ignores transfer-policy authorization, debits `from`, reduces total supply, and emits both `Transfer(from, address(0), amount)` and `BurnAt(msg.sender, from, amount)`. Insufficient balance and protected sources revert. If `from == tx.origin`, the burn also consumes the transaction access key's spending limit, including when a contract invokes the burn.
+
+### Receiver-policy holds
+
+After issuer-policy authorization succeeds, transfers and mints MUST evaluate the resolved recipient's [receive policy](/docs/protocol/tip403/spec#receive-policies). A receiver-policy rejection MUST NOT itself revert the inbound operation. Instead, the token credits ReceivePolicyGuard at `0xb10c000000000000000000000000000000000000` and records a receipt for that amount. The resolved recipient receives no balance credit. This applies to ordinary and virtual recipients, with or without a memo. Other failures, including issuer-policy, pause, balance, and supply-cap failures, still revert.
+
+The guard emits `TransferBlocked` with the addressed recipient preserved in the encoded receipt.
 
 ## Invalid Recipient Protection
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
 
-## Virtual Address Recipients
-Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [virtual addresses](/docs/protocol/tip20/virtual-addresses) before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and authorization, balance updates, and event emission target that master wallet.
+Direct transfers and mints to ReceivePolicyGuard (`0xb10c000000000000000000000000000000000000`) MUST revert with `AddressReserved`; only a receiver-policy hold may create a guard deposit.
 
-Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
+`burnBlocked` and `burnAt` MUST reject the following sources with `ProtectedAddress`: FeeManager (`0xfeec000000000000000000000000000000000000`), StablecoinDEX (`0xdec0000000000000000000000000000000000000`), TIP20ChannelReserve (`0x4d50500000000000000000000000000000000000`), ReceivePolicyGuard, the token's own address, and every address with the 12-byte Zone Portal prefix `0x5ad000000000000000000000`. Guard-held funds may only be burned through the guard's receipt-level operation, preserving backing for other receipts.
+
+## Virtual Address Recipients
+Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [virtual addresses](/docs/protocol/tip20/virtual-addresses) before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and issuer and receiver authorization use that master wallet. An allowed inbound credits the master; a receiver-policy rejection holds the funds in ReceivePolicyGuard instead.
+
+Virtual addresses are valid TIP-20 recipients on those paths but remain forwarding aliases rather than canonical TIP-20 holders. Non-TIP-20 tokens sent to a virtual address do not forward. Allowed forwarded deposits appear as two-hop standard `Transfer` events in the same transaction; indexers and explorers should collapse that pair into one logical deposit to the resolved master wallet.
 
 ## Currencies and Quote Tokens
 Each TIP-20 token declares a [currency identifier](/docs/protocol/tip20/overview#currency-declaration) and a corresponding `quoteToken` used for pricing and routing in the Stablecoin DEX. The currency is set at token creation and **cannot be changed afterward**. **Only tokens with `currency == "USD"` are eligible for paying transaction fees.** Tokens with `currency == "USD"` must pair with a USD-denominated TIP-20 token.
@@ -477,7 +498,8 @@ Pause controls `pause` and `unpause` govern token movement. When paused, transfe
 TIP-20 uses a role-based authorization system. The main roles are:
 - `ISSUER_ROLE`: controls minting and burning.  
 - `PAUSE_ROLE` / `UNPAUSE_ROLE`: controls the token’s paused state.  
-- `BURN_BLOCKED_ROLE`: allows burning balances belonging to addresses that fail TIP-403 authorization.  
+- `BURN_BLOCKED_ROLE`: allows burning unprotected balances belonging to addresses that fail the TIP-403 sender check.
+- `BURN_AT_ROLE`: allows burning any unprotected balance without TIP-403 authorization.
 
 Roles are assigned and managed through `grantRole`, `revokeRole`, `renounceRole`, and `setRoleAdmin`, via the contract admin.
 
@@ -488,17 +510,24 @@ Roles are assigned and managed through `grantRole`, `revokeRole`, `renounceRole`
 `transferFeePreTx` respects the token's pause state and will revert if the token is paused. However, `transferFeePostTx` is intentionally allowed to execute even when the token is paused. This ensures that a transaction which pauses the token can still complete successfully and receive its fee refund. Apart from this specific refund transfer, no other token transfers can occur after a pause event.
 
 ### Implicit approvals for listed precompiles
-An Implicit Approval List names the precompiles that may pull TIP-20 tokens without a prior `approve`. Listed precompiles call the internal `system_transfer_from(from, to, amount)` entrypoint, which:
+An Implicit Approval List names the precompiles that may pull TIP-20 tokens without a prior `approve`. The StablecoinDEX and FeeAMM use the internal `system_transfer_from(from, to, amount)` path, which:
 
 - Is **not** part of the public TIP-20 ABI and **not** callable by external contracts or EOAs.
 - Skips allowance checks and the allowance storage write.
 - Still enforces balance checks, TIP-403 transfer policies, and AccountKeychain spending limits.
 - Emits the standard TIP-20 `Transfer` event.
 
-This generalizes the system-only path described above (`systemTransferFrom`, `transferFeePreTx`, `transferFeePostTx`) to an allow-list of precompiles — the StablecoinDEX, FeeAMM, and the `TIP20ChannelReserve` precompile. Normal `approve`, `permit`, `allowance`, and `transferFrom` behavior is unchanged.
+TIP20ChannelReserve also has implicit approval, with the logical-participant authorization below. Normal `approve`, `permit`, `allowance`, and `transferFrom` behavior is unchanged.
 
 ### Payment-channel reserve
-The enshrined `TIP20ChannelReserve` precompile at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`) is a TIP-20 consumer rather than a change to the TIP-20 contract itself — it pulls funds via the implicit-approval path above and emits standard `Transfer` events from the host TIP-20. See the [enshrined TIP-20 reserve channel section of the T5 page](/docs/protocol/upgrades/t5#enshrined-tip-20-reserve-channel) for the channel lifecycle, channel ID derivation, and event surface.
+The enshrined `TIP20ChannelReserve` precompile at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`) uses an internal custody-transfer path without requiring ERC-20 allowance. For channels opened under these rules:
+
+- `open` and `topUp` MUST authorize the logical payer as sender and resolved payee as recipient, and validate the payee's receive policy against the payer. The reserve need not be issuer-policy-authorized as the physical custody recipient.
+- `settle` and positive capture in `close` MUST recheck the payer-to-payee issuer policy. Delivery to the payee evaluates its receive policy against the logical payer, not the physical reserve sender.
+- Descriptor-bound refunds MUST return only to the authenticated payer. They bypass TIP-403 sender/recipient authorization, including authorization of the reserve itself, but MUST pass the payer's receive policy with the reserve as sender.
+- Custody movement MUST retain pause, recipient, balance, and applicable access-key spending-limit checks, and emit standard `Transfer` events. A receive-policy rejection MUST revert the channel operation instead of creating a guarded payment. Failed delivery MUST leave channel accounting unchanged.
+
+See [TIP-1095](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md) for the operation-specific authorization rules and the [channel lifecycle](/docs/protocol/upgrades/t5#enshrined-tip-20-reserve-channel) for descriptors and vouchers.
 
 
 ## TIP20Factory
@@ -538,7 +567,7 @@ interface ITIP20Factory {
     /// @dev
     ///  - Computes the TIP-20 deployment address as TIP20_PREFIX || lowerBytes,
     ///    where lowerBytes is the highest 64 bits of keccak256(msg.sender, salt)
-    ///  - Reverts with AddressReserved if lowerBytes < 1000
+    ///  - Reverts with AddressReserved if lowerBytes < 1024
     ///  - Ensures the provided quote token is itself a valid TIP-20
     ///  - Enforces USD-denomination rules (USD tokens must use USD quote tokens)
     ///  - Initializes the token with default settings:

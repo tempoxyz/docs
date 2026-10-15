@@ -67,6 +67,12 @@ After the execution of each transaction:
 Fee-balance and liquidity checks happen before execution. A transaction that cannot fund its fees is invalid and cannot be included in that state; this is different from an included transaction whose application call reverts and still pays fees.
 :::
 
+### Fee-policy authorization
+
+Pre-collection MUST authorize the fee payer as a sender on the fee token. It MUST NOT require FeeManager to be authorized as a recipient for the fee deposit. The unused-fee refund returns to the original fee payer without a separate issuer recipient-policy check or receiver-policy evaluation. Fee pre-collection still enforces pause, balance, liquidity, and applicable access-key spending limits.
+
+`distributeFees(validator, token)` is a public, ordinary token-transfer path: each nonzero distribution MUST authorize FeeManager as sender and the resolved validator as recipient, and apply pause and receive-policy rules. Successful collection therefore does not guarantee that fees can currently be distributed. In particular, same-token fees can be collected while issuer policy blocks FeeManager as a sender and prevents distribution.
+
 ## Fee payer
 
 Tempo supports *sponsored transactions* in which the `fee_payer` is a different address from the `tx.origin` of the transaction. This is supported by Tempo's [new transaction type](/docs/protocol/transactions/spec-tempo-transaction), which has a `fee_payer_signature` field.
@@ -99,6 +105,7 @@ The network validates both signatures and executes the transaction.
 
 When `feePayerSignature` is present:
 * Both sender and fee payer signatures must be valid
+* Recovered fee payer must differ from the transaction sender; self-payment requires an absent `feePayerSignature`
 * Fee payer must have sufficient balance in the fee token
 * Transaction is rejected if either signature fails or fee payer's balance is insufficient
 

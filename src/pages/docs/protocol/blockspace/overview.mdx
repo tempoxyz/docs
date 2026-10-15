@@ -26,18 +26,28 @@ Tempo blocks extend the Ethereum block format in multiple ways: there are new he
 ## Specification
 
 ### Header fields
-Tempo extends an Ethereum header with three extra scalars.
+Tempo extends an Ethereum header with gas-accounting fields, a millisecond timestamp component, and consensus context.
 ```rust title="Header struct"
 pub struct Header {
     pub general_gas_limit: u64,
     pub shared_gas_limit: u64,
     pub timestamp_millis_part: u64,
-    pub inner: Header,
+    pub inner: alloy_consensus::Header,
+    pub consensus_context: Option<TempoConsensusContext>,
+}
+
+pub struct TempoConsensusContext {
+    pub epoch: u64,
+    pub view: u64,
+    pub parent_view: u64,
+    pub proposer: PublicKey, // Valid 32-byte Ed25519 public key
 }
 ```
 - `inner` is the canonical Ethereum header (parent_hash, state_root, gas_limit, etc.).
 - `general_gas_limit` and `shared_gas_limit` partition the canonical `gas_limit` for payment and non-payment capacity (see [payment lane specification](/docs/protocol/blockspace/payment-lane-specification)).
 - `timestamp_millis_part` stores the sub‑second component; the full timestamp is `inner.timestamp * 1000 + timestamp_millis_part` .
+
+Current non-genesis headers MUST contain `consensus_context`. It records the consensus epoch, view, parent view, and proposer public key. RLP decoding MUST reject an invalid Ed25519 proposer key. The header RLP field order is `[general_gas_limit, shared_gas_limit, timestamp_millis_part, inner, consensus_context]`, with context encoded as `[epoch, view, parent_view, proposer]`. The context participates in the header hash. JSON-RPC exposes it as `consensusContext`, with `parentView` in camel case.
 
 ### Block body
 The block body in Tempo retains the canonical Ethereum block body structure, with the addition of system transactions. Transactions are ordered in the following sections:
