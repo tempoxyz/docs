@@ -4,24 +4,59 @@ seoTitle: What You Can Build with Tempo Accounts | Tempo Docs
 description: Consumer wallets, company treasuries, automated payments, and agent wallets, each with the keys its holders keep and the limits Tempo enforces.
 ---
 
+import { Card, Cards } from 'vocs'
+
 # Use cases
 
-Tempo Accounts give each party its own key, and Tempo enforces each key's limits on every transaction.
+Each use case gives every party its own key, and Tempo enforces what each key can do.
 
-A customer's passkey, a provider's recovery key, each approver's signer, and your backend's or an agent's access key can each do only what that key allows. Automated payments and agent wallets run on mainnet and testnet with a single-key account. Consumer wallets with several signers, and treasuries, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+The difference between them is who holds which key. A customer's passkey, a company approver's signer, your backend's access key, and an agent's access key can each do only what the account allows them to do, and no one else can widen that.
 
 ## Consumer wallets
 
-Neither you nor your wallet provider can move the customer's funds. The customer's passkey approves payments alone. Your wallet provider's key and a recovery provider's key approve only together, such as to replace the passkey when the customer loses their phone, and Tempo rejects any payment the provider's key signs alone. See [Embed wallets with a provider](/docs/accounts/guides/users/embed-wallets), [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer), [Recover a user's account](/docs/accounts/guides/users/recover-an-account), and the other [Users guides](/docs/accounts/guides/users).
+Your app gives each customer an account they control, even though your app and your wallet provider help run it. The customer's passkey approves payments on its own. Your wallet provider's key and a recovery key approve only together, for example to replace the passkey when the customer loses their phone, so neither you nor the provider can move funds alone.
+
+An account with several signers like this is a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). A provider-held single-key account works on mainnet today: see [Embedded wallets](/docs/accounts/wallets/embedded-wallets).
+
+<Cards>
+  <Card title="Embed wallets with a provider" description="Make your wallet provider's key one of three signers, so only the customer's passkey approves alone." to="/docs/accounts/guides/users/embed-wallets" />
+  <Card title="Add a recovery signer" description="Add a second key so a lost phone doesn't lock the customer out." to="/docs/accounts/guides/users/add-a-recovery-signer" />
+  <Card title="Recover a user's account" description="Replace a lost passkey with the signers the customer still has." to="/docs/accounts/guides/users/recover-an-account" />
+  <Card title="Hand off to a self-custodial wallet" description="Give the customer sole control of the same address from their own wallet." to="/docs/accounts/guides/users/hand-off" />
+</Cards>
 
 ## Business accounts and treasuries
 
-No one moves the company's stablecoins alone. Each approver holds their own signer, and any two of three approve each payment. A team pays from its own budget, an access key with a daily limit, without asking the approvers each time, and an approver who leaves is removed without moving the funds. See [Set up a company treasury](/docs/accounts/guides/teams/company-treasury), [Give a team a budget](/docs/accounts/guides/teams/team-budget), and [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver).
+A company keeps its stablecoins in one account that no single person can spend from. Each approver holds their own signer, and any two of three must approve a payment. A team can spend from its own daily budget without asking the approvers each time, and when an approver leaves, you remove their signer without moving the funds.
+
+Treasuries use configurable accounts, which run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+
+<Cards>
+  <Card title="Set up a company treasury" description="One account three approvers control, where any two approve each payment." to="/docs/accounts/guides/teams/company-treasury" />
+  <Card title="Give a team a budget" description="Let a team pay from the treasury up to a daily limit." to="/docs/accounts/guides/teams/team-budget" />
+  <Card title="Offboard an approver" description="Remove a departing approver and keep the treasury's address and balance." to="/docs/accounts/guides/teams/offboard-an-approver" />
+</Cards>
 
 ## Automated payments
 
-Your backend pays from a customer's account without prompting them, within limits the customer approved once: funding each card swipe, charging a subscription, sweeping idle balances into Earn, or sending scheduled transfers. The customer approves an access key for your backend once, and Tempo holds it to its spending limit, recipients, and expiry, so a leaked backend key can't drain the account. See [Fund a card program](/docs/accounts/guides/automations/fund-a-card-program), [Sweep idle balances into Earn](/docs/accounts/guides/automations/sweep-into-earn), and [Pay approved recipients from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend).
+Your backend pays from a customer's account without asking them each time: funding a card swipe, charging a subscription, sweeping idle balances into Earn, or sending a scheduled transfer. The customer approves one [access key](/docs/accounts/access-keys) for your backend, with a spending limit, a list of recipients, and an expiry. Tempo checks every payment against those bounds, so even a leaked backend key can't spend past them.
+
+Access keys work on mainnet and testnet today.
+
+<Cards>
+  <Card title="Fund a card program" description="Top up a customer's card from their account, up to a daily limit." to="/docs/accounts/guides/automations/fund-a-card-program" />
+  <Card title="Sweep idle balances into Earn" description="Deposit a customer's idle stablecoins into one Earn vault each night." to="/docs/accounts/guides/automations/sweep-into-earn" />
+  <Card title="Pay out from a backend" description="Send payments to approved recipients from a KMS-held key." to="/docs/accounts/guides/automations/pay-out-from-a-backend" />
+  <Card title="Authorize access keys from an embedded wallet" description="Have a Privy or Turnkey wallet sign the access key your backend uses." to="/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet" />
+</Cards>
 
 ## Agent wallets
 
-An AI agent spends only within the bounds of its own access key: a budget, an expiry, and scopes that list the calls it may make. Tempo rejects any transaction outside those bounds, whatever the agent decides, and you revoke the key to stop it. See [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) and [Let an agent pay for APIs](/docs/accounts/guides/agents/pay-for-apis).
+An AI agent pays for what it needs, such as API calls, with its own access key: a budget, an expiry, and a list of the calls it may make. Tempo rejects anything outside those bounds, whatever the agent decides to do, and you can revoke the key at any time to stop it.
+
+Access keys work on mainnet and testnet today.
+
+<Cards>
+  <Card title="Give an agent a wallet" description="An agent's own key, with a budget, an expiry, and only the calls it needs." to="/docs/accounts/guides/agents/give-an-agent-a-wallet" />
+  <Card title="Let an agent pay for APIs" description="Pay for API requests with an MPP client and track the budget left." to="/docs/accounts/guides/agents/pay-for-apis" />
+</Cards>
