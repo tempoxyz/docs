@@ -88,12 +88,43 @@ function renderValue(value: string | number | boolean | null) {
   return String(value)
 }
 
-export function TidxQuery() {
+export type TidxQueryProps = {
+  /** Network the widget opens on. Defaults to the first example's network. */
+  network?: 'mainnet' | 'testnet'
+  /**
+   * Event signature to decode as a table, for example `Transfer(address indexed from, ...)`.
+   * Pass an array to decode several events; the input shows them separated by `;`.
+   */
+  signature?: string | readonly string[]
+  /** Initial query. Adds a "This page" example ahead of the built-in examples. */
+  sql?: string
+}
+
+export function TidxQuery(props: TidxQueryProps = {}) {
+  const { network: initialNetwork, sql: initialSql } = props
+  const initialSignature =
+    typeof props.signature === 'string' ? props.signature : props.signature?.join('; ')
+  const presets = React.useMemo<Preset[]>(() => {
+    if (!initialSql) return PRESETS
+    return [
+      {
+        name: 'This page',
+        description: 'Run the query for this page, or edit it first.',
+        network: initialNetwork ?? 'mainnet',
+        engine: 'clickhouse',
+        ...(initialSignature ? { signature: initialSignature } : {}),
+        sql: initialSql,
+      },
+      ...PRESETS,
+    ]
+  }, [initialNetwork, initialSignature, initialSql])
   const [presetIndex, setPresetIndex] = React.useState(0)
-  const activePreset = PRESETS[presetIndex] ?? PRESETS[0]
-  const [networkKey, setNetworkKey] = React.useState<'mainnet' | 'testnet'>(activePreset.network)
+  const activePreset = presets[presetIndex] ?? presets[0] ?? PRESETS[0]
+  const [networkKey, setNetworkKey] = React.useState<'mainnet' | 'testnet'>(
+    initialNetwork ?? activePreset.network,
+  )
   const [engine, setEngine] = React.useState<'postgres' | 'clickhouse'>(activePreset.engine)
-  const [signature, setSignature] = React.useState(activePreset.signature ?? '')
+  const [signature, setSignature] = React.useState(initialSignature ?? activePreset.signature ?? '')
   const [sql, setSql] = React.useState(activePreset.sql)
   const [result, setResult] = React.useState<TidxResponse | null>(null)
   const [error, setError] = React.useState<string | null>(null)
@@ -102,7 +133,7 @@ export function TidxQuery() {
   const network = NETWORKS[networkKey]
 
   const applyPreset = (nextIndex: number) => {
-    const next = PRESETS[nextIndex] ?? PRESETS[0]
+    const next = presets[nextIndex] ?? presets[0] ?? PRESETS[0]
     setPresetIndex(nextIndex)
     setNetworkKey(next.network)
     setEngine(next.engine)
@@ -128,7 +159,9 @@ export function TidxQuery() {
       url.searchParams.set('chainId', String(network.chainId))
       url.searchParams.set('engine', engine)
       url.searchParams.set('sql', query)
-      if (signature.trim()) url.searchParams.set('signature', signature.trim())
+      for (const item of signature.split(';')) {
+        if (item.trim()) url.searchParams.append('signature', item.trim())
+      }
 
       const response = await fetch(url)
       const json = await response.json()
@@ -171,7 +204,7 @@ export function TidxQuery() {
               onChange={(event) => applyPreset(Number(event.target.value))}
               {...ui.select()}
             >
-              {PRESETS.map((preset, index) => (
+              {presets.map((preset, index) => (
                 <option key={preset.name} value={index}>
                   {preset.name}
                 </option>

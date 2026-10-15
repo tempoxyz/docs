@@ -6,6 +6,7 @@ interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-access-keys_title-f5_v02.png
 ---
 
+import { TidxQuery } from '../../../components/TidxQuery'
 import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
 # Access keys
@@ -112,6 +113,27 @@ await client.token.transferSync({
 The other pages in this section import `account`, `accessKey`, `stablecoin`, and `recipient` from this file. To confirm the key landed, read it back with `client.accessKey.getMetadata({ account, accessKey })`.
 
 Tempo stores each limit and scope with the key, so each one adds to the network fee for authorizing it. This example's authorization and first payment cost under a cent together. To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
+
+## See an account's keys
+
+Tempo emits `KeyAuthorized` when an account adds a key and `KeyRevoked` when it revokes one, so the [public indexer](/docs/api/indexer-api) can list every key an account has had; replace the address with your account's.
+
+<TidxQuery
+  network="mainnet"
+  signature={[
+    'KeyAuthorized(address indexed account, address indexed publicKey, uint8 signatureType, uint64 expiry)',
+    'KeyRevoked(address indexed account, address indexed publicKey)',
+  ]}
+  sql={`SELECT 'authorized' AS event, publicKey AS access_key, expiry, block_num, tx_hash
+FROM KeyAuthorized
+WHERE account = '0x6028375ea6ae3339b16f29b343f8f32f7bb3ee8a'
+UNION ALL
+SELECT 'revoked' AS event, publicKey AS access_key, NULL AS expiry, block_num, tx_hash
+FROM KeyRevoked
+WHERE account = '0x6028375ea6ae3339b16f29b343f8f32f7bb3ee8a'
+ORDER BY block_num DESC
+LIMIT 20`}
+/>
 
 <span id="troubleshoot-backend-payments" />
 

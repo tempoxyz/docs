@@ -1,0 +1,67 @@
+---
+title: "Virtual addresses"
+seoTitle: "Virtual Deposit Addresses for Omnibus Accounts | Tempo Docs"
+description: Give every customer their own deposit address while all stablecoins land in one Tempo account, with no sweeps and no per-customer balances.
+---
+
+# Virtual addresses
+
+Run one omnibus account and give each customer their own deposit address. A payment to a customer's virtual address lands directly in your account, and its transfer events name the customer, so you credit the right customer without sweeping funds between wallets.
+
+For the live demo and full walkthrough, see [Customer deposit addresses](/docs/guide/payments/virtual-addresses).
+
+## How virtual addresses work
+
+A virtual address is an ordinary 20-byte address with a reserved layout:
+
+```text
+0x | masterId (4 bytes) | FDFDFDFDFDFDFDFDFDFD (10 bytes) | userTag (6 bytes)
+```
+
+The `masterId` identifies your account, and the `userTag` is your value for the customer. When a TIP-20 transfer or mint targets a virtual address, Tempo resolves the `masterId` and credits your account in the same call. The virtual address never holds a balance: `balanceOf` on it returns `0`. Because no account is created for it, the first deposit to a new address costs the same as any other transfer.
+
+## Register your account as a master address
+
+Registration is a one-time transaction. Your account calls `registerVirtualMaster(salt)` on the registry precompile at `0xFDC0000000000000000000000000000000000000`, and Tempo derives your `masterId` from your account's address and the salt.
+
+The salt must pass a 32-bit proof of work, which protects your `masterId` from being claimed first by someone else. `VirtualMaster.mineSaltAsync` from `ox/tempo` finds one; in a browser this can take 30 seconds or more. If the derived `masterId` is already taken, registration reverts with `MasterIdCollision` and you retry with another salt. One account can register several `masterId`s.
+
+A `masterId` stays bound to your account's address permanently, with no way to move it to another address. To change who controls the funds later, change the account's signers instead: [adding](/docs/accounts/key-management/add-signers) or [removing signers](/docs/accounts/key-management/remove-signers) keeps the address, and every deposit address derived from it. Configurable accounts run only on the Tempo Accounts devnet today; on mainnet, register a multisig or upgradeable contract as the master if you expect to rotate keys.
+
+## Create an address for each customer
+
+Derive each customer's address offchain from your `masterId` and a `userTag`. Creating an address needs no transaction, so you can issue one per customer, account, or invoice.
+
+```ts [virtualAddress.ts]
+import { VirtualAddress } from 'viem/tempo'
+
+const masterId = process.env.TEMPO_MASTER_ID
+if (!masterId || !/^0x[0-9a-fA-F]{8}$/.test(masterId)) {
+  throw new Error('Set TEMPO_MASTER_ID to your registered 4-byte master ID')
+}
+
+const virtualAddress = VirtualAddress.from({ // [!code hl]
+  masterId: masterId as `0x${string}`, // [!code hl]
+  userTag: '0x000000000001', // [!code hl]
+}) // [!code hl]
+```
+
+Tempo doesn't interpret the `userTag`; any 6-byte value works, including all zeros. That gives each master about 2.8 × 10^14 addresses. Store the mapping from `userTag` to customer in your own records.
+
+## Attribute each deposit
+
+A deposit to a virtual address emits two `Transfer` events: `Transfer(sender, virtualAddress, amount)`, then `Transfer(virtualAddress, yourAccount, amount)`. A transfer with a memo adds `TransferWithMemo` between them. Treat the sequence as one deposit, read the `userTag` from the last 6 bytes of the virtual address, and credit that customer.
+
+Check the recipient before you credit. Your account's [receive policy](/docs/accounts/policies/receive-policies#virtual-address-behavior) applies to every deposit to its virtual addresses, and a held payment goes to `ReceivePolicyGuard` instead of your account. If your account sends to one of its own virtual addresses, both events still emit but the balance doesn't change, so don't count it as a deposit.
+
+For deposit history and account activity, read transfer records with the [Tempo API](/docs/api/transfers).
+
+## Virtual address limits
+
+- **TIP-20 tokens only.** Forwarding applies to TIP-20 transfers and mints. Other token contracts credit the literal virtual address, and those funds can't be recovered.
+- **Unregistered addresses revert.** A transfer to a virtual address whose `masterId` isn't registered fails with `VirtualAddressUnregistered`. Contracts that pay many recipients in one transaction should validate addresses first so one bad address doesn't revert the batch.
+- **Policies apply to your account.** Token policies and receive policies check your account, not the virtual address. TIP-403 policy operations reject virtual addresses.
+- **Not for other protocols' positions.** Don't use a virtual address as a reward recipient, or as the recipient of LP shares or receipts. Reward recipients reject virtual addresses, and positions minted to one can be stranded.
+- **Show the full address.** Two virtual addresses for the same account share their first 4 bytes and middle 10 bytes, so truncated displays can hide which customer an address belongs to.
+
+The [TIP-1022 specification](/docs/protocol/tips/tip-1022) defines the address format, registration, events, and invariants.

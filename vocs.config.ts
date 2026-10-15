@@ -522,7 +522,15 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/docs/accounts' },
           { text: 'How it works', link: '/docs/accounts/how-it-works' },
+          { text: 'Security', link: '/docs/accounts/security' },
+          { text: 'Use cases', link: '/docs/accounts/use-cases' },
+        ],
+      },
+      {
+        text: 'Get started',
+        items: [
           { text: 'Create an account', link: '/docs/accounts/create' },
+          { text: 'Add funds', link: '/docs/accounts/fund' },
         ],
       },
       {
@@ -539,7 +547,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Policies',
+            text: 'Account policies',
             link: '/docs/accounts/policies',
             collapsed: true,
             items: [
@@ -570,7 +578,7 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Fees',
+            text: 'Fee management',
             link: '/docs/accounts/fees',
             collapsed: true,
             items: [
@@ -578,15 +586,16 @@ export default defineConfig({
               { text: 'Fee sponsorship', link: '/docs/accounts/fees/fee-sponsorship' },
             ],
           },
+          { text: 'Virtual addresses', link: '/docs/accounts/virtual-addresses' },
         ],
       },
       {
         text: 'Wallets',
         items: [
-          { text: 'Browser wallets', link: '/docs/accounts/wallets/browser-wallets' },
           { text: 'Embedded wallets', link: '/docs/accounts/wallets/embedded-wallets' },
           { text: 'Server wallets', link: '/docs/accounts/wallets/server-wallets' },
           { text: 'Custodians', link: '/docs/accounts/wallets/custodians' },
+          { text: 'Browser wallets', link: '/docs/accounts/wallets/browser-wallets' },
         ],
       },
       {

@@ -6,6 +6,7 @@ interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-payments-configure-receive-policies_title-f5_v02.png
 ---
 
+import { TidxQuery } from '../../../../components/TidxQuery'
 import * as Demo from '../../../../components/guides/Demo'
 import { ReceivePolicyDemo } from '../../../../components/guides/steps/payments/ReceivePolicyDemo'
 
@@ -148,6 +149,28 @@ The answer covers only the receive policy, not the token's own policy, the sende
 ## Claim a held payment
 
 The recovery authority claims a held payment by passing a destination and the `receipt` bytes from its `TransferBlocked` event (`blockedReceipt`). Here the receiver claims the payment to itself:
+
+To find the payments held for an address, query its `TransferBlocked` events; the query below marks each one `held`, `claimed`, or `burned`.
+
+<TidxQuery
+  network="mainnet"
+  signature={[
+    'TransferBlocked(address indexed token, address indexed receiver, uint64 indexed blockedNonce, uint256 amount, uint8 receiptVersion, bytes receipt)',
+    'ReceiptClaimed(address indexed token, address indexed receiver, uint64 indexed blockedNonce, uint64 blockedAt, uint8 receiptVersion, address originator, address recipient, address recoveryAuthority, address caller, address to, uint256 amount)',
+    'ReceiptBurned(address indexed token, address indexed receiver, uint64 indexed blockedNonce, uint64 blockedAt, uint8 receiptVersion, address originator, address recipient, address recoveryAuthority, address caller, uint256 amount)',
+  ]}
+  sql={`SELECT
+  multiIf(
+    (token, blockedNonce) IN (SELECT token, blockedNonce FROM ReceiptClaimed), 'claimed',
+    (token, blockedNonce) IN (SELECT token, blockedNonce FROM ReceiptBurned), 'burned',
+    'held'
+  ) AS status,
+  token, blockedNonce, amount, block_num, tx_hash
+FROM TransferBlocked
+WHERE receiver = '0xec0eca588024e2d0091e74bd9034ff581111ea7f'
+ORDER BY block_num DESC
+LIMIT 10`}
+/>
 
 ```ts [claim.ts]
 import { client } from './client'
