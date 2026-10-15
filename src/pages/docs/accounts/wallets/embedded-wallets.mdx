@@ -21,7 +21,7 @@ Any provider that signs Ethereum transactions can hold and send stablecoins on T
 | [Turnkey](https://docs.turnkey.com/features/networks/overview) | Yes, through `sign_transaction`, which its policies can inspect | `sign_raw_payload` with no hash function |
 | [Dynamic](https://www.dynamic.xyz/docs) | Yes, through its Tempo SDK extension | `signRawMessage` |
 
-Checked against each provider's docs in October 2026. All three use secp256k1 keys for the account, so the account's own key can't be a passkey or device key.
+All three use secp256k1 keys for the account, so the account's own key can't be a passkey or device key.
 
 <span id="your-app-holds-the-key-through-a-provider" />
 <span id="how-do-i-give-a-service-limited-spending-power" />
