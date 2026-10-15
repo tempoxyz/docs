@@ -8,7 +8,7 @@ license: MIT OR Apache-2.0
 
 Use the documentation for the reader's task. Start with a product guide, then read the API, SDK, or protocol reference needed to implement it. Do not guess RPC or service URLs, contract addresses, chain IDs, fee tokens, package APIs, or protocol details; verify them from the docs before answering or writing code.
 
-This skill is read-only. It may retrieve and explain documentation, but it must not install software, authenticate or fund wallets, change keys or credentials, call paid services, sign messages or transactions, or submit transactions. Those actions require a separate tool or plugin. To set up the Tempo CLI and Tempo Wallet, fund a wallet, or make paid requests, switch to the Tempo CLI skill at `https://tempo.xyz/SKILL.md`, which performs that setup. For other actions, link the relevant documentation and name the tool that performs them, such as the paid tools in [Build with AI](https://tempo.xyz/developers/docs/guide/using-tempo-with-ai.md).
+This skill is read-only. It may retrieve and explain documentation, but it must not install software, authenticate or fund wallets, change keys or credentials, call paid services, sign messages or transactions, or submit transactions. Those actions require a separate tool or plugin. To set up the Tempo CLI and Tempo Wallet, fund a wallet, or make paid requests, switch to the Tempo CLI skill at `https://tempo.xyz/skills/wallet/SKILL.md`, which performs that setup. For other actions, link the relevant documentation and name the tool that performs them, such as the paid tools in [Build with AI](https://tempo.xyz/developers/docs/guide/using-tempo-with-ai.md).
 
 ## Choose the documentation section
 
