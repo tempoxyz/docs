@@ -102,6 +102,8 @@ function mint(
 
 Adds liquidity using only the validator token. For a new pool, the provider receives `floor(amountValidatorToken / 2) - MIN_LIQUIDITY` shares, with `MIN_LIQUIDITY` permanently locked; the deposit must make this amount positive. For an existing pool, shares equal `floor(amountValidatorToken * totalSupply / (V + floor(N * U / SCALE)))`. Only the validator-token reserve increases. Shares are tracked in `liquidityBalances(poolId, account)`, not a separate ERC-20 token. Emits `Mint`.
 
+Minting MUST authorize `msg.sender` as a sender on `userToken`, FeeManager as a recipient on `userToken`, and `to` as a recipient on **both** pool tokens. These requirements apply even though the deposit transfers only `validatorToken`. The underlying deposit also requires the caller's sender authorization and FeeManager's recipient authorization on `validatorToken`, plus the normal balance, pause, receive-policy, and applicable spending-limit checks. Failed issuer-policy authorization reverts with `PolicyForbids`.
+
 ```solidity
 function burn(
     address userToken,
