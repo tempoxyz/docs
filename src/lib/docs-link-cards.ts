@@ -44,6 +44,66 @@ export const docsLinkCards = {
       ],
     },
   ],
+  accountFeatures: [
+    {
+      title: 'Signing methods',
+      description: 'Approve payments with a passkey, a key on the device, or a private key.',
+      icon: 'keyRound',
+      links: [
+        ['Passkeys', '/docs/accounts/authentication/passkeys'],
+        ['Device keys', '/docs/accounts/authentication/device-keys'],
+        ['Private keys', '/docs/accounts/authentication/private-keys'],
+      ],
+    },
+    {
+      title: 'Account policies',
+      description:
+        'Require several approvals, and choose which stablecoins and senders can pay you.',
+      icon: 'shield',
+      links: [
+        ['Signing thresholds', '/docs/accounts/policies/signing-thresholds'],
+        ['Receive policies', '/docs/accounts/policies/receive-policies'],
+      ],
+    },
+    {
+      title: 'Access keys',
+      description: 'Let a backend, a device, or an agent pay on its own, within limits you set.',
+      icon: 'key',
+      links: [
+        ['Spending limits', '/docs/accounts/access-keys/spending-limits'],
+        ['Scopes', '/docs/accounts/access-keys/scopes'],
+        ['Revocation', '/docs/accounts/access-keys/revocation'],
+      ],
+    },
+    {
+      title: 'Key management',
+      description: 'Add, remove, and rotate signers while the address stays the same.',
+      icon: 'rotateKey',
+      links: [
+        ['Add signers', '/docs/accounts/key-management/add-signers'],
+        ['Remove signers', '/docs/accounts/key-management/remove-signers'],
+        ['Account upgrade', '/docs/accounts/key-management/account-upgrade'],
+      ],
+    },
+    {
+      title: 'Fee management',
+      description: 'Pay network fees in stablecoins, or pay them for your customers.',
+      icon: 'tokens',
+      links: [
+        ['Fee tokens', '/docs/accounts/fees/fee-tokens'],
+        ['Fee sponsorship', '/docs/accounts/fees/fee-sponsorship'],
+      ],
+    },
+    {
+      title: 'Virtual addresses',
+      description: 'Give each customer a deposit address that pays into one account.',
+      icon: 'inbox',
+      links: [
+        ['Virtual addresses', '/docs/accounts/virtual-addresses'],
+        ['Customer deposit addresses', '/docs/guide/payments/virtual-addresses'],
+      ],
+    },
+  ],
   accounts: [
     {
       title: 'Create an account',
