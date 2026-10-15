@@ -1,52 +1,25 @@
 ---
 title: "Create an account"
 seoTitle: "Create a Tempo Account with a Passkey, Device Key, or Private Key | Tempo Docs"
-description: Compute a Tempo account's address from its first signer, with no API call or transaction, then try payments, signers, and access keys on the Tempo Accounts devnet.
+description: Create a single-key Tempo account with a passkey on testnet, with no API call or transaction, then try configurable accounts with several signers on the Tempo Accounts devnet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
 ---
 
 import { AccountSandbox } from '../../../components/guides/AccountSandbox'
+import { PasskeyAccountDemo } from '../../../components/guides/PasskeyAccountDemo'
 
 # Create an account
 
 Creating a Tempo account takes no API call and no transaction.
 
-Your app computes a Tempo account's address from its first signer, the passkey, device key, or private key that approves its transactions, and the address can receive stablecoins right away. Pick a first signer below to create an account on the Tempo Accounts devnet.
-
-:::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. The sandbox and the first code example create configurable accounts, even with one signer. To build on mainnet or testnet today, [create a single-key account](#create-a-single-key-account).
-:::
-
-<AccountSandbox />
+A single-key Tempo account's address comes from the key that approves its payments, so your app can create one as soon as it has a key, and the address can receive stablecoins right away. Create a passkey account on Moderato testnet below.
 
 <span id="try-a-passkey-account" />
 
-## How account creation works
+<PasskeyAccountDemo />
 
-1. You choose the first signer: a passkey, a device key, or a private key. It approves alone: its weight is 1, and so is the account's threshold, the total weight an approval needs.
-2. Your app computes the address from that signer. The address can receive stablecoins right away and stays the same when you change signers or add [access keys](/docs/accounts/access-keys).
-3. The account's first transaction, such as a payment, registers it on the [Tempo Accounts devnet](#connect-to-the-devnet). That transaction pays a network fee in a stablecoin, so fund the address first or [sponsor the fee](/docs/accounts/fees/fee-sponsorship).
-
-<span id="create-an-account-from-a-signing-key" />
 <span id="create-a-passkey-account" />
-
-## Create an account in code
-
-```ts [account.ts]
-import { generatePrivateKey } from 'viem/accounts'
-import { Account } from 'viem/tempo'
-
-const privateKey = generatePrivateKey() // Keep this secret: it approves the account's transactions.
-const signer = Account.fromSecp256k1(privateKey) // [!code hl]
-export const account = Account.fromConfig({ address: 'infer', owners: [signer] }) // [!code hl]
-
-// Save account.address and account.config with your user record.
-```
-
-`address: 'infer'` tells [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) to compute the address from the signer, which viem calls an owner. You need the saved `account.config` to [add signers](/docs/accounts/key-management/add-signers) later. Its `version` is a bigint, so store `AccountConfig.toRpc(account.config)` and read it back with `AccountConfig.fromRpc` ([Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
-
-For a passkey or device key, use that signer instead: [signing methods](/docs/accounts/authentication) shows each one. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account, [upgrade it in place](/docs/accounts/key-management/account-upgrade) on the devnet to keep its address.
 
 ## Create a single-key account
 
@@ -65,6 +38,44 @@ await client.faucet.fundSync({ account: account.address }) // test stablecoins
 ```
 
 For a private key, use `Account.fromSecp256k1(privateKey)` instead. For mainnet, use the `tempo` chain from `viem/chains` and fund the address with real stablecoins: [Network details](/docs/quickstart/connection-details) lists both networks. A single-key account can't change its key, so losing the key loses the account: see [Passkeys](/docs/accounts/authentication/passkeys#passkey-limits) before customers fund one.
+
+## Create a configurable account
+
+:::warning
+**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](#connect-to-the-devnet), not on mainnet or testnet, and may still change.
+:::
+
+A configurable account's signers can change while its address stays the same, so you can add a backup key, rotate keys, or require several approvals. Pick a first signer below to create one on the Tempo Accounts devnet.
+
+<AccountSandbox />
+
+<span id="how-account-creation-works" />
+
+### How configurable account creation works
+
+1. You choose the first signer: a passkey, a device key, or a private key. It approves alone: its weight is 1, and so is the account's threshold, the total weight an approval needs.
+2. Your app computes the address from that signer. The address can receive stablecoins right away and stays the same when you change signers or add [access keys](/docs/accounts/access-keys).
+3. The account's first transaction, such as a payment, registers it on the [Tempo Accounts devnet](#connect-to-the-devnet). That transaction pays a network fee in a stablecoin, so fund the address first or [sponsor the fee](/docs/accounts/fees/fee-sponsorship).
+
+<span id="create-an-account-in-code" />
+<span id="create-an-account-from-a-signing-key" />
+
+### Create a configurable account in code
+
+```ts [account.ts]
+import { generatePrivateKey } from 'viem/accounts'
+import { Account } from 'viem/tempo'
+
+const privateKey = generatePrivateKey() // Keep this secret: it approves the account's transactions.
+const signer = Account.fromSecp256k1(privateKey) // [!code hl]
+export const account = Account.fromConfig({ address: 'infer', owners: [signer] }) // [!code hl]
+
+// Save account.address and account.config with your user record.
+```
+
+`address: 'infer'` tells [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) to compute the address from the signer, which viem calls an owner. You need the saved `account.config` to [add signers](/docs/accounts/key-management/add-signers) later. Its `version` is a bigint, so store `AccountConfig.toRpc(account.config)` and read it back with `AccountConfig.fromRpc` ([Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
+
+For a passkey or device key, use that signer instead: [signing methods](/docs/accounts/authentication) shows each one. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account, [upgrade it in place](/docs/accounts/key-management/account-upgrade) on the devnet to keep its address.
 
 ## Connect to the devnet
 
