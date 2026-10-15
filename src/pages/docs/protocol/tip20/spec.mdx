@@ -412,6 +412,9 @@ interface ITIP20 {
     /// @notice The caller does not have the required role or permission for this operation
     error Unauthorized();
 
+    /// @notice A privileged burn targets protected protocol custody
+    error ProtectedAddress();
+
     /// @notice The provided logoURI exceeds the 256-byte cap
     error LogoURITooLong();
 
@@ -444,6 +447,10 @@ The guard emits `TransferBlocked` with the addressed recipient preserved in the 
 ## Invalid Recipient Protection
 TIP-20 tokens cannot be sent to other TIP-20 token contract addresses. The implementation uses a `validRecipient` guard that rejects recipients whose address is zero, or has the TIP-20 prefix (`0x20c000000000000000000000`).
 Any attempt to transfer to a TIP-20 token address must revert with `InvalidRecipient`. This prevents accidental token loss by sending funds to token contracts instead of user accounts.
+
+Direct transfers and mints to ReceivePolicyGuard (`0xb10c000000000000000000000000000000000000`) MUST revert with `AddressReserved`; only a receiver-policy hold may create a guard deposit.
+
+`burnBlocked` and `burnAt` MUST reject the following sources with `ProtectedAddress`: FeeManager (`0xfeec000000000000000000000000000000000000`), StablecoinDEX (`0xdec0000000000000000000000000000000000000`), TIP20ChannelReserve (`0x4d50500000000000000000000000000000000000`), ReceivePolicyGuard, the token's own address, and every address with the 12-byte Zone Portal prefix `0x5ad000000000000000000000`. Guard-held funds may only be burned through the guard's receipt-level operation, preserving backing for other receipts.
 
 ## Virtual Address Recipients
 Recipient-bearing TIP-20 paths — `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, `mint`, and `mintWithMemo` — resolve [virtual addresses](/docs/protocol/tip20/virtual-addresses) before running recipient authorization and mint-recipient checks. When a recipient `to` is a registered virtual address, the effective recipient becomes the registered master wallet, and issuer and receiver authorization use that master wallet. An allowed inbound credits the master; a receiver-policy rejection holds the funds in ReceivePolicyGuard instead.
