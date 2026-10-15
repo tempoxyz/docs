@@ -38,9 +38,7 @@ Tempo stores only a 32-byte hash of the configuration, not the owners themselves
 
 The address is a CREATE2 address computed from the version-0 configuration, with no chain ID ([TIP-1110](https://tips.sh/1110)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold contract code or an EIP-7702 delegation. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [account.ts]
 import { Account } from 'viem/tempo'
@@ -64,6 +62,12 @@ export const account = Account.fromConfig({ // [!code hl]
 // Save both with the account record: Tempo keeps only a hash of the configuration.
 export const saved = { address: account.address, config: account.config } // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 `address: 'infer'` derives the address from this configuration, so creating the account sends nothing. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero. An owner given as a local account, like `finance`, is a key Viem signs with. An owner given as an address, like the controller's passkey, signs on its own device.
 

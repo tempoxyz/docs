@@ -52,9 +52,7 @@ Rebuild the account from `saved`, attaching the keys that approve: the first key
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [recover.ts]
 import { isAddressEqual } from 'viem'
@@ -86,6 +84,12 @@ const { config } = await client.accounts.updateConfigSync({ // [!code hl]
 // persist it: the version increments, and the next step builds from it
 saved.config = config // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 If the attached keys can't reach the threshold, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Once the update lands, the lost passkey can't approve anything.
 

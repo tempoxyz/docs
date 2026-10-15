@@ -68,9 +68,7 @@ await saveAccount(userId, { // [!code hl]
 
 Wherever your app signs with `original` directly, pass an account rebuilt from the saved record instead: a direct signature from the original key now fails with [`RootKeyRetired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/revm/src/native_multisig/mod.rs#L390) (`primitive root key retired`). In the rebuilt account, pass `original` itself in its signer entry so it can sign, and keep the other signers as addresses. viem signs with the keys you pass until their weights reach the threshold. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [pay.ts]
 import { isAddressEqual, parseUnits } from 'viem'
@@ -94,6 +92,12 @@ const account = Account.fromConfig({ // [!code hl]
 
 await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token }) // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 From then on, manage signers like any other configurable account, as in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer). After each signer change, save the `config` that `updateConfigSync` returns and rebuild the account from it. An account built from an older configuration no longer matches the hash Tempo stores, and its transactions fail with `multisig configuration commitment mismatch`.
 

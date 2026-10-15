@@ -52,13 +52,11 @@ For a passkey or device key, use that signer instead: [signing methods](/docs/ac
 
 The Accounts examples connect to the Tempo Accounts devnet, a test network that runs configurable accounts. Its RPC, the endpoint your app sends requests and transactions to, needs a key: [contact Tempo](https://tempo.xyz/contact) for one and set it as the `TEMPO_DEVNET_RPC_KEY` environment variable. The key is a test credential for the devnet, so keep it out of code you commit and out of production apps. In a browser app, read it from your bundler's environment variables instead of `process.env`.
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
 <span id="fund-an-account-on-devnet" />
 
 To fund the address, ask the devnet faucet, which sends test stablecoins, including pathUSD:
+
+::::code-group
 
 ```ts [fund.ts]
 import { account } from './account'
@@ -66,5 +64,11 @@ import { client } from './client'
 
 await client.faucet.fundSync({ account: account.address }) // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 Next, [add funds](/docs/accounts/fund).

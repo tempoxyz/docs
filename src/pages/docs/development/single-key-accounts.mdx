@@ -33,9 +33,7 @@ Because the key fixes the address, you can't replace the root key: a new key is 
 
 The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet or testnet, connect `client` to that network and pay in its stablecoins.
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [sign.ts]
 import { parseUnits } from 'viem'
@@ -53,6 +51,12 @@ await client.token.transferSync({ // [!code hl]
   token: stablecoin, // [!code hl]
 }) // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 Any of the three key types can also sign EIP-7702 authorizations, which let the account run a contract's code as its own ([Tempo and EIP-7702](/docs/protocol/transactions/eip-7702)).
 

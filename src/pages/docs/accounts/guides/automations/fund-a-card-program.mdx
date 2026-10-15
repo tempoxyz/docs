@@ -14,15 +14,13 @@ The customer approves one [access key](/docs/accounts/access-keys) for your back
 
 The examples use a test stablecoin, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts. On mainnet and testnet, a card-funding key works the same from a single-key account, such as one whose key is the customer's passkey.
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
 :::::steps
 
 ### Authorize a card-funding key
 
 Get the customer's card funding address (`cardFundingAddress`) from your [card issuing partner](/docs/partners/cards). Create a secp256k1 key in your KMS and wrap it as a viem account (`cardKey`), as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms). Then have the customer authorize its address (`cardKeyAddress`) in your app:
+
+::::code-group
 
 ```ts [app/enable-card.ts]
 import { parseUnits } from 'viem'
@@ -41,6 +39,12 @@ await client.accessKey.authorizeSync({
   scopes: [{ address: stablecoin, selector: 'transfer(address,uint256)', recipients: [cardFundingAddress] }], // [!code hl]
 })
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 Set the limit to the card's daily spend limit plus a margin for the key's transaction fees, which count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them. Show the customer the card program, the limit, and the expiry before they approve.
 

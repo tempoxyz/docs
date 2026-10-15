@@ -26,15 +26,13 @@ The demo creates a treasury with a device key in this browser, gives a team 2,00
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
 :::::steps
 
 ### Create the team account
 
 Create it [like the treasury](/docs/accounts/guides/teams/company-treasury#create-the-treasury). `member1` to `member3` are keys the members hold themselves, such as passkeys or keys in your KMS.
+
+::::code-group
 
 ```ts [team.ts]
 import { Account } from 'viem/tempo'
@@ -50,6 +48,12 @@ const team = Account.fromConfig({ // [!code hl]
 }) // [!code hl]
 // Save team.address with the team's record. The treasury authorizes this address.
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 ### Authorize it from the treasury
 

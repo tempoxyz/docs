@@ -44,9 +44,7 @@ Your app's signer approves each revocation. Rebuild the account from the record 
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+::::code-group
 
 ```ts [hand-off.ts]
 import { isAddressEqual } from 'viem'
@@ -71,6 +69,12 @@ for (const accessKey of appAccessKeys) { // [!code hl]
   await client.accessKey.revokeSync({ account, accessKey }) // [!code hl]
 } // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 viem signs with `appSigner`. If its weight alone can't reach the threshold, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Revocations leave the configuration unchanged, so the same `account` approves the swap.
 
