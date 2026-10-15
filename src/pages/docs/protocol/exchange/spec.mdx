@@ -126,7 +126,7 @@ function tickToPrice(int16 tick) external pure returns (uint32 price);
 function priceToTick(uint32 price) external pure returns (int16 tick);
 ```
 
-Convert between discrete ticks and scaled prices. `priceToTick` reverts if `price` is out of bounds.
+Convert between discrete ticks and scaled prices using `price = 100_000 + tick`. Both functions MUST enforce `tick % TICK_SPACING == 0`; off-grid values revert with `InvalidTick`. `priceToTick` additionally enforces the price range `[98_000, 102_000]`, reverting with `TickOutOfBounds` outside that range. `tickToPrice` does not enforce the order-placement bounds: an aligned tick such as `2010` converts to `102010` even though an order cannot be placed at that tick. For example, `tickToPrice(1)` and `priceToTick(100001)` revert with `InvalidTick`, while `tickToPrice(10)` returns `100010`.
 
 <span id="pairing-and-orderbook" />
 
