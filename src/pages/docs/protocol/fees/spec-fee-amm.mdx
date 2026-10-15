@@ -115,6 +115,8 @@ function burn(
 
 Burns LP tokens and receives pro-rata share of reserves. Emits `Burn` event.
 
+Burning MUST authorize `msg.sender` as a sender on **both** pool tokens, independently of `to`. Each nonzero underlying payout also checks FeeManager as sender and the resolved payout destination as recipient on that token, with ordinary token-transfer restrictions. An authorized `to` cannot redeem shares on behalf of a policy-blocked LP caller. Issuer-policy failures revert with `PolicyForbids`; subsequent issuer-policy changes can therefore prevent redemption.
+
 ```solidity
 function executeFeeSwap(
     address userToken,
