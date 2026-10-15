@@ -51,7 +51,7 @@ const { config: updated } = await client.accounts.updateConfigSync({
 
 Save the configuration the update returns, and rebuild from it before the next action. The update raises the configuration's version by one, so an account built from the old copy no longer matches the hash Tempo stores, and its next payment or update fails.
 
-If the remaining weights fall short of the threshold, lower `threshold` in the same update. [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver) walks through removing one from a treasury.
+If the remaining weights fall short of the threshold, lower `threshold` in the same update, or add a replacement signer in it instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone, so a 2-of-3 treasury that drops to two signers at threshold 1 no longer needs two approvals. [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver) walks through removing one from a treasury.
 
 <span id="replace-a-signer" />
 <span id="rotate-a-signer-at-the-same-weight" />

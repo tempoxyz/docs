@@ -11,13 +11,13 @@ import { AccessKeyDemo } from '../../../../../components/guides/AccessKeyDemo'
 
 Give an agent a key that pays from an account, but only within the bounds you set.
 
-On Tempo, an agent's wallet is an access key the agent generates and holds. In this guide, the account's signers, the keys the customer or your approvers hold, authorize that key with a budget of 50 OUSD a day, a 30-day expiry, and scopes, the calls it may make: here, only sending the stablecoin with a memo. Tempo enforces those bounds on every transaction, whatever the agent decides to do. The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin.
+On Tempo, an agent's wallet is an access key the agent generates and holds. In this guide, the account's signers, the keys the customer or your approvers hold, authorize that key with a budget of 50 OUSD a day, a 30-day expiry, and scopes, the calls it may make: here, only sending the stablecoin with a memo to merchants you list. Tempo enforces those bounds on every transaction, whatever the agent decides to do. The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin.
 
 <span id="agents" />
 <span id="ai-agents" />
 <span id="authorize-the-agents-task" />
 
-The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key.
+The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key. The demo uses smaller bounds than the code: 10 a day, a one-hour expiry, and `transfer` to any address.
 
 <AccessKeyDemo />
 
@@ -57,6 +57,8 @@ import { client } from './client'
 
 // A test stablecoin on the devnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
+// the addresses the agent may pay
+const merchants = [merchant]
 
 await client.accessKey.authorizeSync({ // [!code hl]
   accessKey: { accessKeyAddress: agentKeyAddress, keyType: 'p256' }, // [!code hl]
@@ -65,7 +67,7 @@ await client.accessKey.authorizeSync({ // [!code hl]
   expiry: Expiry.days(30), // [!code hl]
   // 50 of the stablecoin a day
   limits: [{ token: stablecoin, limit: parseUnits('50', 6), period: 86_400 }], // [!code hl]
-  scopes: [{ address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)' }], // [!code hl]
+  scopes: [{ address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)', recipients: merchants }], // [!code hl]
 }) // [!code hl]
 ```
 
@@ -74,7 +76,7 @@ await client.accessKey.authorizeSync({ // [!code hl]
 Fit all three bounds to the agent's task. Leaving one out removes that check.
 
 - [`limits`](/docs/accounts/access-keys/spending-limits) is the budget, in base units: the stablecoin has 6 decimals, so `parseUnits('50', 6)` is 50 OUSD. `period: 86_400` renews it daily; leave `period` out for a one-time budget. The key's fees count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them.
-- [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make: here, sending the stablecoin with a memo.
+- [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make: here, sending the stablecoin with a memo to `merchants`. Without `recipients`, the key could pay any address.
 - [`expiry`](/docs/accounts/access-keys/expiry) is when the key stops working.
 
 Never give an agent an [admin access key](/docs/accounts/access-keys/admin-access-keys). It has no budget, scopes, or expiry and can authorize more keys, so the agent could spend the whole balance.
@@ -91,13 +93,14 @@ await client.token.transferSync({ // [!code hl]
   account: agentKey, // [!code hl]
   amount: parseUnits('2', 6), // [!code hl]
   // a memo makes this transferWithMemo, the key's one allowed call
-  memo: stringToHex('order-1042'), // [!code hl]
-  to: recipient, // [!code hl]
+  memo: stringToHex('order-1042', { size: 32 }), // [!code hl]
+  // one of the scoped merchants
+  to: merchant, // [!code hl]
   token: stablecoin, // [!code hl]
 }) // [!code hl]
 ```
 
-Tempo rejects any payment over the remaining budget, outside the scopes, or after the expiry. Read what's left with `client.accessKey.getRemainingLimit`. The signers can [change the limit](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) or [the scopes](/docs/accounts/access-keys/scopes#change-allowed-calls) without replacing the key.
+Tempo rejects any payment over the remaining budget, outside the scopes (such as to an address not in `merchants`), or after the expiry. Read what's left with `client.accessKey.getRemainingLimit`. The signers can [change the limit](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) or [the scopes](/docs/accounts/access-keys/scopes#change-allowed-calls) without replacing the key.
 
 <span id="revoke-it" />
 

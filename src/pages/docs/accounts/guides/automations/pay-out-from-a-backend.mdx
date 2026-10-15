@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Your backend sends payouts from a customer's Tempo account without prompting the customer each time.
 
-In this guide, the customer's signers approve an [access key](/docs/accounts/access-keys) once, and your backend keeps it in its KMS to send payouts. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry), so a leaked key can't drain the account. The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value.
+In this guide, the customer's signers approve an [access key](/docs/accounts/access-keys) once, and your backend keeps it in its KMS to send payouts. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees. The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value.
 
 <span id="backend-services" />
 <span id="automations" />
@@ -20,13 +20,13 @@ The demo runs on the devnet because its customer account is a configurable accou
 
 <GuideDemo guide="backend-automation" />
 
-The code pays out a test stablecoin. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The code pays out a test stablecoin. The undefined names are yours: `account` and `address` are the customer's account and its address, `payees` the addresses the key may pay, `payee` one of them, `payoutKeyAddress` the KMS key's address, and `kms`, `kmsKeyId`, and `kmsPublicKey` your KMS client, key ID, and public key. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 :::::steps
 
 ### Authorize a scoped, limited key
 
-Create one secp256k1 key per customer in your KMS. Its address, derived from the public key, is the key's ID on Tempo. Send that address to the customer's app, where the customer's signers authorize it:
+Create one secp256k1 key per customer in your KMS. To pay contractors from your company's own account, create one key per payout service instead. Its address, derived from the public key, is the key's ID on Tempo. Send that address to the customer's app, where the customer's signers authorize it:
 
 ::::code-group
 

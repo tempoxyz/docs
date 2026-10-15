@@ -36,34 +36,28 @@ Neither the token filter nor the sender policy can be a `COMPOUND` policy. An ad
 
 <span id="account-level-receive-policies" />
 <span id="understand-receive-policy-behavior" />
+<span id="how-tempo-enforces-receive-policies" />
 
-## How Tempo enforces receive policies
+## What happens to a blocked payment
 
-Every transfer and mint to the address runs three checks, in order:
+Every TIP-20 transfer and mint to the address runs through its receive policy:
 
-| Check | If it fails |
-| --- | --- |
-| The token's own TIP-403 policy | The call reverts and nothing moves. |
-| The receiver's token filter | The call succeeds. `ReceivePolicyGuard` holds the funds, with blocked reason `TOKEN_FILTER`. |
-| The receiver's sender policy | The call succeeds. `ReceivePolicyGuard` holds the funds, with blocked reason `RECEIVE_POLICY`. |
-
-If all three pass, Tempo credits the receiver.
-
-The sender checked is the `from` address, or the minter for a mint. For a delegated `transferFrom`, that's the token owner, not the spender, and a held payment still spends the spender's allowance.
-
-The checks run on every TIP-20 transfer and mint, including the memo variants and `systemTransferFrom`. Fee deposits and refunds, TIP-20 rewards, and internal balances skip them.
+- **The token's own policy rejects it:** the call reverts and nothing moves.
+- **The receive policy rejects it:** the transaction succeeds, but Tempo holds the funds in `ReceivePolicyGuard` instead of crediting the receiver. The recovery authority can [claim them](#claim-blocked-receipts).
+- **Both accept it:** Tempo credits the receiver.
 
 <span id="virtual-address-behavior" />
 
-A payment to a [virtual address](/docs/protocol/tip20/virtual-addresses) is checked against its master address's policy, so set the policy on the master; a virtual address can't set its own. A held payment's receipt belongs to the master and keeps the original `to` for attribution.
+A payment to a [virtual address](/docs/accounts/virtual-addresses) is checked against its master address's policy, so set the policy on the master; a virtual address can't set its own.
 
 <span id="monitor-blocked-receipts" />
+<span id="blocked-receipts" />
 
-### Blocked receipts
+### Check the recipient before you credit a payment
 
-A held payment looks like a success: the transaction succeeds and the token emits its usual `Transfer` event (and `Mint` for a mint), but the recipient is `ReceivePolicyGuard` at `0xB10C000000000000000000000000000000000000`, not the receiver. Check the event's recipient before you credit a payment.
+A held payment looks like a success, and the token still emits its usual `Transfer` event, but that event's recipient is `ReceivePolicyGuard`, not the receiver. Credit a payment only when the confirmed event names the receiver.
 
-The guard records one receipt per held payment. You can't list receipts onchain, so index the guard's events. `TransferBlocked` fires when a payment is held, and its `receipt` field is the encoded receipt you pass to claim or burn it. `ReceiptClaimed` and `ReceiptBurned` fire when a receipt is released or burned.
+[TIP-403 receive policies](/docs/protocol/tip403/receive-policies) covers the evaluation order, which sender each call checks, the guard's address and events, and which calls skip the checks.
 
 <span id="try-receive-policies" />
 <span id="configure-the-policy" />
@@ -128,7 +122,7 @@ await client.receivePolicy.setSync({
 
 The sender policy here is built-in policy `1` (`'allow-all'` in Viem), so anyone can pay. To limit who can pay, create a sender allowlist the same way as the token allowlist, with sender addresses as members, and pass its ID instead. Viem calls the token filter `tokenPolicyId` and the recovery authority `claimer`: `'self'` is the signing account, `'sender'` is `address(0)`, or pass another address. See [`receivePolicy.set`](https://viem.sh/tempo/actions/receivePolicy.set).
 
-Changing the recovery authority affects only payments held afterward; existing receipts keep the authority they were held under. A recovery authority other than `address(0)` can't be `ReceivePolicyGuard`, a virtual address, or a system precompile that can't initiate calls.
+Changing the recovery authority affects only payments held afterward; existing receipts keep the authority they were held under. See [which addresses can be a recovery authority](/docs/protocol/tip403/receive-policies#receive-policy-configuration).
 
 :::::
 
@@ -150,9 +144,7 @@ The answer covers only the receive policy, not the token's own policy, the sende
 
 ## Claim a held payment
 
-The recovery authority claims a held payment by passing a destination and the `receipt` bytes from its `TransferBlocked` event (`blockedReceipt`). Here the receiver claims the payment to itself:
-
-To find the payments held for an address, query its `TransferBlocked` events; the query below marks each one `held`, `claimed`, or `burned`.
+The recovery authority claims a held payment by passing a destination and the `receipt` bytes from its `TransferBlocked` event. You can't list held payments onchain, so index the guard's events. To find the payments held for an address, query its `TransferBlocked` events; this query marks each one `held`, `claimed`, or `burned`:
 
 <TidxQuery
   network="mainnet"
@@ -173,6 +165,8 @@ WHERE receiver = '0xec0eca588024e2d0091e74bd9034ff581111ea7f'
 ORDER BY block_num DESC
 LIMIT 10`}
 />
+
+Here the receiver claims a held payment to itself, with `blockedReceipt` as the `receipt` bytes from its `TransferBlocked` event:
 
 ```ts [claim.ts]
 import { client } from './client'

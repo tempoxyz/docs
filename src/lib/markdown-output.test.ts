@@ -218,6 +218,53 @@ Status: <Badge variant="red">Required</Badge>
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 
+  test('exports an indexer query as runnable SQL and the request that runs it', async () => {
+    const output = await render(`
+<TidxQuery
+  network="testnet"
+  signature={[
+    'KeyAuthorized(address indexed account, address indexed publicKey)',
+    'KeyRevoked(address indexed account, address indexed publicKey)',
+  ]}
+  sql={\`SELECT publicKey, block_num
+FROM KeyAuthorized
+WHERE account = '0x6028375ea6ae3339b16f29b343f8f32f7bb3ee8a'\`}
+/>
+`)
+    expect(output).toContain(
+      "```sql\nSELECT publicKey, block_num\nFROM KeyAuthorized\nWHERE account = '0x6028375ea6ae3339b16f29b343f8f32f7bb3ee8a'\n```",
+    )
+    expect(output).toContain('curl --get "https://indexer.testnet.tempo.xyz/query"')
+    expect(output).toContain('--data-urlencode "chainId=42431"')
+    expect(output).toContain(
+      '--data-urlencode "signature=KeyAuthorized(address indexed account, address indexed publicKey)"',
+    )
+    expect(output).toContain(
+      '--data-urlencode "signature=KeyRevoked(address indexed account, address indexed publicKey)"',
+    )
+    expect(output).toContain('--data-urlencode "sql@query.sql"')
+    expect(output).not.toContain('interactive web page')
+    expect(output).not.toContain('<TidxQuery')
+  })
+
+  test('exports a single-signature mainnet indexer query', async () => {
+    const output = await render(
+      '<TidxQuery signature="Transfer(address indexed from, address indexed to, uint256 value)" sql={`SELECT value FROM Transfer`} />',
+    )
+    expect(output).toContain('```sql\nSELECT value FROM Transfer\n```')
+    expect(output).toContain('curl --get "https://indexer.tempo.xyz/query"')
+    expect(output).toContain('--data-urlencode "chainId=4217"')
+    expect(output).toContain(
+      '--data-urlencode "signature=Transfer(address indexed from, address indexed to, uint256 value)"',
+    )
+  })
+
+  test('describes the indexer widget when it has no page query', async () => {
+    const output = await render('<TidxQuery />')
+    expect(output).toContain('run SQL against the public Tempo indexer')
+    expect(output).not.toContain('```sql')
+  })
+
   test('replaces an account diagram with its description', async () => {
     const output = await render(`
 <AccountDiagram name="signers" alt="Signers approve, and their weights reach the threshold." />
@@ -522,6 +569,12 @@ export const data = [{ label: 'Example' }]
     ['link button', '<DocsLinkButton>Open docs</DocsLinkButton>', 'static href attribute'],
     ['OpenAPI playground', '<OpenApi.Playground />', 'static operationId attribute'],
     ['OpenAPI endpoints', '<OpenApi.Endpoints />', 'static path attribute'],
+    ['indexer query', '<TidxQuery sql={sql} />', 'static sql attribute'],
+    [
+      'indexer signature',
+      '<TidxQuery signature={signatures} sql="SELECT 1" />',
+      'static signature attribute',
+    ],
   ])('rejects incomplete or dynamic %s data', async (_name, source, message) => {
     await expect(render(source)).rejects.toThrow(message)
   })

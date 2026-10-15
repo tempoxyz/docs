@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Remove a departing approver while the treasury keeps its address, balance, and payment history.
 
-In this guide, a controller leaves a company treasury on the Tempo Accounts devnet where any two of three approvers sign each transaction. The two who remain, finance and operations, remove the controller's signer, revoke any access key the controller could sign with, and add a replacement signer so one lost key can't lock the treasury.
+In this guide, a controller leaves a company treasury on the Tempo Accounts devnet where any two of three approvers sign each transaction. The two who remain, finance and operations, replace the controller's signer with a successor's, or remove it, then revoke any access key the controller could sign with.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.
@@ -54,29 +54,52 @@ function openTreasury(approvers: readonly Account.RootAccount[]) {
 
 ::::
 
-viem signs with the attached keys and throws `Local owners do not meet the threshold.` before sending anything if their weights fall short. The demo runs the same steps with keys the page generates.
+viem signs with the attached keys and throws `Local owners do not meet the threshold.` before sending anything if their weights fall short. The demo, with keys the page generates, replaces the signer in one update, then revokes their keys.
 
 <GuideDemo guide="rotate-keys" />
 
 :::::steps
 
-### Remove their signer
+### Replace their signer
 
-Build the next signer list from the saved one without the departing approver, and keep the threshold. Finance and operations approve it:
+When a successor is ready, swap the controller's signer for the successor's in one update at the same weight, and keep the threshold. Finance and operations approve it, and the treasury stays 2 of 3 throughout:
 
 ```ts [offboard.ts]
-const removed = await client.accounts.updateConfigSync({ // [!code hl]
+const replacement = env('NEW_CONTROLLER_PASSKEY_ADDRESS') // the new approver's passkey, on their device
+
+const replaced = await client.accounts.updateConfigSync({ // [!code hl]
   account: openTreasury([finance, operations]), // [!code hl]
   nextConfig: { // [!code hl]
-    owners: saved.config.owners.filter(({ owner }) => !isAddressEqual(owner, controller)), // [!code hl]
+    owners: saved.config.owners.map((entry) => // [!code hl]
+      isAddressEqual(entry.owner, controller) ? { owner: replacement, weight: entry.weight } : entry, // [!code hl]
+    ), // [!code hl]
     threshold: saved.config.threshold, // [!code hl]
   }, // [!code hl]
 }) // [!code hl]
 // persist it with the treasury record
-saved.config = removed.config // [!code hl]
+saved.config = replaced.config // [!code hl]
 ```
 
-Each signer update raises `config.version` by one and changes the hash Tempo stores, so save the `config` it returns. `openTreasury` reads `saved` on every call, so the next steps build the treasury from the new configuration. An account built from the old configuration fails with `multisig configuration commitment mismatch`, and the controller's passkey can no longer approve anything. If the remaining weights couldn't reach the threshold, viem would throw `Invalid account config: threshold exceeds total owner weight.` and send nothing. Here two signers of weight 1 remain at a threshold of 2.
+Each signer update raises `config.version` by one and changes the hash Tempo stores, so save the `config` it returns. `openTreasury` reads `saved` on every call, so the next steps build the treasury from the new configuration. An account built from the old configuration fails with `multisig configuration commitment mismatch`, and the controller's passkey can no longer approve anything. Have the new approver approve one transaction before you rely on their key.
+
+<span id="remove-their-signer" />
+
+Without a successor yet, drop the controller's entry instead:
+
+```ts [offboard.ts]
+const removed = await client.accounts.updateConfigSync({
+  account: openTreasury([finance, operations]),
+  nextConfig: {
+    owners: saved.config.owners.filter(({ owner }) => !isAddressEqual(owner, controller)), // [!code hl]
+    threshold: saved.config.threshold,
+  },
+})
+saved.config = removed.config
+```
+
+<span id="rebalance-the-threshold" />
+
+Two signers of weight 1 remain at a threshold of 2, so both must approve every payment, and losing either key locks the treasury until you add a replacement with the same update shape, appending `{ owner: replacement, weight: 1 }`. Lowering the threshold to 1 instead keeps a lost key from locking the treasury but lets either approver pay alone. If the remaining weights couldn't reach the threshold, viem would throw `Invalid account config: threshold exceeds total owner weight.` and send nothing.
 
 ### Revoke their keys
 
@@ -91,24 +114,10 @@ await client.accessKey.revokeSync({ // [!code hl]
 
 `serviceKey` is the address you saved when you authorized the key. Revocation is permanent, so if the service still needs to pay, authorize a new key the departing approver never held. If you didn't save every key's address, [list the keys the treasury has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change).
 
-### Rebalance the threshold
+Revocation [leaves two things in place](/docs/accounts/access-keys/revocation#what-revocation-leaves-in-place):
 
-With two approvers left at a threshold of 2, both must approve every payment, and losing either key locks the treasury. Add a replacement approver to return to 2 of 3:
-
-```ts [offboard.ts]
-const replacement = env('NEW_CONTROLLER_PASSKEY_ADDRESS') // the new approver's passkey, on their device
-
-const added = await client.accounts.updateConfigSync({ // [!code hl]
-  account: openTreasury([finance, operations]), // [!code hl]
-  nextConfig: { // [!code hl]
-    owners: [...saved.config.owners, { owner: replacement, weight: 1 }], // [!code hl]
-    threshold: saved.config.threshold, // [!code hl]
-  }, // [!code hl]
-}) // [!code hl]
-saved.config = added.config
-```
-
-If you already have the replacement's key, swap it in for the departing approver's in step 1's update and skip the 2-of-2 interval. Without a replacement, lowering the threshold to 1 keeps a lost key from locking the treasury but lets either approver pay alone. Have the new approver approve one transaction before you rely on their key.
+- **Token approvals:** a spender the key approved can still pull tokens up to the allowance, so set each allowance to zero from the treasury.
+- **Keys it authorized:** if it was an [admin access key](/docs/accounts/access-keys/admin-access-keys), the keys it authorized stay authorized, so revoke each one.
 
 :::::
 

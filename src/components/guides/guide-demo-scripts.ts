@@ -645,7 +645,7 @@ const addSigners: DemoScript = {
       },
     },
     {
-      title: 'Require two factors',
+      title: 'Stop the recovery signer acting alone',
       action: () => 'Create a device key and send the update',
       run: async (state, ctx) => {
         const prepared = await prepareDeviceKey(state, ctx, 'Device key')
@@ -721,18 +721,26 @@ const rotateKeys: DemoScript = {
   ],
   steps: [
     {
-      title: 'Remove their signer',
-      action: () => 'Remove Approver key 2',
+      title: 'Replace their signer',
+      action: () => 'Swap Approver key 2 for Approver key 4',
       run: async (state, ctx) => {
-        const departing = configuredSigners(state.account).find(
+        const before = state.account
+        const departing = configuredSigners(before).find(
           (signer) => signer.name === 'Approver key 2',
         )
         if (!departing) throw new DemoError('Approver key 2 isn’t a signer.')
-        const approvers = nextApprovers(state.account)
-        const sent = await update(state, ctx, checked(removeSigner(state.account, departing.id)))
+        const approvers = nextApprovers(before)
+        const removed = checked(removeSigner(before, departing.id))
+        const replaced = addKeySigner(
+          removed,
+          ctx,
+          ctx.chain.generatePrivateKey(),
+          'Approver key 4',
+        )
+        const sent = await update(state, ctx, asOneUpdate(before, replaced))
         return {
           state: sent.state,
-          result: `${upperFirst(approverNames(approvers))} approved config v${sent.state.account.version}: ${describeConfig(sent.state.account)}. Approver key 2 can’t approve anymore.`,
+          result: `${upperFirst(approverNames(approvers))} approved config v${sent.state.account.version}: ${describeConfig(sent.state.account)}. Approver key 2 can’t approve anymore, and the account can still lose any one key.`,
           hashes: hashes(['Update', sent.hash]),
         }
       },
@@ -747,27 +755,8 @@ const rotateKeys: DemoScript = {
         const sent = await update(state, ctx, revokeAccessKey(state.account, key.id))
         return {
           state: sent.state,
-          result: `${upperFirst(approverNames(approvers))} revoked the service key. Removing a signer doesn’t revoke access keys on its own.`,
+          result: `${upperFirst(approverNames(approvers))} revoked the service key. Replacing a signer doesn’t revoke access keys on its own.`,
           hashes: hashes(['Revoke', sent.hash]),
-        }
-      },
-    },
-    {
-      title: 'Rebalance the threshold',
-      action: () => 'Add Approver key 4',
-      run: async (state, ctx) => {
-        const approvers = nextApprovers(state.account)
-        const next = addKeySigner(
-          state.account,
-          ctx,
-          ctx.chain.generatePrivateKey(),
-          'Approver key 4',
-        )
-        const sent = await update(state, ctx, next)
-        return {
-          state: sent.state,
-          result: `${upperFirst(approverNames(approvers))} approved config v${sent.state.account.version}: ${describeConfig(sent.state.account)}. The account can lose any one key again and still reach its threshold.`,
-          hashes: hashes(['Update', sent.hash]),
         }
       },
     },

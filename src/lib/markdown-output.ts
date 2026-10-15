@@ -14,6 +14,7 @@ import { codeSamples } from '../../node_modules/vocs/dist/internal/openapi/sampl
 import { tempoAgentSetupCommands } from './ai-install-commands'
 import { docsLinkCards } from './docs-link-cards'
 import { loadTempoOpenApi } from './tempo-openapi'
+import { type TidxNetwork, tidxNetworks } from './tidx-networks'
 
 type MarkdownAttribute = {
   name?: string
@@ -26,6 +27,7 @@ type MarkdownExpression = {
     estree?: {
       body?: Array<{
         expression?: {
+          elements?: Array<{ type?: string; value?: unknown } | null>
           expressions?: unknown[]
           quasis?: Array<{ value?: { cooked?: string | null } }>
           type?: string
@@ -342,6 +344,8 @@ function rewriteNode(
     rewriteChildren(node, headingDepth, context)
     return [...(node.children ?? []), paragraph([text(alt)])]
   }
+  if (node.name === 'TidxQuery' && node.attributes?.some((attribute) => attribute.name === 'sql'))
+    return renderTidxQuery(node)
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, context)
   if (
@@ -508,6 +512,54 @@ function renderMermaid(node: MarkdownNode): MarkdownNode[] {
   if (!chart)
     throw new TypeError(`${node.name} requires a static chart attribute for Markdown output.`)
   return [{ type: 'code', lang: 'mermaid', value: chart.trim() }]
+}
+
+function renderTidxQuery(node: MarkdownNode): MarkdownNode[] {
+  const sql = expressionString(node, 'sql') ?? stringAttribute(node, 'sql')
+  if (!sql) throw new TypeError('TidxQuery requires a static sql attribute for Markdown output.')
+  const networkName = optionalStaticStringAttribute(node, 'network') ?? 'mainnet'
+  if (!(networkName in tidxNetworks))
+    throw new TypeError(`Unknown TidxQuery network for Markdown output: ${networkName}`)
+  const network = tidxNetworks[networkName as TidxNetwork]
+  const signatures = staticStringList(node, 'signature')
+  // Mirror the widget's own request so the exported command returns the same rows.
+  const command = [
+    `curl --get "${network.endpoint}/query" \\`,
+    `  --data-urlencode "chainId=${network.chainId}" \\`,
+    '  --data-urlencode "engine=clickhouse" \\',
+    ...signatures.map((signature) => `  --data-urlencode "signature=${signature}" \\`),
+    '  --data-urlencode "sql@query.sql"',
+  ].join('\n')
+  return [
+    paragraph([
+      text('Save this query as '),
+      inlineCode('query.sql'),
+      text(
+        ` and run it against the public Tempo ${networkName} indexer (chain ID ${network.chainId}).`,
+      ),
+    ]),
+    { type: 'code', lang: 'sql', value: sql.trim() },
+    { type: 'code', lang: 'bash', value: command },
+  ]
+}
+
+function staticStringList(node: MarkdownNode, name: string): string[] {
+  const attribute = node.attributes?.find(
+    (candidate) => candidate.type === 'mdxJsxAttribute' && candidate.name === name,
+  )
+  if (!attribute) return []
+  if (typeof attribute.value === 'string') return [attribute.value]
+  const expression = attribute.value?.data?.estree?.body?.[0]?.expression
+  const single = expressionString(node, name)
+  if (single !== undefined) return [single]
+  if (
+    expression?.type === 'ArrayExpression' &&
+    expression.elements?.every(
+      (element) => element?.type === 'Literal' && typeof element.value === 'string',
+    )
+  )
+    return expression.elements.map((element) => String(element?.value))
+  throw new TypeError(`${node.name} requires a static ${name} attribute for Markdown output.`)
 }
 
 function renderBadge(node: MarkdownNode): MarkdownNode[] {

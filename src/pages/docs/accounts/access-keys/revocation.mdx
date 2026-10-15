@@ -27,7 +27,7 @@ When you authorize a key, save its address next to the device or service that ho
 
 Revocation doesn't undo what the key did while it was active:
 
-- Its transactions stay final.
+- Its transactions stay final. A payment racing the revocation goes through only if it lands first; once the revocation lands, Tempo rejects the rest.
 - Its token approvals stay. A spender it approved can still pull tokens up to the allowance, so set each allowance to zero from the account.
 - If it was an admin key, the keys it authorized stay authorized. Revoke each one.
 
@@ -75,7 +75,7 @@ Before you [hand an account to a customer](/docs/accounts/guides/users/hand-off)
 ## Revocation limits
 
 - A revoked key's address can never be authorized again for this account. To restore access, authorize a new key.
-- Revoking a key the account hasn't authorized reverts with [`KeyNotFound`](/docs/protocol/transactions/AccountKeychain#error-keynotfound). That includes a key whose authorization hasn't landed yet: if you bound a [witness](https://viem.sh/tempo/guides/access-keys/witnesses) to it, cancel it with `client.accessKey.burnWitnessSync({ account, witness })`.
+- Revoking a key the account hasn't authorized reverts with [`KeyNotFound`](/docs/protocol/transactions/AccountKeychain#error-keynotfound). That includes a key whose authorization hasn't landed yet: if you bound a [witness](https://viem.sh/tempo/guides/access-keys/witnesses), a 32-byte value signed into the authorization, cancel it with `client.accessKey.burnWitnessSync({ account, witness })`. Tempo then rejects any authorization signed with that witness.
 - An expired key needs no revocation: Tempo already rejects its transactions.
 
 Specification: [Account Keychain key revocation](/docs/protocol/transactions/AccountKeychain#key-revocation).

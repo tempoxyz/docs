@@ -19,12 +19,12 @@ Spending limits are one of an [access key](/docs/accounts/access-keys)'s three b
 
 ## Set a spending limit
 
-Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry covers one token, with the amount in base units (most USD stablecoins have 6 decimals). For example, `{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }` allows 500 OUSD a day. A key without `limits` can spend any amount.
+Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry covers one token, with the amount in base units (most USD stablecoins have 6 decimals). For example, `{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }` allows 500 OUSD a day. A key without `limits` can spend any amount of any token. Once you pass `limits`, a token not in the list has a limit of zero, fees paid in it included, so `limits: []` lets the key spend no TIP-20 tokens.
 
 `period` decides whether the limit renews:
 
 - `0` or omitted: one-time. Once the key spends it, the key can't spend that token again.
-- A number of seconds, such as `86_400` for a day: renewing. The limit resets to its full amount when each period ends.
+- A number of seconds, such as `86_400` for a day: renewing. The first period starts when the key is authorized, not at midnight or another calendar boundary, and the limit resets to its full amount when each period ends. Unspent amounts don't carry over.
 
 <span id="spending-limit-limits" />
 
@@ -70,6 +70,6 @@ Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-k
 
 Set the new limit with viem's [`accessKey.updateLimit`](https://viem.sh/tempo/actions/accessKey.updateLimit).
 
-The update sets both the limit and what's left of it to the new value, so a key that already spent 400 of its 500 OUSD today can spend 50 more. The period and the current period's end stay the same. On a key with no limits, the update turns limits on. It reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)), an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)), or an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits.
+The update sets both the limit and what's left of it to the new value, and later periods renew to the new value. For example, updating a key that already spent 400 of its 500 OUSD today to `parseUnits('600', 6)` lets it spend 600 more today and 600 a day after that, not 100 more today. The period and the current period's end stay the same. On a key with no limits, the update turns limits on. It reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)), an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)), or an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits.
 
 Specification: [Account Keychain spending limits](/docs/protocol/transactions/AccountKeychain#spending-limit-enforcement).

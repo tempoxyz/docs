@@ -10,6 +10,10 @@ If you're using an embedded wallet, your provider most likely creates a single-k
 
 Privy, Turnkey, and Dynamic each give every user one key, held by the provider, so each user's wallet is a [single-key account](/docs/accounts/how-it-works#address): it works on Tempo mainnet and testnet as it is. Because all three also send [Tempo Transactions](/docs/guide/tempo-transaction), your app can pay fees in any stablecoin, batch payments, sponsor your users' fees, and give out [access keys](/docs/accounts/access-keys).
 
+## Keep your existing provider wallets
+
+If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives the same address on Tempo as on other EVM chains, a [single-key account](/docs/development/single-key-accounts), though balances on other chains don't carry over. Sending and receiving stablecoins works as it is. Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends Tempo Transactions. Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions ([Wallet partners](/docs/partners/wallets)), so sponsor fees with your own [fee payer](/docs/accounts/fees/fee-sponsorship).
+
 ## What your provider sets up
 
 Each user gets one secp256k1 key, held by the provider and unlocked when the user logs in. That key controls the whole balance, so whoever the provider lets ask it to sign can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.

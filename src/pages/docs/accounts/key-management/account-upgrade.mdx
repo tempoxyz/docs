@@ -14,7 +14,7 @@ An account upgrade adds backup signers to a single-key account without changing 
 A single-key account works like a standard Ethereum account (an EOA): one key controls it, so losing that key loses the account. An account upgrade turns it into a configurable account with several signers and a threshold at the same address, so a lost key no longer means a lost account. The upgrade is permanent.
 
 :::warning
-**Account upgrades aren't live yet.** Turning a single-key account into a configurable account at the same address ([TIP-1113](https://tips.sh/1113)) works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.
+**Account upgrades aren't live yet.** Turning a single-key account into a configurable account at the same address ([TIP-1113](https://tips.sh/1113)) works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Sent on mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the original key still approves alone, and transactions from the configurable account are rejected.
 :::
 
 <UpgradeAccountDemo />
@@ -37,14 +37,18 @@ Access keys carry over with their limits, so [revoke](/docs/accounts/access-keys
 
 ## Send the upgrade
 
-The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. viem 2.57.5 has no upgrade action, so call the contract with `writeContractSync`. Set `feeToken` to the stablecoin that pays the fee: without it, viem sends a standard Ethereum transaction and the upgrade reverts with [`PrimitiveRootRequired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/precompiles/src/native_multisig/mod.rs#L154). `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. Call it with `writeContractSync`, and stop unless the client is on the devnet. Set `feeToken` to the stablecoin that pays the fee: without it, viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
 ```ts [upgrade.ts]
 import { parseAbi } from 'viem'
+import { tempoDevnet } from 'viem/chains'
 import { Addresses } from 'viem/tempo'
 import { client } from './client'
+
+// Mainnet and testnet accept the transaction but don't upgrade the account.
+if (client.chain.id !== tempoDevnet.id) throw new Error('Account upgrades run only on the Tempo Accounts devnet.') // [!code hl]
 
 // A test stablecoin on the devnet
 const token = '0x20c0000000000000000000000000000000000001'
@@ -78,8 +82,7 @@ After the upgrade, Tempo stores only a hash of the configuration, a fingerprint 
 - Only the original key can sign the upgrade. Access keys can't, but a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it.
 - The upgrade must be the transaction's only call, with no `keyAuthorization` and no EIP-7702 authorization list.
 - Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
-- Afterward, a direct signature from the original key fails with [`RootKeyRetired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/revm/src/native_multisig/mod.rs#L390) (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
-- On mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the original key still approves alone, and transactions from the configurable account are rejected.
+- Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
 - Upgraded accounts don't use the [recovery factory](/docs/accounts/key-management#recover-funds-sent-on-another-chain) for funds sent to their address on another chain. The original key still controls the address there.
 
 Reference: [Single-key accounts](/docs/development/single-key-accounts#upgrade-to-a-configurable-account). Specification: [TIP-1113](https://tips.sh/1113).

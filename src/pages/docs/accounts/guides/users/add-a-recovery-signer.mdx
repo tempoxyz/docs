@@ -1,7 +1,7 @@
 ---
 title: Add a recovery signer
-seoTitle: Add a Recovery Signer and Require Two Factors on a Tempo Account | Tempo Docs
-description: Give a user's Tempo account a second signer so a lost phone or key doesn't lock them out, then require two factors for new devices and signer changes.
+seoTitle: Add a Recovery Signer to a Tempo Account | Tempo Docs
+description: Give a user's Tempo account a second signer so a lost phone or key doesn't lock them out, then add a passkey so no other single key can take over the account.
 interactive: true
 ---
 
@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Add a second key to a user's account so losing their phone or first key doesn't lock them out.
 
-In this guide, your app adds a recovery signer, a second key that can approve transactions, to a user's account on the Tempo Accounts devnet, then requires two factors so whoever holds the recovery signer can't take over the account alone. The first key stays with your app or wallet provider, and the recovery signer goes to a holder the user doesn't lose along with it, such as a recovery provider. With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. The address and balance stay the same.
+In this guide, your app adds a recovery signer, a second key that can approve transactions, to a user's account on the Tempo Accounts devnet, then adds a passkey and raises the threshold so whoever holds the recovery signer can't take over the account alone. The first key stays with your app or wallet provider, and the recovery signer goes to a holder the user doesn't lose along with it, such as a recovery provider. With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. The address and balance stay the same.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding a signer needs one.
@@ -78,6 +78,10 @@ saved.config = config // [!code hl]
 
 ::::
 
+:::warning
+Until the next update lands, either signer can approve anything alone, including removing the other. Don't hand the recovery signer to another party until you [stop it acting alone](#require-two-factors), or send both changes as one update: append `newSigner` and the passkey together and set `threshold: 2`.
+:::
+
 Save the returned `config` in place of the old one right away. Each signer update raises the version, which changes the hash Tempo stores, so a transaction from an account rebuilt from the old copy fails. `openAccount` reads `saved` on every call, so the next step builds from the new configuration. The address comes from the account's first configuration: at version 0, `address: 'infer'` derives it from the signers, and after an update `openAccount` passes the saved address instead.
 
 ### Confirm the account survives losing one signer
@@ -94,10 +98,11 @@ Tempo can't tell whether a signer still holds its key, so have the new signer ap
 <span id="multi-factor-approval" />
 <span id="recommended-setup" />
 <span id="require-multi-factor-approval" />
+<span id="require-two-factors" />
 
-### Require two factors
+### Stop the recovery signer acting alone
 
-Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To require two factors, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2. This step reuses `openAccount` from `add-signer.ts`.
+Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To stop that, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2. This step reuses `openAccount` from `add-signer.ts`.
 
 ```ts [multi-factor.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
@@ -116,7 +121,7 @@ const { config: twoFactor } = await client.accounts.updateConfigSync({ // [!code
 saved.config = twoFactor
 ```
 
-Now a new device or a signer change needs the passkey on the user's device, or the first key and recovery signer together. Give those two keys [different holders](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects-against), because one party holding both can approve alone. Signer changes don't touch access keys, so the user's existing device key keeps paying within its limits.
+Now the passkey on the user's device still approves alone, and any other approval, such as a recovery, needs the first key and recovery signer together. Give those two keys [different holders](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects-against), because one party holding both can approve alone. Signer changes don't touch access keys, so the user's existing device key keeps paying within its limits.
 
 :::::
 

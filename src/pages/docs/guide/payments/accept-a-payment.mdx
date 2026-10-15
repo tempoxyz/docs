@@ -52,9 +52,9 @@ For balance snapshots and display formatting, see [Read balances](#read-balances
 <span id="watch-for-changes" />
 <span id="listen-for-tip-20-transfer-events" />
 
-Enter the receiving account as both `address` and `recipient`. Set `chainId` to `42431` and `type` to `transfer` to read incoming payments on Moderato:
+Enter the receiving account as both `address` and `recipient`; the example uses the same sample address for both. Set `chainId` to `42431` and `type` to `transfer` to read incoming payments on Moderato:
 
-<OpenApi.Playground operationId="getAddressActivities" query="chainId=42431&type=transfer" anchors={false} />
+<OpenApi.Playground operationId="getAddressActivities" query="chainId=42431&type=transfer&recipient=0xbe058e1c4df8a4366a387bf595b284246a93039e" anchors={false} />
 
 For direct transfer subscriptions, use the [CLI, Viem, or Wagmi setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools). Set `account` to the recipient and `token` to AlphaUSD. Wagmi hooks run inside a React component and clean up on unmount:
 

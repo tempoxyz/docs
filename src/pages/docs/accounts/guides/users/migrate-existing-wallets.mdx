@@ -20,7 +20,7 @@ After the upgrade, the account has a list of signers, each with a weight, and a 
 
 ### Choose the new signers
 
-List the original key and at least one backup signer the user can reach without it, such as a passkey on the user's device or your recovery provider's key. Your app holds the original key. The backup's private key stays with its holder, the user's device or your recovery provider, so your app needs only the backup's address. With both at weight 1 and threshold 1, either one approves alone and can replace the other if it's lost.
+List the original key and at least one backup signer the user can reach without it, such as a passkey on the user's device or your recovery provider's key. Here your app holds the original key. If a wallet provider such as Privy or Turnkey holds it instead, the provider must sign the upgrade transaction through its Tempo integration, on the Tempo Accounts devnet, in place of `Account.fromSecp256k1`. The backup's private key stays with its holder, the user's device or your recovery provider, so your app needs only the backup's address. With both at weight 1 and threshold 1, either one approves alone and can replace the other if it's lost.
 
 ```ts [upgrade.ts]
 import { Account, AccountConfig } from 'viem/tempo'

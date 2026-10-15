@@ -1,15 +1,10 @@
 'use client'
 
 import * as React from 'react'
+import { tidxNetworks } from '../lib/tidx-networks'
 import { Container } from './Container'
 import { SqlEditor } from './SqlEditor'
 import * as ui from './TidxQuery.recipes'
-
-type Network = {
-  name: string
-  chainId: number
-  endpoint: string
-}
 
 type Preset = {
   name: string
@@ -29,18 +24,7 @@ type TidxResponse = {
   ok: boolean
 }
 
-const NETWORKS = {
-  mainnet: {
-    name: 'Mainnet',
-    chainId: 4217,
-    endpoint: 'https://indexer.tempo.xyz',
-  },
-  testnet: {
-    name: 'Testnet',
-    chainId: 42431,
-    endpoint: 'https://indexer.testnet.tempo.xyz',
-  },
-} as const satisfies Record<string, Network>
+const NETWORKS = tidxNetworks
 
 const PRESETS: Preset[] = [
   {

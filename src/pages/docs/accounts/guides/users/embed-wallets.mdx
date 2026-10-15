@@ -19,6 +19,8 @@ In this guide, each user's account on the Tempo Accounts devnet has three signer
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. The provider setup below uses one; [connecting a self-custodial wallet](#connect-a-self-custodial-wallet-instead) doesn't.
 :::
 
+If your users already have wallets with Privy or Turnkey, those wallets are [single-key accounts](/docs/development/single-key-accounts) that keep their address on Tempo and work on mainnet as they are: see [Keep your existing provider wallets](/docs/accounts/wallets/embedded-wallets#keep-your-existing-provider-wallets). This guide creates a new account at a new address, with the provider's key as one of its signers. Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions, so use [fee sponsorship](/docs/accounts/fees/fee-sponsorship) to pay your users' fees.
+
 <span id="choose-the-controls-your-application-needs" />
 
 :::::steps
