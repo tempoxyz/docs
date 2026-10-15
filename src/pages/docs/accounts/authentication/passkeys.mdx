@@ -36,9 +36,9 @@ The demo creates a passkey and shows the single-key account it signs for. On the
 ```ts [passkey.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
 
-const credential = await WebAuthnP256.createCredential({ label: 'Acme' })
-const passkey = Account.fromWebAuthnP256(credential)
-const account = Account.fromConfig({ address: 'infer', owners: [passkey] })
+const credential = await WebAuthnP256.createCredential({ label: 'Acme' }) // [!code hl]
+const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
+const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [!code hl]
 ```
 
 `account.address` receives stablecoins right away, and the account's first transaction registers it onchain. Next, [add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).

@@ -17,7 +17,7 @@ import { http } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { createClient } from 'viem/tempo'
 
-export const client = createClient({ chain: tempoModerato, transport: http() })
+export const client = createClient({ chain: tempoModerato, transport: http() }) // [!code hl]
 ```
 
 :::::steps
@@ -37,11 +37,12 @@ await client.accessKey.authorizeSync({
   accessKey: { accessKeyAddress: sweepKeyAddress, keyType: 'secp256k1' },
   account, // the customer's account, signed by its key
   expiry: Expiry.days(90),
-  limits: [{ token: pathUsd, limit: parseUnits('5000', 6), period: 86_400 }], // 5,000 pathUSD a day
-  scopes: [
-    { address: pathUsd, selector: 'approve(address,uint256)', recipients: [vault] },
-    { address: vault, selector: 'deposit(uint256,address,uint256)' },
-  ],
+  // 5,000 pathUSD a day
+  limits: [{ token: pathUsd, limit: parseUnits('5000', 6), period: 86_400 }], // [!code hl]
+  scopes: [ // [!code hl]
+    { address: pathUsd, selector: 'approve(address,uint256)', recipients: [vault] }, // [!code hl]
+    { address: vault, selector: 'deposit(uint256,address,uint256)' }, // [!code hl]
+  ], // [!code hl]
 })
 ```
 
@@ -58,28 +59,30 @@ import { client } from '../client'
 const pathUsd = '0x20c0000000000000000000000000000000000000'
 
 const balance = await client.token.getBalance({ account: address, token: pathUsd })
-const assetAmount = balance.amount - operatingFloat
+const assetAmount = balance.amount - operatingFloat // [!code hl]
 if (assetAmount > 0n) {
-  await client.token.approveSync({
-    account: sweepKey, // the key signs for the customer's account
-    amount: assetAmount,
-    feeToken: pathUsd,
-    spender: vault,
-    token: pathUsd,
-  })
+  await client.token.approveSync({ // [!code hl]
+    // the key signs for the customer's account
+    account: sweepKey, // [!code hl]
+    amount: assetAmount, // [!code hl]
+    feeToken: pathUsd, // [!code hl]
+    spender: vault, // [!code hl]
+    token: pathUsd, // [!code hl]
+  }) // [!code hl]
   const { result: quotedShares } = await Actions.earn.deposit.simulate(client, {
     account: address,
     assetAmount,
     shareAmountMin: 1n,
     vault,
   })
-  const { receipt, shareAmount } = await client.earn.depositSync({
-    account: sweepKey,
-    assetAmount,
-    feeToken: pathUsd,
-    shareAmountMin: EarnShares.minimumOutput(quotedShares, 50), // accept at most 0.5% fewer shares
-    vault,
-  })
+  const { receipt, shareAmount } = await client.earn.depositSync({ // [!code hl]
+    account: sweepKey, // [!code hl]
+    assetAmount, // [!code hl]
+    feeToken: pathUsd, // [!code hl]
+    // accept at most 0.5% fewer shares
+    shareAmountMin: EarnShares.minimumOutput(quotedShares, 50), // [!code hl]
+    vault, // [!code hl]
+  }) // [!code hl]
   // record receipt.transactionHash and shareAmount for reconciliation
 }
 ```
@@ -93,8 +96,8 @@ import { client } from '../client'
 
 const pathUsd = '0x20c0000000000000000000000000000000000000'
 
-const { shareBalance, value } = await client.earn.getPosition({ account: address, vault })
-const { remaining } = await client.accessKey.getRemainingLimit({ account: address, accessKey: sweepKey, token: pathUsd })
+const { shareBalance, value } = await client.earn.getPosition({ account: address, vault }) // [!code hl]
+const { remaining } = await client.accessKey.getRemainingLimit({ account: address, accessKey: sweepKey, token: pathUsd }) // [!code hl]
 ```
 
 Show the customer `value`, not `shareBalance`: shares don't map one-to-one to pathUSD, and `value` is what they're worth now, after fees, in pathUSD base units. `remaining` is what the key can still spend today. To show earnings over time, see [Balances and earnings](/docs/earn/balances). To withdraw, use the customer's own key or a separate key, as in [Withdraw](/docs/earn/withdraw).

@@ -32,32 +32,37 @@ Your own fee payer is an account whose key stays on your backend, funded with st
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts, so these examples can sponsor a single-key or a configurable account. To sponsor single-key accounts on mainnet or testnet, connect `client` to that network instead.
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+In `sponsored-transfer.ts`, `account` is the paying account with the keys that approve the payment attached, such as the account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) or an [access key](/docs/accounts/access-keys) your backend holds for it, and `recipient` is the payee's address. Fund the fee payer's address from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first, so it can pay fees:
 
-In `sponsored-transfer.ts`, `account` is the paying account with the keys that approve the payment attached, such as the account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) or an [access key](/docs/accounts/access-keys) your backend holds for it, and `recipient` is the payee's address:
+::::code-group
 
 ```ts [sponsored-transfer.ts]
 import { parseUnits } from 'viem'
 import { Account } from 'viem/tempo'
 import { client } from './client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a devnet test stablecoin
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 // Keep the fee payer's private key on your server.
-const feePayer = Account.fromSecp256k1(process.env.FEE_PAYER_KEY as `0x${string}`)
-await client.faucet.fundSync({ account: feePayer.address }) // devnet test stablecoins for its fees
+const feePayer = Account.fromSecp256k1(process.env.FEE_PAYER_KEY as `0x${string}`) // [!code hl]
 
 await client.token.transferSync({
-  account, // needs AlphaUSD for the payment, none for the fee
+  account, // needs the stablecoin for the payment, none for the fee
   amount: parseUnits('25', 6),
-  feePayer, // signs only for the fee, and pays it
-  feeToken: alphaUsd, // the fee payer's choice: the token being transferred
+  // The fee payer signs only for the fee, pays it, and picks the token being transferred.
+  feePayer, // [!code hl]
+  feeToken: stablecoin, // [!code hl]
   to: recipient,
-  token: alphaUsd,
+  token: stablecoin,
 })
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
 
 Your backend decides what to sponsor: the fee payer pays for every transaction your code passes it to, so authenticate and rate-limit the requests that trigger one.
 
@@ -71,16 +76,15 @@ The customer's keys stay on their device and sign the payment. The fee payer's k
 import { Account, Relay } from 'viem/tempo'
 import { client } from './client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a devnet test stablecoin
-
 const relay = Relay.create({
   client, // forwards to the Tempo Accounts devnet
   plugins: [
-    Relay.feePayer({
-      account: Account.fromSecp256k1(process.env.FEE_PAYER_KEY as `0x${string}`),
-      feeToken: alphaUsd, // the fee payer pays every fee in AlphaUSD
-      validate: async (request) => request.from !== undefined && (await isCustomer(request.from)),
-    }),
+    Relay.feePayer({ // [!code hl]
+      account: Account.fromSecp256k1(process.env.FEE_PAYER_KEY as `0x${string}`), // [!code hl]
+      // pays every fee in a test stablecoin on the devnet // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+      validate: async (request) => request.from !== undefined && (await isCustomer(request.from)), // [!code hl]
+    }), // [!code hl]
   ],
 })
 
@@ -89,33 +93,31 @@ export default { fetch: relay.fetch }
 
 The server's URL ships in your app, so anyone can send it transactions, and each one it sponsors spends the fee payer's balance. `validate` is your sponsorship policy: it receives the filled transaction, with the sending account's address as `request.from`. `isCustomer` stands for your own check, such as looking that address up in your user records. Only `true` sponsors the transaction. With `false`, the customer's call fails with `Sponsorship rejected.` and nothing is sent. Without `validate`, the server sponsors every transaction it receives. Add rate limits too, since one customer can send many transactions.
 
-`bun fee-payer-server.ts` serves this file as it is. Other servers can pass their requests to `relay.fetch`, which takes a standard `Request` and returns a `Response`. Set `FEE_PAYER_KEY` and `TEMPO_DEVNET_RPC_KEY` on the server, and fund the fee payer's address from the faucet, as in `sponsored-transfer.ts`.
+`bun fee-payer-server.ts` serves this file as it is. Other servers can pass their requests to `relay.fetch`, which takes a standard `Request` and returns a `Response`. Set `FEE_PAYER_KEY` and `TEMPO_DEVNET_RPC_KEY` on the server, and fund the fee payer's address from the faucet. [Relay fee payer](https://viem.sh/tempo/relay/plugins/fee-payer) covers the plugin's other options.
 
-On the customer's device, route the client through your server with `withRelay`, and set `feePayer: true` on each transaction you want sponsored:
+On the customer's device, route the client through your server with [`withRelay`](https://viem.sh/tempo/transports/withRelay), and set `feePayer: true` on each transaction you want sponsored. `devnet` is an `http` transport to the devnet with the RPC key, as in `client.ts`, with the key read from your bundler's environment variables:
 
 ```ts [pay.ts]
 import { http, parseUnits } from 'viem'
 import { tempoDevnet } from 'viem/chains'
 import { createClient, withRelay } from 'viem/tempo'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a devnet test stablecoin
-const rpcKey = import.meta.env.VITE_TEMPO_DEVNET_RPC_KEY // Vite; use your bundler's variable
-
-const devnet = http('https://rpc-multisig-1113.devnet.tempoxyz.dev', {
-  fetchOptions: { headers: { Authorization: `Basic ${btoa(`previews:${rpcKey}`)}` } },
-})
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 const client = createClient({
   chain: tempoDevnet,
-  transport: withRelay(devnet, http('https://fee-payer.example.com')), // your fee payer server
+  // fee payer requests go to your server, everything else to the devnet
+  transport: withRelay(devnet, http('https://fee-payer.example.com')), // [!code hl]
 })
 
 await client.token.transferSync({
-  account, // needs AlphaUSD for the payment, none for the fee
+  account, // needs the stablecoin for the payment, none for the fee
   amount: parseUnits('25', 6),
-  feePayer: true, // ask your fee payer server to sponsor
+  // ask your fee payer server to sponsor
+  feePayer: true, // [!code hl]
   to: recipient,
-  token: alphaUsd,
+  token: stablecoin,
 })
 ```
 

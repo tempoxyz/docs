@@ -15,7 +15,7 @@ On Tempo, an agent's wallet is an access key: a key the agent holds that pays fr
 <span id="ai-agents" />
 <span id="authorize-the-agents-task" />
 
-The demo and the code run on the Tempo Accounts devnet with AlphaUSD, a test stablecoin with no value. The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key.
+The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin. The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key.
 
 <AccessKeyDemo />
 
@@ -34,9 +34,12 @@ Give each agent its own key, generated where it runs, so you can revoke one with
 ```ts [agent-key.ts]
 import { Account, P256 } from 'viem/tempo'
 
-const privateKey = P256.randomPrivateKey() // store in the agent runtime's secret storage
-const agentKey = Account.fromP256(privateKey, { access: address }) // the account's address
-const agentKeyAddress = agentKey.accessKeyAddress // send to the signers; save it with the agent's name
+// store in the agent runtime's secret storage
+const privateKey = P256.randomPrivateKey() // [!code hl]
+// the account's address
+const agentKey = Account.fromP256(privateKey, { access: address }) // [!code hl]
+// send to the signers; save it with the agent's name
+const agentKeyAddress = agentKey.accessKeyAddress // [!code hl]
 ```
 
 The signers authorize that address and its bounds in one transaction:
@@ -46,23 +49,26 @@ import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
 import { client } from './client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
-await client.accessKey.authorizeSync({
-  accessKey: { accessKeyAddress: agentKeyAddress, keyType: 'p256' },
-  account, // the account, signed by its signers
-  expiry: Expiry.days(30),
-  limits: [{ token: alphaUsd, limit: parseUnits('50', 6), period: 86_400 }], // 50 AlphaUSD a day
-  scopes: [{ address: alphaUsd, selector: 'transferWithMemo(address,uint256,bytes32)' }],
-})
+await client.accessKey.authorizeSync({ // [!code hl]
+  accessKey: { accessKeyAddress: agentKeyAddress, keyType: 'p256' }, // [!code hl]
+  // the account, signed by its signers
+  account, // [!code hl]
+  expiry: Expiry.days(30), // [!code hl]
+  // 50 of the stablecoin a day
+  limits: [{ token: stablecoin, limit: parseUnits('50', 6), period: 86_400 }], // [!code hl]
+  scopes: [{ address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)' }], // [!code hl]
+}) // [!code hl]
 ```
 
 <span id="set-its-budget-and-scopes" />
 
 Fit all three bounds to the agent's task. Leaving one out removes that check.
 
-- [`limits`](/docs/accounts/access-keys/spending-limits) is the budget, in base units: AlphaUSD has 6 decimals, so `parseUnits('50', 6)` is 50 AlphaUSD. `period: 86_400` renews it daily; leave `period` out for a one-time budget. The key's fees count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them.
-- [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make: here, sending AlphaUSD with a memo.
+- [`limits`](/docs/accounts/access-keys/spending-limits) is the budget, in base units: the stablecoin has 6 decimals, so `parseUnits('50', 6)` is 50 OUSD. `period: 86_400` renews it daily; leave `period` out for a one-time budget. The key's fees count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them.
+- [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make: here, sending the stablecoin with a memo.
 - [`expiry`](/docs/accounts/access-keys/expiry) is when the key stops working.
 
 Never give an agent an [admin access key](/docs/accounts/access-keys/admin-access-keys). It has no budget, scopes, or expiry and can authorize more keys, so the agent could spend the whole balance.
@@ -75,13 +81,14 @@ The agent signs with its key and pays from the account's balance. The signers do
 import { parseUnits, stringToHex } from 'viem'
 import { client } from './client'
 
-await client.token.transferSync({
-  account: agentKey,
-  amount: parseUnits('2', 6),
-  memo: stringToHex('order-1042'), // a memo makes this transferWithMemo, the key's one allowed call
-  to: recipient,
-  token: alphaUsd,
-})
+await client.token.transferSync({ // [!code hl]
+  account: agentKey, // [!code hl]
+  amount: parseUnits('2', 6), // [!code hl]
+  // a memo makes this transferWithMemo, the key's one allowed call
+  memo: stringToHex('order-1042'), // [!code hl]
+  to: recipient, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
 Tempo rejects any payment over the remaining budget, outside the scopes, or after the expiry. Read what's left with `client.accessKey.getRemainingLimit`. The signers can [change the limit](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) or [the scopes](/docs/accounts/access-keys/scopes#change-allowed-calls) without replacing the key.
@@ -95,7 +102,7 @@ When the task ends or the agent misbehaves, the signers revoke the key by its sa
 ```ts [revoke-agent.ts]
 import { client } from './client'
 
-await client.accessKey.revokeSync({ account, accessKey: agentKeyAddress })
+await client.accessKey.revokeSync({ account, accessKey: agentKeyAddress }) // [!code hl]
 ```
 
 [Revocation](/docs/accounts/access-keys/revocation) is permanent. Once it confirms, Tempo rejects every transaction the key signs, so show the agent's access as removed only then.

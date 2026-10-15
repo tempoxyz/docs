@@ -26,20 +26,21 @@ import { Account, AccountConfig } from 'viem/tempo'
 const original = Account.fromSecp256k1(userPrivateKey) // the key your app holds for this user
 
 // Sorts the signers by address, as Tempo requires
-const { owners, threshold } = AccountConfig.from({
-  owners: [
-    { owner: original.address, weight: 1 },
-    { owner: backupAddress, weight: 1 }, // the user's passkey or your recovery provider's key
-  ],
-  threshold: 1,
-})
+const { owners, threshold } = AccountConfig.from({ // [!code hl]
+  owners: [ // [!code hl]
+    { owner: original.address, weight: 1 }, // [!code hl]
+    // the user's passkey or your recovery provider's key
+    { owner: backupAddress, weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 1, // [!code hl]
+}) // [!code hl]
 ```
 
 Access keys, the limited keys that sign payments for the account, carry over with their limits, so [revoke](/docs/accounts/access-keys/revocation) any you don't want before you upgrade.
 
 ### Upgrade each account in place
 
-Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade): the user's original key signs one transaction whose only call is `upgradeAccount(threshold, owners)`. Set `feeToken` on that call, or on the client, to the stablecoin that pays the fee. Without it, viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor the fee for accounts with no balance. On mainnet or testnet, the same transaction succeeds and charges its fee but changes nothing, so a successful receipt there doesn't mean the account upgraded.
+Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade): the user's original key signs one transaction whose only call is `upgradeAccount(threshold, owners)`. Set `feeToken` on that call, or on the client, to the stablecoin that pays the fee. Without it, viem sends a standard Ethereum transaction and the upgrade reverts with [`PrimitiveRootRequired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/precompiles/src/native_multisig/mod.rs#L154). A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor the fee for accounts with no balance. On mainnet or testnet, the same transaction succeeds and charges its fee but changes nothing, so a successful receipt there doesn't mean the account upgraded.
 
 ### Save the configuration
 
@@ -48,20 +49,22 @@ Tempo stores only a hash of each account's configuration, so the copy your app s
 ```ts [upgrade.ts]
 import { concat, keccak256, toHex } from 'viem'
 
-await saveAccount(userId, { // your app's storage
-  address: original.address, // unchanged by the upgrade
-  config: {
-    owners,
-    salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])),
-    threshold,
-    version: 1n,
-  },
-})
+// your app's storage
+await saveAccount(userId, { // [!code hl]
+  // unchanged by the upgrade
+  address: original.address, // [!code hl]
+  config: { // [!code hl]
+    owners, // [!code hl]
+    salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])), // [!code hl]
+    threshold, // [!code hl]
+    version: 1n, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
 ```
 
 ### Pay through the saved configuration
 
-Wherever your app signs with `original` directly, pass an account rebuilt from the saved record instead: a direct signature from the original key now fails with `RootKeyRetired` (`primitive root key retired`). In the rebuilt account, pass `original` itself in its signer entry so it can sign, and keep the other signers as addresses. viem signs with the keys you pass until their weights reach the threshold. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Wherever your app signs with `original` directly, pass an account rebuilt from the saved record instead: a direct signature from the original key now fails with [`RootKeyRetired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/revm/src/native_multisig/mod.rs#L390) (`primitive root key retired`). In the rebuilt account, pass `original` itself in its signer entry so it can sign, and keep the other signers as addresses. viem signs with the keys you pass until their weights reach the threshold. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -72,20 +75,22 @@ import { isAddressEqual, parseUnits } from 'viem'
 import { Account } from 'viem/tempo'
 import { client } from './client'
 
-const token = '0x20c0000000000000000000000000000000000001' // test AlphaUSD
+// A test stablecoin on the devnet
+const token = '0x20c0000000000000000000000000000000000001'
 const original = Account.fromSecp256k1(userPrivateKey) // the key your app holds for this user
 const { address, config } = await loadAccount(userId) // the record saved above
 
-const account = Account.fromConfig({
-  ...config,
-  address,
-  owners: config.owners.map(({ owner, weight }) => ({
-    owner: isAddressEqual(owner, original.address) ? original : owner, // the key that approves
-    weight,
-  })),
-})
+const account = Account.fromConfig({ // [!code hl]
+  ...config, // [!code hl]
+  address, // [!code hl]
+  owners: config.owners.map(({ owner, weight }) => ({ // [!code hl]
+    // the key that approves
+    owner: isAddressEqual(owner, original.address) ? original : owner, // [!code hl]
+    weight, // [!code hl]
+  })), // [!code hl]
+}) // [!code hl]
 
-await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token })
+await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token }) // [!code hl]
 ```
 
 From then on, manage signers like any other configurable account, as in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer). After each signer change, save the `config` that `updateConfigSync` returns and rebuild the account from it. An account built from an older configuration no longer matches the hash Tempo stores, and its transactions fail with `multisig configuration commitment mismatch`.

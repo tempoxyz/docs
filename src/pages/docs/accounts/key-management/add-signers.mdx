@@ -34,42 +34,31 @@ A recovery signer lets the remaining signers replace a lost one. Give it enough 
 
 A signer update replaces the account's whole signer list. Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version), a fingerprint it checks approvals against but can't read back. Your app saves the account's address and configuration with the account record and builds every approval from that copy.
 
-Each signer's key stays with whoever holds it. To send the update, rebuild the account from the saved record with the approving signers' keys attached, and append the new signer. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Each signer's key stays with whoever holds it. To send the update, rebuild the account from the saved record with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals), and append the new signer. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+::::code-group
+
+```ts [add-signer.ts]
+import { client } from './client'
+
+const { config: updated } = await client.accounts.updateConfigSync({
+  account,
+  nextConfig: { // [!code hl]
+    owners: [...config.owners, { owner: newSigner, weight: 1 }], // [!code hl]
+    threshold: config.threshold, // [!code hl]
+  }, // [!code hl]
+})
+```
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
 ```
 
-```ts [add-signer.ts]
-import { isAddressEqual } from 'viem'
-import { Account } from 'viem/tempo'
-import { client } from './client'
+::::
 
-const { address, config } = await loadAccount(customerId) // your app's storage
+`account` is the rebuilt account, and `config` is the saved configuration it came from. Attach the keys of current signers on the device running the code, such as the customer's passkey in their browser, which approves alone in the [recommended customer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). viem signs with them, highest weight first, until their weights reach the threshold. `newSigner` is the new key's address: a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in viem lists every option.
 
-// Attach the approving signers' keys. The other signers stay addresses.
-const owners = config.owners.map(({ owner, weight }) => ({
-  owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
-  weight,
-}))
-const account =
-  config.version === 0n // never updated: the first signers derive the address
-    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
-    : Account.fromConfig({ ...config, address, owners })
-
-const { config: updated } = await client.accounts.updateConfigSync({
-  account,
-  nextConfig: {
-    owners: [...config.owners, { owner: newSigner, weight: 1 }],
-    threshold: config.threshold,
-  },
-})
-await saveAccount(customerId, { address, config: updated }) // the next action rebuilds from this
-```
-
-`approvers` holds the keys of current signers on the device running the code, such as the customer's passkey in their browser, which approves alone in the [recommended customer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). viem signs with them, highest weight first, until their weights reach the threshold. `newSigner` is the new key's address: a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. viem sorts the signers by address, as Tempo requires.
-
-Before every payment or signer update, rebuild the account from the latest saved record instead of reusing an account object your code kept in memory. The update raises the version by one, so an account built from the old configuration no longer matches the hash Tempo stores, and its next transaction fails. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+Save `updated` with the account record, and before every payment or signer update, rebuild the account from the latest saved record instead of reusing an account object your code kept in memory. The update raises the version by one, so an account built from the old configuration no longer matches the hash Tempo stores, and its next transaction fails. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 <span id="add-signer-limits" />
 
@@ -78,7 +67,7 @@ Before every payment or signer update, rebuild the account from the latest saved
 - An account holds 1 to 48 signers, with total weight at most 255. A transaction carries at most 8 approvals, so the 8 largest weights must reach the threshold. viem checks these limits before sending and throws `Invalid account config` with the reason. A signer already on the list fails with the reason `owners must be strictly ascending`.
 - The approving signers must reach the current threshold without the new signer. If the attached keys fall short, viem throws `Local owners do not meet the threshold.` and sends nothing.
 - `multisig configuration commitment mismatch` means the account was built from a configuration that no longer matches the hash Tempo stores, for example because another signer update landed after you loaded it. Load the latest saved configuration and rebuild the update.
-- `address: 'infer'` derives the address from the first configuration, so it works only before the first update. After a signer change, build the account from its saved address, as the code does.
+- `address: 'infer'` derives the address from the first configuration, so it works only before the first update. After a signer change, build the account from its saved address, as [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals) does.
 - Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
 
 Specification: [configuration updates](https://tips.sh/1109).

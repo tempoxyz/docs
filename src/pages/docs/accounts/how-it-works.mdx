@@ -8,9 +8,16 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 # How it works
 
-A Tempo account is an address that holds stablecoins, and only its own keys can move them. Signers approve together, access keys pay alone within limits, and Tempo checks both on every transaction with no override.
+A Tempo account holds stablecoins, and only the account's own keys can move them.
 
-For example, a customer account has three signers: the customer's passkey on their phone, their backup key in a hardware wallet, and a recovery key in your KMS. The passkey approves alone, and the two keys approve together. Your payout server also holds an access key with a daily limit.
+The account has two kinds of keys:
+
+- **Signers** own the account. They approve payments and any change to the account's keys.
+- **Access keys** make payments on their own, but only within the limits you set, such as a daily amount or a single recipient.
+
+Tempo enforces these rules on every transaction. No one, including Tempo, can move the funds any other way.
+
+For example, say you run a payments app and give each customer a Tempo account. The customer's passkey can approve anything on its own. If they lose their phone, a backup key they keep and a recovery key your app keeps can approve together to replace it. Your app's server holds an access key that pays the customer's scheduled bills, up to 500 OUSD a day.
 
 <span id="tempo-account-model" />
 <span id="signers-change-the-address-doesnt" />

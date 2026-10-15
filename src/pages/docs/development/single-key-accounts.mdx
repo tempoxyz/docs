@@ -42,15 +42,16 @@ import { parseUnits } from 'viem'
 import { Account } from 'viem/tempo'
 import { client } from './client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-const account = Account.fromSecp256k1(process.env.ROOT_KEY as `0x${string}`)
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+const account = Account.fromSecp256k1(process.env.ROOT_KEY as `0x${string}`) // [!code hl]
 
-await client.token.transferSync({
-  account,
-  amount: parseUnits('10', 6),
-  to: process.env.RECIPIENT as `0x${string}`,
-  token: alphaUsd,
-})
+await client.token.transferSync({ // [!code hl]
+  account, // [!code hl]
+  amount: parseUnits('10', 6), // [!code hl]
+  to: process.env.RECIPIENT as `0x${string}`, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
 Any of the three key types can also sign EIP-7702 authorizations, which let the account run a contract's code as its own ([Tempo and EIP-7702](/docs/protocol/transactions/eip-7702)).

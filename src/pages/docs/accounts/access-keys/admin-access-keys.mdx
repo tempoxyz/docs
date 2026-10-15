@@ -17,7 +17,7 @@ An admin key can:
 - [Revoke](/docs/accounts/access-keys/revocation) any access key, including itself.
 - Approve a message that a contract checks with [`verifyKeychainAdmin`](/docs/sdk/foundry/signature-verifier#how-signature-verification-works-in-foundry).
 
-It doesn't count toward the signing threshold, so it can't change the signers or the threshold, or lock the signers out. A key-management call from a limited key reverts with `UnauthorizedCaller`.
+It doesn't count toward the signing threshold, so it can't change the signers or the threshold, or lock the signers out. A key-management call from a limited key reverts with [`UnauthorizedCaller`](/docs/protocol/transactions/AccountKeychain#error-unauthorizedcaller).
 
 <span id="when-to-avoid-admin-keys" />
 
@@ -31,31 +31,11 @@ Store an admin key as carefully as a signer: in a KMS or HSM, or as a [device ke
 
 Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key), with `admin: true`. viem ignores `limits`, `expiry`, and `scopes` on an admin key, and Tempo rejects an admin authorization that carries any of them.
 
-`access-keys.ts` is the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key). It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, authorizing an admin key works the same on mainnet and testnet.
-
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
-
-```ts [admin-key.ts]
-import { account } from './access-keys'
-import { client } from './client'
-
-const kmsKeyAddress = process.env.KMS_KEY_ADDRESS as `0x${string}`
-
-await client.accessKey.authorizeSync({
-  account,
-  accessKey: { address: kmsKeyAddress, type: 'secp256k1' },
-  admin: true,
-})
-
-// true until the key is revoked
-const isAdmin = await client.accessKey.isAdmin({ account, accessKey: kmsKeyAddress })
-```
+In viem, pass `admin: true` to [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize), and check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
 
 ## Admin access key limits
 
-- Changing an admin key's spending limit or scopes reverts with `InvalidKeyId`, because it has neither. To bound its holder, revoke it and authorize a new limited key.
+- Changing an admin key's spending limit or scopes reverts with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid), because it has neither. To bound its holder, revoke it and authorize a new limited key.
 - Revoking an admin key leaves the keys it authorized in place, so revoke each one separately.
 
 Specifications: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys (TIP-1049)](https://tips.sh/1049).

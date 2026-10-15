@@ -10,7 +10,7 @@ Your backend tops up a customer's card from their Tempo account without asking t
 
 <span id="fund-a-card-with-a-daily-limit" />
 
-The examples use AlphaUSD, a test stablecoin with no value, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts. On mainnet and testnet, a card-funding key works the same from a single-key account, such as one whose key is the customer's passkey.
+The examples use a test stablecoin, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts. On mainnet and testnet, a card-funding key works the same from a single-key account, such as one whose key is the customer's passkey.
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
@@ -27,14 +27,16 @@ import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
 import { client } from '../client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 await client.accessKey.authorizeSync({
   accessKey: { accessKeyAddress: cardKeyAddress, keyType: 'secp256k1' },
   account, // the customer's account, signed by its signers
-  expiry: Expiry.days(30),
-  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }], // 500 AlphaUSD a day
-  scopes: [{ address: alphaUsd, selector: 'transfer(address,uint256)', recipients: [cardFundingAddress] }],
+  expiry: Expiry.days(30), // [!code hl]
+  // 500 of the stablecoin a day
+  limits: [{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }], // [!code hl]
+  scopes: [{ address: stablecoin, selector: 'transfer(address,uint256)', recipients: [cardFundingAddress] }], // [!code hl]
 })
 ```
 
@@ -48,15 +50,18 @@ When the card program reports spend, or before it settles, send the amount to th
 import { parseUnits } from 'viem'
 import { client } from '../client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
-await client.token.transferSync({
-  account: cardKey, // the key signs for the customer's account
-  amount: parseUnits('42.50', 6),
-  feeToken: alphaUsd, // the fee counts against the key's daily limit
-  to: cardFundingAddress,
-  token: alphaUsd,
-})
+await client.token.transferSync({ // [!code hl]
+  // the key signs for the customer's account
+  account: cardKey, // [!code hl]
+  amount: parseUnits('42.50', 6), // [!code hl]
+  // the fee counts against the key's daily limit
+  feeToken: stablecoin, // [!code hl]
+  to: cardFundingAddress, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
 Tempo rejects a transfer to any other address, above what's left today, or after the expiry.
@@ -70,13 +75,14 @@ The limit resets to its full amount every 24 hours (`period: 86_400`). Next to t
 ```ts [app/card-settings.ts]
 import { client } from '../client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
-const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({
-  account,
-  accessKey: cardKeyAddress,
-  token: alphaUsd,
-})
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ // [!code hl]
+  account, // [!code hl]
+  accessKey: cardKeyAddress, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
 The customer's signers control the key:

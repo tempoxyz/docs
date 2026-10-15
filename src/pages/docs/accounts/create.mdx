@@ -36,8 +36,8 @@ import { generatePrivateKey } from 'viem/accounts'
 import { Account } from 'viem/tempo'
 
 const privateKey = generatePrivateKey() // Keep this secret: it approves the account's transactions.
-const signer = Account.fromSecp256k1(privateKey)
-export const account = Account.fromConfig({ address: 'infer', owners: [signer] })
+const signer = Account.fromSecp256k1(privateKey) // [!code hl]
+export const account = Account.fromConfig({ address: 'infer', owners: [signer] }) // [!code hl]
 
 // Save account.address and account.config with your user record.
 ```
@@ -56,11 +56,11 @@ The Accounts examples connect to the Tempo Accounts devnet, a test network that 
 
 <span id="fund-an-account-on-devnet" />
 
-To fund the address, ask the devnet faucet, which sends test stablecoins, including AlphaUSD and pathUSD:
+To fund the address, ask the devnet faucet, which sends test stablecoins, including pathUSD:
 
 ```ts [fund.ts]
 import { account } from './account'
 import { client } from './client'
 
-await client.faucet.fundSync({ account: account.address })
+await client.faucet.fundSync({ account: account.address }) // [!code hl]
 ```

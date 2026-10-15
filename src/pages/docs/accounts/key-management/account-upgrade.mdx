@@ -35,55 +35,39 @@ Access keys carry over with their limits, so [revoke](/docs/accounts/access-keys
 
 ## Send the upgrade
 
-The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. viem 2.57.5 has no upgrade action, so call the contract with `writeContractSync`. Set `feeToken` to the stablecoin that pays the fee: without it, viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. viem 2.57.5 has no upgrade action, so call the contract with `writeContractSync`. Set `feeToken` to the stablecoin that pays the fee: without it, viem sends a standard Ethereum transaction and the upgrade reverts with [`PrimitiveRootRequired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/precompiles/src/native_multisig/mod.rs#L154). `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+::::code-group
+
+```ts [upgrade.ts]
+import { parseAbi } from 'viem'
+import { Addresses } from 'viem/tempo'
+import { client } from './client'
+
+// A test stablecoin on the devnet
+const token = '0x20c0000000000000000000000000000000000001'
+
+await client.writeContractSync({ // [!code hl]
+  account: original, // [!code hl]
+  address: Addresses.nativeMultisig, // [!code hl]
+  abi: parseAbi([ // [!code hl]
+    'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)', // [!code hl]
+  ]), // [!code hl]
+  functionName: 'upgradeAccount', // [!code hl]
+  args: [threshold, owners], // [!code hl]
+  feeToken: token, // [!code hl]
+}) // [!code hl]
+```
 
 ```ts [client.ts]
 // [!include ~/snippets/accounts-devnet.ts:client]
 ```
 
-```ts [upgrade.ts]
-import { concat, keccak256, parseAbi, parseUnits, toHex } from 'viem'
-import { Account, Addresses } from 'viem/tempo'
-import { client } from './client'
+::::
 
-const token = '0x20c0000000000000000000000000000000000001' // test AlphaUSD
+`original` is the key that controls the account today, such as `Account.fromSecp256k1(privateKey)`. `owners` and `threshold` come from the upgraded account's configuration: build it with [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) at `original.address`, with `version: 1n` and the salt Tempo derives from the address, `keccak256(concat([toHex('tempo:multisig:upgrade'), original.address]))`, and read `account.config`, which lists the signers sorted by address, as Tempo requires. List `original` as an owner so it can approve, and the backup signer by its address. Its key stays on the user's device or with your recovery provider, and only the address goes in the configuration. [Migrate existing wallets](/docs/accounts/guides/users/migrate-existing-wallets#save-the-configuration) shows saving that configuration.
 
-// The key that controls the account today
-const original = Account.fromSecp256k1(process.env.ACCOUNT_KEY as `0x${string}`)
-
-// The same address after the upgrade, at configuration version 1
-const account = Account.fromConfig({
-  address: original.address,
-  owners: [
-    { owner: original, weight: 1 }, // attached, so it can approve
-    { owner: backupAddress, weight: 1 }, // a passkey or recovery key, by address
-  ],
-  salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])), // Tempo derives it from the address
-  threshold: 1,
-  version: 1n,
-})
-const { owners, threshold } = account.config // signers sorted by address, as Tempo requires
-
-await client.writeContractSync({
-  account: original,
-  address: Addresses.nativeMultisig,
-  abi: parseAbi([
-    'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
-  ]),
-  functionName: 'upgradeAccount',
-  args: [threshold, owners],
-  feeToken: token, // sends a Tempo transaction, which the upgrade requires
-})
-
-await saveAccount(customerId, { address: account.address, config: account.config })
-
-// From now on, pay with the configurable account
-await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token })
-```
-
-`backupAddress` is the backup signer's address. Its key stays on the user's device or with your recovery provider, and only the address goes in the configuration. `saveAccount` stands for your app's storage, and `recipient` is the payee's address.
-
-After the upgrade, Tempo stores only a hash of the configuration, a fingerprint it checks approvals against but can't read back, so the record your app saves is the source of truth for the account's signers. Whenever your app acts for the account later, rebuild it from that record with `Account.fromConfig` and attach the keys that approve, as `account` attaches `original`. The other signers stay as addresses. viem signs with the attached keys until their weights reach the threshold; if they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+After the upgrade, Tempo stores only a hash of the configuration, a fingerprint it checks approvals against but can't read back, so the record your app saves is the source of truth for the account's signers. Whenever your app acts for the account later, rebuild it from that record with `Account.fromConfig` and attach the keys that approve, such as `original`. The other signers stay as addresses. viem signs with the attached keys until their weights reach the threshold; if they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 [Adding](/docs/accounts/key-management/add-signers) or [removing](/docs/accounts/key-management/remove-signers) signers later raises the version: save the `config` that `updateConfigSync` returns and rebuild the account from it, or the next transaction fails with `multisig configuration commitment mismatch`. To upgrade every user's account, follow [Migrate existing wallets](/docs/accounts/guides/users/migrate-existing-wallets).
 
@@ -92,7 +76,7 @@ After the upgrade, Tempo stores only a hash of the configuration, a fingerprint 
 - Only the original key can sign the upgrade. Access keys can't, but a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it.
 - The upgrade must be the transaction's only call, with no `keyAuthorization` and no EIP-7702 authorization list.
 - Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
-- Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
+- Afterward, a direct signature from the original key fails with [`RootKeyRetired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/revm/src/native_multisig/mod.rs#L390) (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
 - On mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the original key still approves alone, and transactions from the configurable account are rejected.
 - Upgraded accounts don't use the [recovery factory](/docs/accounts/key-management#recover-funds-sent-on-another-chain) for funds sent to their address on another chain. The original key still controls the address there.
 

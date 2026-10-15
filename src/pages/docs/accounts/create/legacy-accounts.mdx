@@ -27,7 +27,7 @@ import { injected } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [tempo],
-  connectors: [injected()],
+  connectors: [injected()], // [!code hl]
   transports: { [tempo.id]: http() },
 })
 ```

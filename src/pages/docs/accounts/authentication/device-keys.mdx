@@ -41,42 +41,42 @@ No app server or wallet provider holds the key, but anyone who unlocks the devic
 
 The demo makes the device key its own account on the Tempo Accounts devnet, to show signing without a prompt. Reload the page and the key is still there.
 
-In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 AlphaUSD a day for 30 days, and the first payment carries that authorization. This works on mainnet and testnet today when the customer's account is a single-key account whose one key is the passkey.
+In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 OUSD a day for 30 days, and the first payment carries that authorization. This works on mainnet and testnet today when the customer's account is a single-key account whose one key is the passkey.
 
 The example below uses a configurable account with the passkey as its signer. Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects there ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer):
 
-In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer), and `recipient` is the payee's address:
+::::code-group
 
 ```ts [device-key.ts]
 import { parseUnits } from 'viem'
 import { Account, Expiry, WebCryptoP256 } from 'viem/tempo'
 import { client } from './client'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001' // AlphaUSD, a devnet test stablecoin
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 // Non-extractable. Save keyPair in IndexedDB so it survives a reload.
-const keyPair = await WebCryptoP256.createKeyPair()
+const keyPair = await WebCryptoP256.createKeyPair() // [!code hl]
+const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account }) // [!code hl]
 
-const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account })
-const keyAuthorization = await client.accessKey.signAuthorization({
-  accessKey: deviceKey,
-  account, // approved by the customer's passkey
-  expiry: Expiry.days(30),
-  limits: [{ token: alphaUsd, limit: parseUnits('500', 6), period: 86_400 }],
-})
-
-await client.token.transferSync({
-  account: deviceKey,
-  amount: parseUnits('5', 6),
-  keyAuthorization, // first payment only
-  to: recipient,
-  token: alphaUsd,
-})
+// approved by the customer's passkey
+const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl]
+  accessKey: deviceKey, // [!code hl]
+  account, // [!code hl]
+  expiry: Expiry.days(30), // [!code hl]
+  limits: [{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }], // [!code hl]
+}) // [!code hl]
 ```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+Pass `keyAuthorization` with the device key's first payment, signed by `deviceKey`, as in [Access keys](/docs/accounts/access-keys#authorize-an-access-key). Later payments need only `deviceKey`.
 
 ## Device key limits
 

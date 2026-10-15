@@ -40,18 +40,18 @@ const finance = Account.fromSecp256k1(env('FINANCE_SIGNER_KEY'))
 const operations = Account.fromSecp256k1(env('OPERATIONS_SIGNER_KEY'))
 const controller = env('CONTROLLER_PASSKEY_ADDRESS') // the key stays on the controller's device
 
-const treasury = Account.fromConfig({
-  address: 'infer',
-  owners: [
-    { owner: finance.address, weight: 1 },
-    { owner: operations.address, weight: 1 },
-    { owner: controller, weight: 1 },
-  ],
-  threshold: 2,
-})
+const treasury = Account.fromConfig({ // [!code hl]
+  address: 'infer', // [!code hl]
+  owners: [ // [!code hl]
+    { owner: finance.address, weight: 1 }, // [!code hl]
+    { owner: operations.address, weight: 1 }, // [!code hl]
+    { owner: controller, weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
+}) // [!code hl]
 
 // Save with your treasury record.
-const saved = { address: treasury.address, config: treasury.config }
+const saved = { address: treasury.address, config: treasury.config } // [!code hl]
 
 await client.faucet.fundSync({ account: saved.address }) // devnet test stablecoins
 ```
@@ -69,13 +69,15 @@ To pay, rebuild the treasury from its saved record and attach the keys of the ap
 ```ts [treasury.ts]
 import { isAddressEqual, parseUnits } from 'viem'
 
-const alphaUsd = '0x20c0000000000000000000000000000000000001' // a devnet test stablecoin
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 /** Rebuilds the treasury from its saved record, with the approvers' keys attached. */
 function openTreasury(approvers: readonly Account.RootAccount[]) {
   const { address, config } = saved
   const owners = config.owners.map(({ owner, weight }) => ({
-    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner, // other signers stay addresses
+    // other signers stay addresses
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner, // [!code hl]
     weight,
   }))
   // Never updated (version 0): the address still comes from the first signers.
@@ -85,12 +87,14 @@ function openTreasury(approvers: readonly Account.RootAccount[]) {
 }
 
 // Finance and operations approve: 1 + 1 reaches the threshold of 2.
-await client.token.transferSync({
-  account: openTreasury([finance, operations]),
-  amount: parseUnits('1200', 6), // 1,200 AlphaUSD in base units (6 decimals)
-  to: vendor, // the recipient's address
-  token: alphaUsd,
-})
+await client.token.transferSync({ // [!code hl]
+  account: openTreasury([finance, operations]), // [!code hl]
+  // 1,200 of the stablecoin, in base units (6 decimals)
+  amount: parseUnits('1200', 6), // [!code hl]
+  // the recipient's address
+  to: vendor, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
 ```
 
 viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openTreasury` for every action, not once at startup. A [signer change](/docs/accounts/key-management/add-signers) raises the configuration's version and returns the new `config`. Save it, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.

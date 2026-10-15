@@ -56,7 +56,7 @@ const appSigner = Account.fromSecp256k1(process.env.APP_SIGNER_KEY as `0x${strin
 // Your app's signer approves; the other signers stay addresses.
 const { address, config } = await loadAccount(userId) // your app's storage
 const owners = config.owners.map(({ owner, weight }) => ({
-  owner: isAddressEqual(owner, appSigner.address) ? appSigner : owner,
+  owner: isAddressEqual(owner, appSigner.address) ? appSigner : owner, // [!code hl]
   weight,
 }))
 const account =
@@ -64,9 +64,10 @@ const account =
     ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
     : Account.fromConfig({ ...config, address, owners })
 
-for (const accessKey of appAccessKeys) { // the access key addresses you saved
-  await client.accessKey.revokeSync({ account, accessKey })
-}
+// the access key addresses you saved
+for (const accessKey of appAccessKeys) { // [!code hl]
+  await client.accessKey.revokeSync({ account, accessKey }) // [!code hl]
+} // [!code hl]
 ```
 
 viem signs with `appSigner`. If its weight alone can't reach the threshold, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Revocations leave the configuration unchanged, so the same `account` approves the swap.
@@ -78,14 +79,14 @@ viem signs with `appSigner`. If its weight alone can't reach the threshold, viem
 In one update, replace your app's signers, including any key your wallet provider holds for the user, with the user's signer. Your app's signer approves its own removal.
 
 ```ts [hand-off.ts]
-const { config: handedOff } = await client.accounts.updateConfigSync({
-  account,
-  nextConfig: {
-    owners: [{ owner: userSigner, weight: 1 }],
-    threshold: 1,
-  },
-})
-await saveAccount(userId, { address, config: handedOff })
+const { config: handedOff } = await client.accounts.updateConfigSync({ // [!code hl]
+  account, // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: [{ owner: userSigner, weight: 1 }], // [!code hl]
+    threshold: 1, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+await saveAccount(userId, { address, config: handedOff }) // [!code hl]
 ```
 
 `handedOff` is the new configuration, one version higher. Tempo now checks every approval against its hash, so an account built from the old configuration fails, and the user's wallet needs `handedOff` to approve.

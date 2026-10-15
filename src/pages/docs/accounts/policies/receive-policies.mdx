@@ -71,54 +71,11 @@ The guard records one receipt per held payment. You can't list receipts onchain,
   <ReceivePolicyDemo />
 </Demo.Container>
 
-Receive policies are live on mainnet and testnet for any account, but the demo and the steps below run on the Tempo Accounts devnet. The steps set the same policy in code: accept only AlphaUSD, from any sender, and let the receiver recover held payments. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Receive policies are live on mainnet and testnet for any account, but the demo and the steps below run on the Tempo Accounts devnet. The steps set the same policy in code: accept only one stablecoin, from any sender, and let the receiver recover held payments. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
-```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
-```
+`account` is the receiving account, such as one from [Create an account](/docs/accounts/create), `receiver` is its address, and `stablecoin` is `0x20c0000000000000000000000000000000000001`, a test stablecoin on the devnet. Fund the receiver from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first: each transaction pays a network fee.
 
-`account` is the receiving account, such as one from [Create an account](/docs/accounts/create), `receiver` is its address, and `alphaUsd` is `0x20c0000000000000000000000000000000000001`. Fund the receiver from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first: each transaction pays a network fee.
-
-The Wagmi examples sign with a passkey and use this config, which sends the same devnet key:
-
-```ts [wagmi.config.ts]
-import { tempoDevnet } from 'viem/chains'
-import { createConfig, http } from 'wagmi'
-import { webAuthn } from 'wagmi/tempo'
-
-const rpcKey = import.meta.env.VITE_TEMPO_DEVNET_RPC_KEY // Vite; use your bundler's variable
-
-export const config = createConfig({
-  chains: [tempoDevnet],
-  connectors: [webAuthn()],
-  multiInjectedProviderDiscovery: false,
-  transports: {
-    [tempoDevnet.id]: http('https://rpc-multisig-1113.devnet.tempoxyz.dev', {
-      fetchOptions: { headers: { Authorization: `Basic ${btoa(`previews:${rpcKey}`)}` } },
-    }),
-  },
-})
-
-declare module 'wagmi' {
-  interface Register {
-    config: typeof config
-  }
-}
-```
-
-The CLI examples use the latest [Foundry](/docs/sdk/foundry) release and sign with the receiver's private key. `cast` sends the devnet key with every request through `ETH_RPC_HEADERS`:
-
-```bash [Terminal]
-export TEMPO_RPC_URL=https://rpc-multisig-1113.devnet.tempoxyz.dev
-export ETH_RPC_HEADERS="Authorization: Basic $(printf 'previews:%s' "$TEMPO_DEVNET_RPC_KEY" | base64 | tr -d '\n')"
-export TEMPO_PRIVATE_KEY=<RECEIVER_PRIVATE_KEY> # cast wallet new creates one
-export TEMPO_ACCOUNT_ADDRESS=$(cast wallet address "$TEMPO_PRIVATE_KEY")
-export ALPHA_USD=0x20c0000000000000000000000000000000000001
-export TIP403_REGISTRY=0x403c000000000000000000000000000000000000
-export RECEIVE_POLICY_GUARD=0xB10C000000000000000000000000000000000000
-
-cast rpc tempo_fundAddress "$TEMPO_ACCOUNT_ADDRESS" --rpc-url "$TEMPO_RPC_URL" # devnet test stablecoins
-```
+The steps use Viem. From Wagmi, create the allowlist with `Hooks.policy.useCreateSync` from `wagmi/tempo`, and make the other calls with `useWriteContract` or `useReadContract`, using `Abis` and `Addresses` from `viem/tempo`. From the CLI, call the TIP-403 registry at `0x403c000000000000000000000000000000000000` with `cast`: `createPolicyWithAccounts(address,uint8,address[])`, where policy type `0` is whitelist and the new policy ID is `topics[1]` of the `PolicyCreated` log, `setReceivePolicy(uint64,uint64,address)`, and `validateReceivePolicy(address,address,address)(bool,uint8)`. Claim with `claim(address,bytes)` on `ReceivePolicyGuard`.
 
 <span id="create-or-choose-a-token-filter" />
 
@@ -126,40 +83,27 @@ cast rpc tempo_fundAddress "$TEMPO_ACCOUNT_ADDRESS" --rpc-url "$TEMPO_RPC_URL" #
 
 ### Create a token allowlist
 
-Create a `WHITELIST` policy whose only member is AlphaUSD's token contract address:
+Create a `WHITELIST` policy whose only member is the stablecoin's token contract address:
 
 ::::code-group
 
-```ts [Viem]
+```ts [token-filter.ts]
 import { client } from './client'
 
 const { policyId: tokenPolicyId } = await client.policy.createSync({
   account,
-  type: 'whitelist',
-  addresses: [alphaUsd],
+  type: 'whitelist', // [!code hl]
+  addresses: [stablecoin], // [!code hl]
 })
 ```
 
-```bash [CLI]
-cast send "$TIP403_REGISTRY" \
-  'createPolicyWithAccounts(address,uint8,address[])' \
-  "$TEMPO_ACCOUNT_ADDRESS" 0 "[$ALPHA_USD]" \
-  --tempo.fee-token "$ALPHA_USD" \
-  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
-```
-
-```tsx [Wagmi]
-import { Hooks } from 'wagmi/tempo'
-const { mutate: createFilter, data: filter, isPending, error } = Hooks.policy.useCreateSync()
-const createTokenFilter = () => createFilter({
-  type: 'whitelist', addresses: [alphaUsd],
-})
-const tokenPolicyId = filter?.policyId
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
 ```
 
 ::::
 
-In the CLI, read the new policy ID from `topics[1]` of the `PolicyCreated` log and export it as `TOKEN_POLICY_ID`. The `0` argument is the policy type (whitelist), not built-in policy `0`.
+[`policy.create`](https://viem.sh/tempo/actions/policy.create) also creates `blacklist` policies and policies with no members.
 
 <span id="create-or-choose-a-sender-policy" />
 <span id="choose-a-recovery-authority" />
@@ -168,39 +112,18 @@ In the CLI, read the new policy ID from `topics[1]` of the `PolicyCreated` log a
 
 Call `setReceivePolicy` from the receiving account with the sender policy, token filter, and recovery authority, in that order:
 
-::::code-group
-
-```ts [Viem]
+```ts [set-policy.ts]
 import { client } from './client'
 
 await client.receivePolicy.setSync({
   account,
-  senderPolicyId: 'allow-all',
-  tokenPolicyId,
-  claimer: 'self',
+  senderPolicyId: 'allow-all', // [!code hl]
+  tokenPolicyId, // [!code hl]
+  claimer: 'self', // [!code hl]
 })
 ```
 
-```bash [CLI]
-cast send "$TIP403_REGISTRY" 'setReceivePolicy(uint64,uint64,address)' \
-  1 "$TOKEN_POLICY_ID" "$TEMPO_ACCOUNT_ADDRESS" \
-  --tempo.fee-token "$ALPHA_USD" \
-  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
-```
-
-```tsx [Wagmi]
-import { useWriteContract } from 'wagmi'
-import { Abis, Addresses } from 'viem/tempo'
-const { writeContract, data: hash, isPending, error } = useWriteContract()
-const setPolicy = () => tokenPolicyId !== undefined && writeContract({
-  address: Addresses.tip403Registry, abi: Abis.tip403Registry,
-  functionName: 'setReceivePolicy', args: [1n, tokenPolicyId, receiver],
-})
-```
-
-::::
-
-The sender policy here is built-in policy `1` (`'allow-all'` in Viem), so anyone can pay. To limit who can pay, create a sender allowlist the same way as the token allowlist, with sender addresses as members, and pass its ID instead. Viem calls the token filter `tokenPolicyId` and the recovery authority `claimer`: `'self'` is the signing account, `'sender'` is `address(0)`, or pass another address.
+The sender policy here is built-in policy `1` (`'allow-all'` in Viem), so anyone can pay. To limit who can pay, create a sender allowlist the same way as the token allowlist, with sender addresses as members, and pass its ID instead. Viem calls the token filter `tokenPolicyId` and the recovery authority `claimer`: `'self'` is the signing account, `'sender'` is `address(0)`, or pass another address. See [`receivePolicy.set`](https://viem.sh/tempo/actions/receivePolicy.set).
 
 Changing the recovery authority affects only payments held afterward; existing receipts keep the authority they were held under. A recovery authority other than `address(0)` can't be `ReceivePolicyGuard`, a virtual address, or a system precompile that can't initiate calls.
 
@@ -208,35 +131,15 @@ Changing the recovery authority affects only payments held afterward; existing r
 
 ## Check a payment before sending
 
-Ask whether the receiver's policy accepts a token from a sender. `sender` is the paying address (`TEMPO_SENDER` in the CLI):
+Ask whether the receiver's policy accepts a token from a sender. `sender` is the paying address:
 
-::::code-group
-
-```ts [Viem]
+```ts [validate.ts]
 import { client } from './client'
 
-const { authorized, blockedReason } = await client.receivePolicy.validate({
-  token: alphaUsd, sender, receiver,
-})
+const { authorized, blockedReason } = await client.receivePolicy.validate({ // [!code hl]
+  token: stablecoin, sender, receiver, // [!code hl]
+}) // [!code hl]
 ```
-
-```bash [CLI]
-cast call "$TIP403_REGISTRY" \
-  'validateReceivePolicy(address,address,address)(bool,uint8)' \
-  "$ALPHA_USD" "$TEMPO_SENDER" "$TEMPO_ACCOUNT_ADDRESS" \
-  --rpc-url "$TEMPO_RPC_URL"
-```
-
-```tsx [Wagmi]
-import { useReadContract } from 'wagmi'
-import { Abis, Addresses } from 'viem/tempo'
-const { data: validation } = useReadContract({
-  address: Addresses.tip403Registry, abi: Abis.tip403Registry,
-  functionName: 'validateReceivePolicy', args: [alphaUsd, sender, receiver],
-})
-```
-
-::::
 
 The answer covers only the receive policy, not the token's own policy, the sender's balance, or the rest of the transaction. The policy can also change before the payment executes, so still check where the confirmed payment landed.
 
@@ -244,34 +147,13 @@ The answer covers only the receive policy, not the token's own policy, the sende
 
 ## Claim a held payment
 
-The recovery authority claims a held payment by passing a destination and the `receipt` bytes from its `TransferBlocked` event (`blockedReceipt`, or `BLOCKED_RECEIPT` in the CLI). Here the receiver claims the payment to itself:
+The recovery authority claims a held payment by passing a destination and the `receipt` bytes from its `TransferBlocked` event (`blockedReceipt`). Here the receiver claims the payment to itself:
 
-::::code-group
-
-```ts [Viem]
+```ts [claim.ts]
 import { client } from './client'
 
-await client.receivePolicy.claimSync({ account, to: receiver, receipt: blockedReceipt })
+await client.receivePolicy.claimSync({ account, to: receiver, receipt: blockedReceipt }) // [!code hl]
 ```
-
-```bash [CLI]
-cast send "$RECEIVE_POLICY_GUARD" \
-  'claim(address,bytes)' "$TEMPO_ACCOUNT_ADDRESS" "$BLOCKED_RECEIPT" \
-  --tempo.fee-token "$ALPHA_USD" \
-  --rpc-url "$TEMPO_RPC_URL" --private-key "$TEMPO_PRIVATE_KEY"
-```
-
-```tsx [Wagmi]
-import { useWriteContract } from 'wagmi'
-import { Abis, Addresses } from 'viem/tempo'
-const { writeContract, data: hash, isPending, error } = useWriteContract()
-const claimPayment = () => writeContract({
-  address: Addresses.receivePolicyGuard, abi: Abis.receivePolicyGuard,
-  functionName: 'claim', args: [receiver, blockedReceipt],
-})
-```
-
-::::
 
 A claim releases the receipt's full amount; partial claims aren't supported. When a recovery authority other than `address(0)` claims back to the receiver, the payment completes under the token's own policy without rechecking the receive policy, so claim only payments your application has approved. Every other claim, including any claim under an `address(0)` recovery authority, is a reroute with extra checks; see the [claim rules](/docs/protocol/tip403/receive-policies#claims).
 

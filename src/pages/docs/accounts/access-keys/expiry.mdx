@@ -13,17 +13,14 @@ An expiry makes an access key stop working at a set time, so a forgotten or leak
 
 ## How expiry works
 
-Tempo checks the expiry against block time (the current block's timestamp), not your server's clock. Once block time reaches the expiry, Tempo rejects every transaction the key signs with `KeyExpired`. The expired key's remaining limit reads as zero, and changing it with `updateLimit` reverts with `KeyExpired`.
+Tempo checks the expiry against block time (the current block's timestamp), not your server's clock. Once block time reaches the expiry, Tempo rejects every transaction the key signs with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired). The expired key's remaining limit reads as zero, and changing it with `updateLimit` reverts with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired).
 
 ## Set an expiry
 
-Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). A key without `expiry` never expires, and admin keys can't have one. The `Expiry` helpers in `viem/tempo` return a timestamp relative to now:
+Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). A key without `expiry` never expires, and admin keys can't have one. The `Expiry` helpers in `viem/tempo` return a timestamp relative to now, such as `Expiry.days(30)` or `Expiry.hours(1)`. See viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize).
 
-```ts [expiry.ts]
-expiry: Expiry.days(30), // or Expiry.hours(1), Expiry.months(3)
-```
 
-Use the shortest window the holder needs: hours for a one-off task, 30 days for a device, 90 days for a backend. An expiry at or before the current block time reverts with `ExpiryInPast`.
+Use the shortest window the holder needs: hours for a one-off task, 30 days for a device, 90 days for a backend. An expiry at or before the current block time reverts with [`ExpiryInPast`](/docs/protocol/transactions/AccountKeychain#error-expiryinpast).
 
 ## Renew an expiring key
 

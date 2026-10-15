@@ -39,11 +39,13 @@ import { Account } from 'viem/tempo'
 const finance = Account.fromSecp256k1(process.env.FINANCE_SIGNER_KEY as `0x${string}`)
 const operations = Account.fromSecp256k1(process.env.OPERATIONS_SIGNER_KEY as `0x${string}`)
 
-const account = Account.fromConfig({
-  address: 'infer', // derive the address from these first signers
-  owners: [finance, operations], // weight 1 each
-  threshold: 2,
-})
+const account = Account.fromConfig({ // [!code hl]
+  // derive the address from these first signers
+  address: 'infer', // [!code hl]
+  // weight 1 each
+  owners: [finance, operations], // [!code hl]
+  threshold: 2, // [!code hl]
+}) // [!code hl]
 ```
 
 The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the viem account that source provides instead. For a raw P-256 key, use `Account.fromP256`. [Set up a company treasury](/docs/accounts/guides/teams/company-treasury) walks through the full setup.

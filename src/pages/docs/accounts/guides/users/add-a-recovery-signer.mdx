@@ -53,7 +53,7 @@ import { client } from './client'
 function openAccount(approvers: Account.RootAccount[]) {
   const { address, config } = saved
   const owners = config.owners.map(({ owner, weight }) => ({
-    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner, // [!code hl]
     weight,
   }))
   return config.version === 0n
@@ -61,14 +61,15 @@ function openAccount(approvers: Account.RootAccount[]) {
     : Account.fromConfig({ ...config, address, owners })
 }
 
-const { config } = await client.accounts.updateConfigSync({
-  account: openAccount([currentKey]),
-  nextConfig: {
-    owners: [...saved.config.owners, { owner: newSigner, weight: 1 }],
-    threshold: saved.config.threshold,
-  },
-})
-saved.config = config // the next openAccount call rebuilds from this
+const { config } = await client.accounts.updateConfigSync({ // [!code hl]
+  account: openAccount([currentKey]), // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: [...saved.config.owners, { owner: newSigner, weight: 1 }], // [!code hl]
+    threshold: saved.config.threshold, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+// the next openAccount call rebuilds from this
+saved.config = config // [!code hl]
 ```
 
 Save the returned `config` in place of the old one right away. Each signer update raises the version, which changes the hash Tempo stores, so a transaction from an account rebuilt from the old copy fails. `openAccount` reads `saved` on every call, so the next step builds from the new configuration. The address comes from the account's first configuration: at version 0, `address: 'infer'` derives it from the signers, and after an update `openAccount` passes the saved address instead.
@@ -78,8 +79,8 @@ Save the returned `config` in place of the old one right away. Each signer updat
 Check that the other signers still reach the threshold, whichever one is lost.
 
 ```ts [add-signer.ts]
-const total = config.owners.reduce((sum, { weight }) => sum + weight, 0)
-const recoverable = config.owners.every(({ weight }) => total - weight >= config.threshold)
+const total = config.owners.reduce((sum, { weight }) => sum + weight, 0) // [!code hl]
+const recoverable = config.owners.every(({ weight }) => total - weight >= config.threshold) // [!code hl]
 ```
 
 Tempo can't tell whether a signer still holds its key, so have the new signer approve once before you rely on it.
@@ -98,13 +99,14 @@ import { client } from './client'
 
 const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ label: 'My account' }))
 
-const { config: twoFactor } = await client.accounts.updateConfigSync({
-  account: openAccount([currentKey]), // approves alone at the current threshold of 1
-  nextConfig: {
-    owners: [...saved.config.owners, { owner: passkey.address, weight: 2 }],
-    threshold: 2,
-  },
-})
+const { config: twoFactor } = await client.accounts.updateConfigSync({ // [!code hl]
+  // approves alone at the current threshold of 1
+  account: openAccount([currentKey]), // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: [...saved.config.owners, { owner: passkey.address, weight: 2 }], // [!code hl]
+    threshold: 2, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
 saved.config = twoFactor
 ```
 
