@@ -49,7 +49,7 @@ The customer holds their own funds when they hold the signing key, such as a pas
 - **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight. A transaction runs once its approvers' weights add up to the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
 - **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the spending limits, expiry, and allowed calls you set. A leaked key still can't spend past them.
 
-Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. On mainnet and testnet today, use a single-key account (EOA), like a standard Ethereum account: one key, such as a passkey, approves its payments and authorizes its access keys. On the Tempo Accounts devnet, a single-key account can also [upgrade in place](/docs/accounts/key-management/account-upgrade) to signers and a threshold, and keep its address and balance.
+Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. On mainnet and testnet today, use a single-key account (EOA), like a standard Ethereum account: one key, such as a passkey, approves its payments and authorizes its access keys. On the devnet, it can [upgrade in place](/docs/accounts/key-management/account-upgrade) to signers and a threshold and keep its address and balance.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />

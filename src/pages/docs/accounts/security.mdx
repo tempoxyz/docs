@@ -12,7 +12,7 @@ Tempo's validators check every transaction against the sending account's signers
 
 ## How Tempo enforces an account's rules
 
-An account's rules are part of Tempo's protocol rules, so every validator checks them: the signatures the account requires, its [signing threshold](/docs/accounts/policies/signing-thresholds), each [access key's](/docs/accounts/access-keys) spending limits, scopes, and expiry, and its [receive policy](/docs/accounts/policies/receive-policies). A transaction that breaks any of them never lands. No validator or operator, including Tempo, can skip these checks or move an account's funds without the account's keys.
+An account's rules are part of Tempo's protocol rules, so every validator checks them: the signatures the account requires, its [signing threshold](/docs/accounts/policies/signing-thresholds), each [access key's](/docs/accounts/access-keys) spending limits, scopes, and expiry, and its [receive policy](/docs/accounts/policies/receive-policies). A transaction that breaks any of them never lands, and no validator or operator, including Tempo, can skip these checks.
 
 Tempo is a blockchain run by a distributed set of validators rather than a single sequencer. Each validator checks every block against the protocol's rules before agreeing to it, and a block is final once enough validators agree. A finalized block can't be reverted, so a confirmed transaction can't be changed or undone. These guarantees hold as long as fewer than a third of validators misbehave. See [Consensus and finality](/docs/protocol/blockspace/consensus).
 
@@ -57,7 +57,7 @@ Single-key accounts, access keys, and receive policies are live on mainnet and t
 
 A Tempo account can change the keys behind its address, so a switch to quantum-safe signatures doesn't mean moving funds.
 
-Crypto accounts today are protected by signatures that a large enough quantum computer could forge, including the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys. On most chains, replacing those keys means moving every account to a new address. A [configurable Tempo account](/docs/development/configurable-accounts) keeps its address while its keys change, so when quantum-safe signatures are available, the account switches keys and keeps its address, balances, and integrations.
+Crypto accounts today are protected by signatures that a large enough quantum computer could forge, including the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys. On most chains, replacing those keys means moving every account to a new address. A [configurable Tempo account](/docs/development/configurable-accounts) keeps its address, balances, and integrations while its keys change.
 
 ### What a new key costs on most chains
 
@@ -90,7 +90,7 @@ Tempo accounts accept secp256k1, P-256, and passkey (WebAuthn) signatures today,
 
 ### Why the switch has to happen early
 
-Changing keys only protects an account while its old keys are still safe. Once an attacker can work out a private key from its public key, the attacker and the real owner look the same to Tempo, and nothing can tell them apart. Accounts need to retire their old keys before those keys can be broken, not after.
+Changing keys only protects an account while its old keys are still safe. Once an attacker can work out a private key from its public key, the attacker and the real owner look the same to Tempo. Accounts need to retire their old keys before those keys can be broken, not after.
 
 A retired key can also still act outside the account's own rules:
 

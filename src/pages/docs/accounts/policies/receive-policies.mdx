@@ -68,11 +68,17 @@ A held payment looks like a success, and the token still emits its usual `Transf
   <ReceivePolicyDemo />
 </Demo.Container>
 
-Receive policies are live on mainnet and testnet for any account, but the demo and the steps below run on the Tempo Accounts devnet. The steps set the same policy in code: accept only one stablecoin, from any sender, and let the receiver recover held payments. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The demo and the steps below run on the Tempo Accounts devnet. The steps set the same policy in code: accept only one stablecoin, from any sender, and let the receiver recover held payments. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 `account` is the receiving account, such as one from [Create an account](/docs/accounts/create), `receiver` is its address, and `stablecoin` is `0x20c0000000000000000000000000000000000001`, a test stablecoin on the devnet. Fund the receiver from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first: each transaction pays a network fee.
 
-The steps use Viem. From Wagmi, create the allowlist with `Hooks.policy.useCreateSync` from `wagmi/tempo`, and make the other calls with `useWriteContract` or `useReadContract`, using `Abis` and `Addresses` from `viem/tempo`. From the CLI, call the TIP-403 registry at `0x403c000000000000000000000000000000000000` with `cast`: `createPolicyWithAccounts(address,uint8,address[])`, where policy type `0` is whitelist and the new policy ID is `topics[1]` of the `PolicyCreated` log, `setReceivePolicy(uint64,uint64,address)`, and `validateReceivePolicy(address,address,address)(bool,uint8)`. Claim with `claim(address,bytes)` on `ReceivePolicyGuard`.
+The steps use Viem. From Wagmi, create the allowlist with `Hooks.policy.useCreateSync` from `wagmi/tempo`, and make the other calls with `useWriteContract` or `useReadContract`, using `Abis` and `Addresses` from `viem/tempo`. From the CLI, call the TIP-403 registry at `0x403c000000000000000000000000000000000000` with `cast`:
+
+- `createPolicyWithAccounts(address,uint8,address[])`, where policy type `0` is whitelist and the new policy ID is `topics[1]` of the `PolicyCreated` log.
+- `setReceivePolicy(uint64,uint64,address)`.
+- `validateReceivePolicy(address,address,address)(bool,uint8)`.
+
+Claim with `claim(address,bytes)` on `ReceivePolicyGuard`.
 
 <span id="create-or-choose-a-token-filter" />
 

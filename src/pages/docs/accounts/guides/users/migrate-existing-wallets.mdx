@@ -8,19 +8,19 @@ description: Add backup signers to each user's single-key Tempo account at the s
 
 Upgrade your users' existing single-key accounts in place to add backup signers.
 
-In this guide, your app upgrades its users' single-key accounts (EOAs) on the Tempo Accounts devnet in place into configurable accounts with backup signers, such as the user's passkey or your recovery provider's key. A single-key account, like a standard Ethereum account, has one private key that approves everything, here a key your app holds, so losing that key loses the account. The upgrade keeps the address, balances, and access keys, and it's permanent.
+A single-key account (EOA), like a standard Ethereum account, has one private key that approves everything, here a key your app holds, so losing that key loses the account. Your app upgrades each one in place into a configurable account with backup signers, such as the user's passkey or your recovery provider's key. The upgrade keeps the address, balances, and access keys, and it's permanent.
 
 :::warning
 **Account upgrades aren't live yet.** Turning a single-key account into a configurable account at the same address ([TIP-1113](https://tips.sh/1113)) works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.
 :::
 
-After the upgrade, the account has a list of signers, each with a weight, and a threshold: the total weight an approval needs. The original key keeps approving only if you list it. [Account upgrade](/docs/accounts/key-management/account-upgrade) explains the change and runs one in your browser.
+After the upgrade, the account has weighted signers and a [threshold](/docs/accounts/policies/signing-thresholds). The original key keeps approving only if you list it. [Account upgrade](/docs/accounts/key-management/account-upgrade) explains the change and runs one in your browser.
 
 :::::steps
 
 ### Choose the new signers
 
-List the original key and at least one backup signer the user can reach without it, such as a passkey on the user's device or your recovery provider's key. Here your app holds the original key. If a wallet provider such as Privy or Turnkey holds it instead, the provider must sign the upgrade transaction through its Tempo integration, on the Tempo Accounts devnet, in place of `Account.fromSecp256k1`. The backup's private key stays with its holder, the user's device or your recovery provider, so your app needs only the backup's address. With both at weight 1 and threshold 1, either one approves alone and can replace the other if it's lost.
+List the original key and at least one backup signer the user can reach without it, such as a passkey on the user's device or your recovery provider's key. Here your app holds the original key. If a wallet provider such as Privy or Turnkey holds it instead, the provider signs the upgrade transaction through its Tempo integration in place of `Account.fromSecp256k1`. The backup's private key stays with its holder, so your app needs only the backup's address. With both at weight 1 and threshold 1, either one approves alone and can replace the other if it's lost.
 
 ```ts [upgrade.ts]
 import { Account, AccountConfig } from 'viem/tempo'
@@ -38,7 +38,7 @@ const { owners, threshold } = AccountConfig.from({ // [!code hl]
 }) // [!code hl]
 ```
 
-Access keys, the limited keys that sign payments for the account, carry over with their limits, so [revoke](/docs/accounts/access-keys/revocation) any you don't want before you upgrade.
+[Access keys](/docs/accounts/access-keys) carry over with their limits, so [revoke](/docs/accounts/access-keys/revocation) any you don't want before you upgrade.
 
 ### Upgrade each account in place
 
@@ -46,7 +46,7 @@ Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-man
 
 ### Save the configuration
 
-Tempo stores only a hash of each account's configuration, so the copy your app saves is what it signs with from now on. Once the upgrade succeeds, save the address and configuration with the user's record. An upgraded account starts at version 1, and its salt, a fixed 32-byte value that is part of the configuration, comes from its address.
+Once the upgrade succeeds, save the address and configuration with the user's record. Tempo stores only a hash of the configuration, so your app signs from this copy from now on. An upgraded account starts at version 1, and its salt, a fixed 32-byte value that is part of the configuration, comes from its address.
 
 ```ts [upgrade.ts]
 import { concat, keccak256, toHex } from 'viem'
@@ -99,7 +99,7 @@ await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recip
 
 ::::
 
-From then on, manage signers like any other configurable account, as in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer). After each signer change, save the `config` that `updateConfigSync` returns and rebuild the account from it. An account built from an older configuration no longer matches the hash Tempo stores, and its transactions fail with `multisig configuration commitment mismatch`.
+From then on, manage signers like any other configurable account, as in [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer). After each signer change, save the `config` that `updateConfigSync` returns and rebuild the account from it; an account built from an older configuration fails with `multisig configuration commitment mismatch`.
 
 :::::
 

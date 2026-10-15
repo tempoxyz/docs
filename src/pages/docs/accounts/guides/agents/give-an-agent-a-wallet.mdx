@@ -11,13 +11,13 @@ import { AccessKeyDemo } from '../../../../../components/guides/AccessKeyDemo'
 
 Give an agent a key that pays from an account, but only within the bounds you set.
 
-On Tempo, an agent's wallet is an access key the agent generates and holds. In this guide, the account's signers, the keys the customer or your approvers hold, authorize that key with a budget of 50 OUSD a day, a 30-day expiry, and scopes, the calls it may make: here, only sending the stablecoin with a memo to merchants you list. Tempo enforces those bounds on every transaction, whatever the agent decides to do. The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin.
+On Tempo, an agent's wallet is an access key the agent generates and holds. In this guide, the account's signers, the keys the customer or your approvers hold, authorize that key with a budget of 50 OUSD a day, a 30-day expiry, and scopes that allow only sending the stablecoin with a memo to merchants you list. Tempo enforces those bounds on every transaction, whatever the agent decides to do.
 
 <span id="agents" />
 <span id="ai-agents" />
 <span id="authorize-the-agents-task" />
 
-The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key. The demo uses smaller bounds than the code: 10 a day, a one-hour expiry, and `transfer` to any address.
+The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin. The demo's account is a single-key account, and an agent key works the same way from one on mainnet and testnet. On the devnet, a configurable account can also authorize an agent key. The demo uses smaller bounds than the code: 10 a day, a one-hour expiry, and `transfer` to any address.
 
 <AccessKeyDemo />
 
@@ -76,7 +76,7 @@ await client.accessKey.authorizeSync({ // [!code hl]
 Fit all three bounds to the agent's task. Leaving one out removes that check.
 
 - [`limits`](/docs/accounts/access-keys/spending-limits) is the budget, in base units: the stablecoin has 6 decimals, so `parseUnits('50', 6)` is 50 OUSD. `period: 86_400` renews it daily; leave `period` out for a one-time budget. The key's fees count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them.
-- [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make: here, sending the stablecoin with a memo to `merchants`. Without `recipients`, the key could pay any address.
+- [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make. Without `recipients`, the key could pay any address.
 - [`expiry`](/docs/accounts/access-keys/expiry) is when the key stops working.
 
 Never give an agent an [admin access key](/docs/accounts/access-keys/admin-access-keys). It has no budget, scopes, or expiry and can authorize more keys, so the agent could spend the whole balance.
@@ -88,6 +88,8 @@ The agent signs with its key and pays from the account's balance. The signers do
 ```ts [agent-pay.ts]
 import { parseUnits, stringToHex } from 'viem'
 import { client } from './client'
+
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 await client.token.transferSync({ // [!code hl]
   account: agentKey, // [!code hl]

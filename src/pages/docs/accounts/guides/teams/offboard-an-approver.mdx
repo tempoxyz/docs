@@ -20,7 +20,7 @@ In this guide, a controller leaves a company treasury on the Tempo Accounts devn
 <span id="remove-a-departing-approver" />
 <span id="remove-a-signer" />
 
-The code continues from [Set up a company treasury](/docs/accounts/guides/teams/company-treasury): a 2-of-3 treasury, where any two of its three signers approve each transaction, and its controller is leaving. The finance and operations teams each hold a key (`finance` and `operations`), and the controller approves with a passkey on their own device. `saved` is the record your app keeps for the treasury: the `address` and `config` you saved when you created it. Finance and operations approve each change below. This example loads both of their keys in one process. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+The code continues from [Set up a company treasury](/docs/accounts/guides/teams/company-treasury). The finance and operations teams each hold a key (`finance` and `operations`), and the controller approves with a passkey on their own device. `saved` is the record your app keeps for the treasury: the `address` and `config` you saved when you created it. Finance and operations approve each change below. This example loads both of their keys in one process. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -99,7 +99,7 @@ saved.config = removed.config
 
 <span id="rebalance-the-threshold" />
 
-Two signers of weight 1 remain at a threshold of 2, so both must approve every payment, and losing either key locks the treasury until you add a replacement with the same update shape, appending `{ owner: replacement, weight: 1 }`. Lowering the threshold to 1 instead keeps a lost key from locking the treasury but lets either approver pay alone. If the remaining weights couldn't reach the threshold, viem would throw `Invalid account config: threshold exceeds total owner weight.` and send nothing.
+Two signers of weight 1 remain at a threshold of 2, so both must approve every payment. Losing either key locks the treasury until you add a replacement with the same update shape, appending `{ owner: replacement, weight: 1 }`. Lowering the threshold to 1 instead keeps a lost key from locking the treasury but lets either approver pay alone. If the remaining weights couldn't reach the threshold, viem would throw `Invalid account config: threshold exceeds total owner weight.` and send nothing.
 
 ### Revoke their keys
 

@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 Add a second key to a user's account so losing their phone or first key doesn't lock them out.
 
-In this guide, your app adds a recovery signer, a second key that can approve transactions, to a user's account on the Tempo Accounts devnet, then adds a passkey and raises the threshold so whoever holds the recovery signer can't take over the account alone. The first key stays with your app or wallet provider, and the recovery signer goes to a holder the user doesn't lose along with it, such as a recovery provider. With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. The address and balance stay the same.
+With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. Your app adds a recovery signer, a second key that can approve transactions, then adds a passkey and raises the threshold so whoever holds the recovery signer can't take over the account alone. The first key stays with your app or wallet provider, and the recovery signer goes to a holder the user doesn't lose along with it, such as a recovery provider. The address and balance stay the same.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding a signer needs one.
@@ -24,7 +24,7 @@ In this guide, your app adds a recovery signer, a second key that can approve tr
 
 This guide starts from one signer at weight 1 and a threshold of 1, the total weight an approval needs. That signer, `currentKey`, is the key the account was created with, such as a key your app or wallet provider holds for the user.
 
-Your app also keeps `saved`, the record it stored when it created the account: `{ address: account.address, config: account.config }`. The configuration lists the signers, their weights, the threshold, and a version number. Tempo stores only a hash of it, so your saved copy is the source of truth, and your app rebuilds the account from it before each action.
+Your app also keeps `saved`, the record it stored when it created the account: `{ address: account.address, config: account.config }`. The configuration lists the signers, their weights, the threshold, and a version number. Tempo stores only a hash of it, so your app rebuilds the account from `saved` before each action.
 
 The demo runs these steps in this browser: a private key stands in for the user's first key, and a device key for the passkey.
 
@@ -82,7 +82,7 @@ saved.config = config // [!code hl]
 Until the next update lands, either signer can approve anything alone, including removing the other. Don't hand the recovery signer to another party until you [stop it acting alone](#require-two-factors), or send both changes as one update: append `newSigner` and the passkey together and set `threshold: 2`.
 :::
 
-Save the returned `config` in place of the old one right away. Each signer update raises the version, which changes the hash Tempo stores, so a transaction from an account rebuilt from the old copy fails. `openAccount` reads `saved` on every call, so the next step builds from the new configuration. The address comes from the account's first configuration: at version 0, `address: 'infer'` derives it from the signers, and after an update `openAccount` passes the saved address instead.
+Save the returned `config` in place of the old one right away. Each signer update raises the version, which changes the hash Tempo stores, so a transaction from an account rebuilt from the old copy fails. `openAccount` reads `saved` on every call, so the next step builds from the new configuration. At version 0, `address: 'infer'` derives the address from the signers; after an update, `openAccount` passes the saved address instead.
 
 ### Confirm the account survives losing one signer
 
@@ -102,7 +102,7 @@ Tempo can't tell whether a signer still holds its key, so have the new signer ap
 
 ### Stop the recovery signer acting alone
 
-Either signer can now approve anything alone, including adding a device or removing the other signer, so whoever holds the recovery signer could take over the account. To stop that, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2. This step reuses `openAccount` from `add-signer.ts`.
+While either signer approves alone, whoever holds the recovery signer could take over the account. To stop that, use the [customer accounts setup](/docs/accounts/policies/signing-thresholds#recommended-signer-setups): in one update, add a passkey at weight 2 and raise the threshold to 2. This step reuses `openAccount` from `add-signer.ts`.
 
 ```ts [multi-factor.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'

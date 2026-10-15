@@ -8,7 +8,7 @@ description: Add a passkey, hardware key, or recovery provider to a Tempo accoun
 
 Adding a signer backs up a key you could lose or lets another person approve transactions.
 
-A signer is a key that approves a configurable account's transactions, and adding one is a [signer update](/docs/accounts/key-management#every-change-is-one-signer-update) that the current signers approve. The address, balance, token approvals, and access keys stay the same. The new signer's weight decides what it can approve alone.
+A signer is a key that approves a configurable account's transactions, and adding one is a [signer update](/docs/accounts/key-management#every-change-is-one-signer-update) that the current signers approve. The address, balance, token approvals, and access keys stay the same.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding a signer needs one.
@@ -60,7 +60,7 @@ const { config: updated } = await client.accounts.updateConfigSync({
 
 `account` is the rebuilt account, and `config` is the saved configuration it came from. Attach the keys of current signers on the device running the code, such as the customer's passkey in their browser, which approves alone in the [recommended customer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). viem signs with them, highest weight first, until their weights reach the threshold. `newSigner` is the new key's address: a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in viem lists every option.
 
-Save `updated` with the account record, and before every payment or signer update, rebuild the account from the latest saved record instead of reusing an account object your code kept in memory. The update raises the version by one, so an account built from the old configuration no longer matches the hash Tempo stores, and its next transaction fails. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+Save `updated` with the account record. Before every payment or signer update, rebuild the account from the latest saved record instead of reusing an account object kept in memory. The update raises the version by one, so an account built from the old configuration no longer matches the hash Tempo stores, and its next transaction fails. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 <span id="add-signer-limits" />
 

@@ -11,7 +11,7 @@ Choose signer weights so that no outside party can pay alone and losing any one 
 A signing threshold is the [account policy](/docs/accounts/policies) that decides who controls a configurable Tempo account. Each signer, a key that approves the account's transactions, has a weight, and a transaction runs only when the signers who approve it reach the threshold in total weight.
 
 :::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Weights and thresholds exist only on configurable accounts.
+**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.
 :::
 
 <span id="how-approvals-add-up" />
@@ -67,9 +67,9 @@ Count parties, not keys. Two keys in the same KMS, or a wallet provider's key an
 
 <span id="recovery-provider" />
 
-A recovery provider is any party other than the customer and your wallet provider that holds one key to help replace a lost signer, such as a key in your own KMS or a recovery service you contract. Tempo doesn't limit a signer to recovery: any set of signers that reaches the threshold, such as the backup and recovery keys together, can also pay and change signers.
+A recovery provider is any party other than the customer and your wallet provider that holds one key to help replace a lost signer, such as a key in your own KMS or a recovery service you contract. Tempo doesn't limit a signer to recovery: any signers that reach the threshold together can also pay and change signers.
 
-Getting started survives a lost passkey, but either key can pay alone, so keep both with the customer and move to customer accounts before balances grow. In customer accounts, a new device, a signer change, or a payment beyond a device key's limits needs the passkey on the customer's device, or both other keys.
+Getting started survives a lost passkey, but either key can pay alone, so keep both with the customer and move to customer accounts before balances grow.
 
 <span id="team-budgets" />
 <span id="set-up-a-team-account" />
@@ -82,11 +82,13 @@ To let a team spend without lowering the treasury's threshold, the treasury auth
 
 ## Collect approvals
 
-Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three. Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), a fingerprint it checks approvals against but can't read back. So when your app creates the account, it saves `account.address` and `account.config` with the account record, `saved`, and rebuilds the account from that copy whenever signers approve. The examples call that helper `openAccount`: it passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first signer update, then the saved address. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#approve-the-update) shows it in full.
+Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three.
+
+Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), which it checks approvals against but can't read back. When your app creates the account, save `account.address` and `account.config` with the account record, `saved`, and rebuild the account from that copy whenever signers approve. The examples call that helper `openAccount`. It passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first signer update, then the saved address. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#approve-the-update) shows it in full.
 
 Rebuild the account from the latest record before each transaction. A signer update raises the configuration's version, and Tempo checks every transaction against the new configuration's hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
-When the keys on one device reach the threshold, attach them and send the transaction as usual. The customer's passkey reaches it alone, so this payment runs in the customer's browser. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+When the keys on one device reach the threshold, attach them and send the transaction as usual. Here the customer's passkey reaches the threshold alone, so the payment runs in the customer's browser. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -141,7 +143,7 @@ A signer update works the same way: put `Actions.accounts.updateConfig.call({ cu
 
 ## Verify approvals in a contract
 
-A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. `verifyMultisig` exists only on the Tempo Accounts devnet. On mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
+A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. `verifyMultisig` exists only on the Tempo Accounts devnet; on mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
 
 ```solidity [ApprovalCheck.sol]
 // SPDX-License-Identifier: MIT

@@ -8,15 +8,15 @@ description: Embedded wallets from Privy, Turnkey, and Dynamic work on Tempo as 
 
 If you're using an embedded wallet, your provider most likely creates a single-key account for each user and holds its key for them.
 
-Privy, Turnkey, and Dynamic each give every user one key, held by the provider, so each user's wallet is a [single-key account](/docs/accounts/how-it-works#address): it works on Tempo mainnet and testnet as it is. Because all three also send [Tempo Transactions](/docs/guide/tempo-transaction), your app can pay fees in any stablecoin, batch payments, sponsor your users' fees, and give out [access keys](/docs/accounts/access-keys).
+Privy, Turnkey, and Dynamic each hold one key per user, so each user's wallet is a [single-key account](/docs/accounts/how-it-works#address) that works on Tempo mainnet and testnet as it is. All three also send [Tempo Transactions](/docs/guide/tempo-transaction), so your app can pay fees in any stablecoin, batch payments, sponsor your users' fees, and give out [access keys](/docs/accounts/access-keys).
 
 ## Keep your existing provider wallets
 
-If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives the same address on Tempo as on other EVM chains, a [single-key account](/docs/development/single-key-accounts), though balances on other chains don't carry over. Sending and receiving stablecoins works as it is. Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends Tempo Transactions. Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions ([Wallet partners](/docs/partners/wallets)), so sponsor fees with your own [fee payer](/docs/accounts/fees/fee-sponsorship).
+If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains, though balances on other chains don't carry over. Sending and receiving stablecoins works as it is. Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends Tempo Transactions. Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions ([Wallet partners](/docs/partners/wallets)), so sponsor fees with your own [fee payer](/docs/accounts/fees/fee-sponsorship).
 
 ## What your provider sets up
 
-Each user gets one secp256k1 key, held by the provider and unlocked when the user logs in. That key controls the whole balance, so whoever the provider lets ask it to sign can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
+Each user gets one secp256k1 key, which the provider holds and unlocks when the user logs in. That key controls the whole balance, so whoever the provider lets ask it to sign can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
 
 <span id="custody-test" />
 <span id="which-tempo-features-does-my-setup-support" />
@@ -24,7 +24,7 @@ Each user gets one secp256k1 key, held by the provider and unlocked when the use
 
 ## What Tempo adds
 
-Privy, Turnkey, and Dynamic each send Tempo Transactions and sign raw hashes, so you can use every Tempo Transaction feature with any of them. Any other provider that signs Ethereum transactions can still hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). It supports Tempo Transaction features only if it sends Tempo Transactions itself, or signs a transaction's raw hash so your app can send it to a Tempo RPC:
+Any provider that signs Ethereum transactions can hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). It supports Tempo Transaction features only if it sends Tempo Transactions itself, or signs a transaction's raw hash so your app can send it to a Tempo RPC. Privy, Turnkey, and Dynamic do both:
 
 | Provider | Sends Tempo Transactions | Signs raw hashes |
 | --- | --- | --- |

@@ -14,7 +14,7 @@ A Tempo account needs no separate gas token for fees. Set the account's default 
 
 ## Supported fee tokens
 
-The examples on this page run on the Tempo Accounts devnet and pay fees in its faucet's test stablecoins; on mainnet, use the [OUSD](/docs/guide/ousd) address instead. Before a transaction runs, Tempo checks its fee token:
+Before a transaction runs, Tempo checks its fee token:
 
 - It's a [TIP-20 token](/docs/protocol/tip20/overview), Tempo's token standard, whose currency is USD.
 - The account paying the fee holds enough of it to cover the maximum fee: the gas limit times the gas price.
@@ -28,7 +28,7 @@ If any check fails, the transaction is invalid and isn't included. Tempo doesn't
 
 The default covers every transaction the account pays the fee for, including ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence), which can fall back to pathUSD, a stablecoin the account might not hold.
 
-In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to it ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
+In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to it ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), and the examples pay fees in the devnet faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins, such as [OUSD](/docs/guide/ousd) on mainnet.
 
 ::::code-group
 
@@ -64,9 +64,8 @@ Pass `feeToken` to pay one transaction's fee in a different stablecoin. It outra
 import { parseUnits } from 'viem'
 import { client } from './client'
 
-// A test stablecoin on the devnet
+// Two test stablecoins on the devnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
-// A test stablecoin on the devnet
 const otherStablecoin = '0x20c0000000000000000000000000000000000002'
 
 await client.token.transferSync({

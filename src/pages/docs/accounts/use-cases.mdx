@@ -10,7 +10,7 @@ import { Card, Cards } from 'vocs'
 
 Tempo accounts power consumer wallets, business treasuries, automated payments, and agent wallets, with each party holding its own key.
 
-What changes between these use cases is who holds which key. A customer's passkey, a company approver's signer, your backend's access key, and an agent's access key can each do only what the account allows them to do. Tempo enforces those limits on every transaction, and no one else can widen them.
+What changes between these use cases is who holds which key. A customer's passkey, a company approver's signer, your backend's access key, and an agent's access key can each do only what the account allows. Tempo enforces those limits on every transaction, and no one else can widen them.
 
 ## Consumer wallets
 
@@ -27,9 +27,7 @@ An account with several signers like this is a configurable account, which runs 
 
 ## Business accounts and treasuries
 
-A company keeps its stablecoins in one account that no single person can spend from. Each approver holds their own signer, and any two of three must approve a payment. A team can spend from its own daily budget without asking the approvers each time, and when an approver leaves, you remove their signer without moving the funds.
-
-Treasuries use configurable accounts, which run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+A company keeps its stablecoins in one account that no single person can spend from. Each approver holds their own signer, and any two of three must approve a payment. A team can spend from its own daily budget without asking the approvers each time, and when an approver leaves, you remove their signer without moving the funds. Like the consumer setup above, a treasury is a configurable account.
 
 <Cards>
   <Card title="Set up a company treasury" description="One account three approvers control, where any two approve each payment." to="/docs/accounts/guides/teams/company-treasury" />

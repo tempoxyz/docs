@@ -15,7 +15,7 @@ A fee payer, which you run or Tempo hosts, adds its signature to a customer's Te
 
 ## How fee sponsorship works
 
-1. The account signs its calls. If your backend signs and sponsors in one step, it sets the fee token to the token being transferred. If the customer's device signs and sends the transaction to a fee payer server, it leaves the fee token blank, so the server can pick it.
+1. The account signs its calls. When your backend signs and sponsors in one step, it sets the fee token to the token being transferred. When the customer's device signs and sends the transaction to a fee payer server, it leaves the fee token blank for the server to pick.
 2. The fee payer decides whether to sponsor the transaction, picks the fee token, and adds its signature.
 3. Tempo verifies both signatures and charges the fee to the fee payer. If either signature fails or the fee payer can't cover the fee, Tempo rejects the transaction.
 
@@ -34,7 +34,7 @@ Your own fee payer is an account whose key stays on your backend, funded with st
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), the only network that runs configurable accounts, so these examples can sponsor a single-key or a configurable account. To sponsor single-key accounts on mainnet or testnet, connect `client` to that network instead.
 
-In `sponsored-transfer.ts`, `account` is the paying account with the keys that approve the payment attached, such as the account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) or an [access key](/docs/accounts/access-keys) your backend holds for it, and `recipient` is the payee's address. Fund the fee payer's address from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first, so it can pay fees:
+In `sponsored-transfer.ts`, `account` is the paying account with the keys that approve the payment attached, such as the account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) or an [access key](/docs/accounts/access-keys) your backend holds for it. `recipient` is the payee's address. Fund the fee payer's address from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first, so it can pay fees:
 
 ::::code-group
 
@@ -123,7 +123,7 @@ await client.token.transferSync({
 })
 ```
 
-`withRelay` sends the transaction to your server for the fee payer's signature and everything else to the devnet. `account` is the customer's account with the keys on this device attached: a single-key account, or, on the Tempo Accounts devnet, a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
+`withRelay` sends the transaction to your server for the fee payer's signature and everything else to the devnet. `account` is the customer's account with the keys on this device attached: a single-key account, or a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
 
 ## Use Tempo's hosted fee payer
 

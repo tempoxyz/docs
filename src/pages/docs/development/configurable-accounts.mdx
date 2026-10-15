@@ -8,7 +8,9 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 # Configurable accounts
 
-A configurable account is one address controlled by a set of owner keys. Each owner has a weight, and a transaction runs once the owners who sign it reach the account's threshold: with three owners at weight 1 and a threshold of 2, any two can approve. The address never changes, so you can add, remove, or replace owners without moving funds.
+A configurable account is one address controlled by a set of weighted owner keys.
+
+A transaction runs once the weights of the owners who sign it reach the account's threshold: with three owners at weight 1 and a threshold of 2, any two can approve. The address never changes, so you can add, remove, or replace owners without moving funds.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This includes a configurable account with one owner.
@@ -140,7 +142,7 @@ Viem sorts the new owners and signs with `finance` and `operations`, whose weigh
 
 ### Keep the current configuration
 
-The stored hash can't be turned back into the owners and threshold, so keep your own copy. Save the address and configuration when you create the account (`saved` in `account.ts`), and replace the configuration with the returned `config` after each update. The configuration's `version` is a bigint, which `JSON.stringify` can't encode, so store `AccountConfig.toRpc(config)` and read it back with `AccountConfig.fromRpc`.
+The stored hash can't be turned back into the owners and threshold. Save the address and configuration when you create the account (`saved` in `account.ts`), and replace the configuration with the returned `config` after each update. The configuration's `version` is a bigint, which `JSON.stringify` can't encode, so store `AccountConfig.toRpc(config)` and read it back with `AccountConfig.fromRpc`.
 
 To act from the account, rebuild it from that record. Attach the keys that approve this time as local accounts, and leave the other owners as addresses. A version-0 configuration derives the address, so pass the saved address only after the first update:
 

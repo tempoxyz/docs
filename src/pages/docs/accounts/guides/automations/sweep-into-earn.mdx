@@ -8,11 +8,11 @@ description: Give your backend an access key that can only deposit into one Earn
 
 A nightly job on your backend deposits a customer's idle stablecoins into an [Earn](/docs/earn) vault.
 
-In this guide, the job signs with an access key in your KMS that the customer authorizes once with their account's key. The key can deposit into one vault, up to a daily limit, and nothing else: it can't send funds elsewhere or withdraw them. The code runs on Moderato testnet, whose stablecoins have no value and whose RPC needs no key.
+In this guide, the job signs with an access key in your KMS that the customer authorizes once with their account's key. The key can deposit into one vault, up to a daily limit, and nothing else: it can't send funds elsewhere or withdraw them.
 
-A deposit takes two calls: `approve` lets the vault pull funds from the account, and `deposit` pulls them and issues vault shares in return. The key gets exactly those two calls. Before you enable sweeps, run the vault checks in [Deposit](/docs/earn/integrate).
+A deposit takes two calls: `approve` lets the vault pull funds from the account, and `deposit` pulls them and issues vault shares in return. The key's [scopes](/docs/accounts/access-keys/scopes) allow exactly those two calls. Before you enable sweeps, run the vault checks in [Deposit](/docs/earn/integrate).
 
-Earn vaults aren't on the Tempo Accounts devnet, so this page runs on Moderato instead. It uses pathUSD, a pathUSD vault from [Vaults](/docs/earn/vaults), and a single-key account as `account`, since Moderato doesn't run configurable accounts.
+Earn vaults aren't on the Tempo Accounts devnet, so the code runs on Moderato testnet, whose stablecoins have no value and whose RPC needs no key. It uses pathUSD, a pathUSD vault from [Vaults](/docs/earn/vaults), and a single-key account as `account`, since Moderato doesn't run configurable accounts.
 
 :::::steps
 
@@ -52,7 +52,7 @@ export const client = createClient({ chain: tempoModerato, transport: http() }) 
 
 ::::
 
-Show the customer the vault, the daily limit, and the expiry before they approve. The [scopes](/docs/accounts/access-keys/scopes) allow only these two calls, and the [spending limit](/docs/accounts/access-keys/spending-limits) counts approvals, so the vault can't pull more than 5,000 pathUSD a day. Fees the account pays count too, so leave headroom above your largest sweep.
+Show the customer the vault, the daily limit, and the expiry before they approve. The [spending limit](/docs/accounts/access-keys/spending-limits) counts approvals, so the vault can't pull more than 5,000 pathUSD a day. Fees the account pays count too, so leave headroom above your largest sweep.
 
 ### Sweep on a schedule
 

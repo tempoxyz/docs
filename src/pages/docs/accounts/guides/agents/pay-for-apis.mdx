@@ -8,15 +8,15 @@ description: Give an AI agent an access key with a daily budget, pay for API req
 
 Your agent pays for API requests from an account, within a daily budget Tempo enforces.
 
-In this guide, the account's signers authorize an [access key](/docs/accounts/access-keys) that your agent holds, with a budget of 20 OUSD a day, so the agent pays without holding the account's signers. APIs that use the [Machine Payments Protocol (MPP)](/docs/guide/machine-payments) answer `402 Payment Required` with a price; the agent pays and retries, and Tempo rejects any payment past the budget. The examples run on the Tempo Accounts devnet and pay in a test stablecoin.
+In this guide, the account's signers authorize an [access key](/docs/accounts/access-keys) that your agent holds, with a budget of 20 OUSD a day. APIs that use the [Machine Payments Protocol (MPP)](/docs/guide/machine-payments) answer `402 Payment Required` with a price; the agent pays and retries, and Tempo rejects any payment past the budget.
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet and testnet, an agent key works the same from a single-key account; on the devnet, a configurable account can authorize one too.
+The examples pay in a test stablecoin, and `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). On mainnet and testnet, an agent key works the same from a single-key account; on the devnet, a configurable account can authorize one too.
 
 :::::steps
 
 ### Give the agent a budget
 
-The agent holds the key. The account's signers authorize its address with a daily budget and only the calls a one-time MPP payment makes. [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) explains each bound.
+The account's signers authorize the agent key's address with a daily budget and only the calls a one-time MPP payment makes. [Give an agent a wallet](/docs/accounts/guides/agents/give-an-agent-a-wallet) explains each bound.
 
 ::::code-group
 
@@ -77,6 +77,8 @@ The agent reads each payment's receipt from the response. Your app reads how muc
 ```ts [watch-spending.ts]
 import { Receipt } from 'mppx'
 import { client } from './client'
+
+const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 const receipt = Receipt.fromResponse(response) // [!code hl]
 // receipt.reference is the payment's transaction hash

@@ -13,13 +13,13 @@ import { SignInWithTempo } from '../../../../../components/guides/steps/wallet/S
 
 Run your users' wallets inside your app with Privy or Turnkey, without letting the provider move funds alone.
 
-In this guide, each user's account on the Tempo Accounts devnet has three signers, the keys that approve its transactions: the user's passkey on their device, a key your provider (Privy or Turnkey) manages, and a separate [recovery provider's](/docs/accounts/policies/signing-thresholds#recovery-provider) key. The user's passkey approves alone, and your provider's key approves only together with the recovery provider's key, for example to replace a lost passkey. To let users connect a self-custodial wallet such as Tempo Wallet instead, see [Connect a self-custodial wallet instead](#connect-a-self-custodial-wallet-instead), which runs on Moderato testnet.
+Each user's account has three signers, the keys that approve its transactions: the user's passkey on their device, a key your provider (Privy or Turnkey) manages, and a separate [recovery provider's](/docs/accounts/policies/signing-thresholds#recovery-provider) key. The user's passkey approves alone, and your provider's key approves only together with the recovery provider's key, for example to replace a lost passkey. To let users connect a self-custodial wallet such as Tempo Wallet instead, see [Connect a self-custodial wallet instead](#connect-a-self-custodial-wallet-instead), which runs on Moderato testnet.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. The provider setup below uses one; [connecting a self-custodial wallet](#connect-a-self-custodial-wallet-instead) doesn't.
 :::
 
-If your users already have wallets with Privy or Turnkey, those wallets are [single-key accounts](/docs/development/single-key-accounts) that keep their address on Tempo and work on mainnet as they are: see [Keep your existing provider wallets](/docs/accounts/wallets/embedded-wallets#keep-your-existing-provider-wallets). This guide creates a new account at a new address, with the provider's key as one of its signers. Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions, so use [fee sponsorship](/docs/accounts/fees/fee-sponsorship) to pay your users' fees.
+If your users already have wallets with Privy or Turnkey, those wallets are [single-key accounts](/docs/development/single-key-accounts) that keep their address on Tempo and work on mainnet as they are; see [Keep your existing provider wallets](/docs/accounts/wallets/embedded-wallets#keep-your-existing-provider-wallets). This guide creates a new account at a new address, with the provider's key as one of its signers. Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions, so use [fee sponsorship](/docs/accounts/fees/fee-sponsorship) to pay your users' fees.
 
 <span id="choose-the-controls-your-application-needs" />
 
@@ -41,7 +41,7 @@ Create the user's wallet with your provider, then use the wallet's address as `p
 
 ### Make the provider's key one signer
 
-Give the user's passkey weight 2 and each provider's key weight 1, with a [threshold](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) of 2, the total weight an approval needs. A passkey is a key the user's device keeps and unlocks with Face ID, Touch ID, or Windows Hello. Your app signs only with the passkey, which stays on the user's device; each provider keeps its own key, so the account lists those keys by address. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Give the user's passkey weight 2 and each provider's key weight 1, with a [threshold](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) of 2, the total weight an approval needs. Your app signs only with the [passkey](/docs/accounts/authentication/passkeys), which stays on the user's device; each provider keeps its own key, so the account lists those keys by address. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -99,7 +99,7 @@ const account =
     : Account.fromConfig({ ...config, address, owners })
 ```
 
-A signer change, such as replacing a lost passkey or handing the account off, raises the configuration's version, and `updateConfigSync` returns the new `config`. Save it over the old copy before the next payment: Tempo checks every transaction against the current configuration, so an account built from the old one fails. After a change, the new signers would derive a different address, which is why `open-account.ts` passes the saved one. Without the passkey, a payment or change needs both providers' keys, which sign on each provider's own systems. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+A signer change, such as replacing a lost passkey or handing the account off, raises the configuration's version, and `updateConfigSync` returns the new `config`. Save it over the old copy before the next payment: Tempo checks every transaction against the current configuration, so an account built from the old one fails. `open-account.ts` passes the saved address because, after a change, the new signers would derive a different one. Without the passkey, a payment or change needs both providers' keys, which sign on each provider's own systems. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 :::::
 
