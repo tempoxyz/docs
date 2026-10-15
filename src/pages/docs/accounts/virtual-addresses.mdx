@@ -8,7 +8,7 @@ description: Give every customer their own deposit address while all stablecoins
 
 Give each customer their own deposit address while every payment lands in one Tempo account.
 
-A payment to a customer's virtual address lands directly in your account, and its transfer events name the customer, so you credit the right customer with no per-customer wallets and no sweeps. You register your account once, then derive as many addresses as you need offchain. Send only TIP-20 tokens to them: other token contracts leave the funds stuck at the virtual address.
+A virtual address is a deposit address you derive for one customer. A payment to it lands directly in your Tempo account, and its transfer events name the customer, so you credit the right customer with no per-customer wallets and no sweeps. You register your account once, then derive as many addresses as you need offchain.
 
 For the live demo and full walkthrough, see [Customer deposit addresses](/docs/guide/payments/virtual-addresses).
 
@@ -20,7 +20,7 @@ A virtual address is an ordinary 20-byte address with a reserved layout:
 0x | masterId (4 bytes) | FDFDFDFDFDFDFDFDFDFD (10 bytes) | userTag (6 bytes)
 ```
 
-The `masterId` identifies your account, and the `userTag` is your value for the customer. When a TIP-20 transfer or mint targets a virtual address, Tempo resolves the `masterId` and credits your account in the same call. The virtual address never holds a balance: `balanceOf` on it returns `0`. Because no account is created for it, the first deposit to a new address costs the same as any other transfer.
+The `masterId` identifies your account, and the `userTag` is your value for the customer. When a TIP-20 transfer or mint targets a virtual address, Tempo resolves the `masterId` and credits your account in the same call. Send only TIP-20 tokens to a virtual address: other token contracts leave the funds stuck at the virtual address. The virtual address never holds a balance: `balanceOf` on it returns `0`. Because no account is created for it, the first deposit to a new address costs the same as any other transfer.
 
 ## Register your account as a master address
 

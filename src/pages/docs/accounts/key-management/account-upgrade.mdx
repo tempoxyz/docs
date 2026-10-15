@@ -11,7 +11,7 @@ import { UpgradeAccountDemo } from '../../../../components/guides/UpgradeAccount
 
 An account upgrade adds backup signers to a single-key account without changing its address.
 
-A single-key account works like a standard Ethereum account (an EOA). After the upgrade, a lost key no longer means a lost account. The upgrade is permanent.
+A single-key account works like a standard Ethereum account (an EOA): one key controls it, so losing that key loses the account. An account upgrade turns it into a configurable account with several signers and a threshold at the same address, so a lost key no longer means a lost account. The upgrade is permanent.
 
 :::warning
 **Account upgrades aren't live yet.** Turning a single-key account into a configurable account at the same address ([TIP-1113](https://tips.sh/1113)) works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.

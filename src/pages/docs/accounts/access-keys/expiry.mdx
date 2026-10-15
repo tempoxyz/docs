@@ -8,7 +8,7 @@ description: Make an access key stop working at a set time, so a forgotten or le
 
 An expiry makes an access key stop working at a set time, so a forgotten or leaked key ends on its own.
 
-You can't extend an expiry, so replace the key before it passes.
+Expiry is one of an [access key](/docs/accounts/access-keys)'s three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [scopes](/docs/accounts/access-keys/scopes). You set it as a timestamp when you authorize the key, and once block time reaches it, Tempo rejects every transaction the key signs. Choose the shortest window the key's holder needs.
 
 <span id="access-key-expiry" />
 <span id="expiry-limits" />
@@ -26,7 +26,7 @@ Use the shortest window the holder needs: hours for a one-off task, 30 days for 
 
 ## Renew an expiring key
 
-To renew, authorize a new key: Tempo never authorizes the same key address twice for an account. Read the old key's `expiry` with `client.accessKey.getMetadata({ account, accessKey })`, and before that time:
+You can't extend an expiry, so replace the key before it passes. To renew, authorize a new key: Tempo never authorizes the same key address twice for an account. Read the old key's `expiry` with `client.accessKey.getMetadata({ account, accessKey })`, and before that time:
 
 1. Generate a new key where the holder signs.
 2. Have the signers, or an admin key, authorize it with a new expiry.

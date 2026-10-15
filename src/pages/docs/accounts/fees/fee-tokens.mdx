@@ -8,13 +8,13 @@ description: Set the USD stablecoin an account pays network fees in once, and ov
 
 A fee token is the USD stablecoin a transaction pays its network fee in.
 
-An account needs no separate token for fees. Set a default fee token once, and override it on any transaction that should pay in another stablecoin.
+A Tempo account needs no separate gas token for fees. Set the account's default fee token once, and override it on any transaction that should pay in another stablecoin. On mainnet, use [OUSD](/docs/guide/ousd) for most accounts.
 
 <span id="fee-token-limits" />
 
 ## Supported fee tokens
 
-On mainnet, use [OUSD](/docs/guide/ousd) for most accounts. The examples on this page run on the Tempo Accounts devnet, which has no OUSD, so they use test stablecoins from the devnet faucet. Before a transaction runs, Tempo checks its fee token:
+The examples on this page run on the Tempo Accounts devnet, which has no OUSD, so they use test stablecoins from the devnet faucet. Before a transaction runs, Tempo checks its fee token:
 
 - It's a [TIP-20 token](/docs/protocol/tip20/overview), Tempo's token standard, whose currency is USD.
 - The account paying the fee holds enough of it to cover the maximum fee: the gas limit times the gas price.

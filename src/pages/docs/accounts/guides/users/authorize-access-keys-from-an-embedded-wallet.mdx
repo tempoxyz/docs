@@ -8,7 +8,7 @@ description: Have a user's Privy or Turnkey wallet sign a limited access key for
 
 Have a user's Privy or Turnkey wallet sign one access key, so your card backend pays within limits on its own.
 
-By the end of this guide, your card backend holds its own [access key](/docs/accounts/access-keys) that can send up to 100 OUSD a day to your card program's funding address for 30 days. The user's account key stays with their wallet provider, Privy or Turnkey, which signs the authorization once. After that, the card backend signs every payment with its own key, within those limits, and never touches the account key. An agent or a partner can hold an access key the same way.
+By the end of this guide, your card backend holds its own [access key](/docs/accounts/access-keys) that can send up to 100 OUSD a day to your card program's funding address for 30 days. The user's account key stays with their wallet provider, Privy or Turnkey, which signs the authorization once; after that, the card backend signs every payment with its own key, within those limits, and never touches the account key. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
 
 ## Who holds which key
 
@@ -20,9 +20,9 @@ Each party holds a different key, so no party can do more than its key allows. E
 | Your card backend | Its own access key | Send up to 100 OUSD a day to the card program's funding address, for 30 days |
 | Your app | Credentials for the provider's API | Ask the provider to sign, within the provider's policies |
 
-## Authorize the key
+An agent or a partner can hold an access key the same way as the card backend.
 
-The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
+## Authorize the key
 
 :::::steps
 

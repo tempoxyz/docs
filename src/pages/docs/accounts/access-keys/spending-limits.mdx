@@ -11,7 +11,7 @@ import { TidxQuery } from '../../../../components/TidxQuery'
 
 A spending limit caps how much of one TIP-20 token an access key can spend, such as 500 OUSD a day.
 
-Tempo reverts any transaction that would go over the limit. A limit caps how much, not where: [scopes](/docs/accounts/access-keys/scopes) decide where the money goes.
+Spending limits are one of an [access key](/docs/accounts/access-keys)'s three bounds, with [expiry](/docs/accounts/access-keys/expiry) and [scopes](/docs/accounts/access-keys/scopes). Tempo reverts any transaction that would take the key over its limit, which is either one-time or renews each period. A limit caps how much, not where: scopes decide where the money goes.
 
 <span id="tip-20-spending-limits" />
 <span id="per-token-spending-limits" />

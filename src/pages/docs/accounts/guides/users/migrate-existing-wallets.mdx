@@ -8,7 +8,7 @@ description: Add backup signers to each user's single-key Tempo account at the s
 
 Upgrade your users' existing single-key accounts in place to add backup signers.
 
-Each existing account is a single-key account (EOA), like a standard Ethereum account: one private key approves everything, so losing that key loses the account. The upgrade keeps the address, balances, and access keys, and it's permanent.
+In this guide, your app upgrades its users' single-key accounts (EOAs) on the Tempo Accounts devnet in place into configurable accounts with backup signers, such as the user's passkey or your recovery provider's key. A single-key account, like a standard Ethereum account, has one private key that approves everything, here a key your app holds, so losing that key loses the account. The upgrade keeps the address, balances, and access keys, and it's permanent.
 
 :::warning
 **Account upgrades aren't live yet.** Turning a single-key account into a configurable account at the same address ([TIP-1113](https://tips.sh/1113)) works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.

@@ -6,19 +6,25 @@ description: Backends that sign with a KMS key or a Privy or Turnkey server wall
 
 # Server wallets
 
-Backends that sign with a KMS key or a Privy or Turnkey server wallet work on Tempo as they are.
+If you're building a server wallet, give it an access key so Tempo limits what your server can do.
 
-A payout service, a card program, or an agent moves money on its own, often with a key in a KMS or HSM. Any key that signs Ethereum transactions can send stablecoins on Tempo, on mainnet and testnet today. On Tempo, that key can also be an access key with a spending limit, a list of recipients, and an expiry. Give your backend one, so a compromised server can pay only within those bounds.
+A server wallet is a key your backend signs with, in a KMS, an HSM, or a provider such as Privy or Turnkey. It works on Tempo as it is, on mainnet and testnet today: any key that signs Ethereum transactions can send stablecoins. But a server key that controls an account outright can move everything if the server is breached. On Tempo, you can make the server's key an [access key](/docs/accounts/access-keys) instead: Tempo then rejects any payment over its [spending limit](/docs/accounts/access-keys/spending-limits), to a [recipient](/docs/accounts/access-keys/scopes) you didn't list, or after its [expiry](/docs/accounts/access-keys/expiry).
 
-## Give the backend an access key, not the account key
+<span id="give-the-backend-an-access-key-not-the-account-key" />
 
-Keep the account's own key with the user, and give your backend an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits), a list of [recipients](/docs/accounts/access-keys/scopes), and an [expiry](/docs/accounts/access-keys/expiry). The backend then pays without asking the user each time. [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) walks through it.
+## Why an access key, not the account key
+
+If the server holds the account key and is breached, the attacker can move the whole balance. If it holds an access key, the attacker can pay only within that key's limit, recipients, and expiry, and you can [revoke](/docs/accounts/access-keys/revocation) the key.
+
+Keep the account's own key with the user, or with your own signers for a business account, and give the backend the access key. The backend then pays without asking each time. [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) walks through it.
 
 ## Sign with a KMS key
 
 AWS KMS and Google Cloud KMS keys work as access keys, and the private key never leaves the KMS. Access keys sign [Tempo Transactions](/docs/guide/tempo-transaction), so the key signs a 32-byte digest. Both KMSs sign digests with secp256k1 and P-256 keys, and both curves work as access keys. Wrap the KMS signing call as a viem account, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
 
-## Sign with a server wallet
+<span id="sign-with-a-server-wallet" />
+
+## Sign with a server wallet provider
 
 Privy server wallets and Turnkey both sign Tempo Transactions and raw hashes:
 

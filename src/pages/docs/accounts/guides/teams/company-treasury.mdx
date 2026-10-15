@@ -8,7 +8,7 @@ description: Create one Tempo account that three approvers control, where any tw
 
 Set up one Tempo account that three approvers share, where any two must approve each payment.
 
-Tempo checks the approvals itself, so neither one stolen key nor your own backend can pay without a second approver.
+In this guide, you create a treasury account on the Tempo Accounts devnet whose three signers are keys held by finance, operations, and a controller, and any two of them must approve each payment. Tempo checks the approvals itself, so neither one stolen key nor your own backend can pay without a second approver.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.

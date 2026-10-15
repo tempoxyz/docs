@@ -8,7 +8,7 @@ description: Add a passkey, hardware key, or recovery provider to a Tempo accoun
 
 Adding a signer backs up a key you could lose or lets another person approve transactions.
 
-A signer is a key that approves the account's transactions. The current signers approve the addition in one signer update, and the address, balance, token approvals, and access keys stay the same.
+A signer is a key that approves a configurable account's transactions, and adding one is a [signer update](/docs/accounts/key-management#every-change-is-one-signer-update) that the current signers approve. The address, balance, token approvals, and access keys stay the same. The new signer's weight decides what it can approve alone.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding a signer needs one.
