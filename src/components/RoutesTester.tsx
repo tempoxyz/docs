@@ -51,6 +51,7 @@ import {
 import {
   canSubsidize,
   demoMethods,
+  linkedRoute,
   type RoutePick,
   routeChoices,
   routeQuoteRequest,
@@ -136,6 +137,8 @@ export function RoutesTester() {
   const [keyLocked, setKeyLocked] = useState(false)
   const [notice, setNotice] = useState('')
   const chosen = useRef<TestRoute>(undefined)
+  // A link from the supported routes table preselects its route on the first load only.
+  const linked = useRef(true)
   // The directory reflects the key's access policy, so reload it (debounced) when the key changes.
   // A route chosen before the key was added stays chosen, quote and all, if the key can use it.
   useEffect(() => {
@@ -145,7 +148,9 @@ export function RoutesTester() {
     const timer = setTimeout(() => {
       loadRoutes(AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]), apiKey)
         .then((list) => {
-          const previous = chosen.current
+          const previous =
+            chosen.current ?? (linked.current ? linkedRoute(list, location.search) : undefined)
+          linked.current = false
           const kept = previous && list.find((r) => routeKey(r) === routeKey(previous))
           setRoutes(list)
           setPick(kept ? pickOf(kept) : noPick)
@@ -349,7 +354,11 @@ function RouteLifecycle({
   const [refundAddress, setRefundAddress] = useState('')
   // 1:1 delivery is requested wherever the route offers it, until the API refuses the subsidy.
   const [subsidyRefused, setSubsidyRefused] = useState(false)
+  // Why the open quote lacks 1:1 delivery, when the API refused it.
+  const [subsidyNotice, setSubsidyNotice] = useState('')
   const [quote, setQuote] = useState<ApiResult>()
+  // Without a key, a 1:1 quote is the docs demo organization's preview, not the reader's terms.
+  const [quoteKeyed, setQuoteKeyed] = useState(false)
   const [created, setCreated] = useState<ApiResult>()
   const [hashes, setHashes] = useState<string[]>([])
   const [confirmedCalls, setConfirmedCalls] = useState(0)
@@ -440,8 +449,8 @@ function RouteLifecycle({
     sender,
     recipient,
     refundAddress,
-    // 1:1 delivery is organization pricing, so only a quote with the reader's key asks for it.
-    subsidize: subsidyAvailable && !subsidyRefused && !!apiKey.trim(),
+    // Without a key, the docs demo key quotes 1:1 delivery as a preview; it cannot create routes.
+    subsidize: subsidyAvailable && !subsidyRefused,
   }
   let quoteParams: ReturnType<typeof routeQuoteRequest> | undefined
   let quoteValidation = ''
@@ -626,28 +635,35 @@ function RouteLifecycle({
   const unsubsidizedQuote = () => call(quoteRequest(route, { ...input, subsidize: false }))
   // The quote's price list: public without a key, the organization's with one.
   const quotedWith = useRef(apiKey)
-  const getQuote = () =>
+  // A new key gets its own chance at 1:1 delivery, even if the previous key was refused it.
+  const getQuote = ({ retrySubsidy = false } = {}) =>
     task(async () => {
       quotedWith.current = apiKey
+      const request = retrySubsidy ? { ...input, subsidize: subsidyAvailable } : input
+      if (retrySubsidy) setSubsidyRefused(false)
+      setSubsidyNotice('')
       let result: ApiResult
       try {
-        result = await call(quoteRequest(route, input))
+        result = await call(quoteRequest(route, request))
       } catch (e) {
         // Without approval or inventory for 1:1 delivery, quote the route without it.
-        if (!input.subsidize || !isSubsidyRefusal(e)) throw e
+        if (!request.subsidize || !isSubsidyRefusal(e)) throw e
         setSubsidyRefused(true)
+        setSubsidyNotice(`Quoted without 1:1 delivery. ${(e as Error).message}`)
         result = await unsubsidizedQuote()
       }
       setQuote(result)
+      setQuoteKeyed(!!apiKey.trim())
       quoteReady.current = true
     })
   // Adding or removing a key changes the price list, so an open quote is priced again.
   useEffect(() => {
     if (!quote || creation.current || quotedWith.current === apiKey) return
-    void getQuote()
+    void getQuote({ retrySubsidy: true })
   }, [apiKey])
   const editQuote = () => {
     setSubsidyRefused(false)
+    setSubsidyNotice('')
     setQuote(undefined)
     quoteReady.current = false
     onLock(false)
@@ -682,6 +698,7 @@ function RouteLifecycle({
         if (!request.body?.subsidize || !isSubsidyRefusal(e)) throw e
         creation.current = null
         setSubsidyRefused(true)
+        setSubsidyNotice('')
         setQuote(await unsubsidizedQuote())
         throw new Error(
           'Your organization cannot use 1:1 delivery on this route, so the quote is now without it. Review it, then create.',
@@ -1111,6 +1128,16 @@ function RouteLifecycle({
       placeholder: walletLabel(route.destinationChain, 'destination'),
       wide,
     })
+  const refundField = (disabled: boolean) =>
+    addressField({
+      id: 'routes-refund',
+      label: `Refund address on ${route.sourceChain.name}`,
+      chainId: route.sourceChain.id,
+      value: refundAddress,
+      onChange: setRefundAddress,
+      disabled,
+      placeholder: 'Where refunds go',
+    })
   const tempoSignIn = (
     <Demo.Button
       variant="accent"
@@ -1243,7 +1270,20 @@ function RouteLifecycle({
           }
         >
           {quote ? (
-            <QuoteSummary data={terms ?? quote.data} route={route} />
+            <>
+              <QuoteSummary data={terms ?? quote.data} route={route} />
+              {subsidyNotice && (
+                <p role="status" {...cx(stepBody(), cautionText())}>
+                  {subsidyNotice}
+                </p>
+              )}
+              {!quoteKeyed && subsidizedTerms && (
+                <p {...cx(stepBody(), noteStyle())}>
+                  1:1 delivery preview from the docs demo organization. Creating a 1:1 route needs
+                  subsidy approval for your organization.
+                </p>
+              )}
+            </>
           ) : (
             <div {...stepForm()}>
               <div {...fieldGrid()}>
@@ -1287,6 +1327,12 @@ function RouteLifecycle({
                       placeholder: walletLabel(route.sourceChain, 'source'),
                     })}
                     {recipientField(frozen, true)}
+                  </>
+                )}
+                {!isTransfer && (
+                  <>
+                    {recipientField(frozen)}
+                    {refundField(frozen)}
                   </>
                 )}
               </div>
@@ -1337,21 +1383,10 @@ function RouteLifecycle({
               <p {...bodyText()}>
                 Routes creates a {route.sourceChain.name} address for this route.{' '}
                 {route.sourceToken.symbol} sent to it lands automatically as{' '}
-                {route.destinationToken.symbol} in the {route.destinationChain.name} wallet below.
+                {route.destinationToken.symbol} at the {route.destinationChain.name} recipient you
+                quoted.
               </p>
-              <div {...fieldGrid()}>
-                {recipientField(!!creation.current || busy)}
-                {addressField({
-                  id: 'routes-refund',
-                  label: `Refund address on ${route.sourceChain.name}`,
-                  chainId: route.sourceChain.id,
-                  value: refundAddress,
-                  onChange: setRefundAddress,
-                  disabled: !!creation.current || busy,
-                  placeholder: 'Where refunds go',
-                })}
-              </div>
-              {(recipient || refundAddress) && validation && <p {...noteStyle()}>{validation}</p>}
+              {validation && <p {...noteStyle()}>{validation}</p>}
               {!hasKey && <p {...noteStyle()}>{pricingNote}</p>}
               {hasKey && (
                 <Demo.Button
@@ -1669,6 +1704,11 @@ function QuoteSummary({ data, route }: { data: Record<string, unknown>; route: T
       <Row label="Recipient gets">
         {received} {symbol}
       </Row>
+      {delivery && delivery.covered > 0n && (
+        <Row label="Covered by Tempo">
+          {formatUnits(delivery.covered, decimals)} {symbol}
+        </Row>
+      )}
       {fees.length === 0 ? (
         <Row label="Fees">None</Row>
       ) : (

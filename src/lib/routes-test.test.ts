@@ -3,7 +3,9 @@ import {
   canSubsidize,
   demoMethods,
   directorySchema,
+  linkedRoute,
   routeChoices,
+  routeDemoHref,
   routeQuoteRequest,
   routeTestRequest,
   subsidizedDelivery,
@@ -150,23 +152,32 @@ describe('route test requests', () => {
       }),
     ).toEqual([])
   })
-  it('quotes a deposit address without the creation-only recipient and refund address', () => {
-    const deposit = {
-      ...input,
-      method: 'depositAddress' as const,
-      recipient: '',
-      refundAddress: '',
-    }
+  it('quotes a deposit address with the recipient and refund address it is created with', () => {
+    const deposit = { ...input, method: 'depositAddress' as const }
     expect(routeQuoteRequest(route, deposit)).toEqual({
       amount: '1234567',
       sourceChain: route.sourceChain.id,
       sourceToken: route.sourceToken.tokenKey,
       destinationToken: route.destinationToken.tokenKey,
+      recipient: input.recipient,
+      refundAddress: input.refundAddress,
       subsidize: false,
     })
-    expect(() => routeTestRequest(route, deposit)).toThrow('recipient')
+    // Several deposit routes only quote with both addresses, so the quote needs them too.
+    expect(() => routeQuoteRequest(route, { ...deposit, recipient: '' })).toThrow('recipient')
+    expect(() => routeQuoteRequest(route, { ...deposit, refundAddress: '' })).toThrow('refund')
+    expect(routeQuoteRequest(route, deposit)).toEqual(routeTestRequest(route, deposit))
     // Transfer quotes need the same sender and recipient as creation.
     expect(() => routeQuoteRequest(route, { ...input, sender: '' })).toThrow('sender')
     expect(routeQuoteRequest(route, input)).toEqual(routeTestRequest(route, input))
+  })
+  it('links a route to the demo by ID and selects it only while the directory lists it', () => {
+    const odd = { ...route, id: 'a&b=c' }
+    expect(routeDemoHref(route)).toBe('/docs/routes/test?route=test-route')
+    expect(
+      linkedRoute([route, odd], new URL(routeDemoHref(odd), 'https://docs.tempo.xyz').search),
+    ).toBe(odd)
+    expect(linkedRoute([route], '?route=missing')).toBeUndefined()
+    expect(linkedRoute([route], '')).toBeUndefined()
   })
 })
