@@ -140,7 +140,7 @@ Viem sorts the new owners and signs with `finance` and `operations`, whose weigh
 
 ### Keep the current configuration
 
-The stored hash can't be turned back into the owners and threshold, so your app's saved copy is the only record of them. Save the address and configuration when you create the account (`saved` in `account.ts`), and replace the configuration with the returned `config` after each update. The configuration's `version` is a bigint, which `JSON.stringify` can't encode, so store `AccountConfig.toRpc(config)` and read it back with `AccountConfig.fromRpc`.
+The stored hash can't be turned back into the owners and threshold, so keep your own copy. Save the address and configuration when you create the account (`saved` in `account.ts`), and replace the configuration with the returned `config` after each update. The configuration's `version` is a bigint, which `JSON.stringify` can't encode, so store `AccountConfig.toRpc(config)` and read it back with `AccountConfig.fromRpc`.
 
 To act from the account, rebuild it from that record. Attach the keys that approve this time as local accounts, and leave the other owners as addresses. A version-0 configuration derives the address, so pass the saved address only after the first update:
 
@@ -176,6 +176,20 @@ const isCurrent = stored === AccountConfig.getCommitment(saved.config) // [!code
 ```
 
 The stored hash is zero before registration. A mismatch means another update landed, and approvals built on the saved configuration fail.
+
+<span id="rebuild-the-configuration-from-chain-history" />
+
+### Rebuild a lost configuration
+
+Chain history holds the configuration only once the account has used it:
+
+| Account state | Where the configuration is onchain |
+| --- | --- |
+| Never transacted | Nowhere. Your saved copy, including the salt, is the only record. |
+| Version 0, transacted | In each transaction's [`0x05` signature](#multisig-signature-format), which carries the full configuration |
+| Updated or upgraded | In the latest `MultisigConfigUpdated` or `AccountUpgraded` event, which carries the salt, threshold, and owners. An upgrade installs version 1. |
+
+If an update landed but your app failed to save the returned `config`, rebuild it from the update you sent with `AccountConfig.update(saved.config, nextConfig)`, or from the account's latest `MultisigConfigUpdated` event. Before you use the rebuilt configuration, check it against `getConfigCommitment` as above.
 
 <span id="login-signers" />
 

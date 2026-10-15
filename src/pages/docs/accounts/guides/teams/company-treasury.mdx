@@ -64,7 +64,7 @@ await client.faucet.fundSync({ account: saved.address }) // devnet test stableco
 
 `address: 'infer'` computes the address from the first signers and threshold, so creating the treasury sends nothing; Tempo records the treasury with its first transaction. The address can receive stablecoins before then: on the devnet, the [faucet](/docs/accounts/create#fund-an-account-on-devnet) sends it test stablecoins. The treasury pays transaction fees from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
-Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version): enough to check approvals, but not to tell your app who the signers are. Save the address and configuration with your treasury record. The address stays the same when signers change, and every approval is built from the saved configuration.
+Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version): enough to check approvals, but not to tell your app who the signers are. Save the address and configuration with your treasury record, encoded with `AccountConfig.toRpc` as in [Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration), because the configuration contains bigints. The address stays the same when signers change, and every approval is built from the saved configuration.
 
 <span id="collect-approvals" />
 
@@ -77,6 +77,8 @@ import { isAddressEqual, parseUnits } from 'viem'
 
 // A test stablecoin on the devnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
+// Placeholder: the vendor's address
+const vendor = env('VENDOR_ADDRESS')
 
 /** Rebuilds the treasury from its saved record, with the approvers' keys attached. */
 function openTreasury(approvers: readonly Account.RootAccount[]) {
@@ -97,7 +99,6 @@ await client.token.transferSync({ // [!code hl]
   account: openTreasury([finance, operations]), // [!code hl]
   // 1,200 of the stablecoin, in base units (6 decimals)
   amount: parseUnits('1200', 6), // [!code hl]
-  // the recipient's address
   to: vendor, // [!code hl]
   token: stablecoin, // [!code hl]
 }) // [!code hl]

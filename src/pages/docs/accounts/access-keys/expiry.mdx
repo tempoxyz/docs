@@ -21,7 +21,6 @@ Tempo checks the expiry against block time (the current block's timestamp), not 
 
 Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). A key without `expiry` never expires, and admin keys can't have one. The `Expiry` helpers in `viem/tempo` return a timestamp relative to now, such as `Expiry.days(30)` or `Expiry.hours(1)`. See viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize).
 
-
 Use the shortest window the holder needs: hours for a one-off task, 30 days for a device, 90 days for a backend. An expiry at or before the current block time reverts with [`ExpiryInPast`](/docs/protocol/transactions/AccountKeychain#error-expiryinpast).
 
 ## Renew an expiring key
@@ -32,5 +31,7 @@ You can't extend an expiry, so replace the key before it passes. To renew, autho
 2. Have the signers, or an admin key, authorize it with a new expiry.
 3. Switch the holder to the new key.
 4. [Revoke](/docs/accounts/access-keys/revocation) the old key if it hasn't expired yet.
+
+Until the old key expires or is revoked, both keys can spend, each up to its own limit. To keep one budget, authorize the new key with a limit of what the old key has left, then [raise it](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) once the old key is revoked. If the holder can pause, revoke the old key first instead.
 
 Specification: [Account Keychain key expiry](/docs/protocol/transactions/AccountKeychain#key-expiry).

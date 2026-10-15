@@ -56,6 +56,10 @@ The check does not apply to `approve`, `permit`, or `burn`. It also does not aff
 
 For transfer-like operations, the sender checked by the policy is the `from` address. For `mint` and `mintWithMemo`, the sender checked by the policy is `msg.sender`.
 
+For `transferFrom` and `transferFromWithMemo`, the checked sender is the token owner (`from`), not the spender, and a blocked transfer still spends the spender's allowance.
+
+A blocked transfer or mint still emits the token's usual `Transfer` event (and `Mint` for a mint), with `ReceivePolicyGuard` as the recipient instead of the receiver.
+
 ## Receive-policy configuration
 
 Receive policies are stored per address in the TIP-403 registry. Conceptually, each configured address has:
@@ -128,7 +132,7 @@ A claim resumes the original inbound when `recoveryAuthority != address(0)` and 
 
 A resume claim does not recheck the receiver's receive policy. It still requires the receiver to be currently authorized under the token's TIP-403 policy as the destination of the release.
 
-For blocked transfers to a virtual address, the receiver is the resolved master, so a resume releases directly to the master.
+For blocked transfers to a virtual address, the receiver is the resolved master, so the receipt belongs to the master and a resume releases directly to it. The receipt keeps the original virtual `to` address for attribution.
 
 ### Reroute claims
 

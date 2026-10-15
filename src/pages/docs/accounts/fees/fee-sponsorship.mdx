@@ -15,7 +15,7 @@ A fee payer, which you run or Tempo hosts, adds its signature to a customer's Te
 
 ## How fee sponsorship works
 
-1. The account signs its calls and leaves the fee token blank, so the fee payer can pick it.
+1. The account signs its calls. If your backend signs and sponsors in one step, it sets the fee token to the token being transferred. If the customer's device signs and sends the transaction to a fee payer server, it leaves the fee token blank, so the server can pick it.
 2. The fee payer decides whether to sponsor the transaction, picks the fee token, and adds its signature.
 3. Tempo verifies both signatures and charges the fee to the fee payer. If either signature fails or the fee payer can't cover the fee, Tempo rejects the transaction.
 
@@ -131,8 +131,9 @@ Tempo also hosts a fee payer server. The [Fee Payer API](/docs/api/fee-payer) ta
 
 ## Fee sponsorship limits
 
-- A fee payer that your backend passes as `feePayer` pays in the transaction's `feeToken`, or in its own [default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) when that's blank. A fee payer server pays in its `feeToken` setting, whatever the customer's transaction sets. Fund the fee payer with that [supported fee token](/docs/accounts/fees/fee-tokens#supported-fee-tokens).
-- When your backend passes the fee payer as `feePayer`, set `feeToken` to the token a sponsored transfer moves. Without a `feeToken`, the transfer can run out of gas, and on the Tempo Accounts devnet, so can another fee token. Transfers sponsored through a fee payer server don't need this.
+- When your backend passes the fee payer as `feePayer`, always set `feeToken` to the token the sponsored transfer moves; don't leave it blank or pick another token. The fee payer pays in that token.
+- A fee payer server pays in its own `feeToken` setting, whatever the customer's transaction sets, so the customer's device leaves `feeToken` off.
+- Fund the fee payer with the [supported fee token](/docs/accounts/fees/fee-tokens#supported-fee-tokens) it pays in.
 - A sponsored transaction that's included and then fails still costs the fee payer its fee.
 
 Specification: [fee payer](/docs/protocol/fees/spec-fee#fee-payer).

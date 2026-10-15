@@ -241,7 +241,7 @@ describe('GuideDemo scripts', () => {
     expect(recoveryCheck(account).ok).toBe(true)
   })
 
-  it('offboards Approver key 2, revokes the service key, and adds a replacement', async () => {
+  it('replaces Approver key 2 in one update and revokes the service key', async () => {
     const { account } = await run('rotate-keys')
     expect(configuredSigners(account).map((signer) => signer.name)).toEqual([
       'Approver key 1',
@@ -249,7 +249,7 @@ describe('GuideDemo scripts', () => {
       'Approver key 4',
     ])
     expect(account.threshold).toBe(2)
-    expect(account.version).toBe(3)
+    expect(account.version).toBe(2)
     expect(account.accessKeys.find((key) => key.name === 'Service key')?.status).toBe('revoked')
   })
 

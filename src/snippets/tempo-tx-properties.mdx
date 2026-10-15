@@ -2153,6 +2153,8 @@ Set `validAfter` and `validBefore` to bound when a signed transaction may be inc
     :::code-group
 
     ```rust [example.rs]
+    use std::time::{SystemTime, UNIX_EPOCH};
+
     use alloy::primitives::{address, bytes};
     use alloy::providers::Provider;
     use tempo_alloy::rpc::TempoTransactionRequest;
@@ -2163,10 +2165,9 @@ Set `validAfter` and `validBefore` to bound when a signed transaction may be inc
     async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let provider = provider::get_provider().await?;
 
-        // 2026-01-01 00:00:00 UTC
-        let valid_after = 1_767_225_600;
-        // 2026-01-02 00:00:00 UTC
-        let valid_before = 1_767_312_000;
+        // valid from now until one hour from now
+        let valid_after = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+        let valid_before = valid_after + 3600;
 
         let pending = provider
             .send_transaction(
@@ -2195,15 +2196,14 @@ Set `validAfter` and `validBefore` to bound when a signed transaction may be inc
     :::code-group
 
     ```python [example.py]
-    from datetime import datetime, timezone
+    import time
 
     from pytempo import Call, TempoTransaction
     from provider import w3, account
 
-    # 2026-01-01 00:00:00 UTC
-    valid_after = int(datetime(2026, 1, 1, tzinfo=timezone.utc).timestamp())
-    # 2026-01-02 00:00:00 UTC
-    valid_before = int(datetime(2026, 1, 2, tzinfo=timezone.utc).timestamp())
+    # valid from now until one hour from now
+    valid_after = int(time.time())
+    valid_before = valid_after + 3600
 
     tx = TempoTransaction.create(
         chain_id=w3.eth.chain_id,
@@ -2263,10 +2263,9 @@ Set `validAfter` and `validBefore` to bound when a signed transaction may be inc
 
     	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
 
-    	// 2026-01-01 00:00:00 UTC
-    	validAfter := uint64(time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC).Unix())
-    	// 2026-01-02 00:00:00 UTC
-    	validBefore := uint64(time.Date(2026, 1, 2, 0, 0, 0, 0, time.UTC).Unix())
+    	// valid from now until one hour from now
+    	validAfter := uint64(time.Now().Unix())
+    	validBefore := validAfter + 3600
 
     	tx := transaction.NewBuilder(big.NewInt(transaction.ChainIdMainnet)).
     		SetNonce(nonce).
@@ -2302,8 +2301,8 @@ Set `validAfter` and `validBefore` to bound when a signed transaction may be inc
   <Tab title="Cast">
 
     ```bash
-    $ VALID_AFTER=$(date -d '2026-01-01' +%s)
-    $ VALID_BEFORE=$(date -d '2026-01-02' +%s)
+    $ VALID_AFTER=$(date +%s)
+    $ VALID_BEFORE=$((VALID_AFTER + 3600))
     $ cast mktx 0xcafebabecafebabecafebabecafebabecafebabe \
       --data 0xdeadbeef0000000000000000000000000000000001 \
       --rpc-url $TEMPO_RPC_URL \

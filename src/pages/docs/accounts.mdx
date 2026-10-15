@@ -1,7 +1,7 @@
 ---
 title: Accounts
 seoTitle: Self-Custodial Stablecoin Accounts on Tempo | Tempo Docs
-description: Stablecoin accounts with weighted signers and spending-limited access keys that Tempo enforces on every transaction, so your customers hold their own funds.
+description: Stablecoin accounts with weighted signers and spending-limited access keys that Tempo enforces on every transaction, so only the account's own keys can move its funds.
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 ---
 
@@ -14,7 +14,7 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Accounts
 
-A Tempo account is a stablecoin address with its rules built in, so your customers hold their own funds.
+A Tempo account is a stablecoin address with its rules built in, so whoever holds its keys holds the funds.
 
 [How it works →](/docs/accounts/how-it-works)
 
@@ -25,6 +25,20 @@ Each Tempo account holds a customer's stablecoins at one address, with rules tha
 :::warning
 Tempo Accounts is in early development. Configurable accounts, with several signers and a threshold, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. [Contact Tempo](https://tempo.xyz/contact) to discuss access.
 :::
+
+## What's live today
+
+| Feature | Where it runs |
+| --- | --- |
+| [Single-key accounts](/docs/development/single-key-accounts), including [passkeys](/docs/accounts/authentication/passkeys) | Mainnet and testnet |
+| [Access keys](/docs/accounts/access-keys) | Mainnet and testnet |
+| [Fee tokens](/docs/accounts/fees/fee-tokens) and [fee sponsorship](/docs/accounts/fees/fee-sponsorship) | Mainnet and testnet |
+| [Receive policies](/docs/accounts/policies/receive-policies) | Mainnet and testnet |
+| [Virtual addresses](/docs/accounts/virtual-addresses) | Mainnet and testnet |
+| [Configurable accounts](/docs/development/configurable-accounts): several signers, a threshold, and [signer changes](/docs/accounts/key-management) | Tempo Accounts devnet only |
+| [Account upgrade](/docs/accounts/key-management/account-upgrade) of a single-key account | Tempo Accounts devnet only |
+
+The customer holds their own funds when they hold the signing key, such as a passkey. When a wallet provider or your backend holds the key, that party can move the funds too: see [Embedded wallets](/docs/accounts/wallets/embedded-wallets).
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
@@ -67,10 +81,10 @@ Each transaction pays a network fee in a USD stablecoin, not a separate gas toke
 
 ## Start building
 
-[Create an account](/docs/accounts/create) in your browser on the Tempo Accounts devnet, then [add funds](/docs/accounts/fund). [Use cases](/docs/accounts/use-cases) shows which setup fits what you're building, or pick a guide:
+To build on mainnet today, [create a single-key account](/docs/accounts/create#create-a-single-key-account) with a passkey or private key, or keep the [wallets your users already have](/docs/accounts/wallets/browser-wallets). To try several signers and recovery, [create a configurable account](/docs/accounts/create) on the Tempo Accounts devnet. Then [add funds](/docs/accounts/fund). [Use cases](/docs/accounts/use-cases) shows which setup fits what you're building, or pick a guide:
 
 <Cards>
-  <Card title="Embed wallets with a provider" description="Your wallet provider's key is one signer and the customer's passkey another, so the provider can't pay alone." to="/docs/accounts/guides/users/embed-wallets" />
+  <Card title="Embed wallets with a provider" description="The customer's passkey, your provider's key, and a recovery provider's key as three signers, so the provider can't pay alone. Runs on the devnet." to="/docs/accounts/guides/users/embed-wallets" />
   <Card title="Add a recovery signer" description="A second signer, so a customer who loses their phone keeps their account." to="/docs/accounts/guides/users/add-a-recovery-signer" />
   <Card title="Pay out from a backend" description="Your backend pays approved payees, up to a daily limit, without prompting the customer." to="/docs/accounts/guides/automations/pay-out-from-a-backend" />
   <Card title="Fund a card program" description="Your backend tops up a customer's card, up to a daily limit, and can pay no one else." to="/docs/accounts/guides/automations/fund-a-card-program" />
