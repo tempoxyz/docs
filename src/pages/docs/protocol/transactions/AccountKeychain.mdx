@@ -155,6 +155,13 @@ interface IAccountKeychain {
         KeyRestrictions calldata config
     ) external;
 
+    function authorizeKey(
+        address keyId,
+        SignatureType signatureType,
+        KeyRestrictions calldata config,
+        bytes32 witness
+    ) external;
+
     function revokeKey(address keyId) external;
 
     function authorizeAdminKey(
@@ -219,7 +226,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 
 **Requirements:**
 - MUST be called by the Root Key or an active admin access key
-- MUST be invoked via the canonical selector `0x980a6025` (the `(address,uint8,(uint64,bool,(address,uint256,uint64)[],bool,(address,(bytes4,address[])[])[]))` shape). Other selectors revert.
+- MUST use one of the two `authorizeKey` overloads above: `(address,uint8,KeyRestrictions)` or `(address,uint8,KeyRestrictions,bytes32)`. The first has selector `0x980a6025`; the second additionally checks and emits the supplied witness. Both use the same `KeyRestrictions` tuple and authorization requirements.
 - `keyId` MUST NOT be `address(0)` (reverts with `ZeroPublicKey`)
 - `keyId` MUST NOT already be authorized with `expiry > 0` (reverts with `KeyAlreadyExists`)
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked` - prevents replay attacks)
