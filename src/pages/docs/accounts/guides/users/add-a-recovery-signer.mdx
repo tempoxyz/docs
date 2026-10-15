@@ -9,7 +9,9 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Add a recovery signer
 
-A recovery signer is a second key that can approve transactions for a user's account, so losing their phone or first key doesn't lock them out. With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. Add a recovery signer, then require two factors so whoever holds it can't take over the account alone. The address and balance stay the same.
+Add a second key to a user's account so losing their phone or first key doesn't lock them out.
+
+With one signer, a lost key is a lost account: nobody, including Tempo, can recover it. A recovery signer is a second key that can approve transactions for the account. Add one, then require two factors so whoever holds it can't take over the account alone. The address and balance stay the same.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding a signer needs one.

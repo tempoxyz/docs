@@ -6,7 +6,9 @@ description: Add, remove, or rotate a Tempo account's signers in one update that
 
 # Key management
 
-Key management is how you add, remove, or replace an account's signers, the keys that approve its transactions, without changing its address, so its balance and history survive a lost phone or a departing approver. Only the current signers can approve a change, and Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
+Key management lets you add, remove, or replace an account's signers without changing its address.
+
+Signers are the keys that approve the account's transactions. Because the address stays the same, the balance and history survive a lost phone or a departing approver. Only the current signers can approve a change, and Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Adding, removing, and replacing signers all need one.

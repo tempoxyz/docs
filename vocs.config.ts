@@ -518,17 +518,12 @@ export default defineConfig({
     ]
     const accountsSidebar = [
       {
-        text: 'Tempo Accounts',
+        text: 'Getting started',
         items: [
           { text: 'Overview', link: '/docs/accounts' },
           { text: 'How it works', link: '/docs/accounts/how-it-works' },
           { text: 'Security', link: '/docs/accounts/security' },
           { text: 'Use cases', link: '/docs/accounts/use-cases' },
-        ],
-      },
-      {
-        text: 'Get started',
-        items: [
           { text: 'Create an account', link: '/docs/accounts/create' },
           { text: 'Add funds', link: '/docs/accounts/fund' },
         ],

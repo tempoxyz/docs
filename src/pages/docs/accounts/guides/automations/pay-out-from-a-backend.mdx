@@ -9,7 +9,9 @@ import { GuideDemo } from '../../../../../components/guides/GuideDemo'
 
 # Pay out from a backend
 
-Your backend can send payouts from a customer's Tempo account without prompting the customer each time. The customer's signers approve an [access key](/docs/accounts/access-keys) for your backend once, and Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry), so a leaked key can't drain the account.
+Your backend sends payouts from a customer's Tempo account without prompting the customer each time.
+
+The customer's signers approve an [access key](/docs/accounts/access-keys) for your backend once, and Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry), so a leaked key can't drain the account.
 
 <span id="backend-services" />
 <span id="automations" />

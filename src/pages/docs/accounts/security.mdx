@@ -6,34 +6,15 @@ description: Tempo's validators enforce each account's signers, thresholds, and 
 
 # Security
 
-Tempo's validators enforce an account's signers and access key limits on every transaction, so a breach of your app, your backend, or a wallet provider reaches only the keys it holds, within the bounds those keys have.
+No one, including Tempo, can move an account's funds without the account's keys.
+
+Tempo's validators check every transaction against the account's signers, threshold, and access key limits. If your app, your backend, or a wallet provider is breached, the attacker gets only the keys that party holds, and only within those keys' bounds. Your security decision is who holds which keys.
 
 ## How Tempo enforces an account's rules
 
+An account's rules are part of Tempo's protocol rules, so every validator checks them: the signatures the account requires, its [signing threshold](/docs/accounts/policies/signing-thresholds), each [access key's](/docs/accounts/access-keys) spending limits, scopes, and expiry, and its [receive policy](/docs/accounts/policies/receive-policies). A transaction that breaks any of them never lands. No validator or operator, including Tempo, can skip these checks or move an account's funds without the account's keys.
+
 Tempo is a blockchain run by a distributed set of validators rather than a single sequencer. Each validator checks every block against the protocol's rules before agreeing to it, and a block is final once enough validators agree. A finalized block can't be reverted, so a confirmed transaction can't be changed or undone. These guarantees hold as long as fewer than a third of validators misbehave. See [Consensus and finality](/docs/protocol/blockspace/consensus).
-
-An account's rules are part of those protocol rules: the signatures it requires, its [signing threshold](/docs/accounts/policies/signing-thresholds), each [access key's](/docs/accounts/access-keys) spending limits, scopes, and expiry, and its [receive policy](/docs/accounts/policies/receive-policies). A transaction that breaks any of them never lands. No validator or operator, including Tempo, can skip these checks or move an account's funds without the account's keys.
-
-## What your app is responsible for
-
-Tempo checks what a key signs, not whether the right person holds the key. Your app decides the rest:
-
-- **Where keys live.** Keep a passkey or device key on the customer's device, and backend keys in a KMS or HSM.
-- **Which signers your app holds.** Every signer your app or wallet provider holds is weight an attacker gets by breaching you. On a configurable account, keep your combined weight below the threshold, and count parties, not keys ([what a threshold protects against](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects)).
-- **Each account's configuration.** Tempo stores only a hash of a configurable account's signers, weights, threshold, and version, so save the configuration with the account record and replace it after every signer update. Without it, the signers can't approve ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
-- **What gets signed.** A wallet provider's policy engine can't read a raw hash, so it can't tell a key authorization from a payment. Check the key, limits, scopes, and expiry in your own backend before asking the provider to sign ([who can move the funds](/docs/accounts/wallets/embedded-wallets#who-can-move-the-funds)).
-
-## If a key or service is compromised
-
-| Compromise | What an attacker can do | What you do |
-| --- | --- | --- |
-| Lost device | Pay with the device's access key, within its limits, until it expires. A passkey on the device still needs the device's unlock. | [Revoke](/docs/accounts/access-keys/revocation) the device key. On a configurable account, the other signers [replace the passkey](/docs/accounts/guides/users/recover-an-account). On a single-key account whose only key was on the device, no one can recover the funds. |
-| Leaked access key | Spend up to the key's remaining [spending limit](/docs/accounts/access-keys/spending-limits), only to the contracts and recipients in its [scopes](/docs/accounts/access-keys/scopes), until its [expiry](/docs/accounts/access-keys/expiry). A leaked [admin access key](/docs/accounts/access-keys/admin-access-keys) can spend the whole balance and authorize new keys. | Revoke the key. For an admin key, also revoke every key it authorized. Set any token approvals it made to zero ([what revocation leaves in place](/docs/accounts/access-keys/revocation#what-revocation-leaves-in-place)). |
-| Breached backend | Use every key the backend holds: access keys within their bounds, and any signer at its weight. If the backend holds a single-key account's key, it can move the whole balance. | Revoke its access keys and authorize new ones. On a configurable account, the other signers [remove the backend's signer](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer). For a single-key account, move the funds to a new account. |
-| Breached wallet provider | On a single-key embedded wallet, sign anything with the account's key and move the whole balance. On a configurable account where the provider's key is [one signer](/docs/accounts/guides/users/embed-wallets), approve only at that key's weight, which can't reach the threshold alone. | On a configurable account, the customer's passkey replaces the provider's signer. On a single-key account, move the funds to a new account once you control signing again. |
-| Lost saved configuration | Nothing. The configuration lists signer addresses and weights, not keys. | Restore it from a backup. After a signer update, each `MultisigConfigUpdated` event carries the new configuration, so you can rebuild a lost copy from the latest one. For an account that has never been updated, your saved copy is the only record, so back it up. |
-
-On a configurable account, any signer change leaves the account's access keys in place. After replacing a signer, list every key the account has authorized and [revoke the ones its old holder could use](/docs/accounts/access-keys/revocation#revoke-when-signers-change).
 
 ## Who can move the funds
 
@@ -46,5 +27,28 @@ Who can move an account's whole balance depends on who holds the keys that reach
 | [Custodian](/docs/accounts/wallets/custodians) | The custodian, under the policies you set with it |
 | [Browser wallet](/docs/accounts/wallets/browser-wallets) | The user, who holds the account's one private key |
 | [Configurable account](/docs/accounts/policies/signing-thresholds) | Signers whose weights reach the threshold together. In the [recommended setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups), no outside party reaches it alone. |
+
+## What your app is responsible for
+
+Tempo checks what a key signs, not whether the right person holds the key. Your app owns four decisions:
+
+- **Where keys live.** Keep a passkey or device key on the customer's device, and backend keys in a KMS or HSM.
+- **Which signers your app holds.** Every signer your app or wallet provider holds is weight an attacker gets by breaching you. On a configurable account, keep your combined weight below the threshold, and count parties, not keys ([what a threshold protects against](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects)).
+- **Each account's configuration.** Tempo stores only a hash of a configurable account's signers, weights, threshold, and version, so save the configuration with the account record and replace it after every signer update. Without it, the signers can't approve ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
+- **What gets signed.** A wallet provider's policy engine can't read a raw hash, so it can't tell a key authorization from a payment. Check the key, limits, scopes, and expiry in your own backend before asking the provider to sign ([who can move the funds](/docs/accounts/wallets/embedded-wallets#who-can-move-the-funds)).
+
+## If a key or service is compromised
+
+A breach exposes only the keys the breached party held. Revoke those keys, and on a configurable account, use the remaining signers to replace any signer the attacker reached.
+
+| Compromise | What an attacker can do | What you do |
+| --- | --- | --- |
+| Lost device | Pay with the device's access key, within its limits, until it expires. A passkey on the device still needs the device's unlock. | [Revoke](/docs/accounts/access-keys/revocation) the device key. On a configurable account, the other signers [replace the passkey](/docs/accounts/guides/users/recover-an-account). On a single-key account whose only key was on the device, no one can recover the funds. |
+| Leaked access key | Spend up to the key's remaining [spending limit](/docs/accounts/access-keys/spending-limits), only to the contracts and recipients in its [scopes](/docs/accounts/access-keys/scopes), until its [expiry](/docs/accounts/access-keys/expiry). A leaked [admin access key](/docs/accounts/access-keys/admin-access-keys) can spend the whole balance and authorize new keys. | Revoke the key. For an admin key, also revoke every key it authorized. Set any token approvals it made to zero ([what revocation leaves in place](/docs/accounts/access-keys/revocation#what-revocation-leaves-in-place)). |
+| Breached backend | Use every key the backend holds: access keys within their bounds, and any signer at its weight. If the backend holds a single-key account's key, it can move the whole balance. | Revoke its access keys and authorize new ones. On a configurable account, the other signers [remove the backend's signer](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer). For a single-key account, move the funds to a new account. |
+| Breached wallet provider | On a single-key embedded wallet, sign anything with the account's key and move the whole balance. On a configurable account where the provider's key is [one signer](/docs/accounts/guides/users/embed-wallets), approve only at that key's weight, which can't reach the threshold alone. | On a configurable account, the customer's passkey replaces the provider's signer. On a single-key account, move the funds to a new account once you control signing again. |
+| Lost saved configuration | Nothing. The configuration lists signer addresses and weights, not keys. | Restore it from a backup. After a signer update, each `MultisigConfigUpdated` event carries the new configuration, so you can rebuild a lost copy from the latest one. For an account that has never been updated, your saved copy is the only record, so back it up. |
+
+On a configurable account, any signer change leaves the account's access keys in place. After replacing a signer, list every key the account has authorized and [revoke the ones its old holder could use](/docs/accounts/access-keys/revocation#revoke-when-signers-change).
 
 Single-key accounts, access keys, and receive policies are live on mainnet and testnet. Configurable accounts, signer changes, and account upgrades run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
