@@ -3,12 +3,11 @@
 import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react'
 import { style } from '../styles/recipes'
 
-export type CopyButtonState = 'idle' | 'copying' | 'copied' | 'error'
+export type CopyButtonState = 'idle' | 'copied' | 'error'
 
 type CopyButtonProps = Omit<ComponentProps<'button'>, 'children' | 'onClick' | 'type'> & {
   text: string | (() => string | Promise<string>)
   label?: string
-  copyingLabel?: string
   icon?: ReactNode
   copiedIcon?: ReactNode
   resetAfter?: number
@@ -19,7 +18,6 @@ type CopyButtonProps = Omit<ComponentProps<'button'>, 'children' | 'onClick' | '
 export function CopyButton({
   text,
   label = 'Copy',
-  copyingLabel,
   icon,
   copiedIcon,
   resetAfter = 0,
@@ -47,7 +45,6 @@ export function CopyButton({
       setState(next)
       onStateChange?.(next)
     }
-    update('copying')
     try {
       const content = typeof text === 'function' ? await text() : text
       if (currentRequest !== request.current) return
@@ -61,17 +58,15 @@ export function CopyButton({
   }
 
   return (
-    <button {...props} type="button" disabled={disabled || state === 'copying'} onClick={copy}>
+    <button {...props} type="button" disabled={disabled} onClick={copy}>
       {state === 'copied' ? (copiedIcon ?? icon) : icon}
       <span {...copyButtonLabel()}>
-        {(copyingLabel ? [label, copyingLabel, 'Copied'] : [label, 'Copied']).map((label) => (
+        {[label, 'Copied'].map((label) => (
           <span key={label} aria-hidden="true">
             {label}
           </span>
         ))}
-        <span>
-          {state === 'copied' ? 'Copied' : state === 'copying' ? (copyingLabel ?? label) : label}
-        </span>
+        <span>{state === 'copied' ? 'Copied' : label}</span>
       </span>
     </button>
   )

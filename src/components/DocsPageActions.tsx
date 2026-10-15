@@ -87,7 +87,6 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
               key={pathname}
               text={loadMarkdown}
               label="Copy for agent"
-              copyingLabel="Copying…"
               icon={<CopyIcon aria-hidden="true" width="14" height="14" />}
               onStateChange={setState}
             />
