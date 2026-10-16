@@ -104,7 +104,7 @@ await client.token.transferSync({ // [!code hl]
 }) // [!code hl]
 ```
 
-Viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openTreasury` for every action, not once at startup. A [signer change](/docs/accounts/key-management/signer-updates#add-a-signer) raises the configuration's version and returns the new `config`. Save it, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.
+Viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openTreasury` for every action, not once at startup. A [signer change](/docs/accounts/account-configuration/configuration-updates#add-a-signer) raises the configuration's version and returns the new `config`. Save it, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.
 
 This example holds two approvers' keys in one process, so that process could pay alone. In production, each approver checks the recipient and amount and signs on their own device. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). To check the treasury's approvals in your own contract, see [Verify approvals in a contract](/docs/accounts/policies/signing-thresholds#verify-approvals).
 
@@ -133,7 +133,7 @@ const replaced = await client.accounts.updateConfigSync({ // [!code hl]
 saved.config = replaced.config // [!code hl]
 ```
 
-The treasury keeps its address and balance, and the departing approver's key can no longer approve anything. To remove a signer without a successor, or to rotate a key for an approver who stays, see [Signer updates](/docs/accounts/key-management/signer-updates#remove-a-signer).
+The treasury keeps its address and balance, and the departing approver's key can no longer approve anything. To remove a signer without a successor, or to rotate a key for an approver who stays, see [Configuration updates](/docs/accounts/account-configuration/configuration-updates#remove-a-signer).
 
 Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). Revoke every access key the departing approver held or managed with `client.accessKey.revokeSync`, and set to zero any token allowance one of those keys approved. If the key was an [admin access key](/docs/accounts/access-keys/admin-access-keys), revoke the keys it authorized too. [Revocation](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) shows how to list the keys the treasury has authorized.
 

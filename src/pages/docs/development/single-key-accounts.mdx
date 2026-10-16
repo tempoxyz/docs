@@ -72,7 +72,7 @@ The root key can authorize [access keys](/docs/development/account-keychain), ex
 
 An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key, with weights that must reach a threshold. The upgrade is permanent.
 
-Account upgrades aren't live yet. They work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and their specification, [TIP-1113](https://tips.sh/1113), is a Draft that may still change. Sent on mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/key-management/account-upgrade).
+Account upgrades aren't live yet. They work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and their specification, [TIP-1113](https://tips.sh/1113), is a Draft that may still change. Sent on mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
 
 | Property | Rule |
 | --- | --- |
@@ -85,4 +85,4 @@ Account upgrades aren't live yet. They work only on the [Tempo Accounts devnet](
 | Root key afterward | Can't sign directly on Tempo. It approves only if listed as an owner, with its weight. Other chains, and contracts that check signatures themselves, such as Permit2, may still accept it. |
 | Event | `AccountUpgraded(account, commitment, salt, threshold, owners)` |
 
-Viem 2.57.5 has no upgrade action, so call the precompile with `writeContractSync`, as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade). Every approval carries the configuration, so [save it](/docs/development/configurable-accounts#keep-the-current-configuration) with the account record.
+Viem 2.57.5 has no upgrade action, so call the precompile with `writeContractSync`, as in [Account upgrade](/docs/accounts/account-configuration/account-upgrade#send-the-upgrade). Every approval carries the configuration, so [save it](/docs/development/configurable-accounts#keep-the-current-configuration) with the account record.

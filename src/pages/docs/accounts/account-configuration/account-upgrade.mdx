@@ -34,7 +34,7 @@ The original key isn't fully retired: contracts that verify signatures themselve
 
 ## Choose signers
 
-List the original key and at least one backup signer, such as a passkey on the user's device or a key your recovery provider holds. With both at weight 1 and threshold 1, either key can pay alone and replace the other if it's lost. To require two approvals per payment, use threshold 2 with three signers at weight 1. Whatever you choose, the signers left after losing any one must still reach the threshold ([Plan for recovery](/docs/accounts/key-management#plan-for-recovery)).
+List the original key and at least one backup signer, such as a passkey on the user's device or a key your recovery provider holds. With both at weight 1 and threshold 1, either key can pay alone and replace the other if it's lost. To require two approvals per payment, use threshold 2 with three signers at weight 1. Whatever you choose, the signers left after losing any one must still reach the threshold ([Plan for recovery](/docs/accounts/account-configuration#plan-for-recovery)).
 
 Access keys carry over with their limits, so [revoke](/docs/accounts/access-keys/revocation) any you don't want before you upgrade.
 
@@ -74,11 +74,11 @@ await client.writeContractSync({ // [!code hl]
 
 ::::
 
-`original` is the key that controls the account today, such as `Account.fromSecp256k1(privateKey)`. `owners` and `threshold` come from the upgraded account's configuration. Build it with [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) at `original.address`, with `version: 1n` and the salt Tempo derives from the address, `keccak256(concat([toHex('tempo:multisig:upgrade'), original.address]))`, then read `account.config`, which lists the signers sorted by address, as Tempo requires. List `original` as an owner so it can approve, and the backup signer by its address. Its key stays on the user's device or with your recovery provider, and only the address goes in the configuration. [Migrate existing wallets](/docs/accounts/key-management/account-upgrade) shows saving that configuration.
+`original` is the key that controls the account today, such as `Account.fromSecp256k1(privateKey)`. `owners` and `threshold` come from the upgraded account's configuration. Build it with [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) at `original.address`, with `version: 1n` and the salt Tempo derives from the address, `keccak256(concat([toHex('tempo:multisig:upgrade'), original.address]))`, then read `account.config`, which lists the signers sorted by address, as Tempo requires. List `original` as an owner so it can approve, and the backup signer by its address. Its key stays on the user's device or with your recovery provider, and only the address goes in the configuration. [Migrate existing wallets](/docs/accounts/account-configuration/account-upgrade) shows saving that configuration.
 
 After the upgrade, the record your app saves is the account's only readable list of signers ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)). Whenever your app acts for the account later, rebuild it from that record with `Account.fromConfig` and attach the keys that approve, such as `original`. The other signers stay as addresses. Viem signs with the attached keys until their weights reach the threshold; if they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
-[Adding](/docs/accounts/key-management/signer-updates#add-a-signer) or [removing](/docs/accounts/key-management/signer-updates#remove-a-signer) signers later raises the version: save the `config` that `updateConfigSync` returns and rebuild the account from it, or the next transaction fails with `multisig configuration commitment mismatch`. To upgrade every user's account, follow [Migrate existing wallets](/docs/accounts/key-management/account-upgrade).
+[Adding](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [removing](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) signers later raises the version: save the `config` that `updateConfigSync` returns and rebuild the account from it, or the next transaction fails with `multisig configuration commitment mismatch`. To upgrade every user's account, follow [Migrate existing wallets](/docs/accounts/account-configuration/account-upgrade).
 
 <span id="account-upgrade-limits" />
 
@@ -88,6 +88,6 @@ After the upgrade, the record your app saves is the account's only readable list
 - The upgrade must be the transaction's only call, with no `keyAuthorization` and no EIP-7702 authorization list.
 - Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
 - Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
-- Upgraded accounts don't use the [recovery factory](/docs/accounts/key-management#recover-funds-sent-on-another-chain) for funds sent to their address on another chain. The original key still controls the address there.
+- Upgraded accounts don't use the [recovery factory](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain) for funds sent to their address on another chain. The original key still controls the address there.
 
 Reference: [Single-key accounts](/docs/development/single-key-accounts#upgrade-to-a-configurable-account). Specification: [TIP-1113](https://tips.sh/1113).

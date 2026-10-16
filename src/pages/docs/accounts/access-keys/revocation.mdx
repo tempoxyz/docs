@@ -40,7 +40,7 @@ Revocation doesn't undo what the key did while it was active:
 
 Changing a configurable account's signers, which works only on the Tempo Accounts devnet, doesn't touch its access keys, so revoke them yourself: after a recovery, and before a hand-off.
 
-After you [replace a lost or compromised signer](/docs/accounts/key-management/signer-updates#remove-a-lost-or-compromised-signer), revoke every key that signer's holder could use, including any an attacker authorized. You won't have those addresses saved, so list every key the account has authorized from its `KeyAuthorized` events. The devnet RPC searches at most 100,000 blocks per request, so read the events in pages:
+After you [replace a lost or compromised signer](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer), revoke every key that signer's holder could use, including any an attacker authorized. You won't have those addresses saved, so list every key the account has authorized from its `KeyAuthorized` events. The devnet RPC searches at most 100,000 blocks per request, so read the events in pages:
 
 ```ts [find-keys.ts]
 import { Abis, Addresses } from 'viem/tempo'
