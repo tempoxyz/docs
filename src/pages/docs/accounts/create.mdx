@@ -13,17 +13,19 @@ import { SingleKeyAccountDemo } from '../../../components/guides/SingleKeyAccoun
 
 Creating a Tempo account takes no API call and no transaction.
 
-A single-key Tempo account's address comes from the key that approves its payments, so your app can create one as soon as it has a key, and the address can receive stablecoins right away. Create one below on Moderato testnet from a passkey, a device key, or a private key.
-
-<span id="try-a-passkey-account" />
-
-<SingleKeyAccountDemo />
+A single-key Tempo account's address comes from the key that approves its payments, so your app can create one as soon as it has a key, and the address can receive stablecoins right away.
 
 <span id="create-a-passkey-account" />
 
 ## Create a single-key account
 
-On mainnet and testnet today, an account is a [single-key account](/docs/development/single-key-accounts) (EOA): one key, such as a passkey, approves its payments and authorizes its [access keys](/docs/accounts/access-keys). This example creates a passkey account on Moderato testnet and funds it from the testnet faucet:
+On mainnet and testnet today, an account is a [single-key account](/docs/development/single-key-accounts) (EOA): one key, such as a passkey, approves its payments and authorizes its [access keys](/docs/accounts/access-keys). Create one on Moderato testnet from a passkey, a device key, or a private key:
+
+<span id="try-a-passkey-account" />
+
+<SingleKeyAccountDemo />
+
+In code, this creates a passkey account on Moderato testnet and funds it from the testnet faucet:
 
 ```ts [passkey-account.ts]
 import { tempoModerato } from 'viem/chains'
