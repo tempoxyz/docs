@@ -1,0 +1,52 @@
+---
+title: Use Tempo through your custodian
+seoTitle: Use Fireblocks and Other Custodians with Tempo | Tempo Docs
+description: Check which Tempo features your custodian supports, set a fee token on each custody address, and give clients deposit addresses that pay into one custody wallet.
+---
+
+# Use Tempo through your custodian
+
+Send and receive stablecoins on Tempo from the custody setup you already have.
+
+If your company's stablecoins sit with Fireblocks or a similar custodian, the custodian holds each address's key and signs under your approval policies. On Tempo, a custody address is a [single-key account](/docs/accounts/how-it-works#address), and plain stablecoin transfers work as on any EVM chain. A few settings make it work well: a fee token on each address, a deposit address per client, and a receive policy.
+
+Everything on this page is live on mainnet and testnet.
+
+:::::steps
+
+<span id="what-custodians-support-on-tempo" />
+
+### Check what your custodian supports on Tempo
+
+Ask your custodian two questions:
+
+- **Does it send [Tempo Transactions](/docs/guide/tempo-transaction)?** They add a fee token you choose, fee sponsorship, and [access keys](/docs/accounts/access-keys). Without them, you can still send plain transfers.
+- **Can it make contract calls or sign raw hashes?** Setting a default fee token, registering virtual addresses, and setting a receive policy are each a contract call from the custody address.
+
+[Fireblocks](https://developers.fireblocks.com) sends Tempo Transactions with a fee token you choose. Its Tempo transfer API, in beta, also offers parallel and expiring nonces, fee sponsorship from another vault in the same workspace, and memos. A vault can authorize an access key with a contract call to the [Account Keychain](/docs/protocol/transactions/AccountKeychain), and [raw signing](https://developers.fireblocks.com/docs/raw-signing) covers the rest, behind a policy rule that allows it.
+
+Other custodians may support only withdrawals of listed stablecoins, and pick the fee token themselves. [Partners](/docs/partners/wallets#custodial--institutional) lists custodians that support Tempo.
+
+<span id="choose-the-fee-token-for-custody-addresses" />
+
+### Set a default fee token on each custody address
+
+Tempo has no gas token: every transaction pays its fee in a USD stablecoin. Set a [default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each custody address, usually the stablecoin it holds, such as OUSD. To set it, have the custody address call `setUserToken(address)` on the FeeManager at `0xfeec000000000000000000000000000000000000`, with the stablecoin's token contract address.
+
+Without a default, a plain stablecoin transfer pays its fee in the stablecoin it sends, but any other call, such as a contract call, falls back to pathUSD, which the address may not hold. [How Tempo picks the fee token](/docs/accounts/fees#fee-token-precedence) lists the full order.
+
+<span id="attribute-deposits-in-an-omnibus-wallet" />
+
+### Give each client a deposit address
+
+If your custodian holds many clients' funds in one omnibus wallet, register that wallet for [virtual addresses](/docs/accounts/virtual-addresses) and give each client a deposit address derived from it. Deposits land directly in the omnibus wallet, and each deposit names the address it was sent to, so you know which client to credit.
+
+Registration binds the deposit addresses to the custody address permanently, so register an address whose key your custodian won't rotate. [Hold customer funds in an omnibus account](/docs/accounts/custodians/omnibus-accounts) walks through registering, deriving addresses, and crediting deposits. For payments out, add a [payment reference](/docs/guide/payments/transfer-memos) with your internal reference.
+
+<span id="control-what-arrives" />
+
+### Accept only the stablecoins and senders you expect
+
+Set a [receive policy](/docs/accounts/policies/receive-policies) on each custody address so it accepts only the stablecoins and senders you allow. Tempo holds anything else for recovery instead of crediting it, and a held payment still looks like a successful transfer, so credit a deposit only when its confirmed `Transfer` event names the custody address. Deposits to virtual addresses follow the policy of the address they're registered to.
+
+:::::

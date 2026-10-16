@@ -70,7 +70,7 @@ const keys = await Promise.all(
 const unrevoked = keys.filter((key) => !key.isRevoked) // [!code hl]
 ```
 
-Before you [hand an account to a customer](/docs/accounts/guides/users/hand-off), revoke your app's access keys, then swap out your app's signers. Once your signers are gone, your app can't approve anything, including a revocation.
+Before you [hand an account to a customer](/docs/accounts/apps/self-custodial-wallets), revoke your app's access keys, then swap out your app's signers. Once your signers are gone, your app can't approve anything, including a revocation.
 
 ## Revocation limits
 

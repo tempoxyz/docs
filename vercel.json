@@ -1213,7 +1213,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/identity-provider",
-      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
@@ -1233,7 +1233,7 @@
     },
     {
       "source": "/developers/docs/accounts/authentication/privy",
-      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets#build-with-privy",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets#build-with-privy",
       "permanent": true
     },
     {
@@ -1248,22 +1248,22 @@
     },
     {
       "source": "/developers/docs/accounts/guides/add-signers",
-      "destination": "/developers/docs/accounts/guides/users/add-a-recovery-signer#add-a-backup-signer",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/multi-factor",
-      "destination": "/developers/docs/accounts/guides/users/add-a-recovery-signer#require-multi-factor-approval",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/rotate-keys",
-      "destination": "/developers/docs/accounts/guides/teams/company-treasury#rotate-an-approvers-key",
+      "destination": "/developers/docs/accounts/custodians/company-treasury#rotate-an-approvers-key",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/replace-keys",
-      "destination": "/developers/docs/accounts/guides/users/add-a-recovery-signer#recover-from-a-lost-passkey",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
@@ -1278,12 +1278,12 @@
     },
     {
       "source": "/developers/docs/accounts/guides/export",
-      "destination": "/developers/docs/accounts/guides/users/add-a-recovery-signer#hand-off-to-a-self-custodial-wallet",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/recover",
-      "destination": "/developers/docs/accounts/guides/users/add-a-recovery-signer#recover-from-a-lost-passkey",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
@@ -1298,7 +1298,7 @@
     },
     {
       "source": "/developers/docs/accounts/advanced/team-accounts",
-      "destination": "/developers/docs/accounts/guides/teams/company-treasury#give-a-team-a-budget",
+      "destination": "/developers/docs/accounts/custodians/company-treasury#give-a-team-a-budget",
       "permanent": true
     },
     {
@@ -1313,12 +1313,12 @@
     },
     {
       "source": "/developers/docs/accounts/agents",
-      "destination": "/developers/docs/accounts/guides/agents/give-an-agent-a-wallet",
+      "destination": "/developers/docs/accounts/automations/give-an-agent-a-wallet",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/backend-automation",
-      "destination": "/developers/docs/accounts/guides/automations/pay-out-from-a-backend",
+      "destination": "/developers/docs/accounts/automations/pay-out-from-a-backend",
       "permanent": true
     },
     {
@@ -1328,37 +1328,37 @@
     },
     {
       "source": "/developers/docs/accounts/guides/wallet-provider",
-      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/enterprise-sso",
-      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/self-custody",
-      "destination": "/developers/docs/accounts/guides/users/add-a-recovery-signer",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/automate-backend",
-      "destination": "/developers/docs/accounts/guides/automations/pay-out-from-a-backend",
+      "destination": "/developers/docs/accounts/automations/pay-out-from-a-backend",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/spending-account",
-      "destination": "/developers/docs/accounts/guides/automations/fund-a-card-program",
+      "destination": "/developers/docs/accounts/automations/pay-from-an-embedded-wallet",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/agent-wallet",
-      "destination": "/developers/docs/accounts/guides/agents/give-an-agent-a-wallet",
+      "destination": "/developers/docs/accounts/automations/give-an-agent-a-wallet",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/company-treasury",
-      "destination": "/developers/docs/accounts/guides/teams/company-treasury",
+      "destination": "/developers/docs/accounts/custodians/company-treasury",
       "permanent": true
     },
     {
@@ -1383,7 +1383,7 @@
     },
     {
       "source": "/developers/docs/accounts/create/legacy-accounts",
-      "destination": "/developers/docs/accounts/wallets/browser-wallets",
+      "destination": "/developers/docs/accounts/wallets",
       "permanent": true
     },
     {
@@ -1393,7 +1393,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/users/sign-in-with-your-login",
-      "destination": "/developers/docs/accounts/guides/users",
+      "destination": "/developers/docs/accounts/apps",
       "permanent": true
     },
     {
@@ -1423,7 +1423,7 @@
     },
     {
       "source": "/developers/docs/accounts/team-budgets",
-      "destination": "/developers/docs/accounts/guides/teams/company-treasury#give-a-team-a-budget",
+      "destination": "/developers/docs/accounts/custodians/company-treasury#give-a-team-a-budget",
       "permanent": true
     },
     {
@@ -1438,7 +1438,7 @@
     },
     {
       "source": "/developers/docs/accounts/integrate",
-      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets#connect-tempo-wallet",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets#connect-tempo-wallet",
       "permanent": true
     },
     {
@@ -1453,7 +1453,7 @@
     },
     {
       "source": "/developers/docs/accounts/providers",
-      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {

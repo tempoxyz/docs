@@ -1,17 +1,17 @@
 ---
 title: Pay out from a backend
 seoTitle: Send Payouts from a Backend with a Scoped Tempo Access Key | Tempo Docs
-description: Authorize a KMS-held access key that pays only approved payees within a daily limit, then send payouts from your backend without prompting the customer.
+description: Pay contractors, vendors, or sellers from a Tempo account with a KMS-held access key that pays only approved payees, up to a daily limit.
 interactive: true
 ---
 
-import { GuideDemo } from '../../../../../components/guides/GuideDemo'
+import { GuideDemo } from '../../../../components/guides/GuideDemo'
 
 # Pay out from a backend
 
-Your backend sends payouts from a customer's Tempo account without prompting the customer each time.
+Send payouts from your backend with a key that can pay only approved payees, up to a daily limit.
 
-In this guide, the customer's signers approve an [access key](/docs/accounts/access-keys) once, and your backend keeps it in its KMS to send payouts. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees.
+If your company pays contractors, vendors, or sellers in stablecoins, your payout service has to send each payment without someone approving it, and without holding the account's key. In this guide, the account's signers, your own approvers or your customer's, approve an [access key](/docs/accounts/access-keys) once, and your backend keeps it in its KMS. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees.
 
 <span id="backend-services" />
 <span id="automations" />
@@ -119,3 +119,7 @@ The customer isn't prompted. Tempo rejects a payout to an address outside `payee
 - Payouts confirm one at a time by default, because an account's transactions share one nonce, a counter that orders them. To send them concurrently, use [expiring nonces or nonce keys](/docs/guide/payments/send-parallel-transactions).
 - To add a payee, the signers or an [admin key](/docs/accounts/access-keys/admin-access-keys) update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls).
 - You can't extend an expiry, so [authorize a replacement key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before it passes.
+
+## Move idle funds into Earn
+
+Balances waiting for the next payout run can sit in an [Earn](/docs/earn) vault. Use a separate key scoped to the vault's `approve` and `deposit` calls, so the payout key still pays only payees, and follow [Deposit](/docs/earn/integrate) for the vault checks.

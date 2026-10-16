@@ -1,0 +1,100 @@
+---
+title: Add Tempo to your wallet
+seoTitle: Add Tempo Networks, Stablecoin Balances, and Tempo Transactions to a Wallet | Tempo Docs
+description: Add Tempo mainnet and testnet to a wallet, show stablecoin balances without a native gas token, let users pay fees in stablecoins, and send Tempo Transactions.
+---
+
+# Add Tempo to your wallet
+
+Support Tempo in your wallet, from network settings to Tempo Transactions.
+
+If you build a wallet, such as a browser extension, mobile wallet, or hardware wallet, your users can already sign standard Ethereum transactions on Tempo. Tempo has no native gas token, though, so balance checks and fee quotes need changes, and [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
+
+[Integrating wallet support](/docs/quickstart/wallet-developers) has the full checklist and recipes.
+
+:::::steps
+
+### Add the Tempo networks
+
+Add mainnet for production and Moderato testnet for development. Both use `USD` as the currency symbol, because fees are denominated in USD.
+
+| Network | Chain ID | HTTP RPC | WebSocket RPC | Explorer |
+| --- | --- | --- | --- | --- |
+| Tempo Mainnet | `4217` | `https://rpc.tempo.xyz` | `wss://rpc.tempo.xyz` | [explore.tempo.xyz](https://explore.tempo.xyz) |
+| Tempo Testnet (Moderato) | `42431` | `https://rpc.moderato.tempo.xyz` | `wss://rpc.moderato.tempo.xyz` | [explore.testnet.tempo.xyz](https://explore.testnet.tempo.xyz) |
+
+In Viem, use the `tempo` and `tempoModerato` chains from `viem/chains`. [Network details](/docs/quickstart/connection-details) lists both networks.
+
+### Show stablecoin balances
+
+Tempo has no native token, so don't show a native balance. `eth_getBalance` [returns a large placeholder value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) so existing balance checks don't block users, and the `BALANCE` opcode returns 0. Read each stablecoin's TIP-20 balance instead, and remove any check that blocks a transaction on the native balance.
+
+::::code-group
+
+```ts [balance.ts]
+import { client } from './client'
+
+const balance = await client.token.getBalance({
+  account: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
+  token: '0x20c0000000000000000000000000000000000001', // a Moderato test stablecoin
+})
+// { amount: bigint; decimals: number; formatted: string }
+```
+
+```ts [client.ts]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
+```
+
+::::
+
+Pull token names, symbols, and icons from the [tokenlist](/docs/quickstart/tokenlist), at `tokenlist.tempo.xyz/list/4217` for mainnet and `tokenlist.tempo.xyz/list/42431` for testnet.
+
+### Let users pay fees in stablecoins
+
+Each transaction pays its fee in a USD stablecoin, its [fee token](/docs/accounts/fees/fee-tokens). Quote fees in the transaction's fee token, and let users choose it in your confirmation screen or account settings. Pass `feeToken` for one transaction, or set the account's default with `setUserTokenSync`:
+
+::::code-group
+
+```ts [fee-token.ts]
+import { client } from './client'
+
+// Pay this transaction's fee in a different stablecoin
+await client.token.transferSync({
+  amount: { formatted: '100' },
+  feeToken: '0x20c0000000000000000000000000000000000002', // [!code hl]
+  to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+  token: '0x20c0000000000000000000000000000000000001',
+})
+
+// Or set the account's default fee token
+await client.fee.setUserTokenSync({
+  token: '0x20c0000000000000000000000000000000000001',
+})
+```
+
+```ts [client.ts]
+// [!include ~/snippets/viem.moderato.config.ts:setup]
+```
+
+::::
+
+Without a default, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence), which can fall back to pathUSD, a stablecoin the user might not hold. Setting a fee token for each transaction needs a Tempo Transaction.
+
+### Send Tempo Transactions
+
+Replace your EIP-1559 (type 2) envelope with the Tempo Transaction envelope (type `0x76`), using a [Tempo SDK](/docs/guide/tempo-transaction#integration-guides) for TypeScript, Rust, Go, Python, or Foundry. With it, your wallet can:
+
+- [Batch calls](/docs/guide/tempo-transaction#batch-calls) that succeed or fail together, such as an approval and a swap.
+- Accept [sponsored fees](/docs/accounts/fees/fee-sponsorship), so an app pays the fee for your user.
+- Authorize [access keys](/docs/accounts/access-keys), so an app or agent pays from the user's account within a spending limit, scopes, and an expiry.
+- Sign with a [passkey](/docs/accounts/authentication/passkeys), and send [concurrent transactions](/docs/guide/payments/send-parallel-transactions) or [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) without tracking one nonce sequence.
+
+If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Transactions provide them natively: see the [feature comparison](/docs/protocol/transactions/eip-7702#feature-comparison).
+
+:::::
+
+## After you add Tempo
+
+Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. To let a user add backup signers at the same address, the wallet signs an [account upgrade](/docs/accounts/key-management/account-upgrade) as a Tempo Transaction. Upgrades run only on the Tempo Accounts devnet.
+
+To appear in [Wallet partners](/docs/partners/wallets), [contact Tempo](/docs/partners/join) about your integration.

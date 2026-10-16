@@ -12,15 +12,12 @@
 import {
   type AccessKey,
   type AccessKeyKind,
-  type AccessKeyTemplateId,
   type ActionRequest,
   type ActionResult,
-  accessKeyTemplates,
   addAccessKey,
   addSigner,
   approvalSets,
   configuredSigners,
-  formatBalance,
   formatUsd,
   isCreated,
   loadPreset,
@@ -37,25 +34,14 @@ import {
   signerKinds,
   usableSigners,
 } from './account-sandbox'
-import type {
-  ChainConfig,
-  DevnetCallOptions,
-  DevnetSessionInfo,
-  PreparedKey,
-} from './account-sandbox-devnet'
+import type { DevnetCallOptions, DevnetSessionInfo, PreparedKey } from './account-sandbox-devnet'
 
 // ---------------------------------------------------------------------------
 // Types
 
-export type GuideId =
-  | 'add-signers'
-  | 'rotate-keys'
-  | 'recover'
-  | 'export'
-  | 'backend-automation'
-  | 'team-accounts'
+export type GuideId = 'recover' | 'backend-automation'
 
-export type LocalIcon = 'device' | 'laptop' | 'passkey' | 'update' | 'server' | 'team' | 'key'
+export type LocalIcon = 'device' | 'laptop' | 'passkey' | 'update' | 'server'
 
 /** Something in your app or on a device, not on Tempo. */
 export type LocalItem = {
@@ -102,7 +88,6 @@ export type GuideAdapter = {
     signer: Pick<Signer, 'kind' | 'name' | 'privateKey'>,
     options?: DevnetCallOptions,
   ): Promise<PreparedKey>
-  prepareAccessKey(key: AccessKey, options?: DevnetCallOptions): Promise<PreparedKey>
   /** Test funds from the devnet faucet. New accounts have none, and transactions need fees. */
   fund(
     account: SandboxAccount,
@@ -112,16 +97,11 @@ export type GuideAdapter = {
 
 /** Reads and local key work on devnet (`guide-demo-devnet.ts`). */
 export type GuideChain = {
-  /** The account's configuration commitment on Tempo, or `null` before its first transaction. */
-  commitment(address: string): Promise<string | null>
-  configCommitment(config: ChainConfig): string
   /** The address `Account.fromConfig({ address: 'infer' })` derives for this configuration. */
   inferAddress(config: {
     owners: readonly { owner: string; weight: number }[]
     threshold: number
   }): string
-  /** AlphaUSD balance in USD. */
-  balance(address: string): Promise<number>
   /** What an access key can still spend this period, in USD, as Tempo reports it. */
   remaining(account: string, keyId: string): Promise<number>
   generatePrivateKey(): string
@@ -184,10 +164,9 @@ export class DemoError extends Error {
 
 const emptyHeld: Held = { signers: [], accessKeys: [], privateKeys: {}, notes: {} }
 
-export function startState(name?: string): DemoState {
-  const account = loadPreset('from-scratch')
+export function startState(): DemoState {
   return {
-    account: name ? { ...account, name } : account,
+    account: loadPreset('from-scratch'),
     local: [],
     held: emptyHeld,
   }
@@ -273,20 +252,6 @@ export function addedKey(before: SandboxAccount, after: SandboxAccount): AccessK
   if (!key || before.accessKeys.some((item) => item.id === key.id))
     throw new DemoError(after.notice ?? 'The access key wasn’t added.')
   return key
-}
-
-/** An access key built from a template before any account holds it, for `prepareAccessKey`. */
-export function draftAccessKey(
-  template: AccessKeyTemplateId,
-  changes: Partial<Omit<AccessKey, 'id' | 'kind' | 'status' | 'spent'>> = {},
-): AccessKey {
-  return {
-    ...accessKeyTemplates[template],
-    ...changes,
-    id: `draft-${template}`,
-    spent: 0,
-    status: 'active',
-  }
 }
 
 export function paymentRequest(
@@ -451,18 +416,6 @@ function addressOf(account: SandboxAccount) {
   return account.address
 }
 
-async function onChainConfig(ctx: GuideContext, account: SandboxAccount) {
-  const address = addressOf(account)
-  const info = await ctx.adapter.inspect(address)
-  if (!info) throw new DemoError('This page didn’t create that account on devnet.')
-  const commitment = await ctx.chain.commitment(address)
-  const matches =
-    commitment === null ? null : commitment === ctx.chain.configCommitment(info.config)
-  if (matches === false)
-    throw new DemoError('The config hash Tempo stores doesn’t match this page’s record.')
-  return { info, commitment, matches }
-}
-
 // ---------------------------------------------------------------------------
 // Shared steps
 
@@ -578,189 +531,6 @@ const keyWithDeviceKey: DemoAction = {
       hashes: hashes(['Faucet', created.hash], ['Authorize', authorized.hash]),
     }
   },
-}
-
-const addSigners: DemoScript = {
-  title: 'Add a recovery signer',
-  needs: ['webcrypto'],
-  setup: [keyWithDeviceKey],
-  steps: [
-    {
-      title: 'Create the new signer',
-      action: () => 'Generate the recovery key',
-      run: async (state, ctx) => {
-        const privateKey = ctx.chain.generatePrivateKey()
-        const next = withLocal(
-          {
-            ...state,
-            held: { ...state.held, privateKeys: { ...state.held.privateKeys, backup: privateKey } },
-          },
-          {
-            id: 'backup',
-            icon: 'key',
-            label: 'Recovery key',
-            detail: `${approverKeyDetail(ctx, privateKey)} · not a signer yet`,
-            status: 'pending',
-          },
-        )
-        return {
-          state: next,
-          result: `Generated Recovery key (${short(ctx.chain.addressOf(privateKey))}), standing in for the key a recovery provider gives you. It isn’t a signer yet.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Approve the update',
-      action: () => 'Approve with the first key',
-      run: async (state, ctx) => {
-        const privateKey = state.held.privateKeys.backup
-        if (!privateKey) throw new DemoError('Generate the recovery key first.')
-        const before = state.account
-        const approvers = nextApprovers(before)
-        const next = asOneUpdate(before, addKeySigner(before, ctx, privateKey, 'Recovery key'))
-        const sent = await update(state, ctx, next)
-        return {
-          state: updateLocal(sent.state, 'backup', {
-            status: 'done',
-            detail: `${approverKeyDetail(ctx, privateKey)} · signer`,
-          }),
-          result: `${upperFirst(approverNames(approvers))} approved config v${sent.state.account.version} alone, at threshold ${before.threshold}: Recovery key is a signer at weight 1. Same address and balance.`,
-          hashes: hashes(['Update', sent.hash]),
-        }
-      },
-    },
-    {
-      title: 'Confirm the account survives losing one signer',
-      action: () => 'Check recovery',
-      run: async (state, ctx) => {
-        const check = recoveryCheck(state.account)
-        const { matches } = await onChainConfig(ctx, state.account)
-        return {
-          state,
-          result:
-            `${check.message} ${matches ? `The config hash Tempo stores matches config v${state.account.version}.` : ''}`.trim(),
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Stop the recovery signer acting alone',
-      action: () => 'Create a device key and send the update',
-      run: async (state, ctx) => {
-        const prepared = await prepareDeviceKey(state, ctx, 'Device key')
-        const before = prepared.state.account
-        const approvers = nextApprovers(before)
-        const withDeviceKey = addHeldDeviceKey(before, prepared.state.held, 2).account
-        const next = asOneUpdate(before, checked(setThreshold(withDeviceKey, 2)))
-        const sent = await update(prepared.state, ctx, next)
-        const done = updateLocal(sent.state, 'device-signer', {
-          status: 'done',
-          detail: deviceKeyDetail('signer'),
-        })
-        return {
-          state: done,
-          result: `You created a device key in this browser. ${upperFirst(approverNames(approvers))} approved config v${done.account.version}: ${describeConfig(done.account)}. First key and Recovery key now approve only together. ${recoveryCheck(done.account).message}`,
-          hashes: hashes(['Update', sent.hash]),
-        }
-      },
-    },
-  ],
-}
-
-const rotateKeys: DemoScript = {
-  title: 'Offboard an approver',
-  needs: [],
-  setup: [
-    {
-      title: 'Create the treasury',
-      action: () => 'Create with 3 approver keys',
-      run: async (state, ctx) => {
-        const keys = [1, 2, 3].map(() => ctx.chain.generatePrivateKey())
-        const service = ctx.chain.generatePrivateKey()
-        // v0: Approver key 1 alone, the address comes from it.
-        const first = await createAccount(state, ctx, 'private-key', keys[0])
-        let account = patchSigner(first.state.account, first.signer.id, { name: 'Approver key 1' })
-        const before = account
-        // v1: all three keys, any 2 of 3.
-        for (const [index, privateKey] of keys.slice(1).entries()) {
-          const next = checked(addSigner(account, 'private-key', { privateKey }))
-          const signer = addedSigner(account, next)
-          account = patchSigner(next, signer.id, {
-            name: `Approver key ${index + 2}`,
-            detail: approverKeyDetail(ctx, privateKey),
-          })
-        }
-        account = asOneUpdate(before, checked(setThreshold(account, 2)))
-        const configured = await update({ ...first.state, account: before }, ctx, account)
-        // An access key the team's backend uses.
-        const withKey = addAccessKey(configured.state.account, 'private-key', {
-          privateKey: service,
-        })
-        const key = addedKey(configured.state.account, withKey)
-        const authorized = await update(
-          configured.state,
-          ctx,
-          patchKey(withKey, key.id, { name: 'Service key' }),
-        )
-        const done = {
-          ...authorized.state,
-          held: { ...authorized.state.held, privateKeys: { service } },
-        }
-        return {
-          state: done,
-          result: `Created ${short(addressOf(done.account))}: any 2 of Approver keys 1, 2, and 3 (config v${done.account.version}), with a service access key. This page generated and holds every key.`,
-          hashes: hashes(
-            ['Faucet', first.hash],
-            ['Config v1', configured.hash],
-            ['Authorize', authorized.hash],
-          ),
-        }
-      },
-    },
-  ],
-  steps: [
-    {
-      title: 'Replace their signer',
-      action: () => 'Swap Approver key 2 for Approver key 4',
-      run: async (state, ctx) => {
-        const before = state.account
-        const departing = configuredSigners(before).find(
-          (signer) => signer.name === 'Approver key 2',
-        )
-        if (!departing) throw new DemoError('Approver key 2 isn’t a signer.')
-        const approvers = nextApprovers(before)
-        const removed = checked(removeSigner(before, departing.id))
-        const replaced = addKeySigner(
-          removed,
-          ctx,
-          ctx.chain.generatePrivateKey(),
-          'Approver key 4',
-        )
-        const sent = await update(state, ctx, asOneUpdate(before, replaced))
-        return {
-          state: sent.state,
-          result: `${upperFirst(approverNames(approvers))} approved config v${sent.state.account.version}: ${describeConfig(sent.state.account)}. Approver key 2 can’t approve anymore, and the account can still lose any one key.`,
-          hashes: hashes(['Update', sent.hash]),
-        }
-      },
-    },
-    {
-      title: 'Revoke their keys',
-      action: () => 'Revoke the service key',
-      run: async (state, ctx) => {
-        const key = state.account.accessKeys.find((item) => item.name === 'Service key')
-        if (!key) throw new DemoError('No service key to revoke.')
-        const approvers = nextApprovers(state.account)
-        const sent = await update(state, ctx, revokeAccessKey(state.account, key.id))
-        return {
-          state: sent.state,
-          result: `${upperFirst(approverNames(approvers))} revoked the service key. Replacing a signer doesn’t revoke access keys on its own.`,
-          hashes: hashes(['Revoke', sent.hash]),
-        }
-      },
-    },
-  ],
 }
 
 const recover: DemoScript = {
@@ -880,116 +650,12 @@ const recover: DemoScript = {
   ],
 }
 
-const exportAccount: DemoScript = {
-  title: 'Move your account to your own device key',
-  needs: [],
-  setup: [
-    {
-      title: 'Create the app’s account',
-      action: () => 'Create the account',
-      run: async (state, ctx) => {
-        const signerKey = ctx.chain.generatePrivateKey()
-        const appKey = ctx.chain.generatePrivateKey()
-        const created = await createAccount(state, ctx, 'private-key', signerKey)
-        const named = patchSigner(created.state.account, created.signer.id, { name: 'App signer' })
-        const withKey = addAccessKey(named, 'private-key', { privateKey: appKey })
-        const key = addedKey(named, withKey)
-        const authorized = await update(
-          { ...created.state, account: named },
-          ctx,
-          patchKey(withKey, key.id, { name: 'App access key' }),
-        )
-        const done = withLocal(authorized.state, {
-          id: 'app',
-          icon: 'server',
-          label: 'Your app',
-          detail: 'Holds the account’s signer and an access key · this page',
-          status: 'ready',
-        })
-        return {
-          state: done,
-          result: `This page plays your app: it generated and holds the only signer of ${short(addressOf(done.account))} and an access key.`,
-          hashes: hashes(['Faucet', created.hash], ['Authorize', authorized.hash]),
-        }
-      },
-    },
-  ],
-  steps: [
-    {
-      title: 'Get the user’s signer address',
-      action: () => 'Create device key',
-      run: async (state, ctx) => {
-        const { state: next, key } = await prepareDeviceKey(state, ctx, 'Your device key')
-        return {
-          state: next,
-          result: `You created a device key in this browser. Its address, ${short(key.address)}, is what you’d send the app. It isn’t a signer yet.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Revoke your app’s keys',
-      action: () => 'Revoke the app’s key',
-      run: async (state, ctx) => {
-        const key = state.account.accessKeys.find((item) => item.name === 'App access key')
-        if (!key) throw new DemoError('The app holds no access key.')
-        const sent = await update(state, ctx, revokeAccessKey(state.account, key.id))
-        return {
-          state: sent.state,
-          result: 'The app signer revoked the app’s access key first, while it can still approve.',
-          hashes: hashes(['Revoke', sent.hash]),
-        }
-      },
-    },
-    {
-      title: 'Swap the signers',
-      action: () => 'Swap signers',
-      run: async (state, ctx) => {
-        const app = configuredSigners(state.account).find((signer) => signer.name === 'App signer')
-        if (!app) throw new DemoError('No app signer to replace.')
-        const { account: added } = addHeldDeviceKey(state.account, state.held, 1)
-        const next = asOneUpdate(state.account, checked(removeSigner(added, app.id)))
-        const sent = await update(state, ctx, next)
-        let done = updateLocal(sent.state, 'device-signer', {
-          detail: deviceKeyDetail('the only signer'),
-          status: 'done',
-        })
-        done = updateLocal(done, 'app', { detail: 'Can’t approve anything now', status: 'gone' })
-        return {
-          state: done,
-          result: `The app signer approved its own removal in config v${done.account.version}: your device key is the only signer now. Same address and balance.`,
-          hashes: hashes(['Update', sent.hash]),
-        }
-      },
-    },
-    {
-      title: 'Send the user to their wallet',
-      action: () => 'Check the account',
-      run: async (state, ctx) => {
-        const address = addressOf(state.account)
-        const { matches } = await onChainConfig(ctx, state.account)
-        const balance = await ctx.chain.balance(address)
-        return {
-          state,
-          result:
-            `${short(address)} still holds ${formatBalance(balance)}. ${matches ? 'The config hash Tempo stores matches your device key as the only signer.' : ''}`.trim(),
-          hashes: [],
-        }
-      },
-    },
-  ],
-}
-
 /** Create the account with a device key in this browser. */
-const deviceKeyAccount = (title: string, name?: string): DemoAction => ({
+const deviceKeyAccount = (title: string): DemoAction => ({
   title,
   action: () => 'Create with a device key',
   run: async (state, ctx) => {
-    const created = await createAccount(
-      name ? { ...state, account: { ...state.account, name } } : state,
-      ctx,
-      'device',
-    )
+    const created = await createAccount(state, ctx, 'device')
     return {
       state: created.state,
       result: `Created ${short(addressOf(created.state.account))} with a device key on this browser as its only signer. The devnet faucet funded it.`,
@@ -1072,102 +738,9 @@ const backendAutomation: DemoScript = {
   ],
 }
 
-const teamMembers = [1, 2, 3].map((index) => ({
-  id: `member-${index}`,
-  name: `Member ${index}`,
-  weight: 1,
-}))
-
-function teamKey(account: SandboxAccount) {
-  const next = addAccessKey(account, 'team')
-  const key = addedKey(account, next)
-  return patchKey(next, key.id, {
-    name: 'Team account',
-    delegate: { threshold: 2, members: teamMembers },
-  })
-}
-
-const teamAccounts: DemoScript = {
-  title: 'Give a team its own budget',
-  needs: [],
-  setup: [deviceKeyAccount('Create your treasury', 'Your treasury')],
-  steps: [
-    {
-      title: 'Create the team account',
-      action: () => 'Create team account',
-      run: async (state, ctx) => {
-        const draft = draftAccessKey('team', {
-          name: 'Team account',
-          delegate: { threshold: 2, members: teamMembers },
-        })
-        const key = await ctx.adapter.prepareAccessKey(draft, callOptions(state, ctx))
-        const next = withLocal(
-          {
-            ...state,
-            held: {
-              ...state.held,
-              accessKeys: [...state.held.accessKeys, { kind: 'account', key }],
-            },
-          },
-          {
-            id: 'team',
-            icon: 'team',
-            label: 'Team account',
-            detail: `Any 2 of Members 1–3 · ${short(key.address)}`,
-            status: 'ready',
-          },
-        )
-        return {
-          state: next,
-          result: `A team account at ${short(key.address)}: any 2 of Members 1, 2, and 3. This page generated the three member keys.`,
-          hashes: [],
-        }
-      },
-    },
-    {
-      title: 'Authorize it from the treasury',
-      action: () => 'Approve with the device key',
-      run: async (state, ctx) => {
-        const teamId = state.held.accessKeys.find((item) => item.kind === 'account')?.key.address
-        if (!teamId) throw new DemoError('Create the team account first.')
-        const sent = await update(state, ctx, teamKey(state.account))
-        return {
-          state: updateLocal(sent.state, 'team', {
-            detail: `Any 2 of Members 1–3 · ${short(teamId)} · authorized`,
-            status: 'done',
-          }),
-          result: 'The device key authorized the team account on the treasury: 2,000 USD a day.',
-          hashes: hashes(['Authorize', sent.hash]),
-        }
-      },
-    },
-    {
-      title: 'Track the budget',
-      action: () => 'Members 1 and 2 pay $50, then read the budget',
-      run: async (state, ctx) => {
-        const paid = await payWithKey(state, ctx, 'Team account', 50)
-        const info = await ctx.adapter.inspect(addressOf(paid.state.account))
-        const key = paid.state.account.accessKeys.find((item) => item.name === 'Team account')
-        const keyId = key && info?.keys.find((item) => item.id === key.id)?.keyId
-        if (!key || !keyId) throw new DemoError('The team account isn’t authorized.')
-        const left = await ctx.chain.remaining(addressOf(paid.state.account), keyId)
-        return {
-          state: paid.state,
-          result: `Members 1 and 2 signed as the team account, and the $50 came from the treasury’s balance. Tempo reports ${formatUsd(left)} of ${formatUsd(key.limit)} USD left today for the team.`,
-          hashes: hashes(['Pay $50', paid.hash]),
-        }
-      },
-    },
-  ],
-}
-
 export const guideScripts: Record<GuideId, DemoScript> = {
-  'add-signers': addSigners,
-  'rotate-keys': rotateKeys,
   recover,
-  export: exportAccount,
   'backend-automation': backendAutomation,
-  'team-accounts': teamAccounts,
 }
 
 export const guideDemoIds = Object.keys(guideScripts) as GuideId[]
@@ -1178,6 +751,6 @@ export function scriptActions(script: DemoScript) {
 }
 
 /** A script's starting state. */
-export function scriptStart(guide: GuideId) {
-  return startState(guide === 'team-accounts' ? 'Your treasury' : undefined)
+export function scriptStart(_guide: GuideId) {
+  return startState()
 }

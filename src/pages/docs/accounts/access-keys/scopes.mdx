@@ -26,7 +26,7 @@ Pass `scopes` when you [authorize the key](/docs/accounts/access-keys#authorize-
 
 A call that matches no entry reverts with [`CallNotAllowed`](/docs/protocol/transactions/AccountKeychain#error-callnotallowed). Leave out `scopes` and the key can call anything; pass `scopes: []` and it can call nothing.
 
-A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)`, which payments with a reference use, so give that function its own entry. An Earn deposit needs two entries: `approve(address,uint256)` on the stablecoin with the vault as recipient, and `deposit(uint256,address,uint256)` on the vault. [Pay out from a backend](/docs/accounts/guides/automations/pay-out-from-a-backend) and [Sweep into Earn](/docs/accounts/guides/automations/sweep-into-earn) show complete keys.
+A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)`, which payments with a reference use, so give that function its own entry. An Earn deposit needs two entries: `approve(address,uint256)` on the stablecoin with the vault as recipient, and `deposit(uint256,address,uint256)` on the vault. [Pay out from a backend](/docs/accounts/automations/pay-out-from-a-backend) and [Sweep into Earn](/docs/earn) show complete keys.
 
 <span id="change-allowed-calls" />
 

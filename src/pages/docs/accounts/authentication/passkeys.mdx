@@ -43,7 +43,7 @@ const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
 const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [!code hl]
 ```
 
-`account.address` receives stablecoins right away, and the account's first transaction registers it onchain. On the devnet, next [add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). On mainnet and testnet, a single-key passkey account can't add a signer or swap its key ([Passkey limits](#passkey-limits)).
+`account.address` receives stablecoins right away, and the account's first transaction registers it onchain. On the devnet, next [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). On mainnet and testnet, a single-key passkey account can't add a signer or swap its key ([Passkey limits](#passkey-limits)).
 
 ## Passkey limits
 

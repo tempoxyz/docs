@@ -24,8 +24,8 @@ Add each key as a signer, which approves toward the account's [threshold](/docs/
 | --- | --- |
 | CLI wallet, such as the [Tempo CLI wallet](/docs/cli/wallet) or Foundry `cast` | Access key for scripts and agents |
 | Hardware, browser, or mobile wallet | Signer at weight 1, one per approver |
-| [Wallet provider](/docs/accounts/guides/users/self-custodial-wallets), such as Turnkey or Privy | Signer at weight 1. The provider signs only when its own policies allow. |
-| Cloud KMS or HSM | Signer for recovery, or access key for [backend payouts](/docs/accounts/guides/automations/pay-out-from-a-backend) |
+| [Wallet provider](/docs/accounts/apps/self-custodial-wallets), such as Turnkey or Privy | Signer at weight 1. The provider signs only when its own policies allow. |
+| Cloud KMS or HSM | Signer for recovery, or access key for [backend payouts](/docs/accounts/automations/pay-out-from-a-backend) |
 
 On mainnet and testnet today, a private key can be a single-key account's one key, as in a standard Ethereum account, or an access key on that account. Signers need a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), so the next example works only there.
 
@@ -50,7 +50,7 @@ const account = Account.fromConfig({ // [!code hl]
 }) // [!code hl]
 ```
 
-The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the Viem account that source provides instead. For a raw P-256 key, use `Account.fromP256`. [Set up a company treasury](/docs/accounts/guides/teams/company-treasury) walks through the full setup.
+The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the Viem account that source provides instead. For a raw P-256 key, use `Account.fromP256`. [Set up a company treasury](/docs/accounts/custodians/company-treasury) walks through the full setup.
 
 ## Private key limits
 

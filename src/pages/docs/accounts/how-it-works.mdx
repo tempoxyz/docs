@@ -34,7 +34,7 @@ The address is the account's public ID. It holds the account's stablecoins and s
 
 A single-key account has one key, like a standard Ethereum account (an EOA), so losing the key loses the account. A configurable account has signers instead, and its address stays the same when they change, so the customer keeps their address and balance after replacing a lost phone. You can [upgrade a single-key account](/docs/accounts/key-management/account-upgrade) to a configurable one at the same address.
 
-Single-key accounts and their access keys work on mainnet and testnet today, including the ones your users already have in [browser wallets](/docs/accounts/wallets/browser-wallets), [embedded wallets](/docs/accounts/wallets/embedded-wallets), [server wallets](/docs/accounts/wallets/server-wallets), and with [custodians](/docs/accounts/wallets/custodians). Configurable accounts, and upgrades to them, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Single-key accounts and their access keys work on mainnet and testnet today, including the ones in [wallets](/docs/accounts/wallets) your users already have, in your [app's embedded wallets](/docs/accounts/apps), behind your [backend automations](/docs/accounts/automations), and with [custodians](/docs/accounts/custodians). Configurable accounts, and upgrades to them, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="what-tempo-checks-on-every-transaction" />
 <span id="how-tempo-approves-a-transaction" />
@@ -49,7 +49,7 @@ Single-key accounts and their access keys work on mainnet and testnet today, inc
 
 Each signer is a [private key](/docs/accounts/authentication/private-keys), a [device key](/docs/accounts/authentication/device-keys), or a [passkey](/docs/accounts/authentication/passkeys), with a weight. A payment, a new access key, or a signer change goes through once the weights of the signers who approve it reach the account's [threshold](/docs/accounts/policies/signing-thresholds).
 
-In the example, the passkey has weight 2, the backup and recovery keys have weight 1 each, and the threshold is 2. The passkey pays alone. Your recovery key alone reaches 1 of 2, so you can't move the customer's funds. If the customer loses their phone, the backup and recovery keys together [replace the passkey](/docs/accounts/guides/users/recover-an-account).
+In the example, the passkey has weight 2, the backup and recovery keys have weight 1 each, and the threshold is 2. The passkey pays alone. Your recovery key alone reaches 1 of 2, so you can't move the customer's funds. If the customer loses their phone, the backup and recovery keys together [replace the passkey](/docs/accounts/apps/recover-an-account).
 
 <span id="access-keys" />
 

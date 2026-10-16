@@ -26,7 +26,7 @@ Each Tempo account holds a customer's stablecoins at one address, with rules tha
 Tempo Accounts is in early development. Configurable accounts, with several signers and a threshold, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. [Contact Tempo](https://tempo.xyz/contact) to discuss access.
 :::
 
-The customer holds their own funds when they hold the signing key, such as a passkey. When a wallet provider or your backend holds the key, that party can move the funds too: see [Embedded wallets](/docs/accounts/wallets/embedded-wallets).
+The customer holds their own funds when they hold the signing key, such as a passkey. When a wallet provider or your backend holds the key, that party can move the funds too: see [Apps](/docs/accounts/apps) and [Custodians](/docs/accounts/custodians).
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
@@ -69,15 +69,17 @@ Each transaction pays a network fee in a USD stablecoin, not a separate gas toke
 
 ## Start building
 
-To build on mainnet today, [create a single-key account](/docs/accounts/create#create-a-single-key-account) with a passkey or private key, or keep the [wallets your users already have](/docs/accounts/wallets/browser-wallets). To try several signers and recovery, [create a configurable account](/docs/accounts/create) on the Tempo Accounts devnet. Then [add funds](/docs/accounts/fund). [Use cases](/docs/accounts/use-cases) shows which setup fits what you're building, or pick a guide:
+To build on mainnet today, [create a single-key account](/docs/accounts/create#create-a-single-key-account) with a passkey or private key, or support the [wallets your users already have](/docs/accounts/wallets). To try several signers and recovery, [create a configurable account](/docs/accounts/create) on the Tempo Accounts devnet. Then [add funds](/docs/accounts/fund). [Use cases](/docs/accounts/use-cases) matches each setup to [Apps](/docs/accounts/apps), [Automations](/docs/accounts/automations), [Custodians](/docs/accounts/custodians), and [Wallets](/docs/accounts/wallets), or pick a guide:
 
 <Cards>
-  <Card title="Set up a self-custodial wallet with a provider" description="Your provider's key and the user's passkey approve together, and only the user can recover or leave without you. Runs on the devnet." to="/docs/accounts/guides/users/self-custodial-wallets" />
-  <Card title="Add a recovery signer" description="A second signer, so a customer who loses their phone keeps their account." to="/docs/accounts/guides/users/add-a-recovery-signer" />
-  <Card title="Pay out from a backend" description="Your backend pays approved payees, up to a daily limit, without prompting the customer." to="/docs/accounts/guides/automations/pay-out-from-a-backend" />
-  <Card title="Fund a card program" description="Your backend tops up a customer's card, up to a daily limit, and can pay no one else." to="/docs/accounts/guides/automations/fund-a-card-program" />
-  <Card title="Give an agent a wallet" description="An AI agent's own key, with a budget, an expiry, and only the calls it needs." to="/docs/accounts/guides/agents/give-an-agent-a-wallet" />
-  <Card title="Set up a company treasury" description="Any two of three approvers sign each payment, so no one moves funds alone." to="/docs/accounts/guides/teams/company-treasury" />
+  <Card title="Set up a self-custodial wallet with a provider" description="Your provider's key and the user's passkey approve together, and only the user can recover or leave without you. Runs on the devnet." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Recover a user's account" description="Replace a lost passkey with the signers the user still has, at the same address. Runs on the devnet." to="/docs/accounts/apps/recover-an-account" />
+  <Card title="Pay out from a backend" description="Your backend pays approved payees, up to a daily limit, with a key in your KMS." to="/docs/accounts/automations/pay-out-from-a-backend" />
+  <Card title="Pay from a user's embedded wallet" description="A user's Privy or Turnkey wallet authorizes a key once, so your card or subscription backend pays within limits." to="/docs/accounts/automations/pay-from-an-embedded-wallet" />
+  <Card title="Give an agent a wallet" description="An AI agent's own key, with a budget, an expiry, and only the calls it needs." to="/docs/accounts/automations/give-an-agent-a-wallet" />
+  <Card title="Hold customer funds in an omnibus account" description="A deposit address per customer, paying into one account that accepts only the stablecoins you list." to="/docs/accounts/custodians/omnibus-accounts" />
+  <Card title="Set up a company treasury" description="Any two of three approvers sign each payment, so no one moves funds alone. Runs on the devnet." to="/docs/accounts/custodians/company-treasury" />
+  <Card title="Add Tempo to your wallet" description="Add the networks, show stablecoin balances, and send Tempo Transactions from your wallet." to="/docs/accounts/wallets/add-tempo-to-your-wallet" />
 </Cards>
 
 ## Account features

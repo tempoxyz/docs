@@ -60,10 +60,10 @@ Count parties, not keys. Two keys in the same KMS, or a wallet provider's key an
 
 | Setup | Signers (weight) | Threshold | Who can approve |
 | --- | --- | --- | --- |
-| [Getting started](/docs/accounts/guides/users/add-a-recovery-signer) | Passkey (1), backup key (1) | 1 | Either one |
-| [Customer accounts](/docs/accounts/guides/users/add-a-recovery-signer#multi-factor-approval) | Passkey (2), backup key (1), recovery provider (1) | 2 | The passkey, or both keys |
-| [Self-custodial wallets with a provider](/docs/accounts/guides/users/self-custodial-wallets) | Customer's passkey (1), your wallet provider's key (1), customer's backup key (1) | 2 | Any two: the passkey and the provider day to day, or the customer's two keys without you |
-| [Company treasury](/docs/accounts/guides/teams/company-treasury) | Three approvers (1 each) | 2 | Any two |
+| [Getting started](/docs/accounts/apps/self-custodial-wallets) | Passkey (1), backup key (1) | 1 | Either one |
+| [Customer accounts](/docs/accounts/apps/self-custodial-wallets) | Passkey (2), backup key (1), recovery provider (1) | 2 | The passkey, or both keys |
+| [Self-custodial wallets with a provider](/docs/accounts/apps/self-custodial-wallets) | Customer's passkey (1), your wallet provider's key (1), customer's backup key (1) | 2 | Any two: the passkey and the provider day to day, or the customer's two keys without you |
+| [Company treasury](/docs/accounts/custodians/company-treasury) | Three approvers (1 each) | 2 | Any two |
 
 <span id="recovery-provider" />
 
@@ -75,7 +75,7 @@ Getting started survives a lost passkey, but either key can pay alone, so keep b
 <span id="set-up-a-team-account" />
 <span id="team-account-limits" />
 
-To let a team spend without lowering the treasury's threshold, the treasury authorizes the team's own account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/guides/teams/team-budget).
+To let a team spend without lowering the treasury's threshold, the treasury authorizes the team's own account as an access key, and the team's signers approve payments within that budget. See [Give a team a budget](/docs/accounts/custodians/company-treasury).
 
 <span id="collect-and-verify-approvals" />
 <span id="collect-approvals-from-several-approvers" />
@@ -84,7 +84,7 @@ To let a team spend without lowering the treasury's threshold, the treasury auth
 
 Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three.
 
-Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), which it checks approvals against but can't read back. When your app creates the account, save `account.address` and `account.config` with the account record, `saved`, and rebuild the account from that copy whenever signers approve. The examples call that helper `openAccount`. It passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first signer update, then the saved address. [Add a recovery signer](/docs/accounts/guides/users/add-a-recovery-signer#approve-the-update) shows it in full.
+Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), which it checks approvals against but can't read back. When your app creates the account, save `account.address` and `account.config` with the account record, `saved`, and rebuild the account from that copy whenever signers approve. The examples call that helper `openAccount`. It passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first signer update, then the saved address. [Add a recovery signer](/docs/accounts/apps/self-custodial-wallets) shows it in full.
 
 Rebuild the account from the latest record before each transaction. A signer update raises the configuration's version, and Tempo checks every transaction against the new configuration's hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
