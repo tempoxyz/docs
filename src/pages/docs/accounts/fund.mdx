@@ -1,40 +1,49 @@
 ---
 title: "Add funds"
 seoTitle: "Add Funds to a Tempo Account | Tempo Docs"
-description: Receive stablecoins from another account, add funds through Tempo Wallet or an onramp, bring them from another chain, and give each customer a deposit address.
+description: Fund a Tempo account from another Tempo account, a card or bank, or another chain, then confirm the stablecoins arrived before you credit them.
 interactive: true
 ---
 
 import { OpenApi } from 'vocs'
-import { DocsLinkCards } from '../../../components/DocsLinkCards'
 import * as Demo from '../../../components/guides/Demo.tsx'
 import { DepositToTempoWallet } from '../../../components/guides/steps/wallet/DepositToTempoWallet.tsx'
 import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo.tsx'
 
 # Add funds
 
-Stablecoins reach a Tempo account at its address, from another Tempo account, a card or bank, or another chain.
+A Tempo account can receive stablecoins at its address as soon as it exists.
 
-Whichever path you use, confirm the transfer reached the account before you credit the payment, because a [receive policy](/docs/accounts/policies/receive-policies) can hold funds instead of crediting them.
+Pick the path by where the money starts:
 
-## Choose a funding path
+| The money is… | How it gets to the account |
+| --- | --- |
+| In another Tempo account | The sender [transfers it to the address](#send-from-another-tempo-account) |
+| On a card or in a bank account | The user [adds it with Tempo Wallet](#add-money-with-tempo-wallet), or your app [embeds an onramp](#add-a-card-or-bank-onramp-to-your-app) |
+| On another chain | [Tempo Routes](#bring-stablecoins-from-another-chain) moves it to Tempo |
+| Test money, for development | A [faucet](#get-test-funds) sends it |
 
-<DocsLinkCards collection="funding" />
+Whichever path you use, [confirm the funds arrived](#confirm-the-funds-arrived) before you credit them.
+
+<span id="choose-a-funding-path" />
+<span id="receive-from-another-tempo-account" />
+
+## Send from another Tempo account
+
+A sender needs only the account's address. Share it, and the sender transfers stablecoins to it from any Tempo account or wallet.
 
 <span id="add-funds-with-tempo-wallet" />
 
 ## Add money with Tempo Wallet
 
-[Tempo Wallet](https://wallet.tempo.xyz) includes a fiat onramp and funding from other chains. Select **Connect Tempo Wallet** below, then **Add funds**, and choose a funding method in the wallet. The wallet shows the available methods, amount, and any fees before you confirm.
-
-This demo opens the funding flow for **Tempo Mainnet**, using real funds.
+[Tempo Wallet](https://wallet.tempo.xyz) includes a fiat onramp and funding from other chains. Select **Connect Tempo Wallet** below, then **Add funds**, and choose a funding method in the wallet. The wallet shows the available methods, amount, and any fees before you confirm. This demo uses **Tempo Mainnet** and real funds.
 
 <Demo.Container name="Add Funds" showBadge={false}>
   <SignInWithTempo stepNumber={1} />
   <DepositToTempoWallet stepNumber={2} last />
 </Demo.Container>
 
-To add the same button to your app, request [`wallet_deposit`](/docs/guide/getting-funds#open-funding-with-the-accounts-sdk) with the Accounts SDK. A resolved request doesn't mean the account is funded yet, so [verify the incoming transfer](/docs/guide/payments/accept-a-payment) before you credit the payment.
+To add the same button to your app, request [`wallet_deposit`](/docs/guide/getting-funds#open-funding-with-the-accounts-sdk) with the Accounts SDK. The request resolves before card or bank funding completes, so it doesn't mean the account is funded yet.
 
 ### With the CLI
 
@@ -60,36 +69,31 @@ codex exec "Read https://tempo.xyz/skills/wallet/SKILL.md and fund my Tempo Wall
 ```
 :::
 
-## Get test funds
+<span id="pay-by-card-or-bank" />
 
-For development, the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) has a [faucet](/docs/accounts/create#fund-an-account-on-devnet) that sends test stablecoins, including pathUSD, to any address. On Moderato testnet, use the [Tempo Faucet](/docs/guide/getting-funds#testnet-funds) for OUSD and other test stablecoins.
+## Add a card or bank onramp to your app
 
-## Receive from another Tempo account
+Onramp partners turn a card or bank payment into stablecoins sent to the account's address. [Stripe Crypto Onramp](/docs/partners/payments-and-ramps#stripe), [MoonPay](/docs/partners/payments-and-ramps#moonpay), and [Mt Pelerin](/docs/partners/payments-and-ramps#mt-pelerin) each offer a buy flow you embed in your app or link to. [Bridge](/docs/partners/payments-and-ramps#bridge) gives customers virtual bank accounts for incoming funds. [Payments & ramps](/docs/partners/payments-and-ramps) lists every partner.
 
-A sender needs only the account's address. Share it, then [verify the incoming transfer](/docs/guide/payments/accept-a-payment).
+<span id="bring-funds-from-another-chain" />
 
-## Pay by card or bank
+## Bring stablecoins from another chain
 
-Onramp partners turn a card or bank payment into stablecoins sent to the account. [Stripe Crypto Onramp](/docs/partners/payments-and-ramps#stripe), [MoonPay](/docs/partners/payments-and-ramps#moonpay) and [Mt Pelerin](/docs/partners/payments-and-ramps#mt-pelerin) each offer a buy flow you embed in your app or link to, and [Bridge](/docs/partners/payments-and-ramps#bridge) offers virtual bank accounts for incoming funds. Businesses on Stripe can also hold stablecoin balances with Stripe Treasury. See [Payments & ramps](/docs/partners/payments-and-ramps) for the full list.
+[Tempo Routes](/docs/routes) moves stablecoins from supported networks to a Tempo account. Make a [transfer](/docs/routes/transfers) your app authorizes, or give customers a [Routes deposit address](/docs/routes/deposits) they fund from an external wallet.
 
-## Bring funds from another chain
-
-[Tempo Routes](/docs/routes) moves stablecoins from supported networks to a Tempo account. Make a [transfer](/docs/routes/transfers) your app authorizes, or give customers a [Routes deposit address](/docs/routes/deposits) to fund from an external wallet.
-
-## Accept only what you want
-
-A [receive policy](/docs/accounts/policies/receive-policies) sets which stablecoins and senders can pay the account. Tempo holds anything else instead of crediting it.
-
-## Give each customer a deposit address
-
-A [virtual address](/docs/accounts/virtual-addresses) lets one omnibus account take deposits for many customers. Give each customer their own virtual address. Every deposit lands in your account, and its transfer events name the deposit address it was sent to, so you credit the customer you gave that address.
-
+<span id="check-the-balance" />
 <span id="balances" />
+<span id="accept-only-what-you-want" />
+<span id="give-each-customer-a-deposit-address" />
 
-## Check the balance
+## Confirm the funds arrived
 
 Read an account's stablecoin balances with the Tempo API. Enter the address, choose Moderato (`chainId=42431`) or mainnet (`chainId=4217`), and click **Try**. It needs no wallet connection or signing key.
 
 <OpenApi.Playground operationId="getAddressBalances" query="chainId=42431" anchors={false} />
 
-A balance shows what the account holds, not which payment arrived. To credit a specific payment, [verify the incoming transfer](/docs/guide/payments/accept-a-payment). For balance reads from code, see [Read balances](/docs/guide/payments/accept-a-payment#read-balances).
+A balance shows what the account holds, not which payment arrived. Before you credit a specific payment, [verify the incoming transfer](/docs/guide/payments/accept-a-payment): if the account has a [receive policy](/docs/accounts/policies/receive-policies), Tempo holds payments it doesn't accept instead of crediting them. To take deposits for many customers into one account, see [Hold customer funds in an omnibus account](/docs/accounts/custodians/omnibus-accounts).
+
+## Get test funds
+
+On Moderato testnet, the [Tempo Faucet](/docs/guide/getting-funds#testnet-funds) sends OUSD and other test stablecoins. On the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), its [faucet](/docs/accounts/create#fund-an-account-on-devnet) sends test stablecoins, including pathUSD, to any address.
