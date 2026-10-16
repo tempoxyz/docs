@@ -15,42 +15,41 @@ import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
 An access key lets a customer's phone, your backend, or an AI agent pay without the account's signers approving each payment.
 
-The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the access key's spending limit, expiry, and scopes on every transaction, so even a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and with a configurable account only on the Tempo Accounts devnet.
-
-<Cards>
-  <Card title="Spending limits" description="Cap how much of each stablecoin the key can spend, in total or per day." to="/docs/accounts/access-keys/spending-limits" />
-  <Card title="Scopes" description="Limit which contracts, functions, and recipients the key can call." to="/docs/accounts/access-keys/scopes" />
-  <Card title="Expiry" description="Set when the key stops working. You can replace a key, not extend it." to="/docs/accounts/access-keys/expiry" />
-  <Card title="Revocation" description="Stop a key immediately, and clean up what it left behind." to="/docs/accounts/access-keys/revocation" />
-  <Card title="Admin access keys" description="A key with no limits that can authorize and revoke other keys." to="/docs/accounts/access-keys/admin-access-keys" />
-</Cards>
-
-<span id="try-an-access-key" />
-
-<AccessKeyDemo />
+The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so even a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and with a configurable account only on the Tempo Accounts devnet.
 
 <span id="access-keys" />
-
-## What an access key is
-
-An account's signers are the keys that approve its transactions. An access key signs from the account's address and pays from the account's balance, but holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
-
 <span id="access-keys-and-signers" />
 <span id="choose-the-authority-to-delegate" />
 
-An access key isn't a signer. It never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds), so it can't change the account's signers. Among access keys, only [admin access keys](/docs/accounts/access-keys/admin-access-keys) can authorize, change, or revoke keys. Changing a configurable account's signers leaves every access key in place.
+## What an access key is
+
+An access key signs from the account's address and pays from its balance, but holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
+
+An access key isn't a signer. It never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds), so it can't change the account's signers, and changing a configurable account's signers leaves every access key in place.
 
 <span id="access-key-controls" />
+<span id="set-limits-that-match-the-task" />
+<span id="access-key-lifecycle" />
+<span id="read-the-remaining-permission" />
+<span id="read-an-access-key" />
+<span id="change-an-access-key" />
+<span id="access-key-expiry" />
+<span id="scopes" />
+<span id="scope-an-access-key" />
 
-| Control | What it does |
-| --- | --- |
-| <span id="set-limits-that-match-the-task" /><span id="access-key-lifecycle" /><span id="read-the-remaining-permission" /><span id="read-an-access-key" /><span id="change-an-access-key" />[Spending limits](/docs/accounts/access-keys/spending-limits) | Caps how much of each TIP-20 token the key can spend, in total or per period |
-| <span id="access-key-expiry" />[Expiry](/docs/accounts/access-keys/expiry) | Sets when the key stops working |
-| <span id="scopes" /><span id="scope-an-access-key" />[Scopes](/docs/accounts/access-keys/scopes) | Limits which contracts and functions the key can call, and whom it can pay |
-| <span id="admin-access-keys" />[Admin access keys](/docs/accounts/access-keys/admin-access-keys) | Removes all three bounds and lets the key manage the account's other keys |
-| <span id="key-revocation" /><span id="key-revocation-by-situation" /><span id="revoke-an-access-key" />[Revocation](/docs/accounts/access-keys/revocation) | Ends the key permanently |
+## Bound what a key can do
 
-Every bound is optional, and leaving one out removes that check: a key without `scopes` can call any contract. Give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three. Give an admin key only to a party you'd trust with the whole balance.
+Each key carries up to three bounds. Every bound is optional, and leaving one out removes that check: a key without scopes can call any contract. Give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three.
+
+<Cards>
+  <Card title="Spending limits" description="Cap how much of each stablecoin the key can spend, in total or per period." to="/docs/accounts/access-keys/spending-limits" />
+  <Card title="Scopes" description="Limit which contracts and functions the key can call, and whom it can pay." to="/docs/accounts/access-keys/scopes" />
+  <Card title="Expiry" description="Set when the key stops working. You can replace a key, not extend it." to="/docs/accounts/access-keys/expiry" />
+</Cards>
+
+<span id="admin-access-keys" />
+
+An [admin access key](/docs/accounts/access-keys/admin-access-keys) has none of these bounds and can authorize, change, or revoke the account's other keys. Give one only to a party you'd trust with the whole balance.
 
 <span id="access-key-types" />
 <span id="access-key-patterns" />
@@ -73,6 +72,14 @@ Give each device, service, agent, or team its own key, so you can revoke one wit
 | Your backend or an [AI agent](/docs/accounts/automations/give-an-agent-a-wallet) | A P-256 key it generates, or a secp256k1 key in your [KMS or HSM](/docs/accounts/automations/pay-out-from-a-backend#keep-the-key-in-your-kms) |
 | A wallet | A secp256k1 key |
 | A [team](/docs/accounts/custodians/company-treasury) | A configurable account, whose own signers and threshold approve as the key. Works only on the Tempo Accounts devnet ([TIP-1111](https://tips.sh/1111)). |
+
+## Try an access key
+
+Authorize a key with a daily limit, pay with it, watch Tempo reject a payment over the limit, then revoke it:
+
+<span id="try-an-access-key" />
+
+<AccessKeyDemo />
 
 <span id="authorize-a-limited-key" />
 
@@ -126,9 +133,17 @@ The other pages in this section import `account`, `accessKey`, `stablecoin`, and
 
 Tempo stores each limit and scope with the key, so each one adds to the network fee for authorizing it. This example's authorization and first payment cost under a cent together.
 
-To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in viem.
+To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in Viem.
 
-## See an account's keys
+<span id="key-revocation" />
+<span id="key-revocation-by-situation" />
+<span id="revoke-an-access-key" />
+
+## Revoke and audit keys
+
+[Revoke](/docs/accounts/access-keys/revocation) a key to end it permanently, for example when a device is lost or a service is retired. Revocation doesn't undo payments the key already made or token approvals it granted, so clean those up too.
+
+<span id="see-an-accounts-keys" />
 
 Tempo emits `KeyAuthorized` when an account adds a key and `KeyRevoked` when it revokes one, so the [public indexer](/docs/api/indexer-api) can list every key an account has had; replace the address with your account's.
 
