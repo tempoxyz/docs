@@ -36,14 +36,16 @@ tempo wallet whoami
 - Run `tempo wallet refresh` to refresh a stale access key without signing out.
 - Run `tempo wallet logout --yes` to disconnect.
 
-## Balances and credits
+<span id="balances-and-credits" />
+
+## Balances
 
 ```bash [Terminal]
 tempo wallet whoami
-tempo wallet whoami --credits
+tempo wallet whoami --mach
 ```
 
-`whoami` shows your address, token balances, key state, and optional MPP Credits balance. Existing MPP Credits are separate from token balances and apply to eligible one-time MPP charges.
+`whoami` shows your address, token balances, and key state. Use `--mach` to show your onchain MACH balance.
 
 <span id="manage-access-keys" />
 
@@ -67,9 +69,7 @@ tempo wallet fund --mach
 tempo wallet fund --crypto
 ```
 
-On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--mach` opens MACH checkout on mainnet.
-
-MPP Credits are no longer available for purchase, but existing credits can still be redeemed. Use [MACH](https://wallet.tempo.xyz/agent#mach) for new purchases. MACH pays one-time charges that advertise `machineTokenEnabled: true`; session payments use the service's advertised token. `tempo wallet fund --credits` returns a deprecation error; use `tempo wallet fund --mach` instead.
+On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--mach` opens [MACH](https://wallet.tempo.xyz/agent#mach) checkout on mainnet.
 
 Transfer tokens to another address:
 
@@ -88,7 +88,7 @@ tempo wallet services --search <QUERY>
 tempo wallet services <SERVICE_ID>
 ```
 
-The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets HTTP endpoints accept payments inline. The service directory indexes MPP-registered providers. Each entry shows endpoint URLs, HTTP methods, pricing, whether credits are supported, and request schemas. Use it to find the exact URL and payload for [`tempo request`](/docs/cli/request).
+The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets HTTP endpoints accept payments inline. The service directory indexes MPP-registered providers. Each entry shows endpoint URLs, HTTP methods, pricing, and request schemas. Use it to find the exact URL and payload for [`tempo request`](/docs/cli/request).
 
 Agents that support MCP can also use the read-only services MCP server at `https://mpp.dev/mcp/services`. See [Find services](/docs/guide/machine-payments/discover-services) for MCP setup, JSON-RPC examples, and the public catalog API.
 
@@ -121,17 +121,6 @@ tempo wallet -t services <SERVICE_ID>
 tempo request -t --dry-run -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 tempo request -t --max-spend 1.00 -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 ```
-
-If you have existing MPP Credits and the service supports them, capture the challenge first, then pay with credits. `--credits` remains available for legacy spending and prints a deprecation warning:
-
-```bash [Terminal]
-headers="$(mktemp)"
-tempo request -t --dry-run -D "$headers" -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
-tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
-tempo wallet -t transfer --credits --amount-cents 100 --mpp-challenge-file "$headers"
-```
-
-The execution command caps total credit spending, including fees, at $1. Adjust the cap to your approved budget.
 
 See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 
@@ -187,7 +176,7 @@ See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 
 | Flag | Description |
 | --- | --- |
-| `--credits` | Include the MPP Credits balance. |
+| `--mach` | Show the onchain MACH balance. |
 
 ### `tempo wallet revoke`
 
@@ -201,14 +190,12 @@ See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 | --- | --- |
 | `--crypto` | Open direct crypto funding. |
 | `--mach` | Buy MACH for supported services. |
-| `--credits` | Retired. Returns an error directing you to `fund --mach`. |
 
 ### `tempo wallet transfer`
 
 | Flag | Description |
 | --- | --- |
 | `--dry-run` | Preview the transfer without submitting it. |
-| `--credits` | Spend existing MPP Credits on eligible charges, with a deprecation warning. |
 | `--mpp-challenge-file <FILE>` | Pay the MPP challenge in this headers file, captured with `tempo request -D`. |
 
 ### `tempo wallet services`
