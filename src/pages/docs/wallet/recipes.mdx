@@ -44,7 +44,7 @@ Search with `tempo wallet services --search <QUERY>` and inspect the chosen serv
 
 ## Pay a captured challenge with credits
 
-MPP Credits are no longer available for purchase, but existing credits can still be redeemed. Use [MACH](https://wallet.tempo.xyz/agent#mach) for new purchases.
+MPP Credits are no longer available for purchase, but existing credits can still be redeemed. Use [MACH](https://wallet.tempo.xyz/agent#mach) for new purchases. MACH pays one-time charges that advertise `machineTokenEnabled: true`; session payments use the service's advertised token.
 
 To spend existing credits, check that the service supports MPP Credits and that the separate credits balance covers the request. Capture the challenge without paying, then preview and execute the credit payment:
 
@@ -54,8 +54,10 @@ headers="$(mktemp)"
 tempo request -t --dry-run -D "$headers" \
   --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
-tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
+tempo wallet -t transfer --credits --amount-cents 100 --mpp-challenge-file "$headers"
 ```
+
+The execution command caps total credit spending, including fees, at $1. Adjust the cap to your approved budget.
 
 Replace the URL and payload with the service's request schema. Credits are separate from token balances and apply only to eligible one-time charges.
 

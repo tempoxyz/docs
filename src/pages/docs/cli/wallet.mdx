@@ -67,9 +67,9 @@ tempo wallet fund --mach
 tempo wallet fund --crypto
 ```
 
-On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--mach` opens MACH checkout.
+On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--mach` opens MACH checkout on mainnet.
 
-MPP Credits are no longer available for purchase, but existing credits can still be redeemed. Use [MACH](https://wallet.tempo.xyz/agent#mach) for new purchases. `tempo wallet fund --credits` returns a deprecation error; use `tempo wallet fund --mach` instead.
+MPP Credits are no longer available for purchase, but existing credits can still be redeemed. Use [MACH](https://wallet.tempo.xyz/agent#mach) for new purchases. MACH pays one-time charges that advertise `machineTokenEnabled: true`; session payments use the service's advertised token. `tempo wallet fund --credits` returns a deprecation error; use `tempo wallet fund --mach` instead.
 
 Transfer tokens to another address:
 
@@ -128,8 +128,10 @@ If you have existing MPP Credits and the service supports them, capture the chal
 headers="$(mktemp)"
 tempo request -t --dry-run -D "$headers" -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
-tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
+tempo wallet -t transfer --credits --amount-cents 100 --mpp-challenge-file "$headers"
 ```
+
+The execution command caps total credit spending, including fees, at $1. Adjust the cap to your approved budget.
 
 See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 
