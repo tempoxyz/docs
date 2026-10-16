@@ -1,0 +1,53 @@
+---
+title: Custodians
+seoTitle: Hold Customer and Company Funds on Tempo | Tempo Docs
+description: Run an omnibus account for customer deposits, use Tempo through Fireblocks or another custodian, or keep company stablecoins in a treasury that needs several approvers.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Custodians
+
+Hold stablecoins for your customers or your company, yourself or through a custodian.
+
+If you run an exchange or a payments processor, you likely hold many customers' funds in one account. If your funds sit with a custodian such as Fireblocks, the custodian holds the key and signs for you. If your company keeps its own stablecoins, you want no single person or server able to move them. The guides here cover each of these.
+
+## Recommended setup by situation
+
+| Situation | Recommended setup |
+| --- | --- |
+| You hold customer funds yourself, such as an exchange or payments processor | One omnibus account, a [virtual deposit address](/docs/accounts/virtual-addresses) per customer, and a [receive policy](/docs/accounts/policies/receive-policies) that accepts only the stablecoins you list |
+| Your funds sit with a custodian such as Fireblocks | A [default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each custody address, virtual deposit addresses for client deposits, and a receive policy |
+| Your company runs its own treasury with several approvers | A configurable account where each approver holds one signer and a [signing threshold](/docs/accounts/policies/signing-thresholds) requires two or more to approve each payment |
+
+Virtual addresses, receive policies, and fee tokens are live on mainnet and testnet. Configurable accounts with several signers run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+
+## Custodian guides
+
+<Cards>
+  <Card title="Hold customer funds in an omnibus account" description="Give each customer a deposit address that pays into one account, accept only the stablecoins you list, and credit each deposit once." to="/docs/accounts/custodians/omnibus-accounts" />
+  <Card title="Use Tempo through your custodian" description="Check what your custodian supports on Tempo, set a fee token on each custody address, and attribute client deposits." to="/docs/accounts/custodians/use-a-custodian" />
+  <Card title="Set up a company treasury" description="Hold company stablecoins in one account that three approvers control, where any two approve each payment." to="/docs/accounts/custodians/company-treasury" />
+</Cards>
+
+<span id="what-your-custodian-controls" />
+
+## Who controls the key
+
+A custody address on Tempo is a [single-key account](/docs/accounts/how-it-works#address). Your custodian holds that key and decides, through its own policies and approvals, which transactions it signs. Plain stablecoin transfers work as on any EVM chain. What else you get depends on whether your custodian sends [Tempo Transactions](/docs/guide/tempo-transaction), which add a fee token you choose, fee sponsorship, and access keys. [Use Tempo through your custodian](/docs/accounts/custodians/use-a-custodian#check-what-your-custodian-supports-on-tempo) lists what to ask.
+
+When you hold the key yourself, the account's signers decide. A single-key account is controlled by whoever holds its one key. A configurable account lets you require several approvers, as in [Set up a company treasury](/docs/accounts/custodians/company-treasury), and keep the same address when approvers change.
+
+<span id="what-custodians-support-on-tempo" />
+<span id="choose-the-fee-token-for-custody-addresses" />
+<span id="attribute-deposits-in-an-omnibus-wallet" />
+<span id="control-what-arrives" />
+
+## Custody features on Tempo
+
+- **Fee tokens:** Tempo has no gas token. Every transaction pays its fee in a USD stablecoin, so set a [default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each address that sends.
+- **Virtual addresses:** each customer's [deposit address](/docs/accounts/virtual-addresses) pays straight into your account, with no sweeps, and each deposit names the address it was sent to.
+- **Receive policies:** a [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you allow. Tempo holds anything else for recovery instead of crediting it.
+- **Memos:** add a [payment reference](/docs/guide/payments/transfer-memos) to each payment out, so you can reconcile it with your records.
+
+[Partners](/docs/partners/wallets#custodial--institutional) lists custodians that support Tempo.

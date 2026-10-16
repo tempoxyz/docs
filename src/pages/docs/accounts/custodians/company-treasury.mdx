@@ -8,7 +8,7 @@ description: Create one Tempo account that three approvers control, where any tw
 
 Set up one Tempo account that three approvers share, where any two must approve each payment.
 
-In this guide, you create a treasury account on the Tempo Accounts devnet whose three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself, so neither one stolen key nor your own backend can pay without a second approver.
+If you run finance or engineering at a company that holds its own stablecoins, you want no single person, stolen key, or server able to move them. In this guide, you create a treasury account on the Tempo Accounts devnet whose three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself, so neither one stolen key nor your own backend can pay without a second approver.
 
 :::warning
 **Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This guide uses one.
@@ -110,6 +110,33 @@ This example holds two approvers' keys in one process, so that process could pay
 
 :::::
 
+<span id="offboard-an-approver" />
+<span id="remove-a-departing-approver" />
+
+## Replace an approver
+
+When an approver leaves, swap their signer for their successor's in one update, at the same weight and threshold. The two remaining approvers approve it, so the treasury stays 2 of 3 throughout:
+
+```ts [treasury.ts]
+const successor = env('NEW_CONTROLLER_PASSKEY_ADDRESS') // the successor's passkey, on their device
+
+const replaced = await client.accounts.updateConfigSync({ // [!code hl]
+  account: openTreasury([finance, operations]), // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: saved.config.owners.map((entry) => // [!code hl]
+      isAddressEqual(entry.owner, controller) ? { owner: successor, weight: entry.weight } : entry, // [!code hl]
+    ), // [!code hl]
+    threshold: saved.config.threshold, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+// Save it with the treasury record.
+saved.config = replaced.config // [!code hl]
+```
+
+The treasury keeps its address and balance, and the departing approver's key can no longer approve anything. To remove a signer without a successor, or to rotate a key for an approver who stays, see [Remove signers](/docs/accounts/key-management/remove-signers).
+
+Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). Revoke every access key the departing approver held or managed with `client.accessKey.revokeSync`, and set to zero any token allowance one of those keys approved. If the key was an [admin access key](/docs/accounts/access-keys/admin-access-keys), revoke the keys it authorized too. [Revocation](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) shows how to list the keys the treasury has authorized.
+
 <span id="treasury-limits" />
 <span id="give-a-team-a-budget" />
 <span id="rotate-an-approvers-key" />
@@ -118,4 +145,4 @@ This example holds two approvers' keys in one process, so that process could pay
 
 A treasury holds 1 to 48 signers, and a transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
 
-To let a team pay within a daily limit without two treasury approvals per payment, [give it a budget](/docs/accounts/guides/teams/team-budget). When an approver leaves or replaces their key, follow [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver). A signer change voids approvals collected for a payment that hasn't been sent, so collect them again.
+To let a team or a backend pay within a daily limit without two treasury approvals per payment, authorize an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits). A signer change voids approvals collected for a payment that hasn't been sent, so collect them again. `multisig configuration commitment mismatch` means the account was built from an outdated configuration, usually because another update landed first; rebuild it from the latest saved configuration.

@@ -27,12 +27,8 @@ import {
 } from './guide-demo-scripts'
 
 const pages: Record<GuideId, string> = {
-  'add-signers': 'guides/users/add-a-recovery-signer',
-  'rotate-keys': 'guides/teams/offboard-an-approver',
-  recover: 'guides/users/recover-an-account',
-  export: 'guides/users/hand-off',
-  'backend-automation': 'guides/automations/pay-out-from-a-backend',
-  'team-accounts': 'guides/teams/team-budget',
+  recover: 'apps/recover-an-account',
+  'backend-automation': 'automations/pay-out-from-a-backend',
 }
 
 /** The `###` headings in the first `:::::steps` block after a guide's `<GuideDemo>` embed. */
@@ -62,7 +58,6 @@ function fakeContext(): Fake {
   const next = (width: number) => `0x${(++serial).toString(16).padStart(width, '0')}`
   const signerAddresses = new Map<string, string>()
   const accounts = new Map<string, SandboxAccount>()
-  const registered = new Set<string>()
   const preparedUses: string[] = []
 
   function addressFor(signer: Signer, options: DevnetCallOptions | undefined) {
@@ -103,7 +98,6 @@ function fakeContext(): Fake {
           return { account: record({ ...nextAccount, address, balance: 0, devnet: {} }) }
         }
         if (previous.balance <= 0) throw new Error('Get test funds first.')
-        registered.add(previous.address)
         return {
           account: record({ ...nextAccount, address: previous.address, devnet: {} }),
           hash: next(64),
@@ -115,7 +109,6 @@ function fakeContext(): Fake {
       async submit(account, request, options) {
         noteKeys(account, options)
         const { account: paid, result } = applyAction(account, request)
-        if (account.address) registered.add(account.address)
         return {
           account: record(paid),
           result: result.ok ? { ...result, hash: next(64) } : result,
@@ -147,15 +140,9 @@ function fakeContext(): Fake {
       async prepareSigner() {
         return { address: next(40) as `0x${string}` }
       },
-      async prepareAccessKey() {
-        return { address: next(40) as `0x${string}` }
-      },
     },
     chain: {
-      commitment: async (address) => (registered.has(address) ? 'committed' : null),
-      configCommitment: () => 'committed',
       inferAddress: () => next(40),
-      balance: async () => 995,
       remaining: async () => 950,
       generatePrivateKey: () => next(64),
       addressOf: (privateKey) => `0x${privateKey.slice(-40)}`,
@@ -221,38 +208,6 @@ describe('GuideDemo scripts', () => {
     })
   })
 
-  it('adds a recovery key, then requires two factors with the prepared device key', async () => {
-    const { states, account, ctx } = await run('add-signers')
-    const added = states[3].account
-    expect(configuredSigners(added).map((signer) => [signer.name, signer.weight])).toEqual([
-      ['First key', 1],
-      ['Recovery key', 1],
-    ])
-    expect(added.threshold).toBe(1)
-    expect(recoveryCheck(added).ok).toBe(true)
-    expect(ctx.preparedUses).toEqual(['device:Device key'])
-    expect(account.version).toBe(added.version + 1)
-    expect(account.threshold).toBe(2)
-    expect(configuredSigners(account).map((signer) => [signer.kind, signer.weight])).toEqual([
-      ['private-key', 1],
-      ['private-key', 1],
-      ['device', 2],
-    ])
-    expect(recoveryCheck(account).ok).toBe(true)
-  })
-
-  it('replaces Approver key 2 in one update and revokes the service key', async () => {
-    const { account } = await run('rotate-keys')
-    expect(configuredSigners(account).map((signer) => signer.name)).toEqual([
-      'Approver key 1',
-      'Approver key 3',
-      'Approver key 4',
-    ])
-    expect(account.threshold).toBe(2)
-    expect(account.version).toBe(2)
-    expect(account.accessKeys.find((key) => key.name === 'Service key')?.status).toBe('revoked')
-  })
-
   it('recovers with both keys, replaces the lost device key, and revokes the device key', async () => {
     const { account, ctx } = await run('recover')
     expect(configuredSigners(account).map((signer) => [signer.name, signer.weight])).toEqual([
@@ -264,12 +219,6 @@ describe('GuideDemo scripts', () => {
     expect(deviceKeys.map((signer) => [signer.weight, signer.lost])).toEqual([[2, false]])
     expect(ctx.preparedUses).toEqual(['device:New device key'])
     expect(account.accessKeys.find((key) => key.name === 'This browser')?.status).toBe('revoked')
-  })
-
-  it('hands the account to the reader’s device key after revoking the app’s key', async () => {
-    const { account } = await run('export')
-    expect(configuredSigners(account).map((signer) => signer.kind)).toEqual(['device'])
-    expect(account.accessKeys.every((key) => key.status === 'revoked')).toBe(true)
   })
 
   it('authorizes the backend key with limits and pays out with it', async () => {
@@ -284,18 +233,6 @@ describe('GuideDemo scripts', () => {
     const paid = account.accessKeys.find((key) => key.name === 'Backend key')
     expect(paid?.status).not.toBe('revoked')
     expect(paid && remainingLimit(paid)).toBe(950)
-  })
-
-  it('spends the team budget through the treasury with the prepared team account', async () => {
-    const { account, ctx } = await run('team-accounts')
-    const team = account.accessKeys.find((key) => key.name === 'Team account')
-    expect(team && remainingLimit(team)).toBe(1_950)
-    expect(team?.delegate?.members.map((member) => member.name)).toEqual([
-      'Member 1',
-      'Member 2',
-      'Member 3',
-    ])
-    expect(ctx.preparedUses).toContain('account:Team account')
   })
 })
 

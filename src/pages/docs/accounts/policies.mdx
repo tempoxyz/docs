@@ -4,6 +4,8 @@ seoTitle: Account Policies for Approvals and Incoming Payments on Tempo | Tempo 
 description: A signing threshold decides who can move a Tempo account's funds, and a receive policy decides which stablecoins and senders can pay it. Tempo enforces both onchain.
 ---
 
+import { Card, Cards } from 'vocs'
+
 # Account policies
 
 A policy is a rule Tempo enforces onchain for an account, so your app doesn't have to.
@@ -17,13 +19,12 @@ A Tempo account has two policies, one for each direction money moves. A [signing
 <span id="private-policies" />
 <span id="combine-account-policies" />
 <span id="combine-policies" />
+<span id="what-a-policy-controls" />
 
-## What a policy controls
-
-| Policy | Decides | Available on |
-| --- | --- | --- |
-| [Signing thresholds](/docs/accounts/policies/signing-thresholds) | Who can move funds out and change signers. A transaction needs approvals from signers whose weights add up to the threshold. | [Configurable accounts](/docs/accounts/how-it-works#address) on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) only |
-| [Receive policies](/docs/accounts/policies/receive-policies) | Which stablecoins and senders can pay the address. Tempo holds blocked payments for recovery instead of rejecting them. | Any account on mainnet and testnet |
+<Cards>
+  <Card title="Signing thresholds" description="Who can move funds out: a transaction needs approvals whose weights add up to the threshold. Devnet only." to="/docs/accounts/policies/signing-thresholds" />
+  <Card title="Receive policies" description="Which stablecoins and senders can pay the account. Tempo holds anything else instead of crediting it." to="/docs/accounts/policies/receive-policies" />
+</Cards>
 
 Add a receive policy only when an address must refuse some stablecoins or senders. It checks what arrives, not who approves, so it works alongside any signing threshold.
 

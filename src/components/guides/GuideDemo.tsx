@@ -5,11 +5,9 @@ import { cx } from 'zyzz'
 import LucideCircleCheck from '~icons/lucide/circle-check'
 import LucideFileCog from '~icons/lucide/file-cog'
 import LucideFingerprint from '~icons/lucide/fingerprint'
-import LucideKeyRound from '~icons/lucide/key-round'
 import LucideLaptop from '~icons/lucide/laptop'
 import LucideServer from '~icons/lucide/server'
 import LucideSmartphone from '~icons/lucide/smartphone'
-import LucideUsers from '~icons/lucide/users'
 import { Container } from '../Container'
 import { AccountState, TxHash } from './AccountSandbox'
 import { accountSandbox } from './AccountSandbox.styles'
@@ -38,8 +36,6 @@ const localIcons: Record<LocalIcon, typeof LucideSmartphone> = {
   passkey: LucideFingerprint,
   update: LucideFileCog,
   server: LucideServer,
-  team: LucideUsers,
-  key: LucideKeyRound,
 }
 
 // ---------------------------------------------------------------------------

@@ -1,0 +1,78 @@
+---
+title: Apps
+seoTitle: Build Consumer Apps on Tempo with Privy, Turnkey, and Dynamic Wallets | Tempo Docs
+description: Give each user of your consumer app a Tempo account that your wallet provider signs for alongside the user, and that the user can recover or leave without you.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Apps
+
+Give each user an account they control, with your wallet provider signing alongside them.
+
+This is for consumer apps, such as wallets, remittance apps, and savings apps, that hold users' wallets with a provider such as Privy, Turnkey, or Dynamic. It covers how each user's account is set up, how a user recovers it, and how they leave, all at the same address. If your users connect a wallet they already have, see [Wallets](/docs/accounts/wallets).
+
+:::warning
+**Configurable accounts aren't live yet.** The self-custodial setup below uses an account with several signers and a threshold ([TIP-1107](https://tips.sh/1107)), which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. Provider wallets with one key each work on mainnet and testnet today.
+:::
+
+<span id="plan-recovery-that-doesnt-depend-on-the-provider" />
+
+## Give each user a self-custodial wallet
+
+We recommend three signers per account, each at weight 1, with any two approving ([signing thresholds](/docs/accounts/policies/signing-thresholds)):
+
+- **The user's [passkey](/docs/accounts/authentication/passkeys)** on their phone.
+- **A key your provider manages**, which signs only for a user your app has signed in.
+- **A backup key the user keeps**, such as a second passkey on another device or a hardware key.
+
+Day to day, the passkey and the provider sign each payment together, so no payment goes through without the user. If the user loses their phone, the provider and the backup replace the passkey. If your app or the provider is down or breached, the user's passkey and backup still pay, recover, or remove the provider's key without either of you. Neither your app nor the provider can move funds alone.
+
+[Set up a self-custodial wallet with a provider](/docs/accounts/apps/self-custodial-wallets) walks through it.
+
+## Guides for consumer apps
+
+<Cards>
+  <Card title="Set up a self-custodial wallet with a provider" description="The user's passkey and your provider's key approve each payment; the user's passkey and backup recover or leave without you. Runs on the devnet." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Recover a user's account" description="Replace a lost passkey or backup at the same address, with the two signers the user still has. Runs on the devnet." to="/docs/accounts/apps/recover-an-account" />
+  <Card title="Pay from a user's embedded wallet" description="Your card backend or an agent pays from the user's wallet within limits the wallet signs once." to="/docs/accounts/automations/pay-from-an-embedded-wallet" />
+</Cards>
+
+<span id="custody-test" />
+<span id="your-app-holds-the-key-through-a-provider" />
+
+## What your provider sets up today
+
+Each user gets one secp256k1 key, which the provider holds and unlocks when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works on Tempo mainnet and testnet as it is. The key controls the whole balance, so whoever the provider lets ask it to sign can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
+
+## Keep your existing provider wallets
+
+If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains, though balances on other chains don't carry over. Sending and receiving stablecoins works as it is. Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends [Tempo Transactions](/docs/guide/tempo-transaction). Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions ([Wallet partners](/docs/partners/wallets)), so sponsor fees with your own [fee payer](/docs/accounts/fees/fee-sponsorship).
+
+<span id="which-tempo-features-does-my-setup-support" />
+<span id="what-tempo-adds" />
+
+## What your provider supports on Tempo
+
+Any provider that signs Ethereum transactions can hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). It supports Tempo Transaction features, such as paying fees in any stablecoin, batching payments, sponsoring fees, and authorizing [access keys](/docs/accounts/access-keys), only if it sends Tempo Transactions itself, or signs a transaction's raw hash so your app can send it to a Tempo RPC. Privy, Turnkey, and Dynamic do both:
+
+| Provider | Sends Tempo Transactions | Signs raw hashes |
+| --- | --- | --- |
+| [Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) | Yes, with calls, fee token, nonces, and sponsorship | `secp256k1_sign`, or `raw_sign` on server wallets |
+| [Turnkey](https://docs.turnkey.com/features/networks/overview) | Yes, through `sign_transaction`, which its policies can inspect | `sign_raw_payload` with no hash function |
+| [Dynamic](https://www.dynamic.xyz/docs) | Yes, through its Tempo SDK extension | `signRawMessage` |
+
+<span id="what-the-providers-policy-engine-can-enforce" />
+<span id="who-can-move-the-funds" />
+<span id="what-we-recommend" />
+
+## Route raw signing through one backend
+
+The provider's policy engine can't read a raw hash, so it can't tell a payment or a key authorization from any other request. Route raw signing through one backend service that builds each transaction and checks it, including any access key's limits, scopes, and expiry, before calling the provider. To keep key authorization inside the policy engine instead, send a Tempo Transaction that calls `authorizeKey` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain) through the provider's transaction API.
+
+<span id="how-do-i-give-a-service-limited-spending-power" />
+<span id="wrap-the-providers-signing-as-an-account" />
+<span id="authorize-from-the-browser" />
+<span id="let-your-backend-or-an-agent-spend-from-a-users-wallet" />
+<span id="give-your-backend-or-an-agent-an-access-key" />
+

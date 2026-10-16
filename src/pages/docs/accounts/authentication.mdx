@@ -4,11 +4,13 @@ seoTitle: Sign for Tempo Accounts with Private Keys, Device Keys, or Passkeys | 
 description: Choose a private key, device key, or passkey for each key on a Tempo account by who should hold it, and set weights so no outside party can approve alone.
 ---
 
+import { Card, Cards } from 'vocs'
+
 # Signing methods
 
-Choose each signing key by who should hold it: the customer, your server, or a wallet provider.
+A signing method is the kind of key that approves an account's transactions: a passkey, a device key, or a private key.
 
-A signing method is the kind of key that approves a Tempo account's transactions, as a signer or as an [access key](/docs/accounts/access-keys): a private key, a device key, or a passkey. A passkey or device key stays with the customer, while a key on your server or with a wallet provider lets that party sign too.
+Each key signs as one of the account's signers or as an [access key](/docs/accounts/access-keys). Choose it by who should hold it: a passkey or device key stays with the customer, while a private key on your server or with a wallet provider lets that party sign too.
 
 <span id="tempo-account-signer-types" />
 <span id="tempo-sign-in-methods" />
@@ -16,14 +18,13 @@ A signing method is the kind of key that approves a Tempo account's transactions
 <span id="signer-rules" />
 <span id="authentication-limits" />
 <span id="signing-method-limits" />
+<span id="choose-a-signing-method" />
 
-## Choose a signing method
-
-| Method | Where the key lives | Use it for | Main limit |
-| --- | --- | --- | --- |
-| [Private keys](/docs/accounts/authentication/private-keys) | A wallet, a wallet provider, or your KMS or HSM | Treasury approvers, backup and recovery keys, servers, and scripts | Anyone who can make it sign, including through your KMS, has its full power |
-| [Device keys](/docs/accounts/authentication/device-keys) | The customer's phone, computer, or browser, which can't export it | Payments within a spending limit, with no prompt | A browser key is gone if the customer clears site data |
-| [Passkeys](/docs/accounts/authentication/passkeys) | Synced across the customer's devices, or on a security key | Customer approvals and signer changes, with Face ID or a fingerprint | Works only on the domain that created it |
+<Cards>
+  <Card title="Passkeys" description="The customer approves with Face ID or a fingerprint. Synced across their devices, and tied to your domain." to="/docs/accounts/authentication/passkeys" />
+  <Card title="Device keys" description="A key the customer's phone, computer, or browser creates and can't export, for payments without a prompt." to="/docs/accounts/authentication/device-keys" />
+  <Card title="Private keys" description="A key in a wallet, a wallet provider, or your KMS or HSM, for servers, treasury approvers, and backups." to="/docs/accounts/authentication/private-keys" />
+</Cards>
 
 Each method works on mainnet and testnet today as the one key of a [single-key account](/docs/accounts/how-it-works#address), like a standard Ethereum account, or as an access key. Several weighted signers on one account need a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 

@@ -1,14 +1,16 @@
 ---
-title: Authorize access keys from an embedded wallet
-seoTitle: Authorize Tempo Access Keys from a Privy or Turnkey Embedded Wallet | Tempo Docs
-description: Have a user's Privy or Turnkey wallet sign a limited access key for your card backend or an agent, so it pays within bounds without the wallet signing each payment.
+title: Pay from a user's embedded wallet
+seoTitle: Pay from a User's Privy or Turnkey Wallet with a Tempo Access Key | Tempo Docs
+description: Have a user's Privy or Turnkey wallet authorize a limited access key once, so your card program or subscription backend pays from it without holding the user's key.
 ---
 
-# Authorize access keys from an embedded wallet
+# Pay from a user's embedded wallet
 
-Have a user's Privy or Turnkey wallet sign one access key, so your card backend pays within limits on its own.
+Let your backend pay from a user's Privy or Turnkey wallet, within limits, without holding the user's key.
 
-Your card backend ends up with its own [access key](/docs/accounts/access-keys) that can send up to 100 OUSD a day to your card program's funding address for 30 days. The user's account key stays with their wallet provider, Privy or Turnkey, which signs the authorization once. After that, the card backend signs every payment with its own key, within those limits, and never touches the account key. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
+If your users hold embedded wallets with Privy or Turnkey and your backend has to pay from them on its own, for a card top-up, a subscription, or a recurring transfer, have the wallet authorize an [access key](/docs/accounts/access-keys) for your backend once. The provider keeps the account key and signs the authorization once. After that, your backend signs each payment with its own key, within the limit, recipients, and expiry the user approved.
+
+This guide funds a card program. Your card backend gets a key that can send up to 100 OUSD a day, only to the card program's funding address from your [card issuing partner](/docs/partners/cards), for 30 days. Size the daily limit to the card's daily spend limit plus fees, and show the user the card program, limit, and expiry before they approve. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
 
 ## Who holds which key
 
@@ -105,7 +107,7 @@ const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl
 export const message = JSON.stringify(KeyAuthorization.toRpc(keyAuthorization)) // send to the holder
 ```
 
-The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so your app has to decide what it asks the provider to sign. See [Route raw signing through one backend](/docs/accounts/wallets/embedded-wallets#who-can-move-the-funds).
+The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so your app has to decide what it asks the provider to sign. See [Route raw signing through one backend](/docs/accounts/apps#who-can-move-the-funds).
 
 ### Send it with the holder's first payment
 

@@ -51,7 +51,7 @@ const { config: updated } = await client.accounts.updateConfigSync({
 
 Save the configuration the update returns, and rebuild from it before the next action. The update raises the configuration's version by one, so an account built from the old copy no longer matches the hash Tempo stores, and its next payment or update fails.
 
-If the remaining weights fall short of the threshold, lower `threshold` in the same update, or add a replacement signer in it instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone, so a 2-of-3 treasury that drops to two signers at threshold 1 no longer needs two approvals. [Offboard an approver](/docs/accounts/guides/teams/offboard-an-approver) walks through removing one from a treasury.
+If the remaining weights fall short of the threshold, lower `threshold` in the same update, or add a replacement signer in it instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone, so a 2-of-3 treasury that drops to two signers at threshold 1 no longer needs two approvals. [Offboard an approver](/docs/accounts/custodians/company-treasury) walks through removing one from a treasury.
 
 <span id="replace-a-signer" />
 <span id="rotate-a-signer-at-the-same-weight" />
@@ -82,7 +82,7 @@ Save `rotation.config` with the account record, as after a removal. Because one 
 
 When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override, so this works only if their weights still reach the threshold. Check that when you create the account, using the rule in [Plan for recovery](/docs/accounts/key-management#plan-for-recovery).
 
-For example, with a passkey at weight 2 plus a backup key and a recovery provider's key at weight 1 each, at threshold 2, the two keys together approve the [rotation](#rotate-a-key-by-replacing-it-in-one-update) that swaps in a new passkey after the customer loses their phone. [Recover a user's account](/docs/accounts/guides/users/recover-an-account) walks through it.
+For example, with a passkey at weight 2 plus a backup key and a recovery provider's key at weight 1 each, at threshold 2, the two keys together approve the [rotation](#rotate-a-key-by-replacing-it-in-one-update) that swaps in a new passkey after the customer loses their phone. [Recover a user's account](/docs/accounts/apps/recover-an-account) walks through it.
 
 Treat a compromised signer as an attacker and leave it out of the approvers. If its weight reaches the threshold alone, it can remove your other signers first, so give that much weight only to a key you'd trust with the whole account.
 

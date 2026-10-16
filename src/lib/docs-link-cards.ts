@@ -59,7 +59,7 @@ export const docsLinkCards = {
         ['Signing methods', '/docs/accounts/authentication'],
         ['Policies', '/docs/accounts/policies'],
         ['Access keys', '/docs/accounts/access-keys'],
-        ['Account recovery', '/docs/accounts/guides/users/recover-an-account'],
+        ['Account recovery', '/docs/accounts/apps/recover-an-account'],
       ],
     },
     {
@@ -67,12 +67,9 @@ export const docsLinkCards = {
       description: 'Walk through wallet providers, treasuries, and agents.',
       icon: 'code',
       links: [
-        [
-          'Self-custodial wallets with a provider',
-          '/docs/accounts/guides/users/self-custodial-wallets',
-        ],
-        ['Set up a company treasury', '/docs/accounts/guides/teams/company-treasury'],
-        ['Give an agent a wallet', '/docs/accounts/guides/agents/give-an-agent-a-wallet'],
+        ['Self-custodial wallets with a provider', '/docs/accounts/apps/self-custodial-wallets'],
+        ['Set up a company treasury', '/docs/accounts/custodians/company-treasury'],
+        ['Give an agent a wallet', '/docs/accounts/automations/give-an-agent-a-wallet'],
       ],
     },
     {
