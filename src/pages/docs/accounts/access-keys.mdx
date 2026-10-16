@@ -17,16 +17,6 @@ An access key lets a customer's phone, your backend, or an AI agent pay without 
 
 The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so even a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and with a configurable account only on the Tempo Accounts devnet.
 
-<span id="access-keys" />
-<span id="access-keys-and-signers" />
-<span id="choose-the-authority-to-delegate" />
-
-## What an access key is
-
-An access key signs from the account's address and pays from its balance, but holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
-
-An access key isn't a signer. It never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds), so it can't change the account's signers, and changing a configurable account's signers leaves every access key in place.
-
 <span id="access-key-controls" />
 <span id="set-limits-that-match-the-task" />
 <span id="access-key-lifecycle" />
@@ -36,20 +26,31 @@ An access key isn't a signer. It never counts toward the [signing threshold](/do
 <span id="access-key-expiry" />
 <span id="scopes" />
 <span id="scope-an-access-key" />
+<span id="bound-what-a-key-can-do" />
+<span id="admin-access-keys" />
 
-## Bound what a key can do
-
-Each key carries up to three bounds. Every bound is optional, and leaving one out removes that check: a key without scopes can call any contract. Give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three.
+## Controls
 
 <Cards>
   <Card title="Spending limits" description="Cap how much of each stablecoin the key can spend, in total or per period." to="/docs/accounts/access-keys/spending-limits" />
   <Card title="Scopes" description="Limit which contracts and functions the key can call, and whom it can pay." to="/docs/accounts/access-keys/scopes" />
   <Card title="Expiry" description="Set when the key stops working. You can replace a key, not extend it." to="/docs/accounts/access-keys/expiry" />
+  <Card title="Revocation" description="Stop a key immediately, and clean up what it left behind." to="/docs/accounts/access-keys/revocation" />
+  <Card title="Admin access keys" description="A key with no bounds that can authorize, change, or revoke other keys." to="/docs/accounts/access-keys/admin-access-keys" />
 </Cards>
 
-<span id="admin-access-keys" />
+<span id="access-keys" />
+<span id="access-keys-and-signers" />
+<span id="choose-the-authority-to-delegate" />
+<span id="what-an-access-key-is" />
 
-An [admin access key](/docs/accounts/access-keys/admin-access-keys) has none of these bounds and can authorize, change, or revoke the account's other keys. Give one only to a party you'd trust with the whole balance.
+## How it works
+
+An access key signs from the account's address and pays from its balance, but holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
+
+An access key isn't a signer. It never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds), so it can't change the account's signers, and changing a configurable account's signers leaves every access key in place.
+
+Each key carries up to three bounds: a spending limit, scopes, and an expiry. Every bound is optional, and leaving one out removes that check: a key without scopes can call any contract. Give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three. An [admin access key](/docs/accounts/access-keys/admin-access-keys) has none of these bounds and can authorize, change, or revoke the account's other keys, so give one only to a party you'd trust with the whole balance.
 
 <span id="access-key-types" />
 <span id="access-key-patterns" />
@@ -61,8 +62,9 @@ An [admin access key](/docs/accounts/access-keys/admin-access-keys) has none of 
 <span id="ai-agents" />
 <span id="authorize-the-agents-task" />
 <span id="keep-account-and-request-budgets-distinct" />
+<span id="give-each-holder-its-own-key" />
 
-## Give each holder its own key
+## One key per holder
 
 Give each device, service, agent, or team its own key, so you can revoke one without touching the rest. Pick the key type by where its holder signs:
 
@@ -73,7 +75,7 @@ Give each device, service, agent, or team its own key, so you can revoke one wit
 | A wallet | A secp256k1 key |
 | A [team](/docs/accounts/custodians/company-treasury) | A configurable account, whose own signers and threshold approve as the key. Works only on the Tempo Accounts devnet ([TIP-1111](https://tips.sh/1111)). |
 
-## Try an access key
+## Try it
 
 Authorize a key with a daily limit, pay with it, watch Tempo reject a payment over the limit, then revoke it:
 
@@ -82,8 +84,9 @@ Authorize a key with a daily limit, pay with it, watch Tempo reject a payment ov
 <AccessKeyDemo />
 
 <span id="authorize-a-limited-key" />
+<span id="authorize-an-access-key" />
 
-## Authorize an access key
+## Authorize a key
 
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), sign a key authorization: a message that names the key and its bounds. Submit it in one of two ways:
 
@@ -138,8 +141,9 @@ To keep the option of canceling a signed authorization before anyone submits it,
 <span id="key-revocation" />
 <span id="key-revocation-by-situation" />
 <span id="revoke-an-access-key" />
+<span id="revoke-and-audit-keys" />
 
-## Revoke and audit keys
+## Revoke and audit
 
 [Revoke](/docs/accounts/access-keys/revocation) a key to end it permanently, for example when a device is lost or a service is retired. Revocation doesn't undo payments the key already made or token approvals it granted, so clean those up too.
 
@@ -165,8 +169,9 @@ LIMIT 20`}
 />
 
 <span id="troubleshoot-backend-payments" />
+<span id="access-key-limits" />
 
-## Access key limits
+## Limits
 
 - An access key can't create a contract at the top level of a transaction. See [Scope limits](/docs/accounts/access-keys/scopes#scope-limits).
 - All of an account's transactions, whichever key signs them, share one sequence number (nonce) by default, so they land in order. To send payments concurrently, use expiring nonces or separate nonce keys. See [Parallel payments](/docs/guide/payments/send-parallel-transactions).

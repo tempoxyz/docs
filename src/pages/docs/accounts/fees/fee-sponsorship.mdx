@@ -12,8 +12,9 @@ A fee payer, which you run or Tempo hosts, adds its signature to a customer's Te
 
 <span id="sponsor-an-accounts-fees" />
 <span id="sponsor-fees-with-a-fee-payer" />
+<span id="how-fee-sponsorship-works" />
 
-## How fee sponsorship works
+## How it works
 
 1. The account signs its calls. When your backend signs and sponsors in one step, it sets the fee token to the token being transferred. When the customer's device signs and sends the transaction to a fee payer server, it leaves the fee token blank for the server to pick.
 2. The fee payer decides whether to sponsor the transaction, picks the fee token, and adds its signature.
@@ -125,11 +126,15 @@ await client.token.transferSync({
 
 `withRelay` sends the transaction to your server for the fee payer's signature and everything else to the devnet. `account` is the customer's account with the keys on this device attached: a single-key account, or a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
 
-## Use Tempo's hosted fee payer
+<span id="use-tempos-hosted-fee-payer" />
+
+## Hosted fee payer
 
 Tempo also hosts a fee payer server. The [Fee Payer API](/docs/api/fee-payer) takes your server's place in `withRelay`, with a Tempo API key. It runs on mainnet and the Moderato testnet, not on the Tempo Accounts devnet, so it can't sponsor configurable accounts. Try it in the [Sponsor fees](/docs/guide/payments/sponsor-user-fees) demo.
 
-## Fee sponsorship limits
+<span id="fee-sponsorship-limits" />
+
+## Limits
 
 - The fee payer pays in the transaction's `feeToken` when your backend sponsors directly, and in its own `feeToken` setting when it runs as a fee payer server ([how fee sponsorship works](#how-fee-sponsorship-works)).
 - Fund the fee payer with the [supported fee token](/docs/accounts/fees/fee-tokens#supported-fee-tokens) it pays in.

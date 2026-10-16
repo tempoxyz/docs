@@ -15,8 +15,9 @@ A private key is one of three signing methods for a Tempo account, with [device 
 <span id="where-private-keys-live" />
 <span id="recommended-roles-for-your-keys" />
 <span id="private-key-sources" />
+<span id="choose-a-role-for-each-key" />
 
-## Choose a role for each key
+## Roles
 
 Add each key as a signer, which approves toward the account's [threshold](/docs/accounts/policies/signing-thresholds), or as an [access key](/docs/accounts/access-keys), which pays alone within its limits:
 
@@ -30,8 +31,9 @@ Add each key as a signer, which approves toward the account's [threshold](/docs/
 On mainnet and testnet today, a private key can be a single-key account's one key, as in a standard Ethereum account, or an access key on that account. Signers need a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), so the next example works only there.
 
 <span id="require-two-treasury-signers" />
+<span id="add-a-private-key-signer" />
 
-## Add a private-key signer
+## Add a private key
 
 Give each key a weight below the threshold, so no single holder can pay alone, and keep each approver's key in its own wallet or HSM. Here both signers must approve:
 
@@ -52,7 +54,9 @@ const account = Account.fromConfig({ // [!code hl]
 
 The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the Viem account that source provides instead. For a raw P-256 key, use `Account.fromP256`. [Set up a company treasury](/docs/accounts/custodians/company-treasury) walks through the full setup.
 
-## Private key limits
+<span id="private-key-limits" />
+
+## Limits
 
 - Tempo sees signatures, not people. Anyone who can make the key sign, including anyone with signing access in your KMS, approves at its weight until you [remove it](/docs/accounts/key-management/signer-updates#remove-a-lost-or-compromised-signer).
 - A signer has no spending limit. To cap what a key can pay, make it an access key instead.

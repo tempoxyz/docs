@@ -21,8 +21,9 @@ A receive policy is one of a Tempo account's two [policies](/docs/accounts/polic
 
 <span id="receive-policies" />
 <span id="when-to-configure-a-receive-policy" />
+<span id="what-a-receive-policy-checks" />
 
-## What a receive policy checks
+## What it checks
 
 Each address sets its policy in the [TIP-403](/docs/protocol/tip403/spec) registry, the same registry of allowlists and blocklists that tokens use to restrict transfers. The policy has three parts:
 
@@ -37,8 +38,9 @@ Neither the token filter nor the sender policy can be a `COMPOUND` policy. An ad
 <span id="account-level-receive-policies" />
 <span id="understand-receive-policy-behavior" />
 <span id="how-tempo-enforces-receive-policies" />
+<span id="what-happens-to-a-blocked-payment" />
 
-## What happens to a blocked payment
+## Blocked payments
 
 Every TIP-20 transfer and mint to the address runs through its receive policy:
 
@@ -52,8 +54,9 @@ A payment to a [virtual address](/docs/accounts/virtual-addresses) is checked ag
 
 <span id="monitor-blocked-receipts" />
 <span id="blocked-receipts" />
+<span id="check-the-recipient-before-you-credit-a-payment" />
 
-### Check the recipient before you credit a payment
+### Check the recipient
 
 A held payment looks like a success, and the token still emits its usual `Transfer` event, but that event's recipient is `ReceivePolicyGuard`, not the receiver. Credit a payment only when the confirmed event names the receiver.
 
@@ -132,7 +135,9 @@ Changing the recovery authority affects only payments held afterward; existing r
 
 :::::
 
-## Check a payment before sending
+<span id="check-a-payment-before-sending" />
+
+## Check before sending
 
 Ask whether the receiver's policy accepts a token from a sender. `sender` is the paying address:
 

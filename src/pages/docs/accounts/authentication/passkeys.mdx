@@ -14,8 +14,9 @@ A passkey lets only the customer approve payments and signer changes, with Face 
 A passkey is one of three signing methods for a Tempo account, with [private keys](/docs/accounts/authentication/private-keys) and [device keys](/docs/accounts/authentication/device-keys). On mainnet and testnet today, a passkey can be a single-key account's one key, but losing it loses the account. On the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), the only network that runs configurable accounts, make a customer's passkey a signer that approves alone, and add a second signer so a lost passkey doesn't lock the customer out. Treasuries use [different weights](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
 
 <span id="passkey-authenticators" />
+<span id="what-a-passkey-is" />
 
-## What a passkey is
+## How it works
 
 A passkey is the WebAuthn credential behind passwordless sign-in: a P-256 key that stays on the customer's device or security key and signs only when the customer approves. It works with Face ID and Touch ID, Windows Hello, an Android screen lock, and security keys such as YubiKey. Tempo checks each passkey signature onchain.
 
@@ -28,8 +29,9 @@ Your servers and wallet providers never hold the passkey. Its security rests on 
 <span id="open-the-account-with-it" />
 <span id="open-an-account-with-a-passkey" />
 <span id="passkey-signer-weights" />
+<span id="create-a-passkey-signer" />
 
-## Create a passkey signer
+## Create a passkey
 
 <PasskeyAccountDemo />
 
@@ -45,7 +47,9 @@ const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [
 
 `account.address` receives stablecoins right away, and the account's first transaction registers it onchain. On the devnet, next [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). On mainnet and testnet, a single-key passkey account can't add a signer or swap its key ([Passkey limits](#passkey-limits)).
 
-## Passkey limits
+<span id="passkey-limits" />
+
+## Limits
 
 - A passkey works only on its domain, the relying party ID (`rpId`), and that domain's subdomains. Pick the `rpId`, such as `acme.com`, before customers create passkeys, and pass it to both `WebAuthnP256.createCredential` and `Account.fromWebAuthnP256`.
 - WebAuthn returns the public key only at creation. Save `credential.id` and `credential.publicKey`, and pass them to `Account.fromWebAuthnP256` when the customer returns.

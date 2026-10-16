@@ -56,7 +56,9 @@ This calls `setUserToken` on the FeeManager, Tempo's built-in fee contract. Pass
 
 The default outranks the token being transferred. With OUSD as the default, a transfer of another stablecoin still pays its fee in OUSD, and is invalid if the account's OUSD can't cover it.
 
-## Override the fee token per transaction
+<span id="override-the-fee-token-per-transaction" />
+
+## Per-transaction fee token
 
 Pass `feeToken` to pay one transaction's fee in a different stablecoin. It outranks the default and every other rule, for that transaction only. Here the account sends one stablecoin to `recipient`, the payee's address, and pays the fee in another stablecoin:
 

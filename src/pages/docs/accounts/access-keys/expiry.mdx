@@ -12,8 +12,9 @@ Expiry is one of an [access key](/docs/accounts/access-keys)'s three bounds, wit
 
 <span id="access-key-expiry" />
 <span id="expiry-limits" />
+<span id="how-expiry-works" />
 
-## How expiry works
+## How it works
 
 Tempo checks the expiry against block time (the current block's timestamp), not your server's clock. Once block time reaches the expiry, Tempo rejects every transaction the key signs with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired). The expired key's remaining limit reads as zero, and changing it with `updateLimit` reverts with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired).
 
@@ -23,7 +24,9 @@ Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/a
 
 Use the shortest window the holder needs: hours for a one-off task, 30 days for a device, 90 days for a backend. An expiry at or before the current block time reverts with [`ExpiryInPast`](/docs/protocol/transactions/AccountKeychain#error-expiryinpast).
 
-## Renew an expiring key
+<span id="renew-an-expiring-key" />
+
+## Renew a key
 
 Tempo never authorizes the same key address twice for an account, so instead of extending an expiry, renew by authorizing a new key before the old one expires. Read the old key's `expiry` with `client.accessKey.getMetadata({ account, accessKey })`, and before that time:
 

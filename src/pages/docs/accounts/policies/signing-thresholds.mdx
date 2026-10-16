@@ -15,8 +15,9 @@ A signing threshold is the [account policy](/docs/accounts/policies) that decide
 :::
 
 <span id="how-approvals-add-up" />
+<span id="signer-weights-and-the-threshold" />
 
-## Signer weights and the threshold
+## Weights and thresholds
 
 Take a customer account at threshold 2, with a passkey at weight 2, and a backup key and a recovery provider's key at weight 1 each:
 
@@ -41,8 +42,9 @@ Signers approve a whole transaction at once, including every call in a batch. Th
 To change signers or the threshold, send a [signer update](/docs/accounts/key-management/signer-updates#add-a-signer), approved at the current threshold.
 
 <span id="what-a-threshold-protects" />
+<span id="what-a-threshold-protects-against" />
 
-## What a threshold protects against
+## What it protects against
 
 A signer can be stolen or lost: a key leaks, a phone breaks, an approver leaves. Choose weights that survive both:
 
@@ -55,8 +57,9 @@ Count parties, not keys. Two keys in the same KMS, or a wallet provider's key an
 <span id="recommended-weights" />
 <span id="multi-factor-approval" />
 <span id="set-up-multi-factor-approval-in-code" />
+<span id="recommended-signer-setups" />
 
-## Recommended signer setups
+## Recommended setups
 
 | Setup | Signers (weight) | Threshold | Who can approve |
 | --- | --- | --- | --- |
@@ -140,8 +143,9 @@ A signer update works the same way: put `Actions.accounts.updateConfig.call({ cu
 <span id="signature-verification" />
 <span id="tempo-approval-verification-methods" />
 <span id="verify-an-account-approval-in-solidity" />
+<span id="verify-approvals-in-a-contract" />
 
-## Verify approvals in a contract
+## Verify in a contract
 
 A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. `verifyMultisig` exists only on the Tempo Accounts devnet; on mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
 
@@ -170,8 +174,9 @@ To check a single access key's signature instead, call `verifyKeychain`, which a
 <span id="approval-limits" />
 <span id="account-security-limits" />
 <span id="multi-factor-approval-limits" />
+<span id="signing-threshold-limits" />
 
-## Signing threshold limits
+## Limits
 
 | Limit | Value |
 | --- | --- |
