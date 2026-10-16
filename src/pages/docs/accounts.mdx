@@ -72,7 +72,7 @@ Each transaction pays a network fee in a USD stablecoin, not a separate gas toke
 To build on mainnet today, [create a single-key account](/docs/accounts/create#create-a-single-key-account) with a passkey or private key, or keep the [wallets your users already have](/docs/accounts/wallets/browser-wallets). To try several signers and recovery, [create a configurable account](/docs/accounts/create) on the Tempo Accounts devnet. Then [add funds](/docs/accounts/fund). [Use cases](/docs/accounts/use-cases) shows which setup fits what you're building, or pick a guide:
 
 <Cards>
-  <Card title="Embed wallets with a provider" description="The customer's passkey, your provider's key, and a recovery provider's key as three signers, so the provider can't pay alone. Runs on the devnet." to="/docs/accounts/guides/users/embed-wallets" />
+  <Card title="Set up a self-custodial wallet with a provider" description="Your provider's key and the user's passkey approve together, and only the user can recover or leave without you. Runs on the devnet." to="/docs/accounts/guides/users/self-custodial-wallets" />
   <Card title="Add a recovery signer" description="A second signer, so a customer who loses their phone keeps their account." to="/docs/accounts/guides/users/add-a-recovery-signer" />
   <Card title="Pay out from a backend" description="Your backend pays approved payees, up to a daily limit, without prompting the customer." to="/docs/accounts/guides/automations/pay-out-from-a-backend" />
   <Card title="Fund a card program" description="Your backend tops up a customer's card, up to a daily limit, and can pay no one else." to="/docs/accounts/guides/automations/fund-a-card-program" />

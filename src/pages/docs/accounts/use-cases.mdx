@@ -14,12 +14,12 @@ What changes between these use cases is who holds which key. A customer's passke
 
 ## Consumer wallets
 
-Your app gives each customer an account they control, even though your app and your wallet provider help run it. The customer's passkey approves payments on its own. Your wallet provider's key and a recovery key approve only together, for example to replace the passkey when the customer loses their phone, so neither you nor the provider can move funds alone.
+Your app gives each customer an account they control, even though your app and your wallet provider help run it. The customer's passkey and your provider's key approve each payment together, and the customer's passkey and backup key can recover or leave without either of you, so neither you nor the provider can move funds alone.
 
 An account with several signers like this is a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). A provider-held single-key account works on mainnet today: see [Embedded wallets](/docs/accounts/wallets/embedded-wallets).
 
 <Cards>
-  <Card title="Embed wallets with a provider" description="Make your wallet provider's key one of three signers, so only the customer's passkey approves alone." to="/docs/accounts/guides/users/embed-wallets" />
+  <Card title="Set up a self-custodial wallet with a provider" description="Your provider's key and the customer's passkey approve together; the customer's passkey and backup recover without you." to="/docs/accounts/guides/users/self-custodial-wallets" />
   <Card title="Add a recovery signer" description="Add a second key so a lost phone doesn't lock the customer out." to="/docs/accounts/guides/users/add-a-recovery-signer" />
   <Card title="Recover a user's account" description="Replace a lost passkey with the signers the customer still has." to="/docs/accounts/guides/users/recover-an-account" />
   <Card title="Hand off to a self-custodial wallet" description="Give the customer sole control of the same address from their own wallet." to="/docs/accounts/guides/users/hand-off" />
