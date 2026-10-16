@@ -5,12 +5,13 @@ description: Give every customer their own deposit address while all stablecoins
 ---
 
 import { Card, Cards } from 'vocs'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 # Virtual addresses
 
 Give each customer their own deposit address while every payment lands in one Tempo account.
 
-Virtual addresses turn one Tempo account into an omnibus account. You register the account once, then hand each customer a deposit address derived from it. Stablecoins sent to any of those addresses land in your account. Each deposit names the address it was sent to, which carries your customer tag, so you credit the right customer without per-customer wallets or sweep jobs. The tag tells you whose address received the deposit, not who sent it.
+Virtual addresses turn one Tempo account into an omnibus account. You register the account once, then hand each customer a deposit address derived from it. Stablecoins sent to any of those addresses land in your account. Each deposit names the address it was sent to, and that address carries your customer tag. You credit the right customer without per-customer wallets or sweep jobs. The tag tells you whose address received the deposit, not who sent it.
 
 ## When to use virtual addresses
 
@@ -20,14 +21,16 @@ Use virtual addresses when your business holds funds for many customers in one a
 - Custodians that run an omnibus wallet for many clients.
 - Payment processors and platforms that issue an address per merchant, customer, or invoice.
 
-If each customer controls their own funds, give them their own Tempo account instead. See [Use cases](/docs/accounts/use-cases).
+If each customer controls their own funds, give them their own [Tempo account](/docs/accounts/use-cases#customer-accounts-or-a-company-account) instead.
 
 ## Choose the account that receives deposits
 
-The account you register is bound to its deposit addresses permanently, so pick it with key changes in mind.
+The account you register is bound to its deposit addresses permanently. Pick it with key changes in mind.
 
-- **Configurable account (recommended).** You can [add](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [remove signers](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) later and keep the same address, so every customer's deposit address keeps working. Until T14, configurable accounts run only on the Tempo Accounts devnet.
-- **Single-key account.** Its deposit addresses work only as long as you keep that one key. On mainnet, if you expect to rotate keys, register a multisig or upgradeable contract instead.
+- **Configurable account (recommended).** [Add](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [remove signers](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) later at the same address. Every customer's deposit address keeps working.
+- **Single-key account.** Its deposit addresses work only while you keep that one key. On mainnet, if you expect to rotate keys, register a multisig or upgradeable contract instead.
+
+<ConfigurableAccountsT14 />
 
 ## Set up deposit addresses
 
@@ -35,7 +38,7 @@ The account you register is bound to its deposit addresses permanently, so pick 
 
 ### Register your account
 
-Send one registration transaction from the account. You can register more than once to get separate ranges of addresses, for example one per business line.
+Send one [registration transaction](/docs/guide/payments/virtual-addresses) from the account. Register more than once to get separate ranges of addresses, such as one per business line.
 
 ### Give each customer an address
 
@@ -47,19 +50,14 @@ Every deposit to a customer's address shows up in your account's transfer histor
 
 :::::
 
-[Customer deposit addresses](/docs/guide/payments/virtual-addresses) walks through all three steps with code and a live demo.
-
 ## Your account's rules still apply
 
-Deposits to a virtual address are deposits to your account. Your account's [receive policy](/docs/accounts/policies/receive-policies#virtual-address-behavior) decides which stablecoins and senders it accepts, and Tempo holds anything else instead of crediting it, so confirm each deposit reached your account before you credit the customer.
+Deposits to a virtual address are deposits to your account. Your account's [receive policy](/docs/accounts/policies/receive-policies#virtual-address-behavior) decides which stablecoins and senders it accepts. Tempo holds anything else instead of crediting it. Confirm each deposit reached your account before you credit the customer.
 
-Tempo forwards only TIP-20 stablecoins. Tell customers to send only supported stablecoins on Tempo, because other tokens sent to a virtual address can't be recovered.
+Tempo forwards only TIP-20 stablecoins. Other tokens sent to a virtual address can't be recovered, so tell customers to send only supported stablecoins on Tempo.
 
 ## Virtual address technical details
 
-The address format, the registry precompile, the transfer events, and the full list of limits live in Tempo EVM.
-
 <Cards>
   <Card title="Virtual addresses for TIP-20 deposits" description="How forwarding works, the address format, and what changes for wallets and indexers." to="/docs/protocol/tip20/virtual-addresses" />
-  <Card title="Customer deposit addresses" description="Register, derive addresses, and attribute deposits, with a live demo." to="/docs/guide/payments/virtual-addresses" />
 </Cards>

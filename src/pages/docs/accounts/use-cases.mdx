@@ -10,24 +10,30 @@ import { Card, Cards } from 'vocs'
 
 Find the setup and guides for what you're building.
 
-Account setups for consumer apps, backends and agents, custodians and treasuries, and wallets differ in who holds which key: a customer's passkey, a provider's key, your backend's access key, or an approver's signer. Each can do only what the account allows, and Tempo enforces those limits on every transaction.
+Consumer apps, backends and agents, custodians and treasuries, and wallets each set up accounts differently. The difference is who holds which key: a customer's passkey, a provider's key, your backend's access key, or an approver's signer. Tempo limits each key to what the account allows, on every transaction.
 
-Single-key accounts, access keys, fee sponsorship, virtual addresses, and receive policies work on mainnet and testnet. Until T14, accounts with several signers and a threshold run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Single-key accounts, access keys, fee sponsorship, virtual addresses, and receive policies work on mainnet and testnet. Configurable accounts, with several signers and a threshold, are planned for the [T14 network upgrade](/docs/protocol/upgrades/t14). Until then, they run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="where-should-funds-live" />
 
 ## Customer accounts or a company account
 
-Funds live in each customer's own account, or in a company account where your ledger records what each customer is owed. The same choice applies to every balance your product holds:
+Funds live in each customer's own account or in one company account. The choice applies to every balance your product holds:
 
-| Balance | Customer accounts | Company account |
+| | Customer accounts | Company account |
 | --- | --- | --- |
-| **Stablecoins** | Each customer's account holds its balance. Read it at that address. | One account holds the total. Your ledger records each customer's credit. |
-| **[Earn](/docs/earn) positions** | Each customer's account holds its vault shares. The Earn API reports earnings per address. | The company account holds the shares. Your ledger allocates their earnings to customers. |
-| **[Zone](/docs/zones) balances** | Each customer reads only their own private balance through account-scoped RPC. | One Zone account holds the funds. Your ledger is the per-customer record. |
-| **Build it** | [Apps](/docs/accounts/apps), or [connect the customer's wallet](/docs/accounts/wallets#connect-a-wallet-to-your-app) | [Hold customer funds in an omnibus account](/docs/accounts/custodians/omnibus-accounts) |
+| **Stablecoins** | Each customer's account holds their balance. | One account holds the total. Your ledger tracks each customer's share. |
+| **Earn positions** | Each account holds its own vault shares. The Earn API reports earnings per address. | The company account holds the shares. Your ledger allocates the earnings. |
+| **Zone balances** | Each customer reads only their own private balance. | One Zone account holds the funds. Your ledger tracks each customer's share. |
 
-A deposit address for a customer identifies incoming payments; it doesn't hold a separate balance or give the customer signing authority over the company account. You can combine the two: customers can have their own accounts for spending while a company account holds Earn positions and pays out.
+<Cards>
+  <Card title="Customer accounts" description="Give each customer an embedded wallet through a provider, or connect the wallet they already use." to="/docs/accounts/apps" />
+  <Card title="Company account" description="Give each customer a deposit address that pays into one omnibus account." to="/docs/accounts/custodians/omnibus-accounts" />
+</Cards>
+
+A customer's deposit address identifies incoming payments. It doesn't hold a separate balance or give the customer signing authority over the company account.
+
+You can combine the two. Customers spend from their own accounts, while a company account holds Earn positions and pays out.
 
 <span id="consumer-wallets" />
 

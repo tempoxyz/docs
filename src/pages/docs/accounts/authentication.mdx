@@ -5,12 +5,13 @@ description: Choose a private key, device key, or passkey for each key on a Temp
 ---
 
 import { Card, Cards } from 'vocs'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 # Signing methods
 
 A signing method is the kind of key that approves an account's transactions: a passkey, a device key, or a private key.
 
-Choose each key by who should hold it. A passkey or device key stays with the customer, while a private key on your server or with a wallet provider lets that party sign too. Every method works on mainnet and testnet today, as the one key of a [single-key account](/docs/accounts/how-it-works#address) or as an [access key](/docs/accounts/access-keys).
+Choose each key by who should hold it. A passkey or device key stays with the customer. A private key on your server or with a wallet provider lets that party sign too. Every method works on mainnet and testnet today, as the one key of a [single-key account](/docs/accounts/how-it-works#address) or as an [access key](/docs/accounts/access-keys).
 
 <span id="signer-rules" />
 <span id="authentication-limits" />
@@ -49,15 +50,30 @@ Choose each key by who should hold it. A passkey or device key stays with the cu
 
 ## How it works
 
-Tempo verifies three kinds of signature: secp256k1, the kind Ethereum wallets use, and P-256, either directly or through WebAuthn as a passkey. The kind of key decides where it can live and how the holder approves. Its role on the account decides what it can do: as a signer it approves at its weight, and as an access key it pays within its bounds. Keep a customer's key on their device, and a server's key in a KMS or HSM.
+Tempo verifies three kinds of signature onchain:
+
+- **secp256k1.** Ethereum wallets use it.
+- **P-256.** Device keys and P-256 private keys use it.
+- **WebAuthn P-256.** Passkeys use it.
+
+The kind of key decides where it can live and how the holder approves. Its role on the account decides what it can do.
 
 <span id="combine-signing-methods" />
 
 ## Combining methods
 
-Each key joins the account as a signer or an access key. A signer approves with a weight, and a transaction runs once the approving signers' weights reach the account's [threshold](/docs/accounts/policies/signing-thresholds). An [access key](/docs/accounts/access-keys) pays alone within its limits and never counts toward the threshold. Add device keys and server payout keys as access keys, because a signer has no spending limit.
+Each key joins the account in one of two roles:
 
-Several weighted signers on one account need a configurable account, which until T14 runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). Tempo has no override, so your app or a provider can approve only with the signers it holds. Set weights so no one but the customer reaches the threshold alone. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts, embedded wallets, and treasuries.
+| Role | What it does |
+| --- | --- |
+| Signer | Approves with a weight. A transaction runs once the approving signers' weights reach the account's [threshold](/docs/accounts/policies/signing-thresholds). |
+| [Access key](/docs/accounts/access-keys) | Pays alone within its limits. Never counts toward the threshold. |
+
+Add device keys and server payout keys as access keys. A signer has no spending limit.
+
+<ConfigurableAccountsT14 />
+
+Several weighted signers on one account need a configurable account. Tempo has no override. Your app or a provider can approve only with the signers it holds. Set weights so no one but the customer reaches the threshold alone. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts, embedded wallets, and treasuries.
 
 <span id="login-sign-in-in-code" />
 

@@ -16,10 +16,10 @@ Access keys are live on mainnet and testnet with a single-key account, so none o
 
 ## Recommended automation setup
 
-- Give each service or agent its own access key, generated where it runs or in your KMS. Only the key's address leaves it.
-- Set all three bounds: a daily limit sized to the job, scopes that list the only recipients or contracts it pays, and an expiry.
-- Keep the account's key with the user, their wallet provider, or your own approvers for a business account.
-- Save each key's address with the service that holds it, so you can [revoke](/docs/accounts/access-keys/revocation) one without stopping the others.
+- **One key per service or agent.** Generate it where it runs or in your KMS. Only the key's address leaves it.
+- **All three bounds.** Set a daily limit sized to the job, scopes that list the only recipients or contracts it pays, and an expiry.
+- **The account's key stays put.** Keep it with the user, their wallet provider, or your own approvers for a business account.
+- **A saved address per key.** Save each key's address with the service that holds it, so you can [revoke](/docs/accounts/access-keys/revocation) one without stopping the others.
 
 ## Automation guides
 
@@ -29,19 +29,18 @@ Access keys are live on mainnet and testnet with a single-key account, so none o
   <Card title="Give an agent a wallet" description="Give an AI agent its own key with a budget, an expiry, and only the calls it needs, and let it pay for APIs with MPP." to="/docs/accounts/automations/give-an-agent-a-wallet" />
 </Cards>
 
-To charge agents for your own API, or to pay per request with the Machine Payments Protocol (MPP), see [Machine payments](/docs/agents).
-
 <span id="give-the-backend-an-access-key-not-the-account-key" />
 
 ## Why an access key, not the account key
 
-If the server holds the account key and is breached, the attacker can move the whole balance. If it holds an access key, the attacker can pay only within that key's limit, recipients, and expiry, and the signers can [revoke](/docs/accounts/access-keys/revocation) the key.
+- **Account key on the server.** A breach lets the attacker move the whole balance.
+- **Access key on the server.** A breach lets the attacker pay only within that key's limit, recipients, and expiry. The signers can [revoke](/docs/accounts/access-keys/revocation) the key.
 
-Any key that signs Ethereum transactions can send stablecoins on Tempo, so a backend that already signs with a KMS key or a provider's server wallet can keep that key. Authorize that key as an access key to add the limits.
+Any key that signs Ethereum transactions can send stablecoins on Tempo. A backend that already signs with a KMS key or a provider's server wallet can keep that key. Authorize it as an access key to add the limits.
 
 ## Sign with a KMS key
 
-AWS KMS and Google Cloud KMS keys work as access keys, and the private key never leaves the KMS. An access key signs the 32-byte digest of each [Tempo Transaction](/docs/guide/tempo-transaction), and both KMSs sign digests with secp256k1 and P-256 keys. Wrap the KMS signing call as a Viem account, as in [Keep the key in your KMS](/docs/accounts/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
+AWS KMS and Google Cloud KMS keys work as access keys. The private key never leaves the KMS. An access key signs the 32-byte digest of each [Tempo Transaction](/docs/guide/tempo-transaction), and both KMSs sign digests with secp256k1 and P-256 keys. Wrap the KMS signing call as a Viem account, as in [Keep the key in your KMS](/docs/accounts/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
 
 <span id="sign-with-a-server-wallet" />
 

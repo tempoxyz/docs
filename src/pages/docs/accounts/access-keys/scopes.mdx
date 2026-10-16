@@ -8,15 +8,13 @@ description: Restrict an access key to the contracts, functions, and recipients 
 
 Scopes are an access key's allowlist of the contracts, functions, and addresses it may call or pay.
 
-Scopes are one of an [access key](/docs/accounts/access-keys)'s three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [expiry](/docs/accounts/access-keys/expiry). Tempo reverts any call outside the key's scopes, so a leaked payout key can pay only your payees. A spending limit caps how much the key spends and scopes decide where it goes, so give every backend, agent, and card key both.
+Scopes are one of an [access key](/docs/accounts/access-keys)'s three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [expiry](/docs/accounts/access-keys/expiry). Tempo reverts any call outside the key's scopes, so a leaked payout key can pay only your payees. A spending limit caps how much the key spends. Scopes decide where it goes. Give every backend, agent, and card key both.
 
-<span id="scopes" />
-<span id="scope-an-access-key" />
 <span id="what-a-scope-restricts" />
 
-## Set scopes
+## How it works
 
-Pass `scopes` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry allows one contract, optionally narrowed to one function and a list of recipients. For example, `{ address: stablecoin, selector: 'transfer(address,uint256)', recipients: [payee] }` lets the key send that stablecoin to `payee` and nothing else.
+Each scope entry allows one contract, optionally narrowed to one function and a list of recipients:
 
 | Field | Allows |
 | --- | --- |
@@ -26,16 +24,23 @@ Pass `scopes` when you [authorize the key](/docs/accounts/access-keys#authorize-
 
 A call that matches no entry reverts with [`CallNotAllowed`](/docs/protocol/transactions/AccountKeychain#error-callnotallowed). Leave out `scopes` and the key can call anything; pass `scopes: []` and it can call nothing.
 
-A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)`, which payments with a reference use, so give that function its own entry. An Earn deposit needs two entries: `approve(address,uint256)` on the stablecoin with the vault as recipient, and `deposit(uint256,address,uint256)` on the vault. [Pay out from a backend](/docs/accounts/automations/pay-out-from-a-backend) and [Sweep into Earn](/docs/earn) show complete keys.
+<span id="scopes" />
+<span id="scope-an-access-key" />
+
+## Set scopes
+
+Pass `scopes` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). For example, `{ address: stablecoin, selector: 'transfer(address,uint256)', recipients: [payee] }` lets the key send that stablecoin to `payee` and nothing else.
+
+A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)`, which payments with a reference use. Give that function its own entry. An Earn deposit needs two entries: `approve(address,uint256)` on the stablecoin with the vault as recipient, and `deposit(uint256,address,uint256)` on the vault. [Pay out from a backend](/docs/accounts/automations/pay-out-from-a-backend) and [Sweep into Earn](/docs/earn) show complete keys.
 
 <span id="change-allowed-calls" />
 <span id="change-a-keys-scopes" />
 
 ## Change scopes
 
-Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's scopes without revoking it; the key itself can't. Call `setAllowedCalls` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain), Tempo's built-in contract that stores access keys. For each contract you pass, it replaces that contract's rules and leaves the others alone, so list every rule you want to keep.
+Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's scopes without revoking it. Call `setAllowedCalls` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain), Tempo's built-in contract that stores access keys. For each contract you pass, it replaces that contract's rules and leaves the others alone. List every rule you want to keep.
 
-This code adds a second recipient to the key from `access-keys.ts`, the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key), and allows `transferWithMemo`. It lists both functions because the call replaces the stablecoin's rules. It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `setAllowedCalls` works the same on mainnet and testnet.
+This code adds a second recipient to the key from `access-keys.ts`, the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key). It also allows `transferWithMemo`. It lists both functions because the call replaces the stablecoin's rules. The example uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `setAllowedCalls` works the same on mainnet and testnet.
 
 ::::code-group
 
@@ -77,7 +82,7 @@ await client.writeContractSync({
 
 ::::
 
-An entry with `selectorRules: []` allows every function on that contract, and `removeAllowedCalls(keyId, target)` removes one contract from the key's scopes. `setAllowedCalls` reverts with [`InvalidCallScope`](/docs/protocol/transactions/AccountKeychain#error-invalidcallscope) when its list of contracts is empty, or on a zero address or a duplicate entry. Both functions revert with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid) on an admin key, which has no scopes.
+An entry with `selectorRules: []` allows every function on that contract. To remove one contract from the key's scopes, call `removeAllowedCalls(keyId, target)`.
 
 To read a key's current scopes, call `getAllowedCalls(account, keyId)`. It returns the scope list and `isScoped`, which is `false` for a key that can call anything. A missing, revoked, or expired key reads as scoped with no allowed calls.
 
@@ -85,6 +90,9 @@ To read a key's current scopes, call `getAllowedCalls(account, keyId)`. It retur
 
 ## Limits
 
-Scopes check only the calls the key signs directly. A contract the key may call can make any calls of its own, and an allowed factory contract can deploy contracts even though the key can't deploy one itself. Allow only contracts you trust.
+- Scopes check only the calls the key signs directly. A contract the key may call can make any calls of its own. An allowed factory contract can deploy contracts, even though the key can't deploy one itself. Allow only contracts you trust.
+- A limited access key can't change scopes, including its own.
+- `setAllowedCalls` reverts with [`InvalidCallScope`](/docs/protocol/transactions/AccountKeychain#error-invalidcallscope) when its list of contracts is empty, or on a zero address or a duplicate entry.
+- `setAllowedCalls` and `removeAllowedCalls` revert with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid) on an admin key, which has no scopes.
 
 Specification: [Account Keychain call scopes](/docs/protocol/transactions/AccountKeychain#call-scope-enforcement).

@@ -8,6 +8,7 @@ mipd: true
 
 import { Card, Cards } from 'vocs'
 import { ConnectWallet } from '../../../components/ConnectWallet.tsx'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 import * as Demo from '../../../components/guides/Demo'
 import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo'
@@ -20,9 +21,9 @@ If you build a wallet such as MetaMask, Rabby, or Ledger, your users expect to h
 
 ## Recommended wallet setup
 
-- **Wallet teams:** add the Tempo networks, show stablecoin balances instead of a native balance, and send [Tempo Transactions](/docs/guide/tempo-transaction) so users can pick a fee token, batch calls, and use sponsored fees and access keys.
-- **Apps:** keep wagmi's `injected` connector for users who have a browser wallet, and create new accounts with a [passkey or device key](/docs/accounts/authentication).
-- **Users who want backup signers:** an [account upgrade](/docs/accounts/account-configuration/account-upgrade) adds them at the same address. Devnet until T14.
+- **Wallet teams.** Add the Tempo networks, and show stablecoin balances instead of a native balance. Send [Tempo Transactions](/docs/guide/tempo-transaction) so users can pick a fee token, batch calls, and use sponsored fees and access keys.
+- **Apps.** Keep wagmi's `injected` connector for users who have a browser wallet. Create new accounts with a [passkey or device key](/docs/accounts/authentication).
+- **Users who want backup signers.** An [account upgrade](/docs/accounts/account-configuration/account-upgrade) adds them at the same address. Devnet until T14.
 
 ## Wallet guides
 
@@ -53,7 +54,7 @@ export const config = createConfig({
 })
 ```
 
-From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain. Tempo has no native gas token: the wallet pays each fee in a stablecoin, [by default](/docs/accounts/fees#fee-token-precedence) the one a payment sends and pathUSD for most other calls. A wallet may also show a placeholder native balance, so [show stablecoin balances](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) in your app instead.
+From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain. Tempo has no native gas token. The wallet pays each fee in a stablecoin: [by default](/docs/accounts/fees#fee-token-precedence), the one a payment sends, and pathUSD for most other calls. A wallet may also show a placeholder native balance. [Show stablecoin balances](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) in your app instead.
 
 <span id="legacy-accounts-compared-with-tempo-accounts" />
 
@@ -69,9 +70,9 @@ A browser wallet signs standard Ethereum transactions, which differ from [Tempo 
 | Several calls | One call per transaction | Several calls that succeed or fail together |
 | [Access keys](/docs/accounts/access-keys) | The wallet authorizes one with an `authorizeKey` call to the [Account Keychain](/docs/development/account-keychain#authorize-an-access-key). The access key then signs its own Tempo Transactions in your app. | Authorized in the transaction that first uses the key |
 
-A hardware wallet also holds one private key, so its account is a single-key account like any other EOA, with the same limits. A wallet that [adds Tempo](/docs/accounts/wallets/add-tempo-to-your-wallet) and sends Tempo Transactions lets its users pick a fee token, batch calls, and accept sponsored fees.
+A hardware wallet also holds one private key, so its account is a single-key account (EOA) with the same limits. Several signers per account and lost-key replacement need a configurable account.
 
-Several signers per account and lost-key replacement need a configurable account, which until T14 runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet.
+<ConfigurableAccountsT14 />
 
 <span id="what-we-recommend" />
 <span id="support-browser-wallets-for-users-who-have-one" />
@@ -83,11 +84,11 @@ Several signers per account and lost-key replacement need a configurable account
 
 ### Create new accounts with a passkey or device key
 
-For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication). A user moving off a browser wallet sends the funds to a new account whose key is a passkey or device key: on mainnet or testnet, a [single-key account](/docs/development/single-key-accounts); on the Tempo Accounts devnet, a [configurable account](/docs/accounts/create) with that key as its first signer.
+For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication). A user moving off a browser wallet sends the funds to a new account whose key is a passkey or device key. On mainnet or testnet, that's a [single-key account](/docs/development/single-key-accounts). On the devnet, it's a [configurable account](/docs/accounts/create) with that key as its first signer.
 
 ### Upgrade an existing address in place
 
-To keep the address instead, [upgrade the account in place](/docs/accounts/account-configuration/account-upgrade): it adds signers, and the original key signs the upgrade as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions.
+To keep the address instead, [upgrade the account in place](/docs/accounts/account-configuration/account-upgrade). The upgrade adds signers. The original key signs it as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions.
 
 <span id="let-the-provider-run-login-services" />
 <span id="integrate-accounts" />
@@ -100,7 +101,7 @@ To keep the address instead, [upgrade the account in place](/docs/accounts/accou
 
 ## Connect a wallet to your app
 
-If a user already has a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet holds the keys and signs; your app uses the address the user selects. Tempo Wallet sends transactions through its own RPC endpoint, not your devnet client, so the demo and code run on Moderato testnet, whose stablecoins have no value.
+If a user already has a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet holds the keys and signs. Your app uses the address the user selects. Tempo Wallet sends transactions through its own RPC endpoint, not your devnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
 
 <Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
   <SignInWithTempo stepNumber={1} />
@@ -121,4 +122,4 @@ const [address] = await provider.request({ method: 'eth_requestAccounts' }) // [
 if (!address) throw new Error('No account was selected')
 ```
 
-Track the wallet connection separately from your app's signed-in session. On `accountsChanged`, update the selected address, or clear it when the wallet disconnects; on `chainChanged`, refresh network-dependent state before you enable transactions. To send payments, create wallet and public clients from this provider as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). [Wallet partners](/docs/partners/wallets) lists other wallets you can connect.
+Track the wallet connection separately from your app's signed-in session. On `accountsChanged`, update the selected address, or clear it when the wallet disconnects. On `chainChanged`, refresh network-dependent state before you enable transactions. To send payments, create wallet and public clients from this provider as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). You can also connect other [wallet partners](/docs/partners/wallets).

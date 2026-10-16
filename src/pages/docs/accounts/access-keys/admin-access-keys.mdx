@@ -8,7 +8,7 @@ description: Let a customer's trusted device or your key-management service auth
 
 An admin access key manages an account's other access keys without the signers approving each change.
 
-It's the only kind of [access key](/docs/accounts/access-keys) that can authorize, change, and revoke keys, so a customer's trusted device can add their new phone, or your key-management service can rotate keys. Unlike a limited key, an admin key has no spending limit, expiry, or scopes, so whoever holds it can spend the whole balance.
+It's the only kind of [access key](/docs/accounts/access-keys) that can authorize, change, and revoke keys. A customer's trusted device can add their new phone, or your key-management service can rotate keys. Unlike a limited key, an admin key has no spending limit, expiry, or scopes. Whoever holds it can spend the whole balance.
 
 <span id="what-an-admin-access-key-can-do" />
 
@@ -21,22 +21,29 @@ An admin key can:
 - [Revoke](/docs/accounts/access-keys/revocation) any access key, including itself.
 - Approve a message that a contract checks with [`verifyKeychainAdmin`](/docs/sdk/foundry/signature-verifier#how-signature-verification-works-in-foundry).
 
-It doesn't count toward the signing threshold, so it can't change the signers or the threshold, or lock the signers out. A key-management call from a limited key reverts with [`UnauthorizedCaller`](/docs/protocol/transactions/AccountKeychain#error-unauthorizedcaller).
+An admin key isn't a signer. It can't change the signers or the threshold, or lock the signers out. A key-management call from a limited key reverts with [`UnauthorizedCaller`](/docs/protocol/transactions/AccountKeychain#error-unauthorizedcaller).
 
 <span id="when-to-avoid-admin-keys" />
 <span id="when-to-use-an-admin-key" />
 
 ## When to use one
 
-Give an admin key only to a party you'd trust with the whole balance. On a configurable account, an admin key also skips the [signing threshold](/docs/accounts/policies/signing-thresholds), so it removes the protection of requiring several signers. Everyone else, including an [AI agent](/docs/accounts/automations/give-an-agent-a-wallet), a [backend that pays out](/docs/accounts/automations/pay-out-from-a-backend), or a [card program](/docs/accounts/automations/pay-from-an-embedded-wallet), gets a limited key.
+Give an admin key only to a party you'd trust with the whole balance. On a configurable account (devnet until [T14](/docs/protocol/upgrades/t14)), an admin key also skips the [signing threshold](/docs/accounts/policies/signing-thresholds). It removes the protection of requiring several signers.
 
-Protect an admin key like a signer: keep it in a KMS or HSM, or as a [device key](/docs/accounts/authentication/device-keys) that can't be exported. A leaked admin key compromises the account, because its holder can authorize a new admin key before you revoke the leaked one.
+| Holder | Key |
+| --- | --- |
+| A customer's trusted device, or your key-management service | Admin key |
+| An [AI agent](/docs/accounts/automations/give-an-agent-a-wallet) | Limited key |
+| A [backend that pays out](/docs/accounts/automations/pay-out-from-a-backend) | Limited key |
+| A [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) | Limited key |
+
+Protect an admin key like a signer. Keep it in a KMS or HSM, or as a [device key](/docs/accounts/authentication/device-keys) that can't be exported. A leaked admin key compromises the account: its holder can authorize a new admin key before you revoke the leaked one.
 
 <span id="authorize-an-admin-key" />
 
 ## Authorize one
 
-Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key), passing `admin: true` to Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). Viem ignores `limits`, `expiry`, and `scopes` on an admin key, and Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
+Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key). Pass `admin: true` to Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). Viem ignores `limits`, `expiry`, and `scopes` on an admin key. Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
 
 <span id="admin-access-key-limits" />
 
@@ -45,4 +52,4 @@ Enough signers to reach the threshold, or an existing admin key, authorize it li
 - Changing an admin key's spending limit or scopes reverts with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid), because it has neither. To bound its holder, revoke it and authorize a new limited key.
 - Revoking an admin key leaves the keys it authorized in place, so revoke each one separately.
 
-Reference: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys](/docs/protocol/transactions/AccountKeychain#admin-key-authorization).
+Specification: [Account Keychain admin keys](/docs/protocol/transactions/AccountKeychain#admin-key-authorization).

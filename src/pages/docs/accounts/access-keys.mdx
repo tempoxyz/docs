@@ -15,7 +15,7 @@ import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
 An access key lets a customer's phone, your backend, or an AI agent pay without the account's signers approving each payment.
 
-The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and, until T14, with a configurable account only on the Tempo Accounts devnet.
+The account's signers authorize an access key once. From then on, the key signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so a leaked key spends only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address). Until T14, access keys on a configurable account run only on the Tempo Accounts devnet.
 
 <span id="access-key-controls" />
 <span id="set-limits-that-match-the-task" />
@@ -46,11 +46,14 @@ The account's signers authorize an access key once, and from then on it signs tr
 
 ## How it works
 
-An access key signs from the account's address and pays from its balance, but holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
+An access key signs from the account's address and pays from its balance. It holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
 
-An access key isn't a signer. It never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds), so it can't change the account's signers, and changing a configurable account's signers leaves every access key in place.
+An access key isn't a signer:
 
-Each key carries up to three bounds: a spending limit, scopes, and an expiry. Every bound is optional, and leaving one out removes that check: a key without scopes can call any contract. Give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three. An [admin access key](/docs/accounts/access-keys/admin-access-keys) has none of these bounds and can authorize, change, or revoke the account's other keys, so give one only to a party you'd trust with the whole balance.
+- **No threshold weight.** It never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds), so it can't change the account's signers.
+- **Survives signer changes.** Changing a configurable account's signers leaves every access key in place.
+
+Each key carries up to three bounds: a spending limit, scopes, and an expiry. Every bound is optional. Leaving one out removes that check: a key without scopes can call any contract. Give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three. An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds. Give one only to a party you'd trust with the whole balance.
 
 <span id="access-key-types" />
 <span id="access-key-patterns" />
@@ -93,7 +96,9 @@ Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-k
 - With the key's first payment: `signAuthorization` returns a `keyAuthorization` that travels with the first transaction the key signs. The key stays authorized even if that transaction's calls revert.
 - On its own: `authorizeSync` sends the authorization in a separate transaction, before the key pays.
 
-This example takes the first path: a new account's signer gives a payout key 10 OUSD for one hour, payable to one recipient. `account.ts` is the configurable account with one signer from [Create an account](/docs/accounts/create#create-an-account-in-code), funded by the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet). `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). To run it on testnet with a single-key account, set `account` to that signer and connect `client` to [testnet](/docs/quickstart/connection-details#testnet).
+This example takes the first path: a new account's signer gives a payout key 10 OUSD for one hour, payable to one recipient.
+
+`account.ts` is the configurable account with one signer from [Create an account](/docs/accounts/create#create-an-account-in-code), funded by the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet). `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). To run the example on the Moderato testnet with a single-key account, set `account` to that signer and connect `client` to [testnet](/docs/quickstart/connection-details#testnet).
 
 ::::code-group
 
@@ -149,7 +154,7 @@ To be able to cancel a signed authorization before anyone submits it, sign it wi
 
 <span id="see-an-accounts-keys" />
 
-Tempo emits `KeyAuthorized` when an account adds a key and `KeyRevoked` when it revokes one, so the [public indexer](/docs/api/indexer-api) can list every key an account has had; replace the address with your account's.
+Tempo emits `KeyAuthorized` when an account adds a key and `KeyRevoked` when it revokes one, so the [public indexer](/docs/api/indexer-api) can list every key an account has had. Replace the address with your account's.
 
 <TidxQuery
   network="mainnet"

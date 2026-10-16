@@ -7,6 +7,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 
 import { Card, Cards } from 'vocs'
 import { DocsProductOverview } from '../../components/DocsProductOverview'
+import ConfigurableAccountsT14 from '../../snippets/configurable-accounts-t14.mdx'
 
 <span id="build-your-account-integration" />
 
@@ -14,7 +15,7 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Tempo Accounts
 
-Give every customer a stablecoin account with its security rules built in. Customers approve payments with a passkey, your backend and agents pay within limits you set, and Tempo enforces every rule onchain.
+Give every customer a stablecoin account with security rules that Tempo enforces onchain.
 
 [Create an account →](/docs/accounts/create)
 
@@ -23,23 +24,17 @@ Give every customer a stablecoin account with its security rules built in. Custo
 <span id="account-capabilities" />
 <span id="accounts-capabilities" />
 
-## What you can build
+<span id="what-you-can-build" />
 
-### Accounts customers control
+## Why Tempo Accounts
 
-Customers approve payments with a [passkey](/docs/accounts/authentication/passkeys), a [key on their device](/docs/accounts/authentication/device-keys), or a [private key](/docs/accounts/authentication/private-keys), and one account can use several. Start with a single passkey, add a backup key so a lost phone doesn't lock anyone out, or pair your wallet provider's key with the customer's so neither of you can move funds alone. When the customer holds the keys, the funds are theirs.
-
-### Automated payments
-
-Your backend, card program, or AI agent can pay from an account with its own [access key](/docs/accounts/access-keys). You set how much it can spend, who it can pay, and when it expires, and Tempo rejects anything outside those limits. A leaked key can only spend what you allowed, and you can revoke it at any time.
-
-### Configurable account policies
-
-Set the rules for money coming in and going out. A [team multisig](/docs/accounts/custodians/team-multisig) needs two approvals for every payment. A [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you choose. [Deposit addresses](/docs/accounts/virtual-addresses) give each customer their own address that pays into one account. Fees are paid in stablecoins, and you can [cover them for your customers](/docs/accounts/fees/fee-sponsorship).
-
-### Works with the wallets you already use
-
-Tempo is [fully EVM compatible](/docs/quickstart/evm-compatibility), so accounts work with every popular [wallet provider](/docs/accounts/apps) and [custodian](/docs/accounts/custodians), including Privy, Turnkey, Dynamic, and Fireblocks, and with browser wallets like MetaMask. Keep your current setup and add Tempo's account features on top.
+- **Customers hold their keys.** Customers approve payments with a [passkey](/docs/accounts/authentication/passkeys), a [device key](/docs/accounts/authentication/device-keys), or a [private key](/docs/accounts/authentication/private-keys). When the customer holds the signing key, neither you nor Tempo can move their funds.
+- **Rules run onchain.** Tempo checks every transaction against the account's rules. No one, including Tempo, can override them.
+- **Automations stay within limits.** Your backend, card program, or AI agent pays with its own [access key](/docs/accounts/access-keys). Tempo rejects any payment over its limit, to an unlisted payee, or after it expires. You can revoke the key at any time.
+- **Recovery and approvals are built in.** Add a backup key so a lost phone doesn't lock anyone out. Require two of three approvers in a [team multisig](/docs/accounts/custodians/team-multisig).
+- **Deposits are easy to reconcile.** Give each customer a [deposit address](/docs/accounts/virtual-addresses) that pays into one account. A [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you choose.
+- **Fees are paid in stablecoins.** Accounts pay network fees in stablecoins, and you can [cover them for your customers](/docs/accounts/fees/fee-sponsorship).
+- **Your wallet stack works.** Tempo is [EVM compatible](/docs/quickstart/evm-compatibility), so [wallet providers](/docs/accounts/apps) and [custodians](/docs/accounts/custodians) such as Privy, Turnkey, Dynamic, and Fireblocks work, along with browser wallets like MetaMask.
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
@@ -62,11 +57,15 @@ A Tempo account is an address that holds stablecoins, with its rules stored onch
 
 - **Address:** holds the account's stablecoins and never changes, even when you [replace its signers](/docs/accounts/account-configuration).
 - **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight, and a transaction runs once its approvers' weights reach the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
-- **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the limits, expiry, and allowed calls you set. A leaked key can't spend past them.
+- **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the limits, expiry, and allowed calls you set.
 
-Tempo checks these rules on every transaction, and no one, including Tempo, can override them. Whoever holds the signing keys holds the funds: the customer when they hold a passkey, or a wallet provider or your backend when it holds the key. [Apps](/docs/accounts/apps) and [Custodians](/docs/accounts/custodians) cover each setup, and [Security](/docs/accounts/security) covers who can move funds in each.
+Whoever holds the signing keys holds the funds.
 
-On mainnet and testnet today, an account has one key, like a standard Ethereum account, and that key authorizes its access keys. A [configurable account](/docs/development/configurable-accounts) can have several signers, and a single-key account can [upgrade in place](/docs/accounts/account-configuration/account-upgrade) to one, keeping its address and balance.
+<ConfigurableAccountsT14 />
+
+On mainnet and testnet, an account is a single-key account. One key approves its payments and authorizes its access keys, like a standard Ethereum account. Access keys, fee tokens, fee sponsorship, receive policies, and virtual addresses all work there.
+
+On the devnet, a [configurable account](/docs/development/configurable-accounts) can have several signers. A single-key account can [upgrade in place](/docs/accounts/account-configuration/account-upgrade) and keep its address and balance.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />
@@ -87,11 +86,7 @@ On mainnet and testnet today, an account has one key, like a standard Ethereum a
 
 ## Start building
 
-:::info
-Single-key accounts, including passkeys, plus access keys, fee tokens, fee sponsorship, receive policies, and virtual addresses work on mainnet and testnet today. Configurable accounts, with several signers and a threshold, are planned for the T14 network upgrade; until then they run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
-:::
-
-To build on mainnet today, [create a single-key account](/docs/accounts/create#create-a-single-key-account) with a passkey or private key, or support the [wallets your users already have](/docs/accounts/wallets). To try several signers and recovery, [create a configurable account](/docs/accounts/create) on the Tempo Accounts devnet. Then [add funds](/docs/accounts/fund). [Use cases](/docs/accounts/use-cases) matches each setup to [Apps](/docs/accounts/apps), [Automations](/docs/accounts/automations), [Custodians](/docs/accounts/custodians), and [Wallets](/docs/accounts/wallets). Each guide below walks through one setup:
+On mainnet, [create a single-key account](/docs/accounts/create#create-a-single-key-account) or support the [wallets your users already have](/docs/accounts/wallets). To try several signers and recovery, [create a configurable account](/docs/accounts/create#create-a-configurable-account) on the devnet. Then [add funds](/docs/accounts/fund).
 
 <Cards>
   <Card title="Set up a self-custodial wallet with a provider" description="Your provider's key and the user's passkey approve together, and only the user can recover or leave without you. Devnet until T14." to="/docs/accounts/apps/self-custodial-wallets" />

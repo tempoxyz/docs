@@ -10,7 +10,7 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 The Account Keychain holds each account's access keys and checks every transaction they sign against the limits you set.
 
-Access keys are extra keys that sign for an account. The Account Keychain is a precompile, a contract built into Tempo, at `0xAAAAAAAA00000000000000000000000000000000`. Access keys are live on mainnet and testnet. Both [account types](/docs/accounts/keys) use them, though until T14, configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). To build with access keys, start with the [Access keys](/docs/accounts/access-keys) guide.
+Access keys are extra keys that sign for an account, and they are live on mainnet and testnet. The Account Keychain is a precompile, a contract built into Tempo, at `0xAAAAAAAA00000000000000000000000000000000`. Both [account types](/docs/accounts/keys) use access keys, though until [T14](/docs/protocol/upgrades/t14), configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). To build with access keys, start with the [Access keys](/docs/accounts/access-keys) guide.
 
 <AccountDiagram
   name="keychain"
@@ -68,13 +68,13 @@ signature    = 0x04 || account || access_key_signature
 inner_digest = keccak256(0x04 || tx_signature_hash || account)
 ```
 
-The access key signs `inner_digest`; a configurable account acting as an access key signs it with its owners, as a `0x05` signature. Tempo checks that the key is authorized for `account`, unexpired, unrevoked, and of the stored type, then enforces its limits and scopes. Tempo rejects the legacy `0x03` format from T1C.
+The access key signs `inner_digest`; a configurable account acting as an access key signs it with its owners, as a `0x05` signature. Tempo checks that the key is authorized for `account`, unexpired, unrevoked, and of the stored type, then enforces its limits and scopes. Since T1C, Tempo rejects the legacy `0x03` format.
 
 <span id="revoke-access" />
 
 ## Revoke an access key
 
-`revokeKey(keyId)` is permanent: that key ID can never be authorized again for the account. Owner changes, upgrades, and revoking an admin key leave every other key in place, so revoke each key separately.
+`revokeKey(keyId)` is permanent: that key ID can never be authorized again for the account. Configuration updates, account upgrades, and revoking an admin key leave every other key in place, so revoke each key separately.
 
 <span id="admin-access-keys" />
 

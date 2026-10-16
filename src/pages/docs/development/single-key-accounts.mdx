@@ -34,7 +34,7 @@ Because the key fixes the address, you can't replace the root key: a new key is 
 
 ## Signing with the root key
 
-The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 On mainnet or Moderato testnet, which need no key, use `createClient({ chain: tempo })` or `createClient({ chain: tempoModerato })` instead, with the chain from `viem/chains`, and pay in that network's stablecoins: [Network details](/docs/quickstart/connection-details) lists both.
 
@@ -79,7 +79,7 @@ Until T14, the upgrade transaction ([TIP-1113](https://tips.sh/1113)) does nothi
 
 | Property | Rule |
 | --- | --- |
-| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, a contract built into the Tempo Accounts devnet at `0xAACC000000000000000000000000000000000000` |
+| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, a contract built into the devnet at `0xAACC000000000000000000000000000000000000` |
 | Signed by | The root key, directly. Access keys can't upgrade. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it. |
 | Transaction | `upgradeAccount` is its only call, with no `key_authorization` or authorization list |
 | Eligible accounts | No contract code, no EIP-7702 delegation, and no configuration yet |

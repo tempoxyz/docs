@@ -8,7 +8,7 @@ description: Give each customer a virtual deposit address that pays into one Tem
 
 Take deposits for every customer into one account, and still know who paid.
 
-If you run an exchange or a payments processor, you hold many customers' stablecoins in one account and keep each customer's balance in your own ledger. On Tempo, you give each customer a [virtual address](/docs/accounts/virtual-addresses): a deposit address that pays straight into your account, with no per-customer wallet and no sweep job. Each deposit names the address it was sent to, so you know which customer to credit.
+Exchanges and payments processors hold many customers' stablecoins in one account. Each customer's balance lives in your own ledger. On Tempo, you give each customer a [virtual address](/docs/accounts/virtual-addresses): a deposit address that pays straight into your account, with no per-customer wallet and no sweep job. Each deposit names the address it was sent to, so you know which customer to credit.
 
 Virtual addresses and receive policies are live on mainnet and testnet. The code below runs on Moderato testnet.
 
@@ -18,18 +18,16 @@ Virtual addresses and receive policies are live on mainnet and testnet. The code
 
 ### Choose the account that receives deposits
 
-Registering an account binds every deposit address you derive from it to that account permanently, so pick one whose keys you can change without changing its address.
+Registering an account binds every deposit address you derive from it to that account permanently. Pick one whose keys you can change without changing its address.
 
-- **On mainnet and testnet,** a single-key account's deposit addresses work only as long as you keep that one key. If you expect to rotate keys, register a multisig or upgradeable contract instead.
-- **Configurable accounts** let you [add](/docs/accounts/account-configuration/configuration-updates#add-a-signer) and [remove signers](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) at the same address, but until T14 run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
-
-[Choose the account that receives deposits](/docs/accounts/virtual-addresses#choose-the-account-that-receives-deposits) compares the options.
+- **Single-key account.** On mainnet and testnet, its deposit addresses work only while you keep that one key. If you expect to rotate keys, register a multisig or upgradeable contract instead.
+- **Configurable account.** [Add](/docs/accounts/account-configuration/configuration-updates#add-a-signer) and [remove signers](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) at the same address. Until T14, it runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="register-and-derive" />
 
 ### Register the account and derive deposit addresses
 
-Register the account once by calling `registerVirtualMaster` on the virtual-address registry from it, with a salt you mine offchain with `VirtualMaster.mineSaltAsync`. Registration returns a 4-byte master ID. You can register more than once to get separate ranges of addresses, for example one per business line.
+Register the account once: call `registerVirtualMaster` on the virtual-address registry from it, with a salt you mine offchain with `VirtualMaster.mineSaltAsync`. Registration returns a 4-byte master ID. Register more than once to get separate ranges of addresses, such as one per business line.
 
 Then derive each customer's address offchain from the master ID and a 6-byte customer tag you choose. Deriving an address sends no transaction:
 
@@ -47,13 +45,13 @@ const virtualAddress = VirtualAddress.from({ // [!code hl]
 }) // [!code hl]
 ```
 
-Keep the mapping from customer tag to customer in your own records. [Customer deposit addresses](/docs/guide/payments/virtual-addresses) walks through registration with a live demo.
+Keep the mapping from customer tag to customer in your own records. To try registration first, use the [live deposit address demo](/docs/guide/payments/virtual-addresses).
 
 <span id="set-a-receive-policy" />
 
 ### Accept only the stablecoins you list
 
-Set a [receive policy](/docs/accounts/policies/receive-policies) on the registered account. Tempo checks deposits to its virtual addresses against the account's policy, because a virtual address can't set its own. This policy accepts one stablecoin from any sender, and lets your account recover anything it holds back:
+Set a [receive policy](/docs/accounts/policies/receive-policies) on the registered account. Tempo checks deposits to its virtual addresses against the account's policy, because a virtual address can't set its own. This policy accepts one stablecoin from any sender. It lets your account recover anything it holds back:
 
 ::::code-group
 
@@ -81,27 +79,27 @@ await client.receivePolicy.setSync({
 
 ::::
 
-`account` is the registered account and `stablecoin` is the token contract address you accept. Only TIP-20 stablecoins are forwarded to your account. Tell customers to send only the stablecoins you list on Tempo, because other tokens sent to a virtual address can't be recovered.
+`account` is the registered account and `stablecoin` is the token contract address you accept. Only TIP-20 stablecoins are forwarded to your account. Other tokens sent to a virtual address can't be recovered, so tell customers to send only the stablecoins you list on Tempo.
 
 <span id="credit-each-deposit" />
 
 ### Credit each deposit once
 
-A deposit to a virtual address emits two `Transfer` events in one transaction: sender to virtual address, then virtual address to your account. Treat the pair as one deposit to your account, not two. Then:
+A deposit to a virtual address emits [two `Transfer` events](/docs/protocol/tip20/virtual-addresses) in one transaction: sender to virtual address, then virtual address to your account. Treat the pair as one deposit to your account, not two. Then:
 
 - **Read the customer tag** from the virtual address: its last 6 bytes are the tag you chose. Look up the customer in your records.
 - **Check the recipient.** A deposit your receive policy blocks still succeeds and still emits `Transfer`, but its recipient is `ReceivePolicyGuard`, not your account. Credit only when the confirmed event names your account.
 - **Record it once.** Store the network, transaction hash, and log index as a unique key, and credit the customer in the same database transaction.
 
-Read live deposits with [webhooks](/docs/api/webhooks) or [transfer events](/docs/guide/payments/accept-a-payment#detect-payments), and history with the [transfers API](/docs/api/transfers). [Match payments to customers](/docs/guide/payments/accept-a-payment#match-payments-to-customers) covers verification in more depth.
+Read live deposits with [webhooks](/docs/api/webhooks) or [transfer events](/docs/guide/payments/accept-a-payment#detect-payments), and history with the [transfers API](/docs/api/transfers).
 
 <span id="handle-held-payments" />
 
 ### Handle held payments
 
-A deposit in a stablecoin you don't list stays in `ReceivePolicyGuard` until your account claims it. Index the guard's `TransferBlocked` events for your account to find held deposits, decide whether to return or accept each one, and claim it with `client.receivePolicy.claimSync`. A claim releases the full amount.
+A deposit in a stablecoin you don't list stays in `ReceivePolicyGuard` until your account claims it. Index the guard's `TransferBlocked` events for your account to find held deposits. Decide whether to return or accept each one, then [claim it](/docs/accounts/policies/receive-policies#claim-blocked-receipts) with `client.receivePolicy.claimSync`. A claim releases the full amount.
 
-[Claim a held payment](/docs/accounts/policies/receive-policies#claim-blocked-receipts) shows the query and the claim call. To let senders recover their own held payments instead, set the recovery authority to the sender (`claimer: 'sender'`).
+To let senders recover their own held payments instead, set the recovery authority to the sender (`claimer: 'sender'`).
 
 :::::
 
@@ -110,5 +108,3 @@ A deposit in a stablecoin you don't list stays in `ReceivePolicyGuard` until you
 - A virtual address never holds a balance: `balanceOf` on it returns `0`. Show customers the balance from your ledger.
 - Some protocols record ownership against the literal address they're given. Don't send LP shares, receipts, or rewards to a virtual address unless that protocol supports it.
 - The customer tag tells you whose address received a deposit, not who sent it.
-
-[Virtual addresses for TIP-20 deposits](/docs/protocol/tip20/virtual-addresses) covers the address format, the full event sequences for memo and mint paths, and what changes for wallets and indexers.

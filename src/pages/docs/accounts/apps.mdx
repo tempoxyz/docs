@@ -11,7 +11,7 @@ import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14
 
 Give each user an account they control, with your wallet provider signing alongside them.
 
-This is for consumer apps, such as wallets, remittance apps, and savings apps, that hold users' wallets with a provider such as Privy, Turnkey, or Dynamic. Each user keeps the same address when they recover the account or leave your app. If your users connect a wallet they already have, see [Wallets](/docs/accounts/wallets).
+Use this setup for consumer apps, such as wallets, remittance apps, and savings apps, that hold users' wallets with a provider such as Privy, Turnkey, or Dynamic. Each user keeps the same address when they recover the account or leave your app. Users who connect a [wallet they already have](/docs/accounts/wallets) hold their own key instead.
 
 <span id="plan-recovery-that-doesnt-depend-on-the-provider" />
 
@@ -19,7 +19,7 @@ This is for consumer apps, such as wallets, remittance apps, and savings apps, t
 
 <ConfigurableAccountsT14 />
 
-Provider wallets with one key each work on mainnet and testnet today.
+Provider wallets with one key each work on mainnet and testnet today ([what your provider sets up today](#what-your-provider-sets-up-today)).
 
 We recommend three signers per account, each at weight 1, with any two approving ([signing thresholds](/docs/accounts/policies/signing-thresholds)):
 
@@ -27,9 +27,7 @@ We recommend three signers per account, each at weight 1, with any two approving
 - **A key your provider manages**, which signs only for a user your app has signed in.
 - **A backup key the user keeps**, such as a second passkey on another device or a hardware key.
 
-Day to day, the passkey and the provider sign each payment together, so no payment goes through without the user. If the user loses their phone, the provider and the backup replace the passkey. If your app or the provider is down or breached, the user's passkey and backup still pay, recover, or remove the provider's key without either of you.
-
-[Set up a self-custodial wallet with a provider](/docs/accounts/apps/self-custodial-wallets) walks through it.
+Day to day, the passkey and the provider sign each payment together. No payment goes through without the user. If the user loses their phone, the provider and the backup replace the passkey. If your app or the provider is down or breached, the user's passkey and backup still pay, recover, or remove the provider's key without either of you.
 
 ## Guides for consumer apps
 
@@ -44,18 +42,20 @@ Day to day, the passkey and the provider sign each payment together, so no payme
 
 ## What your provider sets up today
 
-Each user gets one secp256k1 key, which the provider holds and unlocks when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works on Tempo mainnet and testnet as it is. The key controls the whole balance, so anyone the provider lets request a signature can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
+Each user gets one secp256k1 key. The provider holds it and unlocks it when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works on Tempo mainnet and testnet as it is. The key controls the whole balance. Anyone the provider lets request a signature can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
 
 ## Keep your existing provider wallets
 
-If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains, though balances on other chains don't carry over. Sending and receiving stablecoins works as it is. Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends [Tempo Transactions](/docs/guide/tempo-transaction). Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions ([Wallet partners](/docs/partners/wallets)), so sponsor fees with your own [fee payer](/docs/accounts/fees/fee-sponsorship).
+If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains. Balances on other chains don't carry over. Sending and receiving stablecoins works as it is.
+
+Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends [Tempo Transactions](/docs/guide/tempo-transaction). Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions ([Wallet partners](/docs/partners/wallets)). Sponsor fees with your own [fee payer](/docs/accounts/fees/fee-sponsorship).
 
 <span id="which-tempo-features-does-my-setup-support" />
 <span id="what-tempo-adds" />
 
 ## What your provider supports on Tempo
 
-Any provider that signs Ethereum transactions can hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). It supports Tempo Transaction features, such as paying fees in any stablecoin, batching payments, sponsoring fees, and authorizing [access keys](/docs/accounts/access-keys), only if it sends Tempo Transactions itself, or signs a transaction's raw hash so your app can send it to a Tempo RPC. Privy, Turnkey, and Dynamic do both:
+Any provider that signs Ethereum transactions can hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). Tempo Transaction features need more: paying fees in any stablecoin, batching payments, sponsoring fees, and authorizing [access keys](/docs/accounts/access-keys). For those, the provider sends Tempo Transactions itself, or signs a transaction's raw hash so your app can send it to a Tempo RPC. Privy, Turnkey, and Dynamic do both:
 
 | Provider | Sends Tempo Transactions | Signs raw hashes |
 | --- | --- | --- |
@@ -69,7 +69,7 @@ Any provider that signs Ethereum transactions can hold and send stablecoins on T
 
 ## Route raw signing through one backend
 
-The provider's policy engine can't read a raw hash, so it can't tell a payment or a key authorization from any other request. Route raw signing through one backend service that builds each transaction and checks it, including any access key's limits, scopes, and expiry, before calling the provider. To keep key authorization inside the policy engine instead, send a Tempo Transaction that calls `authorizeKey` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain) through the provider's transaction API.
+The provider's policy engine can't read a raw hash. It can't tell a payment or a key authorization from any other request. Route raw signing through one backend service. That service builds each transaction and checks it, including any access key's limits, scopes, and expiry, before calling the provider. To keep key authorization inside the policy engine instead, send a Tempo Transaction that calls `authorizeKey` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain) through the provider's transaction API.
 
 <span id="how-do-i-give-a-service-limited-spending-power" />
 <span id="wrap-the-providers-signing-as-an-account" />
