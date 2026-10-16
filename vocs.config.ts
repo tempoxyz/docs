@@ -1565,7 +1565,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/integration',
-      destination: '/docs/accounts/use-cases#customer-accounts-or-a-company-account',
+      destination: '/docs/accounts/use-cases',
       status: 301,
     },
     {
