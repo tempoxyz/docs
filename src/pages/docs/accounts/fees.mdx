@@ -10,7 +10,7 @@ import { Card, Cards } from 'vocs'
 
 Every Tempo transaction pays its network fee in a USD stablecoin, so accounts need no separate gas token.
 
-For each transaction, you decide who pays the fee and which stablecoin it's paid in. Fee tokens and fee sponsorship work on mainnet and testnet, and the same fee rules apply to configurable accounts, which until T14 run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+For each transaction, you decide who pays the fee and which stablecoin pays it. Fee tokens and fee sponsorship work on mainnet and testnet. The same fee rules apply to configurable accounts, which run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) until T14.
 
 <span id="sponsor-an-accounts-fees" />
 <span id="sponsor-fees-with-a-fee-payer" />
@@ -30,11 +30,13 @@ For each transaction, you decide who pays the fee and which stablecoin it's paid
 
 ## How it works
 
-By default the account pays its own fees, and a plain transfer pays in the stablecoin it sends. A [fee token](/docs/accounts/fees/fee-tokens) pays in a different stablecoin, and a [fee payer](/docs/accounts/fees/fee-sponsorship) pays for your customers; a fee payer only pays and can't change the account's calls or move its funds.
+- **By default.** The account pays its own fee. A plain transfer pays in the stablecoin it sends.
+- **With a fee token.** The fee is paid in a different stablecoin, the [fee token](/docs/accounts/fees/fee-tokens).
+- **With a fee payer.** A [fee payer](/docs/accounts/fees/fee-sponsorship) pays for your customers. It can't change the account's calls or move its funds.
 
-A standard stablecoin transfer costs about $0.00003 when the network is quiet and about $0.0006 at the base fee's cap. Before the transaction runs, Tempo deducts its maximum fee (gas limit times gas price) from the fee payer's balance in the fee token, then refunds the unused part.
+A standard stablecoin transfer costs about $0.00003 when the network is quiet. It costs about $0.0006 at the base fee's cap. Before the transaction runs, Tempo deducts its maximum fee (gas limit times gas price) from the fee payer's balance in the fee token. Afterward, Tempo refunds the unused part.
 
-If the validator producing the block wants a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm), a set of built-in exchange pools, converts the fee to it. If the fee token fails any of [Tempo's fee token checks](/docs/accounts/fees/fee-tokens#supported-fee-tokens), the transaction is invalid: Tempo never includes it, so it costs nothing. A transaction that's included and then fails still pays its fee.
+If the validator producing the block wants a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the fee to it. The Fee AMM is a set of built-in exchange pools. If the fee token fails any of [Tempo's fee token checks](/docs/accounts/fees/fee-tokens#supported-fee-tokens), the transaction is invalid. Tempo never includes it, so it costs nothing. A transaction that's included and then fails still pays its fee.
 
 <span id="set-an-accounts-default-fee-token" />
 <span id="fee-token-precedence" />
@@ -50,6 +52,6 @@ Tempo uses the first of these that applies:
 4. The input token of a single Stablecoin DEX swap.
 5. pathUSD, the first stablecoin deployed on Tempo.
 
-Tempo checks only that first token: if the fee payer can't pay in it, the transaction is invalid, even when a later token would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD, which the fee payer may not hold, so [set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token).
+Tempo checks only that first token. If the fee payer can't pay in it, the transaction is invalid, even when a later token would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD. The fee payer may not hold pathUSD, so [set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token).
 
 Specification: [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).

@@ -11,7 +11,7 @@ import { GuideDemo } from '../../../../components/guides/GuideDemo'
 
 Send payouts from your backend with a key that can pay only approved payees, up to a daily limit.
 
-If your company pays contractors, vendors, or sellers in stablecoins, your payout service has to send each payment without someone approving it and without holding the account's key. The account's signers, your approvers or your customer's, approve an [access key](/docs/accounts/access-keys) once, and your backend keeps it in its KMS. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees.
+If your company pays contractors, vendors, or sellers in stablecoins, your payout service sends each payment without someone approving it and without holding the account's key. The account's signers, your approvers or your customer's, approve an [access key](/docs/accounts/access-keys) once. Your backend keeps it in its KMS. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees.
 
 <span id="backend-services" />
 <span id="automations" />
@@ -20,7 +20,7 @@ The demo and the code run on the Tempo Accounts devnet, a test network whose sta
 
 <GuideDemo guide="backend-automation" />
 
-The code pays out a test stablecoin. You supply the undefined names: `account` and `address` are the customer's account and its address, `payees` the addresses the key may pay, `payee` one of them, `payoutKeyAddress` the KMS key's address, and `kms`, `kmsKeyId`, and `kmsPublicKey` your KMS client, key ID, and public key. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The code pays out a test stablecoin. You supply the undefined names: `account` and `address` are the customer's account and its address, `payees` the addresses the key may pay, `payee` one of them, `payoutKeyAddress` the KMS key's address, and `kms`, `kmsKeyId`, and `kmsPublicKey` your KMS client, key ID, and public key. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 :::::steps
 
@@ -59,11 +59,11 @@ await client.accessKey.authorizeSync({
 
 Authorizing is one transaction the customer approves, for example with their passkey. Show them the payees, daily limit, and expiry before they do.
 
-Limits are in base units: the stablecoin has 6 decimals, so `parseUnits('1000', 6)` is 1,000 OUSD. Size the limit to your largest payout day plus fees, which count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
+Limits are in base units: the stablecoin has 6 decimals, so `parseUnits('1000', 6)` is 1,000 OUSD. Size the limit to your largest payout day plus fees. Fees count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
 ### Keep the key in your KMS
 
-The private key never leaves the KMS, and Tempo stores only the key's address, payees, limit, and expiry. Wrap the key in a Viem account that asks the KMS for each signature:
+The private key never leaves the KMS. Tempo stores only the key's address, payees, limit, and expiry. Wrap the key in a Viem account that asks the KMS for each signature:
 
 ```ts [backend/payout-key.ts]
 import { PublicKey, Signature } from 'ox'
@@ -116,10 +116,10 @@ The customer isn't prompted. Tempo rejects a payout to an address outside `payee
 
 ## Before you go live
 
-- Payouts confirm one at a time by default, because an account's transactions share one nonce, a counter that orders them. To send them concurrently, use [expiring nonces or nonce keys](/docs/guide/payments/send-parallel-transactions).
-- To add a payee, the signers or an [admin key](/docs/accounts/access-keys/admin-access-keys) update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls).
-- You can't extend an expiry, so [authorize a replacement key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before it passes.
+- **Concurrent payouts.** An account's transactions share one nonce, a counter that orders them, so payouts confirm one at a time by default. To send them concurrently, use [expiring nonces or nonce keys](/docs/guide/payments/send-parallel-transactions).
+- **New payees.** To add a payee, the signers or an [admin key](/docs/accounts/access-keys/admin-access-keys) update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls).
+- **Expiry.** You can't extend an expiry. [Authorize a replacement key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before it passes.
 
 ## Move idle funds into Earn
 
-Balances waiting for the next payout run can sit in an [Earn](/docs/earn) vault. Use a separate key scoped to the vault's `approve` and `deposit` calls, so the payout key still pays only payees, and follow [Deposit](/docs/earn/integrate) for the vault checks.
+Balances waiting for the next payout run can sit in an [Earn](/docs/earn) vault. Use a separate key scoped to the vault's `approve` and `deposit` calls, so the payout key still pays only payees. Follow [Deposit](/docs/earn/integrate) for the vault checks.

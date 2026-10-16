@@ -9,15 +9,15 @@ import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14
 
 # Account configuration
 
-An account's configuration is its signers, their weights, and its threshold, and you can change it without changing the address.
+A configurable account changes its signers, weights, and threshold without changing its address.
 
-A Tempo account's signers are the keys that approve its transactions. A configurable account changes its configuration at the same address, so its balance and history survive a lost phone or a departing approver. Only the current signers can approve a change, and Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
+An account's configuration is its signers, their weights, and its threshold. A signer is a key that approves the account's transactions. Because the address stays, the balance and history survive a lost phone or a departing approver. Only the current signers can approve a change. Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
 
 ## Changes
 
 <Cards>
-  <Card title="Configuration updates" description="Add a backup or another approver, remove a departing signer, or replace a lost or compromised key." to="/docs/accounts/account-configuration/configuration-updates" />
-  <Card title="Account upgrade" description="Turn a single-key account into a configurable account at the same address." to="/docs/accounts/account-configuration/account-upgrade" />
+  <Card title="Configuration updates" description="Add a backup or another approver, remove a departing signer, or replace a lost or compromised key. Devnet until T14." to="/docs/accounts/account-configuration/configuration-updates" />
+  <Card title="Account upgrade" description="Turn a single-key account into a configurable account at the same address. Devnet until T14." to="/docs/accounts/account-configuration/account-upgrade" />
 </Cards>
 
 <span id="one-signer-update-same-address" />
@@ -31,7 +31,9 @@ A Tempo account's signers are the keys that approve its transactions. A configur
 
 ## How it works
 
-A configuration update replaces the account's whole signer list and its [threshold](/docs/accounts/policies/signing-thresholds), the total weight an approval needs, in one transaction. Signers whose weights reach the current threshold approve it, the same way they approve a payment. Once it lands, a removed signer can't approve anything, and approvals collected before the update stop counting.
+<ConfigurableAccountsT14 />
+
+A configuration update replaces the account's whole signer list and its [threshold](/docs/accounts/policies/signing-thresholds) in one transaction. Signers whose weights reach the current threshold approve it, the same way they approve a payment. [Configuration updates](/docs/accounts/account-configuration/configuration-updates) shows how to build and send one.
 
 The situations differ in who approves:
 
@@ -46,17 +48,15 @@ The situations differ in who approves:
 <span id="revoke-a-key" />
 <span id="revoke-access-keys" />
 
-A configuration update doesn't touch access keys or token approvals, so a device key on a lost phone keeps paying within its limits until you [revoke it](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change).
+A configuration update doesn't touch access keys or token approvals. A device key on a lost phone keeps paying within its limits until you [revoke it](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change).
 
-A single-key account (EOA), like a standard Ethereum account, has no signer list to change, so [upgrade it](/docs/accounts/account-configuration/account-upgrade) to a configurable account first.
+A single-key account (EOA) has no signer list to change. [Upgrade it](/docs/accounts/account-configuration/account-upgrade) to a configurable account first.
 
 <span id="watch-signer-changes" />
 
 ## Watch changes
 
-<ConfigurableAccountsT14 />
-
-Each configuration update emits `MultisigConfigUpdated` with the account, its new version, threshold, and signer list. The public indexer doesn't cover the Tempo Accounts devnet, so read the event with Viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
+Each configuration update emits `MultisigConfigUpdated` with the account, its new version, threshold, and signer list. The public indexer doesn't cover the Tempo Accounts devnet. Read the event with Viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
 
 ```ts [watch-signers.ts]
 import { Abis, Addresses } from 'viem/tempo'
@@ -81,23 +81,23 @@ const updates = await client.getContractEvents({ // [!code hl]
 
 ## Plan for recovery
 
-Only the other signers can replace a lost one, so when you create the account, choose weights that reach the threshold without any one signer: total weight minus the largest signer's weight must be at least the threshold.
+Only the other signers can replace a lost one. When you create the account, choose weights that reach the threshold without any one signer. The rule: total weight minus the largest signer's weight must be at least the threshold.
 
-For example, a passkey at weight 2, plus a backup key and a recovery provider's key at weight 1 each, at threshold 2, passes: 4 minus 2 leaves 2. The two keys together replace a lost passkey, and the passkey alone replaces either key. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists others that pass, and [Add a recovery signer](/docs/accounts/account-configuration/configuration-updates#add-a-recovery-signer) adds one to an existing account.
+For example, take a passkey at weight 2, plus a backup key and a recovery provider's key at weight 1 each, at threshold 2. It passes: 4 minus 2 leaves 2. The two keys together replace a lost passkey. The passkey alone replaces either key. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists others that pass. [Add a recovery signer](/docs/accounts/account-configuration/configuration-updates#add-a-recovery-signer) adds one to an existing account.
 
 <span id="key-management-limits" />
 <span id="account-recovery-limits" />
 <span id="recovery-limits" />
 <span id="key-rotation-limits" />
 
-A recovery signer can approve payments at its weight too, so give it no more weight than recovery needs. Tempo can't tell whether a signer still holds its key, so have each new signer approve once before you rely on it.
+A recovery signer can approve payments at its weight too, so give it no more weight than recovery needs.
 
 <span id="recover-funds-sent-on-another-chain" />
 
 ### Funds on other chains
 
-The account has the same address on other EVM chains, so a sender can pay it on the wrong chain by mistake. The specification for configurable account addresses defines a recovery factory contract for that chain. With it, the secp256k1 signers you created the account with (standard Ethereum keys, such as KMS or hardware wallet keys) could deploy a recovery wallet at the address and retrieve the funds if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet, so funds sent to the address on another chain can't be retrieved today.
+The account has the same address on other EVM chains. A sender can pay it on the wrong chain by mistake. The specification for configurable account addresses defines a recovery factory contract for that chain. With it, the secp256k1 signers you created the account with (standard Ethereum keys, such as KMS or hardware wallet keys) could deploy a recovery wallet at the address and retrieve the funds. That works if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet. Funds sent to the address on another chain can't be retrieved today.
 
-Passkeys and device keys don't count. Accounts [upgraded in place](/docs/accounts/account-configuration/account-upgrade) don't use the factory: on other chains, the original key still controls the address. To keep the option open, create the account with secp256k1 signers whose weights reach the threshold on their own.
+Passkeys and device keys don't count. Accounts [upgraded in place](/docs/accounts/account-configuration/account-upgrade) don't use the factory. On other chains, their original key still controls the address. To keep the option open, create the account with secp256k1 signers whose weights reach the threshold on their own.
 
 Reference: [configurable accounts](/docs/development/configurable-accounts), [configuration updates](/docs/development/configurable-accounts#configuration-updates), [configurable account addresses](/docs/development/configurable-accounts#configurable-account-address).

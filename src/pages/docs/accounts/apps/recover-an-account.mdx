@@ -12,7 +12,7 @@ import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-
 
 Replace a user's lost passkey at the same address, with the two signers they still have.
 
-If you run a consumer app and a user loses the phone that holds their passkey, you don't move their funds to a new account. This guide assumes the [self-custodial setup](/docs/accounts/apps/self-custodial-wallets), where three signers (keys that approve the account's transactions) each have weight 1 and any two approve: the user's passkey, a key your wallet provider manages, and a backup key the user keeps. Without the passkey, the provider's key and the backup still reach 2 together, so they approve swapping in a new passkey from the user's new phone. The new passkey then revokes the lost phone's device key. The address, balance, and [Earn](/docs/earn) positions stay the same.
+When a user of your consumer app loses the phone that holds their passkey, you replace the passkey instead of moving their funds to a new account. The steps assume the [self-custodial setup](/docs/accounts/apps/self-custodial-wallets): three signers at weight 1, any two approving. They are the user's passkey, a key your wallet provider manages, and a backup key the user keeps. Without the passkey, the provider's key and the backup approve swapping in a new passkey from the user's new phone. The new passkey and the provider then revoke the lost phone's device key. The balance and [Earn](/docs/earn) positions stay at the same address.
 
 <span id="account-recovery-limits" />
 <span id="recommended-recovery-setups" />
@@ -23,9 +23,7 @@ If you run a consumer app and a user loses the phone that holds their passkey, y
 
 <ConfigurableAccountsT14 />
 
-Replacing a lost signer needs a configurable account.
-
-Tempo can't override an account's signers, so recovery works only if the remaining signers reach the threshold. Check that before the user funds the account, whichever signer is lost:
+Replacing a lost signer needs a configurable account. Tempo can't override an account's signers. Recovery works only if the remaining signers reach the threshold. Check that before the user funds the account, whichever signer is lost:
 
 ```ts [check.ts]
 const total = saved.config.owners.reduce((sum, { weight }) => sum + weight, 0)
@@ -55,7 +53,9 @@ const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
 
 ### Approve with the remaining signers
 
-Rebuild the account from `saved`, attaching the keys that approve: `providerAccount`, the provider's key wrapped as in [Set up a self-custodial wallet](/docs/accounts/apps/self-custodial-wallets#connect-privy-or-turnkey), and the user's backup. Signers without an attached key, such as the lost passkey at `lostPasskey`, stay addresses that can't sign. `openAccount` passes the saved address, because `address: 'infer'` derives a different one once signers change. The update swaps the lost passkey for the new one at the same weight. Viem signs it with both attached keys, whose weights of 1 each reach the threshold of 2.
+Rebuild the account from `saved`, attaching the keys that approve: `providerAccount`, the provider's key wrapped as in [Set up a self-custodial wallet](/docs/accounts/apps/self-custodial-wallets#connect-privy-or-turnkey), and the user's backup. Signers without an attached key, such as the lost passkey at `lostPasskey`, stay addresses that can't sign.
+
+`openAccount` passes the saved address, because `address: 'infer'` derives a different one once signers change. The update swaps the lost passkey for the new one at the same weight. Viem signs it with both attached keys, whose weights of 1 each reach the threshold of 2.
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -99,11 +99,11 @@ saved.config = config // [!code hl]
 
 ::::
 
-As with every payment, build the update in your backend and check it before asking the provider to sign ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). If the attached keys can't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, such as the backup on the user's laptop, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Once the update lands, the lost passkey can't approve anything.
+As with every payment, build the update in your backend and check it before asking the provider to sign ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). If the attached keys can't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices), such as the backup on the user's laptop. Once the update lands, the lost passkey can't approve anything.
 
 ### Revoke the lost device's keys
 
-The lost phone's device key is an [access key](/docs/accounts/access-keys): it pays from the account within its limits without the signers' approval. Changing signers doesn't revoke it, so revoke it now. `lostDeviceKey` is the address your app saved when it authorized the key. Build from the updated `saved.config`: an account built from the old configuration fails with `multisig configuration commitment mismatch`. On the new phone, the new passkey and the provider approve together, as for any payment.
+The lost phone's device key is an [access key](/docs/accounts/access-keys). It pays from the account within its limits without the signers' approval. A configuration update doesn't revoke it, so revoke it now. `lostDeviceKey` is the address your app saved when it authorized the key. Build from the updated `saved.config`: an account built from the old configuration fails with `multisig configuration commitment mismatch`. On the new phone, the new passkey and the provider approve together, as for any payment.
 
 ```ts [recover.ts]
 await client.accessKey.revokeSync({ // [!code hl]

@@ -6,12 +6,13 @@ interactive: true
 ---
 
 import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
 
 # Device keys
 
 A device key lets the customer's phone, computer, or browser pay without asking the customer to approve each payment.
 
-A device key is a P-256 key that the device's own key store creates and signs with, but won't export. The customer's passkey authorizes the device key once as an [access key](/docs/accounts/access-keys), and Tempo rejects any payment the device key signs over its spending limit or after it expires.
+A device key is a P-256 key that the device's own key store creates and never exports. The customer's passkey authorizes it once as an [access key](/docs/accounts/access-keys). Tempo rejects any payment it signs over its spending limit or after it expires. On a server, use a [private key](/docs/accounts/authentication/private-keys) in your KMS or HSM instead.
 
 <span id="what-a-device-key-is" />
 
@@ -28,11 +29,9 @@ Each platform keeps device keys in its own key store:
 | Windows | TPM, through the Microsoft Platform Crypto Provider |
 | Browsers | Non-extractable WebCrypto key, kept in IndexedDB |
 
-On a server, use a [private key](/docs/accounts/authentication/private-keys) in your KMS or HSM instead.
-
 <span id="what-a-device-key-trusts" />
 
-No app server or wallet provider holds the key, but anyone who unlocks the device can pay with it, up to its [spending limit](/docs/accounts/access-keys/spending-limits) and until it [expires](/docs/accounts/access-keys/expiry). Add a device key as an access key to get that cap, because a signer has no spending limit.
+Your servers and wallet providers never hold the device key. Anyone who unlocks the device can pay with it, up to its [spending limit](/docs/accounts/access-keys/spending-limits) and until it [expires](/docs/accounts/access-keys/expiry). Add a device key as an access key to get that cap. A signer has no spending limit.
 
 <span id="create-the-key-on-the-device" />
 <span id="authorize-it-from-a-signer" />
@@ -43,13 +42,15 @@ No app server or wallet provider holds the key, but anyone who unlocks the devic
 
 <P256KeyDemo />
 
-The demo makes the device key its own account on the Tempo Accounts devnet, to show signing without a prompt. Reload the page and the key is still there.
+The demo makes the device key its own account on the Tempo Accounts devnet to show signing without a prompt. Reload the page and the key is still there.
 
-In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 OUSD a day for 30 days, and the first payment carries that authorization. This works on mainnet and testnet today when the customer's account is a single-key account whose one key is the passkey.
+In your app, add the key to the customer's account as an access key instead. The device creates the key. The customer's passkey authorizes it for up to 500 OUSD a day for 30 days. The first payment carries that authorization.
 
-The example below uses a configurable account with the passkey as its signer. Until T14, configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+On mainnet and testnet today, a device key can be an access key on a single-key account whose one key is the customer's passkey.
 
-In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer):
+<ConfigurableAccountsT14 />
+
+This example uses a configurable account with the passkey as its signer, so `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer):
 
 ::::code-group
 

@@ -10,16 +10,25 @@ import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-
 
 A configuration update changes a configurable account's signers, weights, or threshold, at the same address.
 
-A signer is a key that approves a configurable account's transactions. To back up a key you could lose, let another person approve, end an approver's access, or rotate a key, the current signers approve one [configuration update](/docs/accounts/account-configuration#every-change-is-one-signer-update): a new signer list and threshold. The address, balance, token approvals, and access keys stay the same.
+A signer is a key that approves a configurable account's transactions. Use a configuration update to back up a key, add an approver, end an approver's access, or rotate a key. The current signers approve one update: a new signer list and threshold. The address, balance, token approvals, and access keys stay the same.
 
 <span id="send-the-signer-update" />
 <span id="how-a-signer-update-works" />
 
 ## How it works
 
-A configuration update replaces the account's whole signer list. Build it from the address and configuration your app saved for the account ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)). Rebuild the account with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals), and pass the new list to `updateConfigSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+<ConfigurableAccountsT14 />
 
-Each update raises the configuration's version by one. Save the `config` it returns with the account record, and rebuild from the latest saved record before every payment or update: an account built from the old configuration no longer matches the hash Tempo stores, and its next transaction fails. Approvals collected under the old signer list stop counting.
+A configuration update replaces the account's whole signer list. Build it from the address and configuration your app saved for the account ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)):
+
+1. Rebuild the account with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals).
+2. Pass the new signer list and threshold to `updateConfigSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold.
+
+To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+
+Each update raises the configuration's version by one. Save the `config` it returns with the account record. Rebuild from the latest saved record before every payment or update. An account built from the old configuration no longer matches the hash Tempo stores, so its next transaction fails.
+
+Once the update lands, a removed signer can't approve anything. Approvals collected under the old signer list stop counting.
 
 <span id="what-adding-a-signer-does" />
 <span id="choose-the-new-signers-weight" />
@@ -28,14 +37,16 @@ Each update raises the configuration's version by one. Save the `config` it retu
 
 ## Add a signer
 
-<ConfigurableAccountsT14 />
-
 The weight you give the new signer decides what it can approve alone. Every signer has a weight of at least 1:
 
-- Below the threshold, the new signer approves only together with others, so no single backup or recovery signer controls the account.
-- At or above the threshold, it approves anything alone, including removing every other signer. Give this weight only to a key you'd trust with the whole account.
+- **Below the threshold.** The new signer approves only together with others. No single backup or recovery signer controls the account.
+- **At or above the threshold.** The new signer approves anything alone, including removing every other signer. Give this weight only to a key you'd trust with the whole account.
 
-The threshold stays the same unless you change it, so each new signer adds a way to reach it. To keep requiring the same approvers, raise the threshold in the same update. For a recovery signer, give it enough weight that the account can [lose any one signer](/docs/accounts/account-configuration#plan-for-recovery) and still reach the threshold, and no more, because it can approve payments at that weight too. [Signing thresholds](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists recommended setups. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The threshold stays the same unless you change it, so each new signer adds a way to reach it. To keep requiring the same approvers, raise the threshold in the same update.
+
+Give a recovery signer enough weight that the account can [lose any one signer](/docs/accounts/account-configuration#plan-for-recovery) and still reach the threshold. Give it no more, because it can approve payments at that weight too. [Signing thresholds](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists recommended setups.
+
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -57,7 +68,9 @@ const { config: updated } = await client.accounts.updateConfigSync({
 
 ::::
 
-`account` is the rebuilt account, and `config` is the saved configuration it came from. `newSigner` is the new key's address: a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. Viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in Viem lists every option. Tempo can't tell whether a signer still holds its key, so have each new signer approve once before you rely on it.
+`account` is the rebuilt account, and `config` is the saved configuration it came from. `newSigner` is the new key's address: a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. In the examples below, `departing` and `oldSigner` are addresses already on the signer list. Viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in Viem lists every option.
+
+Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
 
 <span id="what-removing-a-signer-stops" />
 <span id="revoke-what-the-old-signer-authorized" />
@@ -79,9 +92,9 @@ const { config: updated } = await client.accounts.updateConfigSync({
 })
 ```
 
-If the remaining weights fall short of the threshold, lower `threshold` in the same update, or [replace the signer](#replace-a-signer-in-one-update) instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone, so a 2-of-3 multisig that drops to two signers at threshold 1 no longer needs two approvals. [Replace an approver](/docs/accounts/custodians/team-multisig#replace-an-approver) covers a team multisig.
+If the remaining weights fall short of the threshold, lower `threshold` in the same update. Or [replace the signer](#replace-a-signer-in-one-update) instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone. A 2-of-3 multisig that drops to two signers at threshold 1 no longer needs two approvals. [Replace an approver](/docs/accounts/custodians/team-multisig#replace-an-approver) covers a team multisig.
 
-[Access keys](/docs/accounts/access-keys) keep working after the update. A device key or agent key the removed signer authorized keeps paying within its limits, so [revoke every key](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) its holder could reach, including any an attacker added.
+[Access keys](/docs/accounts/access-keys) keep working after the update. A device key or agent key the removed signer authorized keeps paying within its limits. [Revoke every key](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) its holder could reach, including any an attacker added.
 
 <span id="replace-a-signer" />
 <span id="rotate-a-signer-at-the-same-weight" />
@@ -90,7 +103,7 @@ If the remaining weights fall short of the threshold, lower `threshold` in the s
 
 ## Replace a signer
 
-Rotate when the holder stays but the key changes: a new hardware wallet, a new device, or a new wallet provider. Put the new key at the old one's weight and keep the threshold, so every group of signers that could approve before still can:
+Rotate when the holder stays but the key changes: a new hardware wallet, a new device, or a new wallet provider. Put the new key at the old one's weight and keep the threshold. Every group of signers that could approve before still can:
 
 ```ts [rotate-signer.ts]
 import { isAddressEqual } from 'viem'
@@ -117,9 +130,9 @@ Because one update swaps the keys, the account never has both keys active, or ne
 
 ### Lost or compromised signers
 
-When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override, so this works only if their weights still reach the threshold. Check that when you create the account, using the rule in [Plan for recovery](/docs/accounts/account-configuration#plan-for-recovery). [Recover a user's account](/docs/accounts/apps/recover-an-account) walks through replacing a lost passkey.
+When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override. This works only if their weights still reach the threshold, so check the rule in [Plan for recovery](/docs/accounts/account-configuration#plan-for-recovery) when you create the account. [Recover a user's account](/docs/accounts/apps/recover-an-account) walks through replacing a lost passkey.
 
-Treat a compromised signer as an attacker and leave it out of the approvers. If its weight reaches the threshold alone, it can remove your other signers before you remove it.
+Treat a compromised signer as an attacker. Leave it out of the approvers. If its weight reaches the threshold alone, it can remove your other signers before you remove it.
 
 <span id="add-signer-limits" />
 <span id="limits-on-adding-signers" />

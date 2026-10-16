@@ -8,9 +8,7 @@ description: Add Tempo mainnet and testnet to a wallet, show stablecoin balances
 
 Support Tempo in your wallet, from network settings to Tempo Transactions.
 
-If you build a wallet, such as a browser extension, mobile wallet, or hardware wallet, your users can already sign standard Ethereum transactions on Tempo. Tempo has no native gas token, so balance checks and fee quotes need changes. [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
-
-[Integrating wallet support](/docs/quickstart/wallet-developers) has the full checklist and recipes.
+If you build a wallet, such as a browser extension, mobile wallet, or hardware wallet, your users can already sign standard Ethereum transactions on Tempo. Tempo has no native gas token, so [balance checks and fee quotes need changes](/docs/quickstart/wallet-developers). [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
 
 :::::steps
 
@@ -23,11 +21,11 @@ Add mainnet for production and Moderato testnet for development. Both use `USD` 
 | Tempo Mainnet | `4217` | `https://rpc.tempo.xyz` | `wss://rpc.tempo.xyz` | [explore.tempo.xyz](https://explore.tempo.xyz) |
 | Tempo Testnet (Moderato) | `42431` | `https://rpc.moderato.tempo.xyz` | `wss://rpc.moderato.tempo.xyz` | [explore.testnet.tempo.xyz](https://explore.testnet.tempo.xyz) |
 
-In Viem, use the `tempo` and `tempoModerato` chains from `viem/chains`. [Network details](/docs/quickstart/connection-details) lists both networks.
+In Viem, use the `tempo` and `tempoModerato` chains from `viem/chains`.
 
 ### Show stablecoin balances
 
-Tempo has no native token, so don't show a native balance. `eth_getBalance` [returns a large placeholder value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) so existing balance checks don't block users, and the `BALANCE` opcode returns 0. Read each stablecoin's TIP-20 balance instead, and remove any check that blocks a transaction on the native balance.
+Don't show a native balance. `eth_getBalance` [returns a large placeholder value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) so existing balance checks don't block users. The `BALANCE` opcode returns 0. Read each stablecoin's TIP-20 balance instead. Remove any check that blocks a transaction on the native balance.
 
 ::::code-group
 
@@ -89,12 +87,12 @@ Replace your EIP-1559 (type 2) envelope with the Tempo Transaction envelope (typ
 - Authorize [access keys](/docs/accounts/access-keys), so an app or agent pays from the user's account within a spending limit, scopes, and an expiry.
 - Sign with a [passkey](/docs/accounts/authentication/passkeys), and send [concurrent transactions](/docs/guide/payments/send-parallel-transactions) or [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) without tracking one nonce sequence.
 
-If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Transactions include both in the protocol: see the [feature comparison](/docs/protocol/transactions/eip-7702#feature-comparison).
+If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Transactions [include both in the protocol](/docs/protocol/transactions/eip-7702#feature-comparison).
 
 :::::
 
 ## After you add Tempo
 
-Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. To let a user add backup signers at the same address, the wallet signs an [account upgrade](/docs/accounts/account-configuration/account-upgrade) as a Tempo Transaction. Until T14, upgrades run only on the Tempo Accounts devnet.
+Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. To let a user add backup signers at the same address, the wallet signs an [account upgrade](/docs/accounts/account-configuration/account-upgrade) as a Tempo Transaction. Until [T14](/docs/protocol/upgrades/t14), upgrades run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
-To appear in [Wallet partners](/docs/partners/wallets), [contact Tempo](/docs/partners/join) about your integration.
+To list your wallet in [Wallet partners](/docs/partners/wallets), [tell us about your integration](/docs/partners/join).
