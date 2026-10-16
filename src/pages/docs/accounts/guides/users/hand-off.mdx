@@ -40,7 +40,7 @@ The user creates a passkey in a self-custodial wallet, such as [Tempo Wallet](ht
 
 Changing signers leaves access keys active, so revoke each one your app holds first, while your app's signer can still approve. [Revoked](/docs/accounts/access-keys/revocation) keys can't be authorized on this account again.
 
-Your app's signer approves each revocation. Rebuild the account from the address and configuration you saved for this user, since Tempo stores only a hash of the configuration. Attach your app's signer as a key viem can sign with, and leave the other signers as addresses.
+Your app's signer approves each revocation. Rebuild the account from the address and configuration you saved for this user, since Tempo stores only a hash of the configuration. Attach your app's signer as a key Viem can sign with, and leave the other signers as addresses.
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -76,7 +76,7 @@ for (const accessKey of appAccessKeys) { // [!code hl]
 
 ::::
 
-viem signs with `appSigner`. If its weight alone can't reach the threshold, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Revocations leave the configuration unchanged, so the same `account` approves the swap.
+Viem signs with `appSigner`. If its weight alone can't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Revocations leave the configuration unchanged, so the same `account` approves the swap.
 
 <span id="swap-the-signers-in-one-update" />
 

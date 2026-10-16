@@ -31,7 +31,7 @@ Store an admin key as carefully as a signer: in a KMS or HSM, or as a [device ke
 
 ## Authorize an admin key
 
-Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key), passing `admin: true` to viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). viem ignores `limits`, `expiry`, and `scopes` on an admin key, and Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
+Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key), passing `admin: true` to Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). Viem ignores `limits`, `expiry`, and `scopes` on an admin key, and Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
 
 ## Admin access key limits
 

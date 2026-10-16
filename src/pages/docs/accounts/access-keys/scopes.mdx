@@ -16,7 +16,7 @@ Scopes are one of an [access key](/docs/accounts/access-keys)'s three bounds, wi
 
 ## Set scopes
 
-Pass `scopes` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry allows one contract, optionally narrowed to one function and a list of recipients. For example, `{ address: stablecoin, selector: 'transfer(address,uint256)', recipients: [payee] }` lets the key send that stablecoin to `payee` and nothing else.
+Pass `scopes` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry allows one contract, optionally narrowed to one function and a list of recipients. For example, `{ address: stablecoin, selector: 'transfer(address,uint256)', recipients: [payee] }` lets the key send that stablecoin to `payee` and nothing else.
 
 | Field | Allows |
 | --- | --- |

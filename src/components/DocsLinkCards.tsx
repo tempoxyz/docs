@@ -2,13 +2,8 @@ import BotIcon from '~icons/lucide/bot'
 import BracesIcon from '~icons/lucide/braces'
 import CodeIcon from '~icons/lucide/code-xml'
 import CoinsIcon from '~icons/lucide/coins'
-import InboxIcon from '~icons/lucide/inbox'
-import KeyIcon from '~icons/lucide/key'
-import KeyRoundIcon from '~icons/lucide/key-round'
 import NetworkIcon from '~icons/lucide/network'
-import RotateCcwKeyIcon from '~icons/lucide/rotate-ccw-key'
 import ServerIcon from '~icons/lucide/server'
-import ShieldCheckIcon from '~icons/lucide/shield-check'
 import WalletIcon from '~icons/lucide/wallet'
 import { docsLinkCards } from '../lib/docs-link-cards'
 import {
@@ -27,11 +22,6 @@ const icons = {
   wallet: WalletIcon,
   tokens: CoinsIcon,
   server: ServerIcon,
-  keyRound: KeyRoundIcon,
-  shield: ShieldCheckIcon,
-  key: KeyIcon,
-  rotateKey: RotateCcwKeyIcon,
-  inbox: InboxIcon,
 }
 
 export function DocsLinkCards({ collection }: { collection: keyof typeof docsLinkCards }) {

@@ -20,7 +20,7 @@ Keep the account's own key with the user, or with your own signers for a busines
 
 ## Sign with a KMS key
 
-AWS KMS and Google Cloud KMS keys work as access keys, and the private key never leaves the KMS. An access key signs the 32-byte digest of each [Tempo Transaction](/docs/guide/tempo-transaction), and both KMSs sign digests with secp256k1 and P-256 keys. Wrap the KMS signing call as a viem account, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
+AWS KMS and Google Cloud KMS keys work as access keys, and the private key never leaves the KMS. An access key signs the 32-byte digest of each [Tempo Transaction](/docs/guide/tempo-transaction), and both KMSs sign digests with secp256k1 and P-256 keys. Wrap the KMS signing call as a Viem account, as in [Keep the key in your KMS](/docs/accounts/guides/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
 
 <span id="sign-with-a-server-wallet" />
 
@@ -33,7 +33,7 @@ Privy server wallets and Turnkey both sign Tempo Transactions and raw hashes:
 | [Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) server wallets | Sends Tempo Transactions through its wallet API, or signs raw hashes with `raw_sign` |
 | [Turnkey](https://docs.turnkey.com/features/networks/overview) | Signs Tempo Transactions with `sign_transaction`, which its policies can inspect, or raw hashes with `sign_raw_payload` |
 
-To use one as an access key, wrap its raw-hash signing as a viem account, as in [Authorize access keys from an embedded wallet](/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet#wrap-the-providers-signing-as-an-account).
+To use one as an access key, wrap its raw-hash signing as a Viem account, as in [Authorize access keys from an embedded wallet](/docs/accounts/guides/users/authorize-access-keys-from-an-embedded-wallet#wrap-the-providers-signing-as-an-account).
 
 ## Rotate and revoke backend keys
 

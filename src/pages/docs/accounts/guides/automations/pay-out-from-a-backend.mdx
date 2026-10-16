@@ -63,7 +63,7 @@ Limits are in base units: the stablecoin has 6 decimals, so `parseUnits('1000', 
 
 ### Keep the key in your KMS
 
-The private key never leaves the KMS, and Tempo stores only the key's address, payees, limit, and expiry. Wrap the key in a viem account that asks the KMS for each signature:
+The private key never leaves the KMS, and Tempo stores only the key's address, payees, limit, and expiry. Wrap the key in a Viem account that asks the KMS for each signature:
 
 ```ts [backend/payout-key.ts]
 import { PublicKey, Signature } from 'ox'

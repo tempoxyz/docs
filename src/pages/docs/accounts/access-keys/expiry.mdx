@@ -19,7 +19,7 @@ Tempo checks the expiry against block time (the current block's timestamp), not 
 
 ## Set an expiry
 
-Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). A key without `expiry` never expires, and admin keys can't have one. The `Expiry` helpers in `viem/tempo` return a timestamp relative to now, such as `Expiry.days(30)` or `Expiry.hours(1)`. See viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize).
+Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). A key without `expiry` never expires, and admin keys can't have one. The `Expiry` helpers in `viem/tempo` return a timestamp relative to now, such as `Expiry.days(30)` or `Expiry.hours(1)`. See Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize).
 
 Use the shortest window the holder needs: hours for a one-off task, 30 days for a device, 90 days for a backend. An expiry at or before the current block time reverts with [`ExpiryInPast`](/docs/protocol/transactions/AccountKeychain#error-expiryinpast).
 

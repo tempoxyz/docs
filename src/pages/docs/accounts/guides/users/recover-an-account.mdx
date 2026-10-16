@@ -48,7 +48,7 @@ const passkey = Account.fromWebAuthnP256(await WebAuthnP256.createCredential({ l
 
 ### Approve with the remaining signers
 
-Rebuild the account from `saved`, attaching the keys that approve: the first key, held by your app or wallet provider, and the recovery signer. Signers without an attached key, such as the lost passkey at `lostPasskey`, stay addresses that can't sign. `openAccount` passes the saved address, because `address: 'infer'` derives a different one once signers change. The update swaps the lost passkey for the new one at the same weight. viem signs it with both attached keys, whose weights of 1 each reach the threshold of 2.
+Rebuild the account from `saved`, attaching the keys that approve: the first key, held by your app or wallet provider, and the recovery signer. Signers without an attached key, such as the lost passkey at `lostPasskey`, stay addresses that can't sign. `openAccount` passes the saved address, because `address: 'infer'` derives a different one once signers change. The update swaps the lost passkey for the new one at the same weight. Viem signs it with both attached keys, whose weights of 1 each reach the threshold of 2.
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -91,7 +91,7 @@ saved.config = config // [!code hl]
 
 ::::
 
-If the attached keys can't reach the threshold, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Once the update lands, the lost passkey can't approve anything.
+If the attached keys can't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Once the update lands, the lost passkey can't approve anything.
 
 ### Revoke the lost device's keys
 

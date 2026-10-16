@@ -54,7 +54,7 @@ function openTreasury(approvers: readonly Account.RootAccount[]) {
 
 ::::
 
-viem signs with the attached keys and throws `Local owners do not meet the threshold.` before sending anything if their weights fall short. The demo, with keys the page generates, replaces the signer in one update, then revokes their keys.
+Viem signs with the attached keys and throws `Local owners do not meet the threshold.` before sending anything if their weights fall short. The demo, with keys the page generates, replaces the signer in one update, then revokes their keys.
 
 <GuideDemo guide="rotate-keys" />
 
@@ -99,7 +99,7 @@ saved.config = removed.config
 
 <span id="rebalance-the-threshold" />
 
-Two signers of weight 1 remain at a threshold of 2, so both must approve every payment. Losing either key locks the treasury until you add a replacement with the same update shape, appending `{ owner: replacement, weight: 1 }`. Lowering the threshold to 1 instead keeps a lost key from locking the treasury but lets either approver pay alone. If the remaining weights couldn't reach the threshold, viem would throw `Invalid account config: threshold exceeds total owner weight.` and send nothing.
+Two signers of weight 1 remain at a threshold of 2, so both must approve every payment. Losing either key locks the treasury until you add a replacement with the same update shape, appending `{ owner: replacement, weight: 1 }`. Lowering the threshold to 1 instead keeps a lost key from locking the treasury but lets either approver pay alone. If the remaining weights couldn't reach the threshold, Viem would throw `Invalid account config: threshold exceeds total owner weight.` and send nothing.
 
 ### Revoke their keys
 
