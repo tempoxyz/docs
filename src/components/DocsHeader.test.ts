@@ -79,7 +79,7 @@ describe('getActiveDocsSection', () => {
     ['/docs/accounts', 'accounts'],
     ['/docs/accounts/create', 'accounts'],
     ['/docs/accounts/keys', 'developers'],
-    ['/docs/accounts/guides/users/embed-wallets', 'accounts'],
+    ['/docs/accounts/guides/users/self-custodial-wallets', 'accounts'],
     ['/docs/accounts/access-keys', 'accounts'],
     ['/docs/accounts/authentication', 'accounts'],
     ['/docs/accounts/authentication/passkeys', 'accounts'],

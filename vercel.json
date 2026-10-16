@@ -1213,7 +1213,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/identity-provider",
-      "destination": "/developers/docs/accounts/guides/users/embed-wallets",
+      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
       "permanent": true
     },
     {
@@ -1233,7 +1233,7 @@
     },
     {
       "source": "/developers/docs/accounts/authentication/privy",
-      "destination": "/developers/docs/accounts/guides/users/embed-wallets#build-with-privy",
+      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets#build-with-privy",
       "permanent": true
     },
     {
@@ -1328,12 +1328,12 @@
     },
     {
       "source": "/developers/docs/accounts/guides/wallet-provider",
-      "destination": "/developers/docs/accounts/guides/users/embed-wallets",
+      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/guides/enterprise-sso",
-      "destination": "/developers/docs/accounts/guides/users/embed-wallets",
+      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
       "permanent": true
     },
     {
@@ -1438,7 +1438,7 @@
     },
     {
       "source": "/developers/docs/accounts/integrate",
-      "destination": "/developers/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet",
+      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets#connect-tempo-wallet",
       "permanent": true
     },
     {
@@ -1453,7 +1453,7 @@
     },
     {
       "source": "/developers/docs/accounts/providers",
-      "destination": "/developers/docs/accounts/guides/users/embed-wallets",
+      "destination": "/developers/docs/accounts/guides/users/self-custodial-wallets",
       "permanent": true
     },
     {

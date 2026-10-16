@@ -602,8 +602,8 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'Embed wallets with a provider',
-                link: '/docs/accounts/guides/users/embed-wallets',
+                text: 'Self-custodial wallets with a provider',
+                link: '/docs/accounts/guides/users/self-custodial-wallets',
               },
               {
                 text: 'Authorize access keys from an embedded wallet',
@@ -1493,7 +1493,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/identity-provider',
-      destination: '/docs/accounts/guides/users/embed-wallets',
+      destination: '/docs/accounts/guides/users/self-custodial-wallets',
       status: 301,
     },
     {
@@ -1513,7 +1513,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/authentication/privy',
-      destination: '/docs/accounts/guides/users/embed-wallets#build-with-privy',
+      destination: '/docs/accounts/guides/users/self-custodial-wallets#build-with-privy',
       status: 301,
     },
     {
@@ -1610,12 +1610,12 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/wallet-provider',
-      destination: '/docs/accounts/guides/users/embed-wallets',
+      destination: '/docs/accounts/guides/users/self-custodial-wallets',
       status: 301,
     },
     {
       source: '/docs/accounts/guides/enterprise-sso',
-      destination: '/docs/accounts/guides/users/embed-wallets',
+      destination: '/docs/accounts/guides/users/self-custodial-wallets',
       status: 301,
     },
     {
@@ -1715,7 +1715,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/integrate',
-      destination: '/docs/accounts/guides/users/embed-wallets#connect-tempo-wallet',
+      destination: '/docs/accounts/guides/users/self-custodial-wallets#connect-tempo-wallet',
       status: 301,
     },
     {
@@ -1730,7 +1730,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/providers',
-      destination: '/docs/accounts/guides/users/embed-wallets',
+      destination: '/docs/accounts/guides/users/self-custodial-wallets',
       status: 301,
     },
     {

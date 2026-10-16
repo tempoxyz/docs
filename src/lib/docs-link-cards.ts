@@ -67,7 +67,10 @@ export const docsLinkCards = {
       description: 'Walk through wallet providers, treasuries, and agents.',
       icon: 'code',
       links: [
-        ['Embed wallets with a provider', '/docs/accounts/guides/users/embed-wallets'],
+        [
+          'Self-custodial wallets with a provider',
+          '/docs/accounts/guides/users/self-custodial-wallets',
+        ],
         ['Set up a company treasury', '/docs/accounts/guides/teams/company-treasury'],
         ['Give an agent a wallet', '/docs/accounts/guides/agents/give-an-agent-a-wallet'],
       ],

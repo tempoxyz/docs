@@ -55,4 +55,4 @@ The provider's policy engine can't read a raw hash, so it can't tell a key autho
 
 ### Plan recovery that doesn't depend on the provider
 
-To make the provider's key one of several signers, so neither your app nor the provider can move funds alone, see [Embed wallets](/docs/accounts/guides/users/embed-wallets). It uses a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Make the provider's key one of three signers, next to the user's passkey and a backup key the user keeps, with any two approving. The passkey and the provider sign each payment together. If your app or the provider is down or breached, the user's passkey and backup still pay, recover, or remove the provider's key, so neither you nor the provider can move funds alone. See [Set up a self-custodial wallet with a provider](/docs/accounts/guides/users/self-custodial-wallets). It uses a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).

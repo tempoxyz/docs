@@ -65,7 +65,7 @@ Token rules.
 
 Connect users to Tempo Wallet.
 
-[Connect an account](/docs/accounts/guides/users/embed-wallets) to send a test payment.
+[Connect an account](/docs/accounts/guides/users/self-custodial-wallets) to send a test payment.
 
 </DocsProductOverview>
 
@@ -76,7 +76,9 @@ Read the account's transfer history.
 
     expect(output).toContain('# Accounts\n\nConnect users to Tempo Wallet.')
     expect(output).toContain('Connect users to Tempo Wallet.')
-    expect(output).toContain('[Connect an account](/docs/accounts/guides/users/embed-wallets)')
+    expect(output).toContain(
+      '[Connect an account](/docs/accounts/guides/users/self-custodial-wallets)',
+    )
     expect(output).toContain('A connected account receives stablecoins and sends a payment.')
     expect(output).toContain("## Reconcile payments\n\nRead the account's transfer history.")
     expect(output).not.toContain('DocsProductOverview')
