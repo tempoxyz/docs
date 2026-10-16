@@ -12,11 +12,11 @@ Set up one Tempo account that three approvers share, where any two must approve 
 
 If your team holds stablecoins together, such as a company's funds or a shared budget, you want no single person or key able to move them. Here you create a multisig account on the Tempo Accounts devnet whose three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself, so neither one stolen key nor your own backend can pay without a second approver.
 
-<ConfigurableAccountsT14 />
-
 <span id="treasury-model" />
 
 Each approver's signer has a weight of 1, and the [threshold](/docs/accounts/policies/signing-thresholds) is 2. The same threshold covers signer changes, so no single approver can add or remove a signer.
+
+<ConfigurableAccountsT14 />
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 

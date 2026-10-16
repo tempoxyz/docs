@@ -12,12 +12,12 @@ Choose signer weights so that no outside party can pay alone and losing any one 
 
 A signing threshold is the [account policy](/docs/accounts/policies) that decides who controls a configurable Tempo account. Each signer, a key that approves the account's transactions, has a weight, and a transaction runs only when the signers who approve it reach the threshold in total weight.
 
-<ConfigurableAccountsT14 />
-
 <span id="how-approvals-add-up" />
 <span id="signer-weights-and-the-threshold" />
 
 ## Weights and thresholds
+
+<ConfigurableAccountsT14 />
 
 Take a customer account at threshold 2, with a passkey at weight 2, and a backup key and a recovery provider's key at weight 1 each:
 
@@ -147,7 +147,7 @@ A configuration update works the same way: put `Actions.accounts.updateConfig.ca
 
 ## Verify in a contract
 
-A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. Until T14, `verifyMultisig` exists only on the Tempo Accounts devnet; on mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
+A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. Until T14, `verifyMultisig` exists only on the Tempo Accounts devnet; on mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
 
 ```solidity [ApprovalCheck.sol]
 // SPDX-License-Identifier: MIT

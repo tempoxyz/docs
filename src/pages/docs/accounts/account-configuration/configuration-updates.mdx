@@ -12,8 +12,6 @@ A configuration update changes a configurable account's signers, weights, or thr
 
 A signer is a key that approves a configurable account's transactions. To back up a key you could lose, let another person approve, end an approver's access, or rotate a key, the current signers approve one [configuration update](/docs/accounts/account-configuration#every-change-is-one-signer-update): a new signer list and threshold. The address, balance, token approvals, and access keys stay the same.
 
-<ConfigurableAccountsT14 />
-
 <span id="send-the-signer-update" />
 <span id="how-a-signer-update-works" />
 
@@ -29,6 +27,8 @@ Each update raises the configuration's version by one. Save the `config` it retu
 <span id="add-a-recovery-signer" />
 
 ## Add a signer
+
+<ConfigurableAccountsT14 />
 
 The weight you give the new signer decides what it can approve alone. Every signer has a weight of at least 1:
 
@@ -136,4 +136,4 @@ Treat a compromised signer as an attacker and leave it out of the approvers. If 
 - `multisig configuration commitment mismatch` means the account was built from a configuration that no longer matches the hash Tempo stores, for example because another configuration update landed first. Load the latest saved configuration and rebuild the update.
 - Rebuild with `address: 'infer'` only while the configuration is version 0. After a configuration update, the current signers no longer derive the address, so pass the saved `address`, as [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals) does.
 
-Specifications: [configuration updates](https://tips.sh/1109), [configurable accounts](https://tips.sh/1107).
+Reference: [configuration updates](/docs/development/configurable-accounts#configuration-updates), [configurable accounts](/docs/development/configurable-accounts).

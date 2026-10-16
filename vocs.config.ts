@@ -875,6 +875,11 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
+                text: 'T14',
+                badge: { text: 'Planned', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t14',
+              },
+              {
                 text: 'T13',
                 badge: { text: 'Upcoming', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t13',

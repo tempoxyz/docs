@@ -45,4 +45,4 @@ Enough signers to reach the threshold, or an existing admin key, authorize it li
 - Changing an admin key's spending limit or scopes reverts with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid), because it has neither. To bound its holder, revoke it and authorize a new limited key.
 - Revoking an admin key leaves the keys it authorized in place, so revoke each one separately.
 
-Specifications: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys (TIP-1049)](https://tips.sh/1049).
+Reference: [Account Keychain](/docs/protocol/transactions/AccountKeychain), [admin access keys](/docs/protocol/transactions/AccountKeychain#admin-key-authorization).
