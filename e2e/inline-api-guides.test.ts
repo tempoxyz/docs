@@ -6,7 +6,7 @@ const guides = [
     anchor: 'read-balances',
     title: 'Receive payments',
     operation: 'List address balances',
-    endpoint: '/v1/addresses/',
+    endpoint: '/balances',
     requestPath: /^\/v1\/addresses\/0x[0-9a-fA-F]{40}\/balances$/,
   },
   {

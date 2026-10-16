@@ -1438,7 +1438,7 @@
     },
     {
       "source": "/developers/docs/accounts/integrate",
-      "destination": "/developers/docs/accounts/apps/self-custodial-wallets#connect-tempo-wallet",
+      "destination": "/developers/docs/accounts/wallets#connect-a-wallet-to-your-app",
       "permanent": true
     },
     {

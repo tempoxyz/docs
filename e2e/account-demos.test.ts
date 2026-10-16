@@ -58,7 +58,7 @@ test('creates and reconnects the same passkey account without funding or sending
   await expect(demo.getByTestId('passkey-account-address')).toHaveText(address)
 
   // A passkey connection must not be mistaken for a Tempo Wallet connection.
-  await page.locator('[data-v-gutter-left] a[href="/docs/accounts/guides/wallet-provider"]').click()
+  await page.locator('[data-v-gutter-left] a[href="/docs/accounts/wallets"]').click()
   await expect(
     page.getByRole('button', { name: 'Connect Tempo Wallet', exact: true }),
   ).toBeEnabled()
@@ -106,7 +106,7 @@ test('requests a testnet connection from Tempo Wallet', async ({ page, context, 
         </script>`,
     }),
   )
-  await page.goto('/docs/accounts/guides/wallet-provider#connect-tempo-wallet')
+  await page.goto('/docs/accounts/wallets#connect-a-wallet-to-your-app')
   const connect = page.getByRole('button', { name: 'Connect Tempo Wallet', exact: true })
   await expect(connect).toBeEnabled()
   if (new URL(page.url()).protocol === 'http:') {
@@ -133,7 +133,7 @@ test('keeps account demos usable on a narrow screen', async ({ page, baseURL }) 
   ).toBeEnabled()
   await expect(demo.getByRole('button', { name: 'Use an existing passkey' })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-  await page.goto('/docs/accounts/guides/wallet-provider#connect-tempo-wallet')
+  await page.goto('/docs/accounts/wallets#connect-a-wallet-to-your-app')
   await expect(
     page.getByRole('button', { name: 'Connect Tempo Wallet', exact: true }),
   ).toBeEnabled()

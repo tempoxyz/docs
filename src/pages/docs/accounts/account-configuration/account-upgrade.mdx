@@ -53,13 +53,28 @@ The original key signs one transaction whose only call is `upgradeAccount(thresh
 ::::code-group
 
 ```ts [upgrade.ts]
-import { parseAbi } from 'viem'
+import { concat, keccak256, parseAbi, toHex } from 'viem'
 import { tempoDevnet } from 'viem/chains'
-import { Addresses } from 'viem/tempo'
+import { Account, Addresses } from 'viem/tempo'
 import { client } from './client'
 
 // Mainnet and testnet accept the transaction but don't upgrade the account.
 if (client.chain.id !== tempoDevnet.id) throw new Error('Account upgrades run only on the Tempo Accounts devnet.') // [!code hl]
+
+// The key that controls the account today
+const original = Account.fromSecp256k1(process.env.PRIVATE_KEY as `0x${string}`)
+// The backup signer's address. Its key stays on the user's device or with your recovery provider.
+const backup = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+
+// The account's configuration after the upgrade
+const account = Account.fromConfig({ // [!code hl]
+  address: original.address, // [!code hl]
+  owners: [original, backup], // [!code hl]
+  threshold: 1, // [!code hl]
+  salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])), // [!code hl]
+  version: 1n, // [!code hl]
+}) // [!code hl]
+const { owners, threshold } = account.config
 
 // A test stablecoin on the devnet
 const token = '0x20c0000000000000000000000000000000000001'
@@ -74,6 +89,8 @@ await client.writeContractSync({ // [!code hl]
   args: [threshold, owners], // [!code hl]
   feeToken: token, // [!code hl]
 }) // [!code hl]
+
+// Save account.config. Your app rebuilds the account from it.
 ```
 
 ```ts [client.ts]
@@ -82,11 +99,7 @@ await client.writeContractSync({ // [!code hl]
 
 ::::
 
-`original` is the key that controls the account today, such as `Account.fromSecp256k1(privateKey)`. `owners` and `threshold` come from the upgraded account's configuration:
-
-1. Build it with [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) at `original.address`, with `version: 1n` and the salt Tempo derives from the address, `keccak256(concat([toHex('tempo:multisig:upgrade'), original.address]))`.
-2. In the owners you pass, list `original` so it can approve, and the backup signer by its address. The backup key stays on the user's device or with your recovery provider; only its address goes in the configuration.
-3. Read `account.config`, which lists the signers sorted by address, as Tempo requires.
+The upgraded configuration uses `version: 1n` and a salt Tempo derives from the address. `account.config` lists the signers sorted by address, as Tempo requires.
 
 After the upgrade, the record your app saves is the account's only readable list of signers. [Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration) shows how to save it. Each time your app acts for the account, rebuild it from that record with `Account.fromConfig` and attach the keys that approve, such as `original`. The other signers stay as addresses.
 
