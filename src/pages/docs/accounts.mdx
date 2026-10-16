@@ -31,19 +31,19 @@ Tempo Accounts is in early development. Passkey accounts, access keys, fee spons
 
 ### Accounts customers control
 
-An account can be approved by a [passkey](/docs/accounts/authentication/passkeys), a [device key](/docs/accounts/authentication/device-keys), a [private key](/docs/accounts/authentication/private-keys), or several of them together. Choose the setup that fits your customers: one passkey for a simple wallet, a passkey plus a backup key so a lost phone isn't a lost account, or your wallet provider's key alongside the customer's so neither of you can move funds alone. As long as the customer holds the keys that approve payments, the funds are theirs.
+Customers approve payments with a [passkey](/docs/accounts/authentication/passkeys), a [key on their device](/docs/accounts/authentication/device-keys), or a [private key](/docs/accounts/authentication/private-keys), and one account can use several. Start with a single passkey, add a backup key so a lost phone doesn't lock anyone out, or pair your wallet provider's key with the customer's so neither of you can move funds alone. When the customer holds the keys, the funds are theirs.
 
 ### Automated payments
 
-Give your backend, a card program, or an AI agent its own [access key](/docs/accounts/access-keys) to pay from an account. Tempo rejects any payment over its budget, to someone you didn't allow, or after it expires, so a leaked key can spend only what you allowed. You can revoke it at any time.
+Your backend, card program, or AI agent can pay from an account with its own [access key](/docs/accounts/access-keys). You set how much it can spend, who it can pay, and when it expires, and Tempo rejects anything outside those limits. A leaked key can only spend what you allowed, and you can revoke it at any time.
 
 ### Configurable account policies
 
-Require two people to approve each payment from a [team multisig](/docs/accounts/custodians/team-multisig), accept only the stablecoins and senders you allow with a [receive policy](/docs/accounts/policies/receive-policies), and give each customer a [deposit address](/docs/accounts/virtual-addresses) that pays straight into one account. Fees are paid in stablecoins, and you can [cover them for your customers](/docs/accounts/fees/fee-sponsorship).
+Set the rules for money coming in and going out. A [team multisig](/docs/accounts/custodians/team-multisig) needs two approvals for every payment. A [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you choose. [Deposit addresses](/docs/accounts/virtual-addresses) give each customer their own address that pays into one account. Fees are paid in stablecoins, and you can [cover them for your customers](/docs/accounts/fees/fee-sponsorship).
 
 ### Works with the wallets you already use
 
-Tempo is [fully EVM compatible](/docs/quickstart/evm-compatibility), so the accounts work with every popular [wallet provider](/docs/accounts/apps) and [custodian](/docs/accounts/custodians), such as Privy, Turnkey, Dynamic, and Fireblocks, and with browser wallets like MetaMask. Keep the wallet stack you have and add Tempo's account features on top.
+Tempo is [fully EVM compatible](/docs/quickstart/evm-compatibility), so accounts work with every popular [wallet provider](/docs/accounts/apps) and [custodian](/docs/accounts/custodians), including Privy, Turnkey, Dynamic, and Fireblocks, and with browser wallets like MetaMask. Keep your current setup and add Tempo's account features on top.
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
