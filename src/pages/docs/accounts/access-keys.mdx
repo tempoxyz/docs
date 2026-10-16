@@ -15,7 +15,7 @@ import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
 An access key lets a customer's phone, your backend, or an AI agent pay without the account's signers approving each payment.
 
-The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so even a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and with a configurable account only on the Tempo Accounts devnet.
+The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and with a configurable account only on the Tempo Accounts devnet.
 
 <span id="access-key-controls" />
 <span id="set-limits-that-match-the-task" />
@@ -136,7 +136,7 @@ The other pages in this section import `account`, `accessKey`, `stablecoin`, and
 
 Tempo stores each limit and scope with the key, so each one adds to the network fee for authorizing it. This example's authorization and first payment cost under a cent together.
 
-To keep the option of canceling a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in Viem.
+To be able to cancel a signed authorization before anyone submits it, sign it with a 32-byte `witness`; burning the witness cancels it. See [Witnesses](https://viem.sh/tempo/guides/access-keys/witnesses) and [Authorize access keys](https://viem.sh/tempo/guides/access-keys/authorize) in Viem.
 
 <span id="key-revocation" />
 <span id="key-revocation-by-situation" />
@@ -145,7 +145,7 @@ To keep the option of canceling a signed authorization before anyone submits it,
 
 ## Revoke and audit
 
-[Revoke](/docs/accounts/access-keys/revocation) a key to end it permanently, for example when a device is lost or a service is retired. Revocation doesn't undo payments the key already made or token approvals it granted, so clean those up too.
+[Revoke](/docs/accounts/access-keys/revocation) a key to end it permanently, for example when a device is lost or a service is retired. Payments the key already made stay final, and its token approvals stay until you set them to zero.
 
 <span id="see-an-accounts-keys" />
 

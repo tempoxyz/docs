@@ -18,7 +18,7 @@ Tempo is a blockchain run by a distributed set of validators rather than a singl
 
 ## Who can move the funds
 
-Who can move an account's whole balance depends on who holds the keys that reach its threshold. Access key holders can pay only within their bounds in every setup.
+Whoever holds keys that reach an account's threshold can move its whole balance. In every setup, access key holders can pay only within their bounds.
 
 | Setup | Who can move the whole balance |
 | --- | --- |
@@ -58,7 +58,7 @@ Single-key accounts, access keys, and receive policies are live on mainnet and t
 
 A Tempo account can change the keys behind its address, so a switch to quantum-safe signatures doesn't mean moving funds.
 
-Crypto accounts today are protected by signatures that a large enough quantum computer could forge, including the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys. On most chains, replacing those keys means moving every account to a new address. A [configurable Tempo account](/docs/development/configurable-accounts) keeps its address, balances, and integrations while its keys change.
+A large enough quantum computer could forge the signatures that protect crypto accounts today, including the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys. On most chains, replacing those keys means moving every account to a new address. A [configurable Tempo account](/docs/development/configurable-accounts) keeps its address, balances, and integrations while its keys change.
 
 ### What a new key costs on most chains
 
@@ -79,7 +79,7 @@ A [single-key Tempo account](/docs/development/single-key-accounts#single-key-ad
 3. **Remove the old keys in the same update.** The old keys approve one update that adds the new signer and [removes the old ones](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) together, so no old key controls the account afterward. The address, balances, and token approvals don't change, and counterparties don't have to do anything.
 4. **Replace access keys.** An [access key](/docs/accounts/access-keys) that signs with an old key type is as breakable as the account's old signers. Revoke each one, such as a backend's or an agent's, and authorize a quantum-safe replacement without touching the account's signers.
 
-Upgrading, removing signers, and replacing access keys are features Tempo accounts already have. Adding a quantum-safe signer is the step that isn't built yet.
+Tempo accounts already support upgrading, removing signers, and replacing access keys. Only step 2, adding a quantum-safe signer, isn't built yet.
 
 ### What a quantum-safe key type needs
 
@@ -91,7 +91,7 @@ Tempo accounts accept secp256k1, P-256, and passkey (WebAuthn) signatures today,
 
 ### Why the switch has to happen early
 
-Changing keys only protects an account while its old keys are still safe. Once an attacker can work out a private key from its public key, the attacker and the real owner look the same to Tempo. Accounts need to retire their old keys before those keys can be broken, not after.
+Changing keys only protects an account while its old keys are still safe. Once an attacker can work out a private key from its public key, the attacker and the real owner look the same to Tempo. Accounts need to retire their old keys before those keys can be broken.
 
 A retired key can also still act outside the account's own rules:
 

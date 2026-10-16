@@ -124,7 +124,7 @@ await client.token.transferSync({
 })
 ```
 
-`withRelay` sends the transaction to your server for the fee payer's signature and everything else to the devnet. `account` is the customer's account with the keys on this device attached: a single-key account, or a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
+`account` is the customer's account with the keys on this device attached: a single-key account, or a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
 
 <span id="use-tempos-hosted-fee-payer" />
 

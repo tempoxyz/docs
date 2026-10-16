@@ -45,7 +45,7 @@ const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
 const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [!code hl]
 ```
 
-`account.address` receives stablecoins right away, and the account's first transaction registers it onchain. On the devnet, next [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups). On mainnet and testnet, a single-key passkey account can't add a signer or swap its key ([Passkey limits](#passkey-limits)).
+`account.address` receives stablecoins right away, and the account's first transaction registers it onchain. On the devnet, next [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
 
 <span id="passkey-limits" />
 
@@ -55,4 +55,4 @@ const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [
 - WebAuthn returns the public key only at creation. Save `credential.id` and `credential.publicKey`, and pass them to `Account.fromWebAuthnP256` when the customer returns.
 - Passkeys work only over HTTPS or on `localhost`. A cancelled or timed-out prompt fails with `NotAllowedError`.
 - A passkey on a security key isn't synced, so losing the key loses the signer.
-- On mainnet and testnet, a passkey account is a single-key account and can't swap its key. A synced passkey survives a lost phone only through its sync provider, such as iCloud Keychain or Google Password Manager. If the customer loses every synced copy, they lose the account and its funds.
+- On mainnet and testnet, a passkey account is a single-key account and can't add a signer or swap its key. A synced passkey survives a lost phone only through its sync provider, such as iCloud Keychain or Google Password Manager. If the customer loses every synced copy, they lose the account and its funds.

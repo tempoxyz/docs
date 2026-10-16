@@ -14,7 +14,7 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 Every Tempo EVM account is either a single-key account or a configurable account, and they differ in who approves transactions.
 
-A single-key account is approved by one key, as on Ethereum. A configurable account is approved by weighted owners (the Accounts guides call them signers): a transaction runs once the approving owners' weights reach the account's threshold. Either type can also authorize access keys, which sign alone within limits. [How it works](/docs/accounts/how-it-works) walks through an example.
+One key approves a single-key account's transactions, as on Ethereum. Weighted owners approve a configurable account's transactions (the Accounts guides call them signers), and a transaction runs once the approving owners' weights reach the account's threshold. Either type can also authorize access keys, which sign alone within limits. [How it works](/docs/accounts/how-it-works) walks through an example.
 
 <AccountDiagram
   name="account-types"

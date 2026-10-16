@@ -41,7 +41,7 @@ await client.faucet.fundSync({ account: account.address }) // test stablecoins
 
 For a device key, use `Account.fromWebCryptoP256(await WebCryptoP256.createKeyPair())`. For a private key, use `Account.fromSecp256k1(privateKey)`.
 
-For mainnet, use the `tempo` chain from `viem/chains` and fund the address with real stablecoins: [Network details](/docs/quickstart/connection-details) lists both networks. A single-key account can't change its key, so losing the key loses the account: see [Passkeys](/docs/accounts/authentication/passkeys#passkey-limits) before customers fund one.
+For mainnet, use the `tempo` chain from `viem/chains` and fund the address with real stablecoins. [Network details](/docs/quickstart/connection-details) lists both networks. A single-key account can't change its key, so losing the key loses the account. Read [Passkeys](/docs/accounts/authentication/passkeys#passkey-limits) before customers fund one.
 
 ## Create a configurable account
 

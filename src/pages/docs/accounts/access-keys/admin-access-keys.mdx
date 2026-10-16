@@ -30,7 +30,7 @@ It doesn't count toward the signing threshold, so it can't change the signers or
 
 Give an admin key only to a party you'd trust with the whole balance. Everyone else, including an [AI agent](/docs/accounts/automations/give-an-agent-a-wallet), a [backend that pays out](/docs/accounts/automations/pay-out-from-a-backend), or a [card program](/docs/accounts/automations/pay-from-an-embedded-wallet), gets a limited key.
 
-Store an admin key as carefully as a signer: in a KMS or HSM, or as a [device key](/docs/accounts/authentication/device-keys) that can't be exported. A leaked admin key compromises the account, because its holder can authorize a new admin key before you revoke the leaked one.
+Protect an admin key like a signer: keep it in a KMS or HSM, or as a [device key](/docs/accounts/authentication/device-keys) that can't be exported. A leaked admin key compromises the account, because its holder can authorize a new admin key before you revoke the leaked one.
 
 <span id="authorize-an-admin-key" />
 

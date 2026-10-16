@@ -10,7 +10,7 @@ import { Card, Cards } from 'vocs'
 
 Let a backend or an agent pay from an account without holding the account's key.
 
-If you run payouts or payroll, fund cards, or build an AI agent that pays for things, your code has to send stablecoins without a person approving each payment. On Tempo, give that code its own [access key](/docs/accounts/access-keys), never the account's key. The account's signers authorize the key once, and Tempo rejects any payment over its [spending limit](/docs/accounts/access-keys/spending-limits), outside its [scopes](/docs/accounts/access-keys/scopes), or after its [expiry](/docs/accounts/access-keys/expiry).
+If you run payouts or payroll, fund cards, or build an AI agent that pays for things, your code has to send stablecoins without a person approving each payment. Give that code its own [access key](/docs/accounts/access-keys) instead of the account's key. The account's signers authorize the key once, and Tempo rejects any payment over its [spending limit](/docs/accounts/access-keys/spending-limits), outside its [scopes](/docs/accounts/access-keys/scopes), or after its [expiry](/docs/accounts/access-keys/expiry).
 
 Access keys are live on mainnet and testnet with a single-key account, so none of these setups needs a configurable account.
 
@@ -37,7 +37,7 @@ To charge agents for your own API, or to pay per request with the Machine Paymen
 
 If the server holds the account key and is breached, the attacker can move the whole balance. If it holds an access key, the attacker can pay only within that key's limit, recipients, and expiry, and the signers can [revoke](/docs/accounts/access-keys/revocation) the key.
 
-Any key that signs Ethereum transactions can send stablecoins on Tempo, so a backend that already signs with a KMS key or a provider's server wallet works as it is. Making that key an access key adds the limits.
+Any key that signs Ethereum transactions can send stablecoins on Tempo, so a backend that already signs with a KMS key or a provider's server wallet can keep that key. Authorize that key as an access key to add the limits.
 
 ## Sign with a KMS key
 

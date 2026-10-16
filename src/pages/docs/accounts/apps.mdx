@@ -10,7 +10,7 @@ import { Card, Cards } from 'vocs'
 
 Give each user an account they control, with your wallet provider signing alongside them.
 
-This is for consumer apps, such as wallets, remittance apps, and savings apps, that hold users' wallets with a provider such as Privy, Turnkey, or Dynamic. It covers how each user's account is set up, how a user recovers it, and how they leave, all at the same address. If your users connect a wallet they already have, see [Wallets](/docs/accounts/wallets).
+This is for consumer apps, such as wallets, remittance apps, and savings apps, that hold users' wallets with a provider such as Privy, Turnkey, or Dynamic. Each user keeps the same address when they recover the account or leave your app. If your users connect a wallet they already have, see [Wallets](/docs/accounts/wallets).
 
 :::warning
 **Configurable accounts aren't live yet.** The self-custodial setup below uses an account with several signers and a threshold ([TIP-1107](https://tips.sh/1107)), which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. Provider wallets with one key each work on mainnet and testnet today.
@@ -26,7 +26,7 @@ We recommend three signers per account, each at weight 1, with any two approving
 - **A key your provider manages**, which signs only for a user your app has signed in.
 - **A backup key the user keeps**, such as a second passkey on another device or a hardware key.
 
-Day to day, the passkey and the provider sign each payment together, so no payment goes through without the user. If the user loses their phone, the provider and the backup replace the passkey. If your app or the provider is down or breached, the user's passkey and backup still pay, recover, or remove the provider's key without either of you. Neither your app nor the provider can move funds alone.
+Day to day, the passkey and the provider sign each payment together, so no payment goes through without the user. If the user loses their phone, the provider and the backup replace the passkey. If your app or the provider is down or breached, the user's passkey and backup still pay, recover, or remove the provider's key without either of you.
 
 [Set up a self-custodial wallet with a provider](/docs/accounts/apps/self-custodial-wallets) walks through it.
 
@@ -43,7 +43,7 @@ Day to day, the passkey and the provider sign each payment together, so no payme
 
 ## What your provider sets up today
 
-Each user gets one secp256k1 key, which the provider holds and unlocks when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works on Tempo mainnet and testnet as it is. The key controls the whole balance, so whoever the provider lets ask it to sign can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
+Each user gets one secp256k1 key, which the provider holds and unlocks when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works on Tempo mainnet and testnet as it is. The key controls the whole balance, so anyone the provider lets request a signature can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
 
 ## Keep your existing provider wallets
 

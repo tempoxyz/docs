@@ -33,7 +33,7 @@ const recoverable = saved.config.owners.every(({ weight }) => total - weight >= 
 
 Tempo stores only a hash of the account's configuration, so your app rebuilds the account from the address and configuration it saved after the last update: `saved.address` and `saved.config` below.
 
-The demo runs the same recovery in this browser with slightly different signers: a device key at weight 2 stands in for the passkey, a private key for the provider's key, and a second private key for the backup. The demo treats the device key as lost, and the replacement approves the revoke alone because of its weight of 2.
+The demo runs the same recovery in this browser with different signers: a device key at weight 2 stands in for the passkey, a private key for the provider's key, and a second private key for the backup. The demo treats the device key as lost, and the replacement approves the revoke alone because of its weight of 2.
 
 <GuideDemo guide="recover" />
 

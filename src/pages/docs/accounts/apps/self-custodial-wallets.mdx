@@ -26,7 +26,7 @@ On Tempo, each user's account can have three signers, the keys that approve its 
 | Your wallet provider | Nothing. Its key is one approval of the two each transaction needs. |
 | Your app | Nothing. It holds no key; it asks the provider to sign only for a signed-in user. |
 
-No one can approve a payment without the user. See [Security](/docs/accounts/security#who-can-move-the-funds) for how this compares with other setups.
+[Security](/docs/accounts/security#who-can-move-the-funds) compares this with other setups.
 
 <span id="choose-the-controls-your-application-needs" />
 
@@ -108,7 +108,7 @@ Before the user funds the account, have them confirm their backup works: sign a 
 | --- | --- | --- |
 | The user lost their phone | The provider and the backup | [Replace the passkey](/docs/accounts/apps/recover-an-account) with one on the new phone |
 | Your app or the provider is down or breached | The passkey and the backup | Pay as usual, or [remove the provider's key](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer) |
-| The user wants to leave | The passkey and the backup [Remove the provider's key](/docs/accounts/account-configuration/configuration-updates#remove-a-signer), or swap it for another signer the user holds ([replace a signer](/docs/accounts/account-configuration/configuration-updates#replace-a-signer-in-one-update)), at the same address |
+| The user wants to leave | The passkey and the backup | [Remove the provider's key](/docs/accounts/account-configuration/configuration-updates#remove-a-signer), or swap it for another signer the user holds ([replace a signer](/docs/accounts/account-configuration/configuration-updates#replace-a-signer-in-one-update)), at the same address |
 
 Each signer change keeps the account's address, balances, and [Earn](/docs/earn) positions. Save the new configuration that each update returns.
 
