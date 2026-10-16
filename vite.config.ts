@@ -2,7 +2,7 @@ import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
 import Icons from 'unplugin-icons/vite'
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { defineConfig, type Environment, loadEnv, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV ?? ''),
     },
     plugins: [
+      deferAiIndexDuringRscScan(),
       // Example regions are not complete modules. Keep server tooling out of
       // the client discovery graph; Vocs owns the persisted color scheme.
       zyzz({
@@ -71,6 +72,26 @@ export default defineConfig(({ mode }) => {
     server: useHttp ? { host: 'localhost' } : undefined,
   }
 })
+
+// plugin-rsc analyzes client and server references with two unwritten builds
+// that keep only each module's imports.
+function isRscScanBuild(environment: Environment) {
+  return environment.mode === 'build' && environment.config.build.write === false
+}
+
+function deferAiIndexDuringRscScan(): Plugin {
+  return {
+    name: 'tempo-defer-ai-index-during-rsc-scan',
+    apply: 'build',
+    enforce: 'pre',
+    // The AI index fetches external llms.txt pages for minutes. Let it keep
+    // building through the scans instead of holding up reference discovery.
+    load(id) {
+      if (id === '\0virtual:vocs/ai-search-manifest' && isRscScanBuild(this.environment))
+        return 'export const getAiSearchManifest = async () => undefined'
+    },
+  }
+}
 
 function developersProxyBasePath(): Plugin {
   return {
