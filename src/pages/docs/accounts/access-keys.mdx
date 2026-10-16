@@ -15,7 +15,7 @@ import { AccessKeyDemo } from '../../../components/guides/AccessKeyDemo'
 
 An access key lets a customer's phone, your backend, or an AI agent pay without the account's signers approving each payment.
 
-The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and with a configurable account only on the Tempo Accounts devnet.
+The account's signers authorize an access key once, and from then on it signs transactions from the account by itself. Tempo checks the key's bounds on every transaction, so a leaked key can spend only what those bounds allow. Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address), and, until T14, with a configurable account only on the Tempo Accounts devnet.
 
 <span id="access-key-controls" />
 <span id="set-limits-that-match-the-task" />
@@ -73,7 +73,7 @@ Give each device, service, agent, or team its own key, so you can revoke one wit
 | A customer's browser or phone | A P-256 [device key](/docs/accounts/authentication/device-keys) the device can't export, or a WebAuthn [passkey](/docs/accounts/authentication/passkeys) |
 | Your backend or an [AI agent](/docs/accounts/automations/give-an-agent-a-wallet) | A P-256 key it generates, or a secp256k1 key in your [KMS or HSM](/docs/accounts/automations/pay-out-from-a-backend#keep-the-key-in-your-kms) |
 | A wallet | A secp256k1 key |
-| A [team](/docs/accounts/custodians/team-multisig) | A configurable account, whose own signers and threshold approve as the key. Works only on the Tempo Accounts devnet ([TIP-1111](https://tips.sh/1111)). |
+| A [team](/docs/accounts/custodians/team-multisig) | A configurable account, whose own signers and threshold approve as the key. Devnet until T14 ([TIP-1111](https://tips.sh/1111)). |
 
 ## Try it
 

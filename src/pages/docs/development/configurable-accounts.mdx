@@ -5,6 +5,7 @@ description: Control one Tempo address with weighted owner keys and a threshold,
 ---
 
 import { AccountDiagram } from '../../../components/AccountDiagram'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 # Configurable accounts
 
@@ -12,9 +13,9 @@ A configurable account is one address controlled by a set of weighted owner keys
 
 A transaction runs once the weights of the owners who sign it reach the account's threshold: with three owners at weight 1 and a threshold of 2, any two can approve. The address never changes, so you can add, remove, or replace owners without moving funds.
 
-:::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. This includes a configurable account with one owner.
-:::
+<ConfigurableAccountsT14 />
+
+This includes a configurable account with one owner.
 
 <AccountDiagram
   name="configurable"

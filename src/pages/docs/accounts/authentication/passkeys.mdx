@@ -11,7 +11,7 @@ import { PasskeyAccountDemo } from '../../../../components/guides/PasskeyAccount
 
 A passkey lets only the customer approve payments and signer changes, with Face ID, a fingerprint, or a security key.
 
-A passkey is one of three signing methods for a Tempo account, with [private keys](/docs/accounts/authentication/private-keys) and [device keys](/docs/accounts/authentication/device-keys). On mainnet and testnet today, a passkey can be a single-key account's one key, but losing it loses the account. On the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), the only network that runs configurable accounts, make a customer's passkey a signer that approves alone, and add a second signer so a lost passkey doesn't lock the customer out. Treasuries use [different weights](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
+A passkey is one of three signing methods for a Tempo account, with [private keys](/docs/accounts/authentication/private-keys) and [device keys](/docs/accounts/authentication/device-keys). On mainnet and testnet today, a passkey can be a single-key account's one key, but losing it loses the account. Until T14, configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). There, make a customer's passkey a signer that approves alone, and add a second signer so a lost passkey doesn't lock the customer out. Treasuries use [different weights](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
 
 <span id="passkey-authenticators" />
 <span id="what-a-passkey-is" />
@@ -45,7 +45,7 @@ const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
 const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [!code hl]
 ```
 
-`account.address` receives stablecoins right away, and the account's first transaction registers it onchain. On the devnet, next [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
+`account.address` receives stablecoins right away, and the account's first transaction registers it onchain. Next, [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) with the weights in [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups).
 
 <span id="passkey-limits" />
 

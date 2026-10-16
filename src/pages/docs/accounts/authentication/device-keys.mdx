@@ -47,7 +47,7 @@ The demo makes the device key its own account on the Tempo Accounts devnet, to s
 
 In your app, add the key to the customer's account as an access key instead. The device creates the key, the customer's passkey authorizes it for up to 500 OUSD a day for 30 days, and the first payment carries that authorization. This works on mainnet and testnet today when the customer's account is a single-key account whose one key is the passkey.
 
-The example below uses a configurable account with the passkey as its signer. Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects there ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The example below uses a configurable account with the passkey as its signer. Until T14, configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer):
 

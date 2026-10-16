@@ -19,7 +19,7 @@ This is for exchanges and payments processors that hold many customers' funds, f
 
 <Cards>
   <Card title="Hold customer funds in an omnibus account" description="Give each customer a deposit address that pays into one account, and accept only the stablecoins you list." to="/docs/accounts/custodians/omnibus-accounts" />
-  <Card title="Set up a team multisig" description="One account that several people control, where any two approve each payment. Runs on the devnet." to="/docs/accounts/custodians/team-multisig" />
+  <Card title="Set up a team multisig" description="One account that several people control, where any two approve each payment. Devnet until T14." to="/docs/accounts/custodians/team-multisig" />
   <Card title="Custody partners" description="Custodians and institutional wallets that support Tempo, such as Fireblocks." to="/docs/partners/wallets#custodial--institutional" />
 </Cards>
 
@@ -30,7 +30,7 @@ This is for exchanges and payments processors that hold many customers' funds, f
 
 When a custodian holds your funds, the custody address is a [single-key account](/docs/accounts/how-it-works#address): the custodian holds its key and decides, through its own policies and approvals, which transactions it signs. Plain stablecoin transfers work as on any EVM chain. Fee tokens, fee sponsorship, and access keys need your custodian to send [Tempo Transactions](/docs/guide/tempo-transaction), so ask which it supports.
 
-When you hold the keys yourself, the account's signers decide. A [team multisig](/docs/accounts/custodians/team-multisig) requires several approvers and keeps its address when they change. It's a configurable account, which runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+When you hold the keys yourself, the account's signers decide. A [team multisig](/docs/accounts/custodians/team-multisig) requires several approvers and keeps its address when they change. It's a configurable account, which until T14 runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="what-custodians-support-on-tempo" />
 <span id="choose-the-fee-token-for-custody-addresses" />

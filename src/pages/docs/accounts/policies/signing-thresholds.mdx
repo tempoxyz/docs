@@ -4,15 +4,15 @@ seoTitle: Signer Weights and Signing Thresholds for Tempo Accounts | Tempo Docs
 description: Give each signer a weight and set the total weight a transaction needs, so no outside party can pay alone and losing one signer doesn't lock the account.
 ---
 
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+
 # Signing thresholds
 
 Choose signer weights so that no outside party can pay alone and losing any one signer doesn't lock the account.
 
 A signing threshold is the [account policy](/docs/accounts/policies) that decides who controls a configurable Tempo account. Each signer, a key that approves the account's transactions, has a weight, and a transaction runs only when the signers who approve it reach the threshold in total weight.
 
-:::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.
-:::
+<ConfigurableAccountsT14 />
 
 <span id="how-approvals-add-up" />
 <span id="signer-weights-and-the-threshold" />
@@ -147,7 +147,7 @@ A configuration update works the same way: put `Actions.accounts.updateConfig.ca
 
 ## Verify in a contract
 
-A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. `verifyMultisig` exists only on the Tempo Accounts devnet; on mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
+A contract checks that an account's signers approved a message with `verifyMultisig` on the [signature verifier](/docs/protocol/tips/tip-1020), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. Until T14, `verifyMultisig` exists only on the Tempo Accounts devnet; on mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
 
 ```solidity [ApprovalCheck.sol]
 // SPDX-License-Identifier: MIT

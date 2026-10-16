@@ -28,7 +28,7 @@ If any check fails, the transaction is invalid and isn't included. Tempo doesn't
 
 The default covers every transaction the account pays the fee for, including ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence), which can fall back to pathUSD, a stablecoin the account might not hold.
 
-In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to it ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), and the examples pay fees in the devnet faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins, such as [OUSD](/docs/guide/ousd) on mainnet.
+In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Until T14, configurable accounts run only on the Tempo Accounts devnet, so `client.ts` connects to it ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)), and the examples pay fees in the devnet faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins, such as [OUSD](/docs/guide/ousd) on mainnet.
 
 ::::code-group
 
