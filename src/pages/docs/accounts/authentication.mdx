@@ -12,15 +12,6 @@ A signing method is the kind of key that approves an account's transactions: a p
 
 Choose each key by who should hold it. A passkey or device key stays with the customer, while a private key on your server or with a wallet provider lets that party sign too. Every method works on mainnet and testnet today, as the one key of a [single-key account](/docs/accounts/how-it-works#address) or as an [access key](/docs/accounts/access-keys).
 
-<span id="tempo-account-signer-types" />
-<span id="tempo-sign-in-methods" />
-<span id="tempo-signing-methods" />
-<span id="what-a-signer-is" />
-
-## What a signing method is
-
-Tempo verifies three kinds of signature: secp256k1, the kind Ethereum wallets use, and P-256, either directly or through WebAuthn as a passkey. The kind of key decides where it can live and how the holder approves, not what it can do. Its role on the account decides that: as a signer it approves at its weight, and as an access key it pays within its bounds.
-
 <span id="signer-rules" />
 <span id="authentication-limits" />
 <span id="signing-method-limits" />
@@ -40,10 +31,9 @@ Tempo verifies three kinds of signature: secp256k1, the kind Ethereum wallets us
 <span id="relay-trust" />
 <span id="who-can-sign-in-as-a-customer" />
 <span id="who-can-sign-for-a-customer" />
+<span id="choose-a-key-by-who-holds-it" />
 
-## Choose a key by who holds it
-
-Once a key is on the account, Tempo treats all three the same; what differs is who holds the key and how they approve. Keep a customer's key on their device, and a server's key in a KMS or HSM.
+## Methods
 
 <Cards>
   <Card title="Passkeys" description="The customer approves with Face ID or a fingerprint. Synced across their devices, and tied to your domain." to="/docs/accounts/authentication/passkeys" />
@@ -51,9 +41,19 @@ Once a key is on the account, Tempo treats all three the same; what differs is w
   <Card title="Private keys" description="A key in a wallet, a wallet provider, or your KMS or HSM, for servers, treasury approvers, and backups." to="/docs/accounts/authentication/private-keys" />
 </Cards>
 
-Any of these keys can also be an [access key](/docs/accounts/access-keys) instead of a signer, so it pays within a spending limit, scopes, and an expiry.
+<span id="tempo-account-signer-types" />
+<span id="tempo-sign-in-methods" />
+<span id="tempo-signing-methods" />
+<span id="what-a-signer-is" />
+<span id="what-a-signing-method-is" />
 
-## Combine signing methods
+## How it works
+
+Tempo verifies three kinds of signature: secp256k1, the kind Ethereum wallets use, and P-256, either directly or through WebAuthn as a passkey. The kind of key decides where it can live and how the holder approves, not what it can do. Its role on the account decides that: as a signer it approves at its weight, and as an access key it pays within its bounds. Keep a customer's key on their device, and a server's key in a KMS or HSM.
+
+<span id="combine-signing-methods" />
+
+## Combining methods
 
 Each key joins the account as a signer or an access key. A signer approves with a weight, and a transaction runs once the approving signers' weights reach the account's [threshold](/docs/accounts/policies/signing-thresholds). An [access key](/docs/accounts/access-keys) pays alone within its limits and never counts toward the threshold. Add device keys and server payout keys as access keys: a signer has no spending limit.
 

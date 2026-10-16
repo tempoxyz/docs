@@ -29,8 +29,9 @@ A call that matches no entry reverts with [`CallNotAllowed`](/docs/protocol/tran
 A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)`, which payments with a reference use, so give that function its own entry. An Earn deposit needs two entries: `approve(address,uint256)` on the stablecoin with the vault as recipient, and `deposit(uint256,address,uint256)` on the vault. [Pay out from a backend](/docs/accounts/automations/pay-out-from-a-backend) and [Sweep into Earn](/docs/earn) show complete keys.
 
 <span id="change-allowed-calls" />
+<span id="change-a-keys-scopes" />
 
-## Change a key's scopes
+## Change scopes
 
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's scopes without revoking it; the key itself can't. Call `setAllowedCalls` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain), Tempo's built-in contract that stores access keys. For each contract you pass, it replaces that contract's rules and leaves the others alone, so list every rule you want to keep.
 
@@ -80,7 +81,9 @@ An entry with `selectorRules: []` allows every function on that contract, and `r
 
 To read a key's current scopes, call `getAllowedCalls(account, keyId)`. It returns the scope list and `isScoped`, which is `false` for a key that can call anything. A missing, revoked, or expired key reads as scoped with no allowed calls.
 
-## Scope limits
+<span id="scope-limits" />
+
+## Limits
 
 Scopes check only the calls the key signs directly. A contract the key may call can make any calls of its own, and an allowed factory contract can deploy contracts even though the key can't deploy one itself. Allow only contracts you trust.
 

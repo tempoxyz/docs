@@ -22,14 +22,17 @@ A single-key account works like a standard Ethereum account (an EOA): one key co
 <span id="make-a-single-key-account-recoverable" />
 <span id="upgrade-an-existing-account" />
 <span id="legacy-account-upgrade" />
+<span id="what-an-upgrade-changes" />
 
-## What an upgrade changes
+## What changes
 
 The upgrade gives the account a list of signers, each with a weight, and a threshold: the total weight an approval needs. From then on, signers whose weights reach the threshold approve for the account. The original key approves only if you list it, at its weight. The address, balances, token approvals, nonce, contract storage, and access keys with their limits stay the same.
 
 The original key isn't fully retired: contracts that verify signatures themselves, such as Permit2, may still accept it, and it still controls the address on other EVM chains.
 
-## Choose signers and threshold
+<span id="choose-signers-and-threshold" />
+
+## Choose signers
 
 List the original key and at least one backup signer, such as a passkey on the user's device or a key your recovery provider holds. With both at weight 1 and threshold 1, either key can pay alone and replace the other if it's lost. To require two approvals per payment, use threshold 2 with three signers at weight 1. Whatever you choose, the signers left after losing any one must still reach the threshold ([Plan for recovery](/docs/accounts/key-management#plan-for-recovery)).
 
@@ -77,7 +80,9 @@ After the upgrade, the record your app saves is the account's only readable list
 
 [Adding](/docs/accounts/key-management/signer-updates#add-a-signer) or [removing](/docs/accounts/key-management/signer-updates#remove-a-signer) signers later raises the version: save the `config` that `updateConfigSync` returns and rebuild the account from it, or the next transaction fails with `multisig configuration commitment mismatch`. To upgrade every user's account, follow [Migrate existing wallets](/docs/accounts/key-management/account-upgrade).
 
-## Account upgrade limits
+<span id="account-upgrade-limits" />
+
+## Limits
 
 - Only the original key can sign the upgrade. Access keys can't, but a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it.
 - The upgrade must be the transaction's only call, with no `keyAuthorization` and no EIP-7702 authorization list.

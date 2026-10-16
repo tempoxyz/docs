@@ -16,8 +16,9 @@ Spending limits are one of an [access key](/docs/accounts/access-keys)'s three b
 <span id="tip-20-spending-limits" />
 <span id="per-token-spending-limits" />
 <span id="one-time-and-periodic-limits" />
+<span id="set-a-spending-limit" />
 
-## Set a spending limit
+## Set a limit
 
 Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry covers one token, with the amount in base units (most USD stablecoins have 6 decimals). For example, `{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }` allows 500 OUSD a day. A key without `limits` can spend any amount of any token. Once you pass `limits`, a token not in the list has a limit of zero, fees paid in it included, so `limits: []` lets the key spend no TIP-20 tokens.
 
@@ -27,8 +28,9 @@ Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-
 - A number of seconds, such as `86_400` for a day: renewing. The first period starts when the key is authorized, not at midnight or another calendar boundary, and the limit resets to its full amount when each period ends. Unspent amounts don't carry over.
 
 <span id="spending-limit-limits" />
+<span id="what-counts-against-the-limit" />
 
-## What counts against the limit
+## What counts
 
 In a transaction the key signs, each of these counts against the limit for its token:
 
@@ -42,8 +44,9 @@ Assets other than TIP-20 tokens, such as NFTs, don't count, and neither does a `
 
 <span id="read-an-access-key" />
 <span id="read-the-remaining-permission" />
+<span id="read-the-remaining-limit" />
 
-## Read the remaining limit
+## Remaining limit
 
 Read what a key can still spend with Viem's [`accessKey.getRemainingLimit`](https://viem.sh/tempo/actions/accessKey.getRemainingLimit). It returns `remaining` and `periodEnd`.
 
@@ -63,8 +66,9 @@ LIMIT 10`}
 />
 
 <span id="change-an-access-key" />
+<span id="change-a-spending-limit" />
 
-## Change a spending limit
+## Change a limit
 
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's limit without revoking it. A limited access key can't change limits, not even its own.
 

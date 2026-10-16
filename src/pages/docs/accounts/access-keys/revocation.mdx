@@ -11,8 +11,9 @@ Revoking an access key shuts it off for good: once the revocation lands, Tempo r
 Revocation ends an [access key](/docs/accounts/access-keys) on demand, without waiting for its [expiry](/docs/accounts/access-keys/expiry). Revoke a key as soon as its device is lost, its secret leaks, or its holder no longer needs it.
 
 <span id="key-revocation-by-situation" />
+<span id="revoke-an-access-key" />
 
-## Revoke an access key
+## Revoke a key
 
 Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. A limited access key can't revoke any key, including itself.
 
@@ -22,8 +23,9 @@ When you authorize a key, save its address next to the device or service that ho
 
 <span id="key-revocation" />
 <span id="what-revocation-stops" />
+<span id="what-revocation-leaves-in-place" />
 
-## What revocation leaves in place
+## What stays in place
 
 Revocation doesn't undo what the key did while it was active:
 
@@ -32,8 +34,9 @@ Revocation doesn't undo what the key did while it was active:
 - If it was an admin key, the keys it authorized stay authorized. Revoke each one.
 
 <span id="revoke-after-a-signer-change" />
+<span id="revoke-when-signers-change" />
 
-## Revoke when signers change
+## When signers change
 
 Changing a configurable account's signers, which works only on the Tempo Accounts devnet, doesn't touch its access keys, so revoke them yourself: after a recovery, and before a hand-off.
 
@@ -72,7 +75,9 @@ const unrevoked = keys.filter((key) => !key.isRevoked) // [!code hl]
 
 Before you [hand an account to a customer](/docs/accounts/apps/self-custodial-wallets), revoke your app's access keys, then swap out your app's signers. Once your signers are gone, your app can't approve anything, including a revocation.
 
-## Revocation limits
+<span id="revocation-limits" />
+
+## Limits
 
 - A revoked key's address can never be authorized again for this account. To restore access, authorize a new key.
 - Revoking a key the account hasn't authorized reverts with [`KeyNotFound`](/docs/protocol/transactions/AccountKeychain#error-keynotfound). That includes a key whose authorization hasn't landed yet. If you bound a [witness](https://viem.sh/tempo/guides/access-keys/witnesses), a 32-byte value signed into the authorization, cancel it with `client.accessKey.burnWitnessSync({ account, witness })`. Tempo then rejects any authorization signed with that witness.

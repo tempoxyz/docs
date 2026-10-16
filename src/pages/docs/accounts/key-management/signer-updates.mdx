@@ -15,8 +15,9 @@ A signer is a key that approves a configurable account's transactions. To back u
 :::
 
 <span id="send-the-signer-update" />
+<span id="how-a-signer-update-works" />
 
-## How a signer update works
+## How it works
 
 A signer update replaces the account's whole signer list. Build it from the address and configuration your app saved for the account ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)): rebuild the account with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals), and pass the new list to `updateConfigSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
@@ -85,8 +86,9 @@ If the remaining weights fall short of the threshold, lower `threshold` in the s
 <span id="replace-a-signer" />
 <span id="rotate-a-signer-at-the-same-weight" />
 <span id="rotate-a-key-by-replacing-it-in-one-update" />
+<span id="replace-a-signer-in-one-update" />
 
-## Replace a signer in one update
+## Replace a signer
 
 Rotate when the holder stays but the key changes: a new hardware wallet, a new device, or a new wallet provider. Put the new key at the old one's weight and keep the threshold, so every group of signers that could approve before still can:
 
@@ -111,8 +113,9 @@ Because one update swaps the keys, the account never has both keys active, or ne
 <span id="rotate-a-compromised-signer" />
 <span id="recover-with-the-remaining-signers" />
 <span id="remove-a-lost-or-compromised-signer" />
+<span id="replace-a-lost-or-compromised-signer" />
 
-### Replace a lost or compromised signer
+### Lost or compromised signers
 
 When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override, so this works only if their weights still reach the threshold. Check that when you create the account, using the rule in [Plan for recovery](/docs/accounts/key-management#plan-for-recovery). [Recover a user's account](/docs/accounts/apps/recover-an-account) walks through replacing a lost passkey.
 
@@ -124,8 +127,9 @@ Treat a compromised signer as an attacker and leave it out of the approvers. If 
 <span id="signer-recovery-limits" />
 <span id="remove-signer-limits" />
 <span id="limits-on-removing-signers" />
+<span id="signer-update-limits" />
 
-## Signer update limits
+## Limits
 
 - An account holds 1 to 48 signers, with total weight at most 255. A transaction carries at most 8 approvals, so the 8 largest weights must reach the threshold. Viem checks these limits before sending and throws `Invalid account config` with the reason. A signer already on the list fails with the reason `owners must be strictly ascending`.
 - The approving signers must reach the current threshold, and the new signer list must reach the new one. Viem throws `Local owners do not meet the threshold.` when the attached keys fall short, and `Invalid account config: threshold exceeds total owner weight.` when the new list does.
