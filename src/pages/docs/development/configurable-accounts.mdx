@@ -74,7 +74,7 @@ export const saved = { address: account.address, config: account.config } // [!c
 
 `address: 'infer'` derives the address from this configuration, so creating the account sends nothing. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero. An owner given as a local account, like `finance`, is a key Viem signs with. An owner given as an address, like the controller's passkey, signs on its own device.
 
-The address is the same on other EVM chains, so a sender can pay it on the wrong chain by mistake. TIP-1110 defines a recovery factory contract for those chains: it would let the initial secp256k1 owners deploy a recovery wallet at the address and retrieve the funds, if their weights reach the original threshold. P-256 and WebAuthn owners don't count. No chain has the recovery factory yet, so those funds can't be retrieved today. See [Recover funds sent on another chain](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain).
+The address is the same on other EVM chains, so a sender can pay it on the wrong chain by mistake. [TIP-1110](https://tips.sh/1110) defines a recovery factory contract for those chains: it would let the initial secp256k1 owners deploy a recovery wallet at the address and retrieve the funds, if their weights reach the original threshold. P-256 and WebAuthn owners don't count. No chain has the recovery factory yet, so those funds can't be retrieved today. See [Recover funds sent on another chain](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain).
 
 ### Account registration
 

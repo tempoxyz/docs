@@ -37,7 +37,7 @@ const account = Account.fromConfig({
 
 The passkey approves alone, and the backup and recovery keys approve together. Either of those alone reaches 1 of 2 and can't pay.
 
-Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it: each pays alone within its limits, and an [admin access key](/docs/accounts/access-keys/admin-access-keys) can also authorize other access keys.
+Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it: each pays alone within its limits. An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits, so once the signers authorize one, it can pay and authorize other access keys without reaching the threshold. On a configurable account, authorize one only if you'd let that single key act for the whole account.
 
 To change signers or the threshold, send a [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer), approved at the current threshold.
 
