@@ -72,7 +72,7 @@ Your backend decides what to sponsor: the fee payer pays for every transaction y
 
 ### When the customer's device signs
 
-The customer's keys stay on their device and sign the payment. The fee payer's key stays on your backend and signs only for the fee, so run the fee payer as a server that the customer's device sends its transactions to. viem's `Relay` with the `Relay.feePayer` plugin is that server. It forwards requests to the devnet through the same `client`, and adds the fee payer's signature to each transaction that `validate` approves:
+The customer's keys stay on their device and sign the payment. The fee payer's key stays on your backend and signs only for the fee, so run the fee payer as a server that the customer's device sends its transactions to. Viem's `Relay` with the `Relay.feePayer` plugin is that server. It forwards requests to the devnet through the same `client`, and adds the fee payer's signature to each transaction that `validate` approves:
 
 ```ts [fee-payer-server.ts]
 import { Account, Relay } from 'viem/tempo'
@@ -131,8 +131,7 @@ Tempo also hosts a fee payer server. The [Fee Payer API](/docs/api/fee-payer) ta
 
 ## Fee sponsorship limits
 
-- When your backend passes the fee payer as `feePayer`, always set `feeToken` to the token the sponsored transfer moves; don't leave it blank or pick another token. The fee payer pays in that token.
-- A fee payer server pays in its own `feeToken` setting, whatever the customer's transaction sets, so the customer's device leaves `feeToken` off.
+- The fee payer pays in the transaction's `feeToken` when your backend sponsors directly, and in its own `feeToken` setting when it runs as a fee payer server ([how fee sponsorship works](#how-fee-sponsorship-works)).
 - Fund the fee payer with the [supported fee token](/docs/accounts/fees/fee-tokens#supported-fee-tokens) it pays in.
 - A sponsored transaction that's included and then fails still costs the fee payer its fee.
 

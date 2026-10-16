@@ -16,7 +16,7 @@ Revocation ends an [access key](/docs/accounts/access-keys) on demand, without w
 
 Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. A limited access key can't revoke any key, including itself.
 
-In viem, call [`accessKey.revoke`](https://viem.sh/tempo/actions/accessKey.revoke) with the account and the key's address.
+In Viem, call [`accessKey.revoke`](https://viem.sh/tempo/actions/accessKey.revoke) with the account and the key's address.
 
 When you authorize a key, save its address next to the device or service that holds it, so you know which address to revoke. Show a key as removed only after the revocation confirms.
 

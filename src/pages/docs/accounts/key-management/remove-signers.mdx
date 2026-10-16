@@ -24,7 +24,7 @@ Once the update lands, the removed signer can't approve anything, and approvals 
 
 ## Remove a signer
 
-Each signer's key stays with whoever holds it, and Tempo stores only a hash of the account's configuration: its signers, weights, threshold, salt, and version. Your app rebuilds the account from the address and configuration it last saved, with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals). Drop the departing signer's entry and send the update. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Your app rebuilds the account from the address and configuration it last saved ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)), with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals). Drop the departing signer's entry and send the update. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -47,7 +47,7 @@ const { config: updated } = await client.accounts.updateConfigSync({
 
 ::::
 
-`account` is the rebuilt account, and `config` is the saved configuration it came from. Attach the keys, on the device running the code, of signers that stay and approve the removal, such as the customer's passkey in their browser. viem signs with them, highest weight first, until their weights reach the current threshold. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+`account` is the rebuilt account, and `config` is the saved configuration it came from. Attach the keys, on the device running the code, of signers that stay and approve the removal, such as the customer's passkey in their browser. Viem signs with them, highest weight first, until their weights reach the current threshold. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 Save the configuration the update returns, and rebuild from it before the next action. The update raises the configuration's version by one, so an account built from the old copy no longer matches the hash Tempo stores, and its next payment or update fails.
 
@@ -92,7 +92,7 @@ Treat a compromised signer as an attacker and leave it out of the approvers. If 
 
 ## Limits on removing signers
 
-- The approving signers must reach the current threshold, and the remaining weights must reach the new one. viem checks both before sending anything: it throws `Local owners do not meet the threshold.` when the attached keys fall short, and `Invalid account config: threshold exceeds total owner weight.` when the remaining weights do.
+- The approving signers must reach the current threshold, and the remaining weights must reach the new one. Viem checks both before sending anything: it throws `Local owners do not meet the threshold.` when the attached keys fall short, and `Invalid account config: threshold exceeds total owner weight.` when the remaining weights do.
 - An account keeps at least one signer.
 - `multisig configuration commitment mismatch` means the account was rebuilt from an older configuration than the one Tempo stores, for example because another signer update landed first. Load the latest saved configuration and rebuild the account.
 - Rebuild with `address: 'infer'` only while the configuration is version 0. After a signer update, the current signers no longer derive the address, so pass the saved `address`, as [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals) does.

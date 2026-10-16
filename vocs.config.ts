@@ -1720,7 +1720,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/balances',
-      destination: '/docs/guide/payments/accept-a-payment#read-balances',
+      destination: '/docs/accounts/fund#check-the-balance',
       status: 301,
     },
     {

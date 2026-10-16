@@ -1443,7 +1443,7 @@
     },
     {
       "source": "/developers/docs/accounts/balances",
-      "destination": "/developers/docs/guide/payments/accept-a-payment#read-balances",
+      "destination": "/developers/docs/accounts/fund#check-the-balance",
       "permanent": true
     },
     {

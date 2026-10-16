@@ -6,7 +6,6 @@ ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 ---
 
 import { Card, Cards } from 'vocs'
-import { DocsLinkCards } from '../../components/DocsLinkCards'
 import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 <span id="build-your-account-integration" />
@@ -83,4 +82,11 @@ To build on mainnet today, [create a single-key account](/docs/accounts/create#c
 
 ## Account features
 
-<DocsLinkCards collection="accountFeatures" />
+<Cards>
+  <Card title="Signing methods" description="Approve payments with a passkey, a key on the device, or a private key." to="/docs/accounts/authentication" />
+  <Card title="Account policies" description="Require several approvals, and choose which stablecoins and senders can pay the account." to="/docs/accounts/policies" />
+  <Card title="Access keys" description="Let a backend, a device, or an agent pay on its own, within limits you set." to="/docs/accounts/access-keys" />
+  <Card title="Key management" description="Add, remove, and rotate signers while the address stays the same." to="/docs/accounts/key-management" />
+  <Card title="Fee management" description="Pay network fees in stablecoins, or pay them for your customers." to="/docs/accounts/fees" />
+  <Card title="Virtual addresses" description="Give each customer a deposit address that pays into one account." to="/docs/accounts/virtual-addresses" />
+</Cards>

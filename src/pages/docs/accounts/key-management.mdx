@@ -45,7 +45,7 @@ A single-key account (EOA), like a standard Ethereum account, has no signer list
 
 ## Watch signer changes
 
-Each signer update emits `MultisigConfigUpdated` with the account, its new version, threshold, and signer list. The public indexer doesn't cover the Tempo Accounts devnet, so read the event with viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
+Each signer update emits `MultisigConfigUpdated` with the account, its new version, threshold, and signer list. The public indexer doesn't cover the Tempo Accounts devnet, so read the event with Viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
 
 ```ts [watch-signers.ts]
 import { Abis, Addresses } from 'viem/tempo'

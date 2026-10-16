@@ -129,7 +129,7 @@ Now the passkey on the user's device still approves alone, and any other approva
 
 ## Recovery signer limits
 
-- Only current signers count toward the threshold, not the signer being added. When one key can't reach it alone, pass more approving keys to `openAccount`. If the keys you pass still fall short, viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+- Only current signers count toward the threshold, not the signer being added. When one key can't reach it alone, pass more approving keys to `openAccount`. If the keys you pass still fall short, Viem throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 - `multisig configuration commitment mismatch` means the account was rebuilt from an older configuration than the one Tempo stores, usually because another update landed first or the app didn't store the returned `config`. Load the latest saved configuration and rebuild the update.
 
 When the user loses a signer, follow [Recover a user's account](/docs/accounts/guides/users/recover-an-account).

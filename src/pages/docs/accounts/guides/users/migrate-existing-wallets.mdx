@@ -42,7 +42,7 @@ const { owners, threshold } = AccountConfig.from({ // [!code hl]
 
 ### Upgrade each account in place
 
-Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade): the user's original key signs one transaction whose only call is `upgradeAccount(threshold, owners)`. Set `feeToken` on that call, or on the client, to the stablecoin that pays the fee. Without it, viem sends a standard Ethereum transaction and the upgrade reverts with [`PrimitiveRootRequired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/precompiles/src/native_multisig/mod.rs#L154). A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor the fee for accounts with no balance. On mainnet or testnet, the same transaction succeeds and charges its fee but changes nothing, so a successful receipt there doesn't mean the account upgraded.
+Send the upgrade for each account as in [Account upgrade](/docs/accounts/key-management/account-upgrade#send-the-upgrade): the user's original key signs one transaction whose only call is `upgradeAccount(threshold, owners)`. Set `feeToken` on that call, or on the client, to the stablecoin that pays the fee. Without it, Viem sends a standard Ethereum transaction and the upgrade reverts with [`PrimitiveRootRequired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/precompiles/src/native_multisig/mod.rs#L154). A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor the fee for accounts with no balance. On mainnet or testnet, the same transaction succeeds and charges its fee but changes nothing, so a successful receipt there doesn't mean the account upgraded.
 
 ### Save the configuration
 
@@ -66,7 +66,7 @@ await saveAccount(userId, { // [!code hl]
 
 ### Pay through the saved configuration
 
-Wherever your app signs with `original` directly, pass an account rebuilt from the saved record instead: a direct signature from the original key now fails with [`RootKeyRetired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/revm/src/native_multisig/mod.rs#L390) (`primitive root key retired`). In the rebuilt account, pass `original` itself in its signer entry so it can sign, and keep the other signers as addresses. viem signs with the keys you pass until their weights reach the threshold. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+Wherever your app signs with `original` directly, pass an account rebuilt from the saved record instead: a direct signature from the original key now fails with [`RootKeyRetired`](https://github.com/tempoxyz/tempo/blob/3530079/crates/revm/src/native_multisig/mod.rs#L390) (`primitive root key retired`). In the rebuilt account, pass `original` itself in its signer entry so it can sign, and keep the other signers as addresses. Viem signs with the keys you pass until their weights reach the threshold. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 

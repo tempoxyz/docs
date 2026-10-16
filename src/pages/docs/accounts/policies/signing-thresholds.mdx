@@ -104,7 +104,7 @@ await client.token.transferSync({ account: openAccount([passkey]), amount, to, t
 
 ::::
 
-`passkey` is the customer's passkey account, such as `Account.fromWebAuthnP256(credential)`. viem signs with the attached keys, highest weight first, until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing.
+`passkey` is the customer's passkey account, such as `Account.fromWebAuthnP256(credential)`. Viem signs with the attached keys, highest weight first, until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing.
 
 ### Approvers on separate devices
 
@@ -130,11 +130,11 @@ const receipt = await client.sendTransactionSync({ ...request, signatures: [back
 
 For a configurable account, `signTransaction` returns the signer's approval rather than a signed transaction. An approval covers the exact transaction, the account, and the configuration version, so send every approver the same `request`, show them what they're approving, such as the recipient and amount, and submit it unchanged. The request contains bigints, so move it between devices in an encoding that keeps them.
 
-Approvals can arrive in any order: viem sorts them by signer address when it combines them. Submit only the approvals the threshold needs, with none to spare: the passkey's approval alone, or the backup and recovery approvals together. Tempo adds up approvals in order of signer address and rejects the transaction with `excess multisig owner signatures` when an approval comes after the total already reaches the threshold. Too few fail with `multisig signature weight below threshold`.
+Approvals can arrive in any order: Viem sorts them by signer address when it combines them. Submit only the approvals the threshold needs, with none to spare: the passkey's approval alone, or the backup and recovery approvals together. Tempo adds up approvals in order of signer address and rejects the transaction with `excess multisig owner signatures` when an approval comes after the total already reaches the threshold. Too few fail with `multisig signature weight below threshold`.
 
 An approval also covers the transaction's nonce, its place in the account's sequence of transactions. If another transaction from the account lands first, submitting fails with `nonce too low`, so prepare again and collect new approvals. To keep slow approvals valid while the account keeps paying, pass `prepareTransactionRequest` its own `nonceKey`, a random `bigint` from `1n` to `2n ** 256n - 2n` that starts a [separate sequence](/docs/guide/tempo-transaction#concurrent-transactions) for this transaction. The maximum `uint256` selects an [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) instead.
 
-A signer update works the same way: put `Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig })` in `calls`, collect approvals from the current signers, and once it lands, save `AccountConfig.update(saved.config, nextConfig)` as the account's configuration. An update voids approvals collected under the old configuration, so collect those again.
+A signer update works the same way: put `Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig })` in `calls`, collect approvals from the current signers, and once it lands, save `AccountConfig.update(saved.config, nextConfig)` as the account's configuration. That's the same configuration `updateConfigSync` returns. An update voids approvals collected under the old configuration, so collect those again.
 
 <span id="verify-approvals" />
 <span id="signature-verification" />
