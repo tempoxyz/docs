@@ -26,6 +26,20 @@ Tempo Accounts is in early development. Passkey accounts, access keys, fee spons
 
 <span id="account-capabilities" />
 <span id="accounts-capabilities" />
+
+## What you can build
+
+### Accounts customers control
+
+Customers sign up with a [passkey](/docs/accounts/authentication/passkeys) and approve payments with Face ID or a fingerprint, with no seed phrase to lose. A [device key](/docs/accounts/authentication/device-keys) lets their phone or browser pay small amounts without a prompt, and the key never leaves the device. Add a backup signer, and a lost phone no longer means a lost account.
+
+### Automated payments
+
+Give your backend, a card program, or an AI agent its own [access key](/docs/accounts/access-keys) to pay from an account. Tempo rejects any payment over its budget, to someone you didn't allow, or after it expires, so a leaked key can spend only what you allowed. You can revoke it at any time.
+
+### Configurable account policies
+
+Decide how money leaves and arrives. Require two people to approve each payment from a [team multisig](/docs/accounts/custodians/team-multisig), accept only the stablecoins and senders you allow with a [receive policy](/docs/accounts/policies/receive-policies), and give each customer a [deposit address](/docs/accounts/virtual-addresses) that pays straight into one account. Fees are paid in stablecoins, and you can [cover them for your customers](/docs/accounts/fees/fee-sponsorship).
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
 <span id="tempo-account-building-blocks" />
