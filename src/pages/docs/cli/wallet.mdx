@@ -9,7 +9,7 @@ import { Cards, Card } from 'vocs'
 
 # `tempo wallet`
 
-`tempo wallet` is the command-line way to use [Tempo Wallet](https://wallet.tempo.xyz) from scripts, terminals, and AI agents. Use it to sign in, manage balances and access keys, discover [MPP](https://mpp.dev/overview) services, fund token or credit balances, and manage payment sessions. Use [`tempo request`](/docs/cli/request) when you want the CLI to make the paid HTTP call.
+`tempo wallet` is the command-line way to use [Tempo Wallet](https://wallet.tempo.xyz) from scripts, terminals, and AI agents. Use it to sign in, manage balances and access keys, discover [MPP](https://mpp.dev/overview) services, fund token balances, and manage payment sessions. Use [`tempo request`](/docs/cli/request) when you want the CLI to make the paid HTTP call.
 
 <span id="download-the-tempo-wallet-cli" />
 
@@ -36,14 +36,16 @@ tempo wallet whoami
 - Run `tempo wallet refresh` to refresh a stale access key without signing out.
 - Run `tempo wallet logout --yes` to disconnect.
 
-## Balances and credits
+<span id="balances-and-credits" />
+
+## Balances
 
 ```bash [Terminal]
 tempo wallet whoami
-tempo wallet whoami --credits
+tempo wallet whoami --mach
 ```
 
-`whoami` shows your address, token balances, key state, and optional MPP Credits balance. Credits are separate from token balances and only apply to eligible one-time MPP charges.
+`whoami` shows your address, token balances, and key state. Use `--mach` to show your onchain MACH balance.
 
 <span id="manage-access-keys" />
 
@@ -63,11 +65,11 @@ Each wallet can have multiple access keys with independent spending limits. Use 
 
 ```bash [Terminal]
 tempo wallet fund
-tempo wallet fund --credits
+tempo wallet fund --mach
 tempo wallet fund --crypto
 ```
 
-On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--credits` opens MPP Credits purchase for eligible one-time services.
+On testnet, the default flow opens the faucet. On mainnet, it opens available funding options. `--crypto` opens direct crypto funding. `--mach` opens [MACH](https://wallet.tempo.xyz/agent#mach) checkout on mainnet.
 
 Transfer tokens to another address:
 
@@ -86,7 +88,7 @@ tempo wallet services --search <QUERY>
 tempo wallet services <SERVICE_ID>
 ```
 
-The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets HTTP endpoints accept payments inline. The service directory indexes MPP-registered providers. Each entry shows endpoint URLs, HTTP methods, pricing, whether credits are supported, and request schemas. Use it to find the exact URL and payload for [`tempo request`](/docs/cli/request).
+The [Machine Payments Protocol](https://mpp.dev/overview) (MPP) lets HTTP endpoints accept payments inline. The service directory indexes MPP-registered providers. Each entry shows endpoint URLs, HTTP methods, pricing, and request schemas. Use it to find the exact URL and payload for [`tempo request`](/docs/cli/request).
 
 Agents that support MCP can also use the read-only services MCP server at `https://mpp.dev/mcp/services`. See [Find services](/docs/guide/machine-payments/discover-services) for MCP setup, JSON-RPC examples, and the public catalog API.
 
@@ -118,15 +120,6 @@ tempo wallet -t services --search <QUERY>
 tempo wallet -t services <SERVICE_ID>
 tempo request -t --dry-run -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
 tempo request -t --max-spend 1.00 -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
-```
-
-If a service supports MPP Credits, capture the challenge first, then pay with credits:
-
-```bash [Terminal]
-headers="$(mktemp)"
-tempo request -t --dry-run -D "$headers" -X POST --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
-tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
-tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
 ```
 
 See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
@@ -183,7 +176,7 @@ See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 
 | Flag | Description |
 | --- | --- |
-| `--credits` | Include the MPP Credits balance. |
+| `--mach` | Show the onchain MACH balance. |
 
 ### `tempo wallet revoke`
 
@@ -196,14 +189,13 @@ See [Recipes](/docs/wallet/recipes) for complete flows, including agent setup.
 | Flag | Description |
 | --- | --- |
 | `--crypto` | Open direct crypto funding. |
-| `--credits` | Buy MPP Credits for eligible one-time services. |
+| `--mach` | Buy MACH for supported services. |
 
 ### `tempo wallet transfer`
 
 | Flag | Description |
 | --- | --- |
 | `--dry-run` | Preview the transfer without submitting it. |
-| `--credits` | Pay with MPP Credits instead of tokens. |
 | `--mpp-challenge-file <FILE>` | Pay the MPP challenge in this headers file, captured with `tempo request -D`. |
 
 ### `tempo wallet services`
