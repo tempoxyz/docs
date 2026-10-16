@@ -10,15 +10,15 @@ import { Card, Cards } from 'vocs'
 
 Give each customer their own deposit address while every payment lands in one Tempo account.
 
-Virtual addresses let one Tempo account act as an omnibus account. You register the account once, then hand each customer a deposit address derived from it. Stablecoins sent to any of those addresses land directly in your account. Each deposit names the address it was sent to, which carries your customer tag, so you credit the right customer without per-customer wallets or sweep jobs. The tag tells you whose address received the deposit, not who sent it.
+Virtual addresses turn one Tempo account into an omnibus account. You register the account once, then hand each customer a deposit address derived from it. Stablecoins sent to any of those addresses land in your account. Each deposit names the address it was sent to, which carries your customer tag, so you credit the right customer without per-customer wallets or sweep jobs. The tag tells you whose address received the deposit, not who sent it.
 
 ## When to use virtual addresses
 
 Use virtual addresses when your business holds funds for many customers in one account:
 
-- **Exchanges and brokers** that give each customer a deposit address.
-- **Custodians** that run an omnibus wallet for many clients.
-- **Payment processors and platforms** that issue an address per merchant, customer, or invoice.
+- Exchanges and brokers that give each customer a deposit address.
+- Custodians that run an omnibus wallet for many clients.
+- Payment processors and platforms that issue an address per merchant, customer, or invoice.
 
 If each customer controls their own funds, give them their own Tempo account instead. See [Use cases](/docs/accounts/use-cases).
 
@@ -53,7 +53,7 @@ Every deposit to a customer's address shows up in your account's transfer histor
 
 Deposits to a virtual address are deposits to your account. Your account's [receive policy](/docs/accounts/policies/receive-policies#virtual-address-behavior) decides which stablecoins and senders it accepts, and Tempo holds anything else instead of crediting it, so confirm each deposit reached your account before you credit the customer.
 
-Only TIP-20 stablecoins are forwarded. Tell customers to send only supported stablecoins on Tempo, because other tokens sent to a virtual address can't be recovered.
+Tempo forwards only TIP-20 stablecoins. Tell customers to send only supported stablecoins on Tempo, because other tokens sent to a virtual address can't be recovered.
 
 ## Virtual address technical details
 

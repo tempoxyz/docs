@@ -36,7 +36,7 @@ A Tempo account's signers are the keys that approve its transactions. A configur
 
 A configuration update replaces the account's whole signer list and its [threshold](/docs/accounts/policies/signing-thresholds), the total weight an approval needs, in one transaction. Signers whose weights reach the current threshold approve it, the same way they approve a payment. Once it lands, a removed signer can't approve anything, and approvals collected before the update stop counting.
 
-What differs between situations is who approves:
+The situations differ in who approves:
 
 | Situation | The update | Who approves |
 | --- | --- | --- |
@@ -82,7 +82,7 @@ const updates = await client.getContractEvents({ // [!code hl]
 
 ## Plan for recovery
 
-After a signer is lost, only the others can replace it. So when you create the account, choose weights that reach the threshold without any one signer: total weight minus the largest signer's weight must be at least the threshold.
+Only the other signers can replace a lost one, so when you create the account, choose weights that reach the threshold without any one signer: total weight minus the largest signer's weight must be at least the threshold.
 
 For example, a passkey at weight 2, plus a backup key and a recovery provider's key at weight 1 each, at threshold 2, passes: 4 minus 2 leaves 2. The two keys together replace a lost passkey, and the passkey alone replaces either key. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists others that pass, and [Add a recovery signer](/docs/accounts/account-configuration/configuration-updates#add-a-recovery-signer) adds one to an existing account.
 
@@ -97,7 +97,7 @@ A recovery signer can approve payments at its weight too, so give it no more wei
 
 ### Funds on other chains
 
-The account has the same address on other EVM chains, so a sender can pay it on the wrong chain by mistake. The specification for configurable account addresses defines a way back: a recovery factory contract on that chain. It would let the secp256k1 signers (standard Ethereum keys, such as KMS or hardware wallet keys) you created the account with deploy a recovery wallet at the address and retrieve the funds, if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet, so funds sent to the address on another chain can't be retrieved today.
+The account has the same address on other EVM chains, so a sender can pay it on the wrong chain by mistake. The specification for configurable account addresses defines a recovery factory contract for that chain. With it, the secp256k1 signers you created the account with (standard Ethereum keys, such as KMS or hardware wallet keys) could deploy a recovery wallet at the address and retrieve the funds if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet, so funds sent to the address on another chain can't be retrieved today.
 
 Passkeys and device keys don't count. Accounts [upgraded in place](/docs/accounts/account-configuration/account-upgrade) don't use the factory: on other chains, the original key still controls the address. To keep the option open, create the account with secp256k1 signers whose weights reach the threshold on their own.
 

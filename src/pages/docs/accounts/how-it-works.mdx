@@ -13,11 +13,11 @@ A Tempo account holds stablecoins, and only the account's own keys can move them
 A Tempo account has signers and can have access keys, and Tempo checks what each can do on every transaction:
 
 - **Signers** own the account. They approve payments and any change to the account's keys. An existing wallet's account starts with one signer: its existing key.
-- **Access keys** are optional. The signers authorize each one, and it makes payments on its own, but only within the limits you set, such as a daily amount or a single recipient.
+- **Access keys** are optional. The signers authorize each one, and it pays on its own within the limits you set, such as a daily amount or a single recipient.
 
 No one, including Tempo, can move an account's funds any other way.
 
-For example, say you run a payments app and give each customer a Tempo account. The customer's passkey can approve anything on its own. If they lose their phone, a backup key they keep and a recovery key your app keeps can approve together to replace it. Your app's server holds an access key that pays the customer's scheduled bills, up to 500 OUSD a day.
+Say you run a payments app and give each customer a Tempo account. The customer's passkey can approve anything on its own. If they lose their phone, a backup key they keep and a recovery key your app keeps can approve together to replace it. Your app's server holds an access key that pays the customer's scheduled bills, up to 500 OUSD a day.
 
 <span id="tempo-account-model" />
 <span id="signers-change-the-address-doesnt" />
@@ -34,7 +34,7 @@ The address is the account's public ID. It holds the account's stablecoins and s
 
 A single-key account has one key, like a standard Ethereum account (an EOA), so losing the key loses the account. A configurable account has signers instead, and its address stays the same when they change, so the customer keeps their address and balance after replacing a lost phone. You can [upgrade a single-key account](/docs/accounts/account-configuration/account-upgrade) to a configurable one at the same address.
 
-Single-key accounts and their access keys work on mainnet and testnet today, including the ones in [wallets](/docs/accounts/wallets) your users already have, in your [app's embedded wallets](/docs/accounts/apps), behind your [backend automations](/docs/accounts/automations), and with [custodians](/docs/accounts/custodians). Configurable accounts, and upgrades to them, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Single-key accounts and their access keys work on mainnet and testnet today: in the [wallets](/docs/accounts/wallets) your users already have, your [app's embedded wallets](/docs/accounts/apps), your [backend automations](/docs/accounts/automations), and [custodians](/docs/accounts/custodians). Configurable accounts, and upgrades to them, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="what-tempo-checks-on-every-transaction" />
 <span id="how-tempo-approves-a-transaction" />
@@ -60,7 +60,7 @@ In the example, the passkey has weight 2, the backup and recovery keys have weig
   alt="An access key has a key type (passkey, P-256, or secp256k1), spending limits per TIP-20 token that apply once or per period, an expiry, and scopes over contracts, functions, and recipients. An admin access key has no limits and manages other access keys."
 />
 
-A payout server can't ask for the customer's passkey on every payout. Instead, the signers approve an [access key](/docs/accounts/access-keys) once, and from then on it pays alone within its bounds: a spending limit per stablecoin, an expiry, and scopes that limit which contracts and functions it calls and whom it pays. Tempo checks those bounds on every transaction, so even if the payout server's key leaks, it can't spend past its daily limit.
+A payout server can't ask for the customer's passkey on every payout. Instead, the signers approve an [access key](/docs/accounts/access-keys) once, and from then on it pays alone within its bounds: a spending limit per stablecoin, an expiry, and scopes that limit which contracts and functions it calls and whom it pays. Tempo checks those bounds on every transaction, so a leaked payout server key can't spend past its daily limit.
 
 An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds and can manage the account's other access keys, so give one only to a party you'd trust with the whole balance. No access key counts toward the threshold, admin or not, so only the signers can change the signers or the threshold.
 

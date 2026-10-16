@@ -16,7 +16,7 @@ import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInW
 
 Add Tempo to a wallet, or let your users pay with the wallet they already have.
 
-If you build a wallet such as MetaMask, Rabby, or Ledger, your users expect to hold and send stablecoins on Tempo from it. If you build an app, some of your users already have one of those wallets and want to pay with it. Either way, the account is a [single-key account](/docs/accounts/how-it-works#address): one private key, held in the wallet, approves every transaction. It works on mainnet and testnet today.
+If you build a wallet such as MetaMask, Rabby, or Ledger, your users expect to hold and send stablecoins on Tempo from it. If you build an app, some of your users already have one of those wallets and want to pay with it. Either way, the account is a [single-key account](/docs/accounts/how-it-works#address): one private key, held in the wallet, approves every transaction. Single-key accounts work on mainnet and testnet.
 
 ## Recommended wallet setup
 
@@ -59,7 +59,7 @@ From there, `useConnect` and wagmi's transaction hooks work as on any EVM chain.
 
 ## What a browser wallet's account can't do
 
-Here's what a browser wallet's standard Ethereum transactions can't do compared with [Tempo Transactions](/docs/guide/tempo-transaction), Tempo's own transaction type:
+A browser wallet signs standard Ethereum transactions, which differ from [Tempo Transactions](/docs/guide/tempo-transaction), Tempo's own transaction type, in these ways:
 
 | | Standard Ethereum transactions (browser wallet) | Tempo Transactions |
 | --- | --- | --- |
@@ -71,7 +71,7 @@ Here's what a browser wallet's standard Ethereum transactions can't do compared 
 
 A hardware wallet also holds one private key, so its account is a single-key account like any other EOA, with the same limits. A wallet that [adds Tempo](/docs/accounts/wallets/add-tempo-to-your-wallet) and sends Tempo Transactions lets its users pick a fee token, batch calls, and accept sponsored fees.
 
-Several signers per account, and replacing a lost key, need a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet.
+Several signers per account and lost-key replacement need a configurable account, which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet.
 
 <span id="what-we-recommend" />
 <span id="support-browser-wallets-for-users-who-have-one" />

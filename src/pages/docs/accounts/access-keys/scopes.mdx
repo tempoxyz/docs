@@ -8,7 +8,7 @@ description: Restrict an access key to the contracts, functions, and recipients 
 
 Scopes are an access key's allowlist of the contracts, functions, and addresses it may call or pay.
 
-Scopes are one of an [access key](/docs/accounts/access-keys)'s three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [expiry](/docs/accounts/access-keys/expiry). Tempo reverts any call outside the key's scopes, so a leaked payout key can still pay only your payees. A spending limit caps how much the key spends and scopes decide where it goes, so give every backend, agent, and card key both.
+Scopes are one of an [access key](/docs/accounts/access-keys)'s three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [expiry](/docs/accounts/access-keys/expiry). Tempo reverts any call outside the key's scopes, so a leaked payout key can pay only your payees. A spending limit caps how much the key spends and scopes decide where it goes, so give every backend, agent, and card key both.
 
 <span id="scopes" />
 <span id="scope-an-access-key" />
@@ -35,7 +35,7 @@ A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)
 
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's scopes without revoking it; the key itself can't. Call `setAllowedCalls` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain), Tempo's built-in contract that stores access keys. For each contract you pass, it replaces that contract's rules and leaves the others alone, so list every rule you want to keep.
 
-This code adds a second recipient to the key from `access-keys.ts`, the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key), and also allows `transferWithMemo`. It lists both functions because the call replaces the stablecoin's rules. It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `setAllowedCalls` works the same on mainnet and testnet.
+This code adds a second recipient to the key from `access-keys.ts`, the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key), and allows `transferWithMemo`. It lists both functions because the call replaces the stablecoin's rules. It uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `setAllowedCalls` works the same on mainnet and testnet.
 
 ::::code-group
 

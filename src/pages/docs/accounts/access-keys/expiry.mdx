@@ -28,7 +28,7 @@ Use the shortest window the holder needs: hours for a one-off task, 30 days for 
 
 ## Renew a key
 
-Tempo never authorizes the same key address twice for an account, so instead of extending an expiry, renew by authorizing a new key before the old one expires. Read the old key's `expiry` with `client.accessKey.getMetadata({ account, accessKey })`, and before that time:
+Tempo never authorizes the same key address twice for an account, so to renew, authorize a new key before the old one expires. Read the old key's `expiry` with `client.accessKey.getMetadata({ account, accessKey })`, and before that time:
 
 1. Generate a new key where the holder signs.
 2. Have the signers, or an admin key, authorize it with a new expiry.

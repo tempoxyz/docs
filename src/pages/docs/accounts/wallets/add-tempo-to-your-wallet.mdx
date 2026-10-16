@@ -8,7 +8,7 @@ description: Add Tempo mainnet and testnet to a wallet, show stablecoin balances
 
 Support Tempo in your wallet, from network settings to Tempo Transactions.
 
-If you build a wallet, such as a browser extension, mobile wallet, or hardware wallet, your users can already sign standard Ethereum transactions on Tempo. Tempo has no native gas token, though, so balance checks and fee quotes need changes, and [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
+If you build a wallet, such as a browser extension, mobile wallet, or hardware wallet, your users can already sign standard Ethereum transactions on Tempo. Tempo has no native gas token, so balance checks and fee quotes need changes. [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
 
 [Integrating wallet support](/docs/quickstart/wallet-developers) has the full checklist and recipes.
 
@@ -89,7 +89,7 @@ Replace your EIP-1559 (type 2) envelope with the Tempo Transaction envelope (typ
 - Authorize [access keys](/docs/accounts/access-keys), so an app or agent pays from the user's account within a spending limit, scopes, and an expiry.
 - Sign with a [passkey](/docs/accounts/authentication/passkeys), and send [concurrent transactions](/docs/guide/payments/send-parallel-transactions) or [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) without tracking one nonce sequence.
 
-If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Transactions provide them natively: see the [feature comparison](/docs/protocol/transactions/eip-7702#feature-comparison).
+If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Transactions include both in the protocol: see the [feature comparison](/docs/protocol/transactions/eip-7702#feature-comparison).
 
 :::::
 

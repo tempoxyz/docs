@@ -8,13 +8,13 @@ description: Have a user's Privy or Turnkey wallet authorize a limited access ke
 
 Let your backend pay from a user's Privy or Turnkey wallet, within limits, without holding the user's key.
 
-If your users hold embedded wallets with Privy or Turnkey and your backend has to pay from them on its own, for a card top-up, a subscription, or a recurring transfer, have the wallet authorize an [access key](/docs/accounts/access-keys) for your backend once. The provider keeps the account key and signs the authorization once. After that, your backend signs each payment with its own key, within the limit, recipients, and expiry the user approved.
+If your users hold Privy or Turnkey embedded wallets and your backend pays from them on its own, for a card top-up, a subscription, or a recurring transfer, have the wallet authorize an [access key](/docs/accounts/access-keys) for your backend. The provider keeps the account key and signs that authorization once. After that, your backend signs each payment with its own key, within the limit, recipients, and expiry the user approved.
 
 This guide funds a card program. Your card backend gets a key that can send up to 100 OUSD a day, only to the card program's funding address from your [card issuing partner](/docs/partners/cards), for 30 days. Size the daily limit to the card's daily spend limit plus fees, and show the user the card program, limit, and expiry before they approve. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
 
 ## Who holds which key
 
-Each party holds a different key, so no party can do more than its key allows. On each card swipe, your card backend pulls the purchase amount from the user's balance in seconds, without asking the wallet provider to sign. The access key caps the amount, recipient, and duration:
+On each card swipe, your card backend pulls the purchase amount from the user's balance in seconds, without asking the wallet provider to sign. The access key caps the amount, recipient, and duration. Each party can do only what its own key allows:
 
 | Party | Holds | Can do on its own |
 | --- | --- | --- |
@@ -107,7 +107,7 @@ const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl
 export const message = JSON.stringify(KeyAuthorization.toRpc(keyAuthorization)) // send to the holder
 ```
 
-The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so your app has to decide what it asks the provider to sign. See [Route raw signing through one backend](/docs/accounts/apps#who-can-move-the-funds).
+The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so your app decides what the provider signs. See [Route raw signing through one backend](/docs/accounts/apps#who-can-move-the-funds).
 
 ### Send it with the holder's first payment
 

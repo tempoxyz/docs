@@ -33,7 +33,7 @@ A Tempo account has two policies, one for each direction money moves: a signing 
 
 ## How it works
 
-Tempo checks an account's policies on every transaction, before it lands. Neither your app, a wallet provider, nor Tempo can skip them, so a breached backend or a buggy client can't get past them either.
+Tempo checks an account's policies on every transaction, before it lands. Your app, a wallet provider, and Tempo can't skip them, and neither can a breached backend or a buggy client.
 
 The two policies work independently. Without a receive policy, an account accepts every transfer the token itself allows, so add one only when the account must refuse some stablecoins or senders. Spending limits aren't a policy: they belong to [access keys](/docs/accounts/access-keys), which pay alone within their limits and never count toward the threshold.
 

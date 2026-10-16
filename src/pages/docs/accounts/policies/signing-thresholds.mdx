@@ -85,7 +85,7 @@ To let a team spend without lowering the treasury's threshold, the treasury auth
 
 ## Collect approvals
 
-Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three.
+Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS.
 
 Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), which it checks approvals against but can't read back. When your app creates the account, save `account.address` and `account.config` with the account record, `saved`, and rebuild the account from that copy whenever signers approve. The examples call that helper `openAccount`. It passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first configuration update, then the saved address. [Add a recovery signer](/docs/accounts/apps/self-custodial-wallets) shows it in full.
 

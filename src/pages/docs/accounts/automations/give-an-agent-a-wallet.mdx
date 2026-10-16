@@ -11,7 +11,7 @@ import { AccessKeyDemo } from '../../../../components/guides/AccessKeyDemo'
 
 Give an agent a key that pays from an account, but only within the bounds you set.
 
-If you build an AI agent that pays merchants or APIs from a user's or your company's account, don't give it the account's key. On Tempo, an agent's wallet is an access key the agent generates and holds. In this guide, the account's signers, the keys the customer or your approvers hold, authorize that key with a budget of 50 OUSD a day, a 30-day expiry, and scopes that allow only sending the stablecoin with a memo to merchants you list. Tempo enforces those bounds on every transaction, whatever the agent decides to do.
+If you build an AI agent that pays merchants or APIs from a user's or your company's account, don't give it the account's key. On Tempo, an agent's wallet is an access key the agent generates and holds. The account's signers, the keys the customer or your approvers hold, authorize that key with a budget of 50 OUSD a day, a 30-day expiry, and scopes that allow only sending the stablecoin with a memo to merchants you list. Tempo enforces those bounds on every transaction, whatever the agent decides to do.
 
 <span id="agents" />
 <span id="ai-agents" />
@@ -145,7 +145,7 @@ Mppx.create({ methods: [tempo({ account: agentKey, getClient: () => client })] }
 const response = await fetch(paidUrl) // [!code hl]
 ```
 
-Without `getClient`, mppx has no RPC for the devnet and the request fails. Tempo rejects a payment outside the scopes, over the remaining budget, or after the expiry, and the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
+Without `getClient`, mppx has no RPC for the devnet and the request fails. If Tempo rejects the payment for the key's bounds, the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
 
 The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds, so to test, run your own [MPP server](/docs/guide/machine-payments/server) on the devnet: in its `tempo()` method, set `currency` to the `stablecoin` address and pass `chainId: 31318` and `getClient: () => client`.
 
