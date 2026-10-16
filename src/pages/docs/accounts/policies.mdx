@@ -10,21 +10,33 @@ import { Card, Cards } from 'vocs'
 
 A policy is a rule Tempo enforces onchain for an account, so your app doesn't have to.
 
-A Tempo account has two policies, one for each direction money moves. A [signing threshold](/docs/accounts/policies/signing-thresholds) decides who can move funds out, and a [receive policy](/docs/accounts/policies/receive-policies) decides which stablecoins and senders can pay in.
+A Tempo account has two policies, one for each direction money moves: a signing threshold for funds going out, and a receive policy for payments coming in.
 
 <span id="what-account-policies-control" />
 <span id="tempo-account-policy-types" />
 <span id="tempo-account-policies" />
+
+## What a policy is
+
+Tempo checks an account's policies on every transaction, before it lands. Neither your app, a wallet provider, nor Tempo can skip them, so a breached backend or a buggy client can't get past them either.
+
 <span id="escalation-rules" />
 <span id="private-policies" />
-<span id="combine-account-policies" />
-<span id="combine-policies" />
 <span id="what-a-policy-controls" />
+
+## Control money out and money in
+
+Each policy covers one direction:
 
 <Cards>
   <Card title="Signing thresholds" description="Who can move funds out: a transaction needs approvals whose weights add up to the threshold. Devnet only." to="/docs/accounts/policies/signing-thresholds" />
   <Card title="Receive policies" description="Which stablecoins and senders can pay the account. Tempo holds anything else instead of crediting it." to="/docs/accounts/policies/receive-policies" />
 </Cards>
+
+<span id="combine-account-policies" />
+<span id="combine-policies" />
+
+## Combine policies with access keys
 
 Add a receive policy only when an address must refuse some stablecoins or senders. It checks what arrives, not who approves, so it works alongside any signing threshold.
 
