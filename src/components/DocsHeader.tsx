@@ -598,7 +598,12 @@ function SidebarDisclosure({
       </summary>
       <div {...ui.sidebarDisclosureLayout()}>
         <SidebarNodes
-          nodes={node.items ?? []}
+          // The summary only toggles, so a group with its own page lists that page first.
+          nodes={
+            node.link
+              ? [{ text: 'Overview', link: node.link }, ...(node.items ?? [])]
+              : (node.items ?? [])
+          }
           pathname={pathname}
           activeAnchor={activeAnchor}
           depth={depth + 1}

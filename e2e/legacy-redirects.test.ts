@@ -5,7 +5,7 @@ const legacyRoutes = [
   ['/docs/guide', '/docs/quickstart/integrate-tempo'],
   ['/docs/quickstart', '/docs/quickstart/integrate-tempo'],
   ['/docs/guide/building-with-ai', '/docs/guide/using-tempo-with-ai'],
-  ['/docs/learn/tempo/receive-policies', '/docs/guide/payments/configure-receive-policies'],
+  ['/docs/learn/tempo/receive-policies', '/docs/accounts/policies/receive-policies'],
   ['/docs/protocol/blockspace', '/docs/protocol/blockspace/overview'],
   ['/docs/protocol/tip20', '/docs/protocol/tip20/overview'],
   ['/docs/protocol/tip20-rewards', '/docs/protocol/upgrades/t7#deprecate-tip-20-rewards'],

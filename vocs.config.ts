@@ -1690,7 +1690,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/integrate',
-      destination: '/docs/accounts/apps/self-custodial-wallets#connect-tempo-wallet',
+      destination: '/docs/accounts/wallets#connect-a-wallet-to-your-app',
       status: 301,
     },
     {

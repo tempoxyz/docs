@@ -44,14 +44,20 @@ The weight you give the new signer decides what it can approve alone. Every sign
 
 The threshold stays the same unless you change it, so each new signer adds a way to reach it. To keep requiring the same approvers, raise the threshold in the same update.
 
-Give a recovery signer enough weight that the account can [lose any one signer](/docs/accounts/account-configuration#plan-for-recovery) and still reach the threshold. Give it no more, because it can approve payments at that weight too. [Signing thresholds](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists recommended setups.
+Give a recovery signer enough weight that the account can [lose any one signer](/docs/accounts/account-configuration#plan-for-recovery) and still reach the threshold. Give it no more, because it can approve payments at that weight too.
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). The remove and replace examples below use the same `account.ts` and `client.ts`.
 
 ::::code-group
 
 ```ts [add-signer.ts]
+import { writeFileSync } from 'node:fs'
+import { AccountConfig } from 'viem/tempo'
+import { account, config } from './account'
 import { client } from './client'
+
+// The new signer's address
+const newSigner = process.env.NEW_SIGNER as `0x${string}`
 
 const { config: updated } = await client.accounts.updateConfigSync({
   account,
@@ -60,6 +66,32 @@ const { config: updated } = await client.accounts.updateConfigSync({
     threshold: config.threshold, // [!code hl]
   }, // [!code hl]
 })
+
+// Save the new configuration. The next action rebuilds the account from it.
+writeFileSync('account.json', JSON.stringify({ address: account.address, config: AccountConfig.toRpc(updated) }))
+```
+
+```ts [account.ts]
+import { readFileSync } from 'node:fs'
+import { isAddressEqual } from 'viem'
+import { Account, AccountConfig } from 'viem/tempo'
+
+// The address and configuration your app saved for the account
+const saved = JSON.parse(readFileSync('account.json', 'utf8'))
+export const config = AccountConfig.fromRpc(saved.config)
+
+// The signers approving this time. Their weights must reach the threshold.
+const approvers = [Account.fromSecp256k1(process.env.SIGNER_KEY as `0x${string}`)]
+
+const owners = config.owners.map(({ owner, weight }) => ({
+  owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
+  weight,
+}))
+// Until the first update, the configuration derives the address.
+export const account =
+  config.version === 0n
+    ? Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+    : Account.fromConfig({ ...config, address: saved.address, owners })
 ```
 
 ```ts [client.ts]
@@ -68,7 +100,7 @@ const { config: updated } = await client.accounts.updateConfigSync({
 
 ::::
 
-`account` is the rebuilt account, and `config` is the saved configuration it came from. `newSigner` is the new key's address: a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. In the examples below, `departing` and `oldSigner` are addresses already on the signer list. Viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in Viem lists every option.
+`account.ts` rebuilds the account from the record your app saved and attaches the approving keys. The new signer can be a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. Viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in Viem lists every option.
 
 Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
 
@@ -80,8 +112,14 @@ Tempo can't tell whether a signer still holds its key. Have each new signer appr
 When an approver leaves or a key is lost, the signers that stay approve a list without its signer:
 
 ```ts [remove-signer.ts]
+import { writeFileSync } from 'node:fs'
 import { isAddressEqual } from 'viem'
+import { AccountConfig } from 'viem/tempo'
+import { account, config } from './account'
 import { client } from './client'
+
+// The address of the signer that's leaving
+const departing = process.env.DEPARTING_SIGNER as `0x${string}`
 
 const { config: updated } = await client.accounts.updateConfigSync({
   account,
@@ -90,6 +128,8 @@ const { config: updated } = await client.accounts.updateConfigSync({
     threshold: config.threshold, // [!code hl]
   }, // [!code hl]
 })
+
+writeFileSync('account.json', JSON.stringify({ address: account.address, config: AccountConfig.toRpc(updated) }))
 ```
 
 If the remaining weights fall short of the threshold, lower `threshold` in the same update. Or [replace the signer](#replace-a-signer-in-one-update) instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone. A 2-of-3 multisig that drops to two signers at threshold 1 no longer needs two approvals. [Replace an approver](/docs/accounts/custodians/team-multisig#replace-an-approver) covers a team multisig.
@@ -106,11 +146,17 @@ If the remaining weights fall short of the threshold, lower `threshold` in the s
 Rotate when the holder stays but the key changes: a new hardware wallet, a new device, or a new wallet provider. Put the new key at the old one's weight and keep the threshold. Every group of signers that could approve before still can:
 
 ```ts [rotate-signer.ts]
+import { writeFileSync } from 'node:fs'
 import { isAddressEqual } from 'viem'
+import { AccountConfig } from 'viem/tempo'
+import { account, config } from './account'
 import { client } from './client'
 
-const rotation = await client.accounts.updateConfigSync({
-  // on a scheduled rotation, the old key can be one of the approvers
+// The key being replaced, and its replacement
+const oldSigner = process.env.OLD_SIGNER as `0x${string}`
+const newSigner = process.env.NEW_SIGNER as `0x${string}`
+
+const { config: updated } = await client.accounts.updateConfigSync({
   account,
   nextConfig: { // [!code hl]
     owners: config.owners.map((entry) => // [!code hl]
@@ -119,6 +165,8 @@ const rotation = await client.accounts.updateConfigSync({
     threshold: config.threshold, // [!code hl]
   }, // [!code hl]
 })
+
+writeFileSync('account.json', JSON.stringify({ address: account.address, config: AccountConfig.toRpc(updated) }))
 ```
 
 Because one update swaps the keys, the account never has both keys active, or neither.
