@@ -16,7 +16,7 @@ A single-key account works like a standard Ethereum account (an EOA): one key co
 
 <ConfigurableAccountsT14 />
 
-Until T14, the upgrade transaction ([TIP-1113](https://tips.sh/1113)) does nothing on mainnet or testnet: it succeeds and charges its fee, but the original key still approves alone, and transactions from the configurable account are rejected.
+Until T14, the upgrade transaction does nothing on mainnet or testnet: it succeeds and charges its fee, but the original key still approves alone, and transactions from the configurable account are rejected.
 
 <UpgradeAccountDemo />
 
@@ -91,4 +91,4 @@ After the upgrade, the record your app saves is the account's only readable list
 - Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
 - Upgraded accounts don't use the [recovery factory](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain) for funds sent to their address on another chain. The original key still controls the address there.
 
-Reference: [Single-key accounts](/docs/development/single-key-accounts#upgrade-to-a-configurable-account). Specification: [TIP-1113](https://tips.sh/1113).
+Reference: [Single-key accounts](/docs/development/single-key-accounts#upgrade-to-a-configurable-account).

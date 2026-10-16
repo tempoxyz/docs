@@ -14,16 +14,16 @@ Replace a user's lost passkey at the same address, with the two signers they sti
 
 If you run a consumer app and a user loses the phone that holds their passkey, you don't move their funds to a new account. This guide assumes the [self-custodial setup](/docs/accounts/apps/self-custodial-wallets), where three signers (keys that approve the account's transactions) each have weight 1 and any two approve: the user's passkey, a key your wallet provider manages, and a backup key the user keeps. Without the passkey, the provider's key and the backup still reach 2 together, so they approve swapping in a new passkey from the user's new phone. The new passkey then revokes the lost phone's device key. The address, balance, and [Earn](/docs/earn) positions stay the same.
 
-<ConfigurableAccountsT14 />
-
-Replacing a lost signer needs a configurable account.
-
 <span id="account-recovery-limits" />
 <span id="recommended-recovery-setups" />
 <span id="replace-a-lost-signer" />
 <span id="key-replacement" />
 <span id="replace-a-signer" />
 <span id="recover-from-a-lost-passkey" />
+
+<ConfigurableAccountsT14 />
+
+Replacing a lost signer needs a configurable account.
 
 Tempo can't override an account's signers, so recovery works only if the remaining signers reach the threshold. Check that before the user funds the account, whichever signer is lost:
 
