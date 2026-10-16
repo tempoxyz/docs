@@ -1,7 +1,7 @@
 ---
-title: Accounts
-seoTitle: Self-Custodial Stablecoin Accounts on Tempo | Tempo Docs
-description: Stablecoin accounts with weighted signers and spending-limited access keys that Tempo enforces on every transaction, so only the account's own keys can move its funds.
+title: Tempo Accounts
+seoTitle: "Tempo Accounts | Tempo Docs"
+description: Give every customer a stablecoin account with its security rules built in. Customers approve with a passkey, your backend and agents pay within limits, and Tempo enforces every rule onchain.
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 ---
 
@@ -12,21 +12,30 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 <DocsProductOverview image="accounts" alt="A Tempo account: an address that holds stablecoin balances, a passkey and a private key as signers with weight 1 each toward a threshold of 2, and an access key with a daily limit.">
 
-# Accounts
+# Tempo Accounts
 
-A Tempo account is a stablecoin address with its rules built in, so whoever holds its keys holds the funds.
+Give every customer a stablecoin account with its security rules built in. Customers approve payments with a passkey, your backend and agents pay within limits you set, and Tempo enforces every rule onchain.
 
-[How it works →](/docs/accounts/how-it-works)
+[Create an account →](/docs/accounts/create)
 
 </DocsProductOverview>
 
-Each Tempo account holds a customer's stablecoins at one address, with rules that set which keys approve its payments and how much a server or agent can spend on its own. Tempo checks those rules on every transaction and can't override them.
-
 :::warning
-Tempo Accounts is in early development. Configurable accounts, with several signers and a threshold, run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. [Contact Tempo](https://tempo.xyz/contact) to discuss access.
+Tempo Accounts is in early development. Passkey accounts, access keys, fee sponsorship, receive policies, and deposit addresses work on mainnet and testnet. Accounts with several signers run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). [Contact Tempo](https://tempo.xyz/contact) to discuss access.
 :::
 
-The customer holds their own funds when they hold the signing key, such as a passkey. When a wallet provider or your backend holds the key, that party can move the funds too. [Apps](/docs/accounts/apps) and [Custodians](/docs/accounts/custodians) cover those setups.
+<span id="account-capabilities" />
+
+## Accounts capabilities
+
+| Capability | What it does |
+| --- | --- |
+| **Passkey accounts** | Customers sign up and approve payments with Face ID or a fingerprint, with no seed phrase to lose. |
+| **Stablecoin fees** | Accounts pay network fees in USD stablecoins, or you [pay them for your customers](/docs/accounts/fees/fee-sponsorship) so they never hold a fee balance. |
+| **Spending limits** | Give your backend, a card program, or an AI agent its own [access key](/docs/accounts/access-keys) with a budget, allowed recipients, and an expiry. |
+| **Incoming payment rules** | A [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you allow. |
+| **Deposit addresses** | Give each customer a [deposit address](/docs/accounts/virtual-addresses) that pays straight into one account, with no sweeps. |
+| **Recovery and approvals** | Add [backup signers](/docs/accounts/account-configuration) to replace a lost key at the same address, or require two approvers for each payment. Devnet only. |
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
@@ -41,14 +50,19 @@ The customer holds their own funds when they hold the signing key, such as a pas
 <span id="access-keys" />
 <span id="key-management" />
 <span id="fee-management" />
+<span id="whats-in-a-tempo-account" />
 
-## What's in a Tempo account
+## How Tempo Accounts work
+
+A Tempo account is an address that holds stablecoins, with its rules stored onchain:
 
 - **Address:** holds the account's stablecoins and never changes, even when you [replace its signers](/docs/accounts/account-configuration).
-- **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight. A transaction runs once its approvers' weights add up to the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
-- **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the spending limits, expiry, and allowed calls you set. A leaked key still can't spend past them.
+- **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight, and a transaction runs once its approvers' weights reach the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
+- **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the limits, expiry, and allowed calls you set. A leaked key can't spend past them.
 
-Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. On mainnet and testnet today, use a single-key account (EOA), like a standard Ethereum account: one key, such as a passkey, approves its payments and authorizes its access keys. On the devnet, it can [upgrade in place](/docs/accounts/account-configuration/account-upgrade) to signers and a threshold and keep its address and balance.
+Tempo checks these rules on every transaction, and no one, including Tempo, can override them. Whoever holds the signing keys holds the funds: the customer when they hold a passkey, or a wallet provider or your backend when it holds the key. [Apps](/docs/accounts/apps) and [Custodians](/docs/accounts/custodians) cover each setup, and [Security](/docs/accounts/security) covers who can move funds in each.
+
+On mainnet and testnet today, an account has one key, like a standard Ethereum account, and that key authorizes its access keys. On the devnet, an account can have several signers and [upgrade in place](/docs/accounts/account-configuration/account-upgrade) from one key, keeping its address and balance.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />
