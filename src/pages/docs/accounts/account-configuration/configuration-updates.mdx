@@ -79,7 +79,7 @@ const { config: updated } = await client.accounts.updateConfigSync({
 })
 ```
 
-If the remaining weights fall short of the threshold, lower `threshold` in the same update, or [replace the signer](#replace-a-signer-in-one-update) instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone, so a 2-of-3 treasury that drops to two signers at threshold 1 no longer needs two approvals. [Replace an approver](/docs/accounts/custodians/company-treasury#replace-an-approver) covers a treasury.
+If the remaining weights fall short of the threshold, lower `threshold` in the same update, or [replace the signer](#replace-a-signer-in-one-update) instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone, so a 2-of-3 treasury that drops to two signers at threshold 1 no longer needs two approvals. [Replace an approver](/docs/accounts/custodians/team-multisig#replace-an-approver) covers a treasury.
 
 [Access keys](/docs/accounts/access-keys) keep working after the update. A device key or agent key the removed signer authorized keeps paying within its limits, so [revoke every key](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) its holder could reach, including any an attacker added.
 

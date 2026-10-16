@@ -68,7 +68,7 @@ export const docsLinkCards = {
       icon: 'code',
       links: [
         ['Self-custodial wallets with a provider', '/docs/accounts/apps/self-custodial-wallets'],
-        ['Set up a company treasury', '/docs/accounts/custodians/company-treasury'],
+        ['Set up a team multisig', '/docs/accounts/custodians/team-multisig'],
         ['Give an agent a wallet', '/docs/accounts/automations/give-an-agent-a-wallet'],
       ],
     },
