@@ -10,7 +10,7 @@ import { AccountDiagram } from '../../../components/AccountDiagram'
 
 The Account Keychain holds each account's access keys and checks every transaction they sign against the limits you set.
 
-Access keys are extra keys that sign for an account. The Account Keychain is a precompile, a contract built into Tempo, at `0xAAAAAAAA00000000000000000000000000000000`. Access keys are live on mainnet and testnet. Both [account types](/docs/accounts/keys) use them, though configurable accounts work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). To build with access keys, start with the [Access keys](/docs/accounts/access-keys) guide.
+Access keys are extra keys that sign for an account. The Account Keychain is a precompile, a contract built into Tempo, at `0xAAAAAAAA00000000000000000000000000000000`. Access keys are live on mainnet and testnet. Both [account types](/docs/accounts/keys) use them, though until T14, configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). To build with access keys, start with the [Access keys](/docs/accounts/access-keys) guide.
 
 <AccountDiagram
   name="keychain"
@@ -24,7 +24,7 @@ Access keys are extra keys that sign for an account. The Account Keychain is a p
 | secp256k1 | `0` | The key's address |
 | P-256 | `1` | The key's address |
 | WebAuthn | `2` | The passkey's address |
-| Configurable account | `3` | The account's address. Its owners sign for it. Only on the Tempo Accounts devnet ([TIP-1111](https://tips.sh/1111), Draft). |
+| Configurable account | `3` | The account's address. Its owners sign for it. Devnet until T14 ([TIP-1111](https://tips.sh/1111)). |
 
 ## Access key restrictions
 

@@ -5,6 +5,8 @@ description: Give each user a Tempo account where your wallet provider's key and
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-providers_title-f5_v02.png
 ---
 
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+
 
 # Set up a self-custodial wallet with a provider
 
@@ -14,9 +16,7 @@ If you run a consumer app that signs users in with its own login and holds their
 
 On Tempo, each user's account can have three signers, the keys that approve its transactions: the user's passkey, a key your provider manages, and a backup key the user keeps. Any two approve. Day to day, the passkey and the provider sign together, so every payment needs both the user's passkey and your login. If your app or the provider is down or breached, the user's passkey and backup still reach the threshold without either of you.
 
-:::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change.
-:::
+<ConfigurableAccountsT14 />
 
 ## Who can move the funds
 

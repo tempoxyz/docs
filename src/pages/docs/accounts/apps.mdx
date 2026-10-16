@@ -5,6 +5,7 @@ description: Give each user of your consumer app a Tempo account that your walle
 ---
 
 import { Card, Cards } from 'vocs'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 # Apps
 
@@ -12,9 +13,9 @@ Give each user an account they control, with your wallet provider signing alongs
 
 This is for consumer apps, such as wallets, remittance apps, and savings apps, that hold users' wallets with a provider such as Privy, Turnkey, or Dynamic. Each user keeps the same address when they recover the account or leave your app. If your users connect a wallet they already have, see [Wallets](/docs/accounts/wallets).
 
-:::warning
-**Configurable accounts aren't live yet.** The self-custodial setup below uses an account with several signers and a threshold ([TIP-1107](https://tips.sh/1107)), which works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet. Provider wallets with one key each work on mainnet and testnet today.
-:::
+<ConfigurableAccountsT14 />
+
+Provider wallets with one key each work on mainnet and testnet today.
 
 <span id="plan-recovery-that-doesnt-depend-on-the-provider" />
 
@@ -33,8 +34,8 @@ Day to day, the passkey and the provider sign each payment together, so no payme
 ## Guides for consumer apps
 
 <Cards>
-  <Card title="Set up a self-custodial wallet with a provider" description="The user's passkey and your provider's key approve each payment; the user's passkey and backup recover or leave without you. Runs on the devnet." to="/docs/accounts/apps/self-custodial-wallets" />
-  <Card title="Recover a user's account" description="Replace a lost passkey or backup at the same address, with the two signers the user still has. Runs on the devnet." to="/docs/accounts/apps/recover-an-account" />
+  <Card title="Set up a self-custodial wallet with a provider" description="The user's passkey and your provider's key approve each payment; the user's passkey and backup recover or leave without you. Devnet until T14." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Recover a user's account" description="Replace a lost passkey or backup at the same address, with the two signers the user still has. Devnet until T14." to="/docs/accounts/apps/recover-an-account" />
   <Card title="Pay from a user's embedded wallet" description="Your card backend or an agent pays from the user's wallet within limits the wallet signs once." to="/docs/accounts/automations/pay-from-an-embedded-wallet" />
 </Cards>
 

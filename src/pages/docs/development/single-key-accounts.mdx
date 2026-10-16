@@ -5,6 +5,7 @@ description: Derive a Tempo address from one secp256k1, P-256, or WebAuthn key, 
 ---
 
 import { AccountDiagram } from '../../../components/AccountDiagram'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 # Single-key accounts
 
@@ -14,7 +15,7 @@ Single-key accounts are live on mainnet and testnet. They work like an Ethereum 
 
 <AccountDiagram
   name="single-key"
-  alt="A root key derives the account's address and authorizes its access keys. On the Tempo Accounts devnet, the account can upgrade to a configurable account at the same address, starting at configuration version 1."
+  alt="A root key derives the account's address and authorizes its access keys. The account can upgrade to a configurable account at the same address, starting at configuration version 1."
 />
 
 <span id="compared-with-an-ethereum-eoa" />
@@ -29,7 +30,7 @@ The address is the last 20 bytes of `keccak256(x ‖ y)`, the hash of the root k
 | P-256 | `Account.fromP256(privateKey)` |
 | WebAuthn (passkey) | `Account.fromWebAuthnP256(credential)` |
 
-Because the key fixes the address, you can't replace the root key: a new key is a new address. On the Tempo Accounts devnet, you can [upgrade to a configurable account](#upgrade-to-a-configurable-account) to change keys and keep the address.
+Because the key fixes the address, you can't replace the root key: a new key is a new address. To change keys and keep the address, [upgrade to a configurable account](#upgrade-to-a-configurable-account), which until T14 runs only on the Tempo Accounts devnet.
 
 ## Signing with the root key
 
@@ -72,7 +73,9 @@ The root key can authorize [access keys](/docs/development/account-keychain), ex
 
 An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key, with weights that must reach a threshold. The upgrade is permanent.
 
-Account upgrades aren't live yet. They work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and their specification, [TIP-1113](https://tips.sh/1113), is a Draft that may still change. Sent on mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
+<ConfigurableAccountsT14 />
+
+Until T14, the upgrade transaction ([TIP-1113](https://tips.sh/1113)) does nothing on mainnet or testnet: it succeeds and charges its fee, but the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
 
 | Property | Rule |
 | --- | --- |

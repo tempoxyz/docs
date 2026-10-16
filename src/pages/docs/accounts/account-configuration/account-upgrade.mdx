@@ -6,6 +6,7 @@ interactive: true
 ---
 
 import { UpgradeAccountDemo } from '../../../../components/guides/UpgradeAccountDemo'
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
 
 # Account upgrade
 
@@ -13,9 +14,9 @@ An account upgrade adds backup signers to a single-key account without changing 
 
 A single-key account works like a standard Ethereum account (an EOA): one key controls it, so losing that key loses the account. An account upgrade turns it into a configurable account with several signers and a threshold, at the same address. The upgrade is permanent.
 
-:::warning
-**Account upgrades aren't live yet.** Turning a single-key account into a configurable account at the same address ([TIP-1113](https://tips.sh/1113)) works only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Sent on mainnet or testnet, the upgrade transaction succeeds and charges its fee but changes nothing: the original key still approves alone, and transactions from the configurable account are rejected.
-:::
+<ConfigurableAccountsT14 />
+
+Until T14, the upgrade transaction ([TIP-1113](https://tips.sh/1113)) does nothing on mainnet or testnet: it succeeds and charges its fee, but the original key still approves alone, and transactions from the configurable account are rejected.
 
 <UpgradeAccountDemo />
 

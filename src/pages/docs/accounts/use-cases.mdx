@@ -12,7 +12,7 @@ Find the setup and guides for what you're building.
 
 Account setups for consumer apps, backends and agents, custodians and treasuries, and wallets differ in who holds which key: a customer's passkey, a provider's key, your backend's access key, or an approver's signer. Each can do only what the account allows, and Tempo enforces those limits on every transaction.
 
-Single-key accounts, access keys, fee sponsorship, virtual addresses, and receive policies work on mainnet and testnet. Accounts with several signers and a threshold run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Single-key accounts, access keys, fee sponsorship, virtual addresses, and receive policies work on mainnet and testnet. Until T14, accounts with several signers and a threshold run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="consumer-wallets" />
 
@@ -22,8 +22,8 @@ For teams building a consumer app, such as a remittance or savings app, on embed
 
 <Cards>
   <Card title="Apps" description="How each user's account is set up with your wallet provider, and who can move the funds." to="/docs/accounts/apps" />
-  <Card title="Set up a self-custodial wallet with a provider" description="The provider's key and the user's passkey approve together; the user can recover or leave without you. Runs on the devnet." to="/docs/accounts/apps/self-custodial-wallets" />
-  <Card title="Recover a user's account" description="Replace a lost passkey with the signers the user still has. Runs on the devnet." to="/docs/accounts/apps/recover-an-account" />
+  <Card title="Set up a self-custodial wallet with a provider" description="The provider's key and the user's passkey approve together; the user can recover or leave without you. Devnet until T14." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Recover a user's account" description="Replace a lost passkey with the signers the user still has. Devnet until T14." to="/docs/accounts/apps/recover-an-account" />
 </Cards>
 
 <span id="automated-payments" />
@@ -50,7 +50,7 @@ For exchanges and payments processors that hold customer funds, businesses whose
   <Card title="Custodians" description="The recommended setup for omnibus accounts, custodian-held funds, and company treasuries." to="/docs/accounts/custodians" />
   <Card title="Hold customer funds in an omnibus account" description="A deposit address per customer, paying into one account that accepts only the stablecoins you list." to="/docs/accounts/custodians/omnibus-accounts" />
   <Card title="Custody partners" description="Custodians and institutional wallets that support Tempo, such as Fireblocks." to="/docs/partners/wallets#custodial--institutional" />
-  <Card title="Set up a team multisig" description="Three approvers, any two of whom approve each payment. Runs on the devnet." to="/docs/accounts/custodians/team-multisig" />
+  <Card title="Set up a team multisig" description="Three approvers, any two of whom approve each payment. Devnet until T14." to="/docs/accounts/custodians/team-multisig" />
 </Cards>
 
 ## Wallets

@@ -8,6 +8,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
 
 import { AccountSandbox } from '../../../components/guides/AccountSandbox'
 import { SingleKeyAccountDemo } from '../../../components/guides/SingleKeyAccountDemo'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 # Create an account
 
@@ -45,9 +46,7 @@ For mainnet, use the `tempo` chain from `viem/chains` and fund the address with 
 
 ## Create a configurable account
 
-:::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](#connect-to-the-devnet), not on mainnet or testnet, and may still change.
-:::
+<ConfigurableAccountsT14 />
 
 A configurable account's signers can change while its address stays the same, so you can add a backup key, rotate keys, or require several approvals. Pick a first signer below to create one on the Tempo Accounts devnet.
 
