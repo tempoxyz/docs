@@ -563,12 +563,18 @@ export default defineConfig({
             ],
           },
           {
-            text: 'Key management',
-            link: '/docs/accounts/key-management',
+            text: 'Account configuration',
+            link: '/docs/accounts/account-configuration',
             collapsed: true,
             items: [
-              { text: 'Signer updates', link: '/docs/accounts/key-management/signer-updates' },
-              { text: 'Account upgrade', link: '/docs/accounts/key-management/account-upgrade' },
+              {
+                text: 'Configuration updates',
+                link: '/docs/accounts/account-configuration/configuration-updates',
+              },
+              {
+                text: 'Account upgrade',
+                link: '/docs/accounts/account-configuration/account-upgrade',
+              },
             ],
           },
           {
@@ -1518,7 +1524,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/change-email',
-      destination: '/docs/accounts/key-management/signer-updates#remove-a-signer',
+      destination: '/docs/accounts/account-configuration/configuration-updates#remove-a-signer',
       status: 301,
     },
     {
@@ -1538,7 +1544,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/upgrade',
-      destination: '/docs/accounts/key-management/account-upgrade',
+      destination: '/docs/accounts/account-configuration/account-upgrade',
       status: 301,
     },
     {
@@ -1613,22 +1619,22 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/key-rotation',
-      destination: '/docs/accounts/key-management',
+      destination: '/docs/accounts/account-configuration',
       status: 301,
     },
     {
       source: '/docs/accounts/key-rotation/signer-rotation',
-      destination: '/docs/accounts/key-management/signer-updates#remove-a-signer',
+      destination: '/docs/accounts/account-configuration/configuration-updates#remove-a-signer',
       status: 301,
     },
     {
       source: '/docs/accounts/key-rotation/signer-recovery',
-      destination: '/docs/accounts/key-management/signer-updates#remove-a-signer',
+      destination: '/docs/accounts/account-configuration/configuration-updates#remove-a-signer',
       status: 301,
     },
     {
       source: '/docs/accounts/key-rotation/account-upgrade',
-      destination: '/docs/accounts/key-management/account-upgrade',
+      destination: '/docs/accounts/account-configuration/account-upgrade',
       status: 301,
     },
     {
@@ -1653,7 +1659,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/recovery',
-      destination: '/docs/accounts/key-management',
+      destination: '/docs/accounts/account-configuration',
       status: 301,
     },
     {

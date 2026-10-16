@@ -39,7 +39,7 @@ The passkey approves alone, and the backup and recovery keys approve together. E
 
 Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, signer changes, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it: each pays alone within its limits, and an [admin access key](/docs/accounts/access-keys/admin-access-keys) can also authorize other access keys.
 
-To change signers or the threshold, send a [signer update](/docs/accounts/key-management/signer-updates#add-a-signer), approved at the current threshold.
+To change signers or the threshold, send a [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer), approved at the current threshold.
 
 <span id="what-a-threshold-protects" />
 <span id="what-a-threshold-protects-against" />
@@ -49,7 +49,7 @@ To change signers or the threshold, send a [signer update](/docs/accounts/key-ma
 A signer can be stolen or lost: a key leaks, a phone breaks, an approver leaves. Choose weights that survive both:
 
 - **Theft:** no single party reaches the threshold alone, unless that party is the customer.
-- **Loss:** the other signers still reach the threshold without any one of them. [Plan for recovery](/docs/accounts/key-management#plan-for-recovery) gives the rule to check.
+- **Loss:** the other signers still reach the threshold without any one of them. [Plan for recovery](/docs/accounts/account-configuration#plan-for-recovery) gives the rule to check.
 
 Count parties, not keys. Two keys in the same KMS, or a wallet provider's key and a recovery key it also runs, belong to one party, which can approve with their combined weight.
 
@@ -87,9 +87,9 @@ To let a team spend without lowering the treasury's threshold, the treasury auth
 
 Each signer's key stays with its holder: the customer's passkey on their device, their backup key in a hardware wallet, and the recovery key with the [recovery provider](#recovery-provider), such as your KMS. No single place holds all three.
 
-Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), which it checks approvals against but can't read back. When your app creates the account, save `account.address` and `account.config` with the account record, `saved`, and rebuild the account from that copy whenever signers approve. The examples call that helper `openAccount`. It passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first signer update, then the saved address. [Add a recovery signer](/docs/accounts/apps/self-custodial-wallets) shows it in full.
+Tempo stores only a hash of the account's configuration (its signers, weights, threshold, and version), which it checks approvals against but can't read back. When your app creates the account, save `account.address` and `account.config` with the account record, `saved`, and rebuild the account from that copy whenever signers approve. The examples call that helper `openAccount`. It passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses, and with `address: 'infer'` until the first configuration update, then the saved address. [Add a recovery signer](/docs/accounts/apps/self-custodial-wallets) shows it in full.
 
-Rebuild the account from the latest record before each transaction. A signer update raises the configuration's version, and Tempo checks every transaction against the new configuration's hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
+Rebuild the account from the latest record before each transaction. A configuration update raises the configuration's version, and Tempo checks every transaction against the new configuration's hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
 When the keys on one device reach the threshold, attach them and send the transaction as usual. Here the customer's passkey reaches the threshold alone, so the payment runs in the customer's browser. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -137,7 +137,7 @@ Approvals can arrive in any order: Viem sorts them by signer address when it com
 
 An approval also covers the transaction's nonce, its place in the account's sequence of transactions. If another transaction from the account lands first, submitting fails with `nonce too low`, so prepare again and collect new approvals. To keep slow approvals valid while the account keeps paying, pass `prepareTransactionRequest` its own `nonceKey`, a random `bigint` from `1n` to `2n ** 256n - 2n` that starts a [separate sequence](/docs/guide/tempo-transaction#concurrent-transactions) for this transaction. The maximum `uint256` selects an [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) instead.
 
-A signer update works the same way: put `Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig })` in `calls`, collect approvals from the current signers, and once it lands, save `AccountConfig.update(saved.config, nextConfig)` as the account's configuration. That's the same configuration `updateConfigSync` returns. An update voids approvals collected under the old configuration, so collect those again.
+A configuration update works the same way: put `Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig })` in `calls`, collect approvals from the current signers, and once it lands, save `AccountConfig.update(saved.config, nextConfig)` as the account's configuration. That's the same configuration `updateConfigSync` returns. An update voids approvals collected under the old configuration, so collect those again.
 
 <span id="verify-approvals" />
 <span id="signature-verification" />

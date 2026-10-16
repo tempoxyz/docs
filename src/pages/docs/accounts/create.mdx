@@ -77,9 +77,9 @@ export const account = Account.fromConfig({ address: 'infer', owners: [signer] }
 // Save account.address and account.config with your user record.
 ```
 
-`address: 'infer'` tells [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) to compute the address from the signer, which Viem calls an owner. You need the saved `account.config` to [add signers](/docs/accounts/key-management/signer-updates#add-a-signer) later. Its `version` is a bigint, so store `AccountConfig.toRpc(account.config)` and read it back with `AccountConfig.fromRpc` ([Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
+`address: 'infer'` tells [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) to compute the address from the signer, which Viem calls an owner. You need the saved `account.config` to [add signers](/docs/accounts/account-configuration/configuration-updates#add-a-signer) later. Its `version` is a bigint, so store `AccountConfig.toRpc(account.config)` and read it back with `AccountConfig.fromRpc` ([Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
 
-For a passkey or device key, use that signer instead: [signing methods](/docs/accounts/authentication) shows each one. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account, [upgrade it in place](/docs/accounts/key-management/account-upgrade) to keep its address.
+For a passkey or device key, use that signer instead: [signing methods](/docs/accounts/authentication) shows each one. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account, [upgrade it in place](/docs/accounts/account-configuration/account-upgrade) to keep its address.
 
 ## Connect to the devnet
 

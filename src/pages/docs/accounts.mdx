@@ -44,11 +44,11 @@ The customer holds their own funds when they hold the signing key, such as a pas
 
 ## What's in a Tempo account
 
-- **Address:** holds the account's stablecoins and never changes, even when you [replace its signers](/docs/accounts/key-management).
+- **Address:** holds the account's stablecoins and never changes, even when you [replace its signers](/docs/accounts/account-configuration).
 - **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight. A transaction runs once its approvers' weights add up to the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
 - **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the spending limits, expiry, and allowed calls you set. A leaked key still can't spend past them.
 
-Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. On mainnet and testnet today, use a single-key account (EOA), like a standard Ethereum account: one key, such as a passkey, approves its payments and authorizes its access keys. On the devnet, it can [upgrade in place](/docs/accounts/key-management/account-upgrade) to signers and a threshold and keep its address and balance.
+Each transaction pays a network fee in a USD stablecoin, not a separate gas token, and a [fee payer](/docs/accounts/fees) can pay it for your customers. On mainnet and testnet today, use a single-key account (EOA), like a standard Ethereum account: one key, such as a passkey, approves its payments and authorizes its access keys. On the devnet, it can [upgrade in place](/docs/accounts/account-configuration/account-upgrade) to signers and a threshold and keep its address and balance.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />
@@ -88,7 +88,7 @@ To build on mainnet today, [create a single-key account](/docs/accounts/create#c
   <Card title="Signing methods" description="Approve payments with a passkey, a key on the device, or a private key." to="/docs/accounts/authentication" />
   <Card title="Account policies" description="Require several approvals, and choose which stablecoins and senders can pay the account." to="/docs/accounts/policies" />
   <Card title="Access keys" description="Let a backend, a device, or an agent pay on its own, within limits you set." to="/docs/accounts/access-keys" />
-  <Card title="Key management" description="Add, remove, and rotate signers while the address stays the same." to="/docs/accounts/key-management" />
+  <Card title="Account configuration" description="Add, remove, and rotate signers while the address stays the same." to="/docs/accounts/account-configuration" />
   <Card title="Fee management" description="Pay network fees in stablecoins, or pay them for your customers." to="/docs/accounts/fees" />
   <Card title="Virtual addresses" description="Give each customer a deposit address that pays into one account." to="/docs/accounts/virtual-addresses" />
 </Cards>

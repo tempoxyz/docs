@@ -1268,7 +1268,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/change-email",
-      "destination": "/developers/docs/accounts/key-management/signer-updates#remove-a-signer",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
       "permanent": true
     },
     {
@@ -1288,7 +1288,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/upgrade",
-      "destination": "/developers/docs/accounts/key-management/account-upgrade",
+      "destination": "/developers/docs/accounts/account-configuration/account-upgrade",
       "permanent": true
     },
     {
@@ -1363,22 +1363,22 @@
     },
     {
       "source": "/developers/docs/accounts/key-rotation",
-      "destination": "/developers/docs/accounts/key-management",
+      "destination": "/developers/docs/accounts/account-configuration",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/key-rotation/signer-rotation",
-      "destination": "/developers/docs/accounts/key-management/signer-updates#remove-a-signer",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/key-rotation/signer-recovery",
-      "destination": "/developers/docs/accounts/key-management/signer-updates#remove-a-signer",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/key-rotation/account-upgrade",
-      "destination": "/developers/docs/accounts/key-management/account-upgrade",
+      "destination": "/developers/docs/accounts/account-configuration/account-upgrade",
       "permanent": true
     },
     {
@@ -1408,7 +1408,7 @@
     },
     {
       "source": "/developers/docs/accounts/recovery",
-      "destination": "/developers/docs/accounts/key-management",
+      "destination": "/developers/docs/accounts/account-configuration",
       "permanent": true
     },
     {

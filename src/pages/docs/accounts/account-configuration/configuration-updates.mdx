@@ -1,17 +1,17 @@
 ---
-title: Signer updates
-seoTitle: Add, Remove, or Replace Signers on a Tempo Account | Tempo Docs
-description: Add a backup or recovery signer, remove a departing or compromised one, or rotate a key, in one signer update that keeps the account's address, balance, and access keys.
+title: Configuration updates
+seoTitle: Add, Remove, or Replace Signers with a Configuration Update on Tempo | Tempo Docs
+description: Add a backup or recovery signer, remove a departing or compromised one, or rotate a key, in one configuration update that keeps the account's address, balance, and access keys.
 ---
 
-# Signer updates
+# Configuration updates
 
-A signer update adds, removes, or replaces the keys that approve a configurable account, at the same address.
+A configuration update changes a configurable account's signers, weights, or threshold, at the same address.
 
-A signer is a key that approves a configurable account's transactions. To back up a key you could lose, let another person approve, end an approver's access, or rotate a key, the current signers approve one [signer update](/docs/accounts/key-management#every-change-is-one-signer-update): a new signer list and threshold. The address, balance, token approvals, and access keys stay the same.
+A signer is a key that approves a configurable account's transactions. To back up a key you could lose, let another person approve, end an approver's access, or rotate a key, the current signers approve one [configuration update](/docs/accounts/account-configuration#every-change-is-one-signer-update): a new signer list and threshold. The address, balance, token approvals, and access keys stay the same.
 
 :::warning
-**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Every signer update needs one.
+**Configurable accounts aren't live yet.** Accounts with several signers and a threshold ([TIP-1107](https://tips.sh/1107)) work only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), not on mainnet or testnet, and may still change. Every configuration update needs one.
 :::
 
 <span id="send-the-signer-update" />
@@ -19,7 +19,7 @@ A signer is a key that approves a configurable account's transactions. To back u
 
 ## How it works
 
-A signer update replaces the account's whole signer list. Build it from the address and configuration your app saved for the account ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)): rebuild the account with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals), and pass the new list to `updateConfigSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+A configuration update replaces the account's whole signer list. Build it from the address and configuration your app saved for the account ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)): rebuild the account with the approving signers' keys attached, as in [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals), and pass the new list to `updateConfigSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 Each update raises the configuration's version by one. Save the `config` it returns with the account record, and rebuild from the latest saved record before every payment or update: an account built from the old configuration no longer matches the hash Tempo stores, and its next transaction fails. Approvals collected under the old signer list stop counting.
 
@@ -35,7 +35,7 @@ The weight you give the new signer decides what it can approve alone. Every sign
 - Below the threshold, the new signer approves only together with others, so no single backup or recovery signer controls the account.
 - At or above the threshold, it approves anything alone, including removing every other signer. Give this weight only to a key you'd trust with the whole account.
 
-The threshold stays the same unless you change it, so each new signer adds a way to reach it. To keep requiring the same approvers, raise the threshold in the same update. For a recovery signer, give it enough weight that the account can [lose any one signer](/docs/accounts/key-management#plan-for-recovery) and still reach the threshold, and no more, because it can approve payments at that weight too. [Signing thresholds](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists recommended setups. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The threshold stays the same unless you change it, so each new signer adds a way to reach it. To keep requiring the same approvers, raise the threshold in the same update. For a recovery signer, give it enough weight that the account can [lose any one signer](/docs/accounts/account-configuration#plan-for-recovery) and still reach the threshold, and no more, because it can approve payments at that weight too. [Signing thresholds](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists recommended setups. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -117,7 +117,7 @@ Because one update swaps the keys, the account never has both keys active, or ne
 
 ### Lost or compromised signers
 
-When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override, so this works only if their weights still reach the threshold. Check that when you create the account, using the rule in [Plan for recovery](/docs/accounts/key-management#plan-for-recovery). [Recover a user's account](/docs/accounts/apps/recover-an-account) walks through replacing a lost passkey.
+When a signer is lost or compromised, the other signers approve the update without it. Tempo has no recovery service or override, so this works only if their weights still reach the threshold. Check that when you create the account, using the rule in [Plan for recovery](/docs/accounts/account-configuration#plan-for-recovery). [Recover a user's account](/docs/accounts/apps/recover-an-account) walks through replacing a lost passkey.
 
 Treat a compromised signer as an attacker and leave it out of the approvers. If its weight reaches the threshold alone, it can remove your other signers first, so give that much weight only to a key you'd trust with the whole account.
 
@@ -133,7 +133,7 @@ Treat a compromised signer as an attacker and leave it out of the approvers. If 
 
 - An account holds 1 to 48 signers, with total weight at most 255. A transaction carries at most 8 approvals, so the 8 largest weights must reach the threshold. Viem checks these limits before sending and throws `Invalid account config` with the reason. A signer already on the list fails with the reason `owners must be strictly ascending`.
 - The approving signers must reach the current threshold, and the new signer list must reach the new one. Viem throws `Local owners do not meet the threshold.` when the attached keys fall short, and `Invalid account config: threshold exceeds total owner weight.` when the new list does.
-- `multisig configuration commitment mismatch` means the account was built from a configuration that no longer matches the hash Tempo stores, for example because another signer update landed first. Load the latest saved configuration and rebuild the update.
-- Rebuild with `address: 'infer'` only while the configuration is version 0. After a signer update, the current signers no longer derive the address, so pass the saved `address`, as [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals) does.
+- `multisig configuration commitment mismatch` means the account was built from a configuration that no longer matches the hash Tempo stores, for example because another configuration update landed first. Load the latest saved configuration and rebuild the update.
+- Rebuild with `address: 'infer'` only while the configuration is version 0. After a configuration update, the current signers no longer derive the address, so pass the saved `address`, as [Signing thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals) does.
 
 Specifications: [configuration updates](https://tips.sh/1109), [configurable accounts](https://tips.sh/1107).
