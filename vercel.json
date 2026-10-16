@@ -1268,7 +1268,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/change-email",
-      "destination": "/developers/docs/accounts/key-management/remove-signers",
+      "destination": "/developers/docs/accounts/key-management/signer-updates#remove-a-signer",
       "permanent": true
     },
     {
@@ -1368,12 +1368,12 @@
     },
     {
       "source": "/developers/docs/accounts/key-rotation/signer-rotation",
-      "destination": "/developers/docs/accounts/key-management/remove-signers",
+      "destination": "/developers/docs/accounts/key-management/signer-updates#remove-a-signer",
       "permanent": true
     },
     {
       "source": "/developers/docs/accounts/key-rotation/signer-recovery",
-      "destination": "/developers/docs/accounts/key-management/remove-signers",
+      "destination": "/developers/docs/accounts/key-management/signer-updates#remove-a-signer",
       "permanent": true
     },
     {

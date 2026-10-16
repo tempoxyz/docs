@@ -75,7 +75,7 @@ await client.writeContractSync({ // [!code hl]
 
 After the upgrade, the record your app saves is the account's only readable list of signers ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)). Whenever your app acts for the account later, rebuild it from that record with `Account.fromConfig` and attach the keys that approve, such as `original`. The other signers stay as addresses. Viem signs with the attached keys until their weights reach the threshold; if they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
-[Adding](/docs/accounts/key-management/add-signers) or [removing](/docs/accounts/key-management/remove-signers) signers later raises the version: save the `config` that `updateConfigSync` returns and rebuild the account from it, or the next transaction fails with `multisig configuration commitment mismatch`. To upgrade every user's account, follow [Migrate existing wallets](/docs/accounts/key-management/account-upgrade).
+[Adding](/docs/accounts/key-management/signer-updates#add-a-signer) or [removing](/docs/accounts/key-management/signer-updates#remove-a-signer) signers later raises the version: save the `config` that `updateConfigSync` returns and rebuild the account from it, or the next transaction fails with `multisig configuration commitment mismatch`. To upgrade every user's account, follow [Migrate existing wallets](/docs/accounts/key-management/account-upgrade).
 
 ## Account upgrade limits
 
