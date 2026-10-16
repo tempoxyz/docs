@@ -136,7 +136,7 @@ const { config } = await client.accounts.updateConfigSync({ // [!code hl]
 saved.config = config // [!code hl]
 ```
 
-Viem sorts the new owners and signs with `finance` and `operations`, whose weights reach the current threshold of 2. The returned `config` is version 1, with the same salt. Save it, then [rebuild the account](#keep-the-current-configuration) from it before the next action. [Add signers](/docs/accounts/key-management/add-signers) walks through a full update.
+Viem sorts the new owners and signs with `finance` and `operations`, whose weights reach the current threshold of 2. The returned `config` is version 1, with the same salt. Save it, then [rebuild the account](#keep-the-current-configuration) from it before the next action. [Signer updates](/docs/accounts/key-management/signer-updates#add-a-signer) walks through a full update.
 
 <span id="read-the-current-configuration" />
 

@@ -17,8 +17,7 @@ A Tempo account's signers are the keys that approve its transactions. A configur
 :::
 
 <Cards>
-  <Card title="Add signers" description="Add a backup, a recovery key, or another approver." to="/docs/accounts/key-management/add-signers" />
-  <Card title="Remove signers" description="Remove or replace a lost, compromised, or departing signer." to="/docs/accounts/key-management/remove-signers" />
+  <Card title="Signer updates" description="Add a backup or another approver, remove a departing signer, or replace a lost or compromised key." to="/docs/accounts/key-management/signer-updates" />
   <Card title="Account upgrade" description="Turn a single-key account into a configurable account at the same address." to="/docs/accounts/key-management/account-upgrade" />
 </Cards>
 
@@ -38,9 +37,9 @@ What differs between situations is who approves:
 
 | Situation | The update | Who approves |
 | --- | --- | --- |
-| [Add a backup or recovery signer](/docs/accounts/key-management/add-signers) | Adds the new signer | The current signers |
-| [Rotate a key](/docs/accounts/key-management/remove-signers#rotate-a-key-by-replacing-it-in-one-update) | Swaps the new key in at the old one's weight | The current signers, including the old key |
-| [Replace a lost or compromised signer](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer) | Swaps a new signer in for it | The other signers, without it |
+| [Add a backup or recovery signer](/docs/accounts/key-management/signer-updates#add-a-signer) | Adds the new signer | The current signers |
+| [Rotate a key](/docs/accounts/key-management/signer-updates#rotate-a-key-by-replacing-it-in-one-update) | Swaps the new key in at the old one's weight | The current signers, including the old key |
+| [Replace a lost or compromised signer](/docs/accounts/key-management/signer-updates#remove-a-lost-or-compromised-signer) | Swaps a new signer in for it | The other signers, without it |
 | [Offboard an approver](/docs/accounts/custodians/company-treasury) | Removes their signer, and lowers the threshold if needed | The remaining approvers |
 | [Hand off to a self-custodial wallet](/docs/accounts/apps/self-custodial-wallets) | Replaces your app's signers with one the user holds | Your app's signers |
 
@@ -80,7 +79,7 @@ const updates = await client.getContractEvents({ // [!code hl]
 
 After a signer is lost, only the others can replace it. So when you create the account, choose weights that reach the threshold without any one signer: total weight minus the largest signer's weight must be at least the threshold.
 
-For example, a passkey at weight 2, plus a backup key and a recovery provider's key at weight 1 each, at threshold 2, passes: 4 minus 2 leaves 2. The two keys together replace a lost passkey, and the passkey alone replaces either key. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists others that pass, and [Add a recovery signer](/docs/accounts/key-management/add-signers#add-a-recovery-signer) adds one to an existing account.
+For example, a passkey at weight 2, plus a backup key and a recovery provider's key at weight 1 each, at threshold 2, passes: 4 minus 2 leaves 2. The two keys together replace a lost passkey, and the passkey alone replaces either key. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists others that pass, and [Add a recovery signer](/docs/accounts/key-management/signer-updates#add-a-recovery-signer) adds one to an existing account.
 
 <span id="key-management-limits" />
 <span id="account-recovery-limits" />

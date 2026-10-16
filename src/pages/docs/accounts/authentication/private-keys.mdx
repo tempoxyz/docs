@@ -54,6 +54,6 @@ The example reads raw keys from the environment. To keep a key in its wallet, KM
 
 ## Private key limits
 
-- Tempo sees signatures, not people. Anyone who can make the key sign, including anyone with signing access in your KMS, approves at its weight until you [remove it](/docs/accounts/key-management/remove-signers#remove-a-lost-or-compromised-signer).
+- Tempo sees signatures, not people. Anyone who can make the key sign, including anyone with signing access in your KMS, approves at its weight until you [remove it](/docs/accounts/key-management/signer-updates#remove-a-lost-or-compromised-signer).
 - A signer has no spending limit. To cap what a key can pay, make it an access key instead.
 - Only the secp256k1 signers you create the account with could [recover funds sent to its address on another chain](/docs/accounts/key-management#recover-funds-sent-on-another-chain), and no chain supports that recovery yet.

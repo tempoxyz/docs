@@ -567,8 +567,7 @@ export default defineConfig({
             link: '/docs/accounts/key-management',
             collapsed: true,
             items: [
-              { text: 'Add signers', link: '/docs/accounts/key-management/add-signers' },
-              { text: 'Remove signers', link: '/docs/accounts/key-management/remove-signers' },
+              { text: 'Signer updates', link: '/docs/accounts/key-management/signer-updates' },
               { text: 'Account upgrade', link: '/docs/accounts/key-management/account-upgrade' },
             ],
           },
@@ -1519,7 +1518,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/change-email',
-      destination: '/docs/accounts/key-management/remove-signers',
+      destination: '/docs/accounts/key-management/signer-updates#remove-a-signer',
       status: 301,
     },
     {
@@ -1619,12 +1618,12 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/key-rotation/signer-rotation',
-      destination: '/docs/accounts/key-management/remove-signers',
+      destination: '/docs/accounts/key-management/signer-updates#remove-a-signer',
       status: 301,
     },
     {
       source: '/docs/accounts/key-rotation/signer-recovery',
-      destination: '/docs/accounts/key-management/remove-signers',
+      destination: '/docs/accounts/key-management/signer-updates#remove-a-signer',
       status: 301,
     },
     {
