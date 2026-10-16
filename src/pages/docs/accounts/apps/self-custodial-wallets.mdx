@@ -1,0 +1,118 @@
+---
+title: Set up a self-custodial wallet with a provider
+seoTitle: Self-Custodial Embedded Wallets with Privy or Turnkey on Tempo | Tempo Docs
+description: Give each user a Tempo account where your wallet provider's key and the user's passkey approve payments together, and only the user can recover or leave without your app or the provider.
+ogImage: /og/2026-q4/og_2026-q4_docs_accounts-providers_title-f5_v02.png
+---
+
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+
+# Set up a self-custodial wallet with a provider
+
+Your provider's key and the user's passkey approve each payment together, and only the user can recover or leave without you.
+
+Use this setup if your consumer app signs users in with its own login and holds their wallets with a provider such as Privy or Turnkey. The user keeps control of the account. In some markets, self-custody rules require that the user keep exclusive control of their funds: neither your app nor your provider can move or recover them alone, and the user can still reach them if your systems are down or breached. A key export alone meets the first part, but leaves most users with key material they can't safely use.
+
+<ConfigurableAccountsT14 />
+
+Each user's account has three signers, the keys that approve its transactions: the user's passkey, a key your provider manages, and a backup key the user keeps. Any two approve. The user's passkey and backup still reach the [threshold](/docs/accounts/policies/signing-thresholds) if your app or the provider is down or breached.
+
+## Who can move the funds
+
+| Who | What they can do alone |
+| --- | --- |
+| The user, with their passkey and backup | Pay, recover, remove the provider's key, or leave |
+| Your wallet provider | Nothing. Its key is one approval of the two each transaction needs. |
+| Your app | Nothing. It holds no key; it asks the provider to sign only for a signed-in user. |
+
+<span id="choose-the-controls-your-application-needs" />
+
+:::::steps
+
+<span id="build-with-privy" />
+<span id="build-with-turnkey" />
+
+### Connect Privy or Turnkey
+
+Your provider signs with its key through its own API, and only for a user your app has signed in.
+
+- [Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction): start from the [Privy Tempo example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo). Sign transaction hashes with `secp256k1_sign`, or `raw_sign` on server wallets.
+- [Turnkey](https://docs.turnkey.com/features/networks/tempo): start from the [Turnkey Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo). Sign transaction hashes with `sign_raw_payload` and no hash function.
+
+Create a wallet for the user with your provider, then wrap it as a Viem account that asks the provider for each signature, as in [Pay from a user's embedded wallet](/docs/accounts/automations/pay-from-an-embedded-wallet#wrap-the-providers-signing-as-an-account). Call it `providerAccount`.
+
+<span id="make-the-providers-key-one-signer" />
+
+### Create the account with three signers
+
+Give the user's [passkey](/docs/accounts/authentication/passkeys), the provider's key, and the user's backup key weight 1 each, with a [threshold](/docs/accounts/policies/signing-thresholds) of 2. The backup is a second passkey on another device, or a hardware key, that the user sets up during onboarding. The account lists it by address. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+::::code-group
+
+```ts [account.ts]
+import { Account, WebAuthnP256 } from 'viem/tempo'
+import { providerAccount } from './provider-account'
+
+const credential = await WebAuthnP256.createCredential({ label: 'My account' })
+const passkey = Account.fromWebAuthnP256(credential)
+
+export const account = Account.fromConfig({
+  address: 'infer', // derive the address from these first signers
+  owners: [ // [!code hl]
+    { owner: passkey, weight: 1 }, // [!code hl]
+    { owner: providerAccount, weight: 1 }, // [!code hl]
+    { owner: backupAddress, weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
+})
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+Creating the account sends nothing. The address can receive stablecoins right away, and the first transaction registers it onchain. Save `account.address`, `account.config`, and the passkey's [`credential.id` and `credential.publicKey`](/docs/accounts/authentication/passkeys#passkey-limits) with the user's record, and rebuild the account from them each time ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
+
+### Pay with the passkey and the provider
+
+Viem signs with the keys attached to the account until their weights reach the threshold. With the passkey and `providerAccount` attached, each payment prompts the user for their passkey and asks the provider for one signature:
+
+```ts [pay.ts]
+import { parseUnits } from 'viem'
+import { account } from './account'
+import { client } from './client'
+
+// A test stablecoin on the devnet
+const token = '0x20c0000000000000000000000000000000000001'
+
+await client.faucet.fundSync({ account: account.address }) // devnet test stablecoins
+await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token }) // [!code hl]
+```
+
+The provider signs a transaction's hash, which its policy engine can't read. Build each transaction in your backend and check it before asking the provider to sign ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). For small payments without a passkey prompt, have the passkey and provider authorize a [device key](/docs/accounts/authentication/device-keys) with a spending limit.
+
+### Back up the user's account
+
+Before the user funds the account, have them confirm their backup works: sign a test message with it, or approve one small payment with the passkey and backup together. A user who loses the passkey and the backup while your provider is unreachable can't approve anything until the provider is back.
+
+:::::
+
+## If something goes wrong
+
+| What happened | Who approves | What they do |
+| --- | --- | --- |
+| The user lost their phone | The provider and the backup | [Replace the passkey](/docs/accounts/apps/recover-an-account) with one on the new phone |
+| Your app or the provider is down or breached | The passkey and the backup | Pay as usual, or [remove the provider's key](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer) |
+| The user wants to leave | The passkey and the backup | [Remove the provider's key](/docs/accounts/account-configuration/configuration-updates#remove-a-signer), or swap it for another signer the user holds ([replace a signer](/docs/accounts/account-configuration/configuration-updates#replace-a-signer-in-one-update)), at the same address |
+
+Each configuration update keeps the account's address, balances, and [Earn](/docs/earn) positions. Save the new configuration that each update returns.
+
+## Get funds out without your app
+
+A user recovering through the passkey and backup can sign from any Tempo client, not only your app. To leave entirely, they [withdraw from Earn](/docs/earn/withdraw), then send their stablecoins to another account or an [offramp](/docs/partners/payments-and-ramps).
+
+## Add a recovery service
+
+To recover users who lose both the passkey and the backup, add a fourth signer held by a recovery service you contract, at weight 1. The service then approves together with one of the user's keys or the provider. Any two signers can also pay. Choose a service you'd trust with that ([recovery provider](/docs/accounts/policies/signing-thresholds#recovery-provider)).

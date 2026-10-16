@@ -1,0 +1,55 @@
+---
+title: Custodians
+seoTitle: Hold Customer and Team Funds on Tempo | Tempo Docs
+description: Run an omnibus account for customer deposits, use Tempo through Fireblocks or another custodian, or keep a team's stablecoins in a multisig.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Custodians
+
+Hold stablecoins for your customers or your team, yourself or through a custodian.
+
+Start here if you run an exchange or payments processor that holds many customers' funds, if your funds sit with a custodian such as Fireblocks, or if your team wants no single person able to move its stablecoins.
+
+<span id="recommended-setup-by-situation" />
+<span id="custodian-guides" />
+<span id="guides" />
+
+## Custody guides
+
+<Cards>
+  <Card title="Hold customer funds in an omnibus account" description="Give each customer a deposit address that pays into one account, and accept only the stablecoins you list." to="/docs/accounts/custodians/omnibus-accounts" />
+  <Card title="Set up a team multisig" description="One account that several people control, where any two approve each payment. Devnet until T14." to="/docs/accounts/custodians/team-multisig" />
+  <Card title="Custody partners" description="Custodians and institutional wallets that support Tempo, such as Fireblocks." to="/docs/partners/wallets#custodial--institutional" />
+</Cards>
+
+<span id="what-your-custodian-controls" />
+<span id="who-controls-the-key" />
+
+## How it works
+
+| Setup | Account | Who holds the keys | Who approves a payment |
+| --- | --- | --- | --- |
+| A custodian holds your funds | [Single-key account](/docs/accounts/how-it-works#address) | The custodian | The custodian, through its own policies and approvals |
+| You hold the keys | [Team multisig](/docs/accounts/custodians/team-multisig), a configurable account | Your approvers | Approvers whose weights reach the threshold |
+
+Plain stablecoin transfers from a custody address work as on any EVM chain. Fee tokens, fee sponsorship, and access keys need your custodian to send [Tempo Transactions](/docs/guide/tempo-transaction). Ask your custodian which it supports.
+
+A team multisig keeps its address when its approvers change. Until [T14](/docs/protocol/upgrades/t14), it runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+
+<span id="what-custodians-support-on-tempo" />
+<span id="choose-the-fee-token-for-custody-addresses" />
+<span id="attribute-deposits-in-an-omnibus-wallet" />
+<span id="control-what-arrives" />
+<span id="custody-features-on-tempo" />
+<span id="features-to-use" />
+
+## Tempo features for custodians
+
+<Cards>
+  <Card title="Fee tokens" description="Tempo has no gas token. Set a default stablecoin for fees on each address that sends." to="/docs/accounts/fees/fee-tokens" />
+  <Card title="Virtual addresses" description="Give each customer a deposit address that pays straight into your account, with no sweeps." to="/docs/accounts/virtual-addresses" />
+  <Card title="Receive policies" description="Accept only the stablecoins and senders you allow. Tempo holds anything else instead of crediting it." to="/docs/accounts/policies/receive-policies" />
+  <Card title="Transfer memos" description="Add a payment reference to each payment, so you can reconcile it with your records." to="/docs/guide/payments/transfer-memos" />
+</Cards>

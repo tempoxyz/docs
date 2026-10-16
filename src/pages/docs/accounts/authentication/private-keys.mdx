@@ -1,0 +1,69 @@
+---
+title: Private keys
+seoTitle: Use Wallet, KMS, and HSM Keys as Tempo Account Signers | Tempo Docs
+description: Sign for a Tempo account with a key you already hold in a wallet, KMS, or HSM, as a weighted signer or as an access key with spending limits.
+---
+
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+
+# Private keys
+
+A private key lets you sign for a Tempo account with a key you already hold in a wallet, KMS, or HSM.
+
+A private key is a secp256k1 or P-256 key that you hold in a wallet, a wallet provider, or your KMS or HSM. Tempo verifies each signature onchain. Use one for servers, scripts, treasury approvers, and backups. For a key that stays with the customer, use a [passkey](/docs/accounts/authentication/passkeys) or a [device key](/docs/accounts/authentication/device-keys) instead.
+
+<span id="what-a-private-key-is" />
+<span id="what-a-private-key-trusts" />
+<span id="where-private-keys-live" />
+<span id="recommended-roles-for-your-keys" />
+<span id="private-key-sources" />
+<span id="choose-a-role-for-each-key" />
+<span id="roles" />
+
+## How it works
+
+Add each key as a signer, which approves toward the account's [threshold](/docs/accounts/policies/signing-thresholds), or as an [access key](/docs/accounts/access-keys), which pays alone within its limits:
+
+| Where the key lives | Add it as |
+| --- | --- |
+| CLI wallet, such as the [Tempo CLI wallet](/docs/cli/wallet) or Foundry `cast` | Access key for scripts and agents |
+| Hardware, browser, or mobile wallet | Signer at weight 1, one per approver |
+| [Wallet provider](/docs/accounts/apps/self-custodial-wallets), such as Turnkey or Privy | Signer at weight 1. The provider signs only when its own policies allow. |
+| Cloud KMS or HSM | Signer for recovery, or access key for [backend payouts](/docs/accounts/automations/pay-out-from-a-backend) |
+
+Anyone who can make the key sign approves at its weight, including anyone with signing access in your KMS. That lasts until you [remove the key](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer).
+
+<span id="require-two-treasury-signers" />
+<span id="add-a-private-key-signer" />
+
+## Add a private key
+
+On mainnet and testnet today, a private key can be a single-key account's one key, as in a standard Ethereum account. It can also be an access key on that account.
+
+<ConfigurableAccountsT14 />
+
+Signers need a configurable account, so this example runs only on the Tempo Accounts devnet. Give each key a weight below the threshold, so no single holder can pay alone. Keep each approver's key in its own wallet or HSM. Here both signers must approve:
+
+```ts [treasury.ts]
+import { Account } from 'viem/tempo'
+
+const finance = Account.fromSecp256k1(process.env.FINANCE_SIGNER_KEY as `0x${string}`)
+const operations = Account.fromSecp256k1(process.env.OPERATIONS_SIGNER_KEY as `0x${string}`)
+
+const account = Account.fromConfig({ // [!code hl]
+  // derive the address from these first signers
+  address: 'infer', // [!code hl]
+  // weight 1 each
+  owners: [finance, operations], // [!code hl]
+  threshold: 2, // [!code hl]
+}) // [!code hl]
+```
+
+The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the Viem account that source provides. For a raw P-256 key, use `Account.fromP256`. [Set up a team multisig](/docs/accounts/custodians/team-multisig) walks through the full setup.
+
+<span id="private-key-limits" />
+
+## Limits
+
+- A signer has no spending limit. To cap what a key can pay, make it an access key instead.
+- Only the secp256k1 signers you create the account with could [recover funds sent to its address on another chain](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain). No chain supports that recovery yet.

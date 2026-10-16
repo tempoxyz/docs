@@ -225,7 +225,7 @@ Read the memo from `TransferWithMemo` and look up the corresponding invoice. Use
 
 ### Verify delivery
 
-Check the network, token, recipient, and amount against the invoice using the confirmed `Transfer` event. For [blocked receipts](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts), the recipient is the receive-policy guard.
+Check the network, token, recipient, and amount against the invoice using the confirmed `Transfer` event. For [blocked receipts](/docs/accounts/policies/receive-policies#blocked-receipts), the recipient is the receive-policy guard.
 
 ### Record the payment once
 
@@ -314,7 +314,7 @@ When a contract collects payment with `transferFrom`, require delivery before fu
 - Read the contract’s token balance before and after `transferFrom`. Require the expected increase before updating the invoice or delivering the purchased item.
 - Revert if the expected funds did not arrive.
 
-See the [TIP-20 contract interface](/docs/protocol/tip20/spec#tip20) and [receive-policy behavior](/docs/guide/payments/configure-receive-policies#understand-receive-policy-behavior) before implementing settlement.
+See the [TIP-20 contract interface](/docs/protocol/tip20/spec#tip20) and [receive-policy behavior](/docs/accounts/policies/receive-policies#how-tempo-enforces-receive-policies) before implementing settlement.
 
 <span id="payment-verification-best-practices" />
 

@@ -1,0 +1,61 @@
+---
+title: Use cases
+seoTitle: What You Can Build with Tempo Accounts | Tempo Docs
+description: Find the Tempo account setup for a consumer app, a backend or agent that pays on its own, a custodian or treasury, or a wallet adding Tempo.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Use cases
+
+Find the setup and guides for what you're building.
+
+Each setup differs in who holds which key: a customer's passkey, a provider's key, your backend's access key, or an approver's signer.
+
+<span id="consumer-wallets" />
+
+## Apps
+
+For teams building a consumer app, such as a remittance or savings app, on embedded wallets from a provider such as Privy or Turnkey.
+
+<Cards>
+  <Card title="Apps" description="How each user's account is set up with your wallet provider, and who can move the funds." to="/docs/accounts/apps" />
+  <Card title="Set up a self-custodial wallet with a provider" description="The provider's key and the user's passkey approve together; the user can recover or leave without you. Devnet until T14." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Recover a user's account" description="Replace a lost passkey with the signers the user still has. Devnet until T14." to="/docs/accounts/apps/recover-an-account" />
+</Cards>
+
+<span id="automated-payments" />
+<span id="agent-wallets" />
+
+## Automations
+
+For backends that pay out, fund cards, or charge subscriptions, and for AI agents that pay on someone's behalf, each with its own access key.
+
+<Cards>
+  <Card title="Automations" description="Give each service or agent its own access key with a limit, scopes, and an expiry." to="/docs/accounts/automations" />
+  <Card title="Pay out from a backend" description="Pay approved payees up to a daily limit with a key in your KMS." to="/docs/accounts/automations/pay-out-from-a-backend" />
+  <Card title="Pay from a user's embedded wallet" description="Have a user's Privy or Turnkey wallet authorize a key once, so your backend pays within limits." to="/docs/accounts/automations/pay-from-an-embedded-wallet" />
+  <Card title="Give an agent a wallet" description="An agent's own key, with a budget, an expiry, and only the calls it needs." to="/docs/accounts/automations/give-an-agent-a-wallet" />
+</Cards>
+
+<span id="business-accounts-and-treasuries" />
+
+## Custodians
+
+For exchanges and payments processors that hold customer funds, businesses whose funds sit with a custodian such as Fireblocks, and companies running their own treasury.
+
+<Cards>
+  <Card title="Custodians" description="The recommended setup for omnibus accounts, custodian-held funds, and company treasuries." to="/docs/accounts/custodians" />
+  <Card title="Hold customer funds in an omnibus account" description="A deposit address per customer, paying into one account that accepts only the stablecoins you list." to="/docs/accounts/custodians/omnibus-accounts" />
+  <Card title="Custody partners" description="Custodians and institutional wallets that support Tempo, such as Fireblocks." to="/docs/partners/wallets#custodial--institutional" />
+  <Card title="Set up a team multisig" description="Three approvers, any two of whom approve each payment. Devnet until T14." to="/docs/accounts/custodians/team-multisig" />
+</Cards>
+
+## Wallets
+
+For wallet teams adding Tempo, such as MetaMask, Rabby, or Ledger, and for apps whose users connect those wallets.
+
+<Cards>
+  <Card title="Wallets" description="Connect MetaMask, Rabby, or Tempo Wallet to your app, and see what a single-key account can do." to="/docs/accounts/wallets" />
+  <Card title="Add Tempo to your wallet" description="Add the networks, show stablecoin balances, let users pay fees in stablecoins, and send Tempo Transactions." to="/docs/accounts/wallets/add-tempo-to-your-wallet" />
+</Cards>

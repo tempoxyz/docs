@@ -1,0 +1,125 @@
+---
+title: Pay out from a backend
+seoTitle: Send Payouts from a Backend with a Scoped Tempo Access Key | Tempo Docs
+description: Pay contractors, vendors, or sellers from a Tempo account with a KMS-held access key that pays only approved payees, up to a daily limit.
+interactive: true
+---
+
+import { GuideDemo } from '../../../../components/guides/GuideDemo'
+
+# Pay out from a backend
+
+Send payouts from your backend with a key that can pay only approved payees, up to a daily limit.
+
+If your company pays contractors, vendors, or sellers in stablecoins, your payout service sends each payment without someone approving it and without holding the account's key. The account's signers, your approvers or your customer's, approve an [access key](/docs/accounts/access-keys) once. Your backend keeps it in its KMS. Tempo lets that key pay only the [payees they list](/docs/accounts/access-keys/scopes), up to a [daily limit](/docs/accounts/access-keys/spending-limits), until it [expires](/docs/accounts/access-keys/expiry) or is revoked. A leaked key can still send up to the limit each day until then, but only to those payees.
+
+<span id="backend-services" />
+<span id="automations" />
+
+The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value. The demo's customer account is a configurable account whose one signer is a device key in this browser. On mainnet and testnet, a single-key account, such as one whose key is the customer's passkey, authorizes a payout key the same way.
+
+<GuideDemo guide="backend-automation" />
+
+The code pays out a test stablecoin. You supply the undefined names: `account` and `address` are the customer's account and its address, `payees` the addresses the key may pay, `payee` one of them, `payoutKeyAddress` the KMS key's address, and `kms`, `kmsKeyId`, and `kmsPublicKey` your KMS client, key ID, and public key. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+:::::steps
+
+### Authorize a scoped, limited key
+
+Create one secp256k1 key per customer in your KMS. To pay contractors from your company's own account, create one key per payout service instead. Its address, derived from the public key, is the key's ID on Tempo. Send that address to the customer's app, where the customer's signers authorize it:
+
+::::code-group
+
+```ts [app/approve-payouts.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+import { client } from '../client'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+await client.accessKey.authorizeSync({
+  accessKey: { accessKeyAddress: payoutKeyAddress, keyType: 'secp256k1' },
+  account, // the customer's account, signed by its signers, such as a passkey
+  expiry: Expiry.days(90), // [!code hl]
+  // 1,000 of the stablecoin a day
+  limits: [{ token: stablecoin, limit: parseUnits('1000', 6), period: 86_400 }], // [!code hl]
+  scopes: [ // [!code hl]
+    { address: stablecoin, selector: 'transfer(address,uint256)', recipients: payees }, // [!code hl]
+    { address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)', recipients: payees }, // [!code hl]
+  ], // [!code hl]
+})
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+Authorizing is one transaction the customer approves, for example with their passkey. Show them the payees, daily limit, and expiry before they do.
+
+Limits are in base units: the stablecoin has 6 decimals, so `parseUnits('1000', 6)` is 1,000 OUSD. Size the limit to your largest payout day plus fees. Fees count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
+
+### Keep the key in your KMS
+
+The private key never leaves the KMS. Tempo stores only the key's address, payees, limit, and expiry. Wrap the key in a Viem account that asks the KMS for each signature:
+
+```ts [backend/payout-key.ts]
+import { PublicKey, Signature } from 'ox'
+import { Account } from 'viem/tempo'
+
+export const payoutKey = Account.from({ // [!code hl]
+  access: address, // the customer's account address
+  keyType: 'secp256k1',
+  publicKey: PublicKey.fromHex(kmsPublicKey), // read once from your KMS
+  async sign({ hash }) { // [!code hl]
+    // your KMS client returns { r, s, yParity }
+    return Signature.toHex(await kms.sign(kmsKeyId, hash)) // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+```
+
+In your KMS, allow only the payout service to sign with the key, and log each signing request so you can match it to a payout.
+
+### Send payouts
+
+```ts [backend/send-payout.ts]
+import { parseUnits, stringToHex } from 'viem'
+import { client } from '../client'
+import { payoutKey } from './payout-key'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+await client.token.transferSync({ // [!code hl]
+  // the key signs for the customer's account
+  account: payoutKey, // [!code hl]
+  amount: parseUnits('250', 6), // [!code hl]
+  // the fee counts against the key's daily limit
+  feeToken: stablecoin, // [!code hl]
+  // your payout ID, for reconciliation
+  memo: stringToHex('payout-1042', { size: 32 }), // [!code hl]
+  to: payee, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
+```
+
+The customer isn't prompted. Tempo rejects a payout to an address outside `payees`, one over what's left of today's limit, or any payout after the key expires. To stop payouts, have the signers [revoke the key](/docs/accounts/access-keys/revocation#revoke-an-access-key).
+
+:::::
+
+<span id="recommended-limits-for-common-automations" />
+<span id="recommended-limits-for-backend-automations" />
+<span id="troubleshoot-backend-payments" />
+<span id="payout-limits" />
+
+## Before you go live
+
+- **Concurrent payouts.** An account's transactions share one nonce, a counter that orders them, so payouts confirm one at a time by default. To send them concurrently, use [expiring nonces or nonce keys](/docs/guide/payments/send-parallel-transactions).
+- **New payees.** To add a payee, the signers or an [admin key](/docs/accounts/access-keys/admin-access-keys) update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls).
+- **Expiry.** You can't extend an expiry. [Authorize a replacement key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before it passes.
+
+## Move idle funds into Earn
+
+Balances waiting for the next payout run can sit in an [Earn](/docs/earn) vault. Use a separate key scoped to the vault's `approve` and `deposit` calls, so the payout key still pays only payees. Follow [Deposit](/docs/earn/integrate) for the vault checks.

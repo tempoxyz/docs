@@ -64,15 +64,21 @@ test('seven sections expose product tasks and expandable developer chapters', as
       label: 'Accounts',
       path: '/docs/accounts',
       links: [
+        '/docs/accounts/how-it-works',
+        '/docs/accounts/security',
+        '/docs/accounts/use-cases',
         '/docs/accounts/create',
-        '/docs/accounts/integrate',
-        '/docs/accounts/balances',
-        '/docs/guide/payments/send-a-payment',
-        '/docs/guide/payments/accept-a-payment',
-        '/docs/accounts/integration',
-        '/docs/accounts/examples',
-        '/docs/guide/payments/send-a-payment/browser',
-        '/docs/guide/payments/virtual-addresses',
+        '/docs/accounts/fund',
+        '/docs/accounts/authentication',
+        '/docs/accounts/policies',
+        '/docs/accounts/access-keys',
+        '/docs/accounts/account-configuration',
+        '/docs/accounts/fees',
+        '/docs/accounts/virtual-addresses',
+        '/docs/accounts/apps',
+        '/docs/accounts/automations',
+        '/docs/accounts/custodians',
+        '/docs/accounts/wallets',
       ],
     },
     {
@@ -130,10 +136,6 @@ test('seven sections expose product tasks and expandable developer chapters', as
     )
     await expect(utilities.locator('[aria-current]')).toHaveCount(0)
     await expect(page.locator('#related-documentation')).toHaveCount(0)
-    if (section.label === 'Accounts') {
-      for (const label of ['Account setup', 'Send payments', 'Receive payments'])
-        await developerDisclosure(sidebar, label, false).click()
-    }
     for (const href of section.links)
       await expect(sidebar.locator(`a[href="${href}"]`), `${section.label}: ${href}`).toBeVisible()
   }
@@ -161,13 +163,12 @@ for (const section of [
     label: 'Accounts',
     overview: '/docs/accounts',
     paths: [
-      '/docs/build',
-      '/docs/payments',
       '/docs/accounts/create',
-      '/docs/accounts/agents',
-      '/docs/accounts/examples',
-      '/docs/guide/payments/transfer-memos',
-      '/docs/guide/getting-funds',
+      '/docs/accounts/access-keys',
+      '/docs/accounts/policies/signing-thresholds',
+      '/docs/accounts/automations/pay-out-from-a-backend',
+      '/docs/accounts/policies/receive-policies',
+      '/docs/accounts/wallets#connect-tempo-wallet',
     ],
   },
   {
@@ -194,6 +195,11 @@ for (const section of [
     overview: '/docs/development',
     paths: [
       '/docs/network/transactions',
+      '/docs/build',
+      '/docs/payments',
+      '/docs/guide/payments/transfer-memos',
+      '/docs/guide/payments/send-a-payment/examples',
+      '/docs/guide/getting-funds',
       '/docs/quickstart/connection-details',
       '/docs/quickstart/wallet-developers',
       '/docs/protocol/rpc',
@@ -348,8 +354,14 @@ test('Changelog lives inside Tempo EVM and retains upgrade URLs', async ({ page 
   await page.goto('/docs/development')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(page.locator('.docs-section-utilities').getByText('Changelog')).toHaveCount(0)
-  await sidebar.getByRole('button', { name: 'Changelog', exact: true }).click()
-  await sidebar.locator('a[href="/docs/protocol/upgrades"]').click()
+  const upgrades = sidebar.locator('a[href="/docs/protocol/upgrades"]')
+  // A click before hydration does nothing, so retry until the chapter opens.
+  await expect(async () => {
+    if (!(await upgrades.isVisible()))
+      await sidebar.getByRole('button', { name: 'Changelog', exact: true }).click()
+    await expect(upgrades).toBeVisible({ timeout: 1000 })
+  }).toPass()
+  await upgrades.click()
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
   await sidebar.locator('a[href="/docs/protocol/upgrades/t11"]').click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('T11 Network Upgrade')
@@ -676,29 +688,25 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   await page.goto('/docs/accounts')
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-  for (const label of ['Account setup', 'Send payments', 'Receive payments']) {
-    const disclosure = developerDisclosure(drawer, label, true)
-    await expect(disclosure.locator('..')).toHaveJSProperty('open', false)
-    await disclosure.click()
-  }
-  for (const href of [
-    '/docs/accounts/integration',
-    '/docs/guide/payments/send-a-payment/browser',
-    '/docs/guide/payments/virtual-addresses',
-  ])
+  for (const href of ['/docs/accounts/create', '/docs/accounts/fund'])
     await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
+  // Each Features and Build group opens to its own overview page and guides.
+  for (const [group, href] of [
+    ['Account policies', '/docs/accounts/policies'],
+    ['Access keys', '/docs/accounts/access-keys'],
+    ['Wallets', '/docs/accounts/wallets'],
+  ]) {
+    const disclosure = drawer.locator('summary').filter({ hasText: new RegExp(`^${group}$`) })
+    await expect(drawer.locator(`a[href="${href}"]`)).toBeHidden()
+    await disclosure.click()
+    await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
+  }
   await expect(drawer.getByText('More guides', { exact: true })).toHaveCount(0)
-  await expect(drawer.getByText('Code examples', { exact: true })).toHaveCount(0)
-  await expect(
-    drawer.locator('a[href="/docs/guide/payments/send-a-payment/examples"]'),
-  ).toHaveCount(0)
-  const clientSetup = drawer.getByRole('link', { name: 'Client setup', exact: true })
-  await expect(clientSetup).toBeVisible()
-  await expect(clientSetup).toHaveAttribute('href', '/docs/accounts/examples')
-  await clientSetup.click()
-  await expect(page).toHaveURL(/\/docs\/accounts\/examples\/?$/)
+  const guide = drawer.getByRole('link', { name: 'Create an account', exact: true })
+  await guide.click()
+  await expect(page).toHaveURL(/\/docs\/accounts\/create\/?$/)
   await expect(drawer).toBeHidden()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Client setup')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Create an account')
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
 })
 
@@ -936,7 +944,7 @@ for (const mobile of [false, true]) {
       section: 'Tempo EVM',
       path: '/docs/quickstart/wallet-developers',
       group: 'Accounts and keys',
-      sibling: '/docs/accounts/access-keys',
+      sibling: '/docs/development/account-keychain',
       unrelated: '/docs/guide/issuance/manage-stablecoin',
     },
     {
@@ -971,18 +979,18 @@ for (const mobile of [false, true]) {
       section: 'Tempo EVM',
       path: '/docs/protocol/transactions/AccountKeychain',
       group: 'Accounts and keys',
-      sibling: '/docs/accounts/access-keys',
+      sibling: '/docs/development/account-keychain',
       unrelated: '/docs/guide/payments/transfer-memos',
-      guide: '/docs/accounts/access-keys',
+      guide: '/docs/development/account-keychain',
     },
     {
       name: 'receive policy reference',
-      section: 'Accounts',
+      section: 'Tempo EVM',
       path: '/docs/protocol/tip403/receive-policies',
       group: 'Receive payments',
-      sibling: '/docs/guide/payments/configure-receive-policies',
-      unrelated: '/docs/accounts/access-keys',
-      guide: '/docs/guide/payments/configure-receive-policies',
+      sibling: '/docs/guide/payments/transfer-memos',
+      unrelated: '/docs/development/account-keychain',
+      guide: '/docs/guide/payments/transfer-memos',
     },
     {
       name: 'Zone architecture reference',
@@ -1086,7 +1094,7 @@ for (const mobile of [false, true]) {
   })
 }
 
-test('the developer guide catalog opens Browser payments in its Accounts home', async ({
+test('the developer guide catalog opens Browser payments in its Tempo EVM home', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
@@ -1099,7 +1107,7 @@ test('the developer guide catalog opens Browser payments in its Accounts home', 
   await expect(browserPayments).toHaveText('Browser payments')
   await browserPayments.click()
   await expect(page).toHaveURL(/\/docs\/guide\/payments\/send-a-payment\/browser\/?$/)
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Browser payments')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(sidebar.getByRole('link', { name: 'Send payments', exact: true })).toBeVisible()

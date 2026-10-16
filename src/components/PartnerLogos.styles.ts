@@ -283,6 +283,11 @@ export const partnerLogoBrale = style({
   backgroundImage: 'url("/assets/partners/directory/brale.svg")',
 })
 
+export const partnerLogoStripe = style({
+  width: '56px',
+  backgroundImage: 'url("/assets/partners/directory/stripe.svg")',
+})
+
 export const partnerLogoMoonpay = style({
   width: '84px',
   backgroundImage: 'url("/assets/partners/directory/moonpay.svg")',

@@ -1,0 +1,100 @@
+---
+title: Account Keychain
+seoTitle: Tempo Account Keychain Access Keys, Spending Limits, and Scopes | Tempo Docs
+description: The rules Tempo enforces on access keys, covering key types, TIP-20 spending limits, expiry, call scopes, authorization, the 0x04 signature, revocation, and admin keys.
+---
+
+import { AccountDiagram } from '../../../components/AccountDiagram'
+
+# Account Keychain
+
+The Account Keychain holds each account's access keys and checks every transaction they sign against the limits you set.
+
+Access keys are extra keys that sign for an account, and they are live on mainnet and testnet. The Account Keychain is a precompile, a contract built into Tempo, at `0xAAAAAAAA00000000000000000000000000000000`. Both [account types](/docs/accounts/keys) use access keys, though until [T14](/docs/protocol/upgrades/t14), configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet). To build with access keys, start with the [Access keys](/docs/accounts/access-keys) guide.
+
+<AccountDiagram
+  name="keychain"
+  alt="An account authorizes an access key, which then signs within a TIP-20 spending limit, an expiry, and call scopes. Revoking a key is permanent."
+/>
+
+## Access key types
+
+| Key type | `signatureType` | Key ID |
+| --- | --- | --- |
+| secp256k1 | `0` | The key's address |
+| P-256 | `1` | The key's address |
+| WebAuthn | `2` | The passkey's address |
+| Configurable account | `3` | The account's address. Its owners sign for it. Devnet until T14 ([TIP-1111](https://tips.sh/1111)). |
+
+## Access key restrictions
+
+| Restriction | Rule |
+| --- | --- |
+| Spending limits | One per TIP-20 token, in base units. `period = 0` sets a one-time limit; a positive `period` resets it every `period` seconds. |
+| What limits count | Direct TIP-20 transfers, approval increases, fees the account pays, and tokens that protocol precompiles pull. `transferFrom` and non-TIP-20 assets don't count. |
+| Expiry | A Unix timestamp. The key stops working at that second. Omit it for no expiry; a direct `authorizeKey` call passes `type(uint64).max` instead. |
+| Scopes | Any call, or an allowlist of `(target, selector, recipients)`: the contracts, functions, and payees the key can use. An empty allowlist denies every call; a target with no selector rules allows any function. Only top-level calls are checked. |
+| Contract creation | A key can't deploy a contract directly, but it can call a permitted factory that does. |
+| Key management | Limited keys can't authorize, change, or revoke keys, including themselves. |
+
+Tempo rejects an expired key with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired), a transaction over a limit with [`SpendingLimitExceeded`](/docs/protocol/transactions/AccountKeychain#error-spendinglimitexceeded), and a call outside the scopes with [`CallNotAllowed`](/docs/protocol/transactions/AccountKeychain#error-callnotallowed).
+
+## Access keys on each account type
+
+| | [Single-key account](/docs/development/single-key-accounts) | [Configurable account](/docs/development/configurable-accounts) |
+| --- | --- | --- |
+| Authorizes, changes, and revokes keys | The root key | Owners whose weights reach the threshold, with a `0x05` signature |
+| Acts as another account's access key | As type `0`, `1`, or `2`, matching its root key | As type `3`, signed by its owners |
+
+[Admin access keys](#admin-access-keys) can also manage keys on either type. Access keys never count toward a threshold.
+
+<span id="authorizing-an-access-key" />
+
+## Authorize an access key
+
+| Path | Behavior |
+| --- | --- |
+| `key_authorization` on a transaction | The account signs the authorization, and the new key can sign the transaction that carries it. The key stays authorized even if the calls revert. |
+| `authorizeKey` call | The account calls the precompile. The authorization rolls back if the transaction reverts. |
+
+Viem's `client.accessKey.signAuthorization` and `authorize` both use the `key_authorization` path. An optional `witness` binds the authorization to an offchain challenge; burn it with `client.accessKey.burnWitness` to cancel the authorization before it lands.
+
+## `0x04` keychain signature
+
+Viem builds this signature for any access-key account, such as `Account.fromP256(privateKey, { access: account })`. To build it yourself:
+
+```text
+signature    = 0x04 || account || access_key_signature
+inner_digest = keccak256(0x04 || tx_signature_hash || account)
+```
+
+The access key signs `inner_digest`; a configurable account acting as an access key signs it with its owners, as a `0x05` signature. Tempo checks that the key is authorized for `account`, unexpired, unrevoked, and of the stored type, then enforces its limits and scopes. Since T1C, Tempo rejects the legacy `0x03` format.
+
+<span id="revoke-access" />
+
+## Revoke an access key
+
+`revokeKey(keyId)` is permanent: that key ID can never be authorized again for the account. Configuration updates, account upgrades, and revoking an admin key leave every other key in place, so revoke each key separately.
+
+<span id="admin-access-keys" />
+
+## Admin access keys
+
+An admin access key ([TIP-1049](https://tips.sh/1049), live since T6) has no limits, expiry, or scopes. It can authorize and revoke keys, including admin keys, and change a limited key's limits and scopes, but it can't change a configurable account's owners. Its holder can spend the whole balance, so store it as carefully as a root or owner key.
+
+## Account Keychain functions
+
+| Function | Purpose | Viem action |
+| --- | --- | --- |
+| `authorizeKey` | Authorize a limited key | `client.accessKey.authorize` |
+| `authorizeAdminKey` | Authorize an admin key | `client.accessKey.authorize` with `admin: true` |
+| `revokeKey` | Revoke a key | `client.accessKey.revoke` |
+| `updateSpendingLimit` | Set one token's limit; resets the remaining amount and keeps the period | `client.accessKey.updateLimit` |
+| `setAllowedCalls`, `removeAllowedCalls` | Replace or remove a target's scope | `writeContract` |
+| `getKey` | Read a key's type, expiry, and status | `client.accessKey.getMetadata` |
+| `getRemainingLimitWithPeriod` | Read the remaining limit and period end | `client.accessKey.getRemainingLimit` |
+| `getAllowedCalls` | Read a key's scopes | `readContract` |
+| `isAdminKey` | Check whether a key is the root key or an active admin key | `client.accessKey.isAdmin` |
+| `getTransactionKey` | Read the key signing the current transaction; `address(0)` means the root key | None; call it from a contract |
+
+For `writeContract` and `readContract`, pass `Abis.accountKeychain` and `Addresses.accountKeychain` from `viem/tempo`. Functions that change keys must be called directly by the account's transaction (`msg.sender == tx.origin`). The [specification](/docs/protocol/transactions/AccountKeychain) lists every function, event, and error.

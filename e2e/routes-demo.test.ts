@@ -517,9 +517,15 @@ test.describe('Routes demo', () => {
 
     // A single valid continuation fills itself in.
     await pick(fromSelect(page, 'Network'), 'Tempo')
-    await expect(fromSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.sourceToken.tokenKey)
+    await expect(fromSelect(page, 'Asset')).toHaveAttribute(
+      'data-value',
+      tempoToTron.sourceToken.tokenKey,
+    )
     await expect(toSelect(page, 'Network')).toHaveAttribute('data-value', chains.tron.id)
-    await expect(toSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.destinationToken.tokenKey)
+    await expect(toSelect(page, 'Asset')).toHaveAttribute(
+      'data-value',
+      tempoToTron.destinationToken.tokenKey,
+    )
     await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
     await expect(button(page, 'Deposit address')).toBeDisabled()
 

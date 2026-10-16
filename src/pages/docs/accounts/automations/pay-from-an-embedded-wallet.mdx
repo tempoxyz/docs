@@ -1,0 +1,218 @@
+---
+title: Pay from a user's embedded wallet
+seoTitle: Pay from a User's Privy or Turnkey Wallet with a Tempo Access Key | Tempo Docs
+description: Have a user's Privy or Turnkey wallet authorize a limited access key once, so your card program or subscription backend pays from it without holding the user's key.
+---
+
+# Pay from a user's embedded wallet
+
+Let your backend pay from a user's Privy or Turnkey wallet, within limits, without holding the user's key.
+
+Use this when your users hold Privy or Turnkey embedded wallets and your backend pays from them on its own, such as for a card top-up, a subscription, or a recurring transfer. The wallet authorizes an [access key](/docs/accounts/access-keys) for your backend. The provider keeps the account key and signs that authorization once. After that, your backend signs each payment with its own key, within the limit, recipients, and expiry the user approved.
+
+The example funds a card program. Your card backend gets a key that can send up to 100 OUSD a day, only to the card program's funding address from your [card issuing partner](/docs/partners/cards), for 30 days. Size the daily limit to the card's daily spend limit plus fees. Show the user the card program, limit, and expiry before they approve. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
+
+## Who holds which key
+
+On each card swipe, your card backend pulls the purchase amount from the user's balance in seconds, without asking the wallet provider to sign. Each party can do only what its own key allows:
+
+| Party | Holds | Can do on its own |
+| --- | --- | --- |
+| The wallet provider | The account key | Sign what its setup allows, including a transfer of the whole balance |
+| Your card backend | Its own access key | Send up to 100 OUSD a day to the card program's funding address, for 30 days |
+| Your app | Credentials for the provider's API | Ask the provider to sign, within the provider's policies |
+
+An agent or a partner can hold an access key the same way as the card backend.
+
+## Authorize the key
+
+:::::steps
+
+### Wrap the provider's signing as an account
+
+Tempo needs the account key to sign a 32-byte hash as is, with no message prefix. Both providers offer that:
+
+- Privy: `secp256k1_sign` on an embedded wallet's provider, or `POST /v1/wallets/{wallet_id}/raw_sign` on a server wallet.
+- Turnkey: `sign_raw_payload` with `HASH_FUNCTION_NO_OP` and `PAYLOAD_ENCODING_HEXADECIMAL`. The account that [`@turnkey/viem`](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo)'s `createAccount` returns already signs hashes this way.
+
+Put that call behind a `signHash` function. Then build a Tempo account that signs only through it. The account needs the key's public key. If your provider doesn't return it, recover it once from a signature:
+
+::::code-group
+
+```ts [provider-account.ts]
+import { isAddressEqual, keccak256, recoverPublicKey, toHex } from 'viem'
+import { Account, PublicKey } from 'viem/tempo'
+import { signHash, walletAddress } from './provider' // your calls to the provider's API
+
+// Recover the wallet's public key once, from a signature over a fixed hash that isn't a transaction
+const probe = keccak256(toHex('tempo:recover-public-key'))
+const publicKey = PublicKey.fromHex(await recoverPublicKey({ hash: probe, signature: await signHash(probe) }))
+
+export const providerAccount = Account.from({ // [!code hl]
+  keyType: 'secp256k1', // [!code hl]
+  publicKey, // [!code hl]
+  // every signature goes through the provider // [!code hl]
+  sign: ({ hash }) => signHash(hash), // [!code hl]
+}) // [!code hl]
+if (!isAddressEqual(providerAccount.address, walletAddress)) throw new Error('Wrong public key')
+```
+
+```ts [client.ts]
+// [!include ~/snippets/viem.moderato.public.ts:setup]
+```
+
+::::
+
+`providerAccount.address` is the user's account address. To fund it on Moderato, call `client.faucet.fundSync({ account: providerAccount.address })`.
+
+### Have the holder create its key
+
+The card backend generates its own key and sends the app only the key's address. The private key never leaves the backend:
+
+```ts [holder-key.ts]
+import { Account, P256 } from 'viem/tempo'
+
+// the private key stays with the holder
+const privateKey = P256.randomPrivateKey() // [!code hl]
+export const holderKey = Account.fromP256(privateKey, { access: accountAddress }) // [!code hl]
+
+// send this address to the app
+console.log(holderKey.accessKeyAddress) // [!code hl]
+```
+
+`accountAddress` is the user's account address, which the app sends the holder. The holder can use any [access key type](/docs/accounts/access-keys#give-each-holder-its-own-key), including a secp256k1 key in its own KMS.
+
+### Sign the key authorization
+
+The app builds a key authorization, a message that names the holder's key and its bounds, and the provider signs it. `holderKeyAddress` is the address the holder sent, and `cardFunding` is the card program's funding address. Nothing goes onchain yet:
+
+```ts [authorize.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+import { KeyAuthorization } from 'ox/tempo'
+import { client } from './client'
+import { providerAccount } from './provider-account'
+
+// A test stablecoin on testnet
+export const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl]
+  account: providerAccount, // [!code hl]
+  accessKey: { accessKeyAddress: holderKeyAddress, keyType: 'p256' }, // [!code hl]
+  expiry: Expiry.days(30), // [!code hl]
+  limits: [{ token: stablecoin, limit: parseUnits('100', 6), period: 86_400 }], // [!code hl]
+  scopes: [{ address: stablecoin, recipients: [cardFunding], selector: 'transfer(address,uint256)' }], // [!code hl]
+}) // [!code hl]
+
+export const message = JSON.stringify(KeyAuthorization.toRpc(keyAuthorization)) // send to the holder
+```
+
+The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so [your app decides what the provider signs](/docs/accounts/apps#route-raw-signing-through-one-backend).
+
+### Send it with the holder's first payment
+
+The holder parses the app's `message` and attaches the authorization to its first payment. Tempo registers the key and checks the payment against the key's bounds in the same transaction:
+
+```ts [first-payment.ts]
+import { parseUnits } from 'viem'
+import { KeyAuthorization } from 'ox/tempo'
+import { message, stablecoin } from './authorize' // message: received from the app
+import { client } from './client'
+import { holderKey } from './holder-key'
+
+const { receipt } = await client.token.transferSync({
+  account: holderKey,
+  amount: parseUnits('1', 6),
+  // first payment only
+  keyAuthorization: KeyAuthorization.fromRpc(JSON.parse(message)), // [!code hl]
+  to: cardFunding,
+  token: stablecoin,
+})
+```
+
+Later payments leave out `keyAuthorization`. The account pays each payment's network fee, and the fees count against the key's daily limit.
+
+To register the key before the holder pays, the app sends the authorization on its own instead. The provider signs the authorization's hash, then a transaction from the account that carries it. The account needs a stablecoin balance for the fee:
+
+```ts [register.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+import { stablecoin } from './authorize'
+import { client } from './client'
+import { providerAccount } from './provider-account'
+
+await client.accessKey.authorizeSync({ // [!code hl]
+  account: providerAccount, // [!code hl]
+  accessKey: { accessKeyAddress: holderKeyAddress, keyType: 'p256' }, // [!code hl]
+  expiry: Expiry.days(30), // [!code hl]
+  limits: [{ token: stablecoin, limit: parseUnits('100', 6), period: 86_400 }], // [!code hl]
+  scopes: [{ address: stablecoin, recipients: [cardFunding], selector: 'transfer(address,uint256)' }], // [!code hl]
+}) // [!code hl]
+```
+
+### Check and revoke the key
+
+Anyone can read the key's state from the account address. Revoking the key needs the account key, so the provider signs the revocation:
+
+```ts [check.ts]
+import { stablecoin } from './authorize'
+import { client } from './client'
+import { providerAccount } from './provider-account'
+
+const key = await client.accessKey.getMetadata({ account: providerAccount.address, accessKey: holderKeyAddress }) // [!code hl]
+// key.expiry, key.isRevoked, key.spendPolicy ('limited' when the key has limits)
+
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ // [!code hl]
+  account: providerAccount.address, // [!code hl]
+  accessKey: holderKeyAddress, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
+```
+
+```ts [revoke.ts]
+import { client } from './client'
+import { providerAccount } from './provider-account'
+
+await client.accessKey.revokeSync({ account: providerAccount, accessKey: holderKeyAddress }) // [!code hl]
+```
+
+Once the [revocation](/docs/accounts/access-keys/revocation) lands, Tempo rejects every payment the key signs. The payments it already made stay final.
+
+:::::
+
+<span id="authorize-from-the-browser" />
+
+## Authorize from the browser with the Accounts SDK
+
+When the account key is a Privy embedded wallet that the user unlocks in your app, the [Accounts SDK](https://accounts.tempo.xyz/docs) signs the authorization through Privy's `secp256k1_sign`. Its Privy adapter needs `@privy-io/react-auth` 3.25.0 or later. Mount `PrivyAccountsBridge` from `accounts/react/privy` under Privy's `PrivyProvider`, then ask the provider to authorize the holder's key:
+
+```ts [connect.ts]
+import { parseUnits, toHex } from 'viem'
+import { Provider } from 'accounts'
+import { privy } from 'accounts/react/privy'
+import { tempoModerato } from 'viem/chains'
+import { Expiry } from 'viem/tempo'
+
+// A test stablecoin on testnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+const provider = Provider.create({ adapter: privy(), chains: [tempoModerato], testnet: true }) // [!code hl]
+await provider.request({ method: 'wallet_connect' })
+
+const { keyAuthorization, rootAddress } = await provider.request({ // [!code hl]
+  method: 'wallet_authorizeAccessKey', // [!code hl]
+  params: [ // [!code hl]
+    { // [!code hl]
+      address: holderKeyAddress, // [!code hl]
+      keyType: 'p256', // [!code hl]
+      expiry: Expiry.days(30), // [!code hl]
+      limits: [{ token: stablecoin, limit: toHex(parseUnits('100', 6)), period: 86_400 }], // [!code hl]
+      scopes: [{ address: stablecoin, recipients: [cardFunding], selector: 'transfer(address,uint256)' }], // [!code hl]
+    }, // [!code hl]
+  ], // [!code hl]
+}) // [!code hl]
+// keyAuthorization is already JSON-safe: send it and rootAddress to the holder
+```
+
+`rootAddress` is the account address the holder passes as `access`. The holder then submits `KeyAuthorization.fromRpc(keyAuthorization)` with its first payment, as in the steps above. The Accounts SDK's `turnkey` adapter, exported from `accounts`, does the same for Turnkey wallets. Both adapters are Tempo code, not Privy or Turnkey code. Privy publishes no guide for this flow.
+

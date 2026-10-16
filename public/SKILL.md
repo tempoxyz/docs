@@ -17,16 +17,16 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 | Section | Start here when the reader wants to… |
 | --- | --- |
 | [Get Started](https://tempo.xyz/developers/get-started.md) | Choose an integration, send a first test payment, get testnet funds, connect a coding agent, or find the SDKs and CLI. |
-| [Accounts](https://tempo.xyz/developers/docs/accounts.md) | Create accounts, connect wallets, read balances, send or receive payments, and reconcile customer deposits. |
+| [Accounts](https://tempo.xyz/developers/docs/accounts.md) | Create accounts, set up sign-in, security policies, access keys, and fees, or follow guides for wallet providers, SSO, self-custody, agents, automations, spending, and treasuries. |
 | [Earn](https://tempo.xyz/developers/docs/earn.md) | Choose a vault, deposit stablecoins, read positions, or withdraw. Earn is in beta; check access on the introduction page. |
 | [Routes](https://tempo.xyz/developers/docs/routes.md) | Accept cross-network deposits, quote transfers, or track delivery. Routes is in beta; check access on the introduction page. |
 | [Zones](https://tempo.xyz/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is in limited preview; check access on the introduction page. |
 | [Machine Payments](https://tempo.xyz/developers/docs/agents.md) | Pay for APIs, accept API payments, discover services, or integrate MPP. |
-| [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
+| [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, send or receive payments and reconcile deposits, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
 | [API reference](https://tempo.xyz/developers/docs/api.md) | Find Tempo API endpoints by product, authentication, Console management endpoints, JSON-RPC, and the indexer. |
 | [Partners](https://tempo.xyz/developers/docs/partners.md) | Find third-party wallets, bridges, RPC infrastructure, data services, and integrations. |
 
-Accounts covers application payment workflows; Tempo EVM covers the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.
+Accounts covers account setup and its guides; Tempo EVM covers payments and the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.
 
 Within Tempo EVM, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
 
@@ -47,7 +47,7 @@ Read the relevant pages before answering or changing code. If MCP is unavailable
 
 - [Documentation index](https://tempo.xyz/developers/llms.txt): every page grouped by the current navigation.
 - [Full documentation](https://tempo.xyz/developers/llms-full.txt): all exported pages with their section and source URL. Prefer individual pages for focused questions.
-- Markdown pages: append `.md` to a page URL, for example `https://tempo.xyz/developers/docs/accounts/balances.md`. Strip a trailing slash first. Use the HTTP or browsing tool available in your environment.
+- Markdown pages: append `.md` to a page URL, for example `https://tempo.xyz/developers/docs/accounts/access-keys.md`. Strip a trailing slash first. Use the HTTP or browsing tool available in your environment.
 
 For MPP behavior, cross-check [MPP documentation](https://mpp.dev/llms.txt). For exact SDK methods, read the relevant Viem, Wagmi, or Accounts reference returned by MCP or linked from the page.
 

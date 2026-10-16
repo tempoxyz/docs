@@ -1,0 +1,41 @@
+---
+title: "T14 Network Upgrade"
+seoTitle: "T14 Network Upgrade | Tempo Docs"
+description: T14 is planned to bring configurable accounts to testnet and mainnet, with weighted signers and a threshold at one address, configuration updates, in-place upgrades from single-key accounts, and configurable accounts as access keys.
+---
+
+# T14 Network Upgrade
+
+T14 is the planned network upgrade that brings configurable accounts to testnet and mainnet.
+
+:::info[T14 status]
+T14 is planned and its scope may still change. No activation dates are set. Until T14 activates, configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+:::
+
+## Timeline
+
+| Network | Activation date (UTC) | Unix timestamp |
+|---------|-----------------------|----------------|
+| Testnet | Not yet scheduled | — |
+| Mainnet | Not yet scheduled | — |
+
+## T14 overview
+
+- **Configurable accounts:** each signer has a weight, and a transaction runs once the signing weights reach the account's threshold. The address stays the same when signers change. See [Tempo Accounts](/docs/accounts).
+- **Configuration updates:** the current signers replace the signer list and threshold in one transaction, at the same address. See [Account configuration](/docs/accounts/account-configuration).
+- **Upgrades from single-key accounts:** an existing single-key account becomes a configurable account at the same address. See [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
+- **Configurable accounts as access keys:** a team's configurable account can act as another account's access key, approving with its own signers. See [Account Keychain](/docs/development/account-keychain#access-key-types).
+
+## T14 specifications
+
+| Specification | What it covers |
+| --- | --- |
+| [TIP-1107](https://tips.sh/1107) | Configurable accounts: the meta proposal that lists the TIPs below |
+| [TIP-1108](https://tips.sh/1108) | The account leaf that stores a configurable account's configuration hash |
+| [TIP-1109](https://tips.sh/1109) | Configuration update rules |
+| [TIP-1110](https://tips.sh/1110) | Configurable account address derivation and recovery |
+| [TIP-1111](https://tips.sh/1111) | Configurable accounts as access keys |
+| [TIP-1113](https://tips.sh/1113) | Upgrading a single-key account in place |
+| [TIP-1114](https://tips.sh/1114) | The configurable account transaction and multisig signature type |
+
+The specifications are under review and may change before T14 activates. Try the behavior now on the [devnet](/docs/accounts/create#connect-to-the-devnet), and see [Configurable accounts](/docs/development/configurable-accounts) for the Tempo EVM reference.
