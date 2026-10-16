@@ -1308,7 +1308,7 @@
     },
     {
       "source": "/developers/docs/accounts/integration",
-      "destination": "/developers/docs/accounts/use-cases#customer-accounts-or-a-company-account",
+      "destination": "/developers/docs/accounts/use-cases",
       "permanent": true
     },
     {
