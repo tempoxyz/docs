@@ -25,6 +25,8 @@ When your application deposits stablecoins into a vault, the account receives sh
 
 A share is not necessarily worth one stablecoin. Its value changes with the underlying strategy's returns, losses, and fees. An account's **position value** is the asset value of all its shares; **earnings** are returns over a period, separate from deposits and withdrawals.
 
+The account that deposits holds the shares: each customer's account, or a company account that your ledger allocates. [Choose an account model](/docs/accounts/integration#where-should-funds-live) decides which.
+
 The [Earn API](/docs/api/earn) exposes the vault's engine, share token, accepted asset, accounting state, and supported operations.
 
 ## Keep value and liquidity separate
@@ -49,7 +51,7 @@ A vault can pay a share of its returns to fee recipients, such as your platform.
 
 At 1%, $10 million in balances earns the fee recipient $100,000 a year. Returns vary, so the fee amount does too.
 
-The vault takes fees by issuing new shares for its fee recipients, so the share price and the observed `apy.vault` already reflect them. Fees charged by the underlying venue are reflected in the engine's reported value. Show customers the combined effect of both before they deposit.
+The vault takes fees by issuing new shares for its fee recipients, so the share price and the observed `apy.vault` already reflect them. Fees charged by the underlying venue are reflected in the engine's reported value. See [what customers net](/docs/earn/vaults#what-customers-net) for the costs outside the observed rate.
 
 Fee terms are set per vault; `state.feesActive` reports whether a vault charges Earn fees. [Contact Tempo](https://tempo.xyz/contact) to configure fee recipients for your Earn program.
 
