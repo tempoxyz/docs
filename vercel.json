@@ -1258,7 +1258,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/rotate-keys",
-      "destination": "/developers/docs/accounts/custodians/company-treasury#rotate-an-approvers-key",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#rotate-an-approvers-key",
       "permanent": true
     },
     {
@@ -1298,7 +1298,7 @@
     },
     {
       "source": "/developers/docs/accounts/advanced/team-accounts",
-      "destination": "/developers/docs/accounts/custodians/company-treasury#give-a-team-a-budget",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#give-a-team-a-budget",
       "permanent": true
     },
     {
@@ -1358,7 +1358,7 @@
     },
     {
       "source": "/developers/docs/accounts/guides/company-treasury",
-      "destination": "/developers/docs/accounts/custodians/company-treasury",
+      "destination": "/developers/docs/accounts/custodians/team-multisig",
       "permanent": true
     },
     {
@@ -1423,7 +1423,7 @@
     },
     {
       "source": "/developers/docs/accounts/team-budgets",
-      "destination": "/developers/docs/accounts/custodians/company-treasury#give-a-team-a-budget",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#give-a-team-a-budget",
       "permanent": true
     },
     {

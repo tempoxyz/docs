@@ -633,12 +633,8 @@ export default defineConfig({
                 link: '/docs/accounts/custodians/omnibus-accounts',
               },
               {
-                text: 'Use Tempo through your custodian',
-                link: '/docs/accounts/custodians/use-a-custodian',
-              },
-              {
-                text: 'Set up a company treasury',
-                link: '/docs/accounts/custodians/company-treasury',
+                text: 'Set up a team multisig',
+                link: '/docs/accounts/custodians/team-multisig',
               },
             ],
           },
@@ -1514,7 +1510,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/rotate-keys',
-      destination: '/docs/accounts/custodians/company-treasury#rotate-an-approvers-key',
+      destination: '/docs/accounts/custodians/team-multisig#rotate-an-approvers-key',
       status: 301,
     },
     {
@@ -1554,7 +1550,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/advanced/team-accounts',
-      destination: '/docs/accounts/custodians/company-treasury#give-a-team-a-budget',
+      destination: '/docs/accounts/custodians/team-multisig#give-a-team-a-budget',
       status: 301,
     },
     {
@@ -1614,7 +1610,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/guides/company-treasury',
-      destination: '/docs/accounts/custodians/company-treasury',
+      destination: '/docs/accounts/custodians/team-multisig',
       status: 301,
     },
     {
@@ -1674,7 +1670,7 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/team-budgets',
-      destination: '/docs/accounts/custodians/company-treasury#give-a-team-a-budget',
+      destination: '/docs/accounts/custodians/team-multisig#give-a-team-a-budget',
       status: 301,
     },
     {

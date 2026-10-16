@@ -84,7 +84,7 @@ describe('getActiveDocsSection', () => {
     ['/docs/accounts/authentication', 'accounts'],
     ['/docs/accounts/authentication/passkeys', 'accounts'],
     ['/docs/accounts/security-policies', 'accounts'],
-    ['/docs/accounts/custodians/company-treasury', 'accounts'],
+    ['/docs/accounts/custodians/team-multisig', 'accounts'],
     ['/docs/protocol/transactions/AccountKeychain', 'developers'],
     ['/docs/protocol/tip20/virtual-addresses', 'developers'],
     ['/docs/protocol/tip403/receive-policies', 'developers'],
