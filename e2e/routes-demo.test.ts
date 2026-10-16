@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 import { base58Encode } from '../src/lib/base58'
 
 // Drives the Routes demo against a scripted Routes API, browser wallet, and Tempo RPC, so every
@@ -471,11 +471,16 @@ const fromSelect = (page: Page, label: string) =>
   page.getByRole('group', { name: 'From' }).getByLabel(label)
 const toSelect = (page: Page, label: string) =>
   page.getByRole('group', { name: 'To' }).getByLabel(label)
+/** Opens a route picker and chooses the option with this label. */
+async function pick(picker: Locator, label: string) {
+  await picker.click()
+  await picker.page().getByRole('option', { name: label, exact: true }).click()
+}
 async function chooseRoute(page: Page, from: [string, string], to: [string, string]) {
-  await fromSelect(page, 'Network').selectOption({ label: from[0] })
-  await fromSelect(page, 'Asset').selectOption({ label: from[1] })
-  await toSelect(page, 'Network').selectOption({ label: to[0] })
-  await toSelect(page, 'Asset').selectOption({ label: to[1] })
+  await pick(fromSelect(page, 'Network'), from[0])
+  await pick(fromSelect(page, 'Asset'), from[1])
+  await pick(toSelect(page, 'Network'), to[0])
+  await pick(toSelect(page, 'Asset'), to[1])
 }
 const lifecycle = (page: Page) => page.locator('.routes-test-lifecycle')
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
@@ -511,15 +516,15 @@ test.describe('Routes demo', () => {
     expect(api.to('GET', '/v1/routes').at(-1)?.headers['tempo-api-key']).toBe(key)
 
     // A single valid continuation fills itself in.
-    await fromSelect(page, 'Network').selectOption({ label: 'Tempo' })
-    await expect(fromSelect(page, 'Asset')).toHaveValue(tempoToTron.sourceToken.tokenKey)
-    await expect(toSelect(page, 'Network')).toHaveValue(chains.tron.id)
-    await expect(toSelect(page, 'Asset')).toHaveValue(tempoToTron.destinationToken.tokenKey)
+    await pick(fromSelect(page, 'Network'), 'Tempo')
+    await expect(fromSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.sourceToken.tokenKey)
+    await expect(toSelect(page, 'Network')).toHaveAttribute('data-value', chains.tron.id)
+    await expect(toSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.destinationToken.tokenKey)
     await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
     await expect(button(page, 'Deposit address')).toBeDisabled()
 
     // Non-EVM sources fund a deposit address.
-    await fromSelect(page, 'Network').selectOption({ label: 'Solana' })
+    await pick(fromSelect(page, 'Network'), 'Solana')
     await expect(button(page, 'Transfer')).toBeDisabled()
     await expect(button(page, 'Deposit address')).toHaveAttribute('aria-pressed', 'true')
     // Deposit quotes use the recipient and refund address the address is created with.
@@ -915,7 +920,8 @@ test.describe('Routes demo', () => {
     )
     await button(page, 'Retry').click()
     await expect(fromSelect(page, 'Network')).toBeEnabled()
-    await expect(fromSelect(page, 'Network').locator('option')).toHaveCount(4)
+    await fromSelect(page, 'Network').click()
+    await expect(page.getByRole('listbox', { name: 'Network' }).getByRole('option')).toHaveCount(3)
   })
 
   test('explains the live Tron failures, and quotes without 1:1 when inventory runs out', async ({
@@ -1377,6 +1383,6 @@ test.describe('Routes demo without a key', () => {
       'This key cannot use USDC on Base to USDC.e on Tempo. Choose another route.',
     )
     await expect(fromSelect(page, 'Network')).toBeEnabled()
-    await expect(fromSelect(page, 'Network')).toHaveValue('')
+    await expect(fromSelect(page, 'Network')).toHaveAttribute('data-value', '')
   })
 })
