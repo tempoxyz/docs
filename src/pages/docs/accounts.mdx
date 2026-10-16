@@ -29,8 +29,6 @@ Tempo Accounts is in early development. Passkey accounts, access keys, fee spons
 
 ## What you can build
 
-Tempo accounts are [fully EVM compatible](/docs/quickstart/evm-compatibility) and work with every popular wallet provider and custodian, such as Privy, Turnkey, Dynamic, and Fireblocks.
-
 ### Accounts customers control
 
 An account can be approved by a [passkey](/docs/accounts/authentication/passkeys), a [device key](/docs/accounts/authentication/device-keys), a [private key](/docs/accounts/authentication/private-keys), or several of them together. Choose the setup that fits your customers: one passkey for a simple wallet, a passkey plus a backup key so a lost phone isn't a lost account, or your wallet provider's key alongside the customer's so neither of you can move funds alone. As long as the customer holds the keys that approve payments, the funds are theirs.
@@ -42,6 +40,10 @@ Give your backend, a card program, or an AI agent its own [access key](/docs/acc
 ### Configurable account policies
 
 Require two people to approve each payment from a [team multisig](/docs/accounts/custodians/team-multisig), accept only the stablecoins and senders you allow with a [receive policy](/docs/accounts/policies/receive-policies), and give each customer a [deposit address](/docs/accounts/virtual-addresses) that pays straight into one account. Fees are paid in stablecoins, and you can [cover them for your customers](/docs/accounts/fees/fee-sponsorship).
+
+### Works with the wallets you already use
+
+Tempo is [fully EVM compatible](/docs/quickstart/evm-compatibility), so the accounts work with every popular [wallet provider](/docs/accounts/apps) and [custodian](/docs/accounts/custodians), such as Privy, Turnkey, Dynamic, and Fireblocks, and with browser wallets like MetaMask. Keep the wallet stack you have and add Tempo's account features on top.
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
