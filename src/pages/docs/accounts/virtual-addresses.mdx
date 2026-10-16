@@ -5,7 +5,6 @@ description: Give every customer their own deposit address while all stablecoins
 ---
 
 import { Card, Cards } from 'vocs'
-import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 # Virtual addresses
 
@@ -25,12 +24,7 @@ If each customer controls their own funds, give them their own [Tempo account](/
 
 ## Choose the account that receives deposits
 
-The account you register is bound to its deposit addresses permanently. Pick it with key changes in mind.
-
-- **Configurable account (recommended).** [Add](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [remove signers](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) later at the same address. Every customer's deposit address keeps working.
-- **Single-key account.** Its deposit addresses work only while you keep that one key. On mainnet, if you expect to rotate keys, register a multisig or upgradeable contract instead.
-
-<ConfigurableAccountsT14 />
+Deposit addresses stay bound to the account you register, so register one whose keys can change. A [configurable account](/docs/accounts/account-configuration/configuration-updates) adds or removes signers at the same address, and runs on the devnet until [T14](/docs/protocol/upgrades/t14). On mainnet, register a multisig or upgradeable contract instead of a single-key account if you expect to rotate keys.
 
 ## Set up deposit addresses
 
