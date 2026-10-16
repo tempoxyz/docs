@@ -18,12 +18,14 @@ For each transaction, you decide who pays the fee and which stablecoin it's paid
 
 ## Choose who pays and in which stablecoin
 
-The account pays its own fees unless a fee payer sponsors them, which lets your customers transact without holding a fee balance. A fee payer can't change the account's calls or move its funds.
+By default the account pays its own fees, and a plain transfer pays in the stablecoin it sends. Set a fee token to pay in a different stablecoin, or a fee payer to pay for your customers.
 
 <Cards>
   <Card title="Fee tokens" description="Choose which stablecoin pays an account's fees, per account or per transaction." to="/docs/accounts/fees/fee-tokens" />
   <Card title="Fee sponsorship" description="Pay your customers' fees with a fee payer, so they need no fee balance." to="/docs/accounts/fees/fee-sponsorship" />
 </Cards>
+
+A fee payer only pays: it can't change the account's calls or move its funds.
 
 <span id="how-an-account-pays-fees" />
 <span id="how-tempo-account-fees-work" />

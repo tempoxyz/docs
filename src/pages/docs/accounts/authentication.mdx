@@ -41,15 +41,17 @@ Tempo verifies three kinds of signature: secp256k1, the kind Ethereum wallets us
 <span id="who-can-sign-in-as-a-customer" />
 <span id="who-can-sign-for-a-customer" />
 
-## Pick a method by who holds the key
+## Choose a key by who holds it
 
-Each method fits a different holder. Pick the one where the key lives with the party that should approve:
+Once a key is on the account, Tempo treats all three the same; what differs is who holds the key and how they approve. Keep a customer's key on their device, and a server's key in a KMS or HSM.
 
 <Cards>
   <Card title="Passkeys" description="The customer approves with Face ID or a fingerprint. Synced across their devices, and tied to your domain." to="/docs/accounts/authentication/passkeys" />
   <Card title="Device keys" description="A key the customer's phone, computer, or browser creates and can't export, for payments without a prompt." to="/docs/accounts/authentication/device-keys" />
   <Card title="Private keys" description="A key in a wallet, a wallet provider, or your KMS or HSM, for servers, treasury approvers, and backups." to="/docs/accounts/authentication/private-keys" />
 </Cards>
+
+Any of these keys can also be an [access key](/docs/accounts/access-keys) instead of a signer, so it pays within a spending limit, scopes, and an expiry.
 
 ## Combine signing methods
 

@@ -24,20 +24,16 @@ Tempo checks an account's policies on every transaction, before it lands. Neithe
 <span id="private-policies" />
 <span id="what-a-policy-controls" />
 
+<span id="combine-account-policies" />
+<span id="combine-policies" />
+
 ## Control money out and money in
 
-Each policy covers one direction:
+Each policy covers one direction, and the two work independently. Without a receive policy, an account accepts every transfer the token itself allows, so add one only when the account must refuse some stablecoins or senders.
 
 <Cards>
   <Card title="Signing thresholds" description="Who can move funds out: a transaction needs approvals whose weights add up to the threshold. Devnet only." to="/docs/accounts/policies/signing-thresholds" />
   <Card title="Receive policies" description="Which stablecoins and senders can pay the account. Tempo holds anything else instead of crediting it." to="/docs/accounts/policies/receive-policies" />
 </Cards>
 
-<span id="combine-account-policies" />
-<span id="combine-policies" />
-
-## Combine policies with access keys
-
-Add a receive policy only when an address must refuse some stablecoins or senders. It checks what arrives, not who approves, so it works alongside any signing threshold.
-
-Spending limits belong to [access keys](/docs/accounts/access-keys), not policies. An access key pays alone, within its limits, and never counts toward the threshold.
+Spending limits aren't a policy: they belong to [access keys](/docs/accounts/access-keys), which pay alone within their limits and never count toward the threshold.
