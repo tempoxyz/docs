@@ -802,6 +802,11 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
+                text: 'T13',
+                badge: { text: 'Upcoming', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t13',
+              },
+              {
                 text: 'T12',
                 badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
