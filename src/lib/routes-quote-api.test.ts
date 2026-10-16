@@ -57,10 +57,22 @@ describe('Routes quote proxy', () => {
     expect(await response.json()).toEqual(quote)
     const [target, init] = fetchMock.mock.calls[0]
     expect(String(target)).toBe(
-      'https://api.tempo.xyz/v1/routes/deposit-addresses/quote?amount=1000000&sourceChain=eip155%3A8453',
+      'https://api.tempo.xyz/v1/routes/deposit-addresses/quote?amount=1000000&sourceChain=eip155%3A8453&subsidize=true',
     )
     expect(init?.headers).toEqual({ 'tempo-api-key': 'docs-key' })
     expect(init?.redirect).toBe('error')
+  })
+
+  test.each([
+    [{ kind: 'transfers', mode: 'exactSource' }, 'true'],
+    [{ kind: 'transfers', mode: 'exactSource', subsidize: false }, 'false'],
+    [{ kind: 'deposit-addresses', subsidize: false }, 'false'],
+    [{ kind: 'transfers', mode: 'exactDestination' }, null],
+  ])('previews 1:1 delivery by default and keeps an explicit choice: %j', async (body, subsidize) => {
+    expect((await POST(request(body))).status).toBe(200)
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('subsidize')).toBe(
+      subsidize,
+    )
   })
 
   test.each([

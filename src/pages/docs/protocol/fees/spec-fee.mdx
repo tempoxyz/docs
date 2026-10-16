@@ -67,6 +67,12 @@ After the execution of each transaction:
 Fee-balance and liquidity checks happen before execution. A transaction that cannot fund its fees is invalid and cannot be included in that state; this is different from an included transaction whose application call reverts and still pays fees.
 :::
 
+### Fee-policy authorization
+
+Pre-collection MUST authorize the fee payer as a sender on the fee token. It MUST NOT require FeeManager to be authorized as a recipient for the fee deposit. The unused-fee refund returns to the original fee payer without a separate issuer recipient-policy check or receiver-policy evaluation. Fee pre-collection still enforces pause, balance, liquidity, and applicable access-key spending limits.
+
+`distributeFees(validator, token)` is a public, ordinary token-transfer path: each nonzero distribution MUST authorize FeeManager as sender and the resolved validator as recipient, and apply pause and receive-policy rules. Successful collection therefore does not guarantee that fees can currently be distributed. In particular, same-token fees can be collected while issuer policy blocks FeeManager as a sender and prevents distribution.
+
 ## Fee payer
 
 Tempo supports *sponsored transactions* in which the `fee_payer` is a different address from the `tx.origin` of the transaction. This is supported by Tempo's [new transaction type](/docs/protocol/transactions/spec-tempo-transaction), which has a `fee_payer_signature` field.
@@ -99,6 +105,7 @@ The network validates both signatures and executes the transaction.
 
 When `feePayerSignature` is present:
 * Both sender and fee payer signatures must be valid
+* Recovered fee payer must differ from the transaction sender; self-payment requires an absent `feePayerSignature`
 * Fee payer must have sufficient balance in the fee token
 * Transaction is rejected if either signature fails or fee payer's balance is insufficient
 
@@ -111,7 +118,7 @@ The protocol checks for token preferences in five ways, with this order of prece
 2. Account (set on the FeeManager contract by the `fee_payer` of the transaction)
 3. TIP-20 contract (if the transaction is calling `transfer` or `transferWithMemo` on a TIP-20 token contract, the transaction uses that token as its fee token)
 4. Stablecoin DEX (for certain swap calls, the transaction uses the `tokenIn` argument as its fee token)
-5. PathUSD (as a fallback)
+5. PathUSD (as a fallback; from [T13](/docs/protocol/upgrades/t13), pathUSD and then OUSD)
 
 The protocol checks preferences at each of these levels, stopping at the first one at which a preference is specified. At that level, the protocol performs the following checks. If any of the checks fail, the transaction is invalid (without looking at any further levels):
 
@@ -119,7 +126,7 @@ The protocol checks preferences at each of these levels, stopping at the first o
 * The user must have sufficient balance in that token to pay the `gasLimit` on the transaction at the transaction's `gasPrice`.
 * There must be sufficient liquidity on the [fee AMM](/docs/protocol/fees/spec-fee-amm), as discussed in that specification.
 
-If no preference is specified at the transaction, account, or contract level, the protocol falls back to [pathUSD](#pathusd).
+If no preference is specified at the transaction, account, or contract level, the protocol falls back to [pathUSD](#pathusd). From T13, the fallback is an [ordered list](#ordered-fallback-from-t13).
 
 :::note
 To avoid depending on the pathUSD fallback, set an explicit fee token preference. For most accounts, this is [OUSD](/docs/guide/ousd), the recommended stablecoin on Tempo. Call `setUserToken` on the FeeManager, or set `fee_token` on each transaction.
@@ -163,7 +170,13 @@ For [Tempo Transactions](/docs/protocol/transactions/spec-tempo-transaction), th
 
 ### pathUSD
 
-If no fee preference is set at the transaction, account, or contract level, the protocol falls back to [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) as the user's fee token preference. 
+If no fee preference is set at the transaction, account, or contract level, the protocol falls back to [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) as the user's fee token preference.
+
+#### Ordered fallback from T13
+
+After [T13](/docs/protocol/upgrades/t13) activates, the fallback tries pathUSD (`0x20c0000000000000000000000000000000000000`) and then [OUSD](/docs/guide/ousd) (`0x20c0000000000000000000006a37da5c996874be`), in that order. The protocol selects the first token in which the fee payer's balance covers the maximum fee, `ceil(gasLimit * maxFeePerGas / 10^12)` in base units (`gasPrice` for legacy transactions). If neither token covers it, the transaction is invalid. A zero maximum fee selects pathUSD.
+
+Only an insufficient balance moves to the next token. After selection, the checks above apply to the selected token, and a failure does not try another token. Fee collection, refunds, and the receipt's `feeToken` use the selected token.
 
 ## Validator preferences
 

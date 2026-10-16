@@ -621,6 +621,8 @@ export default defineConfig({
         text: 'Routes',
         items: [
           { text: 'Introduction', link: '/docs/routes' },
+          { text: 'Try a route', link: '/docs/routes/test' },
+          { text: 'Set up API access', link: '/docs/routes/api-setup' },
           { text: 'Supported routes', link: '/docs/routes/networks' },
           { text: 'Quotes and fees', link: '/docs/routes/quotes' },
           { text: 'Accept deposits', link: '/docs/routes/deposits' },
@@ -629,10 +631,8 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Integration guides',
+        text: 'cURL examples',
         items: [
-          { text: 'Test a route', link: '/docs/routes/test' },
-          { text: 'API setup', link: '/docs/routes/api-setup' },
           { text: 'Deposit address example', link: '/docs/routes/examples/deposits' },
           { text: 'Transfer example', link: '/docs/routes/examples/transfers' },
         ],
@@ -801,6 +801,11 @@ export default defineConfig({
             text: 'Network upgrades',
             collapsed: false,
             items: [
+              {
+                text: 'T13',
+                badge: { text: 'Upcoming', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t13',
+              },
               {
                 text: 'T12',
                 badge: { text: 'Mainnet', variant: 'info' as const },

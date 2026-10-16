@@ -6,7 +6,6 @@ import { defineConfig, type Environment, loadEnv, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
-import { skipReferenceScans } from './scripts/zyzz-build'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
@@ -28,24 +27,22 @@ export default defineConfig(({ mode }) => {
       deferAiIndexDuringRscScan(),
       // Example regions are not complete modules. Keep server tooling out of
       // the client discovery graph; Vocs owns the persisted color scheme.
-      skipReferenceScans(
-        zyzz({
-          exclude: [
-            'src/snippets',
-            'src/test',
-            'src/pages/_api',
-            'src/marketing/blogPlugin.ts',
-            'scripts',
-            'e2e',
-            'search-benchmark',
-            'playwright.config.ts',
-            'playwright.zones.config.ts',
-            'playwright.production.config.ts',
-            'vocs.config.ts',
-          ],
-          script: false,
-        }),
-      ),
+      zyzz({
+        exclude: [
+          'src/snippets/**',
+          'src/test/**',
+          'src/pages/_api/**',
+          'src/marketing/blogPlugin.ts',
+          'scripts/**',
+          'e2e/**',
+          'search-benchmark/**',
+          'playwright.config.ts',
+          'playwright.zones.config.ts',
+          'playwright.production.config.ts',
+          'vocs.config.ts',
+        ],
+        script: false,
+      }),
       blogPostsPlugin(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),

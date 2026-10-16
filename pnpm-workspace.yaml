@@ -18,6 +18,8 @@ minimumReleaseAgeExclude:
   - '@vocs/twoslash-rust'
   - '@vocs/twoslash-rust-darwin-arm64'
   - '@vocs/twoslash-rust-linux-x64-gnu'
+  # Only this release: it ships the glibc 2.17 Linux addon that Vercel needs.
+  - zyzz@0.0.33
 
 onlyBuiltDependencies:
   - core-js
@@ -43,7 +45,6 @@ overrides:
   'undici@>=8.0.0 <8.10.2': 8.10.2
 
 patchedDependencies:
-  zyzz@0.0.27: patches/zyzz@0.0.27.patch
   '@braintree/sanitize-url@7.1.2': patches/@braintree__sanitize-url@7.1.2.patch
   dayjs@1.11.20: patches/dayjs@1.11.20.patch
   vocs@2.10.3: patches/vocs@2.10.3.patch
