@@ -11,6 +11,7 @@ import {
 import { operationWithQuery } from '../../node_modules/vocs/dist/internal/openapi/query-presets.js'
 import { groupPath } from '../../node_modules/vocs/dist/internal/openapi/route.js'
 import { codeSamples } from '../../node_modules/vocs/dist/internal/openapi/sample.js'
+import { paymentRoutes, providerReviewedAt } from '../data/paymentRoutes'
 import { tempoAgentSetupCommands } from './ai-install-commands'
 import { docsLinkCards } from './docs-link-cards'
 import { loadTempoOpenApi } from './tempo-openapi'
@@ -329,6 +330,7 @@ function rewriteNode(
   }
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, context)
+  if (node.name === 'PaymentRoutesExplorer') return renderPaymentRoutes()
   if (node.name === 'DocsLinkButton') return renderLinkButton(node)
   if (node.name === 'OpenApi.Endpoints' || node.name === 'OpenApi.Playground')
     return renderOpenApi(node, headingDepth, context.openApi)
@@ -367,6 +369,47 @@ function rewriteNode(
 
   rewriteChildren(node, headingDepth, context)
   return [node]
+}
+
+function renderPaymentRoutes(): MarkdownNode[] {
+  return [
+    paragraph([
+      text(
+        'Dated provider documentation, separate from Routes API availability. Confirm current support directly with each provider. For the live API catalog, use ',
+      ),
+      link('Supported routes', '/docs/routes/networks'),
+      text('. Each entry retains its source review date.'),
+    ]),
+    {
+      type: 'list',
+      ordered: false,
+      spread: false,
+      children: paymentRoutes.map((route) => ({
+        type: 'listItem',
+        spread: false,
+        children: [
+          paragraph([
+            text(
+              `${route.sourceRail} ${route.sourceCurrency} → ${route.destinationRail} ${route.destinationCurrency}. Provider: `,
+            ),
+            link(route.provider, route.providerUrl),
+            text(`. Reviewed ${providerReviewedAt(route.provider)}. `),
+            text(
+              [
+                route.region,
+                route.minimum && `Minimum: ${route.minimum}`,
+                route.limit && `Limit: ${route.limit}`,
+                route.settlement && `Settlement: ${route.settlement}`,
+                route.note,
+              ]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+          ]),
+        ],
+      })),
+    },
+  ]
 }
 
 function renderCards(

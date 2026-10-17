@@ -1,0 +1,49 @@
+---
+title: "Plan a payment corridor"
+seoTitle: "Plan a Stablecoin Payment Corridor | Tempo Docs"
+description: Define the currencies, bank rails, token contracts, and delivery requirements for a payment that uses stablecoins on Tempo.
+---
+
+# Plan a payment corridor
+
+Start with the money your sender has and the money your recipient needs. A cross-border payment corridor can include a bank collection, stablecoin conversion, an onchain transfer, and a local payout. Confirm each leg separately before presenting the whole payment as available.
+
+## Choose the integration for each leg
+
+| Payment leg | Start here | Confirm before offering it |
+| --- | --- | --- |
+| Stablecoins between Tempo and another network | [Tempo Routes](/docs/routes) and its [live directory](/docs/routes/networks) | Exact network and token pair, direction, funding method, organization access, and a current quote. |
+| Bank or local payment rail to or from a stablecoin | [Payment route providers](/docs/partners/payment-routes) and [Payments & ramps](/docs/partners/payments-and-ramps) | Country and customer eligibility, currency, rail, onboarding, bank cutoffs, limits, and payout terms. |
+| Payment between accounts on Tempo | [Send a payment](/docs/guide/payments/send-a-payment) | Recipient, token contract, balance, and applicable transfer policies. |
+| Conversion between stablecoins on Tempo | [Swap stablecoins](/docs/guide/stablecoin-dex/executing-swaps) | Supported pair, available liquidity, order size, and execution terms. |
+
+A provider listing and an API route describe different integrations. Neither proves that a bank-to-bank corridor is available through a single Routes API call.
+
+## Define the source and destination
+
+Record these fields before selecting providers or building a quote flow:
+
+| Field | What to record |
+| --- | --- |
+| Sender | Customer type, sending country, source currency, and funding rail or network. |
+| Recipient | Receiving country, destination currency, and required bank account, local rail, or wallet. |
+| Onchain assets | Network and token contract for every leg, including the asset received on Tempo. Symbols alone are insufficient. |
+| Amount | Typical and maximum payment size; whether the sender's debit or recipient's credit must be fixed. |
+| Integration | Who collects the funds, signs the source transaction, performs conversion, and submits the payout. |
+| Operations | Quote expiry, cutoffs, expected delivery, reconciliation identifiers, refund path, and the party responsible for each failure. |
+
+For **BRL collected through Pix**, start by checking providers that document Pix funding and the exact asset they deliver on Tempo. For **MXN paid through SPEI**, check the opposite direction: the provider's accepted source asset, Mexican payout eligibility, beneficiary requirements, and delivery terms. Do not infer the reverse direction or a combined Brazil-to-Mexico corridor from separate directory entries.
+
+## Check a Routes API leg
+
+Read the [supported routes](/docs/routes/networks) before offering a network or asset. Then [request a quote](/docs/routes/quotes) for the chosen pair, amount, and funding method. Follow pagination when reading the API directory, and use an authenticated request when checking your organization's access.
+
+Use [deposit addresses](/docs/routes/deposits) when the sender pays from an external wallet. Use [transfers](/docs/routes/transfers) when your application can authorize the source transaction. These flows can have different coverage for the same pair.
+
+A completed source transaction does not establish destination delivery. [Track delivery](/docs/routes/delivery) before crediting the recipient or starting a dependent payout. A bank provider's settlement schedule remains separate from onchain settlement.
+
+## Compare the full payment terms
+
+Compare the recipient's expected amount for the same sender amount, rather than comparing only a headline fee. Include collection fees, conversion spread, network and routing fees, and payout charges. Check what is fixed by the quote, what can change, and when it expires.
+
+Routes quote terms apply to the quoted onchain leg. Provider onboarding, fiat conversion, bank settlement, and local payout terms require their own confirmation. Record those boundaries in the customer experience and in your reconciliation flow.

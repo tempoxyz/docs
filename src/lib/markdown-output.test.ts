@@ -8,6 +8,18 @@ import { docsLinkCards } from './docs-link-cards'
 import { plainMarkdownComponents } from './markdown-output'
 
 describe('plainMarkdownComponents', () => {
+  test('exports provider sources and review dates without duplicating the live API catalog', async () => {
+    const output = await render('<PaymentRoutesExplorer />')
+    expect(output).toContain('Dated provider documentation, separate from Routes API availability')
+    expect(output).toContain('[Supported routes](/docs/routes/networks)')
+    expect(output).toContain('ACH USD → Tempo OUSD')
+    expect(output).toContain('[Bridge](https://apidocs.bridge.xyz/')
+    expect(output).toContain('Reviewed October 6, 2026')
+    expect(output).toContain('Reviewed August 22, 2026')
+    expect(output).not.toContain('Routes API mainnet catalog')
+    expect(output).not.toContain('<PaymentRoutesExplorer')
+  })
+
   test('keeps the linked specification badge with its own page in full exports', async () => {
     const output = await render(`
 <span id="old-title" />

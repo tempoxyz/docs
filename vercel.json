@@ -2,6 +2,16 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/developers/docs/ecosystem/payment-routes",
+      "destination": "/developers/docs/partners/payment-routes",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/routes/get-started",
+      "destination": "/developers/docs/routes/api-setup",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/api/routes/quotes",
       "destination": "/developers/docs/api/routes/transfers#quoteroutestransfer",
       "permanent": true

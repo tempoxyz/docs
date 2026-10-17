@@ -702,6 +702,8 @@ export default defineConfig({
           { text: 'Exchanges', link: '/docs/partners/exchanges' },
           { text: 'Bridges', link: '/docs/partners/bridges' },
           { text: 'Payments & ramps', link: '/docs/partners/payments-and-ramps' },
+          { text: 'Payment route providers', link: '/docs/partners/payment-routes' },
+          { text: 'Plan a payment corridor', link: '/docs/partners/payment-corridors' },
           { text: 'Cards', link: '/docs/partners/cards' },
           { text: 'Partner with Tempo', link: '/docs/partners/join' },
         ],
@@ -1133,6 +1135,12 @@ export default defineConfig({
       status: 301,
     },
     { source: '/docs/ecosystem', destination: '/docs/partners', status: 301 },
+    {
+      source: '/docs/ecosystem/payment-routes',
+      destination: '/docs/partners/payment-routes',
+      status: 301,
+    },
+    { source: '/docs/api/routes/get-started', destination: '/docs/routes/api-setup', status: 301 },
 
     {
       source: '/docs/guide/machine-payments/use-cases/:path*',
