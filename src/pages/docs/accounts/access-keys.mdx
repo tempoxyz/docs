@@ -115,7 +115,17 @@ Use all three controls together:
 - **Token budget:** `period: 0` is a one-time allowance. A positive `period` sets the renewal interval in seconds.
 - **Call scopes:** limit the target contracts, function selectors, and recipients the key may use.
 
-Spending limits cover direct TIP-20 `transfer`, `transferWithMemo`, and `approve` calls. `transferFrom` and token movements initiated by another contract fall outside these checks, so pair budgets with call scopes.
+Spending limits charge direct TIP-20 transfers and approval increases. Ordinary allowance-based `transferFrom` calls consume the spender's allowance without charging the active key's budget again. Protocol fee and implicit-approval paths enforce their own spending checks; see the [Account Keychain specification](/docs/protocol/transactions/AccountKeychain#spending-limit-enforcement).
+
+:::warning[Standing approvals can exceed an access key's budget]
+Avoid leaving standing token approvals on accounts with untrusted access keys. Approvals belong to the account and spender, not to an individual key. An access key that can invoke an approved contract may use an allowance granted by the root key or another access key, even if it exceeds its own remaining budget.
+
+For example, if the root key approves a swap router for 1,000 tokens, an access key with a 10-token budget may trigger a 1,000-token pull through an allowed router call. If that call accepts an arbitrary output recipient, the key may direct the swap proceeds elsewhere.
+
+- Batch approval of only the required amount, the contract call, and `approve(spender, 0)` in one atomic transaction. Clear existing allowances before relying on a restricted key's budget.
+- Restrict each key to the targets and function selectors its task needs. Scopes check top-level calls; allowing a router call also allows the token pulls that call can trigger. Review the allowed function's recipient and routing controls before keeping an approval.
+- Apply this guidance to every integration that uses allowance-based pulls, including swap routers, vaults, and bridges.
+:::
 
 Access-key-signed transactions cannot contain a top-level contract-creation call. A call to a factory can create contracts internally when the key's call scopes permit that factory call.
 
