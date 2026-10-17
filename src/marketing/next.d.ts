@@ -12,6 +12,7 @@ declare module 'virtual:blog-posts' {
     categories: string[]
     authors: string
     ogImage?: string
+    shareImage?: string
     featured: boolean
     html: string
   }[]

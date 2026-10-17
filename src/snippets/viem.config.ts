@@ -1,8 +1,7 @@
 // [!region setup]
-import { privateKeyToAccount } from 'viem/accounts'
-import { createClient } from 'viem/tempo'
+import { Account, createClient } from 'viem/tempo'
 
 export const client = createClient({
-  account: privateKeyToAccount('0x...'),
+  account: Account.fromSecp256k1('0x...'),
 })
 // [!endregion setup]

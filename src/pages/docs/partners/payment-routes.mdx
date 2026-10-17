@@ -1,0 +1,49 @@
+---
+title: "Payment route providers"
+seoTitle: "Payment Route Providers and Fiat Ramps | Tempo Docs"
+description: Find provider-documented fiat, cross-chain, and exchange routes into and out of Tempo by currency, rail, direction, and provider.
+interactive: true
+---
+
+import { PaymentRoutesExplorer } from '../../../components/PaymentRoutesExplorer'
+
+# Payment route providers
+
+Find providers for a specific source currency, destination asset, and payment rail. This directory preserves dated provider documentation so you can shortlist integrations and confirm current terms with each provider.
+
+For transfers through the Tempo Routes API, use the [live supported routes](/docs/routes/networks) and [Routes integration guides](/docs/routes). For a payment that includes a bank or local payout, start with [planning a payment corridor](/docs/partners/payment-corridors).
+
+:::warning
+This is a provider research directory, not a live availability feed or a list of Routes API integrations. Each entry shows its review date. Country, account, asset, amount, compliance checks, liquidity, and provider configuration can affect availability. Confirm current support and the destination token contract before moving funds.
+:::
+
+<PaymentRoutesExplorer />
+
+## Choose a rail and direction
+
+Filter the source and destination separately. A provider supporting deposits does not establish that it supports withdrawals, or that two listed legs can be combined into an end-to-end payment.
+
+For example, **BRL** with **Pix** as the source narrows the directory to documented funding paths from Brazil. **MXN** with **SPEI** as the destination narrows it to documented Mexican payout paths. These filters are research starting points; they do not confirm your customer's eligibility or a quote for a particular amount.
+
+Provider asset names are preserved from their documentation. Verify the network and token contract before treating similarly named assets as interchangeable.
+
+## How provider entries are maintained
+
+Bridge, Due, and Fonbnk documentation was reviewed on October 6, 2026. Other entries were reviewed on August 22, 2026. Those are source-review dates, not guarantees that the terms remain available today. Suspended and announced-only routes were excluded from the October refresh.
+
+Providers offer their own products, onboarding, and eligibility requirements. Minimums, limits, and settlement estimates are provider-supplied and may change. Use the source linked in each row to confirm current terms. A provider's Tempo integration alone is not sufficient evidence for a specific route.
+
+For Routes API discovery, the [public route catalog](https://api.tempo.xyz/v1/routes?limit=50) and [supported routes page](/docs/routes/networks) are the maintained sources. The directory here does not attribute API routes to providers.
+
+## Provider source documentation
+
+- [Bridge route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes#route-explorer)
+- [Due supported currencies and payment methods](https://due.readme.io/docs/supported-payment-methods)
+- [Fonbnk supported countries and cryptocurrencies](https://docs.fonbnk.com/supported-countries-and-cryptocurrencies)
+- [MoonPay Tempo support](https://www.moonpay.com/newsroom/moonpay-tempo)
+- [Kraken Tempo deposits and withdrawals](https://blog.kraken.com/product/new-features/usdt0-and-usdce-now-available-on-tempo)
+- [OKX Tempo USDT support](https://www.okx.com/en-us/help/okx-to-support-usdt-on-the-tempo-chain)
+- [OKX Tempo USDT0 support](https://www.okx.com/en-us/learn/tempo-usdt0)
+- [LayerZero / Stargate guide](/docs/guide/bridge-layerzero)
+- [Bungee guide](/docs/guide/bridge-bungee)
+- [Relay guide](/docs/guide/bridge-relay)

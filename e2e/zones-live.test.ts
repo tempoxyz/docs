@@ -1,5 +1,5 @@
-import { expect, type Page, test } from '@playwright/test'
 import { getDemoStep } from './helpers'
+import { expect, type Page, test } from './live'
 
 // Opt in explicitly: these checks create a fresh passkey and spend only faucet-funded testnet assets.
 test.skip(process.env.ZONES_LIVE_E2E !== 'true', 'Requires the live Moderato Zones sandbox')

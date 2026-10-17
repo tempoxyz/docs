@@ -3,6 +3,7 @@ import { developersPath } from '../_lib/developersPaths'
 import FeaturedVisual from '../blog/_components/FeaturedVisual'
 import { formatDate } from '../blog/_lib/categories'
 import { getAllPosts, getFeaturedPost } from '../blog/_lib/posts'
+import * as ui from './BlogSection.recipes'
 import EdgeMarkers from './EdgeMarkers'
 import Reveal from './Reveal'
 
@@ -13,39 +14,31 @@ export default function BlogSection() {
 
   return (
     <section>
-      <Reveal className="flex flex-col items-center px-5 text-center">
-        <h2 className="font-sans text-[clamp(2rem,6vw,3rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased">
-          Dive deeper into Tempo&apos;s engineering
-        </h2>
-        <p className="mt-6 max-w-[560px] font-sans text-[16px] text-foreground/50 leading-[1.4] tracking-[0] lg:text-[20px]">
+      <Reveal className={ui.reveal().className}>
+        <h2 {...ui.blogSectionHeading()}>Dive deeper into Tempo&apos;s engineering</h2>
+        <p {...ui.blogSectionDescription()}>
           Product announcements, engineering deep dives, network upgrades, events, and case studies{' '}
-          <span className="text-foreground">from the team building Tempo.</span>
+          <span {...ui.blogSectionText()}>from the team building Tempo.</span>
         </p>
       </Reveal>
 
-      <Reveal className="mt-16">
+      <Reveal className={ui.reveal2().className}>
         <Link
           href={developersPath(`/blog/${featured.slug}`)}
-          className="group grid border border-line transition-colors hover:bg-surface-block lg:grid-cols-2"
+          className={ui.link({ className: 'group' }).className}
         >
-          <div className="relative h-[200px] overflow-hidden border-line border-b lg:order-2 lg:h-auto lg:min-h-[280px] lg:border-b-0 lg:border-l">
+          <div {...ui.blogSectionLayout()}>
             <FeaturedVisual />
           </div>
-          <div className="flex flex-col justify-center gap-4 p-6 lg:order-1 lg:p-10">
-            <h3 className="max-w-[480px] font-sans text-[clamp(1.5rem,3.5vw,2.125rem)] text-foreground leading-[1.15] tracking-[-0.02em] antialiased">
-              {featured.title}
-            </h3>
-            <p className="max-w-[480px] font-sans text-[15px] text-foreground/50 leading-[1.55] tracking-[0]">
-              {featured.excerpt}
-            </p>
-            <p className="font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
-              {formatDate(featured.date)}
-            </p>
+          <div {...ui.blogSectionLayout2()}>
+            <h3 {...ui.blogSectionHeading2()}>{featured.title}</h3>
+            <p {...ui.blogSectionDescription2()}>{featured.excerpt}</p>
+            <p {...ui.blogSectionDescription3()}>{formatDate(featured.date)}</p>
           </div>
         </Link>
       </Reveal>
 
-      <div className="relative -mt-px border-line border-t">
+      <div {...ui.blogSectionLayout3()}>
         <EdgeMarkers wideOnly />
         <ul>
           {latest.map((post, i) => (
@@ -53,15 +46,11 @@ export default function BlogSection() {
               <Reveal delay={i * 50}>
                 <Link
                   href={developersPath(`/blog/${post.slug}`)}
-                  className="group flex flex-col gap-2 border-line border-b px-5 py-5 transition-colors hover:bg-surface-block lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:px-8"
+                  className={ui.link2({ className: 'group' }).className}
                 >
-                  <span className="font-sans text-[16px] text-foreground tracking-[0] transition-colors">
-                    {post.title}
-                  </span>
-                  <span className="flex flex-wrap items-center gap-3">
-                    <span className="whitespace-nowrap font-mono text-[12px] text-foreground/40 uppercase tracking-[0.02em]">
-                      {formatDate(post.date)}
-                    </span>
+                  <span {...ui.blogSectionText2()}>{post.title}</span>
+                  <span {...ui.blogSectionText3()}>
+                    <span {...ui.blogSectionText4()}>{formatDate(post.date)}</span>
                   </span>
                 </Link>
               </Reveal>
@@ -69,10 +58,7 @@ export default function BlogSection() {
           ))}
         </ul>
         <Reveal>
-          <Link
-            href={developersPath('/blog')}
-            className="flex items-center justify-center border-line border-b px-5 py-5 font-sans text-[16px] text-foreground tracking-[0] transition-colors hover:bg-surface-block lg:px-8"
-          >
+          <Link href={developersPath('/blog')} className={ui.link3().className}>
             View all blogs
           </Link>
         </Reveal>

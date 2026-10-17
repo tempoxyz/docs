@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useRef } from 'react'
 import type { DotPattern, LitCell } from './dotPatterns'
+import * as ui from './PlusCanvas.recipes'
 
 // Same grid + interaction model as DotCanvas, but each cell is painted as a "+"
 // glyph instead of a circle. Geometry from Figma (node 561:2991): 4px squares
@@ -311,10 +312,10 @@ export default function PlusCanvas({ className, pattern, children }: Props) {
   return (
     <div
       ref={containerRef}
-      aria-hidden
-      className={`pointer-events-none absolute inset-0 ${className ?? ''}`}
+      aria-hidden="true"
+      className={` ${ui.plusCanvasLayout().className} ${className ?? ''}`}
     >
-      <canvas ref={canvasRef} className="block h-full w-full" />
+      <canvas ref={canvasRef} {...ui.canvas()} />
       {children}
     </div>
   )

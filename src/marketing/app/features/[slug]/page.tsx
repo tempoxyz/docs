@@ -8,6 +8,7 @@ import HeroDots from '../../_components/HeroDots'
 import Reveal from '../../_components/Reveal'
 import TokensSections from '../_components/TokensSections'
 import TransactionsSections from '../_components/TransactionsSections'
+import * as ui from './page.recipes'
 
 export function generateStaticParams() {
   return features.map((feature) => ({ slug: feature.slug }))
@@ -37,36 +38,32 @@ export default function FeaturePage({ params }: { params: FeatureParams }) {
   const secondaryActions = heroActions.filter((a) => a !== primaryAction)
 
   const page = (
-    <main className="min-h-screen w-full bg-surface-page">
-      <div className="mx-auto w-full max-w-7xl border-line border-x bg-surface-shell">
+    <main {...ui.main()}>
+      <div {...ui.featurePageLayout()}>
         <Header />
 
-        <section className="relative isolate px-5 py-28 lg:py-36">
+        <section {...ui.featurePageSection()}>
           <HeroDots plus={feature.slug === 'transactions' || feature.slug === 'tokens'} />
-          <Reveal className="flex flex-col items-center text-center">
-            <h1 className="text-balance font-sans text-[clamp(2.5rem,7vw,3.5rem)] text-foreground leading-[1.05] tracking-[-0.03em] antialiased">
-              {feature.title}
-            </h1>
-            <p className="mt-5 max-w-[560px] text-balance font-sans text-[16px] text-foreground/50 leading-[1.5] tracking-[0] lg:text-[18px]">
-              {feature.description}
-            </p>
-            <div className="mt-9 flex w-full max-w-[420px] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
+          <Reveal className={ui.reveal().className}>
+            <h1 {...ui.featurePageTitle()}>{feature.title}</h1>
+            <p {...ui.featurePageDescription()}>{feature.description}</p>
+            <div {...ui.featurePageLayout2()}>
               <Button
                 href={primaryAction.href}
                 variant="primary"
-                className="h-12 w-full px-6 sm:w-auto"
+                className={ui.featurePageButton().className}
               >
                 {primaryAction.label}
               </Button>
               {secondaryActions.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2.5 sm:contents">
+                <div {...ui.featurePageLayout3()}>
                   {secondaryActions.map((action) => (
                     <Button
                       key={action.label}
                       href={action.href}
                       variant="secondary"
                       arrow
-                      className="h-12 w-full px-4 sm:w-auto sm:px-6"
+                      className={ui.featurePageButton2().className}
                     >
                       {action.label}
                     </Button>
@@ -85,17 +82,13 @@ export default function FeaturePage({ params }: { params: FeatureParams }) {
         ) : feature.slug === 'tokens' ? (
           <TokensSections />
         ) : (
-          <div id="capabilities" className="scroll-mt-12 border-line border-t">
+          <div id="capabilities" {...ui.featurePageLayout4()}>
             {items.map((item, i) => (
               <Reveal key={item.label} delay={i * 50}>
-                <div className="grid gap-6 border-line border-b px-5 py-10 lg:grid-cols-2 lg:items-start lg:gap-12 lg:px-8">
-                  <div className="flex flex-col gap-2">
-                    <h3 className="font-sans text-[20px] text-foreground tracking-[0] lg:text-[24px]">
-                      {item.label}
-                    </h3>
-                    <p className="text-pretty font-sans text-[16px] text-foreground/50 leading-[1.4] tracking-[0] lg:max-w-[360px]">
-                      {item.desc}
-                    </p>
+                <div {...ui.featurePageLayout5()}>
+                  <div {...ui.featurePageLayout6()}>
+                    <h3 {...ui.featurePageHeading()}>{item.label}</h3>
+                    <p {...ui.featurePageDescription2()}>{item.desc}</p>
                   </div>
                   {item.code ? (
                     <CodePanel code={item.code} highlight={item.highlight} inline />

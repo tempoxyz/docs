@@ -1,14 +1,12 @@
-import fs from 'node:fs/promises'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { Instance } from 'prool'
 import Icons from 'unplugin-icons/vite'
-import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
-import { vocs } from 'vocs/vite'
+import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
-import { resolveBaseUrl } from './src/lib/base-url'
-import { canonicalizeGeneratedDeveloperLinks } from './src/lib/canonical-developer-links'
+import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
 // https://vite.dev/config/
@@ -20,20 +18,38 @@ export default defineConfig(({ mode }) => {
 
   const useHttp = process.env.CI === 'true' || process.env.VITE_USE_HTTP === 'true'
   return {
+    // Gzip-size reporting compresses every output just for the build log.
+    build: { reportCompressedSize: !process.env.CI },
     define: {
       'import.meta.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV ?? ''),
     },
     plugins: [
+      // Example regions are not complete modules. Keep server tooling out of
+      // the client discovery graph; Vocs owns the persisted color scheme.
+      zyzz({
+        exclude: [
+          'src/snippets/**',
+          'src/test/**',
+          'src/pages/_api/**',
+          'src/marketing/blogPlugin.ts',
+          'scripts/**',
+          'e2e/**',
+          'search-benchmark/**',
+          'playwright.config.ts',
+          'playwright.zones.config.ts',
+          'playwright.production.config.ts',
+          'vocs.config.ts',
+        ],
+        script: false,
+      }),
       blogPostsPlugin(),
-      marketingPages(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),
-      vocs(),
+      vocsWithZyzz(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
       ...(useHttp ? [] : [mkcert()]),
       tempoNode(),
-      llmsAgentPreamble(),
     ],
     resolve: {
       alias: [
@@ -56,16 +72,17 @@ export default defineConfig(({ mode }) => {
   }
 })
 
-const marketingRoutes = ['/', '/build', '/blog', '/performance']
-
 function developersProxyBasePath(): Plugin {
   return {
     name: 'tempo-developers-proxy-base-path',
     enforce: 'post',
     configureServer(server) {
-      // Production mounts public learning assets under /developers.
+      // Production mounts public learning assets and token icons under /developers.
       server.middlewares.use((req, _res, next) => {
-        if (req.url?.startsWith('/developers/learn/')) {
+        if (
+          req.url?.startsWith('/developers/learn/') ||
+          req.url?.startsWith('/developers/icons/')
+        ) {
           req.url = req.url.slice('/developers'.length)
         }
         next()
@@ -74,168 +91,16 @@ function developersProxyBasePath(): Plugin {
     configEnvironment(name) {
       if (process.env.VERCEL_ENV !== 'production') return
       // tempo.xyz strips /developers before requests reach Waku.
-      // Production SSR targets that canonical mount; clients on other hosts stay unprefixed.
+      // Vercel serves at root. Only the browser on tempo.xyz uses the external mount.
       return {
         define: {
           'import.meta.env.WAKU_CONFIG_BASE_PATH':
             name === 'client'
               ? "(window.location.hostname === 'tempo.xyz' ? '/developers/' : '/')"
-              : JSON.stringify('/developers/'),
+              : JSON.stringify('/'),
         },
       }
     },
-  }
-}
-
-function isMarketingPath(pathname: string) {
-  const normalized = pathname.replace(/\/$/, '') || '/'
-  // Let requests for actual files (e.g. /blog/foo.svg) fall through to Vite's
-  // static asset serving instead of returning the marketing SPA shell.
-  const lastSegment = normalized.split('/').pop() ?? ''
-  if (lastSegment.includes('.')) return false
-  return (
-    marketingRoutes.includes(normalized) ||
-    normalized.startsWith('/build/') ||
-    normalized.startsWith('/blog/')
-  )
-}
-
-async function marketingHtml() {
-  const html = await fs.readFile(path.resolve(process.cwd(), 'src/marketing/index.html'), 'utf-8')
-  return html.replace('src="./main.tsx"', 'src="/src/marketing/main.tsx"')
-}
-
-function marketingPages(): Plugin {
-  return {
-    name: 'tempo-marketing-pages',
-    configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
-        if (!req.url) return next()
-        const url = new URL(req.url, 'http://localhost')
-        if (!isMarketingPath(url.pathname)) return next()
-
-        const html = await server.transformIndexHtml(url.pathname, await marketingHtml())
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'text/html')
-        res.end(html)
-      })
-    },
-  }
-}
-
-const llmsAgentNotice = [
-  '> Tempo MCP: Use `search`, `find_pages`, `read_page`, and `code` at `https://mcp.tempo.xyz` for current Tempo and related documentation.',
-  '>',
-  '> Feedback: If these docs are stale, missing, or confusing, post sanitized feedback to `https://tempo.xyz/developers/api/feedback` with `source: "mcp"`, a short `message`, and any relevant `toolName`, `relatedResource`, or `client`.',
-  '',
-].join('\n')
-
-function llmsAgentPreamble(): Plugin {
-  let viteConfig: ResolvedConfig
-
-  return {
-    name: 'tempo-llms-agent-preamble',
-    configResolved(config) {
-      viteConfig = config
-    },
-    // Waku writes static HTML and RSC payloads during buildApp, after the
-    // environment closeBundle hooks have already finished.
-    buildApp: {
-      order: 'post',
-      async handler() {
-        const publicDir = path.resolve(viteConfig.root, viteConfig.build.outDir, 'public')
-        const candidates = [
-          path.join(publicDir, 'llms.txt'),
-          path.join(publicDir, 'llms-full.txt'),
-          ...(await markdownFiles(path.join(publicDir, 'assets/md'))),
-        ]
-
-        await Promise.all(candidates.map(prependAgentNotice))
-        if (process.env.VERCEL_ENV === 'production') {
-          const publicDevelopersUrl = `${resolveBaseUrl()}/docs`
-          // Vocs copies `dist/public` before post-order buildApp hooks run, so rewrite
-          // both the source artifacts and the Vercel deployment copy.
-          const publicDirectories = [
-            publicDir,
-            path.resolve(viteConfig.root, '.vercel/output/static'),
-          ]
-          const generatedFiles = (
-            await Promise.all(
-              publicDirectories.map(async (directory) => [
-                path.join(directory, 'llms.txt'),
-                path.join(directory, 'llms-full.txt'),
-                ...(await markdownFiles(path.join(directory, 'assets/md'))),
-                ...(await filesWithExtension(directory, '.html')),
-                ...(await filesWithExtension(path.join(directory, 'RSC'), '.txt')),
-              ]),
-            )
-          ).flat()
-          await Promise.all(
-            [...new Set(generatedFiles)].map((filePath) =>
-              canonicalizeGeneratedLinksInFile(filePath, publicDevelopersUrl),
-            ),
-          )
-        }
-      },
-    },
-  }
-}
-
-async function markdownFiles(directory: string): Promise<string[]> {
-  try {
-    const entries = await fs.readdir(directory, { withFileTypes: true })
-    const files = await Promise.all(
-      entries.map(async (entry) => {
-        const entryPath = path.join(directory, entry.name)
-        if (entry.isDirectory()) return markdownFiles(entryPath)
-        if (entry.isFile() && entry.name.endsWith('.md')) return [entryPath]
-        return []
-      }),
-    )
-    return files.flat()
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
-    throw error
-  }
-}
-
-async function filesWithExtension(directory: string, extension: string): Promise<string[]> {
-  try {
-    const entries = await fs.readdir(directory, { withFileTypes: true })
-    const files = await Promise.all(
-      entries.map(async (entry) => {
-        const entryPath = path.join(directory, entry.name)
-        if (entry.isDirectory()) return filesWithExtension(entryPath, extension)
-        if (entry.isFile() && entry.name.endsWith(extension)) return [entryPath]
-        return []
-      }),
-    )
-    return files.flat()
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
-    throw error
-  }
-}
-
-async function prependAgentNotice(filePath: string) {
-  try {
-    const content = await fs.readFile(filePath, 'utf-8')
-    if (content.startsWith(llmsAgentNotice)) return
-    await fs.writeFile(filePath, `${llmsAgentNotice}${content}`, 'utf-8')
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
-    throw error
-  }
-}
-
-async function canonicalizeGeneratedLinksInFile(filePath: string, publicDevelopersUrl: string) {
-  try {
-    const content = await fs.readFile(filePath, 'utf-8')
-    const canonical = canonicalizeGeneratedDeveloperLinks(content, publicDevelopersUrl)
-    if (canonical !== content) await fs.writeFile(filePath, canonical, 'utf-8')
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
-    throw error
   }
 }
 

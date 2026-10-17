@@ -1,4 +1,4 @@
-import { developersPath } from '../marketing/app/_lib/developersPaths'
+import { developersApiPath } from '../marketing/app/_lib/developersPaths'
 
 type ZoneTransportConfig = {
   onFetchRequest?: (
@@ -11,6 +11,9 @@ export const feeToken = '0x20c0000000000000000000000000000000000001' as const
 export const stablecoinDex = '0xDEc0000000000000000000000000000000000000' as const
 export const moderatoZoneFactory = '0x7Cc496Dc634b718289c192b59CF90262C5228545' as const
 export const zoneOutbox = '0x1c00000000000000000000000000000000000002' as const
+// Zone A/B sandbox deployment: onWithdrawalReceived(bytes32,address,uint128,bytes).
+// Keep its ABI and payload paired with this address, not the latest protocol source.
+// Deployment details: /docs/guide/private-zones#sandbox-router-deployment.
 export const swapAndDepositRouter = '0xf9b794e0dca9bc12ac90067df792d7aad33436e4' as const
 // Private sequencers currently only accept the raw transaction param on eth_sendRawTransactionSync.
 export const zoneRpcSyncTimeout = 0
@@ -100,7 +103,7 @@ export function getZoneTransportConfig(rpcUrl: string): ZoneTransportConfig | un
 
 export function getZoneRpcHttpUrl(zoneId: number, rpcUrl: string) {
   if (isDemoZoneRpc(zoneId, rpcUrl)) {
-    return developersPath(`/api/zone-rpc?zone=${zoneId}`)
+    return developersApiPath(`/api/zone-rpc?zone=${zoneId}`)
   }
 
   return stripRpcBasicAuth(rpcUrl)

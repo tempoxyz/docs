@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { paymentRoutes } from '../data/paymentRoutes'
-import { mainnetRoutesApiRoutes, routesApiRoutes } from '../data/routesApiCatalog'
-import { filterPaymentRoutes, type PaymentRouteFilters } from './PaymentRoutesExplorer'
+import { filterPaymentRoutes, type PaymentRouteFilters } from '../lib/payment-route-filters'
 
 const emptyFilters: PaymentRouteFilters = {
   sourceRail: '',
@@ -10,7 +9,6 @@ const emptyFilters: PaymentRouteFilters = {
   destinationCurrency: '',
   provider: '',
   category: '',
-  method: '',
 }
 
 describe('payment route explorer', () => {
@@ -61,35 +59,6 @@ describe('payment route explorer', () => {
         'Relay',
       ]),
     )
-  })
-
-  it('keeps testnet and provider coverage out of the default API catalog', () => {
-    const mainnet = mainnetRoutesApiRoutes()
-    expect(mainnet).toHaveLength(22)
-    expect(routesApiRoutes.filter((route) => route.testnet)).toHaveLength(2)
-    expect(mainnet.every((route) => !route.testnet && !('provider' in route))).toBe(true)
-    expect(new Set(routesApiRoutes.map((route) => route.id)).size).toBe(routesApiRoutes.length)
-  })
-
-  it('filters an API pair by assets and supported method', () => {
-    const pair = filterPaymentRoutes(routesApiRoutes, {
-      ...emptyFilters,
-      sourceRail: 'Base',
-      sourceCurrency: 'USDC',
-      destinationRail: 'Tempo',
-      destinationCurrency: 'USDC.e',
-      method: 'Transfer',
-    })
-    expect(pair).toHaveLength(1)
-    expect('methods' in pair[0] && pair[0].methods).toEqual(['Deposit address', 'Transfer'])
-
-    expect(
-      filterPaymentRoutes(routesApiRoutes, {
-        ...emptyFilters,
-        sourceRail: 'Polygon',
-        method: 'Transfer',
-      }),
-    ).toEqual([])
   })
 
   it('excludes withdrawn provider coverage from the October refresh', () => {

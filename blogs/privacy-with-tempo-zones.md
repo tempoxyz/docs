@@ -5,6 +5,7 @@ date: 2026-09-23
 category: technical
 authors: "Liam & Varun"
 ogImage: /blog/privacy-with-tempo-zones-thumbnail.png
+shareImage: /og/2026-q4/og_2026-q4_devblog_privacy-with-tempo-zones_linework-000_v02.png
 ---
 
 ## Introduction

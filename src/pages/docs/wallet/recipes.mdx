@@ -1,165 +1,92 @@
 ---
-title: "Tempo Wallet CLI: core flow recipes"
-seoTitle: "Tempo Wallet CLI Recipes | Docs"
-description: Use Tempo Wallet CLI recipes for agent setup, MPP service discovery, paid requests, credits, sessions, funding, and transfers.
+title: "tempo wallet recipes"
+seoTitle: "tempo wallet: Recipes | Tempo Docs"
+description: Let an agent pay for services, reconcile payment sessions, and recover a wallet connection.
+ogImage: /og/2026-q4/og_2026-q4_docs_wallet-recipes_title-f5_v02.png
 ---
 
-# Tempo Wallet CLI: core flow recipes
+import { Cards, Card } from 'vocs'
 
-## Tempo Wallet core flow
+<span id="tempo-wallet-cli-core-flow-recipes" />
 
-```bash
-tempo wallet -t whoami
-tempo wallet -t whoami --credits
-tempo wallet services --search ai
-tempo wallet services <SERVICE_ID>
-tempo request --dry-run <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
-tempo request --max-spend 1.00 <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
-```
+# `tempo wallet` recipes
 
-## Tempo Wallet operations
+Use these recipes after [signing in to Tempo Wallet](/docs/cli/wallet#sign-in). For the first paid request, follow [Pay with the CLI](/docs/guide/machine-payments/agent).
 
-```bash
-# Wallet readiness and balances
-tempo wallet whoami
-tempo wallet whoami --credits
+<span id="tempo-wallet-agent-pattern" />
+<span id="tempo-wallet-is-agent-ready-by-design" />
 
-# Key and spending-limit state
-tempo wallet keys
-tempo wallet revoke <ACCESS_KEY_ADDRESS> --dry-run
+## Let an agent pay for services
 
-# Fund wallet
-tempo wallet fund
-tempo wallet fund --credits
+Set up your agent with the [prompt on the CLI overview](/docs/cli#set-up-your-agent). It installs two skills in skill-enabled agents such as Claude Code, Amp, and Codex:
 
-# Transfer tokens
-tempo wallet transfer <AMOUNT> <TOKEN> <TO_ADDRESS> --dry-run
-tempo wallet transfer <AMOUNT> <TOKEN> <TO_ADDRESS>
-```
+| Skill | Description |
+| --- | --- |
+| `tempo-wallet` | Readiness checks, balances, service discovery, and session and funding actions. |
+| `tempo-request` | Paid HTTP requests with payment preview (`--dry-run`) and execution. |
 
-For machine-readable output:
+Tempo Wallet uses mainnet for live payments. Check the network and balance before authorizing spending, and set both limits:
 
-```bash
-tempo wallet -t whoami
-tempo wallet -t whoami --credits
-tempo wallet -t keys
-```
+- **Per command:** `tempo request --max-spend` caps one command's payment spending.
+- **Per account:** access-key limits apply separately to the signing key. See [Give an agent access](/docs/accounts/agents) for authorization and revocation.
 
-Use access-key spending limits and `tempo request --max-spend` for agent workflows. Credits are separate from token balances and only work with eligible one-time MPP charges.
+Service discovery returns endpoint metadata, and `--dry-run` reads the current payment terms without paying. Neither replaces handling the service's result or errors. For the commands, see [agent and script mode](/docs/cli/wallet#agent-and-script-mode).
 
-## Tempo Wallet service discovery
+<span id="tempo-wallet-core-flow" />
+<span id="tempo-wallet-service-discovery" />
+<span id="tempo-wallet-end-to-end-script-pattern" />
 
-```bash
-# Search services by keyword
-tempo wallet services --search ai
+<span id="tempo-wallet-request-execution" />
 
-# Inspect one service to see exact endpoints
-tempo wallet services <SERVICE_ID>
-```
+## Find and pay for a service
 
-Tip: copy endpoint URL, method, and payload shape directly from service details.
+Search with `tempo wallet services --search <QUERY>` and inspect the chosen service with `tempo wallet services <SERVICE_ID>`. Use its endpoint and schema in [`tempo request`](/docs/cli/request); preview with `--dry-run` and set `--max-spend` when paying.
 
-Service details also show pricing, payment mode, and whether `supportsCredits: true` is available.
+<span id="tempo-wallet-session-management" />
 
-## Tempo Wallet request execution
+## Reconcile and close payment sessions
 
-Preview before paying:
-
-```bash
-tempo request --dry-run <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
-```
-
-Execute paid request:
-
-```bash
-tempo request --max-spend 1.00 <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
-```
-
-Capture headers for a credits flow:
-
-```bash
-headers="$(mktemp)"
-tempo request -t --dry-run -D "$headers" -X POST --json '{"input":"hello"}' <SERVICE_ENDPOINT_URL>
-tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
-tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
-```
-
-## Tempo Wallet session management
-
-```bash
-# List sessions
+```bash [Terminal]
 tempo wallet sessions list
-
-# Reconcile local state against on-chain state
 tempo wallet sessions sync
-
-# Preview close operations first
 tempo wallet sessions close --dry-run --all
-
-# Close orphaned sessions
 tempo wallet sessions close --orphaned
-
-# Finalize channels pending close
 tempo wallet sessions close --finalize
 ```
 
-Sessions are MPP payment channels used by pay-as-you-go services. One-time charges may use direct token payment or MPP Credits when the service supports credits.
+`sync` reconciles local records with onchain state. Inspect the close preview before closing sessions. `--orphaned` targets orphaned onchain channels; `--finalize` completes channels already pending close.
 
-## Tempo Wallet agent and script mode
+<span id="tempo-wallet-operations" />
+<span id="tempo-wallet-agent-and-script-mode" />
+<span id="tempo-wallet-failure-recovery-shortcuts" />
 
-Use TOON output (`-t`) when command output is consumed by agents or scripts.
+## Recover the wallet connection
 
-```bash
-tempo wallet -t whoami
-tempo wallet -t services --search ai
-tempo wallet -t services <SERVICE_ID>
-tempo request -t --dry-run --max-spend 1.00 <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
-```
+Run `tempo wallet whoami` to inspect readiness and balances. If the access key is stale, run `tempo wallet refresh`. If you're signed out, run `tempo wallet login`.
 
-## Tempo Wallet failure recovery shortcuts
+For a request schema error, inspect `tempo wallet services <SERVICE_ID>`. For insufficient funds, [add funds](/docs/cli/wallet#add-funds). Add `-t` for machine-readable output in scripts.
 
-```bash
-# Wallet not ready / auth missing
-tempo wallet login
-tempo wallet -t whoami
+<span id="related-tempo-wallet-docs" />
 
-# Suspected key issue
-tempo wallet logout --yes
-tempo wallet login
-tempo wallet keys
-tempo wallet refresh
+## Related
 
-# Request failing due to payload/path mismatch
-tempo wallet services <SERVICE_ID>
-
-# Insufficient funds
-tempo wallet fund
-
-# Credit-eligible one-time MPP charge
-tempo wallet -t whoami --credits
-tempo wallet fund --credits
-```
-
-If issues persist, continue with [Troubleshooting](/docs/cli/wallet).
-
-## Tempo Wallet end-to-end script pattern
-
-```bash
-# 1) Ensure wallet is ready
-tempo wallet -t whoami
-
-# 2) Discover service details
-tempo wallet -t services --search ai
-
-# 3) Preview cost
-tempo request --dry-run <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
-
-# 4) Execute with a spend cap
-tempo request --max-spend 1.00 <SERVICE_ENDPOINT_URL> --json '{"input":"hello"}'
-```
-
-## Related Tempo Wallet docs
-
-1. [Reference](/docs/wallet/reference)
-2. [Wallet CLI Reference](/docs/cli/wallet)
-3. [Use with Agents](/docs/wallet/use-with-agents)
+<Cards>
+  <Card
+    title="tempo wallet"
+    description="Every wallet command and its options"
+    to="/docs/cli/wallet#commands"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="tempo request"
+    description="Request flags for paid HTTP calls"
+    to="/docs/cli/request#flags"
+    icon="lucide:send"
+  />
+  <Card
+    title="Give an agent access"
+    description="Authorize and revoke an agent's access key"
+    to="/docs/accounts/agents"
+    icon="lucide:bot"
+  />
+</Cards>

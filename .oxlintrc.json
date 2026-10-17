@@ -1,0 +1,62 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "off"
+  },
+  "jsPlugins": [
+    {
+      "name": "zyzz",
+      "specifier": "zyzz/oxlint"
+    }
+  ],
+  "settings": {
+    "zyzz": {
+      "imports": [
+        "../../../../styles/recipes",
+        "../../../../styles/scoped",
+        "../../../../styles/theme",
+        "../../../styles/controls",
+        "../../../styles/recipes",
+        "../../../styles/scoped",
+        "../../../styles/theme",
+        "../../styles/controls",
+        "../../styles/recipes",
+        "../../styles/scoped",
+        "../../styles/theme",
+        "../styles/recipes",
+        "../styles/scoped",
+        "../styles/theme",
+        "./scoped",
+        "./theme"
+      ]
+    }
+  },
+  "ignorePatterns": ["src/snippets/**", "src/pages/_api/**", "src/test/**", "**/*.test.*"],
+  "rules": {
+    "zyzz/valid-styles": "error",
+    "zyzz/no-conflicting-props": "error",
+    "zyzz/no-unused": "error",
+    "zyzz/use-logical-properties": "error",
+    "zyzz/restricted-properties": [
+      "error",
+      {
+        "transitionProperty": {
+          "reason": "List the properties that animate; avoid animating layout accidentally.",
+          "values": [
+            "color, background-color, border-color, opacity, transform",
+            "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to",
+            "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events",
+            "grid-template-rows",
+            "grid-template-rows,opacity,margin-top",
+            "height,background-color",
+            "none",
+            "opacity",
+            "opacity,scale",
+            "transform, translate, scale, rotate",
+            "width,height"
+          ]
+        }
+      }
+    ]
+  }
+}

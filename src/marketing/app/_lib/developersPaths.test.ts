@@ -26,3 +26,32 @@ describe('developersPath', () => {
     expect(developersPath('/build/tempo-transactions')).toBe('/developers/build/tempo-transactions')
   })
 })
+
+describe('developersApiPath', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+
+  it.each([
+    ['https://developers.tempo.xyz/docs/routes/test', '/api/routes-quote'],
+    ['https://tempo.xyz/developers/docs/routes/test', '/developers/api/routes-quote'],
+    ['https://tempo.xyz/developers', '/developers/api/routes-quote'],
+    ['https://tempo.xyz/developersx/docs', '/api/routes-quote'],
+    ['http://localhost:5173/docs/routes/test', '/api/routes-quote'],
+  ])('follows the mount the page was served from: %s', async (page, expected) => {
+    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.stubGlobal('location', new URL(page))
+    const { developersApiPath } = await import('./developersPaths')
+
+    expect(developersApiPath('/api/routes-quote')).toBe(expected)
+  })
+
+  it('uses the deployment mount without a page', async () => {
+    vi.stubEnv('VERCEL_ENV', 'production')
+    const { developersApiPath } = await import('./developersPaths')
+
+    expect(developersApiPath('/api/zone-rpc?zone=1')).toBe('/developers/api/zone-rpc?zone=1')
+  })
+})

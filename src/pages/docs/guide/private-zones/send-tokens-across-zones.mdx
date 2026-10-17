@@ -2,6 +2,7 @@
 title: Send tokens across zones
 description: Send OUSD from Zone A into Zone B by routing a same-token withdrawal through Tempo's L1 router and confirming the target deposit.
 interactive: true
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones-send-tokens-across-zones_title-f5_v02.png
 ---
 
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
@@ -16,9 +17,9 @@ export const crossZoneBalances = [
 
 # Send tokens across zones
 
-Move tokens from one Zone to another without changing the asset. This example sends `OUSD` test tokens between **Zone A** and **Zone B**, two Zones on Tempo Testnet. The transfer settles through the public chain before Zone B credits the balance.
+Send `OUSD` test tokens from **Zone A** to **Zone B** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). The transfer settles through the public chain before Zone B credits the balance.
 
-The flow uses `swapAndDepositRouter` on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `OUSD`, then deposit that `OUSD` into `Zone B`.
+The flow uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/private-zones#sandbox-router-deployment) on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `OUSD`, then deposit that `OUSD` into `Zone B`.
 
 <ZoneDiagram
   name="cross-zone-send"
@@ -28,8 +29,6 @@ The flow uses `swapAndDepositRouter` on the public chain in same-token mode: wit
 <a id="sending-pathusd-from-zone-a-into-zone-b" />
 
 ## Sending OUSD from Zone A into Zone B
-
-By the end of this guide you will have sent **25 OUSD** from **Zone A** into **Zone B** and confirmed the routed deposit.
 
 <Demo.Container
   name="Send tokens across zones"
@@ -42,7 +41,7 @@ By the end of this guide you will have sent **25 OUSD** from **Zone A** into **Z
 
 ## Code example
 
-This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token, router, and portal constants used throughout the zone guides.
+This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token and portal constants used throughout the zone guides. The router address below is specific to Moderato's Zone A and Zone B sandbox.
 
 The callback encoding below is specific to the legacy testnet router. Current routers require an encrypted deposit payload and a Tempo refund recipient. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this route to another deployment.
 
@@ -50,11 +49,11 @@ It shows the core routed send submission path; use the demo above when you want 
 
 ```ts
 import { encodeAbiParameters, parseUnits } from 'viem'
-import { Actions } from 'viem/tempo'
 
+const swapAndDepositRouter = '0xf9b794e0dca9bc12ac90067df792d7aad33436e4' as const
 const transferAmount = parseUnits('25', 6)
 
-await zoneAClient.zone.signAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
 const callbackData = encodeAbiParameters(
   [
@@ -68,7 +67,7 @@ const callbackData = encodeAbiParameters(
   [false, ousd, ZONE_B.portalAddress, rootClient.account.address, zeroBytes32, 0n],
 )
 
-const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
+const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
   account: rootClient.account,
   amount: transferAmount,
   data: callbackData,
@@ -79,12 +78,15 @@ const { receipt } = await Actions.zone.requestWithdrawalSync(zoneAClient, {
   token: ousd,
 })
 
+// This receipt confirms source submission. Verify L1 processing and destination credit next.
 console.log(receipt.blockNumber)
 ```
 
 ## What this routed send does
 
 The cross-zone transfer path looks like this: the token leaves `Zone A`, briefly lands on the public chain, and is deposited back into `Zone B` as the same asset.
+
+Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to confirm destination credit. Source receipt success alone does not prove the transfer completed.
 
 1. Withdraws `OUSD` from `Zone A` through `ZoneOutbox`.
 2. Routes that withdrawal to `swapAndDepositRouter` on Tempo.

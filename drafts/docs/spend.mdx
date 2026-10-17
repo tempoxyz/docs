@@ -1,0 +1,89 @@
+---
+title: "Spend"
+seoTitle: "Tempo Spend | Tempo Docs"
+description: "Plan stablecoin payments funded from approved balances and vault positions, with application permissions, spending limits, and delivery tracking."
+---
+
+import { Card, Cards } from 'vocs'
+
+# Spend
+
+Tempo Spend connects a stablecoin payment to the assets a user allows it to draw from. Use it for subscriptions, card funding, and other application-initiated payments without requiring users to move funds into a separate spending balance first.
+
+:::note[Integration availability]
+This page describes the Spend integration design. Confirm supported funding sources and Spend-specific interfaces with Tempo before implementation. The linked payment and access-key guides document the underlying Tempo primitives.
+:::
+
+## Separate payment permission from funding
+
+A Spend integration has two controls:
+
+- **Spending permission** defines what an application can pay: the payment token, amount limit, allowed calls, and expiry.
+- **Funding settings** define which assets can supply those payments, including supported stablecoins, [Earn](/docs/earn) positions, and private balances.
+
+The application requests a recipient, payment token, and amount. The funding flow obtains that amount from the approved sources. For example, a payment of 50 OUSD could use 20 OUSD already in the wallet and redeem another 30 OUSD from an approved vault.
+
+The application sees a 50 OUSD payment regardless of the funding split. Keeping funding settings separate from application permission lets the user change supported funding sources without expressing the application's budget in vault shares.
+
+## Define the application's authority
+
+Use a limited access key for an application that needs to submit payments while the user is offline. Tempo's [Account Keychain](/docs/protocol/transactions/AccountKeychain) supports token limits, expiry, and restrictions on contract calls. The account's root or admin authority controls those permissions and can revoke the key.
+
+Show the authorized token, amount, duration, expiry, and application identity before the user approves. Recurring native limits use fixed intervals in seconds: a 30-day interval is not a calendar month.
+
+A payment-token limit does not, by itself, bound the cost of obtaining that token. A funding integration also needs limits on the vault shares or swap inputs it can consume. Token allowances and contract-mediated transfers have separate semantics; use the [keychain's permission rules](/docs/protocol/transactions/AccountKeychain#access-keys) when designing the complete flow.
+
+## Track a payment through delivery
+
+Keep the business payment separate from its funding operations and transaction submissions.
+
+| Stage | What your application tracks |
+| --- | --- |
+| Requested | A stable payment identifier, account, recipient, token, and amount |
+| Preparing funds | Permission, approved sources, available liquidity, and any required withdrawal or conversion |
+| Submitted | The transaction hash or withdrawal request used to obtain and send funds |
+| Delivered | The intended recipient has received the required token and amount |
+| Failed or unresolved | The error, known transactions, and whether a retry is safe |
+
+A simulation checks a proposed transaction against current state; it does not reserve funds. Keep the original payment identifier on retries and reconcile an unknown outcome before submitting another payment.
+
+Confirm delivery from the resulting transfers. A successful TIP-20 transaction can redirect a blocked payment to the receive-policy guard rather than the intended recipient. Follow [receive-policy handling](/docs/guide/payments/configure-receive-policies) and the [transaction and transfer model](/docs/api/transactions-and-transfers) before marking the payment complete.
+
+For card integrations, track card authorization and onchain funding separately. A card authorization is not confirmation that the stablecoin payment settled.
+
+## Account for each funding source
+
+**Wallet balances** can fund a direct stablecoin payment. Start with the [send a payment guide](/docs/guide/payments/send-a-payment) to implement and verify that flow.
+
+**Earn positions** require a supported redemption path with enough available liquidity. Preserve any withdrawal waiting period in the payment state instead of treating the full position value as immediately spendable.
+
+**Private balances** require a [Zone withdrawal](/docs/protocol/zones/bridging#withdrawals-zone--tempo) before public-chain payment. Withdrawal and public settlement happen in stages. Zone authority is separate from public-chain authority; a public spending limit does not automatically constrain a key authorized inside a Zone. The public recipient and amount remain visible when funds leave the Zone.
+
+## Build the payment integration
+
+<Cards>
+  <Card
+    title="Send a payment"
+    icon="lucide:send"
+    description="Transfer stablecoins and confirm the recipient receives them."
+    to="/docs/guide/payments/send-a-payment"
+  />
+  <Card
+    title="Access-key permissions"
+    icon="lucide:key-round"
+    description="Configure limited keys, spending budgets, expiry, and call scopes."
+    to="/docs/protocol/transactions/AccountKeychain"
+  />
+  <Card
+    title="Payment reconciliation"
+    icon="lucide:receipt-text"
+    description="Attach transfer memos and connect payments to business records."
+    to="/docs/guide/payments/transfer-memos"
+  />
+  <Card
+    title="Sponsor transaction fees"
+    icon="lucide:badge-dollar-sign"
+    description="Pay transaction fees on behalf of your users."
+    to="/docs/guide/payments/sponsor-user-fees"
+  />
+</Cards>

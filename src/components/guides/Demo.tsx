@@ -1,23 +1,32 @@
 'use client'
 import { useQueryClient } from '@tanstack/react-query'
-import type { VariantProps } from 'cva'
 import * as React from 'react'
-import type { Address, BaseError } from 'viem'
+import { type Address, type BaseError, isAddressEqual } from 'viem'
 import { tempoModerato } from 'viem/chains'
-import { useAccount, useConnect, useConnections, useDisconnect } from 'wagmi'
+import { Abis } from 'viem/tempo'
+import {
+  useAccount,
+  useConnect,
+  useConnections,
+  useDisconnect,
+  useReadContract,
+  useWatchContractEvent,
+} from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { cx, type Props as StyleProps } from 'zyzz'
 import LucideCheck from '~icons/lucide/check'
 import LucideCopy from '~icons/lucide/copy'
 import LucideExternalLink from '~icons/lucide/external-link'
 import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
 import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
-import { cva, cx } from '../../../cva.config'
 import { usePostHogTracking } from '../../lib/posthog'
+import { button } from '../../styles/controls'
 import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Badge } from '../Badge'
 import { Container as ParentContainer } from '../Container'
 import { isFundableWalletConnector } from '../lib/wallets'
+import * as ui from './Demo.recipes'
 import { alphaUsd } from './tokens'
 
 export { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd } from './tokens'
@@ -49,16 +58,18 @@ export function ExplorerLink({ hash, inline = false }: { hash: string; inline?: 
   const url = `${getExplorerHost()}/tx/${hash}`
 
   return (
-    <div className={inline ? 'inline-flex' : 'mt-1'}>
+    <div
+      className={inline ? ui.explorerLinkLayout().className : ui.explorerLinkLayout2().className}
+    >
       <a
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-1 text-[13px] text-accent -tracking-[1%] hover:underline"
+        {...ui.explorerLinkLink()}
         onClick={() => trackExternalLinkClick(url, 'View receipt')}
       >
         View receipt
-        <LucideExternalLink className="size-3" />
+        <LucideExternalLink className={ui.lucideExternalLink().className} />
       </a>
     </div>
   )
@@ -69,12 +80,12 @@ export function ReceiptHash({ hash }: { hash: string }) {
   const { trackCopy } = usePostHogTracking()
 
   return (
-    <div className="mt-1 flex items-center gap-2 text-[13px] -tracking-[1%]">
-      <span className="text-gray9">Receipt hash</span>
-      <code className="min-w-0 break-all font-mono text-[12px] text-gray12">{hash}</code>
+    <div {...ui.receiptHashLayout()}>
+      <span {...ui.receiptHashText()}>Receipt hash</span>
+      <code {...ui.code()}>{hash}</code>
       <button
         type="button"
-        className="shrink-0 text-gray9 transition-colors hover:text-gray12"
+        {...ui.receiptHashButton()}
         onClick={() => {
           copyToClipboard(hash)
           trackCopy('code', hash)
@@ -82,7 +93,11 @@ export function ReceiptHash({ hash }: { hash: string }) {
         aria-label={copied ? 'Copied receipt hash' : 'Copy receipt hash'}
         title={copied ? 'Copied' : 'Copy receipt hash'}
       >
-        {copied ? <LucideCheck className="size-3" /> : <LucideCopy className="size-3" />}
+        {copied ? (
+          <LucideCheck className={ui.lucideExternalLink().className} />
+        ) : (
+          <LucideCopy className={ui.lucideExternalLink().className} />
+        )}
       </button>
     </div>
   )
@@ -103,16 +118,18 @@ export function ExplorerAccountLink({
   const url = `${getExplorerHost()}/address/${address}${tab ? `?tab=${tab}` : ''}`
 
   return (
-    <div className={inline ? 'inline-flex' : 'mt-1'}>
+    <div
+      className={inline ? ui.explorerLinkLayout().className : ui.explorerLinkLayout2().className}
+    >
       <a
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-1 text-[13px] text-accent -tracking-[1%] hover:underline"
+        {...ui.explorerLinkLink()}
         onClick={() => trackExternalLinkClick(url, label)}
       >
         {label}
-        <LucideExternalLink className="size-3" />
+        <LucideExternalLink className={ui.lucideExternalLink().className} />
       </a>
     </div>
   )
@@ -123,6 +140,7 @@ export function Container(
     {
       name: string
       showBadge?: boolean | undefined
+      showRestart?: boolean | undefined
     } & (
       | {
           footerVariant: undefined
@@ -139,7 +157,7 @@ export function Container(
     )
   >,
 ) {
-  const { children, name, showBadge = true } = props
+  const { children, name, showBadge = true, showRestart = true } = props
   const { address } = useAccount()
   const connections = useConnections()
   const disconnect = useDisconnect()
@@ -183,22 +201,16 @@ export function Container(
   return (
     <ParentContainer
       headerLeft={
-        <div className="flex items-center gap-1.5">
-          <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
-            {name}
-          </h4>
+        <div {...ui.containerLayout()}>
+          <h4 {...ui.containerHeading()}>{name}</h4>
           {showBadge && <Badge variant="blue">Demo</Badge>}
         </div>
       }
       headerRight={
         <div>
-          {address && (
-            <button
-              type="button"
-              onClick={restart}
-              className="flex items-center gap-1 text-[12.5px] text-gray9 leading-none tracking-[-1%]"
-            >
-              <LucideRotateCcw className="mt-px size-3 text-gray9" />
+          {showRestart && address && (
+            <button type="button" onClick={restart} {...ui.containerButton()}>
+              <LucideRotateCcw className={ui.lucideRotateCcw().className} />
               Restart
             </button>
           )}
@@ -206,82 +218,88 @@ export function Container(
       }
       footer={footerElement}
     >
-      <div className="space-y-4">{children}</div>
+      <div {...ui.containerLayout2()}>{children}</div>
     </ParentContainer>
   )
 }
 
 export namespace Container {
   function BalancesFooterItem(props: { address: Address; token: Address }) {
-    const queryClient = useQueryClient()
     const { address, token } = props
-    const {
-      data: balance,
-      isPending: balanceIsPending,
-      queryKey: balancesKey,
-    } = Hooks.token.useGetBalance({
+    const { data: balance, isPending: balanceIsPending } = Hooks.token.useGetBalance({
       account: address,
       token,
     })
-    const { data: metadata, isPending: metadataIsPending } = Hooks.token.useGetMetadata({
-      token,
+    // The footer shows only the symbol; full token metadata costs one RPC call per field.
+    const { data: symbol, isPending: symbolIsPending } = useReadContract({
+      address: token,
+      abi: Abis.tip20,
+      functionName: 'symbol',
     })
 
-    Hooks.token.useWatchTransfer({
-      token,
-      args: {
-        to: address,
-      },
-      onTransfer: () => {
-        queryClient.invalidateQueries({ queryKey: balancesKey })
-      },
-      enabled: !!address,
-    })
-
-    Hooks.token.useWatchTransfer({
-      token,
-      args: {
-        from: address,
-      },
-      onTransfer: () => {
-        queryClient.invalidateQueries({ queryKey: balancesKey })
-      },
-      enabled: !!address,
-    })
-
-    const isPending = balanceIsPending || metadataIsPending
-    const isUndefined = balance === undefined || metadata === undefined
+    const isPending = balanceIsPending || symbolIsPending
+    const isUndefined = balance === undefined || symbol === undefined
 
     return (
       <div>
         {isPending || isUndefined ? (
           <span />
         ) : (
-          <span className="flex gap-1">
-            <span className="text-gray10">{balance.formatted}</span>
-            {metadata.symbol}
+          <span {...ui.balancesFooterItemText()}>
+            <span {...ui.balancesFooterItemText2()}>{balance.formatted}</span>
+            {symbol}
           </span>
         )}
       </div>
     )
   }
 
+  // One filter per transfer direction covers every token, so a footer with five balances polls
+  // the public RPC as often as one with a single balance and stays under its per-client limit.
+  function useWatchBalanceTransfers(address: Address | undefined, tokens: Address[]) {
+    const queryClient = useQueryClient()
+    const onLogs = (logs: readonly { address: Address }[]) => {
+      for (const token of tokens)
+        if (logs.some((log) => isAddressEqual(log.address, token)))
+          queryClient.invalidateQueries({ queryKey: ['getBalance', { account: address, token }] })
+    }
+
+    useWatchContractEvent({
+      address: tokens,
+      abi: Abis.tip20,
+      eventName: 'Transfer',
+      args: { to: address },
+      enabled: !!address,
+      onLogs,
+    })
+
+    useWatchContractEvent({
+      address: tokens,
+      abi: Abis.tip20,
+      eventName: 'Transfer',
+      args: { from: address },
+      enabled: !!address,
+      onLogs,
+    })
+  }
+
   export function BalancesFooter(props: { address?: string | undefined; tokens: Address[] }) {
     const { address, tokens } = props
     const personalBalanceLabel = tokens.length > 1 ? 'Personal balances' : 'Personal balance'
+    useWatchBalanceTransfers(address as Address | undefined, tokens)
 
     return (
-      <div className="flex h-full flex-col gap-2 py-2 leading-none">
-        <div className="grid grid-cols-[7rem_1px_minmax(0,1fr)] items-center gap-x-2 gap-y-1">
-          <span className="text-gray10">{personalBalanceLabel}</span>
-          <div className="min-h-5 w-px self-stretch bg-gray4" />
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-3 sm:gap-y-2">
+      <div {...ui.balancesFooterLayout()}>
+        <div {...ui.balancesFooterLayout2()}>
+          <span {...ui.balancesFooterItemText2()}>{personalBalanceLabel}</span>
+          <div {...ui.balancesFooterLayout3()} />
+          <div {...ui.balancesFooterLayout4()}>
             {address ? (
               tokens.map((token) => (
                 <BalancesFooterItem key={token} address={address as Address} token={token} />
               ))
             ) : (
-              <span className="text-gray9">No account detected</span>
+              <span {...ui.receiptHashText()}>No account detected</span>
             )}
           </div>
         </div>
@@ -296,11 +314,11 @@ export namespace Container {
     const command = `pnpx gitpick ${src}`
 
     return (
-      <div className="flex w-full justify-between">
+      <div {...ui.sourceFooterLayout()}>
         {/** biome-ignore lint/a11y/noStaticElementInteractions: _ */}
         {/** biome-ignore lint/a11y/useKeyWithClickEvents: _ */}
         <div
-          className="flex cursor-pointer items-center gap-[6px] font-mono text-[12px] text-primary tracking-tight max-sm:hidden"
+          {...ui.sourceFooterLayout2()}
           onClick={() => {
             copy(command)
             trackCopy('command', command)
@@ -308,17 +326,17 @@ export namespace Container {
           title="Copy to clipboard"
         >
           <div>
-            <span className="text-gray10">pnpx gitpick</span> {src}
+            <span {...ui.balancesFooterItemText2()}>pnpx gitpick</span> {src}
           </div>
           {isCopied ? (
-            <LucideCheck className="size-3 text-gray10" />
+            <LucideCheck className={ui.lucideCheck().className} />
           ) : (
-            <LucideCopy className="size-3 text-gray10" />
+            <LucideCopy className={ui.lucideCheck().className} />
           )}
         </div>
-        <div className="text-[12px] text-accent tracking-tight">
+        <div {...ui.sourceFooterLayout3()}>
           <a
-            className="flex items-center gap-1"
+            {...ui.sourceFooterLink()}
             href={`https://github.com/${src}`}
             rel="noreferrer"
             target="_blank"
@@ -333,7 +351,7 @@ export namespace Container {
               trackExternalLinkClick(`https://github.com/${src}`, 'Source')
             }}
           >
-            Source <LucideExternalLink className="size-[12px]" />
+            Source <LucideExternalLink className={ui.lucideExternalLink2().className} />
           </a>
         </div>
       </div>
@@ -354,29 +372,26 @@ export function Step(
   const { actions, active, children, completed, error, number, title } = props
   return (
     <div data-active={active} data-completed={completed} className="group">
-      <header className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:justify-start">
-        <div className="flex items-center gap-3.5">
+      <header {...ui.stepHeader()}>
+        <div {...ui.stepLayout()}>
           <div
-            className={cx(
-              'flex size-7 shrink-0 items-center justify-center rounded-full text-center text-[13px] text-black tabular-nums opacity-40 group-data-[completed=true]:opacity-100 dark:text-white',
-              completed ? 'bg-green3' : 'bg-gray4',
+            {...cx(
+              ui.stepLayout2(),
+              !!completed && ui.stepLayout3(),
+              !completed && ui.stepLayout4(),
             )}
           >
-            {completed ? <LucideCheck className="text-green9" /> : number}
+            {completed ? <LucideCheck className={ui.lucideCheck2().className} /> : number}
           </div>
-          <div className="text-[14px] text-black -tracking-[1%] group-data-[active=false]:opacity-40 dark:text-white">
-            {title}
-          </div>
+          <div {...ui.stepLayout5()}>{title}</div>
         </div>
-        <div className="opacity-40 group-data-[active=true]:opacity-100 group-data-[completed=true]:opacity-100">
-          {actions}
-        </div>
+        <div {...ui.stepLayout6()}>{actions}</div>
       </header>
       {children}
       {error && (
         <>
-          <div className="h-2" />
-          <div className="rounded bg-destructiveTint px-3 py-2 font-normal text-[14px] text-destructive leading-normal -tracking-[2%]">
+          <div {...ui.stepLayout7()} />
+          <div role="alert" {...ui.stepLayout8()}>
             {'shortMessage' in error ? error.shortMessage : error.message}
           </div>
         </>
@@ -420,16 +435,16 @@ export function Login() {
     )
 
   return (
-    <div className="space-y-2">
+    <div {...ui.loginLayout()}>
       {connect.isPending ? (
         <Button disabled variant="default">
-          <LucidePictureInPicture2 className="mt-px" />
+          <LucidePictureInPicture2 className={ui.lucidePictureInPicture2().className} />
           Check prompt
         </Button>
       ) : (
         <Button
           variant="accent"
-          className="font-normal text-[14px] -tracking-[2%]"
+          className={ui.loginButton().className}
           onClick={async () => {
             await disconnect.disconnectAsync().catch(() => {})
             connect.connect({
@@ -445,7 +460,7 @@ export function Login() {
         </Button>
       )}
       {connect.error && (
-        <div className="max-w-[22rem] rounded bg-destructiveTint px-3 py-2 font-normal text-[13px] text-destructive leading-normal -tracking-[2%]">
+        <div {...ui.loginLayout2()}>
           {'shortMessage' in connect.error ? connect.error.shortMessage : connect.error.message}
         </div>
       )}
@@ -453,14 +468,14 @@ export function Login() {
   )
 }
 
-export function Logout() {
+export function Logout({ label = 'Sign out' }: { label?: string } = {}) {
   const { address, connector } = useAccount()
   const disconnect = useDisconnect()
   const [copied, copyToClipboard] = useCopyToClipboard()
   const { trackCopy, trackButtonClick } = usePostHogTracking()
   if (!address) return null
   return (
-    <div className="flex items-center gap-1">
+    <div {...ui.sourceFooterLink()}>
       <Button
         onClick={() => {
           copyToClipboard(address)
@@ -469,9 +484,9 @@ export function Logout() {
         variant="default"
       >
         {copied ? (
-          <LucideCheck className="mt-px text-gray9" />
+          <LucideCheck className={ui.lucideCheck3().className} />
         ) : (
-          <LucideWalletCards className="mt-px text-gray9" />
+          <LucideWalletCards className={ui.lucideCheck3().className} />
         )}
         {StringFormatter.truncate(address, {
           start: 6,
@@ -481,14 +496,14 @@ export function Logout() {
       </Button>
       <Button
         variant="destructive"
-        className="font-normal text-[14px] -tracking-[2%]"
+        className={ui.loginButton().className}
         onClick={() => {
           disconnect.disconnect({ connector })
-          trackButtonClick('Sign out', 'destructive')
+          trackButtonClick(label, 'destructive')
         }}
         type="button"
       >
-        Sign out
+        {label}
       </Button>
     </div>
   )
@@ -496,7 +511,7 @@ export function Logout() {
 
 export function Button(
   props: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> &
-    VariantProps<typeof buttonClassName> & {
+    StyleProps.Variants<typeof button> & {
       render?: React.ReactElement
     },
 ) {
@@ -505,7 +520,7 @@ export function Button(
   return (
     <Element
       disabled={disabled ? true : undefined}
-      className={buttonClassName({
+      {...button({
         className,
         disabled,
         size,
@@ -516,31 +531,6 @@ export function Button(
     />
   )
 }
-
-const buttonClassName = cva({
-  base: 'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-default disabled:opacity-50',
-  defaultVariants: {
-    size: 'default',
-    variant: 'default',
-  },
-  variants: {
-    disabled: {
-      true: 'pointer-events-none opacity-50',
-    },
-    size: {
-      default: 'min-h-10 px-4 py-2 text-[14px] leading-5',
-    },
-    static: {
-      true: 'pointer-events-none cursor-default',
-    },
-    variant: {
-      accent: 'border border-transparent bg-invert text-invert hover:opacity-90',
-      default:
-        'border border-[var(--line-strong)] bg-[var(--surface-card)] text-primary hover:bg-[var(--surface-panel)]',
-      destructive: 'border border-transparent bg-destructiveTint text-destructive hover:opacity-90',
-    },
-  },
-})
 
 export function useCopyToClipboard(props?: useCopyToClipboard.Props) {
   const { timeout = 1_500 } = props ?? {}
@@ -584,9 +574,8 @@ export declare namespace useCopyToClipboard {
 /** The Tempo "T" mark inside a square, with the T cut out. Inherits `currentColor`. */
 export function TempoMarkBoxed(props: { className?: string }) {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: _
     <svg
-      aria-hidden
+      aria-hidden="true"
       className={props.className}
       fill="currentColor"
       height="28"

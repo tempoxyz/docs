@@ -1,0 +1,293 @@
+{
+  "DFNS": {
+    "file": "dfns.svg",
+    "source": "https://dfns.co/logotype.svg",
+    "darkFile": "dfns-dark.svg",
+    "darkTreatment": "Dark text adapted for contrast; original geometry and brand colors retained."
+  },
+  "Dynamic": {
+    "file": "dynamic.svg",
+    "source": "https://cdn.prod.website-files.com/626692727bba3f384e008e8a/693845111bc07ac641926138_714a9e2b8dc77b2e4cd11c533e83ba38_logo.svg",
+    "darkFile": "dynamic-dark.svg",
+    "darkTreatment": "Dark text adapted for contrast; original geometry and brand colors retained."
+  },
+  "Turnkey": {
+    "file": "turnkey.svg",
+    "source": "https://cdn.prod.website-files.com/676848b756c25a3a99d7f262/691eebaa83af61f129213e45_Logo%20-%20Black.svg"
+  },
+  "0x": {
+    "file": "0x.svg",
+    "source": "https://cdn.prod.website-files.com/66967cfef0a246cbbb9aee94/66967cfef0a246cbbb9aeeee_logo.svg"
+  },
+  "Across": {
+    "file": "across.svg",
+    "source": "https://across.to/favicon.svg"
+  },
+  "SenseiNode": {
+    "file": "senseinode.svg",
+    "source": "https://cdn.prod.website-files.com/62c45e4db6125c609200cf9e/62d52fee0476b2ab2dc0d547_SenseiNode%20AbstractLogoBlue.svg"
+  },
+  "Alchemy": {
+    "file": "alchemy.svg",
+    "source": "https://media.alchemy.com/1715711987-alchemy-circle-icon.svg"
+  },
+  "Gem Wallet": {
+    "file": "gem-wallet.svg",
+    "source": "https://gemwallet.com/images/logo.svg"
+  },
+  "Blockradar": {
+    "file": "blockradar.svg",
+    "source": "https://www.blockradar.co/brand/blockradar-wordmark-inverted.svg"
+  },
+  "Cubist": {
+    "file": "cubist.svg",
+    "source": "https://cdn.prod.website-files.com/638a2693daaf8527290065a3/67e001a25cbde22c48073385_cubist-logomark.svg"
+  },
+  "Open USD (OUSD)": {
+    "file": "open-usd-ousd.svg",
+    "source": "https://joinopenstandard.com/brand/ousd-symbol.svg"
+  },
+  "Goldsky": {
+    "file": "goldsky.svg",
+    "source": "https://goldsky.com/images/favicon.svg?v2"
+  },
+  "SQD": {
+    "file": "sqd.svg",
+    "source": "https://sqd.dev/favicon.svg"
+  },
+  "Zerion": {
+    "file": "zerion.svg",
+    "source": "https://zerion.io/_next/static/media/zerion-logo.85fd1b5e.svg"
+  },
+  "BitGo": {
+    "file": "bitgo.svg",
+    "source": "https://www.bitgo.com/static/icons/favicon.svg"
+  },
+  "Luganodes": {
+    "file": "luganodes.svg",
+    "source": "https://luganodes.com/ln-logo/ln-logo-black.svg?dpl=dpl_7kkUtRkMZ964p7jo2iLybXcP4wzZ",
+    "darkFile": "luganodes-dark.svg",
+    "darkTreatment": "Dark text adapted for contrast; original geometry and brand colors retained."
+  },
+  "Rio": {
+    "file": "rio.svg",
+    "source": "https://www.rio.trade/images/rio---logo-01.svg",
+    "darkFile": "rio-dark.svg",
+    "darkTreatment": "Dark text adapted for contrast; original geometry and brand colors retained."
+  },
+  "dRPC": {
+    "file": "drpc.svg",
+    "source": "https://drpc.org/images/drpc_logo/full/svg/dRPC_fullcollor_white.svg"
+  },
+  "Mt Pelerin": {
+    "file": "mt-pelerin.svg",
+    "source": "https://www.mtpelerin.com/icons/safari-pinned-tab.svg"
+  },
+  "Brale": {
+    "file": "brale.svg",
+    "source": "https://brale.xyz/favicon/favicon.svg"
+  },
+  "MoonPay": {
+    "file": "moonpay.svg",
+    "source": "https://www.moonpay.com/logos/moonpay-dark.svg"
+  },
+  "Chainlink": {
+    "file": "chainlink-mark.svg",
+    "source": "https://cdn.prod.website-files.com/5f6b7190899f41fb70882d08/66560dd6ed44f1b79c527842_brand-logo-blue.svg",
+    "treatment": "Symbol cropped from official brand sheet; paths unchanged."
+  },
+  "Range": {
+    "file": "range.svg",
+    "source": "https://range.org/icon.svg?icon.0rtma5mit2tzh.svg"
+  },
+  "RedStone": {
+    "file": "redstone.svg",
+    "source": "https://www.redstone.finance/images/Redstone-Logo_2.svg"
+  },
+  "Safe": {
+    "file": "safe.svg",
+    "source": "https://safe.global/images/home/common/safe-labs.svg"
+  },
+  "Enact": {
+    "file": "enact.svg",
+    "source": "https://www.enact.finance/enact-logo-white.svg?dpl=dpl_45u2utxQEHshzgqD2vZvcC174Mho"
+  },
+  "Pimlico": {
+    "file": "pimlico.svg",
+    "source": "https://www.pimlico.io/images/brand/pimlico-logo.svg"
+  },
+  "Elliptic": {
+    "file": "elliptic.svg",
+    "source": "https://www.elliptic.co/favicon.svg"
+  },
+  "Hercle": {
+    "file": "hercle.svg",
+    "source": "https://www.hercle.com/favicon.svg"
+  },
+  "UR": {
+    "file": "ur.svg",
+    "source": "https://ur.app/images/tempo/ur-logo.svg?dpl=dpl_83RMq8dRdPsJFnhUoVsnDCaWn76j"
+  },
+  "ZeroDev": {
+    "file": "zerodev.svg",
+    "source": "https://zerodev.app/hero/zerodev-wordmark.svg"
+  },
+  "Codex": {
+    "file": "codex.svg",
+    "source": "https://www.codex.io"
+  },
+  "Crossmint": {
+    "file": "crossmint.svg",
+    "source": "https://www.crossmint.com",
+    "darkFile": "crossmint-dark.svg",
+    "darkTreatment": "Dark text adapted for contrast; original geometry and brand colors retained."
+  },
+  "Allium": {
+    "file": "allium.svg",
+    "source": "https://www.allium.so"
+  },
+  "Artemis": {
+    "file": "artemis.svg",
+    "source": "https://about.artemis.ai/"
+  },
+  "Coins.ph": {
+    "file": "coins-ph.svg",
+    "source": "https://www.coins.ph/en-ph/business",
+    "darkFile": "coins-ph-dark.svg",
+    "darkTreatment": "Dark text adapted for contrast; original geometry and brand colors retained."
+  },
+  "Para": {
+    "file": "para.svg",
+    "source": "https://www.getpara.com/"
+  },
+  "Uniswap": {
+    "file": "uniswap.svg",
+    "source": "https://developers.uniswap.org/docs/trading/swapping-api/getting-started"
+  },
+  "Tempo Explorer": {
+    "file": "tempo-explorer.svg",
+    "source": "https://explore.tempo.xyz"
+  },
+  "Bridge": {
+    "file": "bridge-mark.svg",
+    "source": "Existing Tempo brand asset: public/partners/bridge.svg",
+    "treatment": "Symbol cropped from official lockup; paths unchanged."
+  },
+  "Privy": {
+    "file": "privy.svg",
+    "source": "Existing Tempo brand asset: public/partners/privy.svg"
+  },
+  "Fireblocks": {
+    "file": "fireblocks.svg",
+    "source": "Existing Tempo brand asset: public/partners/fireblocks.svg"
+  },
+  "Blockaid": {
+    "file": "blockaid.svg",
+    "source": "Existing Tempo brand asset: public/partners/blockaid.svg"
+  },
+  "Chainalysis": {
+    "file": "chainalysis.svg",
+    "source": "Existing Tempo brand asset: public/partners/chainalysis.svg"
+  },
+  "TRM Labs": {
+    "file": "trm-labs.svg",
+    "source": "Existing Tempo brand asset: public/partners/trm.svg"
+  },
+  "LayerZero": {
+    "file": "layerzero.svg",
+    "source": "Existing Tempo brand asset: public/partners/layerzero.svg"
+  },
+  "Squid": {
+    "file": "squid.svg",
+    "source": "https://www.squidrouter.com"
+  },
+  "Utila": {
+    "file": "utila.svg",
+    "source": "https://utila.io"
+  },
+  "XFX": {
+    "file": "xfx.svg",
+    "source": "https://www.xfx.io/"
+  },
+  "Conduit": {
+    "file": "conduit.svg",
+    "source": "https://cdn.prod.website-files.com/66697b36164b98f5f5be828b/6745f778c640e3ad35d82993_Conduit%20Symbol%20Black.svg"
+  },
+  "Quicknode": {
+    "file": "quicknode.svg",
+    "source": "https://images.ctfassets.net/23fkqdsgbpuj/5BVMgz0rxErLyFqK72Oacp/0659ed67cdd12e34e1e6c8eb1e3c0a1f/Logo.svg"
+  },
+  "SonarX": {
+    "file": "sonarx.svg",
+    "source": "https://www.sonarx.com/sv-logo-white.svg"
+  },
+  "Coinbase": {
+    "file": "coinbase.svg",
+    "source": "https://mintcdn.com/coinbase-prod/B68gj-lD9xkJGij4/logos/wordmark-light.svg",
+    "darkFile": "coinbase-dark.svg",
+    "darkSource": "https://mintcdn.com/coinbase-prod/B68gj-lD9xkJGij4/logos/wordmark-dark.svg",
+    "treatment": "Coinbase symbol cropped from official documentation lockup; paths unchanged."
+  },
+  "Dune": {
+    "file": "dune.svg",
+    "source": "https://mintcdn.com/dune/zh-3B8LgVmyrKOaG/logo/dune-logo-light.svg",
+    "darkFile": "dune-dark.svg",
+    "darkSource": "https://mintcdn.com/dune/zh-3B8LgVmyrKOaG/logo/dune-logo-dark.svg"
+  },
+  "Tenderly": {
+    "file": "tenderly.svg",
+    "source": "https://mintcdn.com/tenderly/OpA99rKrR1G10AGk/logo/tenderly-logo-light-background.svg",
+    "darkFile": "tenderly-dark.svg",
+    "darkSource": "https://mintcdn.com/tenderly/OpA99rKrR1G10AGk/logo/tenderly-logo-dark-background.svg"
+  },
+  "Relay": {
+    "file": "relay.svg",
+    "source": "https://mintcdn.com/unevenlabs/Gbv82V37Oid9F6eG/logo/relay-black.svg",
+    "darkFile": "relay-dark.svg",
+    "darkSource": "https://mintcdn.com/unevenlabs/Gbv82V37Oid9F6eG/logo/relay-white.svg"
+  },
+  "Blockdaemon": {
+    "file": "blockdaemon.svg",
+    "source": "https://cdn.prod.website-files.com/6a454e50f799e4616f7f1eba/6a84e41e53e82d99bf0b1ed9_Purple-Logo%20Lockup.svg"
+  },
+  "Wirex": {
+    "file": "wirex-mark.png",
+    "source": "https://static.wixstatic.com/media/f627bc_368bdd9c95224947beecd1909708c11b~mv2.png"
+  },
+  "CoinGecko": {
+    "file": "coingecko.png",
+    "source": "https://mintcdn.com/coingecko/i9l2MT4etZGYjSx8/assets/logos/light.png",
+    "darkFile": "coingecko-dark.png",
+    "darkSource": "https://mintcdn.com/coingecko/i9l2MT4etZGYjSx8/assets/logos/dark.png"
+  },
+  "Rhino.fi": {
+    "file": "rhino-fi.png",
+    "source": "https://framerusercontent.com/images/qPFdvVMf4lSwLiWTMQL3D2g3s.png"
+  },
+  "Validation Cloud": {
+    "file": "validation-cloud.avif",
+    "source": "https://cdn.prod.website-files.com/653acce1d72443c35298481d/653acf45ffcda0e52d2348c9_Logo_Black%201%20(2).avif"
+  },
+  "Rabby": {
+    "file": "rabby-mark.png",
+    "source": "https://rabby.io/assets/images/favicon.png"
+  },
+  "Bitget Wallet": {
+    "file": "bitget-wallet-mark.png",
+    "source": "https://cdn.jjdsn.site/bgw-web-pro-static/17c3dc65b04a52709561f1c2f7d0ccd8/img/f84b9173413a.png"
+  },
+  "AllUnity": {
+    "file": "allunity.png",
+    "source": "https://framerusercontent.com/images/wHUFeofZ6TmZTzSQ1EspE7J8o.png",
+    "darkFile": "allunity-dark.png",
+    "darkSource": "https://framerusercontent.com/images/37LpMmjKickRaHlRROl0EkXIeg.png"
+  },
+  "Figure": {
+    "file": "figure.png",
+    "source": "https://cdn.figure.com/shared-assets/favicons/figuremarkets-v25/markets-v25-apple-touch-icon.png"
+  },
+  "Hastra": {
+    "file": "hastra.ico",
+    "source": "https://hastra.io/favicon.ico"
+  }
+}

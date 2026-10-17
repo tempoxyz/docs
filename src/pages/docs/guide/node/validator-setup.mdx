@@ -2,6 +2,7 @@
 title: "Validator onboarding"
 seoTitle: "Tempo Validator Onboarding | Docs"
 description: Generate signing keys and run your Tempo validator node for the first time.
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-node-validator-setup_title-f5_v02.png
 ---
 
 # Validator onboarding
@@ -51,12 +52,13 @@ The public key should match the output of the `generate-signing-key` command.
 
 ### Step 2: Create the add-validator signature
 
-The signature proves ownership of the ed25519 key being registered. Generate it with:
+The signature proves ownership of the ed25519 key being registered. Use the same encryption secret as in Step 1. The Bash/Zsh process substitution below streams it from your secret manager:
 
 ::::code-group
 ```bash [Mainnet]
 tempo consensus create-add-validator-signature \
   --signing-key <PRIVATE_KEY_PATH> \
+  --secret <(<ENCRYPTION_KEY_CMD>) \
   --validator-address <YOUR_VALIDATOR_ADDRESS> \
   --consensus.public-key <YOUR_PUBLIC_KEY> \
   --ingress <IP:PORT> \
@@ -67,6 +69,7 @@ tempo consensus create-add-validator-signature \
 ```bash [Testnet]
 tempo consensus create-add-validator-signature \
   --signing-key <PRIVATE_KEY_PATH> \
+  --secret <(<ENCRYPTION_KEY_CMD>) \
   --validator-address <YOUR_VALIDATOR_ADDRESS> \
   --consensus.public-key <YOUR_PUBLIC_KEY> \
   --ingress <IP:PORT> \
@@ -89,7 +92,7 @@ Provide the following values along with the signature to the Tempo team:
 | **Fee recipient** | Ethereum address (`0x…`) | The address that receives transaction fees from blocks your validator proposes. If you are not prepared to accept fees, use `0x0000000000000000000000000000000000000000`. |
 | **Signature** | `0x`-prefixed hex | The ed25519 signature proving you control the signing key (from [Step 2](#step-2-create-the-add-validator-signature)). |
 
-Once the Tempo team adds your validator on-chain, it will enter the active set in the [next epoch](/docs/guide/node/validator-status#state-transitions).
+Once the Tempo team adds your validator onchain, follow its [state transitions](/docs/guide/node/validator-status#state-transitions) through peer registration and distributed key generation to active participation.
 
 ## Running the validator
 
@@ -131,6 +134,27 @@ tempo node --datadir <datadir> \
 The notable difference between RPC nodes and validator nodes is the omission of the `--follow` argument and the addition of the `--consensus.signing-key` argument. If the signing key is encrypted, provide the encryption key with `--consensus.secret`.
 
 Once your node is up, it may not start syncing immediately. This is because your node might not be part of the active set. In most cases, your validator will enter the active set in under 6 hours after the on-chain addition of the validator identity.
+
+### Configure your firewall
+
+Other validators connect to your ingress `IP:port` over consensus P2P (`8000/TCP` by default) from their registered egress IPs, and your node connects out to theirs. Build the allowlist from `tempo consensus info`:
+
+::::code-group
+```bash [Mainnet]
+tempo consensus info --rpc-url https://rpc.tempo.xyz
+```
+```bash [Testnet]
+tempo consensus info --rpc-url https://rpc.testnet.tempo.xyz
+```
+::::
+
+Allow every validator in the `validators` output: inbound to your ingress port from each `egress` IP, and outbound to each `ingress` address.
+
+:::warning
+Do not build the allowlist from `ValidatorConfigV2.getActiveValidators()` alone. It returns the configured registry, not the committee consensus is using. A deactivated validator stays in the committee until a DKG ceremony removes it, and a failed DKG round keeps the previous committee in place. Your node connects to both the committee and the active registry; `tempo consensus info` returns both.
+:::
+
+The set can change in any finalized block, not only at epoch boundaries: validators can [update their IP addresses](/docs/guide/node/validator-lifecycle#update-ip-addresses), new validators can be registered, and existing validators can [rotate their identity](/docs/guide/node/validator-lifecycle#rotate-validator-identity). Automate the refresh and run it continuously rather than on a fixed schedule, and remove a validator's rules only after it no longer appears in the output. See [Validator network topology](/docs/guide/node/validator-topology#validator-firewall-policy) for the rest of the firewall policy.
 
 ### Optional flags
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment, useState } from 'react'
+import { cx as composeStyles } from 'zyzz'
 import FeatureDiagram from '../diagrams/_components/FeatureDiagram'
 import type { FeatureDiagramSpec } from '../diagrams/_lib/featureDiagram'
 import Button from './Button'
@@ -9,10 +10,11 @@ import EdgeMarkers from './EdgeMarkers'
 import ModeToggle, { type ShowcaseMode } from './ModeToggle'
 import { panelFadeClass } from './panelFade'
 import Reveal from './Reveal'
+import * as ui from './TokensShowcase.recipes'
 
 const VISUAL_HEIGHT = 'lg:h-[424px]'
 const CODE_HEIGHT = 'max-h-[390px]'
-const DIAGRAM_CONTAINER = 'p-6 lg:min-h-0 lg:p-10'
+const DIAGRAM_CONTAINER = ui.tokensShowcaseStateState().className
 const SHOWCASE_HEIGHT = 'lg:min-h-[560px]'
 
 type Row = {
@@ -250,7 +252,7 @@ const rows: Row[] = [
 function VisualMock({ active }: { active: Row }) {
   return (
     // Bleed over the visual column padding so the diagram sets the full frame.
-    <div className={`${VISUAL_HEIGHT} lg:-mx-10`}>
+    <div className={`${VISUAL_HEIGHT} ${ui.visualMockLayout().className} `}>
       <FeatureDiagram spec={active.spec} containerClassName={DIAGRAM_CONTAINER} />
     </div>
   )
@@ -270,15 +272,11 @@ export default function TokensShowcase() {
       {/* Mirror of TransactionsShowcase: content column first in the DOM so
           mobile stacks heading-first, reversed on desktop so the visual sits
           on the left. */}
-      <Reveal
-        className={`relative border border-line lg:flex ${SHOWCASE_HEIGHT} lg:flex-row-reverse lg:items-stretch`}
-      >
+      <Reveal className={` ${ui.reveal().className} ${SHOWCASE_HEIGHT} ${ui.reveal2().className} `}>
         <EdgeMarkers wideOnly />
-        <div className="flex flex-col justify-center bg-surface-shell p-7 lg:w-1/2 lg:p-12">
-          <h2 className="max-w-[520px] font-sans text-[clamp(1.5rem,5vw,2.5rem)] text-foreground leading-[1.1] tracking-[-0.02em] antialiased">
-            Stablecoin-native tokens.
-          </h2>
-          <div className="-mx-7 mt-8 border-line border-y lg:-mx-12">
+        <div {...ui.tokensShowcaseLayout()}>
+          <h2 {...ui.tokensShowcaseHeading()}>Stablecoin-native tokens.</h2>
+          <div {...ui.tokensShowcaseLayout2()}>
             {rows.map((row, i) => (
               <button
                 key={row.title}
@@ -287,26 +285,28 @@ export default function TokensShowcase() {
                 onFocus={() => selectRow(i)}
                 onClick={() => selectRow(i)}
                 aria-pressed={active === i}
-                className={`group flex w-full items-start justify-between gap-6 border-line border-b px-7 py-5 text-left last:border-b-0 lg:px-12 ${
-                  active === i ? 'text-foreground' : 'text-foreground/55 hover:text-foreground/80'
-                }`}
+                {...composeStyles(
+                  ui.tokensShowcaseButton({ className: 'group' }),
+                  !!(active === i) && ui.tokensShowcaseButton2(),
+                  !(active === i) && ui.tokensShowcaseButton3(),
+                )}
               >
                 <span>
-                  <span className="block font-sans text-[20px] leading-[1.2] tracking-[0]">
-                    {row.title}
-                  </span>
-                  <span className="mt-2 block max-w-[560px] font-sans text-[14px] text-foreground/55 leading-[1.45] tracking-[0] group-hover:text-foreground/65">
-                    {row.desc}
-                  </span>
+                  <span {...ui.tokensShowcaseText()}>{row.title}</span>
+                  <span {...ui.tokensShowcaseText2()}>{row.desc}</span>
                 </span>
                 <span
-                  aria-hidden
-                  className={`mt-1.5 size-2 shrink-0 ${active === i ? 'bg-foreground' : 'bg-foreground/25'}`}
+                  aria-hidden="true"
+                  {...composeStyles(
+                    ui.tokensShowcaseText3(),
+                    !!(active === i) && ui.tokensShowcaseText4(),
+                    !(active === i) && ui.tokensShowcaseText5(),
+                  )}
                 />
               </button>
             ))}
           </div>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 lg:justify-start">
+          <div {...ui.tokensShowcaseLayout3()}>
             <Button href="/docs/protocol/tip20/overview" variant="primary">
               Explore TIP-20
             </Button>
@@ -316,11 +316,11 @@ export default function TokensShowcase() {
           </div>
         </div>
 
-        <div className="relative flex min-h-[360px] items-center justify-center border-line border-t p-6 pt-18 lg:w-1/2 lg:border-t-0 lg:border-r lg:p-10 lg:pt-18">
-          <div className="absolute top-6 right-6 z-20 lg:top-8 lg:right-10">
+        <div {...ui.tokensShowcaseLayout4()}>
+          <div {...ui.tokensShowcaseLayout5()}>
             <ModeToggle mode={mode} setMode={setMode} />
           </div>
-          <div className="grid w-full max-w-[560px] grid-cols-1">
+          <div {...ui.tokensShowcaseLayout6()}>
             {rows.map((row, i) => (
               <Fragment key={row.title}>
                 <div
@@ -331,7 +331,7 @@ export default function TokensShowcase() {
                 </div>
                 <div
                   inert={!(i === active && mode === 'code')}
-                  className={`${panelFadeClass(i === active && mode === 'code')} pb-16`}
+                  className={`${panelFadeClass(i === active && mode === 'code')} ${ui.tokensShowcaseLayout7().className} `}
                 >
                   <CodeWindow
                     title={row.panelTitle}

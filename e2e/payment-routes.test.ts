@@ -1,68 +1,71 @@
 import { expect, test } from '@playwright/test'
 
-const route = '/docs/ecosystem/payment-routes'
+const route = '/docs/partners/payment-routes'
 
-test('serves API coverage without JavaScript and filters a mainnet pair', async ({
+test('serves provider research without JavaScript and separates API support', async ({
   page,
   request,
 }) => {
   const response = await request.get(route)
   expect(response.status()).toBe(200)
-  const html = await response.text()
+  const html = (await response.text()).replaceAll(/<!--.*?-->/g, '')
   expect(html).toContain('<table')
-  expect(html.match(/<tr(?:\s|>)/g)).toHaveLength(23)
-  expect(html).toContain('OUSD')
-  expect(html).toContain('Deposit address, Transfer')
+  expect(html.includes('Reviewed October 6, 2026')).toBe(true)
+  expect(html).toContain('Provider documentation snapshots')
 
   await page.goto(route, { waitUntil: 'networkidle' })
-  await expect(page.getByRole('combobox', { name: 'Catalog', exact: true })).toHaveValue('api')
-  await expect(page.getByRole('status')).toHaveText('22 routes')
-  await expect(page.getByRole('columnheader', { name: 'Provider', exact: true })).toHaveCount(0)
-  await page.getByRole('combobox', { name: 'Source chain', exact: true }).selectOption('Base')
-  await page.getByRole('combobox', { name: 'Source asset', exact: true }).selectOption('USDC')
-  await page
-    .getByRole('combobox', { name: 'Destination asset', exact: true })
-    .selectOption('USDC.e')
-  await page.getByRole('combobox', { name: 'Method', exact: true }).selectOption('Transfer')
-  await expect(page.getByRole('status')).toHaveText('1 route')
+  await expect(page.getByRole('status').filter({ hasText: 'provider entries' })).toHaveText(
+    '582 provider entries',
+  )
+  await expect(page.getByRole('combobox', { name: 'Catalog', exact: true })).toHaveCount(0)
   await expect(
-    page.getByRole('cell', { name: 'Deposit address, Transfer', exact: true }),
-  ).toHaveCount(1)
-  await page.getByRole('button', { name: 'Reset filters' }).click()
-  await expect(page.getByRole('status')).toHaveText('22 routes')
-  await page.getByRole('checkbox', { name: 'Include testnet routes' }).check()
-  await expect(page.getByRole('status')).toHaveText('24 routes')
-  await expect(page.getByRole('cell', { name: 'alphaUSD', exact: true })).toHaveCount(2)
-})
-
-test('keeps provider coverage separate and resets filters when switching catalogs', async ({
-  page,
-}) => {
-  await page.goto(route, { waitUntil: 'networkidle' })
-  await page.getByRole('combobox', { name: 'Source chain', exact: true }).selectOption('Base')
-  await page.getByRole('combobox', { name: 'Catalog', exact: true }).selectOption('providers')
-  await expect(page.getByRole('columnheader', { name: 'Provider', exact: true })).toBeVisible()
-  await expect(page.getByRole('status')).toHaveText('582 routes')
-  await expect(
-    page.getByText('These providers offer their own products and onboarding.', { exact: false }),
-  ).toBeVisible()
-  await page.getByRole('button', { name: 'Show more' }).click()
-  await expect(page.locator('tbody tr')).toHaveCount(200)
+    page.getByRole('link', { name: 'Supported routes', exact: true }).first(),
+  ).toHaveAttribute('href', '/docs/routes/networks')
   await page.getByRole('combobox', { name: 'Provider', exact: true }).selectOption('Bridge')
   await page
     .getByRole('combobox', { name: 'Source rail or chain', exact: true })
     .selectOption('ACH')
-  await expect(page.getByRole('status')).toHaveText('5 routes')
-  await page.getByRole('combobox', { name: 'Catalog', exact: true }).selectOption('api')
-  await expect(page.getByRole('status')).toHaveText('22 routes')
+  await page.getByRole('combobox', { name: 'Source currency', exact: true }).selectOption('USD')
+  await expect(page.getByRole('status').filter({ hasText: 'provider entries' })).toHaveText(
+    '5 provider entries',
+  )
+  await expect(page.locator('tbody tr')).toHaveCount(5)
+  await page.getByRole('button', { name: 'Reset filters' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'provider entries' })).toHaveText(
+    '582 provider entries',
+  )
+  await expect(page.locator('tbody tr')).toHaveCount(100)
+  await page.getByRole('button', { name: 'Show more' }).click()
+  await expect(page.locator('tbody tr')).toHaveCount(200)
 })
 
-test('keeps the mobile document within the viewport', async ({ page }) => {
+test('supports empty filters and preserves the old explorer URL', async ({ page, request }) => {
+  const response = await request.get('/docs/ecosystem/payment-routes', { maxRedirects: 0 })
+  expect(response.status()).toBe(301)
+  expect(response.headers().location).toContain('/docs/partners/payment-routes')
+  await page.goto(route, { waitUntil: 'networkidle' })
+  await page.getByRole('combobox', { name: 'Provider', exact: true }).selectOption('Kraken')
+  await page.getByRole('combobox', { name: 'Source currency', exact: true }).selectOption('BRL')
+  await expect(page.getByRole('status').filter({ hasText: 'provider entries' })).toHaveText(
+    '0 provider entries',
+  )
+  await expect(
+    page.getByText('No provider entries match these filters. Reset to try another pair.'),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Reset filters' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'provider entries' })).toHaveText(
+    '582 provider entries',
+  )
+})
+
+test('keeps provider research and corridor planning usable on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(route, { waitUntil: 'networkidle' })
-  await expect(page.getByRole('combobox', { name: 'Catalog', exact: true })).toBeVisible()
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  await page.getByRole('combobox', { name: 'Catalog', exact: true }).selectOption('providers')
   await expect(page.getByRole('combobox', { name: 'Provider', exact: true })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+  await page.goto('/docs/partners/payment-corridors', { waitUntil: 'networkidle' })
+  await expect(
+    page.getByRole('heading', { name: 'Plan a payment corridor', level: 1 }),
+  ).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
 })

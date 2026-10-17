@@ -2,6 +2,7 @@
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { useWebAuthnConnector } from '../../wagmi.config'
 import { Button, useHydrated } from './Demo'
+import * as ui from './EmbedPasskeys.recipes'
 
 export function EmbedPasskeys() {
   const account = useAccount()
@@ -27,7 +28,7 @@ export function EmbedPasskeys() {
 
   if (account.address)
     return (
-      <div className="flex items-center gap-2">
+      <div {...ui.embedPasskeysLayout()}>
         <Button
           onClick={() => disconnect.disconnect({ connector: account.connector })}
           variant="destructive"
@@ -63,8 +64,8 @@ export function SignInButtons() {
     )
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-1">
+    <div {...ui.signInButtonsLayout()}>
+      <div {...ui.signInButtonsLayout2()}>
         <Button
           variant="accent"
           onClick={async () => {
@@ -97,10 +98,7 @@ export function SignInButtons() {
         </Button>
       </div>
       {connect.error && (
-        <div
-          className="max-w-[22rem] rounded bg-destructiveTint px-3 py-2 font-normal text-[13px] text-destructive leading-normal -tracking-[2%]"
-          role="alert"
-        >
+        <div {...ui.signInButtonsLayout3()} role="alert">
           {'shortMessage' in connect.error ? connect.error.shortMessage : connect.error.message}
         </div>
       )}

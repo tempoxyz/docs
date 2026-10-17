@@ -1,11 +1,12 @@
 ---
 title: Monitoring a validator
 description: Monitor validator health with metrics, Grafana dashboards, and log management.
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-node-validator-monitoring_title-f5_v02.png
 ---
 
 # Monitoring a validator
 
-This guide covers how to monitor your Tempo validator's health, diagnose issues, and manage logs.
+Monitor your Tempo validator's health, diagnose issues, and manage logs. These examples assume execution metrics are enabled with `--metrics 9000`. Consensus metrics listen on `127.0.0.1:8001` by default; use `--consensus.metrics-address` to change that address.
 
 ## Consensus states
 
@@ -22,14 +23,18 @@ If this counter is increasing, your validator is actively proposing blocks.
 
 ### Voter
 
-Your validator is voting on blocks proposed by others (notarization and finalization). This is the most common state.
+To confirm your validator has started voting, check its outbound notarize and finalize votes:
 
 ```bash
-# Inbound voting messages (should increase steadily)
-curl -s localhost:8002/metrics | grep consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total | grep data_0
+# Individual votes sent by your node
+curl -s localhost:8001/metrics \
+  | grep '^consensus_engine_epoch_manager_simplex_voter_outbound_messages_total{' \
+  | grep -E 'message="(Notarize|Finalize)"'
 ```
 
-This counter should increase steadily when your node is participating in consensus.
+Increasing counters confirm your node is signing and attempting to broadcast votes.
+
+The same outbound metric counts certificates under `message="Notarization"`, `"Finalization"`, and `"Nullification"`. A node observing an epoch without a signing share can broadcast certificates built from other validators' votes, so keep the individual-vote filter above.
 
 ## Execution states
 
@@ -39,7 +44,7 @@ Your node is syncing historical blocks.
 
 ```bash
 # Check sync stage
-curl -s localhost:6060/metrics | grep reth_sync_checkpoint
+curl -s localhost:9000/metrics | grep reth_sync_checkpoint
 ```
 
 If `reth_sync_checkpoint` shows stages other than `Finish`, you're still syncing.
@@ -50,7 +55,7 @@ Your node is fully synced and processing new blocks in real-time.
 
 ```bash
 # Processed height should match or be close to finalized height
-curl -s localhost:8002/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
+curl -s localhost:8001/metrics | grep -E "marshal_finalized_height|marshal_processed_height"
 ```
 
 Both values should be nearly equal and increasing together.
@@ -67,6 +72,7 @@ Both values should be nearly equal and increasing together.
 | `consensus_engine_marshal_processed_height` | Latest height your node has processed | Critical when it hasn't increased in an hour, warning when it's behind finalized height | Your node is processing blocks |
 | `consensus_engine_peer_manager_peers` | Number of peers registered with the consensus peer manager | Warning when it's below the expected validator count, critical when it's 0 | Your node is registered with consensus peers |
 | `consensus_engine_epoch_manager_simplex_batcher_inbound_messages_total` | Number of inbound messages related to voting on the consensus layer | Warning when it's not increasing and your node is synced | Your node is receiving voting messages from the consensus layer |
+| `consensus_engine_epoch_manager_simplex_voter_outbound_messages_total` | Number of outbound votes and certificates, distinguished by `message` | Warning when `Notarize` and `Finalize` counters stop increasing while your node is synced and expected to vote | Your node is attempting to broadcast votes when filtered to `Notarize` and `Finalize`; certificate broadcasts also occur in observer mode |
 | `consensus_application_parent_ahead_of_local_time` | Number of times the parent block timestamp was ahead of local time | Warning when it increases frequently | Your node's clock may be out of sync — check NTP configuration |
 | `reth_sync_checkpoint` | Current sync progress | Warning on when there are no changes in the `Finish` stage | Your node is syncing with the network |
 | `reth_payloads_resolved_block` | Number of built and resolved payloads | Warning when it hasn't increased in 12 hours | Your node has built and resolved blocks |
@@ -97,7 +103,7 @@ The dashboard uses these template variables:
 | `loki_ds` | Loki datasource (for log-based panels) |
 | `network_name` | Filter by network/validator job name |
 
-Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8002/metrics`).
+Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8001/metrics`).
 
 ## Log management
 

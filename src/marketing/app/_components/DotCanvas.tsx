@@ -1,6 +1,7 @@
 'use client'
 
 import { type ReactNode, useEffect, useRef } from 'react'
+import * as ui from './DotCanvas.recipes'
 import type { DotPattern, LitCell } from './dotPatterns'
 
 // Grid geometry from Figma (node 561:2991): 4px squares on an 18px pitch.
@@ -299,10 +300,10 @@ export default function DotCanvas({ className, pattern, children }: Props) {
   return (
     <div
       ref={containerRef}
-      aria-hidden
-      className={`pointer-events-none absolute inset-0 ${className ?? ''}`}
+      aria-hidden="true"
+      className={` ${ui.dotCanvasLayout().className} ${className ?? ''}`}
     >
-      <canvas ref={canvasRef} className="block h-full w-full" />
+      <canvas ref={canvasRef} {...ui.canvas()} />
       {children}
     </div>
   )

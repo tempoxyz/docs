@@ -1,5 +1,7 @@
 'use client'
 
+import { cx as composeStyles } from 'zyzz'
+import * as ui from './ModeToggle.recipes'
 export type ShowcaseMode = 'visual' | 'code'
 
 export default function ModeToggle({
@@ -15,19 +17,19 @@ export default function ModeToggle({
   } satisfies Record<ShowcaseMode, string>
 
   return (
-    <div className="flex justify-end">
-      <span className="flex border border-line bg-surface-shell">
+    <div {...ui.modeToggleLayout()}>
+      <span {...ui.modeToggleText()}>
         {(['visual', 'code'] as const).map((option) => (
           <button
             key={option}
             type="button"
             onClick={() => setMode(option)}
             aria-pressed={mode === option}
-            className={`h-8 border-line border-r px-3 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors last:border-r-0 ${
-              mode === option
-                ? 'bg-surface-card-elev text-foreground'
-                : 'text-foreground/55 hover:bg-surface-block hover:text-foreground/70'
-            }`}
+            {...composeStyles(
+              ui.modeToggleButton(),
+              !!(mode === option) && ui.modeToggleButton2(),
+              !(mode === option) && ui.modeToggleButton3(),
+            )}
           >
             {labels[option]}
           </button>
