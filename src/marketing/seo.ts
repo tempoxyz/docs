@@ -23,7 +23,14 @@ export function absoluteUrl(base: string, pathname: string): string {
   return base ? `${base}${normalized}` : normalized
 }
 
-/** Production HTML must link to the docs mount even before router hydration. */
+/**
+ * The production proxy strips /developers before requests reach Waku, so
+ * developersProxyBasePath in vite.config.ts uses / on the server and
+ * /developers/ in browsers on tempo.xyz. Waku Link therefore emits /blog/...
+ * during SSR, pointing crawlers to missing marketing pages.
+ * Blog cards use <a> with this URL until routing and rendered link bases can be
+ * separated. This preserves crawlable URLs at the cost of full-page navigation.
+ */
 export function blogPostHref(slug: string, vercelEnv = import.meta.env.VERCEL_ENV): string {
   return absoluteUrl(
     vercelEnv === 'production' ? 'https://tempo.xyz/developers' : '',
