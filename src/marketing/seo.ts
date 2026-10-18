@@ -32,10 +32,7 @@ export function absoluteUrl(base: string, pathname: string): string {
  * separated. This preserves crawlable URLs at the cost of full-page navigation.
  */
 export function blogPostHref(slug: string, vercelEnv = import.meta.env.VERCEL_ENV): string {
-  return absoluteUrl(
-    vercelEnv === 'production' ? 'https://tempo.xyz/developers' : '',
-    `/blog/${slug}`,
-  )
+  return absoluteUrl(vercelEnv === 'production' ? '/developers' : '', `/blog/${slug}`)
 }
 
 // The renderer only reads `title`, `section`, and `subsection` — keep the

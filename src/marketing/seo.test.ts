@@ -4,7 +4,7 @@ import { blogPostHref, blogPostImageUrl, blogPostJsonLd, ogImageUrl, type PostSe
 
 describe('blog post links', () => {
   it.each([
-    ['production', 'https://tempo.xyz/developers/blog/t6'],
+    ['production', '/developers/blog/t6'],
     ['preview', '/blog/t6'],
     ['', '/blog/t6'],
   ])('links to the served post in %s', (environment, expected) => {
