@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Link } from 'waku'
 import { ChevronText } from '../../../../components/ChevronLink'
 import { Tabs } from '../../../../components/Tabs'
+import { blogPostHref } from '../../../seo'
 import { categories, type PostMeta } from '../_lib/categories'
 import {
   tempoBlogEmpty,
@@ -67,8 +67,8 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
         <ul className={`tempo-blog-post-list ${tempoBlogPostList().className}`}>
           {visible.map((post) => (
             <li key={post.slug}>
-              <Link
-                to={`/blog/${post.slug}`}
+              <a
+                href={blogPostHref(post.slug)}
                 className={`tempo-blog-post-card ${tempoBlogPostCard().className}`}
               >
                 <span className={`tempo-blog-post-thumbnail ${tempoBlogPostThumbnail().className}`}>
@@ -84,7 +84,7 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
                   </p>
                   <PostByline post={post} />
                 </div>
-              </Link>
+              </a>
             </li>
           ))}
         </ul>

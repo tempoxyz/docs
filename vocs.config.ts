@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
   developerSurfaceRedirects,
@@ -12,6 +13,8 @@ import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
+import { transformMarkdownOutput } from './src/lib/markdown-output-transform'
+import { renderMermaid } from './src/lib/markdown-renderers'
 import { annotateRoutesAvailability } from './src/lib/routes-openapi'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 
@@ -22,7 +25,11 @@ const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/op
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
-const tempoChangelog = Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' })
+// Page renders, Markdown exports, and builds share one GitHub request per cache window.
+const tempoChangelog = cacheChangelog(
+  Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
+  { name: 'tempoxyz/tempo' },
+)
 
 const changelog = Changelog.from({
   ...tempoChangelog,
@@ -259,6 +266,17 @@ export default defineConfig({
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
   markdown: {
+    output: {
+      validation: 'fail',
+      transform: transformMarkdownOutput,
+      // These modules depend on browser styles/hooks. Resolve by module + export
+      // without importing their React implementations during Markdown generation.
+      components: ['MermaidDiagram', 'StaticMermaidDiagram'].map((name) => ({
+        module: `./src/components/${name}.tsx`,
+        export: name,
+        render: renderMermaid,
+      })),
+    },
     rehypePlugins: [rehypeCompactShikiStyles],
     outputRemarkPlugins: [plainMarkdownComponents],
   },
@@ -603,6 +621,8 @@ export default defineConfig({
         text: 'Routes',
         items: [
           { text: 'Introduction', link: '/docs/routes' },
+          { text: 'Try a route', link: '/docs/routes/test' },
+          { text: 'Set up API access', link: '/docs/routes/api-setup' },
           { text: 'Supported routes', link: '/docs/routes/networks' },
           { text: 'Quotes and fees', link: '/docs/routes/quotes' },
           { text: 'Accept deposits', link: '/docs/routes/deposits' },
@@ -611,10 +631,8 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Integration guides',
+        text: 'cURL examples',
         items: [
-          { text: 'Test a route', link: '/docs/routes/test' },
-          { text: 'API setup', link: '/docs/routes/api-setup' },
           { text: 'Deposit address example', link: '/docs/routes/examples/deposits' },
           { text: 'Transfer example', link: '/docs/routes/examples/transfers' },
         ],
@@ -784,13 +802,17 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
+                text: 'T13',
+                badge: { text: 'Upcoming', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t13',
+              },
+              {
                 text: 'T12',
-                badge: { text: 'Testnet', variant: 'info' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
                 text: 'T11',
-                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t11',
               },
               {

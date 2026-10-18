@@ -1,7 +1,7 @@
 ---
 title: "tempo wallet recipes"
 seoTitle: "tempo wallet: Recipes | Tempo Docs"
-description: Let an agent pay for services, pay a captured MPP challenge with credits, reconcile payment sessions, and recover a wallet connection.
+description: Let an agent pay for services, reconcile payment sessions, and recover a wallet connection.
 ogImage: /og/2026-q4/og_2026-q4_docs_wallet-recipes_title-f5_v02.png
 ---
 
@@ -36,26 +36,11 @@ Service discovery returns endpoint metadata, and `--dry-run` reads the current p
 <span id="tempo-wallet-service-discovery" />
 <span id="tempo-wallet-end-to-end-script-pattern" />
 
+<span id="tempo-wallet-request-execution" />
+
 ## Find and pay for a service
 
 Search with `tempo wallet services --search <QUERY>` and inspect the chosen service with `tempo wallet services <SERVICE_ID>`. Use its endpoint and schema in [`tempo request`](/docs/cli/request); preview with `--dry-run` and set `--max-spend` when paying.
-
-<span id="tempo-wallet-request-execution" />
-
-## Pay a captured challenge with credits
-
-Check that the service supports MPP Credits and that the separate credits balance covers the request. Capture the challenge without paying, then preview and execute the credit payment:
-
-```bash [Terminal]
-tempo wallet -t whoami --credits
-headers="$(mktemp)"
-tempo request -t --dry-run -D "$headers" \
-  --json '{"input":"hello"}' <SERVICE_URL>/<ENDPOINT_PATH>
-tempo wallet -t transfer --credits --dry-run --mpp-challenge-file "$headers"
-tempo wallet -t transfer --credits --mpp-challenge-file "$headers"
-```
-
-Replace the URL and payload with the service's request schema. Credits are separate from token balances and apply only to eligible one-time charges.
 
 <span id="tempo-wallet-session-management" />
 

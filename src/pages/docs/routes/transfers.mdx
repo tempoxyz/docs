@@ -11,11 +11,17 @@ import { OpenApi } from 'vocs'
 
 Move stablecoins when your application can authorize the source transaction through a wallet or its own signer. Routes prepares the source calls; your application signs them and tracks delivery.
 
-## Set up Routes API access
+<span id="set-up-routes-api-access" />
 
-Create a key with `routes:read` and `routes:write` using [API setup](/docs/routes/api-setup). Choose the networks and tokens from [Supported routes](/docs/routes/networks). The request builders below expose the API fields and copyable code samples.
+## Prepare a transfer route
 
-The example fixes the source amount with `exactSource`. Check that the selected route supports it. The [complete cURL example](/docs/routes/examples/transfers) shows every input and request in one place.
+Before the first step, have:
+
+- A backend key with `routes:read` and `routes:write` from [Set up API access](/docs/routes/api-setup).
+- A route with transfer support from [Supported routes](/docs/routes/networks). This guide fixes the source amount with `exactSource`, so check that the route lists that mode.
+- A signer for the sender account on the source network, such as a connected wallet or your own signing service. The Routes API key does not authorize that account.
+
+Each step below has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test). The [cURL example](/docs/routes/examples/transfers) runs every step from a terminal.
 
 <span id="submit-and-track-a-transfer" />
 
@@ -31,13 +37,13 @@ The example fixes the source amount with `exactSource`. Check that the selected 
 
 A quote prices the request; it does not reserve or create a transfer.
 
-### Review fees
+<span id="review-fees" />
 
-Show the source amount, expected destination amount, minimum destination amount, and fees. `destinationAmount` includes route deductions; an empty `fees` array does not mean the route is free. Check `quote.expiresAt` and refresh expired terms.
+Show the source amount, destination amount, minimum destination amount, and fees as described in [Quotes and fees](/docs/routes/quotes). Refresh the quote when `quote.expiresAt` passes.
 
 ### Create the transfer
 
-Set a unique `idempotency-key` for this operation. Reuse it when retrying the create request with unchanged inputs.
+Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stored for this payment.
 
 <OpenApi.Playground operationId="createRoutesTransfer" anchors={false} />
 
@@ -49,9 +55,9 @@ Save the returned transfer `id` and retain its unsigned `action`. Review the ret
 
 Use the source account's signer to submit the returned calls in order. Calls can include approvals and may require separate transactions. Handle the returned `action.type` using the [EVM or Tron action format](/docs/api/routes/transfers).
 
-For an `evm:calls` action, pass each call's `to`, `data`, and `value` to your source-chain wallet client. Wait for successful execution before the next call, and retain all hashes as `transactionHashes`. If submission stops partway through, inspect the transactions already sent before resuming. The Routes API key does not authorize the source account.
+For an `evm:calls` action, pass each call's `to`, `data`, and `value` to your source-chain wallet client. Wait for successful execution before the next call, and retain all hashes as `transactionHashes`. If submission stops partway through, inspect the transactions already sent before resuming.
 
-On Tempo, [Tempo Wallet](/docs/accounts/integrate) submits every call as one atomic transaction, so the sender signs once. Try both paths in the [Routes API demo](/docs/routes/test).
+On Tempo, [Tempo Wallet](/docs/accounts/integrate) submits every call as one atomic transaction, so the sender signs once. [Try a route](/docs/routes/test) to compare both paths.
 
 ### Register the source transactions
 
@@ -67,6 +73,8 @@ The API verifies and associates the hashes with the transfer.
 
 <OpenApi.Playground operationId="getRoutesTransfer" anchors={false} />
 
-Keep the payment pending until `status` is `completed`. Reconcile the delivered amount and destination transaction references. Follow [Track delivery](/docs/routes/delivery) for failures and refunds.
+Keep the payment pending until `status` is `completed`. Reconcile the delivered amount and destination transaction references.
 
 :::::
+
+Continue with [Track delivery](/docs/routes/delivery) for every status, failures, and refunds.

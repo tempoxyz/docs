@@ -22,10 +22,10 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
 - API reference (`/docs/api`) is its own top-nav link, matching Console's "API Docs" link. Partners (`/docs/partners`) contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
 - Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
-- `SKILL.md` is the docs site's published skill. The installable plugin's skill lives in `tempoxyz/plugins`; update it separately when routing changes.
-- `src/lib/ai-docs.ts` and the Vite build hook generate `llms.txt`, `llms-full.txt`, Markdown section context, and the published skill from source. Never edit `dist` or `.vercel` copies by hand.
+- `public/SKILL.md` is the canonical Tempo docs skill, published at `/SKILL.md`. The `tempoxyz/plugins` copy is generated from it by that repo's skill sync, so edit only `public/SKILL.md` here.
+- `src/lib/markdown-output-transform.ts` uses `src/lib/ai-docs.ts` to add section context before Vocs validates and writes Markdown exports. `SKILL.md` links to `public/SKILL.md`, the source Vite serves and copies. Never edit `dist` or `.vercel` copies by hand.
 - After changing navigation or exported components, build and run `pnpm check:markdown` to check content and IA coverage. Keep Markdown exports useful without interactive UI.
-- When a top-nav section is added, renamed, or removed, update its routing description in `src/lib/ai-docs.ts`, the routing table in `SKILL.md`, and the tests that name sections (`DocsHeader.test.ts`, `ai-docs.test.ts`, `ai-docs-dev.test.ts`, `markdown-output.test.ts`).
+- When a top-nav section is added, renamed, or removed, update its routing description in `src/lib/ai-docs.ts`, the routing table in `SKILL.md`, and the tests that name sections (`DocsHeader.test.ts`, `ai-docs.test.ts`, `markdown-output-transform.test.ts`, `markdown-output.test.ts`).
 
 ### API reference sidebar
 
@@ -35,7 +35,7 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Keep the API reference to API pages: endpoints, authentication, conventions, and API guides. Client libraries live under Get Started › Tempo SDK; the Tempo API client for TypeScript (`tapimo`) is at `/docs/sdk/typescript/api-client`.
 - A single-tag section renders its operations directly under the section header, so give that tag the section's name as its `x-displayName`.
 - When renaming or merging a tag, set `x-pagePath` to keep the existing URL; the display name otherwise changes the page path.
-- The `introFlat`, `hide`, `groupExtrasByName`, and `sectionExtras` sidebar options are local additions to vocs. Ship them through `patches/vocs@2.8.5.patch`, including their types, or upstream.
+- The `introFlat`, `hide`, `groupExtrasByName`, and `sectionExtras` sidebar options are local additions to vocs. Ship them through `patches/vocs@2.10.3.patch`, including their types, or upstream.
 
 ### Moving, renaming, or removing pages
 
@@ -79,9 +79,12 @@ Use `pnpm`.
 - Vocs reads `vocs.config.ts` (sidebar, redirects, OpenAPI options) only at startup and does not watch it. Batch config edits, then restart once to check them.
 - Vite restarts the server by itself when a file imported by `vite.config.ts` changes, including `src/lib/ai-docs.ts` and `src/lib/docs-sections.ts`. Make all edits to those files in one pass.
 - Adding or deleting a page file also restarts the server, so routes stay current.
-- The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting. If responses stay slow (20 seconds or more per page) after many edits, one restart clears it.
+- The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting.
 - Check rendered pages with headless Playwright screenshots against the running server. Wait for React hydration before clicking sidebar controls.
-- If the server runs out of memory, start it with `NODE_OPTIONS=--max-old-space-size=16384`. Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
+- Heap use stays flat across MDX edits, repeat page loads, and Markdown requests (`.md` twins, `curl`). Node cannot unload ES modules, so two kinds of edits still keep memory: an edit to `vocs.config.ts` or a file it imports keeps one copy of the config (about 15 MB), and an edit to a component that a page renders standalone (`<Component />`) keeps one copy of the component modules (50–125 MB) once a Markdown request follows. Restart after many of those edits. Vocs reuses config loads and shares one Markdown component loader; `src/test/vocs-config-resolve.test.ts` fails if a Vocs upgrade drops the config reuse.
+- Each newly compiled page adds 10–15 MB, so loading about 100 distinct pages passes Node's default heap limit. For broad checks such as crawling the site, start the server with `NODE_OPTIONS=--max-old-space-size=16384`.
+- The changelog fetches GitHub releases at most every 10 minutes and serves the last result when GitHub rate-limits. Set `GITHUB_TOKEN` to raise the limit.
+- Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
 
 Before finishing docs-only changes, run at least `pnpm check:types` when practical. Run `pnpm build` for config, component, routing, sidebar, or MDX structure changes. Run targeted tests for changed interactive components.
 
@@ -288,3 +291,7 @@ Blog-specific instructions live in `blogs/AGENTS.md`. Read that file before edit
 - Confirm renamed headings preserve important anchors.
 - Run the generic-heading scan for touched Markdown/MDX files.
 - Run the most relevant validation command for the change size.
+
+## Generated Markdown
+
+Follow [MARKDOWN.md](./MARKDOWN.md) for component contracts, validation, and overrides. Add renderer tests and run `pnpm check:markdown` after building.

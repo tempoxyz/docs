@@ -18,12 +18,15 @@ concurrency:
 jobs:
   verify:
     name: ${{ matrix.name }}
-    runs-on: ${{ matrix.target == 'e2e' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    # Site builds are mostly single-threaded plugin work, so Depot's faster cores
+    # roughly halve them. Set the DEPOT_DISABLED variable to fall back to GitHub.
+    runs-on: ${{ startsWith(matrix.runner, 'depot-') && vars.DEPOT_DISABLED == 'true' && 'ubuntu-latest' || matrix.runner }}
     container: ${{ matrix.container }}
-    # Vocs compiles five environments; the enforced Zyzz contract takes ~4–6
-    # minutes per environment on CI. Keep cheap checks on the existing budget.
-    timeout-minutes: ${{ matrix.target == 'check' && 15 || 35 }}
+    # Site builds compile five Vite environments; keep headroom over the build.
+    timeout-minutes: ${{ matrix.target == 'check' && 15 || 20 }}
     permissions:
+      # E2E shards read the E2E Build artifact from this run.
+      actions: read
       contents: read
       id-token: write
     # Report cheap failures early and cancel sibling builds/tests on failure.
@@ -33,26 +36,43 @@ jobs:
         include:
           - target: check
             name: Check
+            runner: ubuntu-latest
             shard: 0
             container: ''
           - target: production
             name: Sitemap
+            runner: depot-ubuntu-latest-8
             shard: 0
             container: ''
+          # One build serves every E2E shard. It runs in the shards' container so
+          # absolute paths in the server output match where the shards serve it.
+          - target: e2e-build
+            name: E2E Build
+            runner: depot-ubuntu-latest-8
+            shard: 0
+            container:
+              image: mcr.microsoft.com/playwright:v1.61.1-noble
+              options: --user 1001
+          # Depot shares egress IPs, which exhaust Moderato's anonymous per-IP
+          # connection limit. Live tests send Moderato RPC through the Tempo API
+          # with TEMPO_RPC_API_KEY, which reaches the RPC as an authenticated client.
           - target: e2e
             name: E2E Tests (1/3)
+            runner: depot-ubuntu-latest-8
             shard: 1
             container:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
               options: --user 1001
           - target: e2e
             name: E2E Tests (2/3)
+            runner: depot-ubuntu-latest-8
             shard: 2
             container:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
               options: --user 1001
           - target: e2e
             name: E2E Tests (3/3)
+            runner: depot-ubuntu-latest-8
             shard: 3
             container:
               image: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -60,10 +80,10 @@ jobs:
 
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+        uses: tempoxyz/gh-actions/actions/secure-runner@947d9a3ccb2425a9c94d563fd721cc0e33c89e26 # 2026-10-15T00-15-06Z-947d9a3c
         with:
           # Container jobs cannot be hardened in-place and lack the GitHub CLI.
-          disable-enforcement: ${{ matrix.target == 'e2e' }}
+          disable-enforcement: ${{ startsWith(matrix.target, 'e2e') }}
 
       - name: Clone repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -71,7 +91,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+        uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@947d9a3ccb2425a9c94d563fd721cc0e33c89e26 # 2026-10-15T00-15-06Z-947d9a3c
         with:
           run_install: false
           version: 10.28.1
@@ -89,6 +109,9 @@ jobs:
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: node-cache-${{ runner.os }}-${{ steps.pnpm-store.outputs.arch }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          # A lockfile change still reuses every unchanged package in the store.
+          restore-keys: |
+            node-cache-${{ runner.os }}-${{ steps.pnpm-store.outputs.arch }}-pnpm-
 
       - name: Install dependencies
         run: |
@@ -132,18 +155,20 @@ jobs:
           node --experimental-strip-types scripts/fetch-openapi.ts "$RUNNER_TEMP/openapi.json"
           echo "OPENAPI_SPEC_URL=$RUNNER_TEMP/openapi.json" >> "$GITHUB_ENV"
 
-      # Vocs keys snippets by content; also invalidate when their type environment changes.
+      # Vocs keys Twoslash snippets by content. Their type environment is the
+      # installed packages, so key on the lockfile and patches; source edits
+      # would otherwise miss on nearly every run. Bump v2 if Twoslash options change.
       # Graphite checks its own 24-hour TTL and route coverage before using cached links.
       - name: Cache documentation build inputs
-        if: matrix.target != 'check'
+        if: matrix.target == 'production' || matrix.target == 'e2e-build'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             node_modules/.cache/vocs/twoslash
             node_modules/.cache/graphite-related-docs.json
-          key: docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.target }}-${{ matrix.shard }}
+          key: docs-inputs-${{ runner.os }}-v2-${{ hashFiles('pnpm-lock.yaml', 'patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.target }}-${{ matrix.shard }}
           restore-keys: |
-            docs-inputs-${{ runner.os }}-v1-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', '*.ts', '*.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx', 'src/**/*.json', 'scripts/**', 'patches/**') }}-
+            docs-inputs-${{ runner.os }}-v2-${{ hashFiles('pnpm-lock.yaml', 'patches/**') }}-
 
       # The Check sibling validates types once; builds preserve the normal site pipeline.
       - name: Build
@@ -168,7 +193,7 @@ jobs:
         run: pnpm run check:markdown
 
       - name: Build app for E2E
-        if: matrix.target == 'e2e'
+        if: matrix.target == 'e2e-build'
         run: node scripts/guard-vocs-config.mjs && pnpm run build:site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -176,15 +201,43 @@ jobs:
           VITE_E2E: "true"
           VITE_USE_HTTP: "true"
 
+      - name: Upload app for E2E
+        if: matrix.target == 'e2e-build'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-dist-${{ github.run_attempt }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+          # Shards wait on this upload; speed matters more than size.
+          compression-level: 1
+
+      - name: Wait for app build
+        id: e2e-build
+        if: matrix.target == 'e2e'
+        run: node scripts/wait-for-e2e-build.mjs "E2E Build" e2e-dist
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Download app for E2E
+        if: matrix.target == 'e2e'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ${{ steps.e2e-build.outputs.name }}
+          path: dist
+          github-token: ${{ github.token }}
+          run-id: ${{ github.run_id }}
+
       - name: Run Playwright tests
         if: matrix.target == 'e2e'
         run: |
           pnpm exec playwright test --list --reporter=./scripts/playwright-shard-reporter.ts > "$RUNNER_TEMP/e2e-tests.txt"
           test -s "$RUNNER_TEMP/e2e-tests.txt"
-          pnpm run test:e2e --workers=4 --test-list "$RUNNER_TEMP/e2e-tests.txt"
+          pnpm run test:e2e --workers=6 --test-list "$RUNNER_TEMP/e2e-tests.txt"
         env:
           E2E_SHARD: ${{ matrix.shard }}
           E2E_SHARDS: 3
+          TEMPO_RPC_API_KEY: ${{ secrets.TEMPO_RPC_API_KEY }}
 
       - name: Upload test results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -202,7 +255,7 @@ jobs:
       id-token: write
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@55fe3b63d9612623cc51e6c62d9d62fbcb175fb0 # 2026-09-29T01-25-15Z-55fe3b63
+        uses: tempoxyz/gh-actions/actions/secure-runner@947d9a3ccb2425a9c94d563fd721cc0e33c89e26 # 2026-10-15T00-15-06Z-947d9a3c
 
       - name: Verify required jobs
         run: |

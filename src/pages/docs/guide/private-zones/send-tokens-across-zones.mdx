@@ -19,7 +19,7 @@ export const crossZoneBalances = [
 
 Send `OUSD` test tokens from **Zone A** to **Zone B** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). The transfer settles through the public chain before Zone B credits the balance.
 
-The flow uses `swapAndDepositRouter` on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `OUSD`, then deposit that `OUSD` into `Zone B`.
+The flow uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/private-zones#sandbox-router-deployment) on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `OUSD`, then deposit that `OUSD` into `Zone B`.
 
 <ZoneDiagram
   name="cross-zone-send"
@@ -41,7 +41,7 @@ The flow uses `swapAndDepositRouter` on the public chain in same-token mode: wit
 
 ## Code example
 
-This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token, router, and portal constants used throughout the zone guides.
+This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token and portal constants used throughout the zone guides. The router address below is specific to Moderato's Zone A and Zone B sandbox.
 
 The callback encoding below is specific to the legacy testnet router. Current routers require an encrypted deposit payload and a Tempo refund recipient. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this route to another deployment.
 
@@ -50,6 +50,7 @@ It shows the core routed send submission path; use the demo above when you want 
 ```ts
 import { encodeAbiParameters, parseUnits } from 'viem'
 
+const swapAndDepositRouter = '0xf9b794e0dca9bc12ac90067df792d7aad33436e4' as const
 const transferAmount = parseUnits('25', 6)
 
 await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
@@ -77,12 +78,15 @@ const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
   token: ousd,
 })
 
+// This receipt confirms source submission. Verify L1 processing and destination credit next.
 console.log(receipt.blockNumber)
 ```
 
 ## What this routed send does
 
 The cross-zone transfer path looks like this: the token leaves `Zone A`, briefly lands on the public chain, and is deposited back into `Zone B` as the same asset.
+
+Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to confirm destination credit. Source receipt success alone does not prove the transfer completed.
 
 1. Withdraws `OUSD` from `Zone A` through `ZoneOutbox`.
 2. Routes that withdrawal to `swapAndDepositRouter` on Tempo.

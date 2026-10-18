@@ -6,6 +6,7 @@ interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_earn-vaults_title-f5_v02.png
 ---
 
+import { EarnStrategyCard, EarnStrategyCards } from '../../../components/EarnIllustration'
 import { EarnVaultDemo } from '../../../components/guides/EarnVaultDemo'
 
 <span id="choose-a-vault" />
@@ -18,7 +19,7 @@ Choose a vault that accepts the stablecoin your customers hold and supports the 
 
 ## Find a vault
 
-Start with the [verified vault directory](/docs/api/earn#getverifiedearnvaults). Check each vault's accepted asset, strategy, access restrictions, fees, and withdrawal capabilities. The directory's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
+Start with the [verified vault directory](/docs/api/earn#getverifiedearnvaults), then evaluate each vault in the order below: where its returns come from, what customers net, how they exit, and who can deposit. The directory's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
 
 <span id="inspect-the-selected-vault" />
 
@@ -34,7 +35,15 @@ Save the selected vault's `id` (its contract address) and network together. The 
 
 ## How vaults generate returns
 
-An engine is the contract that connects an Earn vault to its underlying strategy.
+Each vault earns from one strategy. Strategies fall into three categories:
+
+<EarnStrategyCards>
+  <EarnStrategyCard strategy="treasuries" title="U.S. Treasuries" description="Tokenized U.S. Treasury bonds and sovereign debt products." />
+  <EarnStrategyCard strategy="credit" title="Institutional credit" description="Tokenized private credit, such as warehouse lending and CLOs." />
+  <EarnStrategyCard strategy="lending" title="Collateralized lending" description="Onchain lending pools. Rates move with borrow demand." />
+</EarnStrategyCards>
+
+An engine is the contract that connects an Earn vault to its underlying strategy. The vault directory reports each vault's engine and accepted asset; available strategies vary by network.
 
 | Source | How it connects to Earn |
 | --- | --- |
@@ -42,14 +51,48 @@ An engine is the contract that connects an Earn vault to its underlying strategy
 | **Managed strategies** | An engine connects to a provider-managed vault that allocates funds across its strategy. |
 | **Tokenized assets** | An engine accesses an asset, such as tokenized treasuries or private credit, through a supported liquidity pool. |
 
-## Eligibility and risk
+## What changes a position's value
 
-Before enabling a deposit, check the accepted asset, the account's eligibility, `state.depositsPaused`, and the operations listed in `capabilities`. Use the deployed vault’s supported operations through [Viem’s Earn actions](/docs/earn/integrate). The Earn read API does not submit deposits or withdrawals.
+A share's value moves with its strategy's returns, losses, and fees. A verified listing does not remove these risks.
 
-## Liquidity and fees
+| Strategy | What moves value |
+| --- | --- |
+| **U.S. Treasuries** | Interest rates, and the tokenized product's issuer and redemption terms. |
+| **Institutional credit** | Borrower repayment. A default reduces value. |
+| **Collateralized lending** | Borrow demand sets the rate. A loan whose collateral falls short can cause a loss. |
 
-Check withdrawal support before the first deposit. `capabilities.redeem` and `capabilities.asyncRedeem` distinguish immediate and queued redemption support. `instantLiquidity` describes vault-wide liquidity, not a user-specific quote; `null` means a reliable value is unavailable.
+## What customers net
 
-Read the provider's deposit, management, and withdrawal fees before presenting a rate. An observed APY describes a measurement window; it is not a promised return.
+The observed `apy.vault` already reflects [Earn fees](/docs/earn/how-it-works#fees-and-revenue-share) and the underlying venue's fees. Show the remaining costs before the account deposits:
 
-Continue with [Deposit](/docs/earn/integrate). See [Withdraw](/docs/earn/withdraw) for the exit flow your application needs to support.
+| Cost | Where it appears |
+| --- | --- |
+| **Earn fees** | Already in the share price and `apy.vault`. `state.feesActive` reports whether the vault charges them. |
+| **Underlying venue fees** | Already in the engine's reported value. |
+| **Provider deposit, management, and withdrawal fees** | Read them from the provider before presenting a rate. |
+| **Network fees** | Each deposit and withdrawal transaction. |
+| **Moving funds from another network** | Each [Routes quote](/docs/routes/quotes), in and out. |
+| **Rewards** | Reported separately in the `apy` object, under temporary terms. |
+
+An observed APY describes a measurement window; it is not a promised return.
+
+<span id="liquidity-and-fees" />
+
+## How customers exit
+
+Check withdrawal support before the first deposit:
+
+| Path | Vault support | Settlement | When liquidity is short |
+| --- | --- | --- | --- |
+| **Immediate redemption** | `capabilities.redeem` | In the redemption transaction | Fails; it does not enter a queue. |
+| **Queued withdrawal** | `capabilities.asyncRedeem` | A request, then a later claim | Waits in the queue. |
+
+`instantLiquidity` describes vault-wide liquidity, not a user-specific quote; `null` means a reliable value is unavailable. [Withdraw](/docs/earn/withdraw) covers the exit flow.
+
+<span id="eligibility-and-risk" />
+
+## Who can deposit
+
+A vault accepts one stablecoin, and its share token is open or allowlisted to approved holders. Before enabling a deposit, check the accepted asset, the account's eligibility, `state.depositsPaused`, and the operations listed in `capabilities`. Use the deployed vault's supported operations through [Viem's Earn actions](/docs/earn/integrate). The Earn read API does not submit deposits or withdrawals.
+
+Continue with [Deposit](/docs/earn/integrate).

@@ -1,24 +1,49 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index 2a1dd1a139e0e00ff88029366aa64b1ae141102b..b0be958bd82bf1205266e1ea7b42b5d446fbfcb5 100644
+index 565de93..258c88b 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
-@@ -18,3 +18,4 @@ export { ScrollRestoration } from './react/ScrollRestoration.js';
+@@ -18,4 +18,5 @@ export { Sandbox } from './react/Sandbox/index.js';
+ export { ScrollRestoration } from './react/ScrollRestoration.js';
  export { Tab, Tabs } from './react/Tabs.js';
  export { useConfig } from './react/useConfig.js';
- //# sourceMappingURL=index.d.ts.map
+-//# sourceMappingURL=index.d.ts.map
+\ No newline at end of file
++//# sourceMappingURL=index.d.ts.map
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
 diff --git a/dist/index.js b/dist/index.js
-index 704383913c9f400e8ee4de07df317bd2c6a29ca6..688bebd8a598081378c790a1bfec16e52b6bae7b 100644
+index 7043839..688bebd 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -18,3 +18,4 @@ export { ScrollRestoration } from './react/ScrollRestoration.js';
+@@ -17,4 +17,5 @@ export { Sandbox } from './react/Sandbox/index.js';
+ export { ScrollRestoration } from './react/ScrollRestoration.js';
  export { Tab, Tabs } from './react/Tabs.js';
  export { useConfig } from './react/useConfig.js';
- //# sourceMappingURL=index.js.map
+-//# sourceMappingURL=index.js.map
+\ No newline at end of file
++//# sourceMappingURL=index.js.map
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
+diff --git a/dist/internal/openapi/openapi.d.ts b/dist/internal/openapi/openapi.d.ts
+index bf62698..09bb5fb 100644
+--- a/dist/internal/openapi/openapi.d.ts
++++ b/dist/internal/openapi/openapi.d.ts
+@@ -65,6 +65,14 @@ export type SidebarExtras = {
+      * @default true
+      */
+     backLink?: boolean | undefined;
++    /** Spread `intro` items at the top level instead of nesting them under "Introduction". */
++    introFlat?: boolean | undefined;
++    /** Hide generated groups by display name or id. */
++    hide?: readonly string[] | undefined;
++    /** Extra items inside a generated group, keyed by group display name. */
++    groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
++    /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
++    sectionExtras?: Record<string, SidebarItem[]> | undefined;
+     /**
+      * Names of `x-tagGroups` sections to flatten: their categories render as
+      * top-level sidebar items (as without tag groups) instead of nesting under
 diff --git a/dist/internal/openapi/query-presets.d.ts b/dist/internal/openapi/query-presets.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..6198c7fedbb1eb5981674e850926e9e93504f09a
+index 0000000..6198c7f
 --- /dev/null
 +++ b/dist/internal/openapi/query-presets.d.ts
 @@ -0,0 +1,4 @@
@@ -28,7 +53,7 @@ index 0000000000000000000000000000000000000000..6198c7fedbb1eb5981674e850926e9e9
 +export declare function documentWithQuery(document: Record<string, unknown>, preset?: QueryPreset): Record<string, unknown>;
 diff --git a/dist/internal/openapi/query-presets.js b/dist/internal/openapi/query-presets.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..39cecdb10217c149f860d32afd6bab4373458a6f
+index 0000000..39cecdb
 --- /dev/null
 +++ b/dist/internal/openapi/query-presets.js
 @@ -0,0 +1,39 @@
@@ -71,26 +96,107 @@ index 0000000000000000000000000000000000000000..39cecdb10217c149f860d32afd6bab43
 +    }
 +    return copy;
 +}
-diff --git a/dist/internal/vite-plugins.js b/dist/internal/vite-plugins.js
-index ba17f7d688e4c4df6da2abe1b7bf875655a83e79..5838377e726db569ff9f0a2e97e49c05049b63d9 100644
---- a/dist/internal/vite-plugins.js
-+++ b/dist/internal/vite-plugins.js
-@@ -218,7 +218,9 @@ export function llms(config) {
-                 next();
-             });
-         },
--        async buildEnd() {
-+        async writeBundle(options) {
-+            if (!options.dir?.endsWith('/public'))
-+                return;
-             const content = await buildLlmsContent();
-             const outDir = path.resolve(viteConfig.root, config.outDir, 'public');
-             await fs.mkdir(outDir, { recursive: true });
+diff --git a/dist/internal/openapi/registry.js b/dist/internal/openapi/registry.js
+index 3f67f41..9380eae 100644
+--- a/dist/internal/openapi/registry.js
++++ b/dist/internal/openapi/registry.js
+@@ -48,7 +48,7 @@ export function sidebars(config) {
+         const backLink = entry?.sidebar?.backLink ?? true;
+         result[path] = {
+             backLink,
+-            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed }),
++            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed, introFlat: entry?.sidebar?.introFlat, hide: entry?.sidebar?.hide, groupExtrasByName: entry?.sidebar?.groupExtrasByName, sectionExtras: entry?.sidebar?.sectionExtras }),
+         };
+     }
+     return result;
+diff --git a/dist/internal/openapi/sidebar.d.ts b/dist/internal/openapi/sidebar.d.ts
+index 635da1b..ef423db 100644
+--- a/dist/internal/openapi/sidebar.d.ts
++++ b/dist/internal/openapi/sidebar.d.ts
+@@ -34,6 +34,14 @@ export declare namespace toSidebar {
+         flatten?: readonly string[] | undefined;
+         /** Collapse `x-tagGroups` sections independently. @default collapsed */
+         tagGroupsCollapsed?: boolean | undefined;
++        /** Spread `intro` items at the top level instead of nesting them under `Introduction`. */
++        introFlat?: boolean | undefined;
++        /** Generated groups to omit, by display name or id. */
++        hide?: readonly string[] | undefined;
++        /** Extra items inside a generated group, after its `Overview`, keyed by group display name. */
++        groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
++        /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
++        sectionExtras?: Record<string, SidebarItem[]> | undefined;
+     };
+ }
+ //# sourceMappingURL=sidebar.d.ts.map
+\ No newline at end of file
+diff --git a/dist/internal/openapi/sidebar.js b/dist/internal/openapi/sidebar.js
+index a1be030..9115c3d 100644
+--- a/dist/internal/openapi/sidebar.js
++++ b/dist/internal/openapi/sidebar.js
+@@ -38,6 +38,10 @@ export function toSidebar(ir, options = {}) {
+     // collapsible group: an "Overview" link to the landing page followed by the
+     // extra items (e.g. authentication/versioning guide pages).
+     const intro = options.intro ?? [];
++    // `introFlat` spreads intro items at the top level instead of nesting them
++    // under a generated "Introduction" group. `hide` drops generated groups.
++    const introItems = options.introFlat ? intro : null;
++    const hidden = new Set(options.hide ?? []);
+     const introduction = intro.length > 0
+         ? {
+             text: 'Introduction',
+@@ -48,6 +52,9 @@ export function toSidebar(ir, options = {}) {
+     // Extra items (e.g. `x-parent` guide pages) injected into a group, keyed by
+     // group id, rendered after the group's "Overview" link.
+     const groupExtras = options.groupExtras ?? new Map();
++    // Extra items keyed by group display name or `x-tagGroups` section name.
++    const groupExtrasByName = options.groupExtrasByName ?? {};
++    const sectionExtras = options.sectionExtras ?? {};
+     // Generated categories inherit `collapsed`. Tag-group sections can override
+     // that default independently. Active groups still auto-expand at render.
+     const groupCollapsed = options.collapsed ?? false;
+@@ -60,6 +67,7 @@ export function toSidebar(ir, options = {}) {
+             // is a non-link header so its label doesn't compete with the operations.
+             { text: 'Overview', link: groupLink(group) },
+             ...(groupExtras.get(group.id) ?? []),
++            ...(groupExtrasByName[group.name] ?? []),
+             ...group.operations.map((operation) => ({
+                 text: operation.summary || `${operation.method} ${operation.path}`,
+                 link: operationLink(operation, group),
+@@ -73,7 +81,7 @@ export function toSidebar(ir, options = {}) {
+     });
+     const tagGroups = ir.tagGroups ?? [];
+     if (tagGroups.length === 0)
+-        return [introduction, ...ir.groups.map(groupItem)];
++        return [...(introItems ?? [introduction]), ...ir.groups.filter((g) => !(hidden.has(g.name) || hidden.has(g.id))).map(groupItem)];
+     // `x-tagGroups` sections render as collapsible headers. Sections named in
+     // `flatten` spread their categories in place instead.
+     const flatten = new Set(options.flatten ?? []);
+@@ -84,14 +92,15 @@ export function toSidebar(ir, options = {}) {
+             const group = groupById.get(id);
+             return group ? [groupItem(group)] : [];
+         });
++        const extras = sectionExtras[tagGroup.name] ?? [];
+         if (flatten.has(tagGroup.name))
+-            return items;
+-        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items }];
++            return items.map((item) => ({ ...item, items: [item.items[0], ...extras, ...item.items.slice(1)] }));
++        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items: [...extras, ...items] }];
+     });
+     return [
+-        introduction,
++        ...(introItems ?? [introduction]),
+         ...sections,
+-        ...ir.groups.filter((group) => !claimed.has(group.id)).map(groupItem),
++        ...ir.groups.filter((group) => !claimed.has(group.id) && !(hidden.has(group.name) || hidden.has(group.id))).map(groupItem),
+     ];
+ }
+ //# sourceMappingURL=sidebar.js.map
+\ No newline at end of file
 diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
-index 8ad0e7d1635b9ca6b13ef2fb4ac9dd1ca9b6fbff..ff285db6c14437fdeb866dc985f1f4a93f663a70 100644
+index 808d57f..2b6bf2a 100644
 --- a/dist/react/Head.d.ts
 +++ b/dist/react/Head.d.ts
-@@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react/jsx-runtime").JSX
+@@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react").JSX.Element;
  export declare namespace Head {
      type Props = {
          includeJsonLd?: boolean | undefined;
@@ -99,7 +205,7 @@ index 8ad0e7d1635b9ca6b13ef2fb4ac9dd1ca9b6fbff..ff285db6c14437fdeb866dc985f1f4a9
  }
  export declare function resolveTitleTemplate(config: Pick<Config.Config, 'title' | 'titleTemplate'>, path: string, title: string | undefined, frontmatter: Config.Frontmatter | undefined): string | undefined;
 diff --git a/dist/react/Head.js b/dist/react/Head.js
-index 9c7425584c057838cf328fcbff9b64005122268a..b82f9bd0ad8185306542fc8a2a6aafa163104946 100644
+index 9c74255..b82f9bd 100644
 --- a/dist/react/Head.js
 +++ b/dist/react/Head.js
 @@ -6,7 +6,7 @@ import * as JsonLd from './json-ld.js';
@@ -121,7 +227,7 @@ index 9c7425584c057838cf328fcbff9b64005122268a..b82f9bd0ad8185306542fc8a2a6aafa1
                          return (_jsx("meta", { charSet: charSet, httpEquiv: httpEquiv, name: name, property: property, content: content != null ? String(content) : undefined, media: media }, `${name ?? property ?? httpEquiv ?? charSet}-${index}`));
                      }), jsonLd && (_jsx("script", { type: "application/ld+json", 
 diff --git a/dist/react/Layout.d.ts b/dist/react/Layout.d.ts
-index 05018ae8161c97a55f2a20a9d43336d09b743dd1..ccb96643106fc7fa54616fb978403a5ab70861ca 100644
+index 8f4633b..b3389ce 100644
 --- a/dist/react/Layout.d.ts
 +++ b/dist/react/Layout.d.ts
 @@ -3,6 +3,7 @@ export declare namespace Layout {
@@ -134,7 +240,7 @@ index 05018ae8161c97a55f2a20a9d43336d09b743dd1..ccb96643106fc7fa54616fb978403a5a
  //# sourceMappingURL=Layout.d.ts.map
 \ No newline at end of file
 diff --git a/dist/react/Layout.js b/dist/react/Layout.js
-index dd8f3a8162c7c39e4fb39b58cc2cdca86cdfd01b..faea5cb792f26a20dd0b21d4c96b6bd7a45c64c4 100644
+index dd8f3a8..faea5cb 100644
 --- a/dist/react/Layout.js
 +++ b/dist/react/Layout.js
 @@ -2,7 +2,7 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
@@ -149,7 +255,7 @@ index dd8f3a8162c7c39e4fb39b58cc2cdca86cdfd01b..faea5cb792f26a20dd0b21d4c96b6bd7
  //# sourceMappingURL=Layout.js.map
 \ No newline at end of file
 diff --git a/dist/react/Root.js b/dist/react/Root.js
-index 641cee118919e649fc5d977bcfc3f4e62b003007..6f6e5ac6ba9e5e0f0c10f324410e52e379ee20a6 100644
+index 5f3d063..c58b72a 100644
 --- a/dist/react/Root.js
 +++ b/dist/react/Root.js
 @@ -3,13 +3,12 @@ import { config } from 'virtual:vocs/config';
@@ -163,13 +269,13 @@ index 641cee118919e649fc5d977bcfc3f4e62b003007..6f6e5ac6ba9e5e0f0c10f324410e52e3
      const { colorScheme, accentColor } = config;
      return (_jsxs("html", { "data-vocs": true, ...(colorScheme === 'light' || colorScheme === 'dark'
              ? { 'data-vocs-theme': colorScheme }
--            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl }), _jsx(Head, { includeJsonLd: false })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
-+            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
+-            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl }), _jsx(Head, { includeJsonLd: false })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
++            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
  }
  //# sourceMappingURL=Root.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/NotFound.js b/dist/react/internal/NotFound.js
-index b189ea50873a5ef76bf044003476bf4660e9e245..f78449ca827a2fd0d97dc45d1cc627e527ee6441 100644
+index b189ea5..f78449c 100644
 --- a/dist/react/internal/NotFound.js
 +++ b/dist/react/internal/NotFound.js
 @@ -1,8 +1,9 @@
@@ -186,10 +292,10 @@ index b189ea50873a5ef76bf044003476bf4660e9e245..f78449ca827a2fd0d97dc45d1cc627e5
  //# sourceMappingURL=NotFound.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/Sidebar.js b/dist/react/internal/Sidebar.js
-index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78523daebb 100644
+index 47ddd87..32c6107 100644
 --- a/dist/react/internal/Sidebar.js
 +++ b/dist/react/internal/Sidebar.js
-@@ -11,101 +11,25 @@ import * as Sidebar_core from '../../internal/sidebar.js';
+@@ -11,110 +11,25 @@ import * as Sidebar_core from '../../internal/sidebar.js';
  import { Badge } from '../Badge.js';
  import { Link } from '../Link.js';
  import { useSidebar } from '../useSidebar.js';
@@ -198,27 +304,22 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
  /** Active in-page anchor id, for hash-link sidebar items (e.g. OpenAPI). */
  const ActiveAnchorContext = React.createContext(null);
 -/**
-- * The set of in-page anchor ids that the sidebar actually links to (the `#frag`
-- * of every hash-link item). Used so page-level items only defer their active
-- * state to anchors that have a corresponding sidebar item — not to arbitrary
-- * headings on a standalone guide page that happens to live under a section
-- * whose sidebar uses hash links elsewhere.
+- * The set of in-page anchor ids that the sidebar links to on the current page.
+- * Used so page-level items only defer their active state to corresponding
+- * sidebar items — not to arbitrary headings or hash links for another page.
 - */
 -const HashIdsContext = React.createContext(new Set());
--/** Whether any sidebar item links to an in-page anchor. */
--function hasHashLink(items) {
--    return items.some((item) => item.link?.includes('#') || (item.items && hasHashLink(item.items)));
--}
--/** Collects the `#fragment` ids of every hash-link sidebar item. */
--function collectHashIds(items, ids = new Set()) {
+-/** Collects the `#fragment` ids of hash-link sidebar items for the current page. */
+-function collectHashIds(items, path, ids = new Set()) {
+-    const pagePath = path.split('#')[0] ?? path;
 -    for (const item of items) {
--        if (item.link?.includes('#')) {
--            const id = item.link.split('#')[1];
--            if (id)
+-        if (item.link?.includes('#') && !Path.isExternal(item.link)) {
+-            const [itemPath, id] = item.link.split('#');
+-            if (id && (!itemPath || Path.matches(pagePath, itemPath)))
 -                ids.add(id);
 -        }
 -        if (item.items)
--            collectHashIds(item.items, ids);
+-            collectHashIds(item.items, pagePath, ids);
 -    }
 -    return ids;
 -}
@@ -227,19 +328,11 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 - * (used by the OpenAPI section) can show active state. Mirrors the Outline's
 - * IntersectionObserver approach.
 - */
--function useActiveAnchor(enabled, path) {
+-function useActiveAnchor(hashIds, path) {
 -    const [activeId, setActiveId] = React.useState(null);
 -    React.useEffect(() => {
--        if (!enabled || typeof window === 'undefined')
+-        if (hashIds.size === 0 || typeof window === 'undefined')
 -            return;
--        // Reset on every client-side navigation: derive the active section from the
--        // hash of the destination `path` (landing pages like the OpenAPI section
--        // root have none, so they start with no active section). Reading `path`
--        // here — rather than only `window.location` — keeps it a genuine effect
--        // dependency so navigation reliably re-runs this.
--        const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : '';
--        const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '');
--        setActiveId(hash || null);
 -        // OpenAPI pages render inside `article[data-v-content]` too, so the generic
 -        // markdown selector would also match operation sub-headings (Parameters,
 -        // Responses, schema anchors, …) whose ids have no sidebar entry — hijacking
@@ -250,6 +343,25 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 -        const selector = isOpenApi
 -            ? '[data-v-openapi-h1][id], [data-v-openapi-operation-title][id]'
 -            : 'article[data-v-content] :is(h2, h3, h4, h5, h6)[id]';
+-        // Reset on every client-side navigation. If the destination hash belongs
+-        // to a nested heading without a sidebar item, keep its nearest preceding
+-        // sidebar anchor active instead of falling back to the page-level item.
+-        // Reading `path` here — rather than only `window.location` — keeps it a
+-        // genuine effect dependency so navigation reliably re-runs this.
+-        const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : '';
+-        const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '');
+-        let initialId = hashIds.has(hash) ? hash : null;
+-        const target = hash ? document.getElementById(hash) : null;
+-        if (!initialId && target) {
+-            for (const element of document.querySelectorAll(selector)) {
+-                const position = element.compareDocumentPosition(target);
+-                if (element === target || position & Node.DOCUMENT_POSITION_PRECEDING)
+-                    break;
+-                if (hashIds.has(element.id))
+-                    initialId = element.id;
+-            }
+-        }
+-        setActiveId(initialId);
 -        const observer = new IntersectionObserver((entries) => {
 -            for (const entry of entries)
 -                if (entry.isIntersecting) {
@@ -260,6 +372,10 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 -        const observeAll = () => {
 -            observer.disconnect();
 -            for (const element of document.querySelectorAll(selector)) {
+-                // Nested headings without matching sidebar items belong to the current
+-                // section. Observing them would reactivate the page-level item.
+-                if (!hashIds.has(element.id))
+-                    continue;
 -                // Skip changelog release-body headings — they have no sidebar entry and
 -                // would hijack the active section as you scroll through the changelog.
 -                if (element.closest('[data-v-changelog]'))
@@ -277,7 +393,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
 -            observer.disconnect();
 -            mutation?.disconnect();
 -        };
--    }, [enabled, path]);
+-    }, [hashIds, path]);
 -    return activeId;
 +/** Flatten links once; the hook filters them to the current page. */
 +function collectLinks(items) {
@@ -290,10 +406,9 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
      const { className, onNavigate, scrollRef } = props;
      const sidebar = useSidebar();
      const condenseSidebar = React.useMemo(() => Sidebar_core.length(sidebar.items, { startDepth: 2 }) > 25, [sidebar.items]);
--    const hashLinks = React.useMemo(() => hasHashLink(sidebar.items), [sidebar.items]);
--    const hashIds = React.useMemo(() => collectHashIds(sidebar.items), [sidebar.items]);
 -    const { path } = useRouter();
--    const activeAnchor = useActiveAnchor(hashLinks, path);
+-    const hashIds = React.useMemo(() => collectHashIds(sidebar.items, path), [sidebar.items, path]);
+-    const activeAnchor = useActiveAnchor(hashIds, path);
 -    return (_jsx(HashIdsContext.Provider, { value: hashIds, children: _jsx(ActiveAnchorContext.Provider, { value: activeAnchor, children: _jsxs("nav", { className: cx("vocs:flex-1 vocs:flex vocs:flex-col vocs:text-sm vocs:font-[450] vocs:[&>*:not(:last-child)[data-collapsed='false']]:mb-4", className), "data-v-sidebar": true, children: [sidebar.backLink && _jsx(BackLink, { onNavigate: onNavigate }), sidebar.items.map((item, i) => (_jsx(Section, { ...item, condensed: condenseSidebar, onNavigate: onNavigate, scrollRef: scrollRef }, `${item.text}-${i}`)))] }) }) }));
 +    const links = React.useMemo(() => collectLinks(sidebar.items), [sidebar.items]);
 +    const { path, hash } = useRouter();
@@ -302,7 +417,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
  }
  function BackLink(props) {
      const { onNavigate } = props;
-@@ -125,31 +49,19 @@ function Item(props) {
+@@ -134,31 +49,19 @@ function Item(props) {
      const { path } = useRouter();
      const isExternal = external ?? Path.isExternal(link);
      const activeAnchor = React.useContext(ActiveAnchorContext);
@@ -343,7 +458,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
      const itemRef = React.useRef(null);
      const prevPath = React.useRef(path);
      React.useEffect(() => {
-@@ -196,7 +108,7 @@ function Item(props) {
+@@ -205,7 +108,7 @@ function Item(props) {
      if (link && !disabled) {
          if (isExternal)
              return (_jsxs("a", { className: Item.className, "data-condensed": condensed && depth > 1, "data-link": true, "data-v-sidebar-item": true, href: link, ref: itemRef, target: "_blank", rel: "noopener noreferrer", onClick: onNavigate, children: [_jsxs("span", { className: "vocs:inline-flex vocs:items-center vocs:gap-1 vocs:min-w-0 vocs:truncate", children: [text, _jsx(LucideArrowUpRight, { className: "vocs:size-3 vocs:shrink-0" })] }), badge && _jsx(ItemBadge, { badge: badge })] }));
@@ -352,7 +467,7 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
      }
      return (_jsxs("div", { "aria-disabled": disabled, className: Item.className, "data-condensed": condensed && depth > 1, "data-link": link ? true : undefined, "data-v-sidebar-item": true, ref: itemRef, children: [_jsx("span", { className: "vocs:min-w-0 vocs:truncate", children: text }), badge && _jsx(ItemBadge, { badge: badge })] }));
  }
-@@ -252,7 +164,7 @@ function Section(props) {
+@@ -261,7 +164,7 @@ function Section(props) {
      if (items)
          return (_jsxs("section", { "data-collapsed": collapsed, "data-v-sidebar-section": true, children: [(() => {
                      if (text && link)
@@ -361,14 +476,14 @@ index 242cf4f6f5babe929912b71b3a6476bf66c3be57..32c6107472c7132f744cb1e1d5ed3d78
                      // Non-link item is a header.
                      if (text)
                          return (_jsxs("div", { className: depth > 0 ? Section.childHeaderClassName : Section.rootHeaderClassName, "data-condensed": condensed && depth > 1, "data-collapsed": collapsed, "data-collapsable": collapsable, "data-v-sidebar-section-header": true, ...(collapsable
-@@ -275,4 +187,3 @@ function Section(props) {
+@@ -284,4 +187,3 @@ function Section(props) {
      Section.headerLinkClassName = 'vocs:flex-1 vocs:min-w-0 vocs:text-inherit vocs:hover:text-inherit';
      Section.rootHeaderClassName = 'vocs:h-[2.5em] vocs:px-3 vocs:-mx-3 vocs:rounded-md vocs:flex vocs:items-center vocs:justify-between vocs:text-heading vocs:font-medium vocs:data-[collapsable=true]:cursor-pointer';
  })(Section || (Section = {}));
 -//# sourceMappingURL=Sidebar.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/OpenApiPage.js b/dist/react/internal/openapi/OpenApiPage.js
-index 06cc466393643245bf0dfcc0c946e013c717a75c..b74f6a618fbfa9785649de41d8548bc4f4316815 100644
+index 06cc466..b74f6a6 100644
 --- a/dist/react/internal/openapi/OpenApiPage.js
 +++ b/dist/react/internal/openapi/OpenApiPage.js
 @@ -21,7 +21,7 @@ function OpenApiLayout(props) {
@@ -408,7 +523,7 @@ index 06cc466393643245bf0dfcc0c946e013c717a75c..b74f6a618fbfa9785649de41d8548bc4
  //# sourceMappingURL=OpenApiPage.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/Playground.client.d.ts b/dist/react/internal/openapi/Playground.client.d.ts
-index 1d656d2eafda0171ec952be8018e7f2786801e41..0dcf91fa0db1e885a23a88815553e24c66b09cac 100644
+index 1d2726b..c27f2b3 100644
 --- a/dist/react/internal/openapi/Playground.client.d.ts
 +++ b/dist/react/internal/openapi/Playground.client.d.ts
 @@ -1,3 +1,4 @@
@@ -426,7 +541,7 @@ index 1d656d2eafda0171ec952be8018e7f2786801e41..0dcf91fa0db1e885a23a88815553e24c
  }
  /**
 diff --git a/dist/react/internal/openapi/Playground.client.js b/dist/react/internal/openapi/Playground.client.js
-index 8b2cf490518a950cabc306795792e8268b0f41e2..08c49715b64adb33d39479317b9c07b671f14117 100644
+index 8b2cf49..08c4971 100644
 --- a/dist/react/internal/openapi/Playground.client.js
 +++ b/dist/react/internal/openapi/Playground.client.js
 @@ -3,6 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
@@ -489,7 +604,7 @@ index 8b2cf490518a950cabc306795792e8268b0f41e2..08c49715b64adb33d39479317b9c07b6
 -//# sourceMappingURL=Playground.client.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/PlaygroundStandalone.d.ts b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
-index 3e12168d310762629390b37c367b98336ecd3f83..980e4117c47aa3900f86cf714da839897c231bd2 100644
+index fbec302..6fb0a3a 100644
 --- a/dist/react/internal/openapi/PlaygroundStandalone.d.ts
 +++ b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
 @@ -50,6 +50,8 @@ export declare namespace Playground {
@@ -503,7 +618,7 @@ index 3e12168d310762629390b37c367b98336ecd3f83..980e4117c47aa3900f86cf714da83989
  //# sourceMappingURL=PlaygroundStandalone.d.ts.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/PlaygroundStandalone.js b/dist/react/internal/openapi/PlaygroundStandalone.js
-index 0ef0a76d89d887bd13d6e03f23de6a7d313a1576..f63270c74b21f73db073e7fd59c5fcde90cae2c2 100644
+index 0ef0a76..f63270c 100644
 --- a/dist/react/internal/openapi/PlaygroundStandalone.js
 +++ b/dist/react/internal/openapi/PlaygroundStandalone.js
 @@ -1,5 +1,6 @@
@@ -534,14 +649,14 @@ index 0ef0a76d89d887bd13d6e03f23de6a7d313a1576..f63270c74b21f73db073e7fd59c5fcde
 \ No newline at end of file
 diff --git a/dist/react/useActiveSidebarAnchor.d.ts b/dist/react/useActiveSidebarAnchor.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..f462ca3eaa2d302a29eba083a3d57ebd66fe17f1
+index 0000000..f462ca3
 --- /dev/null
 +++ b/dist/react/useActiveSidebarAnchor.d.ts
 @@ -0,0 +1 @@
 +export declare function useActiveSidebarAnchor(links: readonly string[], path: string, hash?: string): string | null;
 diff --git a/dist/react/useActiveSidebarAnchor.js b/dist/react/useActiveSidebarAnchor.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..ae9a29a443610d3b1284055ffa0f9e33aacd5f09
+index 0000000..ae9a29a
 --- /dev/null
 +++ b/dist/react/useActiveSidebarAnchor.js
 @@ -0,0 +1,93 @@
@@ -639,10 +754,10 @@ index 0000000000000000000000000000000000000000..ae9a29a443610d3b1284055ffa0f9e33
 +    return active.path === currentPath ? active.id : null;
 +}
 diff --git a/src/index.ts b/src/index.ts
-index 14ee6f21906fbcf4d8547dcf10ff29144f66755d..21a1a78835806d382364c7a2af8f5a54a48cb0d1 100644
+index 5977d9d..23679ca 100644
 --- a/src/index.ts
 +++ b/src/index.ts
-@@ -17,3 +17,5 @@ export { Sandbox } from './react/Sandbox/index.js'
+@@ -22,3 +22,5 @@ export { Sandbox } from './react/Sandbox/index.js'
  export { ScrollRestoration } from './react/ScrollRestoration.js'
  export { Tab, Tabs } from './react/Tabs.js'
  export { useConfig } from './react/useConfig.js'
@@ -650,7 +765,7 @@ index 14ee6f21906fbcf4d8547dcf10ff29144f66755d..21a1a78835806d382364c7a2af8f5a54
 +export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
 diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..6ee138e2014b3d12549c409f800aa24aab92e5a4
+index 0000000..6ee138e
 --- /dev/null
 +++ b/src/internal/openapi/query-presets.ts
 @@ -0,0 +1,53 @@
@@ -707,22 +822,8 @@ index 0000000000000000000000000000000000000000..6ee138e2014b3d12549c409f800aa24a
 +  }
 +  return copy
 +}
-diff --git a/src/internal/vite-plugins.ts b/src/internal/vite-plugins.ts
-index 2852c38212fde11881cb8fa97328576cee9c5a8c..f9eb59f1b72814aa42d2954897e6671b8b127760 100644
---- a/src/internal/vite-plugins.ts
-+++ b/src/internal/vite-plugins.ts
-@@ -230,7 +230,8 @@ export function llms(config: Config.Config): PluginOption {
-         next()
-       })
-     },
--    async buildEnd() {
-+    async writeBundle(options) {
-+      if (!options.dir?.endsWith('/public')) return
-       const content = await buildLlmsContent()
-       const outDir = path.resolve(viteConfig.root, config.outDir, 'public')
-       await fs.mkdir(outDir, { recursive: true })
 diff --git a/src/react/Head.tsx b/src/react/Head.tsx
-index e7b51ed6d9642a903399dc0d18253a0f3cc955e8..004c4722f97ab7a9db4f0c876ca19b3fa9b97eab 100644
+index e7b51ed..004c472 100644
 --- a/src/react/Head.tsx
 +++ b/src/react/Head.tsx
 @@ -9,7 +9,7 @@ import * as MdxPageContext from './MdxPageContext.js'
@@ -752,7 +853,7 @@ index e7b51ed6d9642a903399dc0d18253a0f3cc955e8..004c4722f97ab7a9db4f0c876ca19b3f
  }
  
 diff --git a/src/react/Layout.tsx b/src/react/Layout.tsx
-index ca77c7aeca381f65af6d7a73f6a79d61890adcb3..4c8fbb9d3ef6566c4c1f7ff1f80cf8d8705ed7d7 100644
+index ca77c7a..4c8fbb9 100644
 --- a/src/react/Layout.tsx
 +++ b/src/react/Layout.tsx
 @@ -2,10 +2,10 @@ import { Head } from './Head.js'
@@ -776,7 +877,7 @@ index ca77c7aeca381f65af6d7a73f6a79d61890adcb3..4c8fbb9d3ef6566c4c1f7ff1f80cf8d8
    }
  }
 diff --git a/src/react/Root.tsx b/src/react/Root.tsx
-index e65e8dfcd6c18b996166a57fdb896791532a769d..91c84df982fb44c95a337cdb7ca298bbffc7d600 100644
+index 77180d1..495ce44 100644
 --- a/src/react/Root.tsx
 +++ b/src/react/Root.tsx
 @@ -2,7 +2,6 @@ import { config } from 'virtual:vocs/config'
@@ -787,7 +888,7 @@ index e65e8dfcd6c18b996166a57fdb896791532a769d..91c84df982fb44c95a337cdb7ca298bb
  import { Root_client } from './Root.client.js'
  import { ScrollRestoration } from './ScrollRestoration.js'
  
-@@ -22,7 +21,6 @@ export async function Root({ children }: { children: React.ReactNode }) {
+@@ -24,7 +23,6 @@ export async function Root({ children }: { children: React.ReactNode }) {
          <link rel="stylesheet" href={stylesUrl} />
          {userStylesUrl && <link rel="stylesheet" href={userStylesUrl} />}
          {groupIconsStylesUrl && <link rel="stylesheet" href={groupIconsStylesUrl} />}
@@ -796,7 +897,7 @@ index e65e8dfcd6c18b996166a57fdb896791532a769d..91c84df982fb44c95a337cdb7ca298bb
        <body data-version="1.0">
          <Root_client>{children}</Root_client>
 diff --git a/src/react/internal/NotFound.tsx b/src/react/internal/NotFound.tsx
-index ccbf3ac5dbb4218fb4d6943a87e8bbb5f2a2c3e3..409c67cd99bf6e16588a1fbe5e0ed82a5cc4dd60 100644
+index ccbf3ac..409c67c 100644
 --- a/src/react/internal/NotFound.tsx
 +++ b/src/react/internal/NotFound.tsx
 @@ -1,43 +1,48 @@
@@ -821,40 +922,51 @@ index ccbf3ac5dbb4218fb4d6943a87e8bbb5f2a2c3e3..409c67cd99bf6e16588a1fbe5e0ed82a
 +        data-v-not-found
        >
 -        <LucideFileQuestion className="vocs:size-10" />
--      </div>
 +        <div
 +          className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
 +          data-v-not-found-icon
 +        >
 +          <LucideFileQuestion className="vocs:size-10" />
 +        </div>
- 
--      <h1
--        className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
--        data-v-not-found-title
--      >
--        Page not found
--      </h1>
++
 +        <h1
 +          className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
 +          data-v-not-found-title
 +        >
 +          Page not found
 +        </h1>
- 
--      <p
--        className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
--        data-v-not-found-description
--      >
--        The page you're looking for doesn't exist or has been moved.
--      </p>
++
 +        <p
 +          className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
 +          data-v-not-found-description
 +        >
 +          The page you're looking for doesn't exist or has been moved.
 +        </p>
- 
++
++        <Link
++          className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
++          data-v-not-found-link
++          to="/"
++        >
++          <LucideHome className="vocs:size-4 vocs:text-secondary" />
++          Back to home
++        </Link>
+       </div>
+-
+-      <h1
+-        className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
+-        data-v-not-found-title
+-      >
+-        Page not found
+-      </h1>
+-
+-      <p
+-        className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
+-        data-v-not-found-description
+-      >
+-        The page you're looking for doesn't exist or has been moved.
+-      </p>
+-
 -      <Link
 -        className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
 -        data-v-not-found-link
@@ -864,24 +976,15 @@ index ccbf3ac5dbb4218fb4d6943a87e8bbb5f2a2c3e3..409c67cd99bf6e16588a1fbe5e0ed82a
 -        Back to home
 -      </Link>
 -    </div>
-+        <Link
-+          className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
-+          data-v-not-found-link
-+          to="/"
-+        >
-+          <LucideHome className="vocs:size-4 vocs:text-secondary" />
-+          Back to home
-+        </Link>
-+      </div>
 +    </>
    )
  }
  
 diff --git a/src/react/internal/Sidebar.tsx b/src/react/internal/Sidebar.tsx
-index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75ec39952b0 100644
+index 12b1355..28d0973 100644
 --- a/src/react/internal/Sidebar.tsx
 +++ b/src/react/internal/Sidebar.tsx
-@@ -11,103 +11,19 @@ import * as Sidebar_core from '../../internal/sidebar.js'
+@@ -11,114 +11,19 @@ import * as Sidebar_core from '../../internal/sidebar.js'
  import { Badge } from '../Badge.js'
  import { Link } from '../Link.js'
  import { useSidebar } from '../useSidebar.js'
@@ -893,27 +996,25 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
  const ActiveAnchorContext = React.createContext<string | null>(null)
  
 -/**
-- * The set of in-page anchor ids that the sidebar actually links to (the `#frag`
-- * of every hash-link item). Used so page-level items only defer their active
-- * state to anchors that have a corresponding sidebar item — not to arbitrary
-- * headings on a standalone guide page that happens to live under a section
-- * whose sidebar uses hash links elsewhere.
+- * The set of in-page anchor ids that the sidebar links to on the current page.
+- * Used so page-level items only defer their active state to corresponding
+- * sidebar items — not to arbitrary headings or hash links for another page.
 - */
 -const HashIdsContext = React.createContext<ReadonlySet<string>>(new Set())
 -
--/** Whether any sidebar item links to an in-page anchor. */
--function hasHashLink(items: Sidebar_core.SidebarItem[]): boolean {
--  return items.some((item) => item.link?.includes('#') || (item.items && hasHashLink(item.items)))
--}
--
--/** Collects the `#fragment` ids of every hash-link sidebar item. */
--function collectHashIds(items: Sidebar_core.SidebarItem[], ids = new Set<string>()): Set<string> {
+-/** Collects the `#fragment` ids of hash-link sidebar items for the current page. */
+-function collectHashIds(
+-  items: Sidebar_core.SidebarItem[],
+-  path: string,
+-  ids = new Set<string>(),
+-): Set<string> {
+-  const pagePath = path.split('#')[0] ?? path
 -  for (const item of items) {
--    if (item.link?.includes('#')) {
--      const id = item.link.split('#')[1]
--      if (id) ids.add(id)
+-    if (item.link?.includes('#') && !Path.isExternal(item.link)) {
+-      const [itemPath, id] = item.link.split('#')
+-      if (id && (!itemPath || Path.matches(pagePath, itemPath))) ids.add(id)
 -    }
--    if (item.items) collectHashIds(item.items, ids)
+-    if (item.items) collectHashIds(item.items, pagePath, ids)
 -  }
 -  return ids
 -}
@@ -923,20 +1024,11 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 - * (used by the OpenAPI section) can show active state. Mirrors the Outline's
 - * IntersectionObserver approach.
 - */
--function useActiveAnchor(enabled: boolean, path: string): string | null {
+-function useActiveAnchor(hashIds: ReadonlySet<string>, path: string): string | null {
 -  const [activeId, setActiveId] = React.useState<string | null>(null)
 -
 -  React.useEffect(() => {
--    if (!enabled || typeof window === 'undefined') return
--
--    // Reset on every client-side navigation: derive the active section from the
--    // hash of the destination `path` (landing pages like the OpenAPI section
--    // root have none, so they start with no active section). Reading `path`
--    // here — rather than only `window.location` — keeps it a genuine effect
--    // dependency so navigation reliably re-runs this.
--    const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : ''
--    const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '')
--    setActiveId(hash || null)
+-    if (hashIds.size === 0 || typeof window === 'undefined') return
 -
 -    // OpenAPI pages render inside `article[data-v-content]` too, so the generic
 -    // markdown selector would also match operation sub-headings (Parameters,
@@ -948,6 +1040,25 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 -    const selector = isOpenApi
 -      ? '[data-v-openapi-h1][id], [data-v-openapi-operation-title][id]'
 -      : 'article[data-v-content] :is(h2, h3, h4, h5, h6)[id]'
+-
+-    // Reset on every client-side navigation. If the destination hash belongs
+-    // to a nested heading without a sidebar item, keep its nearest preceding
+-    // sidebar anchor active instead of falling back to the page-level item.
+-    // Reading `path` here — rather than only `window.location` — keeps it a
+-    // genuine effect dependency so navigation reliably re-runs this.
+-    const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : ''
+-    const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '')
+-    let initialId = hashIds.has(hash) ? hash : null
+-    const target = hash ? document.getElementById(hash) : null
+-    if (!initialId && target) {
+-      for (const element of document.querySelectorAll(selector)) {
+-        const position = element.compareDocumentPosition(target)
+-        if (element === target || position & Node.DOCUMENT_POSITION_PRECEDING) break
+-        if (hashIds.has(element.id)) initialId = element.id
+-      }
+-    }
+-    setActiveId(initialId)
+-
 -    const observer = new IntersectionObserver(
 -      (entries) => {
 -        for (const entry of entries)
@@ -962,6 +1073,9 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 -    const observeAll = () => {
 -      observer.disconnect()
 -      for (const element of document.querySelectorAll(selector)) {
+-        // Nested headings without matching sidebar items belong to the current
+-        // section. Observing them would reactivate the page-level item.
+-        if (!hashIds.has(element.id)) continue
 -        // Skip changelog release-body headings — they have no sidebar entry and
 -        // would hijack the active section as you scroll through the changelog.
 -        if (element.closest('[data-v-changelog]')) continue
@@ -980,7 +1094,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
 -      observer.disconnect()
 -      mutation?.disconnect()
 -    }
--  }, [enabled, path])
+-  }, [hashIds, path])
 -
 -  return activeId
 +/** Flatten links once; the hook filters them to the current page. */
@@ -992,14 +1106,13 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
  }
  
  export function Sidebar(props: Sidebar.Props) {
-@@ -118,34 +34,31 @@ export function Sidebar(props: Sidebar.Props) {
+@@ -129,33 +34,31 @@ export function Sidebar(props: Sidebar.Props) {
      () => Sidebar_core.length(sidebar.items, { startDepth: 2 }) > 25,
      [sidebar.items],
    )
--  const hashLinks = React.useMemo(() => hasHashLink(sidebar.items), [sidebar.items])
--  const hashIds = React.useMemo(() => collectHashIds(sidebar.items), [sidebar.items])
 -  const { path } = useRouter()
--  const activeAnchor = useActiveAnchor(hashLinks, path)
+-  const hashIds = React.useMemo(() => collectHashIds(sidebar.items, path), [sidebar.items, path])
+-  const activeAnchor = useActiveAnchor(hashIds, path)
 +  const links = React.useMemo(() => collectLinks(sidebar.items), [sidebar.items])
 +  const { path, hash } = useRouter()
 +  const activeAnchor = useActiveSidebarAnchor(links, path, hash)
@@ -1050,7 +1163,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
    )
  }
  
-@@ -214,26 +127,16 @@ function Item(props: Item.Props) {
+@@ -224,26 +127,16 @@ function Item(props: Item.Props) {
    const { path } = useRouter()
    const isExternal = external ?? Path.isExternal(link)
    const activeAnchor = React.useContext(ActiveAnchorContext)
@@ -1085,7 +1198,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
  
    const itemRef = React.useRef<HTMLElement>(null)
    const prevPath = React.useRef(path)
-@@ -314,6 +217,7 @@ function Item(props: Item.Props) {
+@@ -324,6 +217,7 @@ function Item(props: Item.Props) {
          to={link}
          ref={itemRef as never}
          onClick={onNavigate}
@@ -1093,7 +1206,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
          {...(active && { 'data-active': true })}
        >
          <span className="vocs:min-w-0 vocs:truncate">{text}</span>
-@@ -411,7 +315,9 @@ function Section(props: Section.Props) {
+@@ -421,7 +315,9 @@ function Section(props: Section.Props) {
                  data-v-sidebar-section-header
                  {...(groupLinkIsActive && { 'data-active': true })}
                >
@@ -1105,7 +1218,7 @@ index b99a0738b2d29fa8740cd56cb0ddbaba3b80048c..28d0973af2e0500baefbb941d3d8f75e
                      {text}
                      {groupLinkIsExternal && <LucideArrowUpRight className="vocs:size-3" />}
 diff --git a/src/react/internal/openapi/OpenApiPage.tsx b/src/react/internal/openapi/OpenApiPage.tsx
-index 939c937581ec434975aee43e7284c6c2d48add93..8207ef51b7f1adef71f1910f5b82880961c1416f 100644
+index 939c937..8207ef5 100644
 --- a/src/react/internal/openapi/OpenApiPage.tsx
 +++ b/src/react/internal/openapi/OpenApiPage.tsx
 @@ -20,6 +20,7 @@ import { Prose, ReferenceGroup, ReferenceOverview } from './Reference.js'
@@ -1183,7 +1296,7 @@ index 939c937581ec434975aee43e7284c6c2d48add93..8207ef51b7f1adef71f1910f5b828809
    type Props = {
      /** Mount path identifying which spec to render (e.g. `/api`). */
 diff --git a/src/react/internal/openapi/Playground.client.tsx b/src/react/internal/openapi/Playground.client.tsx
-index ff2d82408520da58b67b7168a4c3ebac5ff1b869..921f3a9ded9be3acac16be2680f332d319b9d5c2 100644
+index ff2d824..921f3a9 100644
 --- a/src/react/internal/openapi/Playground.client.tsx
 +++ b/src/react/internal/openapi/Playground.client.tsx
 @@ -3,6 +3,7 @@
@@ -1248,7 +1361,7 @@ index ff2d82408520da58b67b7168a4c3ebac5ff1b869..921f3a9ded9be3acac16be2680f332d3
  }
  
 diff --git a/src/react/internal/openapi/PlaygroundStandalone.tsx b/src/react/internal/openapi/PlaygroundStandalone.tsx
-index db348a0cae5b33c5ac89a417a27ec6b0942234d2..f35e4d8a97544e41bc263eb17350195f5b9ce7b6 100644
+index db348a0..f35e4d8 100644
 --- a/src/react/internal/openapi/PlaygroundStandalone.tsx
 +++ b/src/react/internal/openapi/PlaygroundStandalone.tsx
 @@ -1,4 +1,5 @@
@@ -1289,7 +1402,7 @@ index db348a0cae5b33c5ac89a417a27ec6b0942234d2..f35e4d8a97544e41bc263eb17350195f
  }
 diff --git a/src/react/useActiveSidebarAnchor.ts b/src/react/useActiveSidebarAnchor.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..33a3e4485f2750e181e5471451f949814d869cc0
+index 0000000..33a3e44
 --- /dev/null
 +++ b/src/react/useActiveSidebarAnchor.ts
 @@ -0,0 +1,114 @@
@@ -1407,118 +1520,3 @@ index 0000000000000000000000000000000000000000..33a3e4485f2750e181e5471451f94981
 +
 +  return active.path === currentPath ? active.id : null
 +}
-diff --git a/dist/internal/openapi/openapi.d.ts b/dist/internal/openapi/openapi.d.ts
-index bf6269830df4524317016cc59aa28007c62adc58..09bb5fb12357cdc89443e32840a009eaadadcb99 100644
---- a/dist/internal/openapi/openapi.d.ts
-+++ b/dist/internal/openapi/openapi.d.ts
-@@ -65,6 +65,14 @@ export type SidebarExtras = {
-      * @default true
-      */
-     backLink?: boolean | undefined;
-+    /** Spread `intro` items at the top level instead of nesting them under "Introduction". */
-+    introFlat?: boolean | undefined;
-+    /** Hide generated groups by display name or id. */
-+    hide?: readonly string[] | undefined;
-+    /** Extra items inside a generated group, keyed by group display name. */
-+    groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
-+    /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
-+    sectionExtras?: Record<string, SidebarItem[]> | undefined;
-     /**
-      * Names of `x-tagGroups` sections to flatten: their categories render as
-      * top-level sidebar items (as without tag groups) instead of nesting under
-diff --git a/dist/internal/openapi/registry.js b/dist/internal/openapi/registry.js
-index 3f67f4177e14d8b606671500951d1c127fe2a187..9380eae380c99924cab9c6b5bd738a34f9530a65 100644
---- a/dist/internal/openapi/registry.js
-+++ b/dist/internal/openapi/registry.js
-@@ -48,7 +48,7 @@ export function sidebars(config) {
-         const backLink = entry?.sidebar?.backLink ?? true;
-         result[path] = {
-             backLink,
--            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed }),
-+            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed, introFlat: entry?.sidebar?.introFlat, hide: entry?.sidebar?.hide, groupExtrasByName: entry?.sidebar?.groupExtrasByName, sectionExtras: entry?.sidebar?.sectionExtras }),
-         };
-     }
-     return result;
-diff --git a/dist/internal/openapi/sidebar.d.ts b/dist/internal/openapi/sidebar.d.ts
-index 635da1b1493af34d714bed3c066b65b80d31e0e5..ef423db52f9d246d0d062c7edef09e98cad6ef6d 100644
---- a/dist/internal/openapi/sidebar.d.ts
-+++ b/dist/internal/openapi/sidebar.d.ts
-@@ -34,6 +34,14 @@ export declare namespace toSidebar {
-         flatten?: readonly string[] | undefined;
-         /** Collapse `x-tagGroups` sections independently. @default collapsed */
-         tagGroupsCollapsed?: boolean | undefined;
-+        /** Spread `intro` items at the top level instead of nesting them under `Introduction`. */
-+        introFlat?: boolean | undefined;
-+        /** Generated groups to omit, by display name or id. */
-+        hide?: readonly string[] | undefined;
-+        /** Extra items inside a generated group, after its `Overview`, keyed by group display name. */
-+        groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
-+        /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
-+        sectionExtras?: Record<string, SidebarItem[]> | undefined;
-     };
- }
- //# sourceMappingURL=sidebar.d.ts.map
-\ No newline at end of file
-diff --git a/dist/internal/openapi/sidebar.js b/dist/internal/openapi/sidebar.js
-index a1be03042be450bfd09d42b6bef29f3b6c2a8f14..9115c3d8ea2689e50293c8eed8acd3f88630a0bf 100644
---- a/dist/internal/openapi/sidebar.js
-+++ b/dist/internal/openapi/sidebar.js
-@@ -38,6 +38,10 @@ export function toSidebar(ir, options = {}) {
-     // collapsible group: an "Overview" link to the landing page followed by the
-     // extra items (e.g. authentication/versioning guide pages).
-     const intro = options.intro ?? [];
-+    // `introFlat` spreads intro items at the top level instead of nesting them
-+    // under a generated "Introduction" group. `hide` drops generated groups.
-+    const introItems = options.introFlat ? intro : null;
-+    const hidden = new Set(options.hide ?? []);
-     const introduction = intro.length > 0
-         ? {
-             text: 'Introduction',
-@@ -48,6 +52,9 @@ export function toSidebar(ir, options = {}) {
-     // Extra items (e.g. `x-parent` guide pages) injected into a group, keyed by
-     // group id, rendered after the group's "Overview" link.
-     const groupExtras = options.groupExtras ?? new Map();
-+    // Extra items keyed by group display name or `x-tagGroups` section name.
-+    const groupExtrasByName = options.groupExtrasByName ?? {};
-+    const sectionExtras = options.sectionExtras ?? {};
-     // Generated categories inherit `collapsed`. Tag-group sections can override
-     // that default independently. Active groups still auto-expand at render.
-     const groupCollapsed = options.collapsed ?? false;
-@@ -60,6 +67,7 @@ export function toSidebar(ir, options = {}) {
-             // is a non-link header so its label doesn't compete with the operations.
-             { text: 'Overview', link: groupLink(group) },
-             ...(groupExtras.get(group.id) ?? []),
-+            ...(groupExtrasByName[group.name] ?? []),
-             ...group.operations.map((operation) => ({
-                 text: operation.summary || `${operation.method} ${operation.path}`,
-                 link: operationLink(operation, group),
-@@ -73,7 +81,7 @@ export function toSidebar(ir, options = {}) {
-     });
-     const tagGroups = ir.tagGroups ?? [];
-     if (tagGroups.length === 0)
--        return [introduction, ...ir.groups.map(groupItem)];
-+        return [...(introItems ?? [introduction]), ...ir.groups.filter((g) => !(hidden.has(g.name) || hidden.has(g.id))).map(groupItem)];
-     // `x-tagGroups` sections render as collapsible headers. Sections named in
-     // `flatten` spread their categories in place instead.
-     const flatten = new Set(options.flatten ?? []);
-@@ -84,14 +92,15 @@ export function toSidebar(ir, options = {}) {
-             const group = groupById.get(id);
-             return group ? [groupItem(group)] : [];
-         });
-+        const extras = sectionExtras[tagGroup.name] ?? [];
-         if (flatten.has(tagGroup.name))
--            return items;
--        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items }];
-+            return items.map((item) => ({ ...item, items: [item.items[0], ...extras, ...item.items.slice(1)] }));
-+        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items: [...extras, ...items] }];
-     });
-     return [
--        introduction,
-+        ...(introItems ?? [introduction]),
-         ...sections,
--        ...ir.groups.filter((group) => !claimed.has(group.id)).map(groupItem),
-+        ...ir.groups.filter((group) => !claimed.has(group.id) && !(hidden.has(group.name) || hidden.has(group.id))).map(groupItem),
-     ];
- }
- //# sourceMappingURL=sidebar.js.map
-\ No newline at end of file

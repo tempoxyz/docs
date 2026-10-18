@@ -89,3 +89,29 @@ Each demo walks you through signing in with a passkey, getting testnet funds, an
 These demos use an earlier testnet deployment through the legacy Zone A and Zone B interfaces in `viem/tempo`. Its interfaces and chain IDs differ from the current Zone protocol. The sandbox also supports plaintext deposits and direct in-Zone transfers; the current permissioned runtime uses encrypted deposits and does not yet enable those transfers.
 
 Use the guide’s connection details for this sandbox. For another Zone, get the endpoint, access credentials, and supported SDK version from its operator. The [protocol reference](/docs/protocol/zones) describes the current implementation; the [connection guide](/docs/guide/private-zones/connect-to-a-zone) explains direct RPC access and how the demos connect through the docs server.
+
+## Sandbox router deployment
+
+Use this `SwapAndDepositRouter` deployment for the Zone A and Zone B sandbox on **Tempo Moderato testnet**. It supports both same-token transfers and swaps. The [shared demo configuration](https://github.com/tempoxyz/docs/blob/main/src/lib/private-zones.ts) supplies these addresses to the interactive guides.
+
+| Contract | Moderato address |
+| --- | --- |
+| `SwapAndDepositRouter` | [`0xf9b794e0dca9bc12ac90067df792d7aad33436e4`](https://explore.testnet.tempo.xyz/address/0xf9b794e0dca9bc12ac90067df792d7aad33436e4) |
+| `ZoneFactory` | `0x7Cc496Dc634b718289c192b59CF90262C5228545` |
+| `StablecoinDEX` | `0xDEc0000000000000000000000000000000000000` |
+| Zone A portal (Zone ID `6`) | `0x7069DeC4E64Fd07334A0933eDe836C17259c9B23` |
+| Zone B portal (Zone ID `7`) | `0x3F5296303400B56271b476F5A0B9cBF74350D6Ac` |
+
+The deployed router receives `onWithdrawalReceived(bytes32,address,uint128,bytes)` callbacks, with selector `0xbfea9490`. The Zone messenger invokes this callback; your application supplies the router address and callback data to the source Zone's withdrawal request. The six-field `(bool,address,address,address,bytes32,uint128)` payload in the [swap](/docs/guide/private-zones/swap-across-zones#code-example) and [same-token transfer](/docs/guide/private-zones/send-tokens-across-zones#code-example) examples selects a plaintext destination recipient.
+
+:::warning
+Older demo copies use `0x7ebaa4E28fbD892f5B0F152d40173034adE94714`. That deployment expects `onWithdrawalReceived(address,address,uint128,bytes)` (`0x0e9110a5`) and points to a different factory. It is incompatible with these sandbox portals. Use the address above for both transfers and swaps. The latest protocol source also has a different callback interface; match the ABI and payload to the deployed contracts instead of combining versions.
+:::
+
+### Check the full routed result
+
+Before sending funds, check the router's `zoneFactory()` and `stablecoinDEX()` against the table, confirm the factory recognizes the portals, and confirm the target portal enables the output token. A swap also needs a fresh DEX quote and a minimum output bound.
+
+A successful source Zone withdrawal receipt only confirms submission. Wait for the L1 portal's `WithdrawalProcessed` event and check `callbackSuccess`, then confirm the destination balance. A rejected callback can produce a successful L1 processing receipt while returning the principal to the source Zone's `fallbackRecipient`; check that balance as well.
+
+Live checks on **2026-10-14** confirmed a [1 PathUSD transfer from Zone A to Zone B](https://explore.testnet.tempo.xyz/tx/0x8ab7e4fbbbd1e26a8400b111c5726fd05c04359be7a858d62e134a6d600807d9) and a [1 PathUSD swap into 0.994035 AlphaUSD, deposited back into Zone A](https://explore.testnet.tempo.xyz/tx/0x7d95a62c3e94e1f1382c287967d1d7bb13cfc3a3e3b54b5cd32dad240b8b7ec5). Both destination balances were verified. These checks cover the sandbox's plaintext recipient flow, not the current preview's encrypted flow or mainnet.

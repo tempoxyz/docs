@@ -1380,6 +1380,18 @@
       "destination": "/RSC/R/:path"
     },
     {
+      "source": "/developers/blog/:path*",
+      "destination": "/blog/:path*"
+    },
+    {
+      "source": "/developers/images/:path*",
+      "destination": "/images/:path*"
+    },
+    {
+      "source": "/developers/api/og",
+      "destination": "/api/og"
+    },
+    {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path"
     },

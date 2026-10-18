@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { cx as composeStyles } from 'zyzz'
+import { CopyButton } from '../../../components/CopyButton'
 import { codeScroll, themePreserveDark } from '../../../styles/surfaces.styles'
 import * as ui from './CodePanel.recipes'
 import DotCanvas from './DotCanvas'
@@ -197,27 +197,6 @@ function CheckIcon() {
   )
 }
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch {
-      // Clipboard unavailable (e.g. insecure context) — fail silently.
-    }
-  }
-
-  return (
-    <button type="button" onClick={handleCopy} aria-label="Copy code" {...ui.copyButtonButton()}>
-      {copied ? <CheckIcon /> : <CopyIcon />}
-      {copied ? 'Copied' : 'Copy'}
-    </button>
-  )
-}
-
 export default function CodePanel({
   code,
   sizer,
@@ -261,7 +240,14 @@ export default function CodePanel({
           className: `theme-preserve-dark group ${themePreserveDark().className}`,
         })}
       >
-        <CopyButton text={code.join('\n')} />
+        <CopyButton
+          text={code.join('\n')}
+          aria-label="Copy code"
+          icon={<CopyIcon />}
+          copiedIcon={<CheckIcon />}
+          resetAfter={1500}
+          {...ui.copyButtonButton()}
+        />
         <div {...ui.codePanelLayout5()}>
           {sizer !== undefined && (
             <pre aria-hidden="true" {...ui.pre2()}>

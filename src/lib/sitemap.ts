@@ -57,6 +57,12 @@ export function finalizeSitemap(
   const siteBaseUrl =
     blogBaseUrl?.replace(/blog\/$/, '') ?? docsIndexUrl?.replace(/(?:docs|get-started)\/?$/, '')
   if (siteBaseUrl) {
+    // The mounted docs homepage uses a canonical URL without a trailing slash.
+    withoutTemplates = withoutTemplates.replace(LOCATION_PATTERN, (entry, location: string) =>
+      location === siteBaseUrl && new URL(location).pathname !== '/'
+        ? `<loc>${location.replace(/\/$/, '')}</loc>`
+        : entry,
+    )
     withoutTemplates = withoutTemplates.replace(
       /<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>\s*/g,
       (entry, location: string) => {

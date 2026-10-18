@@ -36,8 +36,7 @@ export default function RelatedDocsLinks() {
             <Link
               className={ui.link({ className: 'group' }).className}
               to={link.href}
-              unstable_prefetchOnEnter
-              unstable_prefetchOnView={false}
+              unstable_prefetchOnEnter={{}}
             >
               <span {...ui.relatedDocsLinksText()}>{link.title}</span>
               {link.description && <span {...ui.relatedDocsLinksText2()}>{link.description}</span>}

@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 import { base58Encode } from '../src/lib/base58'
 
 // Drives the Routes demo against a scripted Routes API, browser wallet, and Tempo RPC, so every
@@ -471,11 +471,16 @@ const fromSelect = (page: Page, label: string) =>
   page.getByRole('group', { name: 'From' }).getByLabel(label)
 const toSelect = (page: Page, label: string) =>
   page.getByRole('group', { name: 'To' }).getByLabel(label)
+/** Opens a route picker and chooses the option with this label. */
+async function pick(picker: Locator, label: string) {
+  await picker.click()
+  await picker.page().getByRole('option', { name: label, exact: true }).click()
+}
 async function chooseRoute(page: Page, from: [string, string], to: [string, string]) {
-  await fromSelect(page, 'Network').selectOption({ label: from[0] })
-  await fromSelect(page, 'Asset').selectOption({ label: from[1] })
-  await toSelect(page, 'Network').selectOption({ label: to[0] })
-  await toSelect(page, 'Asset').selectOption({ label: to[1] })
+  await pick(fromSelect(page, 'Network'), from[0])
+  await pick(fromSelect(page, 'Asset'), from[1])
+  await pick(toSelect(page, 'Network'), to[0])
+  await pick(toSelect(page, 'Asset'), to[1])
 }
 const lifecycle = (page: Page) => page.locator('.routes-test-lifecycle')
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
@@ -493,9 +498,9 @@ async function createBaseDepositAddress(page: Page) {
   await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
   await button(page, 'Deposit address').click()
   await page.getByLabel('Amount (USDC)').fill('1')
-  await button(page, 'Get quote').click()
   await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
   await page.getByLabel('Refund address on Base').fill(sender)
+  await button(page, 'Get quote').click()
   await button(page, 'Create').click()
   await expect(lifecycle(page)).toContainText(depositAddress)
 }
@@ -511,20 +516,20 @@ test.describe('Routes demo', () => {
     expect(api.to('GET', '/v1/routes').at(-1)?.headers['tempo-api-key']).toBe(key)
 
     // A single valid continuation fills itself in.
-    await fromSelect(page, 'Network').selectOption({ label: 'Tempo' })
-    await expect(fromSelect(page, 'Asset')).toHaveValue(tempoToTron.sourceToken.tokenKey)
-    await expect(toSelect(page, 'Network')).toHaveValue(chains.tron.id)
-    await expect(toSelect(page, 'Asset')).toHaveValue(tempoToTron.destinationToken.tokenKey)
+    await pick(fromSelect(page, 'Network'), 'Tempo')
+    await expect(fromSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.sourceToken.tokenKey)
+    await expect(toSelect(page, 'Network')).toHaveAttribute('data-value', chains.tron.id)
+    await expect(toSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.destinationToken.tokenKey)
     await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
     await expect(button(page, 'Deposit address')).toBeDisabled()
 
     // Non-EVM sources fund a deposit address.
-    await fromSelect(page, 'Network').selectOption({ label: 'Solana' })
+    await pick(fromSelect(page, 'Network'), 'Solana')
     await expect(button(page, 'Transfer')).toBeDisabled()
     await expect(button(page, 'Deposit address')).toHaveAttribute('aria-pressed', 'true')
-    // Deposit quotes price the route alone; the recipient and refund address come at creation.
+    // Deposit quotes use the recipient and refund address the address is created with.
     await expect(page.getByLabel('Amount (USDC)')).toBeVisible()
-    await expect(page.getByLabel('Refund address on Solana')).toHaveCount(0)
+    await expect(page.getByLabel('Refund address on Solana')).toBeVisible()
 
     // Both flows, with the subsidy offered.
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
@@ -674,29 +679,36 @@ test.describe('Routes demo', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
-    await expect(page.getByLabel('Recipient on Tempo')).toHaveCount(0)
-    await button(page, 'Get quote').click()
-
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.eFeesNone')
-    const quoteQuery = Object.fromEntries(
-      api.to('GET', '/v1/routes/deposit-addresses/quote')[0].query,
-    )
-    expect(quoteQuery).toMatchObject({ subsidize: 'true', amount: '1000000' })
-    expect(quoteQuery).not.toHaveProperty('recipient')
-    expect(quoteQuery).not.toHaveProperty('refundAddress')
-
-    // The deposit address is on the source network and lands on Tempo, where Tempo Wallet can
-    // fill in the recipient.
-    await expect(lifecycle(page)).toContainText(
-      'Routes creates a Base address for this route. USDC sent to it lands automatically as USDC.e in the Tempo wallet below.',
-    )
-    await expect(lifecycle(page).getByRole('button', { name: '(Connect)' })).toBeEnabled()
+    // The recipient is on Tempo, where Tempo Wallet can fill it in.
+    await expect(lifecycle(page).getByRole('button', { name: '(Connect)' }).first()).toBeEnabled()
     await expect(page.getByLabel('Recipient on Tempo')).toHaveAttribute(
       'placeholder',
       'Tempo destination wallet',
     )
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Base').fill(sender)
+    await button(page, 'Get quote').click()
+
+    // Tempo covers the gap between the routed amount (0.9591) and 1:1 delivery.
+    await expect(lifecycle(page)).toContainText(
+      'Recipient gets1 USDC.eCovered by Tempo0.0409 USDC.eFeesNone',
+    )
+    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
+    const quoteQuery = Object.fromEntries(
+      api.to('GET', '/v1/routes/deposit-addresses/quote')[0].query,
+    )
+    // Several deposit routes only quote with both addresses, so the quote carries them.
+    expect(quoteQuery).toMatchObject({
+      subsidize: 'true',
+      amount: '1000000',
+      recipient: tempoRecipient,
+      refundAddress: sender,
+    })
+
+    // The deposit address is on the source network and lands at the quoted Tempo recipient.
+    await expect(lifecycle(page)).toContainText(
+      'Routes creates a Base address for this route. USDC sent to it lands automatically as USDC.e at the Tempo recipient you quoted.',
+    )
     await button(page, 'Create').click()
     await expect(lifecycle(page)).toContainText(depositAddress)
     await expect(lifecycle(page)).toContainText('Watching for your deposit')
@@ -908,7 +920,8 @@ test.describe('Routes demo', () => {
     )
     await button(page, 'Retry').click()
     await expect(fromSelect(page, 'Network')).toBeEnabled()
-    await expect(fromSelect(page, 'Network').locator('option')).toHaveCount(4)
+    await fromSelect(page, 'Network').click()
+    await expect(page.getByRole('listbox', { name: 'Network' }).getByRole('option')).toHaveCount(3)
   })
 
   test('explains the live Tron failures, and quotes without 1:1 when inventory runs out', async ({
@@ -936,6 +949,8 @@ test.describe('Routes demo', () => {
     await chooseRoute(page, ['Tron', 'USDT'], ['Tempo', 'USDT0'])
     await expect(button(page, 'Transfer')).toBeDisabled()
     await page.getByLabel('Amount (USDT)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Tron').fill(tronRecipient)
     await button(page, 'Get quote').click()
     await expect(lifecycle(page)).toContainText(
       'No quote is available for this route right now. Try another amount, or try again later. (quote_not_available · request req_tron_dep)',
@@ -1036,8 +1051,6 @@ test.describe('Routes demo wallets', () => {
 
     // Solana: a Wallet Standard wallet, for the deposit address's refunds.
     await chooseRoute(page, ['Solana', 'USDC'], ['Tempo', 'USDC.e'])
-    await page.getByLabel('Amount (USDC)').fill('1')
-    await button(page, 'Get quote').click()
     await connectFor('Refund address on Solana').click()
     await expect(page.getByLabel('Refund address on Solana')).toHaveValue(solanaAccount)
   })
@@ -1136,9 +1149,9 @@ test.describe('Routes demo wallets', () => {
     await openDemo(page)
     await chooseRoute(page, ['Solana', 'USDC'], ['Tempo', 'USDC.e'])
     await page.getByLabel('Amount (USDC)').fill('1')
-    await button(page, 'Get quote').click()
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Solana').fill(solanaAccount)
+    await button(page, 'Get quote').click()
     await button(page, 'Create').click()
     await button(page, 'Send with Phantom').click()
     await expect(button(page, 'Sent')).toBeVisible()
@@ -1167,17 +1180,22 @@ test.describe('Routes demo wallets', () => {
 
 const keyMissing = apiError(401, 'api_key_missing', 'An API key is required.', 'req_missing')
 const organizationQuote = { ...subsidizedDepositQuote, destinationAmount: usd('0.9991') }
+const unsubsidizedDepositQuote = { ...subsidizedDepositQuote, subsidize: false }
+// The same routes with no subsidy, so keyless quotes use public pricing.
+const plainDirectory = {
+  body: {
+    data: directory.body.data.map((route) => ({ ...route, subsidies: null })),
+    nextCursor: null,
+  },
+}
 
 test.describe('Routes demo without a key', () => {
-  test('quotes at public pricing, then prices for the organization once a key is added', async ({
+  test('previews 1:1 delivery with the docs key, then prices for the organization once a key is added', async ({
     page,
   }) => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
-      'GET /v1/routes/deposit-addresses/quote': [
-        { body: { ...subsidizedDepositQuote, subsidize: false, fees: [] } },
-        { body: organizationQuote },
-      ],
+      'GET /v1/routes/deposit-addresses/quote': [{ body: organizationQuote }],
     })
     const proxied = await mockQuoteProxy(page, [{ body: subsidizedDepositQuote }])
     await page.goto(demo)
@@ -1185,16 +1203,21 @@ test.describe('Routes demo without a key', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
     await button(page, 'Get quote').click()
 
-    // The API prices the route publicly, with no key, no docs proxy, and no 1:1 delivery.
+    // Only an approved organization can quote 1:1 delivery, so the docs key prices the preview.
+    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
+    await expect(lifecycle(page)).toContainText('Covered by Tempo0.0409 USDC.e')
+    await expect(lifecycle(page)).toContainText(
+      '1:1 delivery preview from the docs demo organization. Creating a 1:1 route needs subsidy approval for your organization.',
+    )
     await expect(lifecycle(page)).toContainText(
       'Add your Tempo API key here to create routes with configured pricing. Get yours in the Tempo API console.',
     )
-    const [anonymous] = api.to('GET', '/v1/routes/deposit-addresses/quote')
-    expect(anonymous.headers['tempo-api-key']).toBeUndefined()
-    expect(anonymous.query.get('subsidize')).toBe('false')
-    expect(proxied).toHaveLength(0)
+    expect(proxied[0]).toMatchObject({ kind: 'deposit-addresses', subsidize: 'true' })
+    expect(api.to('GET', '/v1/routes/deposit-addresses/quote')).toHaveLength(0)
     await page.getByRole('button', { name: 'Request' }).click()
     await expect(page.locator('pre')).not.toContainText('tempo-api-key')
 
@@ -1208,20 +1231,47 @@ test.describe('Routes demo without a key', () => {
     await expect(page.getByLabel('Project API key')).toBeFocused()
     await page.getByLabel('Project API key').fill(key)
     await button(page, 'Use key').click()
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
+    await expect(lifecycle(page)).toContainText('Covered by Tempo0.0009 USDC.e')
+    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
     const keyed = api.to('GET', '/v1/routes/deposit-addresses/quote').at(-1)
     expect(keyed?.headers['tempo-api-key']).toBe(key)
     expect(keyed?.query.get('subsidize')).toBe('true')
   })
 
-  test('quotes through the docs proxy while the API requires a key, then asks for one to create', async ({
-    page,
-  }) => {
+  test('explains when the added key cannot use 1:1 delivery', async ({ page }) => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
-      'GET /v1/routes/deposit-addresses/quote': [keyMissing, { body: subsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
-      'GET /v1/routes/deposits': [{ body: { data: [], nextCursor: null } }],
+      'GET /v1/routes/deposit-addresses/quote': [
+        apiError(403, 'routes_subsidy_not_allowed', 'Subsidy not allowed.', 'req_sub'),
+        { body: unsubsidizedDepositQuote },
+      ],
+    })
+    await mockQuoteProxy(page, [{ body: subsidizedDepositQuote }])
+    await page.goto(demo)
+    await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
+    await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
+    await button(page, 'Deposit address').click()
+    await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
+    await button(page, 'Get quote').click()
+    await expect(lifecycle(page)).toContainText('1:1 delivery preview')
+
+    await addKey(page, key)
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
+    await expect(lifecycle(page)).toContainText(
+      'Quoted without 1:1 delivery. This organization is not approved for 1:1 delivery on this route. (routes_subsidy_not_allowed · request req_sub)',
+    )
+    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
+    expect(
+      api.to('GET', '/v1/routes/deposit-addresses/quote').map((q) => q.query.get('subsidize')),
+    ).toEqual(['true', 'false'])
+  })
+
+  test('quotes a route without 1:1 delivery at public pricing', async ({ page }) => {
+    const api = await mockRoutesApi(page, {
+      'GET /v1/routes': [plainDirectory],
+      'GET /v1/routes/deposit-addresses/quote': [{ body: unsubsidizedDepositQuote }],
     })
     const proxied = await mockQuoteProxy(page, [{ body: subsidizedDepositQuote }])
     await page.goto(demo)
@@ -1229,13 +1279,43 @@ test.describe('Routes demo without a key', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
     await button(page, 'Get quote').click()
 
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
+    // The API prices the route publicly, with no key, no docs proxy, and no 1:1 delivery.
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
+    const [anonymous] = api.to('GET', '/v1/routes/deposit-addresses/quote')
+    expect(anonymous.headers['tempo-api-key']).toBeUndefined()
+    expect(anonymous.query.get('subsidize')).toBe('false')
+    expect(proxied).toHaveLength(0)
+  })
+
+  test('quotes through the docs proxy while the API requires a key, then asks for one to create', async ({
+    page,
+  }) => {
+    const api = await mockRoutesApi(page, {
+      'GET /v1/routes': [plainDirectory],
+      'GET /v1/routes/deposit-addresses/quote': [keyMissing, { body: unsubsidizedDepositQuote }],
+      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
+      'GET /v1/routes/deposits': [{ body: { data: [], nextCursor: null } }],
+    })
+    const proxied = await mockQuoteProxy(page, [{ body: unsubsidizedDepositQuote }])
+    await page.goto(demo)
+    await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
+    await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
+    await button(page, 'Deposit address').click()
+    await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
+    await button(page, 'Get quote').click()
+
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
     expect(proxied[0]).toMatchObject({
       kind: 'deposit-addresses',
       amount: '1000000',
       sourceChain: chains.base.id,
+      subsidize: 'false',
     })
     // The API refused the anonymous quote, so the docs proxy priced it.
     expect(api.to('GET', '/v1/routes/deposit-addresses/quote')).toHaveLength(1)
@@ -1244,8 +1324,6 @@ test.describe('Routes demo without a key', () => {
     )
 
     // The key panel opens from step 2, and the route and quote survive the keyed reload.
-    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
-    await page.getByLabel('Refund address on Base').fill(sender)
     const keyed = page.waitForResponse(
       (response) =>
         response.url().startsWith('https://api.tempo.xyz/v1/routes?') &&
@@ -1256,11 +1334,13 @@ test.describe('Routes demo without a key', () => {
     await page.getByLabel('Project API key').fill(key)
     await button(page, 'Use key').click()
     await keyed
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
-    await expect(page.getByLabel('Recipient on Tempo')).toHaveValue(tempoRecipient)
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
     await button(page, 'Create').click()
     await expect(lifecycle(page)).toContainText(depositAddress)
-    expect(api.to('POST', '/v1/routes/deposit-addresses')[0].headers['tempo-api-key']).toBe(key)
+    const [created] = api.to('POST', '/v1/routes/deposit-addresses')
+    expect(created.headers['tempo-api-key']).toBe(key)
+    // The addresses entered for the quote carry through to creation.
+    expect(created.body).toMatchObject({ recipient: tempoRecipient, refundAddress: sender })
 
     // The key that created the address stays for the rest of the test.
     await page.getByRole('button', { name: /API key/ }).click()
@@ -1280,6 +1360,8 @@ test.describe('Routes demo without a key', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
     await button(page, 'Get quote').click()
     await expect(lifecycle(page)).toContainText(
       'The docs demo key cannot quote this route. Add your project API key to quote this route. (routes_not_allowed · request req_docs)',
@@ -1301,6 +1383,6 @@ test.describe('Routes demo without a key', () => {
       'This key cannot use USDC on Base to USDC.e on Tempo. Choose another route.',
     )
     await expect(fromSelect(page, 'Network')).toBeEnabled()
-    await expect(fromSelect(page, 'Network')).toHaveValue('')
+    await expect(fromSelect(page, 'Network')).toHaveAttribute('data-value', '')
   })
 })

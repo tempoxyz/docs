@@ -9,6 +9,7 @@ import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
 import { AgentSetupCommand } from './AgentSetupCommand'
 import { ChevronLink } from './ChevronLink'
+import { CopyButton, type CopyButtonState } from './CopyButton'
 import { CopyIconSwap } from './CopyIconSwap'
 import { tempoAgentStart, tempoAgentStartCommand } from './DocsHome.styles'
 import { SegmentedControl } from './SegmentedControl'
@@ -57,12 +58,10 @@ const agents = [
 ] as const
 
 type Agent = (typeof agents)[number]['id']
-type CopyState = 'copied' | 'error'
-
 export function DocsHomeAgent() {
   const [mounted, setMounted] = useState(false)
   const [agent, setAgent] = useState<Agent>('codex')
-  const [copyState, setCopyState] = useState<CopyState | null>(null)
+  const [copyState, setCopyState] = useState<CopyButtonState>('idle')
   const activeAgent = agents.find((item) => item.id === agent) ?? agents[0]
   const commands = tempoAgentSetupCommands[agent]
   const multipleCommands = commands.includes('\n')
@@ -94,21 +93,6 @@ export function DocsHomeAgent() {
 
   // The icon and label confirm briefly; the status message below stays.
   const [justCopied, setJustCopied] = useState(false)
-  useEffect(() => {
-    if (!justCopied) return
-    const timer = window.setTimeout(() => setJustCopied(false), 1200)
-    return () => window.clearTimeout(timer)
-  }, [justCopied])
-
-  async function copyCommands() {
-    try {
-      await navigator.clipboard.writeText(commands)
-      setCopyState('copied')
-      setJustCopied(true)
-    } catch {
-      setCopyState('error')
-    }
-  }
 
   return (
     <div className={`tempo-agent-start ${tempoAgentStart().className}`}>
@@ -131,7 +115,7 @@ export function DocsHomeAgent() {
             value={agent}
             onValueChange={(id) => {
               setAgent(id)
-              setCopyState(null)
+              setCopyState('idle')
               setJustCopied(false)
             }}
           />
@@ -161,20 +145,26 @@ export function DocsHomeAgent() {
                 {isMcp ? <PlugIcon aria-hidden="true" /> : <TerminalIcon aria-hidden="true" />}
                 {isMcp ? 'MCP server URL' : 'Terminal'}
               </span>
-              <button
-                type="button"
+              <CopyButton
+                key={agent}
+                text={commands}
+                label={copyLabel}
                 disabled={!mounted}
                 className="tempo-agent-start-copy"
                 aria-label={`${copyLabel} for ${activeAgent.label}`}
-                onClick={copyCommands}
-              >
-                <CopyIconSwap
-                  copied={justCopied}
-                  copyIcon={<CopyIcon aria-hidden="true" />}
-                  checkIcon={<CheckIcon aria-hidden="true" />}
-                />
-                <span>{justCopied ? 'Copied' : copyLabel}</span>
-              </button>
+                icon={
+                  <CopyIconSwap
+                    copied={justCopied}
+                    copyIcon={<CopyIcon aria-hidden="true" />}
+                    checkIcon={<CheckIcon aria-hidden="true" />}
+                  />
+                }
+                resetAfter={1200}
+                onStateChange={(next) => {
+                  setJustCopied(next === 'copied')
+                  if (next !== 'idle') setCopyState(next)
+                }}
+              />
             </div>
             <pre>
               <code>{isMcp ? commands : <AgentSetupCommand command={commands} />}</code>

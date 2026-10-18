@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { cx } from 'zyzz'
 import { loadRoutes, RoutesApiError } from '../lib/routes-execution'
-import type { TestRoute } from '../lib/routes-test'
+import { demoMethods, routeDemoHref, type TestRoute } from '../lib/routes-test'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
 import { Container } from './Container'
@@ -88,8 +88,8 @@ export function SupportedRoutesTable() {
         }
         footer={
           <span>
-            Fee coverage means the route supports 1:1 delivery through a Tempo subsidy. Eligibility
-            depends on your organization, billing, and transfer details.
+            Fee coverage means the route supports 1:1 delivery. Eligibility depends on your
+            organization, billing, and transfer details.
           </span>
         }
       >
@@ -140,6 +140,9 @@ export function SupportedRoutesTable() {
                     <th {...head()}>Destination</th>
                     <th {...head()}>Funding</th>
                     <th {...cx(head(), alignEnd())}>Fee coverage</th>
+                    <th {...head()}>
+                      <span {...visuallyHidden()}>Demo</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,6 +165,17 @@ export function SupportedRoutesTable() {
                         {route.subsidies?.depositAddress || route.subsidies?.transfer
                           ? 'Available'
                           : 'Not available'}
+                      </td>
+                      <td {...cx(cell(), detail(), alignEnd())}>
+                        {demoMethods(route).length > 0 && (
+                          <a
+                            href={routeDemoHref(route)}
+                            aria-label={`Try ${assetLabel(route, 'source')} to ${assetLabel(route, 'destination')}`}
+                            {...tryLink()}
+                          >
+                            Try
+                          </a>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -254,6 +268,23 @@ const head = style({
   boxShadow: 'inset 0 -1px 0 var(--line) !custom',
 })
 const alignEnd = style({ textAlign: 'right' })
+const tryLink = style({
+  color: inherited.color.textColorAccent,
+  whiteSpace: 'nowrap',
+  '@media (hover: hover)': { ':hover': { textDecorationLine: 'underline' } },
+})
+const visuallyHidden = style({
+  position: 'absolute',
+  width: '1px',
+  height: '1px',
+  padding: tokens.spacing['0'],
+  // design-exception: The standard visually hidden pattern pulls the 1px box out of the flow.
+  margin: '-1px !custom',
+  overflow: 'hidden',
+  clipPath: 'inset(50%)',
+  whiteSpace: 'nowrap',
+  borderWidth: tokens.borderWidth.none,
+})
 const row = style({
   height: '64px',
   borderBottomWidth: tokens.borderWidth.hairline,

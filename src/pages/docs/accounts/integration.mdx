@@ -14,15 +14,18 @@ Decide whether each customer needs a separate onchain balance or whether deposit
 
 ## Where should funds live?
 
-| Your product needs | Account model | Build it |
+Funds live in each customer's own account, or in a company account where your ledger records what each customer is owed. The same choice applies to every balance your product holds:
+
+| Balance | Customer accounts | Company account |
 | --- | --- | --- |
-| Customers hold and spend their own stablecoin balances | Use a separate account for each customer. Read balances and activity at that account's address. | [Create an account](/docs/accounts/create) or [connect the customer's wallet](/docs/accounts/integrate) |
-| Customers deposit into your business, and you need to identify who paid | Give each customer a virtual deposit address that forwards payments to a shared account. Track customer credits in your application's ledger. | [Customer deposit addresses](/docs/guide/payments/virtual-addresses) |
-| Your business pays employees, suppliers, or other recipients | Fund a company account and send payments from it. Track each payout against your business records. | [Fund an account](/docs/guide/getting-funds), then [send payments](/docs/guide/payments/send-a-payment) |
+| **Stablecoins** | Each customer's account holds its balance. Read it at that address. | One account holds the total. Your ledger records each customer's credit. |
+| **[Earn](/docs/earn) positions** | Each customer's account holds its vault shares. The Earn API reports earnings per address. | The company account holds the shares. Your ledger allocates their earnings to customers. |
+| **[Zone](/docs/zones) balances** | Each customer reads only their own private balance through account-scoped RPC. | One Zone account holds the funds. Your ledger is the per-customer record. |
+| **Build it** | [Create an account](/docs/accounts/create) or [connect the customer's wallet](/docs/accounts/integrate) | [Customer deposit addresses](/docs/guide/payments/virtual-addresses) to identify deposits; [fund the account](/docs/guide/getting-funds) and [send payments](/docs/guide/payments/send-a-payment) for payouts |
 
 A virtual deposit address identifies incoming payments; it does **not** hold a separate balance or give the customer signing authority over the shared account. For example, if two customers deposit 100 and 50 tokens, the shared account receives 150. Your ledger records which customer receives each credit.
 
-You can combine these models: a product might give customers separate accounts while using a company account for payouts.
+You can combine these models: a product might give customers separate accounts for spending while a company account holds Earn positions and pays out.
 
 <span id="create-the-account-and-connect-its-signer" />
 <span id="authorize-and-send-a-payment" />

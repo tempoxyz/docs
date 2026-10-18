@@ -186,6 +186,16 @@ test('closed mobile navigation stays outside the viewport and restores focus on 
   await page.keyboard.press('Escape')
   await expect.poll(rightEdge).toBeLessThanOrEqual(0)
   await expect(trigger).toBeFocused()
+
+  // Activation need not focus the button (for example, on touch browsers).
+  await trigger.evaluate((element) => {
+    element.blur()
+    element.click()
+  })
+  await expect(panel).toBeInViewport()
+  await panel.getByRole('button', { name: 'Close docs navigation', exact: true }).click()
+  await expect.poll(rightEdge).toBeLessThanOrEqual(0)
+  await expect(trigger).toBeFocused()
 })
 
 test('terminal controls share compiled hover and keyboard focus styling', async ({ page }) => {

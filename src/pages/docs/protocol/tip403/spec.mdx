@@ -237,11 +237,13 @@ interface ITIP403Registry {
 
 ### Usage with TIP-20 Tokens
 
-TIP-20 tokens store the current TIP403 registry policy ID they adhere to in their storage. Transfers check `isAuthorizedSender()` for the source and `isAuthorizedRecipient()` for the resolved destination. Mints check `isAuthorizedMintRecipient()` for the resolved destination. The policy to use for the token can only be set by the admin of the token.
+The registry's `tokenTransferPolicyId(token)` returns `(isSet, policyId)`. When `isSet` is true, that binding is authoritative for the token's transfer policy. `TIP20.transferPolicyId()` returns the effective policy ID. Transfers check `isAuthorizedSender()` for the source and `isAuthorizedRecipient()` for the resolved destination. Mints check `isAuthorizedMintRecipient()` for the resolved destination. The policy to use for the token can only be set by the admin of the token.
 
-**Default Policy:** New tokens start with `transferPolicyId = 1` (always-allow policy).
+**Default Policy:** Token creation registers a binding with `isSet = true` and `policyId = 1` (always-allow).
 
-**Policy Changes:** When a token's transfer policy is changed via `changeTransferPolicyId()`, all future transfers are immediately subject to the new policy.
+**Policy Changes:** The token admin's `changeTransferPolicyId()` updates the registry binding. All subsequent policy checks use the new policy. The binding is an internal protocol write; ordinary callers cannot set an arbitrary token's binding.
+
+**Unset bindings:** If `isSet` is false, both `tokenTransferPolicyId(token).policyId` and the token's `transferPolicyId()` getter return the token-local policy value. `migrateTransferPolicyIds(tokens)` permissionlessly registers that same effective value and clears the token-local slot, skipping invalid or already-registered tokens and returning the number registered. It MUST NOT change transfer authorization.
 
 **Virtual addresses:** Policy-configuration functions that accept literal member addresses (`createPolicyWithAccounts`, `modifyPolicyWhitelist`, `modifyPolicyBlacklist`) reject [virtual addresses](/docs/protocol/tip20/virtual-addresses). TIP-20 policy checks for transfers and mints to a virtual address run against the resolved master wallet rather than the forwarding alias, so policy membership must be configured on the master address.
 
@@ -275,6 +277,26 @@ return data.policyType == PolicyType.WHITELIST
     ? policySet[policyId][user]
     : !policySet[policyId][user];
 ```
+
+### Receive policies
+
+An account controls its inbound policy through `setReceivePolicy(senderPolicyId, tokenFilterId, recoveryAuthority)`. The sender policy and token filter MUST be existing simple or built-in policies; compound policies are invalid here. `receivePolicy(account)` returns the configuration. Without a configured policy, inbound transfers are allowed by the receiver layer. Setting both IDs to `1` allows all senders and tokens.
+
+For `validateReceivePolicy(token, sender, receiver)`, evaluation MUST proceed in this order:
+
+1. Evaluate `tokenFilterId` against the **token address**. Rejection returns `(false, TOKEN_FILTER)`.
+2. Evaluate `senderPolicyId` against the **originator address**. Rejection returns `(false, RECEIVE_POLICY)`.
+3. Otherwise return `(true, NONE)`.
+
+The numeric reasons are `NONE = 0`, `TOKEN_FILTER = 1`, and `RECEIVE_POLICY = 2`. Token-filter rejection takes precedence when both checks fail. Virtual recipients use their resolved master as `receiver`. Issuer transfer/mint authorization runs independently and MUST succeed before a receiver-policy hold can be created.
+
+For ordinary inbound TIP-20 transfers and mints, receiver rejection holds the amount at ReceivePolicyGuard (`0xb10c000000000000000000000000000000000000`) instead of reverting. The guard emits `TransferBlocked(token, receiver, blockedNonce, amount, receiptVersion, receipt)`. The receipt binds its version, token, recovery authority, originator, addressed recipient, block timestamp, guard nonce, blocked reason, inbound kind, and memo. `balanceOf(bytes receipt)` returns the outstanding receipt amount. The guard MUST NOT accept a direct token transfer or mint as a substitute for a receipt-backed hold.
+
+`recoveryAuthority = address(0)` gives recovery control to the original sender or minter. Setting it to the receiving account gives that account control; another address gives that third party control. Precompile and virtual recovery addresses MUST be rejected with `InvalidRecoveryAuthority`. The authority is captured in the receipt and MUST NOT change when the receiver later changes its configuration.
+
+The captured authority calls `claim(address to, bytes receipt)` to release the full outstanding amount. A successful claim consumes the receipt; a failed claim MUST preserve it. Claims MUST enforce the token's pause state and valid-recipient rules. A receiver- or third-party-authorized claim directly to the resolved receiver resumes delivery: it checks issuer recipient authorization but skips the receive policy and sender authorization. All originator-authorized claims, and claims to any other destination, are reroutes: they MUST revalidate issuer sender/recipient authorization and the new destination's receive policy, reverting with `PolicyForbids` on rejection rather than creating another hold. The policy sender is the originator in originator-recovery mode and the resolved receiver otherwise. Applicable access-key spending limits also apply to reroutes.
+
+`burnBlockedReceipt(bytes receipt)` requires the token's `BURN_BLOCKED_ROLE` and a denied sender-policy check for the effective owner: the originator in originator-recovery mode, otherwise the resolved receiver. It burns only that receipt's amount and consumes the receipt, rather than burning the pooled guard balance. Token pause and balance checks remain in force.
 
 ## Invariants
 - When policyId = 0, all authorization checks must return false for every address.
