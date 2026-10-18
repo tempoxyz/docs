@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Link } from 'waku'
+import { blogPostHref } from '../../../seo'
 import { categories, type PostMeta } from '../_lib/categories'
 import {
   tempoBlogEmpty,
@@ -60,8 +60,8 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
       <ul className={`tempo-blog-post-list ${tempoBlogPostList().className}`}>
         {visible.map((post) => (
           <li key={post.slug}>
-            <Link
-              to={`/blog/${post.slug}`}
+            <a
+              href={blogPostHref(post.slug)}
               className={`tempo-blog-post-row ${tempoBlogPostRow().className}`}
             >
               <div className={`tempo-blog-post-copy ${tempoBlogPostCopy().className}`}>
@@ -81,7 +81,7 @@ export default function PostExplorer({ posts }: { posts: PostMeta[] }) {
               >
                 ↗
               </span>
-            </Link>
+            </a>
           </li>
         ))}
       </ul>

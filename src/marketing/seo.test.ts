@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { docsStructuredDataHead } from '../lib/docs-structured-data'
-import { blogPostImageUrl, blogPostJsonLd, ogImageUrl, type PostSeo } from './seo'
+import { blogPostHref, blogPostImageUrl, blogPostJsonLd, ogImageUrl, type PostSeo } from './seo'
+
+describe('blog post links', () => {
+  it.each([
+    ['production', 'https://tempo.xyz/developers/blog/t6'],
+    ['preview', '/blog/t6'],
+    ['', '/blog/t6'],
+  ])('links to the served post in %s', (environment, expected) => {
+    expect(blogPostHref('t6', environment)).toBe(expected)
+  })
+})
 
 const post: PostSeo = {
   slug: 'inside-tempo-zones',

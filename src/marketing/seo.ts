@@ -23,6 +23,14 @@ export function absoluteUrl(base: string, pathname: string): string {
   return base ? `${base}${normalized}` : normalized
 }
 
+/** Production HTML must link to the docs mount even before router hydration. */
+export function blogPostHref(slug: string, vercelEnv = import.meta.env.VERCEL_ENV): string {
+  return absoluteUrl(
+    vercelEnv === 'production' ? 'https://tempo.xyz/developers' : '',
+    `/blog/${slug}`,
+  )
+}
+
 // The renderer only reads `title`, `section`, and `subsection` — keep the
 // query minimal so URLs stay stable and cache keys stay small. Encodes with
 // encodeURIComponent (spaces as %20, not '+') so URLs are byte-identical to
