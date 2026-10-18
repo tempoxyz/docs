@@ -81,8 +81,7 @@ const cases: {
     path: '/docs/api',
     title: 'Tempo API reference | Tempo Docs',
     ogTitle: 'Tempo API',
-    descriptionIncludes:
-      'Read balances, track onchain payments, and configure webhooks on the Tempo blockchain',
+    descriptionIncludes: 'Read balances, track onchain payments, and configure webhooks on Tempo',
     ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_api_linework-000_v02.png',
   },
   {
