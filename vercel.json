@@ -1364,18 +1364,6 @@
   ],
   "rewrites": [
     {
-      "source": "/developers/blog/:path*",
-      "destination": "/blog/:path*"
-    },
-    {
-      "source": "/developers/images/:path*",
-      "destination": "/images/:path*"
-    },
-    {
-      "source": "/developers/api/og",
-      "destination": "/api/og"
-    },
-    {
       "source": "/developers/RSC/R/developers.txt",
       "destination": "/developers/RSC/R/_root.txt"
     },
@@ -1390,6 +1378,18 @@
     {
       "source": "/RSC/R/developers/:path(.*)",
       "destination": "/RSC/R/:path"
+    },
+    {
+      "source": "/developers/blog/:path*",
+      "destination": "/blog/:path*"
+    },
+    {
+      "source": "/developers/images/:path*",
+      "destination": "/images/:path*"
+    },
+    {
+      "source": "/developers/api/og",
+      "destination": "/api/og"
     },
     {
       "source": "/ingest/static/:path(.*)",
