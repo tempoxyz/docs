@@ -50,6 +50,17 @@ describe('sitemapCoverage', () => {
 })
 
 describe('finalizeSitemap', () => {
+  it('uses the canonical mounted homepage URL without a trailing slash', () => {
+    const input = sitemap.replace(
+      '</urlset>',
+      '<url><loc>https://tempo.xyz/developers/</loc></url></urlset>',
+    )
+    const result = finalizeSitemap(input, [])
+    expect(result).toContain('<loc>https://tempo.xyz/developers</loc>')
+    expect(result).not.toContain('<loc>https://tempo.xyz/developers/</loc>')
+    expect(finalizeSitemap(result, [])).toBe(result)
+  })
+
   it('excludes redirected marketing surfaces while preserving docs and blog URLs', () => {
     const previousSite = sitemap.replace(
       '</urlset>',

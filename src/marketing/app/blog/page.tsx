@@ -1,5 +1,5 @@
-import { Link } from 'waku'
 import DocsHeader from '../../../components/DocsHeader'
+import { blogPostHref } from '../../seo'
 import BlogFooter from './_components/BlogFooter'
 import PostByline from './_components/PostByline'
 import PostExplorer from './_components/PostExplorer'
@@ -41,8 +41,8 @@ export default function BlogPage() {
         </header>
 
         {featured ? (
-          <Link
-            to={`/blog/${featured.slug}`}
+          <a
+            href={blogPostHref(featured.slug)}
             className={`tempo-blog-featured ${tempoBlogFeatured().className}`}
           >
             <div className={`tempo-blog-featured-copy ${tempoBlogFeaturedCopy().className}`}>
@@ -56,7 +56,7 @@ export default function BlogPage() {
             <div className={`tempo-blog-featured-image ${tempoBlogFeaturedImage().className}`}>
               <PostImage post={featured} priority />
             </div>
-          </Link>
+          </a>
         ) : null}
 
         <PostExplorer posts={postMetas} />
