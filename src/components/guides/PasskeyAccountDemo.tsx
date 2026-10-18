@@ -93,7 +93,7 @@ export function PasskeyAccountDemo() {
                     if (!(await copyAddress(address))) setError('Could not copy the address.')
                   }}
                 >
-                  {copied ? 'Copied address' : 'Copy address'}
+                  {copied ? 'Copied' : 'Copy address'}
                 </Button>
                 <Button
                   type="button"

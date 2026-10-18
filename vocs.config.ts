@@ -685,7 +685,7 @@ export default defineConfig({
     ]
     const ecosystemSidebar = [
       {
-        text: 'ECOSYSTEM',
+        text: 'Ecosystem',
         items: [
           { text: 'All partners', link: '/docs/partners' },
           {
@@ -707,7 +707,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'INFRA',
+        text: 'Infrastructure',
         items: [
           { text: 'RPC & nodes', link: '/docs/partners/rpc-and-nodes' },
           { text: 'Data & oracles', link: '/docs/partners/data-and-oracles' },

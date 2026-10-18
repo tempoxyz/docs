@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'waku'
+import CheckIcon from '~icons/lucide/check'
 import CopyIcon from '~icons/lucide/copy'
 import DownloadIcon from '~icons/lucide/download'
 import ExternalLinkIcon from '~icons/lucide/external-link'
 import { publicAssetPath } from '../lib/public-asset-path'
 import { CopyButton, type CopyButtonState } from './CopyButton'
+import { CopyIconSwap } from './CopyIconSwap'
 import { usePathname } from './DocsHeader'
 import * as ui from './DocsPageActions.recipes'
 import { docsPageActions, docsPageActionsError } from './DocsPageActions.styles'
@@ -87,7 +89,14 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
               key={pathname}
               text={loadMarkdown}
               label="Copy for agent"
-              icon={<CopyIcon aria-hidden="true" width="14" height="14" />}
+              icon={
+                <CopyIconSwap
+                  copied={state === 'copied'}
+                  copyIcon={<CopyIcon width="14" height="14" />}
+                  checkIcon={<CheckIcon width="14" height="14" />}
+                />
+              }
+              resetAfter={1200}
               onStateChange={setState}
             />
             <a href={markdownPath} target="_blank" rel="noreferrer" title="View Markdown">

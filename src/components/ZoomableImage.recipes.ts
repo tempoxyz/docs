@@ -4,11 +4,8 @@ import { vars as tokens } from '../styles/theme'
 export const img = style({
   cursor: 'zoom-in',
   borderRadius: tokens.radius.lg,
-  borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  borderColor: tokens.color.gray4,
-  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-  backgroundColor: '#F9F9F9 !custom',
+  '--corner-radius': tokens.radius.lg,
+  backgroundColor: tokens.color.panel,
   padding: tokens.spacing['2_5'],
   transitionProperty: 'opacity',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -39,12 +36,9 @@ export const zoomableImageLayout2 = style({
   width: '90vw',
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: tokens.radius.lg,
-  borderStyle: 'solid',
-  borderWidth: tokens.borderWidth.hairline,
-  borderColor: tokens.color.gray4,
-  // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-  backgroundColor: '#F9F9F9 !custom',
+  borderRadius: tokens.radius.xl,
+  '--corner-radius': tokens.radius.xl,
+  backgroundColor: tokens.color.panel,
   padding: tokens.spacing['8'],
   '--tempo-style-shadow': '0 25px 50px -12px var(--tempo-style-shadow-color, rgb(0 0 0 / 0.25))',
   // design-exception: Preserve this surface's layered artwork or focus treatment.

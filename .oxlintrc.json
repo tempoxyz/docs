@@ -23,6 +23,7 @@
         "../../styles/recipes",
         "../../styles/scoped",
         "../../styles/theme",
+        "../styles/controls",
         "../styles/recipes",
         "../styles/scoped",
         "../styles/theme",

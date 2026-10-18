@@ -60,7 +60,7 @@ export function checkStylePolicy(source: string, file: string): string[] {
             const imported = item.propertyName?.text ?? item.name.text
             if (
               !item.isTypeOnly &&
-              !['cx', 'global', 'keyframes', 'fontFace', 'layers'].includes(imported)
+              !['cx', 'global', 'keyframes', 'fontFace', 'layers', 'property'].includes(imported)
             )
               report(
                 item,

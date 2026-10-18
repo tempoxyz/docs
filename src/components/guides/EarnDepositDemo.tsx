@@ -286,7 +286,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
                 {...ui.earnDepositDemoLink()}
                 onClick={() => copy(client.account.address)}
               >
-                {copied ? 'Copied address' : 'Copy account address'}
+                {copied ? 'Copied' : 'Copy account address'}
               </button>
             </div>
           )}

@@ -75,9 +75,9 @@ for (const width of [390, 1440]) {
 
 test('compiled homepage layout responds without losing its brand typography', async ({ page }) => {
   await page.goto('/')
-  const start = page.locator('.tempo-docs-home-start')
+  const guides = page.locator('.tempo-docs-home-guide-grid')
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await expect(start).toHaveCSS('display', 'grid')
+  await expect(guides).toHaveCSS('display', 'grid')
   await expect(page.locator('[data-v-gutter-right]')).toBeHidden()
   await expect
     .poll(() =>
@@ -86,14 +86,14 @@ test('compiled homepage layout responds without losing its brand typography', as
         .evaluate((heading) => heading.getBoundingClientRect().top),
     )
     .toBeGreaterThanOrEqual(109)
-  const desktopColumns = await start.evaluate(
+  const desktopColumns = await guides.evaluate(
     (element) => getComputedStyle(element).gridTemplateColumns,
   )
-  expect(desktopColumns.split(' ')).toHaveLength(2)
+  expect(desktopColumns.split(' ')).toHaveLength(3)
   await page.setViewportSize({ width: 390, height: 1000 })
   await expect
     .poll(() =>
-      start.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length),
+      guides.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length),
     )
     .toBe(1)
   await expect(page.locator('.tempo-docs-home h1')).toHaveCSS('font-weight', '500')
@@ -104,7 +104,7 @@ test('component recipes preserve badges and keyboard-accessible docs buttons', a
   const badge = page.locator('.docs-specification-meta span').first()
   // Inline flex is blockified inside the specification's flex link.
   await expect(badge).toHaveCSS('display', 'flex')
-  await expect(badge).toHaveCSS('border-radius', '6px')
+  await expect(badge).toHaveCSS('border-radius', '8px')
 
   await page.goto('/docs/guide/using-tempo-with-ai')
   await page.getByRole('tab', { name: 'Cursor', exact: true }).click()
