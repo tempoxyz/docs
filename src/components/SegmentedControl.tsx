@@ -89,6 +89,7 @@ export function SegmentedControl<const value extends string>(props: {
             type="button"
             role="radio"
             aria-checked={checked}
+            data-tds-control=""
             data-checked={checked ? '' : undefined}
             tabIndex={checked ? 0 : -1}
             disabled={disabled}

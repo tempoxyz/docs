@@ -63,6 +63,7 @@ export function Tabs<const value extends string>(props: {
           }}
           type="button"
           role="tab"
+          data-tds-control=""
           aria-selected={item.value === value}
           aria-controls={controls}
           tabIndex={index === tabbable ? 0 : -1}

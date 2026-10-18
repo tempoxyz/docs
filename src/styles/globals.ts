@@ -1307,8 +1307,8 @@ global({
 
 global({
   '@layer utilities': {
-    // Segmented-control radios and tabs keep their own TDS rings (inset for segments).
-    'body:has(.docs-section-nav) :is(a, button, input, summary):not([role="radio"], [role="tab"]):focus-visible':
+    // The docs-local SegmentedControl and Tabs keep their own TDS rings (inset for segments).
+    'body:has(.docs-section-nav) :is(a, button, input, summary):not([data-tds-control]):focus-visible':
       {
         outlineWidth: tokens.borderWidth.emphasis,
         outlineStyle: 'solid',

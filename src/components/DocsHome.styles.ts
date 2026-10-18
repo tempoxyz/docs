@@ -235,6 +235,12 @@ export const tempoDocsHome = style({
     '& .tempo-docs-home-reference-grid > div:first-child li[data-v]:first-child': {
       gridColumn: '1 / -1',
     },
+    // Standalone links get at least a 24px hit area.
+    '& .tempo-docs-home-guides-more, & .tempo-agent-start-footer > a, & .tempo-agent-start-prerequisite, & .tempo-docs-home-product-group :is(h3[data-v], li[data-v]) > a:not(.heading-anchor), & .tempo-docs-home-reference-grid li a':
+      {
+        display: 'inline-block',
+        minHeight: '24px',
+      },
     // SegmentedControl items keep their inset ring; an outset one is clipped by the scroller.
     '& :is(a, button):not([role="radio"]):focus-visible': {
       outlineWidth: tokens.borderWidth.emphasis,
@@ -478,12 +484,6 @@ export const tempoAgentStart = style({
       color: inherited.color.homeInk,
       textDecoration: 'none',
     },
-    // Standalone links get at least a 24px hit area.
-    '& .tempo-docs-home-guides-more, & .tempo-agent-start-footer > a, & .tempo-agent-start-prerequisite, & .tempo-docs-home-product-group :is(h3[data-v], li[data-v]) > a:not(.heading-anchor), & .tempo-docs-home-reference-grid li a':
-      {
-        display: 'inline-block',
-        minHeight: '24px',
-      },
     '& .tempo-agent-start-feedback': {
       marginTop: tokens.spacing['2_5'],
       marginInlineEnd: tokens.spacing['0'],
