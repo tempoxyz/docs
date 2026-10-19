@@ -1,10 +1,11 @@
 // [!region setup]
 import { tempoModerato } from 'viem/chains'
+import { alphausd, betausd } from 'viem/tokens'
 import { createConfig, http } from 'wagmi'
 import { tempoWallet } from 'wagmi/connectors'
 
-export const alphaUsd = '0x20c0000000000000000000000000000000000001'
-export const betaUsd = '0x20c0000000000000000000000000000000000002'
+export const alphaUsd = alphausd(42431).address
+export const betaUsd = betausd(42431).address
 const chain = tempoModerato.extend({ feeToken: alphaUsd })
 export const config = createConfig({
   chains: [chain],

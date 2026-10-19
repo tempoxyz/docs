@@ -14,6 +14,7 @@ import {
   tempoModerato,
 } from 'viem/chains'
 import { withRelay } from 'viem/tempo'
+import { alphausd } from 'viem/tokens'
 import {
   type CreateConfigParameters,
   createConfig,
@@ -26,7 +27,7 @@ import {
 import { demoWalletAuthorization } from './lib/demo-wallet-authorization'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 
-const feeToken = '0x20c0000000000000000000000000000000000001' as const
+const feeToken = alphausd(42431).address
 
 const chain =
   import.meta.env.VITE_TEMPO_ENV === 'localnet'

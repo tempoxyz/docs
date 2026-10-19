@@ -1,9 +1,10 @@
 import { type Address, type Hex, isAddress } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { Account, createClient } from 'viem/tempo'
+import { alphausd } from 'viem/tokens'
 
 export const adminKeyDemoStorageKey = 'tempo-docs:admin-key-demo:v1'
-export const adminKeyDemoFeeToken = '0x20c0000000000000000000000000000000000001'
+export const adminKeyDemoFeeToken = alphausd(42431).address
 
 export function adminKeyDemoEnvironment(url: string, secure: boolean, webAuthn: boolean) {
   const location = new URL(url)

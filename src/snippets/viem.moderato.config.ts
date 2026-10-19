@@ -1,6 +1,7 @@
 // [!region setup]
 import { tempoModerato } from 'viem/chains'
 import { Account, createClient } from 'viem/tempo'
+import { alphausd } from 'viem/tokens'
 
 const privateKey = process.env.TEMPO_PRIVATE_KEY
 if (!privateKey || !/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
@@ -10,6 +11,6 @@ if (!privateKey || !/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
 export const client = createClient({
   account: Account.fromSecp256k1(privateKey as `0x${string}`),
   chain: tempoModerato,
-  feeToken: '0x20c0000000000000000000000000000000000001',
+  feeToken: alphausd(42431).address,
 })
 // [!endregion setup]

@@ -3,10 +3,11 @@ import { parseEventLogs, parseUnits } from 'viem'
 import { generatePrivateKey } from 'viem/accounts'
 import { tempoModerato } from 'viem/chains'
 import { Abis, Account, createClient } from 'viem/tempo'
+import { alphausd } from 'viem/tokens'
 
 const account = Account.fromSecp256k1(generatePrivateKey())
 const recipient = Account.fromSecp256k1(generatePrivateKey())
-const token = '0x20c0000000000000000000000000000000000001'
+const token = alphausd(42431).address
 const client = createClient({
   account,
   chain: tempoModerato,
