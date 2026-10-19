@@ -374,13 +374,33 @@ export function TxHash({ hash }: { hash: string }) {
   )
 }
 
+/** Copies through a visually hidden field placed beside the button. */
+function copyWithSelection(value: string, host: HTMLElement) {
+  const field = document.createElement('textarea')
+  field.value = value
+  field.className = 'as-hidden'
+  field.setAttribute('readonly', '')
+  field.setAttribute('aria-hidden', 'true')
+  host.append(field)
+  field.select()
+  try {
+    return document.execCommand('copy')
+  } catch {
+    return false
+  } finally {
+    field.remove()
+  }
+}
+
 function CopyButton({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = React.useState(false)
-  async function copy() {
+  async function copy(event: React.MouseEvent<HTMLButtonElement>) {
+    const host = event.currentTarget.parentElement ?? document.body
     try {
       await navigator.clipboard.writeText(value)
     } catch {
-      return
+      // The async clipboard is refused without permission or focus; copy from a hidden field.
+      if (!copyWithSelection(value, host)) return
     }
     setCopied(true)
     setTimeout(() => setCopied(false), 1_200)
@@ -559,13 +579,27 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
     (item) => item.id !== 'add-backup' && item.id !== 'lose-passkey',
   )
 
+  /** Whether the automatic faucet call ran; if it left no funds, Get test funds retries. */
+  const [fundTried, setFundTried] = React.useState(false)
+
   function change(next: SandboxAccount) {
     setSecret(null)
     setKeySecret(null)
     setChoosingBackup(false)
-    void network.commit(account, next).then(({ before, after }) => {
+    void network.commit(account, next).then(async ({ before, after }) => {
       setBefore(before)
       setAccount(after)
+      // A new account gets test funds right away, since every later change needs a fee.
+      if (!isCreated(account) && isCreated(after) && after.devnet && after.balance === 0) {
+        try {
+          const funded = await network.fund(after)
+          setBefore(funded.before)
+          setAccount(funded.after)
+        } catch {
+          // Get test funds is offered as a retry.
+        }
+        setFundTried(true)
+      }
     })
   }
 
@@ -765,7 +799,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
         </fieldset>
 
         <section className="as-panel" aria-label="Try it">
-          {created && !funded && (
+          {created && !funded && fundTried && !network.status && (
             <div className="as-fund">
               <button type="button" className="as-button as-button-primary" onClick={fund}>
                 Get test funds
