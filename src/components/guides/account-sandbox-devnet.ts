@@ -25,6 +25,7 @@ import {
   concat,
   encodeFunctionData,
   type Hex,
+  http,
   isAddressEqual,
   keccak256,
   parseAbi,
@@ -94,7 +95,8 @@ function createDevnetClient(rpcUrl: string) {
   return Tempo.createClient({
     chain: Tempo.Chain.devnet,
     feeToken: devnetToken,
-    transport: Tempo.http(rpcUrl, { retryCount: 0 }),
+    // Concurrent calls share one request: each trip to the devnet goes through a remote proxy.
+    transport: http(rpcUrl, { batch: true, retryCount: 0 }),
   })
 }
 
@@ -1412,10 +1414,11 @@ export function createDevnetAdapter(
       return withLock(session, options, async () => {
         // Bringing devnet up to date sends transactions, which need test funds first. A plain key
         // account has nothing on chain to bring up to date until it upgrades.
+        let changed = false
         if (session.balance > 0 && !session.legacy) {
           const configHash = await syncConfig(session, account)
           const keys = await syncKeys(session, account)
-          if (configHash || keys.length) await readBalance(session)
+          changed = Boolean(configHash || keys.length)
         }
         const next = account.devnet
           ? account
@@ -1424,7 +1427,12 @@ export function createDevnetAdapter(
               title: `On devnet · ${shortAddress(session.address)}`,
               detail: session.balance > 0 ? undefined : 'No funds yet',
             })
-        return decorate(session, await readSpent(session, next), session.lastUpdate)
+        // Independent reads run together, so the batched transport sends them as one request.
+        const [, spent] = await Promise.all([
+          changed ? readBalance(session) : undefined,
+          readSpent(session, next),
+        ])
+        return decorate(session, spent, session.lastUpdate)
       })
     },
 
@@ -1466,8 +1474,11 @@ export function createDevnetAdapter(
               sinceId,
             )
           const hash = keys.at(-1)?.hash ?? configHash
-          if (hash) await readBalance(session)
-          return { account: decorate(session, await readSpent(session, account), hash), hash }
+          const [, spent] = await Promise.all([
+            hash ? readBalance(session) : undefined,
+            readSpent(session, account),
+          ])
+          return { account: decorate(session, spent, hash), hash }
         } catch (error) {
           return {
             account: { ...decorate(session, previous), notice: mapDevnetError(error).message },
