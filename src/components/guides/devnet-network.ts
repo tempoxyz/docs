@@ -1,4 +1,5 @@
 import type { Address } from 'viem'
+import { developersApiPath } from '../../marketing/app/_lib/developersPaths'
 
 /**
  * Where the Accounts demos reach the multisig-1113 devnet. Kept apart from
@@ -10,10 +11,13 @@ export const devnetTailnetRpcUrl = 'http://multisig-1113-nodes-rpc-service.tail3
 
 /**
  * Pages reach the devnet through the docs site's same-origin proxy (`/api/devnet-rpc`), which holds
- * the public endpoint's API key and works from HTTPS pages. Outside a browser, use the tailnet RPC.
+ * the public endpoint's API key and works from HTTPS pages. Under tempo.xyz/developers the proxy is
+ * mounted there too. Outside a browser, use the tailnet RPC.
  */
 export const devnetRpcUrl =
-  typeof window === 'undefined' ? devnetTailnetRpcUrl : `${window.location.origin}/api/devnet-rpc`
+  typeof window === 'undefined'
+    ? devnetTailnetRpcUrl
+    : `${window.location.origin}${developersApiPath('/api/devnet-rpc')}`
 export const devnetChainId = 31_318
 /** AlphaUSD pays for every payment and every fee. */
 export const devnetToken: Address = '0x20c0000000000000000000000000000000000001'
