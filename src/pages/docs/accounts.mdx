@@ -61,13 +61,7 @@ A Tempo account is an address that holds stablecoins, with its rules stored onch
 - **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight, and a transaction runs once its approvers' weights reach the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
 - **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the limits, expiry, and allowed calls you set.
 
-Whoever holds the signing keys holds the funds.
-
 <ConfigurableAccountsT14 />
-
-On mainnet and testnet, an account is a single-key account. One key approves its payments and authorizes its access keys, like a standard Ethereum account. Access keys, fee tokens, fee sponsorship, receive policies, and virtual addresses all work there.
-
-On the devnet, a [configurable account](/docs/development/configurable-accounts) can have several signers. A single-key account can [upgrade in place](/docs/accounts/account-configuration/account-upgrade) and keep its address and balance.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />
