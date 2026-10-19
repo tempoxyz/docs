@@ -1044,11 +1044,15 @@ for (const mobile of [false, true]) {
         ).toBeVisible()
       }
       // The group control folds its children instead of navigating to an introduction.
-      await disclosure.click()
+      // Retry until hydration attaches the toggle; an early click is a no-op.
+      const sibling = sidebar.locator(`a[href="${entry.sibling}"]`)
+      await expect(async () => {
+        if (await sibling.isVisible()) await disclosure.click()
+        await expect(sibling).toBeHidden({ timeout: 1000 })
+      }).toPass()
       await expect(page).toHaveURL(new RegExp(`${entry.path}/?$`))
-      await expect(sidebar.locator(`a[href="${entry.sibling}"]`)).toBeHidden()
       await disclosure.click()
-      await expect(sidebar.locator(`a[href="${entry.sibling}"]`)).toBeVisible()
+      await expect(sibling).toBeVisible()
       if (mobile) await page.keyboard.press('Escape')
       expect((await page.reload())?.status()).toBe(200)
       if (mobile)
