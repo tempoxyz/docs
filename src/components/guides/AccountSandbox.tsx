@@ -393,21 +393,17 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 }
 
 /** A generated private key, shown once in a read-only field. */
-function SecretField({ label, value }: { label: string; value: string }) {
+/** A generated private key on its card: the key, copy, and that it's shown once. */
+function SecretLine({ value }: { value: string }) {
   return (
-    <div className="as-secret">
-      <span className="as-field-label">{label}</span>
-      <span className="as-tx">
-        <input
-          readOnly
-          value={value}
-          aria-label={label}
-          spellCheck={false}
-          onFocus={(event) => event.currentTarget.select()}
-        />
-        <CopyButton value={value} label="Copy private key" />
-      </span>
-    </div>
+    <span className="as-item-secret as-tx">
+      <code className="as-item-secret-value">
+        <span className="as-hidden">Private key: </span>
+        {value}
+      </code>
+      <CopyButton value={value} label="Copy private key" />
+      <span className="as-item-secret-note">shown once</span>
+    </span>
   )
 }
 
@@ -549,6 +545,11 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
     account.accessKeys.some((key) => key.id === keySecret.id && key.status !== 'revoked')
       ? keySecret.value
       : null
+  /** Each generated private key, shown once on its own card. */
+  const secrets: Record<string, string> = {
+    ...(secret && shownSecret ? { [secret.id]: shownSecret } : {}),
+    ...(keySecret && shownKeySecret ? { [keySecret.id]: shownKeySecret } : {}),
+  }
   /** Signers and keys are edited on their cards once the account takes signers. */
   const editable = created && !account.legacy
   const owners = configuredSigners(account)
@@ -721,7 +722,6 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
         ),
         keysFooter: (
           <>
-            {shownKeySecret && <SecretField label="Test key · shown once" value={shownKeySecret} />}
             <AddSelect
               label="Add access key"
               groups={[
@@ -759,12 +759,12 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
             badge={networkBadge(network, account)}
             terse
             edit={edit}
+            secrets={secrets}
             onAddBackup={backup ? () => setChoosingBackup(true) : undefined}
           />
         </fieldset>
 
         <section className="as-panel" aria-label="Try it">
-          {shownSecret && <SecretField label="Test key · shown once" value={shownSecret} />}
           {created && !funded && (
             <div className="as-fund">
               <button type="button" className="as-button as-button-primary" onClick={fund}>
@@ -848,8 +848,10 @@ export function AccountState(props: {
   /** Offered after the no-backup notice. */
   onAddBackup?: (() => void) | undefined
   edit?: AccountEdit | undefined
+  /** A generated private key by signer or key id, shown once on its card. */
+  secrets?: Record<string, string> | undefined
 }) {
-  const { account, health, diff, badge, terse, onAddBackup, edit } = props
+  const { account, health, diff, badge, terse, onAddBackup, edit, secrets } = props
   const signers = account.signers.filter(
     (signer) => !signer.revoked || diff?.signers[signer.id]?.change === 'removed',
   )
@@ -899,6 +901,7 @@ export function AccountState(props: {
                   account={account}
                   signer={signer}
                   change={diff?.signers[signer.id]}
+                  secret={secrets?.[signer.id]}
                   controls={
                     edit && !signer.revoked && diff?.signers[signer.id]?.change !== 'removed'
                       ? edit.signerControls(signer)
@@ -923,6 +926,7 @@ export function AccountState(props: {
                   key={key.id}
                   accessKey={key}
                   change={diff?.keys[key.id]}
+                  secret={secrets?.[key.id]}
                   controls={edit && key.status !== 'revoked' ? edit.keyControls(key) : undefined}
                 />
               ))}
@@ -951,8 +955,10 @@ function StateSigner(props: {
   change: AccountDiff['signers'][string] | undefined
   /** Weight stepper and Remove, in place of the read-only weight. */
   controls?: React.ReactNode
+  /** The signer's generated private key, shown once. */
+  secret?: string | undefined
 }) {
-  const { account, signer, change, controls } = props
+  const { account, signer, change, controls, secret } = props
   const status = signerStatus(account, signer)
   const Icon = signerIcons[signer.kind]
   // A new signer gets a stronger border, not a badge.
@@ -978,6 +984,7 @@ function StateSigner(props: {
             : `weight ${signer.weight}`}
         </span>
       )}
+      {secret && <SecretLine value={secret} />}
     </li>
   )
 }
@@ -987,8 +994,10 @@ function StateKey(props: {
   change: AccountDiff['keys'][string] | undefined
   /** Revoke, at the card's end. */
   controls?: React.ReactNode
+  /** The key's generated private key, shown once. */
+  secret?: string | undefined
 }) {
-  const { accessKey: key, change, controls } = props
+  const { accessKey: key, change, controls, secret } = props
   const status = key.status
   const Icon = keyIcons[key.kind]
   const left = remainingLimit(key)
@@ -1016,6 +1025,7 @@ function StateKey(props: {
         </span>
       </span>
       {controls && <span className="as-item-controls">{controls}</span>}
+      {secret && <SecretLine value={secret} />}
     </li>
   )
 }
@@ -1114,7 +1124,7 @@ function PayPanel(props: {
               </button>
             )
           })}
-          {keys.length > 0 && <span className="as-or">or a key</span>}
+          {keys.length > 0 && <span className="as-or">or an access key</span>}
           {keys.map((key) => (
             <button
               key={key.id}

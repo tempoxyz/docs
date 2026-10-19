@@ -194,8 +194,51 @@ export const accountSandbox = style({
     '& .as-item-controls': {
       display: 'inline-flex',
       flexShrink: 0,
+      alignSelf: 'center',
       alignItems: 'center',
       gap: tokens.spacing['3'],
+    },
+    // A key card runs three lines, so its icon and Revoke sit on the title's line.
+    '& .as-item:has(.as-limit, .as-item-secret)': {
+      alignItems: 'flex-start',
+    },
+    '& .as-item:has(.as-limit, .as-item-secret) :is(.as-icon, .as-item-controls)': {
+      alignSelf: 'flex-start',
+      // design-exception: Centers a 16px icon or a link on the 20px title line.
+      marginTop: '2px !custom',
+    },
+    // A generated private key on its card, shown once.
+    // The key gets its own full-width row, lined up under the card's title.
+    '& .as-item:has(.as-item-secret)': {
+      flexWrap: 'wrap',
+      rowGap: tokens.spacing['1'],
+    },
+    '& .as-item .as-item-secret': {
+      display: 'grid',
+      flexBasis: '100%',
+      gridTemplateColumns: 'minmax(0, 1fr) auto auto',
+      alignItems: 'center',
+      gap: tokens.spacing['1_5'],
+      minWidth: 0,
+      // design-exception: Indents past the 16px icon and its 10px gap to line up with the title.
+      paddingInlineStart: '26px !custom',
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.xs,
+    },
+    '& .as-item .as-item-secret .as-item-secret-value': {
+      flex: 1,
+      minWidth: 0,
+      overflow: 'hidden',
+      color: tokens.color.foreground,
+      fontFamily: tokens.fontFamily.mono,
+      fontSize: tokens.fontSize.xs,
+      textOverflow: 'ellipsis',
+      userSelect: 'all',
+    },
+    '& .as-item .as-item-secret-note': {
+      flexShrink: 0,
+      fontFamily: tokens.fontFamily.sans,
+      whiteSpace: 'nowrap',
     },
     '& :is(.as-item-controls, .as-column-head) .as-stepper button': {
       width: '26px',
