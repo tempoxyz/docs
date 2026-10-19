@@ -4,13 +4,10 @@ import * as React from 'react'
 import type { Hex } from 'viem'
 import { privateKeyToAddress } from 'viem/accounts'
 import LucideAppWindow from '~icons/lucide/app-window'
-import LucideArrowUpRight from '~icons/lucide/arrow-up-right'
 import LucideBot from '~icons/lucide/bot'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronRight from '~icons/lucide/chevron-right'
-import LucideCircleAlert from '~icons/lucide/circle-alert'
 import LucideCircleCheck from '~icons/lucide/circle-check'
-import LucideCircleDot from '~icons/lucide/circle-dot'
 import LucideCircleX from '~icons/lucide/circle-x'
 import LucideCopy from '~icons/lucide/copy'
 import LucideFingerprint from '~icons/lucide/fingerprint'
@@ -20,9 +17,7 @@ import LucideLifeBuoy from '~icons/lucide/life-buoy'
 import LucideMinus from '~icons/lucide/minus'
 import LucidePlus from '~icons/lucide/plus'
 import LucideServer from '~icons/lucide/server'
-import LucideSlidersHorizontal from '~icons/lucide/sliders-horizontal'
 import LucideSmartphone from '~icons/lucide/smartphone'
-import LucideTriangleAlert from '~icons/lucide/triangle-alert'
 import LucideUsb from '~icons/lucide/usb'
 import LucideUsers from '~icons/lucide/users'
 import { Container } from '../Container'
@@ -89,16 +84,6 @@ const keyIcons: Record<AccessKeyKind, typeof LucideFingerprint> = {
   agent: LucideBot,
   service: LucideServer,
   account: LucideUsers,
-}
-
-/** One marker per kind of history entry. */
-const logIcons: Record<LogEntry['kind'], typeof LucideFingerprint> = {
-  preset: LucideCircleDot,
-  event: LucideCircleDot,
-  config: LucideSlidersHorizontal,
-  key: LucideKeyRound,
-  payment: LucideArrowUpRight,
-  approval: LucideCheck,
 }
 
 const paymentAmount = 50
@@ -284,10 +269,10 @@ function useNetwork() {
   }
 }
 
+/** The network after the address, or what devnet is doing right now. */
 function networkBadge(network: Network, account: SandboxAccount) {
-  if (!isCreated(account)) return undefined
   if (network.status) return network.status
-  return account.devnet ? 'Tempo Accounts devnet' : 'Not on devnet yet'
+  return account.devnet ? 'devnet' : undefined
 }
 
 /** On devnet, keys described as hardware or held by a provider are keys in this browser. */
@@ -300,12 +285,84 @@ const browserKeyKinds = new Set<SignerKind>(['hardware', 'wallet-provider', 'rec
 function signerDetail(signer: Signer) {
   // A generated key shows the address it controls: the signer as the account records it.
   if (signer.kind === 'private-key' && signer.privateKey)
-    return `secp256k1 · ${shortAddress(privateKeyToAddress(signer.privateKey as Hex))} · generated in this browser`
+    return `secp256k1 · ${shortAddress(privateKeyToAddress(signer.privateKey as Hex))}`
   if (browserKeyKinds.has(signer.kind))
-    return `${schemeLabels[signerKinds[signer.kind].scheme]} · browser key on devnet`
+    return `${schemeLabels[signerKinds[signer.kind].scheme]} · this browser`
   if (signer.kind === 'passkey') return thisDevicePasskey().detail
-  if (signer.kind === 'device') return 'P-256 · key in this browser'
+  if (signer.kind === 'device') return 'P-256 · this browser'
   return signer.detail
+}
+
+type LedgerRow = { id: number; title: string; detail?: string | undefined; hash?: string }
+
+/** `Device key (W1)` as `Device key · weight 1`. */
+function plainWeights(text: string) {
+  return text
+    .replace(/ \(W(\d+)\)/g, ' · weight $1')
+    .replace(/ W(\d+) → W(\d+)/g, ' · weight $1 → $2')
+}
+
+function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+/** A config update's changes, named for the one kind of change it makes. */
+function configRow(changes: string): Pick<LedgerRow, 'title' | 'detail'> {
+  const added = /(^|, )added /i.test(changes)
+  const revoked = /(^|, )revoked /i.test(changes)
+  const threshold = /(^|, )threshold /i.test(changes)
+  const weight = / W\d+ → W\d+/.test(changes)
+  const kinds = [added, revoked, threshold, weight].filter(Boolean).length
+  if (kinds === 1 && added)
+    return { title: 'Signer added', detail: plainWeights(changes.replace(/^Added /, '')) }
+  if (kinds === 1 && revoked)
+    return { title: 'Signer removed', detail: plainWeights(changes.replace(/^Revoked /, '')) }
+  if (kinds === 1 && threshold)
+    return { title: 'Threshold changed', detail: changes.replace(/^Threshold /, '') }
+  if (kinds === 1 && weight) return { title: 'Weight changed', detail: plainWeights(changes) }
+  return { title: 'Signers changed', detail: plainWeights(changes) }
+}
+
+/**
+ * History as a ledger: a short event name, a detail only when it adds something, and the hash.
+ * The account's own creation steps before devnet (no signers yet, on devnet) aren't events.
+ */
+function ledgerRow(entry: LogEntry, account: SandboxAccount): LedgerRow | null {
+  const base = { id: entry.id, ...(entry.hash ? { hash: entry.hash } : {}) }
+  const { title, detail } = entry
+  if (entry.kind === 'preset') return detail === 'No signers yet' ? null : { ...base, title }
+  if (entry.kind === 'event') {
+    if (title.startsWith('On devnet')) return null
+    if (title.startsWith('Got test funds'))
+      return { ...base, title: 'Funded', detail: title.split(' · ')[1] }
+    return { ...base, title, detail }
+  }
+  if (entry.kind === 'config') {
+    if (title.startsWith('Created account')) {
+      const genesis = account.genesis?.owners[0]
+      const signer = genesis && account.signers.find((item) => item.id === genesis.id)
+      return { ...base, title: 'Account created', detail: signer?.name }
+    }
+    if (title.startsWith('Single-key account'))
+      return { ...base, title: 'Account created', detail: 'Single key' }
+    if (title.startsWith('Upgraded')) return { ...base, title: 'Upgraded', detail: 'Same address' }
+    const update = /^Config v\d+ · (.+)$/.exec(title)
+    if (update?.[1]) return { ...base, ...configRow(update[1]) }
+    return { ...base, title, detail }
+  }
+  if (entry.kind === 'key') {
+    const authorized = /^Authorized (.+)$/.exec(title)
+    if (authorized) return { ...base, title: 'Access key authorized', detail: authorized[1] }
+    const revoked = /^Revoked (.+)$/.exec(title)
+    if (revoked) return { ...base, title: 'Access key revoked', detail: revoked[1] }
+    return { ...base, title, detail }
+  }
+  if (entry.kind === 'payment') {
+    const [sent, key] = title.split(' · ')
+    const by = detail?.replace(/^By (the )?/, '')
+    return { ...base, title: sent ?? title, detail: key ?? (by && capitalize(by)) }
+  }
+  return { ...base, title }
 }
 
 /** A transaction hash with a copy button. This devnet has no public explorer. */
@@ -410,7 +467,7 @@ function signerChoices(platform: boolean, options: { first?: boolean } = {}): Si
   if (options.first)
     choices.push({
       kind: 'private-key',
-      label: 'start from a single-key account (EOA)',
+      label: 'Start from a single-key account',
       description: 'An EOA you already have. Upgrade it later, at the same address.',
       reason: null,
       legacy: true,
@@ -443,23 +500,19 @@ function SignerChooser(props: {
             onClick={() => props.onChoose(choice)}
           >
             {choice.label}
-            {choice.reason && <span className="as-choice-reason">({choice.reason})</span>}
           </button>
         ))}
-        {legacy && (
-          <>
-            <span className="as-or">or</span>
-            <button
-              type="button"
-              className="as-link"
-              title={legacy.description}
-              onClick={() => props.onChoose(legacy)}
-            >
-              {legacy.label}
-            </button>
-          </>
-        )}
       </div>
+      {legacy && (
+        <button
+          type="button"
+          className="as-link as-legacy"
+          title={legacy.description}
+          onClick={() => props.onChoose(legacy)}
+        >
+          {legacy.label}
+        </button>
+      )}
     </Field>
   )
 }
@@ -473,8 +526,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   const [before, setBefore] = React.useState<SandboxAccount | null>(null)
   const health = React.useMemo(() => analyzeAccount(account), [account])
   const diff = before ? diffAccounts(before, account) : undefined
-  const lastHash = account.devnet?.lastHash
-  const receipt = before && lastHash !== before.devnet?.lastHash ? lastHash : undefined
+  const ledger = account.log.flatMap((entry) => ledgerRow(entry, account) ?? [])
   const created = isCreated(account)
   const platform = usePlatformAuthenticator()
   const choices = signerChoices(platform)
@@ -486,7 +538,6 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
       : null
   /** Transactions need fees, so a created account needs test funds before it can act. */
   const funded = Boolean(account.devnet) && account.balance > 0
-  const [fundHash, setFundHash] = React.useState<string | null>(null)
   /** An account created from scratch with one signer offers a backup from its warning. */
   const backup =
     funded &&
@@ -547,10 +598,9 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   }
 
   async function fund() {
-    const { before, after, hash } = await network.fund(account)
+    const { before, after } = await network.fund(account)
     setBefore(before)
     setAccount(after)
-    if (hash) setFundHash(hash)
   }
 
   async function submit(request: ActionRequest) {
@@ -580,7 +630,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
           health={health}
           diff={diff}
           badge={networkBadge(network, account)}
-          receipt={receipt}
+          terse
           onAddBackup={
             backup
               ? () => {
@@ -592,18 +642,12 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
         />
 
         <section className="as-panel" aria-label="Try it">
-          {shownSecret && <SecretField label="Devnet test key, shown once" value={shownSecret} />}
-          {created && (!funded || fundHash) && (
+          {shownSecret && <SecretField label="Test key · shown once" value={shownSecret} />}
+          {created && !funded && (
             <div className="as-fund">
-              {!funded && (
-                <button type="button" className="as-button as-button-primary" onClick={fund}>
-                  Get test funds
-                </button>
-              )}
-              <span className="as-note">
-                The devnet faucet sends test AlphaUSD and other test stablecoins.
-              </span>
-              {fundHash && <TxHash hash={fundHash} />}
+              <button type="button" className="as-button as-button-primary" onClick={fund}>
+                Get test funds
+              </button>
             </div>
           )}
           {!created ? (
@@ -617,15 +661,12 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
           ) : (
             <fieldset className="as-lock" disabled={!funded}>
               <legend className="as-hidden">Actions</legend>
-              {!funded && <p className="as-note">Get test funds first: transactions need fees.</p>}
               {account.legacy ? (
                 <div className="as-upgrade">
                   <button type="button" className="as-button as-button-primary" onClick={upgrade}>
                     Upgrade to a configurable account
                   </button>
-                  <span className="as-note">
-                    Adds signers and access keys. Keeps the address, balance, and token approvals.
-                  </span>
+                  <span className="as-note">Same address</span>
                 </div>
               ) : (
                 <>
@@ -664,29 +705,23 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
           )}
         </section>
 
-        {showLog && account.log.length > 1 && (
+        {showLog && ledger.length > 0 && (
           <details className="as-history">
             <summary>
               <LucideChevronRight aria-hidden="true" className="as-history-chevron" />
               <span>History</span>
-              <span className="as-history-count">{account.log.length}</span>
+              <span className="as-history-count">{ledger.length}</span>
             </summary>
-            <ol className="as-timeline">
-              {account.log.map((entry) => {
-                const Icon = logIcons[entry.kind]
-                return (
-                  <li key={entry.id} data-kind={entry.kind}>
-                    <span className="as-timeline-marker" aria-hidden="true">
-                      <Icon />
-                    </span>
-                    <span className="as-timeline-text">
-                      <span className="as-timeline-title">{entry.title}</span>
-                      {entry.detail && <span className="as-timeline-detail">{entry.detail}</span>}
-                    </span>
-                    {entry.hash && <TxHash hash={entry.hash} />}
-                  </li>
-                )
-              })}
+            <ol className="as-ledger">
+              {ledger.map((row) => (
+                <li key={row.id}>
+                  <span className="as-ledger-text">
+                    <span className="as-ledger-title">{row.title}</span>
+                    {row.detail && <span className="as-ledger-detail">{row.detail}</span>}
+                  </span>
+                  {row.hash && <TxHash hash={row.hash} />}
+                </li>
+              ))}
             </ol>
           </details>
         )}
@@ -695,50 +730,38 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   )
 }
 
-/** Read-only: what the account looks like now, with changes highlighted. */
+/** Read-only: what the account looks like now, with changes emphasized. */
 export function AccountState(props: {
   account: SandboxAccount
   health: AccountHealth
   diff?: AccountDiff | undefined
-  /** Shown beside the address, such as "Not on Tempo yet". */
+  /** Shown after the address, such as `devnet`. */
   badge?: string | undefined
-  /** The transaction that made this change, on a real network. */
-  receipt?: string | undefined
-  /** Offered at the end of the no-backup warning. */
+  /** Notices as short labels, such as `No backup signer`. Errors stay whole. */
+  terse?: boolean | undefined
+  /** Offered after the no-backup notice. */
   onAddBackup?: (() => void) | undefined
 }) {
-  const { account, health, diff, badge, receipt, onAddBackup } = props
+  const { account, health, diff, badge, terse, onAddBackup } = props
   const signers = account.signers.filter(
     (signer) => !signer.revoked || diff?.signers[signer.id]?.change === 'removed',
   )
   const keys = account.accessKeys.filter((key) => key.status !== 'revoked' || diff?.keys[key.id])
-  const updates = account.version - account.startVersion
-  const genesis = account.genesis?.owners[0]
-  const genesisSigner = genesis && account.signers.find((signer) => signer.id === genesis.id)
+  const created = isCreated(account)
   return (
     <section className="as-state" aria-label="Account state">
       <header className="as-state-head">
         <div className="as-state-name">
           <span>{account.name}</span>
-          <span className="as-address">
-            {account.address ? (
-              <code>{shortAddress(account.address)}</code>
-            ) : (
-              <span className="as-muted">No address yet</span>
-            )}
-            {badge && (
-              <span className="as-badge" data-network={account.devnet ? 'devnet' : undefined}>
-                {badge}
-              </span>
-            )}
-          </span>
-          {account.legacy && (
-            <span className="as-muted as-genesis">Single-key account · not upgraded</span>
-          )}
-          {/* Once signers change, say where the unchanged address came from. */}
-          {account.address && genesisSigner && updates > 0 && (
-            <span className="as-muted as-genesis">
-              Address from the first signer, {genesisSigner.name}
+          {(account.address || badge || account.legacy) && (
+            <span className="as-address">
+              {account.address && <code>{shortAddress(account.address)}</code>}
+              {badge && (
+                <span className="as-badge" data-network={account.devnet ? 'devnet' : undefined}>
+                  {badge}
+                </span>
+              )}
+              {account.legacy && <span className="as-badge">single key</span>}
             </span>
           )}
         </div>
@@ -747,39 +770,14 @@ export function AccountState(props: {
         </span>
       </header>
 
-      {account.address && (
-        <div className="as-state-rule">
-          <span className="as-label">Approval</span>
-          {health.approval ? (
-            <ul>
-              <li>
-                <strong data-changed={Boolean(diff?.threshold)}>
-                  {diff?.threshold
-                    ? `weight ${diff.threshold.from} → ${diff.threshold.to}`
-                    : `weight ${health.approval.weight}`}
-                </strong>{' '}
-                · {health.approval.summary}
-              </li>
-            </ul>
-          ) : (
-            <span className="as-bad">Not applied: fix the issue below.</span>
-          )}
-          {(diff?.version || updates > 0 || receipt) && (
-            <span className="as-version" data-changed={Boolean(diff?.version)}>
-              {diff?.version
-                ? `v${diff.version.from} → v${diff.version.to} · same address`
-                : updates > 0
-                  ? `${updates} ${updates === 1 ? 'change' : 'changes'} · same address`
-                  : null}
-              {receipt && <TxHash hash={receipt} />}
-            </span>
-          )}
-        </div>
-      )}
-
       <div className="as-state-columns">
         <div>
-          <span className="as-label">Signers</span>
+          <span className="as-label">
+            Signers
+            {created && !account.legacy && (
+              <span data-changed={Boolean(diff?.threshold)}> · threshold {account.threshold}</span>
+            )}
+          </span>
           {signers.length > 0 ? (
             <ul className="as-state-list">
               {signers.map((signer) => (
@@ -811,8 +809,9 @@ export function AccountState(props: {
 
       {/* Before the first signer, the empty slots say what to do; blocked actions still show. */}
       <Notices
-        notices={isCreated(account) ? health.notices : []}
+        notices={created ? health.notices : []}
         blocked={account.notice}
+        terse={terse}
         onAddBackup={onAddBackup}
       />
     </section>
@@ -827,14 +826,8 @@ function StateSigner(props: {
   const { account, signer, change } = props
   const status = signerStatus(account, signer)
   const Icon = signerIcons[signer.kind]
-  const tag =
-    change?.change === 'added'
-      ? 'Added'
-      : change?.change === 'removed'
-        ? 'Removed'
-        : status === 'lost'
-          ? 'Lost'
-          : null
+  // A new signer gets a stronger border, not a badge.
+  const tag = change?.change === 'removed' ? 'Removed' : status === 'lost' ? 'Lost' : null
   return (
     <li className="as-item" data-status={status} data-change={change?.change}>
       <span className="as-icon" data-kind={signer.kind} aria-hidden="true">
@@ -843,11 +836,7 @@ function StateSigner(props: {
       <span className="as-item-text">
         <span className="as-item-name">
           {signer.name}
-          {tag && (
-            <span className="as-tag" data-tone={tag.toLowerCase()}>
-              {tag}
-            </span>
-          )}
+          {tag && <span className="as-tag">{tag}</span>}
         </span>
         <span className="as-item-detail">{signerDetail(signer)}</span>
       </span>
@@ -868,14 +857,7 @@ function StateKey(props: {
   const status = key.status
   const Icon = keyIcons[key.kind]
   const left = remainingLimit(key)
-  const tag =
-    change?.change === 'added'
-      ? 'Added'
-      : status === 'revoked'
-        ? 'Revoked'
-        : status === 'expired'
-          ? 'Expired'
-          : null
+  const tag = status === 'revoked' ? 'Revoked' : status === 'expired' ? 'Expired' : null
   return (
     <li className="as-item" data-status={status} data-change={change?.change}>
       <span className="as-icon" aria-hidden="true">
@@ -884,11 +866,7 @@ function StateKey(props: {
       <span className="as-item-text">
         <span className="as-item-name">
           {key.name}
-          {tag && (
-            <span className="as-tag" data-tone={tag.toLowerCase()}>
-              {tag}
-            </span>
-          )}
+          {tag && <span className="as-tag">{tag}</span>}
         </span>
         <span className="as-item-detail">{keyDetail(key)}</span>
         <span className="as-limit" data-changed={change?.change === 'spent'}>
@@ -897,10 +875,8 @@ function StateKey(props: {
               {...accountSandboxLimitFill({ width: `${Math.round((left / key.limit) * 100)}%` })}
             />
           </span>
-          <span className="as-muted">
-            {change?.change === 'spent' && change.from !== undefined
-              ? `$${formatUsd(change.from)} → $${formatUsd(left)} left this ${key.period}`
-              : `$${formatUsd(left)} left this ${key.period}`}
+          <span>
+            ${formatUsd(left)} left this {key.period}
           </span>
         </span>
       </span>
@@ -1053,15 +1029,7 @@ function PayPanel(props: {
           <LucideCircleCheck aria-hidden="true" />
           <div className="as-success-text">
             <strong>Sent ${formatUsd(sent.amount)}</strong>
-            <span>
-              Approved by {lowerFirst(sent.result.message)} · Balance{' '}
-              {formatBalance(account.balance)}
-            </span>
-            {sent.result.hash && (
-              <span>
-                Transaction <TxHash hash={sent.result.hash} />
-              </span>
-            )}
+            <span>{sent.result.message}</span>
           </div>
           <button type="button" className="as-button" onClick={() => setSent(null)}>
             Send another
@@ -1072,10 +1040,7 @@ function PayPanel(props: {
           {payer.type === 'signers' && (
             <Meter value={weight} target={required} ok={Boolean(result?.ok)} />
           )}
-          <Outcome
-            result={sent?.result ?? result}
-            empty={`Choose signers with weight ${required}, or a key.`}
-          />
+          <Outcome result={sent?.result ?? result} />
           <button
             type="button"
             className="as-button as-button-primary"
@@ -1179,7 +1144,7 @@ function SignersPanel(props: {
             label: 'Signers',
             options: choices.map((choice) => ({
               value: choice.kind,
-              label: choice.reason ? `${choice.label} (${choice.reason})` : choice.label,
+              label: choice.reason ? `${choice.label} (unavailable)` : choice.label,
               disabled: Boolean(choice.reason),
             })),
           },
@@ -1192,11 +1157,11 @@ function SignersPanel(props: {
 
 /** On devnet, keys the reader adds say how they sign. */
 function keyDetail(key: AccessKey) {
-  if (key.kind === 'private-key') return 'secp256k1 · devnet test key'
-  if (key.kind === 'browser') return 'WebCrypto · private key never leaves this browser'
+  if (key.kind === 'private-key') return 'secp256k1 · test key'
+  if (key.kind === 'browser') return 'WebCrypto · this browser'
   if (key.kind === 'device') {
     const { name, unlock } = thisDevice()
-    return `${unlock} on this ${name} · asks on each payment`
+    return `${unlock} · this ${name}`
   }
   return accessKeyDetail(key)
 }
@@ -1232,7 +1197,6 @@ function KeysPanel(props: {
           {keys.map((key) => (
             <li key={key.id}>
               <span className="as-edit-name">{key.name}</span>
-              <span className="as-muted">{keyDetail(key)}</span>
               <button
                 type="button"
                 className="as-link"
@@ -1244,7 +1208,7 @@ function KeysPanel(props: {
           ))}
         </ul>
       )}
-      {secret && <SecretField label="Devnet test key, shown once" value={secret} />}
+      {secret && <SecretField label="Test key · shown once" value={secret} />}
       <AddSelect
         label="Add access key"
         groups={[
@@ -1258,9 +1222,6 @@ function KeysPanel(props: {
         ]}
         onSelect={(id) => void add(id as AccessKeyTemplateId)}
       />
-      <p className="as-note">
-        Keys pay on their own within their limits. They can’t change signers.
-      </p>
     </div>
   )
 }
@@ -1295,18 +1256,13 @@ function Segmented<T extends string | number>(props: {
   )
 }
 
-function lowerFirst(text: string) {
-  return text.charAt(0).toLowerCase() + text.slice(1)
-}
-
-function Outcome({ result, empty }: { result: ActionResult | null; empty: string }) {
-  if (!result) return <span className="as-result">{empty}</span>
-  const Icon = result.ok ? LucideCircleCheck : LucideCircleX
+/** Whether the chosen approvers can send, and why not. The hash lives in History. */
+function Outcome({ result }: { result: ActionResult | null }) {
+  if (!result) return <span className="as-result" />
   return (
     <span className="as-result" data-ok={result.ok}>
-      <Icon aria-hidden="true" />
+      {!result.ok && <LucideCircleX aria-hidden="true" />}
       {result.message}
-      {result.ok && result.hash && <TxHash hash={result.hash} />}
     </span>
   )
 }
@@ -1398,13 +1354,21 @@ function AddSelect(props: {
   )
 }
 
+/** `No backup signer: losing it locks the account.` as `No backup signer`. */
+function noticeLabel(message: string) {
+  return message.split(':')[0]?.replace(/\.$/, '') ?? message
+}
+
+/** Account notices as muted lines. Only errors, such as a blocked edit, take color. */
 function Notices({
   notices,
   blocked,
+  terse,
   onAddBackup,
 }: {
   notices: Notice[]
   blocked: string | null
+  terse?: boolean | undefined
   onAddBackup?: (() => void) | undefined
 }) {
   const items = blocked
@@ -1413,30 +1377,19 @@ function Notices({
   if (items.length === 0) return null
   return (
     <ul className="as-notices">
-      {items.map((notice) => {
-        const Icon =
-          notice.tone === 'ok'
-            ? LucideCircleCheck
-            : notice.tone === 'warning'
-              ? LucideTriangleAlert
-              : LucideCircleAlert
-        return (
-          <li key={notice.id} data-tone={notice.tone}>
-            <Icon aria-hidden="true" />
-            <span>
-              {notice.message}
-              {notice.id === 'no-backup' && onAddBackup && (
-                <>
-                  {' '}
-                  <button type="button" className="as-link" onClick={onAddBackup}>
-                    Add a backup signer
-                  </button>
-                </>
-              )}
-            </span>
-          </li>
-        )
-      })}
+      {items.map((notice) => (
+        <li key={notice.id} data-tone={notice.tone}>
+          {notice.tone === 'error' && <LucideCircleX aria-hidden="true" />}
+          <span>
+            {terse && notice.tone !== 'error' ? noticeLabel(notice.message) : notice.message}
+          </span>
+          {notice.id === 'no-backup' && onAddBackup && (
+            <button type="button" className="as-link" onClick={onAddBackup}>
+              Add a backup signer
+            </button>
+          )}
+        </li>
+      ))}
     </ul>
   )
 }

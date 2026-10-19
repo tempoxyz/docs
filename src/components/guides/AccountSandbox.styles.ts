@@ -3,17 +3,18 @@ import { style } from '../../styles/scoped'
 import { vars as tokens } from '../../styles/theme'
 
 /**
- * Account sandbox: the account's state in one box, actions below it. The builder and the guide
- * demos share these semantic `as-*` hooks, so the rules stay scoped to the sandbox root.
+ * Account sandbox: the account's state, actions below it, then its history. It follows the account
+ * diagrams: monochrome cards with hairline borders, muted labels, and color only for errors. The
+ * builder and the guide demos share these semantic `as-*` hooks, so the rules stay scoped to the
+ * sandbox root.
  */
 export const accountSandbox = style({
   display: 'grid',
-  gap: tokens.spacing['4'],
+  gap: tokens.spacing['5'],
   minWidth: 0,
   color: tokens.color.foreground,
   fontSize: tokens.fontSize.sm,
-  // design-exception: The sandbox's dense rows keep their original 1.45 rhythm between scale steps.
-  lineHeight: '1.45 !custom',
+  lineHeight: tokens.lineHeight.snug,
   // Button and icon resets sit in the components layer with zero-specificity scopes, below the
   // docs Button's own rules. Unlayered, `color: inherit` would leave black text on black buttons.
   '@layer components': {
@@ -40,16 +41,9 @@ export const accountSandbox = style({
       padding: 0,
       listStyle: 'none',
     },
-    '& .as-label': {
+    '& .as-label, & .as-muted, & .as-note, & .as-field-label': {
       color: tokens.color.muted,
       fontSize: tokens.fontSize.compact,
-    },
-    '& .as-muted': {
-      color: tokens.color.muted,
-      fontSize: tokens.fontSize.compact,
-    },
-    '& .as-bad': {
-      color: tokens.color.red11,
     },
     '& .as-hidden': {
       position: 'absolute',
@@ -63,70 +57,44 @@ export const accountSandbox = style({
     // Account state
     '& .as-state': {
       display: 'grid',
-      gap: tokens.spacing['3_5'],
+      gap: tokens.spacing['4'],
     },
     '& .as-state-head': {
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
       gap: tokens.spacing['3'],
       minWidth: 0,
     },
     '& .as-state-name': {
       display: 'grid',
-      flex: 1,
+      gap: tokens.spacing['0_5'],
       minWidth: 0,
-      fontSize: tokens.fontSize.body,
       fontWeight: tokens.fontWeight.medium,
-    },
-    '& .as-state-name code': {
-      padding: 0,
-      border: 0,
-      backgroundColor: 'transparent !custom',
-      color: tokens.color.muted,
-      fontFamily: inherited.fontFamily.vocsFontFamilyMono,
-      fontSize: tokens.fontSize.xs,
-      fontWeight: tokens.fontWeight.normal,
     },
     '& .as-address': {
       display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'baseline',
-      rowGap: 0,
-      columnGap: tokens.spacing['1_5'],
       color: tokens.color.muted,
       fontSize: tokens.fontSize.xs,
       fontWeight: tokens.fontWeight.normal,
     },
-    '& .as-badge::before': {
-      content: '"· "',
+    '& .as-address code': {
+      padding: 0,
+      border: 0,
+      backgroundColor: 'transparent !custom',
+      color: 'inherit !custom',
+      fontFamily: tokens.fontFamily.mono,
+      fontSize: tokens.fontSize.xs,
+    },
+    '& .as-address > * + *::before': {
+      content: '" · "',
+      whiteSpace: 'pre',
     },
     '& .as-balance': {
-      fontSize: tokens.fontSize.lead,
-      fontVariantNumeric: 'tabular-nums',
-      whiteSpace: 'nowrap',
-    },
-    '& .as-state-rule': {
-      display: 'grid',
-      gridTemplateColumns: 'auto minmax(0, 1fr) auto',
-      alignItems: 'baseline',
-      rowGap: tokens.spacing['1'],
-      columnGap: tokens.spacing['3'],
-      paddingBlock: tokens.spacing['2_5'],
-      paddingInline: 0,
-      borderBlockWidth: tokens.borderWidth.hairline,
-      borderBlockStyle: 'solid',
-      borderBlockColor: tokens.color.line,
-    },
-    '& .as-state-rule ul': {
-      display: 'grid',
-      gap: tokens.spacing['0_5'],
-    },
-    '& .as-state-rule strong': {
       fontWeight: tokens.fontWeight.medium,
-    },
-    '& .as-version': {
-      color: tokens.color.muted,
-      fontSize: tokens.fontSize.xs,
+      fontVariantNumeric: 'tabular-nums',
       whiteSpace: 'nowrap',
     },
     '& .as-state-columns': {
@@ -142,193 +110,159 @@ export const accountSandbox = style({
     },
     '& .as-state-list': {
       display: 'grid',
-      gap: tokens.spacing['1_5'],
-    },
-    '& .as-empty': {
-      paddingBlock: tokens.spacing['2'],
-      paddingInline: 0,
+      gap: tokens.spacing['2'],
     },
     // Where the first signer or access key will appear.
     '& .as-slot': {
       display: 'grid',
-      minHeight: '52px',
+      minHeight: '58px',
       placeItems: 'center',
       paddingBlock: tokens.spacing['2'],
-      paddingInline: tokens.spacing['2_5'],
+      paddingInline: tokens.spacing['3'],
       borderWidth: tokens.borderWidth.hairline,
       borderStyle: 'dashed',
       borderColor: tokens.color.lineStrong,
       borderRadius: tokens.radius.lg,
       color: tokens.color.muted,
       fontSize: tokens.fontSize.compact,
-      textAlign: 'center',
     },
     '& .as-item': {
       display: 'flex',
       alignItems: 'center',
       gap: tokens.spacing['2_5'],
       minWidth: 0,
+      minHeight: '58px',
       paddingBlock: tokens.spacing['2'],
-      paddingInline: tokens.spacing['2_5'],
+      paddingInline: tokens.spacing['3'],
       borderWidth: tokens.borderWidth.hairline,
       borderStyle: 'solid',
       borderColor: tokens.color.line,
       borderRadius: tokens.radius.lg,
       backgroundColor: tokens.color.card,
     },
-    '& .as-item:is([data-status="lost"], [data-status="expired"], [data-status="paused"])': {
-      opacity: 0.6,
-    },
+    // Just added: a stronger border, nothing more.
     '& .as-item[data-change="added"]': {
-      borderColor: tokens.color.green11,
+      borderColor: tokens.color.lineStrong,
     },
-    '& .as-item[data-change="removed"]': {
-      opacity: 0.6,
-    },
+    '& .as-item:is([data-status="lost"], [data-status="expired"], [data-status="paused"], [data-change="removed"])':
+      {
+        opacity: 0.6,
+      },
     '& .as-item[data-change="removed"] :is(.as-item-name, .as-item-detail)': {
       textDecoration: 'line-through',
-    },
-    '& .as-item:is([data-change="lost"], [data-change="revoked"])': {
-      borderColor: tokens.color.red11,
-    },
-    '& .as-item[data-change="spent"] .as-limit': {
-      color: tokens.color.blue11,
     },
     '& .as-icon': {
       display: 'grid',
       flexShrink: 0,
-      width: '20px',
       placeItems: 'center',
       color: tokens.color.muted,
     },
     '& .as-item-text': {
       display: 'grid',
       flex: 1,
-      // design-exception: Signer name and detail read as one unit with a 1px gap between lines.
-      gap: '1px !custom',
+      gap: tokens.spacing['0_5'],
       minWidth: 0,
     },
     '& .as-item-name': {
       display: 'flex',
       flexWrap: 'wrap',
-      alignItems: 'center',
+      alignItems: 'baseline',
       gap: tokens.spacing['1_5'],
       fontWeight: tokens.fontWeight.medium,
     },
     '& .as-item-detail': {
       overflow: 'hidden',
       color: tokens.color.muted,
-      // design-exception: Signer details sit between the 12px and 13px steps to fit one line.
-      fontSize: '12.5px !custom',
+      fontSize: tokens.fontSize.xs,
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
     },
     '& .as-tag': {
+      color: tokens.color.muted,
       fontSize: tokens.fontSize.xs,
       fontWeight: tokens.fontWeight.normal,
-    },
-    '& .as-tag[data-tone="added"]': {
-      color: tokens.color.green11,
-    },
-    '& .as-tag:is([data-tone="removed"], [data-tone="lost"], [data-tone="revoked"], [data-tone="expired"])':
-      {
-        color: tokens.color.red11,
-      },
-    '& .as-tag[data-tone="paused"]': {
-      color: tokens.color.amber11,
     },
     '& .as-weight': {
       flexShrink: 0,
       color: tokens.color.muted,
-      fontSize: tokens.fontSize.compact,
+      fontSize: tokens.fontSize.xs,
       fontVariantNumeric: 'tabular-nums',
     },
     '& .as-limit': {
       display: 'flex',
-      flexWrap: 'wrap',
       alignItems: 'center',
       gap: tokens.spacing['2'],
-      justifySelf: 'start',
-      // design-exception: Optical offset that seats the limit bar under the key detail line.
-      marginTop: '3px !custom',
-      paddingBlock: 0,
-      paddingInline: tokens.spacing['0_5'],
+      marginTop: tokens.spacing['1'],
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.xs,
+      fontVariantNumeric: 'tabular-nums',
     },
     '& .as-limit-bar': {
-      width: '72px',
-      height: '4px',
+      flexShrink: 0,
+      width: tokens.spacing['16'],
+      height: tokens.spacing['1'],
       overflow: 'hidden',
       borderRadius: tokens.radius.xs,
-      backgroundColor: tokens.color.lineStrong,
+      backgroundColor: tokens.color.line,
     },
     '& .as-limit-bar span': {
       display: 'block',
       height: '100%',
-      backgroundColor: tokens.color.foreground,
+      backgroundColor: tokens.color.muted,
     },
 
-    // Notices
+    // Notices: short muted lines; only errors take color.
     '& .as-notices': {
       display: 'grid',
-      gap: tokens.spacing['1_5'],
+      gap: tokens.spacing['1'],
     },
     '& .as-notices li': {
       display: 'flex',
-      alignItems: 'flex-start',
-      gap: tokens.spacing['2'],
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      columnGap: tokens.spacing['2'],
+      color: tokens.color.muted,
       fontSize: tokens.fontSize.compact,
     },
-    '& .as-notices li svg': {
-      // design-exception: Optical offset that centers the icon on the first line of text.
-      marginTop: '1px !custom',
-    },
-    '& .as-notices li[data-tone="ok"] svg': {
-      color: tokens.color.green11,
-    },
-    '& .as-notices li[data-tone="warning"] svg': {
-      color: tokens.color.amber11,
-    },
-    '& .as-notices li[data-tone="error"] svg': {
+    '& .as-notices li[data-tone="error"]': {
       color: tokens.color.red11,
+    },
+    '& .as-notices svg': {
+      width: '14px',
+      height: '14px',
     },
 
     // Actions panel
     '& .as-panel': {
       display: 'grid',
-      gap: tokens.spacing['3_5'],
-      paddingTop: tokens.spacing['4'],
+      gap: tokens.spacing['4'],
+      paddingTop: tokens.spacing['5'],
       borderTopWidth: tokens.borderWidth.hairline,
       borderTopStyle: 'solid',
       borderTopColor: tokens.color.line,
     },
     '& .as-tabs': {
       display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: tokens.spacing['2_5'],
+      minWidth: 0,
     },
     '& .as-tabs fieldset, & .as-segmented': {
       display: 'inline-flex',
       flexWrap: 'wrap',
+      gap: tokens.spacing['0_5'],
       minWidth: 0,
       margin: 0,
-      // design-exception: The segmented control's 3px inset matches its 3px gap between options.
-      padding: '3px !custom',
+      padding: tokens.spacing['0_5'],
       borderWidth: tokens.borderWidth.hairline,
       borderStyle: 'solid',
       borderColor: tokens.color.line,
       borderRadius: tokens.radius.lg,
-      // design-exception: The segmented control's 3px gap matches its 3px inset.
-      gap: '3px !custom',
     },
     '& .as-tabs fieldset button, & .as-segmented button': {
-      minHeight: '30px',
+      minHeight: '28px',
       paddingBlock: 0,
       paddingInline: tokens.spacing['3'],
       border: 0,
-      // design-exception: Options nest inside the 8px control radius minus its 3px inset.
-      borderRadius: '5px !custom',
+      borderRadius: tokens.radius.md,
       backgroundColor: 'transparent !custom',
       color: tokens.color.muted,
       fontSize: tokens.fontSize.compact,
@@ -339,28 +273,36 @@ export const accountSandbox = style({
     },
     '& .as-tabs fieldset button[aria-pressed="true"], & .as-segmented button[aria-pressed="true"]':
       {
-        backgroundColor: tokens.color.foreground,
-        color: tokens.color.background,
+        backgroundColor: tokens.color.container,
+        color: tokens.color.foreground,
       },
     '& .as-panel-body': {
       display: 'grid',
-      gap: tokens.spacing['3_5'],
+      gap: tokens.spacing['4'],
     },
     '& .as-field': {
       display: 'grid',
-      gridTemplateColumns: '120px minmax(0, 1fr)',
-      alignItems: 'center',
+      gridTemplateColumns: '112px minmax(0, 1fr)',
+      alignItems: 'baseline',
       gap: tokens.spacing['3'],
     },
-    '& .as-field-label': {
-      color: tokens.color.muted,
-      fontSize: tokens.fontSize.compact,
+    // Centers the label on the first row of 32px controls.
+    '& .as-field > .as-field-label': {
+      display: 'flex',
+      alignItems: 'center',
+      minHeight: '32px',
+    },
+    '& .as-field-control': {
+      display: 'grid',
+      justifyItems: 'start',
+      gap: tokens.spacing['2_5'],
+      minWidth: 0,
     },
     '& .as-choices': {
       display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'center',
-      gap: tokens.spacing['1_5'],
+      gap: tokens.spacing['2'],
     },
     '& .as-choice': {
       display: 'inline-flex',
@@ -368,7 +310,7 @@ export const accountSandbox = style({
       gap: tokens.spacing['1_5'],
       minHeight: '32px',
       paddingBlock: 0,
-      paddingInline: tokens.spacing['2_5'],
+      paddingInline: tokens.spacing['3'],
       borderWidth: tokens.borderWidth.hairline,
       borderStyle: 'solid',
       borderColor: tokens.color.line,
@@ -381,31 +323,27 @@ export const accountSandbox = style({
     },
     '& .as-choice[aria-pressed="true"]': {
       borderColor: tokens.color.foreground,
-      backgroundColor: tokens.color.foreground,
-      color: tokens.color.background,
+      backgroundColor: tokens.color.container,
     },
-    '& .as-choice[aria-pressed="true"] .as-weight': {
-      color: 'inherit !custom',
-    },
-    '& .as-choice svg': {
-      width: '13px',
-      height: '13px',
+    '& .as-choice svg, & .as-button svg, & .as-add svg': {
+      width: '14px',
+      height: '14px',
     },
     '& .as-or': {
-      paddingBlock: 0,
-      paddingInline: tokens.spacing['1'],
       color: tokens.color.muted,
       fontSize: tokens.fontSize.xs,
+    },
+    '& .as-amount': {
+      display: 'inline-flex',
+      alignItems: 'center',
+      minHeight: '32px',
+      fontVariantNumeric: 'tabular-nums',
     },
     '& .as-outcome': {
       display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'center',
       gap: tokens.spacing['3'],
-      paddingTop: tokens.spacing['3_5'],
-      borderTopWidth: tokens.borderWidth.hairline,
-      borderTopStyle: 'solid',
-      borderTopColor: tokens.color.line,
     },
     '& .as-meter': {
       display: 'inline-flex',
@@ -414,22 +352,19 @@ export const accountSandbox = style({
     },
     '& .as-meter-bar': {
       display: 'inline-flex',
-      // design-exception: Meter segments sit 3px apart, tighter than the 4px spacing step.
-      gap: '3px !custom',
+      gap: tokens.spacing['0_5'],
     },
     '& .as-meter-bar span': {
-      width: '20px',
-      height: '8px',
+      width: tokens.spacing['4'],
+      height: tokens.spacing['1_5'],
       borderRadius: tokens.radius.xs,
-      backgroundColor: tokens.color.lineStrong,
+      backgroundColor: tokens.color.line,
     },
     '& .as-meter-bar span[data-on="true"]': {
       backgroundColor: tokens.color.foreground,
     },
-    '& .as-meter[data-ok="true"] .as-meter-bar span[data-on="true"]': {
-      backgroundColor: tokens.color.green11,
-    },
     '& .as-meter-label': {
+      color: tokens.color.muted,
       fontSize: tokens.fontSize.compact,
       fontVariantNumeric: 'tabular-nums',
       whiteSpace: 'nowrap',
@@ -439,14 +374,16 @@ export const accountSandbox = style({
       flex: 1,
       alignItems: 'center',
       gap: tokens.spacing['1_5'],
-      minWidth: '180px',
+      minWidth: '160px',
       color: tokens.color.muted,
-    },
-    '& .as-result[data-ok="true"]': {
-      color: tokens.color.green11,
+      fontSize: tokens.fontSize.compact,
     },
     '& .as-result[data-ok="false"]': {
       color: tokens.color.red11,
+    },
+    '& .as-result svg': {
+      width: '14px',
+      height: '14px',
     },
     '& .as-button': {
       display: 'inline-flex',
@@ -476,33 +413,23 @@ export const accountSandbox = style({
       backgroundColor: tokens.color.foreground,
       opacity: 0.88,
     },
-    '& .as-button svg': {
-      width: '13px',
-      height: '13px',
-    },
+    // Rows of a signer or key with its controls, aligned without rules between them.
     '& .as-edit-list': {
       display: 'grid',
-      gap: tokens.spacing['1_5'],
+      gap: tokens.spacing['2'],
     },
+    // The name sits in the field label column, its controls beside it.
     '& .as-edit-list li': {
-      display: 'flex',
-      flexWrap: 'wrap',
+      display: 'grid',
+      gridTemplateColumns: '112px auto auto',
+      justifyContent: 'start',
       alignItems: 'center',
-      gap: tokens.spacing['2_5'],
-      paddingBlock: tokens.spacing['1_5'],
-      paddingInline: 0,
-      borderBottomWidth: tokens.borderWidth.hairline,
-      borderBottomStyle: 'solid',
-      borderBottomColor: tokens.color.line,
-    },
-    '& .as-edit-list li[data-lost="true"] .as-edit-name': {
-      color: tokens.color.muted,
-      textDecoration: 'line-through',
+      gap: tokens.spacing['3'],
+      minHeight: '32px',
     },
     '& .as-edit-name': {
-      flex: 1,
-      minWidth: '120px',
-      fontWeight: tokens.fontWeight.medium,
+      minWidth: 0,
+      overflowWrap: 'anywhere',
     },
     '& .as-link': {
       padding: 0,
@@ -511,13 +438,12 @@ export const accountSandbox = style({
       color: tokens.color.muted,
       fontSize: tokens.fontSize.compact,
       textDecoration: 'underline',
+      textDecorationColor: tokens.color.lineStrong,
       textUnderlineOffset: '3px',
     },
     '& .as-link:hover': {
       color: tokens.color.foreground,
-    },
-    '& .as-notices .as-link': {
-      fontSize: 'inherit !custom',
+      textDecorationColor: tokens.color.foreground,
     },
     '& .as-stepper': {
       display: 'inline-flex',
@@ -530,21 +456,24 @@ export const accountSandbox = style({
     },
     '& .as-stepper button': {
       display: 'grid',
-      width: '28px',
-      height: '28px',
+      width: '30px',
+      height: '30px',
       placeItems: 'center',
       border: 0,
+      borderRadius: tokens.radius.md,
       backgroundColor: 'transparent !custom',
+      color: tokens.color.muted,
     },
     '& .as-stepper button:hover:not(:disabled)': {
       backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
+      color: tokens.color.foreground,
     },
     '& .as-stepper svg': {
       width: '12px',
       height: '12px',
     },
     '& .as-stepper-value': {
-      minWidth: '30px',
+      minWidth: tokens.spacing['16'],
       fontSize: tokens.fontSize.compact,
       fontVariantNumeric: 'tabular-nums',
       textAlign: 'center',
@@ -570,10 +499,6 @@ export const accountSandbox = style({
       backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
       color: tokens.color.foreground,
     },
-    '& .as-add svg': {
-      width: '13px',
-      height: '13px',
-    },
     '& .as-add select': {
       position: 'absolute',
       inset: 0,
@@ -581,60 +506,50 @@ export const accountSandbox = style({
       opacity: 0,
       cursor: 'pointer',
     },
-    '& .as-switch': {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: tokens.spacing['2'],
-      cursor: 'pointer',
-    },
-    '& .as-switch input': {
-      width: '16px',
-      height: '16px',
-      accentColor: tokens.color.foreground,
-    },
-    '& .as-note': {
-      color: tokens.color.muted,
-      fontSize: tokens.fontSize.compact,
-    },
-
-    // Guided demo
-    '& .as-step-body': {
+    // The backup chooser, opened from the no-backup notice.
+    '& .as-backup': {
       display: 'grid',
-      gap: tokens.spacing['3'],
-      marginTop: tokens.spacing['3'],
-      // design-exception: Aligns step content with the step title, past the 28px badge and its gap.
-      paddingInlineStart: '42px !custom',
+      justifyItems: 'start',
+      gap: tokens.spacing['2'],
     },
-    '& .as-step-note': {
-      marginTop: tokens.spacing['1_5'],
-      // design-exception: Aligns step content with the step title, past the 28px badge and its gap.
-      paddingInlineStart: '42px !custom',
-      color: tokens.color.muted,
-      fontSize: tokens.fontSize.compact,
-    },
-    '& .as-compare': {
+    '& .as-fund, & .as-upgrade': {
       display: 'flex',
       flexWrap: 'wrap',
-      alignItems: 'flex-start',
-      rowGap: tokens.spacing['3'],
-      columnGap: tokens.spacing['4'],
+      alignItems: 'center',
+      gap: tokens.spacing['3'],
     },
-    '& .as-changes': {
+    // A sent payment, in place of the send row.
+    '& .as-success': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: tokens.spacing['3'],
+      paddingBlock: tokens.spacing['3'],
+      paddingInline: tokens.spacing['3_5'],
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.lineStrong,
+      borderRadius: tokens.radius.lg,
+      backgroundColor: tokens.color.card,
+    },
+    '& .as-success > svg': {
+      color: tokens.color.muted,
+    },
+    '& .as-success-text': {
       display: 'grid',
+      flex: 1,
       gap: tokens.spacing['0_5'],
+      minWidth: 0,
+    },
+    '& .as-success-text strong': {
+      fontWeight: tokens.fontWeight.medium,
+    },
+    '& .as-success-text span': {
+      color: tokens.color.muted,
       fontSize: tokens.fontSize.compact,
     },
-    '& .as-changes li[data-tone="add"]': {
-      color: tokens.color.green11,
-    },
-    '& .as-changes li[data-tone="remove"]': {
-      color: tokens.color.red11,
-    },
-    '& .as-changes li[data-tone="change"]': {
-      color: tokens.color.blue11,
-    },
 
-    // History: a timeline, newest first
+    // History: a ledger, newest first.
     '& .as-history summary': {
       display: 'inline-flex',
       alignItems: 'center',
@@ -660,118 +575,51 @@ export const accountSandbox = style({
       transform: 'rotate(90deg)',
     },
     '& .as-history-count': {
-      minWidth: '20px',
-      // design-exception: The count pill's 1px block inset keeps it the height of the summary text.
-      paddingBlock: '1px !custom',
-      paddingInline: tokens.spacing['1_5'],
-      borderWidth: tokens.borderWidth.hairline,
-      borderStyle: 'solid',
-      borderColor: tokens.color.line,
-      borderRadius: tokens.radius.full,
-      fontFamily: inherited.fontFamily.vocsFontFamilyMono,
-      fontSize: tokens.fontSize.caption,
       fontVariantNumeric: 'tabular-nums',
-      textAlign: 'center',
     },
-    '& .as-timeline': {
+    '& .as-ledger': {
       display: 'grid',
-      marginTop: tokens.spacing['3_5'],
+      marginTop: tokens.spacing['2'],
     },
-    '& .as-timeline li': {
-      position: 'relative',
-      display: 'grid',
-      gridTemplateColumns: '24px minmax(0, 1fr) auto',
-      alignItems: 'start',
+    '& .as-ledger li': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       gap: tokens.spacing['3'],
-      paddingBottom: tokens.spacing['3_5'],
+      minHeight: '40px',
+      paddingBlock: tokens.spacing['2'],
     },
-    '& .as-timeline li:last-child': {
-      paddingBottom: 0,
+    '& .as-ledger li + li': {
+      borderTopWidth: tokens.borderWidth.hairline,
+      borderTopStyle: 'solid',
+      borderTopColor: tokens.color.line,
     },
-    // The rail between markers.
-    '& .as-timeline li:not(:last-child)::before': {
-      position: 'absolute',
-      top: '26px',
-      bottom: '2px',
-      insetInlineStart: '11.5px',
-      width: '1px',
-      backgroundColor: tokens.color.lineStrong,
-      content: '""',
-    },
-    '& .as-timeline-marker': {
-      display: 'grid',
-      width: '24px',
-      height: '24px',
-      placeItems: 'center',
-      borderWidth: tokens.borderWidth.hairline,
-      borderStyle: 'solid',
-      borderColor: tokens.color.lineStrong,
-      borderRadius: tokens.radius.full,
-      backgroundColor: inherited.color.surfacePanel,
-      color: tokens.color.muted,
-    },
-    '& .as-timeline-marker svg': {
-      width: '12px',
-      height: '12px',
-    },
-    '& .as-timeline li:is([data-kind="config"], [data-kind="key"]) .as-timeline-marker': {
-      '--as-marker': tokens.color.blue11,
-    },
-    '& .as-timeline li[data-kind="payment"] .as-timeline-marker': {
-      '--as-marker': tokens.color.green11,
-    },
-    '& .as-timeline li:is([data-kind="config"], [data-kind="key"], [data-kind="payment"]) .as-timeline-marker':
-      {
-        // design-exception: Tints the marker ring with its entry's color, set per kind above.
-        borderColor: 'color-mix(in srgb, var(--as-marker) 45%, transparent) !custom',
-        // design-exception: Tints the marker fill with its entry's color over the panel surface.
-        backgroundColor: 'color-mix(in srgb, var(--as-marker) 12%, var(--surface-panel)) !custom',
-        // design-exception: The marker icon takes its entry's color, set per kind above.
-        color: 'var(--as-marker) !custom',
-      },
-    '& .as-timeline-text': {
-      display: 'grid',
-      gap: tokens.spacing['0_5'],
+    '& .as-ledger-text': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'baseline',
+      columnGap: tokens.spacing['2'],
       minWidth: 0,
-      // design-exception: Optical offset that centers the first line on the 24px marker.
-      paddingTop: '3px !custom',
+      fontSize: tokens.fontSize.compact,
     },
-    '& .as-timeline-title': {
+    '& .as-ledger-title': {
       color: tokens.color.foreground,
-      // design-exception: Timeline titles sit between the 13px and 14px steps beside 12px markers.
-      fontSize: '13.5px !custom',
-      // design-exception: Timeline rows keep their original tight 1.35 line height.
-      lineHeight: '1.35 !custom',
     },
-    '& .as-timeline li:first-child .as-timeline-title': {
-      fontWeight: tokens.fontWeight.medium,
-    },
-    '& .as-timeline-detail': {
-      overflow: 'hidden',
+    '& .as-ledger-detail': {
       color: tokens.color.muted,
-      // design-exception: Timeline details match the 12.5px signer details.
-      fontSize: '12.5px !custom',
-      // design-exception: Timeline rows keep their original tight 1.35 line height.
-      lineHeight: '1.35 !custom',
-      textOverflow: 'ellipsis',
     },
 
     // Network
     '& .as-lock': {
       display: 'contents',
     },
-    '& .as-badge[data-network="devnet"]': {
-      borderColor: tokens.color.green11,
-      color: tokens.color.green11,
-    },
     '& .as-tx': {
       display: 'inline-flex',
       alignItems: 'center',
       gap: tokens.spacing['0_5'],
       color: tokens.color.muted,
-      fontFamily: inherited.fontFamily.vocsFontFamilyMono,
-      // design-exception: Monospace hashes run slightly under the 12px step to fit beside labels.
-      fontSize: '11.5px !custom',
+      fontFamily: tokens.fontFamily.mono,
+      fontSize: tokens.fontSize.xs,
       whiteSpace: 'nowrap',
     },
     '& .as-tx code': {
@@ -800,14 +648,22 @@ export const accountSandbox = style({
       width: '12px',
       height: '12px',
     },
-    '& .as-version .as-tx': {
-      marginInlineStart: tokens.spacing['1_5'],
+    // A hash chip in the ledger.
+    '& .as-ledger .as-tx': {
+      flexShrink: 0,
+      paddingBlock: tokens.spacing['0_5'],
+      paddingInlineStart: tokens.spacing['2'],
+      paddingInlineEnd: tokens.spacing['0_5'],
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.line,
+      borderRadius: tokens.radius.full,
     },
 
     // A generated private key, shown once.
     '& .as-secret': {
       display: 'grid',
-      gap: tokens.spacing['1'],
+      gap: tokens.spacing['1_5'],
     },
     '& .as-secret .as-tx': {
       display: 'flex',
@@ -816,8 +672,8 @@ export const accountSandbox = style({
     '& .as-secret input': {
       flex: 1,
       minWidth: 0,
-      paddingBlock: tokens.spacing['1_5'],
-      paddingInline: tokens.spacing['2'],
+      paddingBlock: tokens.spacing['2'],
+      paddingInline: tokens.spacing['2_5'],
       borderWidth: tokens.borderWidth.hairline,
       borderStyle: 'solid',
       borderColor: tokens.color.line,
@@ -825,6 +681,7 @@ export const accountSandbox = style({
       backgroundColor: tokens.color.card,
       color: tokens.color.foreground,
       font: 'inherit',
+      textOverflow: 'ellipsis',
     },
 
     // Shown instead of the sandbox when this page can't reach devnet.
@@ -838,102 +695,9 @@ export const accountSandbox = style({
       color: tokens.color.muted,
       textAlign: 'center',
     },
-    // An account created from scratch: where its address came from.
-    '& .as-genesis': {
-      fontSize: tokens.fontSize.xs,
-    },
-    '& .as-choice-reason': {
-      fontSize: tokens.fontSize.xs,
-      opacity: 0.85,
-    },
-    // A single payment amount, shown as text instead of a one-option control.
-    '& .as-amount': {
-      fontSize: tokens.fontSize.sm,
-      fontVariantNumeric: 'tabular-nums',
-    },
-    // The backup chooser, opened from the no-backup warning.
-    '& .as-backup': {
-      display: 'grid',
-      justifyItems: 'start',
-      gap: tokens.spacing['1_5'],
-      paddingBottom: tokens.spacing['3'],
-      borderBottomWidth: tokens.borderWidth.hairline,
-      borderBottomStyle: 'solid',
-      borderBottomColor: tokens.color.line,
-    },
-    // Test funds from the devnet faucet.
-    '& .as-fund': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      rowGap: tokens.spacing['2'],
-      columnGap: tokens.spacing['3'],
-    },
-    // A sent payment: one clear confirmation in place of the send row.
-    '& .as-success': {
-      display: 'flex',
-      alignItems: 'center',
-      gap: tokens.spacing['3'],
-      paddingBlock: tokens.spacing['3_5'],
-      paddingInline: tokens.spacing['4'],
-      borderWidth: tokens.borderWidth.hairline,
-      borderStyle: 'solid',
-      borderColor: tokens.color.green11,
-      borderRadius: tokens.radius.lg,
-    },
-    '& .as-success > svg': {
-      width: '22px',
-      height: '22px',
-      color: tokens.color.green11,
-    },
-    '& .as-success-text': {
-      display: 'grid',
-      flex: 1,
-      gap: tokens.spacing['0_5'],
-      minWidth: 0,
-    },
-    '& .as-success-text strong': {
-      color: tokens.color.green11,
-      fontSize: tokens.fontSize.body,
-      fontWeight: tokens.fontWeight.semibold,
-    },
-    '& .as-success-text span': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      gap: tokens.spacing['1'],
-      color: tokens.color.muted,
-      fontSize: tokens.fontSize.compact,
-    },
-    // A plain key account: its one primary action, and what a chooser option means.
-    '& .as-upgrade': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      rowGap: tokens.spacing['2'],
-      columnGap: tokens.spacing['3'],
-    },
-    '& .as-upgrade > .as-note:first-child': {
-      flexBasis: '100%',
-    },
-    // Transaction hashes in the history timeline, after the base .as-tx rules.
-    '& .as-timeline .as-tx': {
-      // design-exception: Optical offset that aligns the hash pill with the entry title.
-      marginTop: '1px !custom',
-      // design-exception: The hash pill hugs its text with a 1px block inset.
-      paddingBlock: '1px !custom',
-      paddingInlineEnd: tokens.spacing['0_5'],
-      paddingInlineStart: tokens.spacing['2'],
-      borderRadius: tokens.radius.full,
-      backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
-      opacity: 0.85,
-    },
-    '& .as-timeline li:hover .as-tx': {
-      opacity: 1,
-    },
-    // Last, so a changed value's color wins over its element's muted color.
+    // Last, so a just-changed value steps up from muted to the foreground color.
     '& [data-changed="true"]': {
-      color: tokens.color.blue11,
+      color: tokens.color.foreground,
     },
   },
   '@media (width <= 640px)': {
@@ -941,25 +705,29 @@ export const accountSandbox = style({
       '& .as-state-columns': {
         gridTemplateColumns: 'minmax(0, 1fr)',
       },
-      '& .as-state-rule': {
-        gridTemplateColumns: 'minmax(0, 1fr)',
-      },
       '& .as-field': {
         gridTemplateColumns: 'minmax(0, 1fr)',
         gap: tokens.spacing['1_5'],
       },
+      '& .as-field > .as-field-label': {
+        minHeight: 0,
+      },
       '& .as-item-detail': {
         whiteSpace: 'normal',
       },
-      '& .as-step-body, & .as-step-note': {
-        paddingInlineStart: 0,
+      '& .as-edit-list li': {
+        gridTemplateColumns: 'minmax(0, 1fr) auto auto',
       },
-      '& .as-timeline li': {
-        gridTemplateColumns: '24px minmax(0, 1fr)',
+      // The three tabs share the row equally instead of wrapping onto a second one.
+      '& .as-tabs fieldset': {
+        display: 'grid',
+        flex: 1,
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
       },
-      '& .as-timeline .as-tx': {
-        gridColumn: 2,
-        paddingTop: 0,
+      '& .as-tabs fieldset button': {
+        paddingInline: tokens.spacing['1_5'],
+        fontSize: tokens.fontSize.xs,
+        whiteSpace: 'normal',
       },
     },
   },
