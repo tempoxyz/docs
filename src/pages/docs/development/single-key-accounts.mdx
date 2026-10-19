@@ -1,0 +1,91 @@
+---
+title: Single-key accounts
+seoTitle: Tempo Single-Key Accounts, Root Keys, and In-Place Upgrades | Tempo Docs
+description: Derive a Tempo address from one secp256k1, P-256, or WebAuthn key, sign and authorize access keys with it, and upgrade to weighted owners at the same address.
+---
+
+import { AccountDiagram } from '../../../components/AccountDiagram'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
+
+# Single-key accounts
+
+A single-key account is an address derived from one public key, its root key, which has full control of the account.
+
+Single-key accounts are live on mainnet and testnet. They work like an Ethereum account (an EOA), except the root key can also be a P-256 key or a passkey. A secp256k1 key has the same address on Tempo as on Ethereum and other EVM chains, but balances don't carry over between chains.
+
+<AccountDiagram
+  name="single-key"
+  alt="A single-key account's private key derives its address and authorizes its access keys."
+/>
+
+<span id="compared-with-an-ethereum-eoa" />
+
+## Single-key address derivation
+
+The address is the last 20 bytes of `keccak256(x ‖ y)`, the hash of the root key's public key coordinates, the same rule Ethereum uses ([specification](/docs/protocol/transactions/spec-tempo-transaction#address-derivation)).
+
+| Root key | Viem account |
+| --- | --- |
+| secp256k1 | `Account.fromSecp256k1(privateKey)` |
+| P-256 | `Account.fromP256(privateKey)` |
+| WebAuthn (passkey) | `Account.fromWebAuthnP256(credential)` |
+
+Because the key fixes the address, you can't replace the root key: a new key is a new address. To change keys and keep the address, [upgrade to a configurable account](#upgrade-to-a-configurable-account), which until T14 runs only on the Tempo Accounts devnet.
+
+## Signing with the root key
+
+The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+On mainnet or Moderato testnet, which need no key, use `createClient({ chain: tempo })` or `createClient({ chain: tempoModerato })` instead, with the chain from `viem/chains`, and pay in that network's stablecoins: [Network details](/docs/quickstart/connection-details) lists both.
+
+::::code-group
+
+```ts [sign.ts]
+import { parseUnits } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+const account = Account.fromSecp256k1(process.env.ROOT_KEY as `0x${string}`) // [!code hl]
+
+await client.token.transferSync({ // [!code hl]
+  account, // [!code hl]
+  amount: parseUnits('10', 6), // [!code hl]
+  to: process.env.RECIPIENT as `0x${string}`, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+Any of the three key types can also sign EIP-7702 authorizations, which let the account run a contract's code as its own ([Tempo and EIP-7702](/docs/protocol/transactions/eip-7702)).
+
+## Access keys on a single-key account
+
+The root key can authorize [access keys](/docs/development/account-keychain), extra keys that sign for the account within the spending limits, expiry, and call scopes you set. It keeps full authority and can revoke any of them, and [admin access keys](/docs/development/account-keychain#admin-access-keys) can manage keys too. To choose limits for a task, follow the [Access keys](/docs/accounts/access-keys) guide.
+
+## Upgrade to a configurable account
+
+An upgrade turns a single-key account into a [configurable account](/docs/development/configurable-accounts) at the same address, so you can add a backup key or rotate keys without moving funds. Owners approve instead of the root key, with weights that must reach a threshold. The upgrade is permanent.
+
+<ConfigurableAccountsT14 />
+
+Until T14, the upgrade transaction ([TIP-1113](https://tips.sh/1113)) does nothing on mainnet or testnet: it succeeds and charges its fee, but the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
+
+| Property | Rule |
+| --- | --- |
+| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, a contract built into the devnet at `0xAACC000000000000000000000000000000000000` |
+| Signed by | The root key, directly. Access keys can't upgrade. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it. |
+| Transaction | `upgradeAccount` is its only call, with no `key_authorization` or authorization list |
+| Eligible accounts | No contract code, no EIP-7702 delegation, and no configuration yet |
+| Installed configuration | Version `1`, salt `keccak256("tempo:multisig:upgrade" ‖ account)` |
+| Kept | Address, balances, contract storage, token approvals, nonce, and access keys with their limits |
+| Root key afterward | Can't sign directly on Tempo. It approves only if listed as an owner, with its weight. Other chains, and contracts that check signatures themselves, such as Permit2, may still accept it. |
+| Event | `AccountUpgraded(account, commitment, salt, threshold, owners)` |
+
+Viem 2.57.5 has no upgrade action, so call the precompile with `writeContractSync`, as in [Account upgrade](/docs/accounts/account-configuration/account-upgrade#send-the-upgrade). Every approval carries the configuration, so [save it](/docs/development/configurable-accounts#keep-the-current-configuration) with the account record.

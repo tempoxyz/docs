@@ -48,7 +48,7 @@ test('production navigation preserves the mount through history and page tools',
   expect(audit.failedRequests).toEqual([])
 })
 
-test('production blog search opens a new account guide with its interactive demo', async ({
+test('production blog search opens the passkey guide with its interactive demo', async ({
   context,
 }) => {
   const audit = await proxyProductionMount(context, upstream)
@@ -57,20 +57,21 @@ test('production blog search opens a new account guide with its interactive demo
   await page.goto(`${productionDocsUrl}/blog`)
   await page.getByRole('button', { name: 'Search documentation', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Search documentation', exact: true })
-  await dialog.getByRole('combobox').fill('admin keys')
+  await dialog.getByRole('combobox').fill('passkeys')
   const result = dialog.locator(
-    'a[href="/developers/docs/accounts/admin-keys#authorize-an-admin-key"]',
+    'a[href="/developers/docs/accounts/authentication/passkeys#create-a-passkey"]',
   )
   await expect(result).toBeVisible()
   await result.click()
   await expect(page).toHaveURL(
-    `${productionDocsUrl}/docs/accounts/admin-keys#authorize-an-admin-key`,
+    `${productionDocsUrl}/docs/accounts/authentication/passkeys#create-a-passkey`,
   )
   await expect(dialog).toBeHidden()
   await expect(page.locator('.docs-section-nav a[aria-current]')).toHaveText('Accounts')
-  await expect(page.getByTestId('admin-key-demo')).toBeVisible()
+  const demo = page.getByTestId('passkey-account-demo')
+  await expect(demo).toBeVisible()
   await expect(
-    page.getByTestId('admin-key-demo').getByRole('button', { name: 'Create test account' }),
+    demo.getByRole('button', { name: 'Create a passkey account', exact: true }),
   ).toBeEnabled()
   expect(audit.errors).toEqual([])
   expect(audit.failedRequests).toEqual([])

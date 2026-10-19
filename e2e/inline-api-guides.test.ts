@@ -2,11 +2,11 @@ import { expect, test } from '@playwright/test'
 
 const guides = [
   {
-    page: '/docs/accounts/balances',
+    page: '/docs/guide/payments/accept-a-payment',
     anchor: 'read-balances',
-    title: 'Balances and activity',
+    title: 'Receive payments',
     operation: 'List address balances',
-    endpoint: '/v1/addresses/',
+    endpoint: '/balances',
     requestPath: /^\/v1\/addresses\/0x[0-9a-fA-F]{40}\/balances$/,
   },
   {
@@ -106,7 +106,7 @@ for (const guide of guides) {
     expect(requests).toHaveLength(1)
     expect(requests[0].method).toBe('GET')
     expect(requests[0].pathname).toMatch(guide.requestPath)
-    if (guide.page === '/docs/accounts/balances') {
+    if (guide.page === '/docs/guide/payments/accept-a-payment') {
       expect(requests[0].chainId).toBe('42431')
     }
     if (guide.page === '/docs/earn/balances') {

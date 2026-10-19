@@ -737,7 +737,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -748,7 +748,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -1197,6 +1197,266 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/accounts/sandbox",
+      "destination": "/developers/docs/accounts/create",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/new-device",
+      "destination": "/developers/docs/accounts/authentication/device-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/admin-keys",
+      "destination": "/developers/docs/accounts/access-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/identity-provider",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/relay",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/p256-keys",
+      "destination": "/developers/docs/accounts/authentication/device-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/email-otp",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/privy",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets#build-with-privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/login-services",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/relays",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/add-signers",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/multi-factor",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/rotate-keys",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#rotate-an-approvers-key",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/replace-keys",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/change-email",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/revoke-keys",
+      "destination": "/developers/docs/accounts/access-keys#revoke-an-access-key",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/export",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/recover",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/upgrade",
+      "destination": "/developers/docs/accounts/account-configuration/account-upgrade",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/verify-approvals",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/team-accounts",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#give-a-team-a-budget",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/approval-rules",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/integration",
+      "destination": "/developers/docs/accounts/use-cases",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/agents",
+      "destination": "/developers/docs/accounts/automations/give-an-agent-a-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/backend-automation",
+      "destination": "/developers/docs/accounts/automations/pay-out-from-a-backend",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/wallet-provider",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/enterprise-sso",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/self-custody",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/automate-backend",
+      "destination": "/developers/docs/accounts/automations/pay-out-from-a-backend",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/spending-account",
+      "destination": "/developers/docs/accounts/automations/pay-from-an-embedded-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/agent-wallet",
+      "destination": "/developers/docs/accounts/automations/give-an-agent-a-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/company-treasury",
+      "destination": "/developers/docs/accounts/custodians/team-multisig",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation",
+      "destination": "/developers/docs/accounts/account-configuration",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation/signer-rotation",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation/signer-recovery",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation/account-upgrade",
+      "destination": "/developers/docs/accounts/account-configuration/account-upgrade",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/create/legacy-accounts",
+      "destination": "/developers/docs/accounts/wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/oidc",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/users/sign-in-with-your-login",
+      "destination": "/developers/docs/accounts/apps",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/policies/escalation-rules",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/policies/private-policies",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/recovery",
+      "destination": "/developers/docs/accounts/account-configuration",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/approvals",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/team-budgets",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#give-a-team-a-budget",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/private-policies",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/verified-facts",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/integrate",
+      "destination": "/developers/docs/accounts/wallets#connect-a-wallet-to-your-app",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/balances",
+      "destination": "/developers/docs/accounts/fund#check-the-balance",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/examples",
+      "destination": "/developers/docs/guide/payments/send-a-payment/examples#payment-client-setup",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/providers",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/guide/use-accounts/fee-sponsorship",
       "destination": "/developers/docs/guide/payments/sponsor-user-fees",
       "permanent": true
@@ -1243,12 +1503,12 @@
     },
     {
       "source": "/developers/learn/tempo/receive-policies",
-      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
       "source": "/developers/docs/learn/tempo/receive-policies",
-      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {

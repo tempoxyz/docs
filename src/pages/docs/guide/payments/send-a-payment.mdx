@@ -22,7 +22,7 @@ For complete files and more languages, see [single transfers](/docs/guide/paymen
 
 ## Send a payment
 
-Use the [CLI, Viem, and Wagmi setup](/docs/accounts/examples#choose-your-tools) with a funded test account. It defines the signer, `client`, `recipient`, and `alphaUsd`; the Python setup supplies `w3` and `transaction_options()`. All amounts use base units: `10_000_000` is ten AlphaUSD. Wagmi hooks belong inside a React component; call the named handlers from buttons and show their pending and error states.
+Use the [CLI, Viem, and Wagmi setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools) with a funded test account. It defines the signer, `client`, `recipient`, and `alphaUsd`; the Python setup supplies `w3` and `transaction_options()`. All amounts use base units: `10_000_000` is ten AlphaUSD. Wagmi hooks belong inside a React component; call the named handlers from buttons and show their pending and error states.
 ::::code-group
 
 ```ts [Viem]
@@ -63,7 +63,7 @@ curl --fail-with-body https://rpc.moderato.tempo.xyz \
 
 ::::
 
-Viem and Wagmi sign and wait for the receipt. Python signs and submits; wait for its receipt below. cURL **only submits an already-signed transaction**: set `SIGNED_TRANSACTION` to the encoded hex bytes from your signer, as shown in [Python setup](/docs/accounts/examples#python-client). The hosted API does not sign a payment for you.
+Viem and Wagmi sign and wait for the receipt. Python signs and submits; wait for its receipt below. cURL **only submits an already-signed transaction**: set `SIGNED_TRANSACTION` to the encoded hex bytes from your signer, as shown in [Python setup](/docs/guide/payments/send-a-payment/examples#python-client). The hosted API does not sign a payment for you.
 
 <span id="send-payment-demo" />
 <span id="send-payment-implementation-steps" />
@@ -216,7 +216,7 @@ print(receipt["transactionHash"].hex())
 
 <OpenApi.Playground operationId="getReceipt" query="chainId=42431" anchors={false} />
 
-Check the transaction status, then match the token contract, recipient, and amount in the receipt's `Transfer` events. A successful transaction alone is not proof that the intended recipient received funds; a [receive policy](/docs/guide/payments/configure-receive-policies#monitor-blocked-receipts) can redirect funds to `ReceivePolicyGuard` instead of the recipient.
+Check the transaction status, then match the token contract, recipient, and amount in the receipt's `Transfer` events. A successful transaction alone is not proof that the intended recipient received funds; a [receive policy](/docs/accounts/policies/receive-policies#blocked-receipts) can redirect funds to `ReceivePolicyGuard` instead of the recipient.
 
 If submission times out, check the submitted transaction hash before rebuilding or sending another payment.
 

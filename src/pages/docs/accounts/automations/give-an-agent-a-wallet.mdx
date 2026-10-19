@@ -1,0 +1,188 @@
+---
+title: Give an agent a wallet
+seoTitle: Give an AI Agent a Budgeted Tempo Access Key | Tempo Docs
+description: Authorize an AI agent's own access key with a budget, an expiry, and only the calls it needs, let it pay for APIs with MPP, and revoke it when the task ends.
+interactive: true
+---
+
+import { AccessKeyDemo } from '../../../../components/guides/AccessKeyDemo'
+
+# Give an agent a wallet
+
+Give an agent a key that pays from an account, but only within the bounds you set.
+
+If you build an AI agent that pays merchants or APIs from a user's or your company's account, don't give it the account's key. On Tempo, an agent's wallet is an access key the agent generates and holds. The account's signers, the keys the customer or your approvers hold, authorize that key. In this guide, its bounds are a budget of 50 OUSD a day, a 30-day expiry, and scopes that allow only sending the stablecoin with a memo to merchants you list. Tempo enforces those bounds on every transaction, whatever the agent decides to do.
+
+<span id="agents" />
+<span id="ai-agents" />
+<span id="authorize-the-agents-task" />
+
+The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin. The demo's account is a single-key account. An agent key works the same way from one on mainnet and testnet. Until [T14](/docs/protocol/upgrades/t14), a configurable account can authorize an agent key only on the devnet. The demo uses smaller bounds than the code: 10 a day, a one-hour expiry, and `transfer` to any address.
+
+<AccessKeyDemo />
+
+`client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+:::::steps
+
+### Authorize the agent's key
+
+Give each agent its own key, generated where it runs, so you can revoke one without stopping the others. Only the key's address leaves the agent:
+
+::::code-group
+
+```ts [agent-key.ts]
+import { Account, P256 } from 'viem/tempo'
+
+// store in the agent runtime's secret storage
+const privateKey = P256.randomPrivateKey() // [!code hl]
+// the account's address
+const agentKey = Account.fromP256(privateKey, { access: address }) // [!code hl]
+// send to the signers; save it with the agent's name
+const agentKeyAddress = agentKey.accessKeyAddress // [!code hl]
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+The signers authorize that address and its bounds in one transaction:
+
+```ts [authorize-agent.ts]
+import { parseUnits } from 'viem'
+import { Expiry } from 'viem/tempo'
+import { client } from './client'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+// the addresses the agent may pay
+const merchants = [merchant]
+
+await client.accessKey.authorizeSync({ // [!code hl]
+  accessKey: { accessKeyAddress: agentKeyAddress, keyType: 'p256' }, // [!code hl]
+  // the account, signed by its signers
+  account, // [!code hl]
+  expiry: Expiry.days(30), // [!code hl]
+  // 50 of the stablecoin a day
+  limits: [{ token: stablecoin, limit: parseUnits('50', 6), period: 86_400 }], // [!code hl]
+  scopes: [{ address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)', recipients: merchants }], // [!code hl]
+}) // [!code hl]
+```
+
+<span id="set-its-budget-and-scopes" />
+
+Fit all three bounds to the agent's task. Leaving one out removes that check.
+
+- [`limits`](/docs/accounts/access-keys/spending-limits) is the budget, in base units: the stablecoin has 6 decimals, so `parseUnits('50', 6)` is 50 OUSD. `period: 86_400` renews it daily; leave `period` out for a one-time budget. The key's fees count against it unless a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them.
+- [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make. Without `recipients`, the key could pay any address.
+- [`expiry`](/docs/accounts/access-keys/expiry) is when the key stops working.
+
+Never give an agent an [admin access key](/docs/accounts/access-keys/admin-access-keys). It has no budget, scopes, or expiry, and it can authorize more keys. The agent could spend the whole balance.
+
+### Let the agent pay
+
+The agent signs with its key and pays from the account's balance. The signers don't approve each payment:
+
+```ts [agent-pay.ts]
+import { parseUnits, stringToHex } from 'viem'
+import { client } from './client'
+
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+await client.token.transferSync({ // [!code hl]
+  account: agentKey, // [!code hl]
+  amount: parseUnits('2', 6), // [!code hl]
+  // a memo makes this transferWithMemo, the key's one allowed call
+  memo: stringToHex('order-1042', { size: 32 }), // [!code hl]
+  // one of the scoped merchants
+  to: merchant, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
+```
+
+Tempo rejects any payment over the remaining budget, outside the scopes (such as to an address not in `merchants`), or after the expiry. Read what's left with `client.accessKey.getRemainingLimit`. The signers can [change the limit](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) or [the scopes](/docs/accounts/access-keys/scopes#change-allowed-calls) without replacing the key.
+
+<span id="revoke-it" />
+
+### Revoke the agent's key
+
+When the task ends or the agent misbehaves, the signers revoke the key by its saved address:
+
+```ts [revoke-agent.ts]
+import { client } from './client'
+
+await client.accessKey.revokeSync({ account, accessKey: agentKeyAddress }) // [!code hl]
+```
+
+[Revocation](/docs/accounts/access-keys/revocation) is permanent. Once it confirms, Tempo rejects every transaction the key signs. Show the agent's access as removed only then.
+
+:::::
+
+<span id="let-an-agent-pay-for-apis" />
+
+## Pay for APIs with MPP
+
+APIs that use the [Machine Payments Protocol (MPP)](/docs/guide/machine-payments) answer `402 Payment Required` with a price. The agent pays with its key and retries. A one-time payment (`charge`) is a transfer to the service with a memo. The agent's key needs both transfer calls, with the recipient left open so it can pay any service. The budget then bounds the total:
+
+```ts [authorize-agent.ts]
+scopes: [
+  { address: stablecoin, selector: 'transferWithMemo(address,uint256,bytes32)' }, // [!code hl]
+  { address: stablecoin, selector: 'transfer(address,uint256)' }, // [!code hl]
+],
+```
+
+For a [payment session](/docs/guide/machine-payments/pay-as-you-go), also scope its payment-channel calls. In the agent, pass the key and the devnet `client` to the [MPP client](/docs/guide/machine-payments/client). `Mppx.create` patches `fetch` to pay each `402` and retry the request:
+
+```ts [agent.ts]
+import { Mppx, tempo } from 'mppx/client'
+import { client } from './client'
+
+// pays on the devnet
+Mppx.create({ methods: [tempo({ account: agentKey, getClient: () => client })] }) // [!code hl]
+
+const response = await fetch(paidUrl) // [!code hl]
+```
+
+Without `getClient`, mppx has no RPC for the devnet and the request fails. If Tempo rejects the payment for the key's bounds, the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
+
+The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds. To test, run your own [MPP server](/docs/guide/machine-payments/server) on the devnet: in its `tempo()` method, set `currency` to the `stablecoin` address and pass `chainId: 31318` and `getClient: () => client`.
+
+<span id="watch-spending" />
+
+### Watch the agent's spending
+
+The agent reads each payment's receipt from the response, and your app reads how much of the budget is left:
+
+```ts [watch-spending.ts]
+import { Receipt } from 'mppx'
+import { client } from './client'
+
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+const receipt = Receipt.fromResponse(response) // [!code hl]
+// receipt.reference is the payment's transaction hash
+
+const { remaining, periodEnd } = await client.accessKey.getRemainingLimit({ // [!code hl]
+  account: address, // [!code hl]
+  accessKey: agentKeyAddress, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
+// remaining is in base units; periodEnd is when the budget renews
+```
+
+Log each receipt with its request, alert when `remaining` runs low, and show the agent's spending in your app next to a [revoke](/docs/accounts/access-keys/revocation#revoke-an-access-key) action.
+
+## Accept payments on your API
+
+To charge agents for your own API, add the [`mppx` middleware](/docs/guide/machine-payments/server) to its endpoints. The server answers `402 Payment Required` with a price. It returns the resource once the payment verifies.
+
+<span id="keep-account-and-request-budgets-distinct" />
+<span id="agent-budget-limits" />
+
+## Agent wallet limits
+
+- **The budget caps the total, not each payment.** One large payment or one expensive API request can use all of it. Cap each payment in the agent's own code. For MPP, [handle payments manually](/docs/guide/machine-payments/client#handle-mpp-payments-manually) and check the price first. In a terminal, [`tempo request --max-spend`](/docs/cli/request) caps what one command spends.
+- **Fees count against the budget.** The exception is a fee payer that covers them, such as an MPP service that sponsors fees.
+- **An expiry can't be extended.** To keep the agent running past it, [authorize a new key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before it passes.

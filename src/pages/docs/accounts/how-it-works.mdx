@@ -1,0 +1,70 @@
+---
+title: How it works
+seoTitle: How Tempo Accounts Work and Why They're Non-Custodial | Tempo Docs
+description: Only a Tempo account's own keys can move its stablecoins. Signers approve together, access keys pay alone within limits, and Tempo has no override.
+---
+
+import { AccountDiagram } from '../../../components/AccountDiagram'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
+
+# How it works
+
+A Tempo account holds stablecoins, and only the account's own keys can move them.
+
+An account has two kinds of keys. Tempo checks what each can do on every transaction:
+
+- **Signers** own the account. They approve payments and any change to the account's keys. An existing wallet's account starts with one signer: its existing key.
+- **Access keys** are optional. The signers authorize each one. It pays on its own within the limits you set, such as a daily amount or a single recipient.
+
+No one, including Tempo, can [move an account's funds](/docs/accounts/security) any other way.
+
+Say you run a payments app and give each customer a Tempo account. The customer's passkey can approve anything on its own. If they lose their phone, a backup key they keep and a recovery key your app keeps can approve together to replace it. Your app's server holds an access key that pays the customer's scheduled bills, up to 500 OUSD a day.
+
+<span id="tempo-account-model" />
+<span id="signers-change-the-address-doesnt" />
+<span id="address" />
+
+<span id="the-address-holds-the-funds" />
+
+## Addresses
+
+<AccountDiagram
+  name="address"
+  alt="An address holds stablecoins, access keys, and a fee token. It is either a single-key account, where one private key approves, or a configurable account, where weighted signers reach a threshold."
+/>
+
+The address is the account's public ID. It holds the account's stablecoins and sets its default [fee token](/docs/accounts/fees), the stablecoin it pays network fees in.
+
+A single-key account has one key, like a standard Ethereum account (an EOA). Losing the key loses the account. A [configurable account](/docs/development/configurable-accounts) has signers instead. Its address stays the same when they change, so the customer keeps their address and balance after replacing a lost phone. You can [upgrade a single-key account](/docs/accounts/account-configuration/account-upgrade) to a configurable one at the same address.
+
+Single-key accounts and their access keys work on mainnet and testnet today: in the [wallets](/docs/accounts/wallets) your users already have, your [app's embedded wallets](/docs/accounts/apps), your [backend automations](/docs/accounts/automations), and [custodians](/docs/accounts/custodians).
+
+<ConfigurableAccountsT14 />
+
+<span id="what-tempo-checks-on-every-transaction" />
+<span id="how-tempo-approves-a-transaction" />
+<span id="signers-approve-together" />
+
+## Signers
+
+<AccountDiagram
+  name="signers"
+  alt="Three signers with weights: a passkey at 2, and a backup key and a recovery key at 1 each, toward a threshold of 2. The passkey approves alone, or both keys approve together."
+/>
+
+Each signer is a [private key](/docs/accounts/authentication/private-keys), a [device key](/docs/accounts/authentication/device-keys), or a [passkey](/docs/accounts/authentication/passkeys), with a weight. A payment, a new access key, or a configuration update goes through once the weights of the signers who approve it reach the account's [threshold](/docs/accounts/policies/signing-thresholds).
+
+In the example, the passkey has weight 2, the backup and recovery keys have weight 1 each, and the threshold is 2. The passkey pays alone. Your recovery key alone reaches 1 of 2, so you can't move the customer's funds. If the customer loses their phone, the backup and recovery keys together [replace the passkey](/docs/accounts/apps/recover-an-account).
+
+<span id="access-keys-pay-alone" />
+
+## Access keys
+
+<AccountDiagram
+  name="access-keys"
+  alt="An access key has a key type (passkey, P-256, or secp256k1), spending limits per TIP-20 token that apply once or per period, an expiry, and scopes over contracts, functions, and recipients. An admin access key has no limits and manages other access keys."
+/>
+
+A payout server can't ask for the customer's passkey on every payout. Instead, the signers approve an [access key](/docs/accounts/access-keys) once. From then on, it pays alone within its bounds: a spending limit per stablecoin, an expiry, and scopes that limit which contracts and functions it calls and whom it pays. Tempo checks those bounds on every transaction. A leaked payout server key can't spend past its daily limit.
+
+An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds and can manage the account's other access keys. Give one only to a party you'd trust with the whole balance. No access key counts toward the threshold, admin or not. Only the signers can change the signers or the threshold.

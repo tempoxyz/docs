@@ -29,13 +29,13 @@ Connect Tempo Wallet or create an account when prompted. Add test funds, enter a
 
 ## Build the payment
 
-Choose the [CLI, Viem, and Wagmi setup](/docs/accounts/examples#choose-your-tools). It defines the Moderato network, AlphaUSD, signer, and recipient. The [complete first-payment script](/docs/accounts/examples#first-payment-script) runs the Viem path end to end. Wagmi hooks belong inside a React component; call the named handlers from buttons and show their pending and error states.
+Choose the [CLI, Viem, and Wagmi setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools). It defines the Moderato network, AlphaUSD, signer, and recipient. The [complete first-payment script](/docs/guide/payments/send-a-payment/examples#first-payment-script) runs the Viem path end to end. Wagmi hooks belong inside a React component; call the named handlers from buttons and show their pending and error states.
 
 :::::steps
 
 ### Create an account
 
-CLI and Viem create a local key; Wagmi opens Tempo Wallet to create or select an account. For local signing, keep the key in your signing environment and set `TEMPO_PRIVATE_KEY` and `TEMPO_ACCOUNT_ADDRESS` in the [client setup](/docs/accounts/examples#choose-your-tools). Account creation does not call a hosted API.
+CLI and Viem create a local key; Wagmi opens Tempo Wallet to create or select an account. For local signing, keep the key in your signing environment and set `TEMPO_PRIVATE_KEY` and `TEMPO_ACCOUNT_ADDRESS` in the [client setup](/docs/guide/payments/send-a-payment/examples#choose-your-tools). Account creation does not call a hosted API.
 
 ::::code-group
 
@@ -107,7 +107,7 @@ curl --fail-with-body https://rpc.moderato.tempo.xyz \
 
 ### Send a payment
 
-Send one AlphaUSD. Every example uses `1_000_000` base units for this six-decimal token. Viem and Wagmi wait for a receipt. Python builds and signs the same transfer with the [typed SDK](/docs/accounts/examples#python-client).
+Send one AlphaUSD. Every example uses `1_000_000` base units for this six-decimal token. Viem and Wagmi wait for a receipt. Python builds and signs the same transfer with the [typed SDK](/docs/guide/payments/send-a-payment/examples#python-client).
 
 ::::code-group
 
@@ -146,7 +146,7 @@ HTTP cannot sign for an account. To submit transaction bytes signed by your appl
 
 ### Check the receipt
 
-Check execution status, then verify the transfer's token, recipient, and amount before recording delivery. The [complete script](/docs/accounts/examples#first-payment-script) includes that verification. Use the returned transaction hash as `PAYMENT_TX_HASH` (CLI) or `paymentHash` (Wagmi). The Wagmi transfer also exposes it as `data?.receipt.transactionHash`.
+Check execution status, then verify the transfer's token, recipient, and amount before recording delivery. The [complete script](/docs/guide/payments/send-a-payment/examples#first-payment-script) includes that verification. Use the returned transaction hash as `PAYMENT_TX_HASH` (CLI) or `paymentHash` (Wagmi). The Wagmi transfer also exposes it as `data?.receipt.transactionHash`.
 
 ::::code-group
 

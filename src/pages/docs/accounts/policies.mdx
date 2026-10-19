@@ -1,0 +1,46 @@
+---
+title: Account policies
+seoTitle: Account Policies for Approvals and Incoming Payments on Tempo | Tempo Docs
+description: A signing threshold decides who can move a Tempo account's funds, and a receive policy decides which stablecoins and senders can pay it. Tempo enforces both onchain.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Account policies
+
+A policy is a rule Tempo enforces onchain for an account, so your app doesn't have to.
+
+A Tempo account has two policies, one for each direction money moves: a signing threshold for funds going out, and a receive policy for payments coming in.
+
+<span id="escalation-rules" />
+<span id="private-policies" />
+<span id="what-a-policy-controls" />
+<span id="combine-account-policies" />
+<span id="combine-policies" />
+<span id="control-money-out-and-money-in" />
+
+## Policies
+
+<Cards>
+  <Card title="Signing thresholds" description="Who can move funds out: a transaction needs approvals whose weights add up to the threshold. Devnet until T14." to="/docs/accounts/policies/signing-thresholds" />
+  <Card title="Receive policies" description="Which stablecoins and senders can pay the account. Tempo holds anything else instead of crediting it." to="/docs/accounts/policies/receive-policies" />
+</Cards>
+
+<span id="what-account-policies-control" />
+<span id="tempo-account-policy-types" />
+<span id="tempo-account-policies" />
+<span id="what-a-policy-is" />
+
+## How it works
+
+Tempo checks each policy onchain:
+
+- **Outgoing funds.** Tempo checks the signing threshold on every transaction the account sends.
+- **Incoming funds.** Tempo checks the receive policy on every transfer and mint to the account.
+
+No one can skip either check, including your app, your wallet provider, Tempo, a breached backend, or a buggy client.
+
+The two policies work independently. Without a receive policy, an account accepts every transfer the token itself allows. Add one only when the account must refuse some stablecoins or senders.
+
+Spending limits aren't a policy. They belong to [access keys](/docs/accounts/access-keys), which pay alone within their limits and never count toward the threshold.
+

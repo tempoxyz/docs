@@ -210,6 +210,25 @@ interface IAccountKeychain {
 }
 ```
 
+## Account Keychain errors
+
+Each error links to where the precompile raises it.
+
+| Error | Tempo returns it when |
+| --- | --- |
+| <span id="error-unauthorizedcaller" />[`UnauthorizedCaller`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L1114) | A key-management call (authorize, revoke, change a limit or scopes) is signed by a limited access key, or doesn't come directly from the account as the transaction's sender. |
+| <span id="error-zeropublickey" />[`ZeroPublicKey`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L269) | The key's address is the zero address. |
+| <span id="error-expiryinpast" />[`ExpiryInPast`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L280) | An authorization sets an expiry at or before the current block time. |
+| <span id="error-keyalreadyexists" />[`KeyAlreadyExists`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L287) | The account already has an access key at this address. |
+| <span id="error-keyalreadyrevoked" />[`KeyAlreadyRevoked`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L292) | The key at this address was revoked. An account can never authorize a revoked address again. |
+| <span id="error-keynotfound" />[`KeyNotFound`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L432) | The account never authorized this key, or its authorization hasn't landed yet. |
+| <span id="error-keyexpired" />[`KeyExpired`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L1204) | Block time has reached the key's expiry. |
+| <span id="error-spendinglimitexceeded" />[`SpendingLimitExceeded`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L1379) | A transaction the key signs would spend more of a token than the key's remaining limit. |
+| <span id="error-invalidspendinglimit" />[`InvalidSpendingLimit`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L303) | An authorization lists the same token twice, or sets a limit above the maximum. |
+| <span id="error-callnotallowed" />[`CallNotAllowed`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L817) | A call the key signs matches none of its scopes: another contract, another function, a recipient that isn't listed, or a contract deployment. |
+| <span id="error-invalidcallscope" />[`InvalidCallScope`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L587) | A scope update is empty or malformed, or an authorization passes scopes while allowing every call. |
+| <span id="error-invalidkeyid" />[`InvalidKeyId`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L470) | The request changes an admin key's limit or scopes, which it doesn't have, or makes the account's own address an admin key. |
+
 ## Behavior
 
 ### Key Authorization

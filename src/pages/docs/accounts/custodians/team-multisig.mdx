@@ -1,0 +1,151 @@
+---
+title: Set up a team multisig
+seoTitle: Set Up a Team Multisig with Several Approvers on Tempo | Tempo Docs
+description: Create one Tempo account that three approvers control, where any two approve each payment and no single key can move funds.
+---
+
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+
+# Set up a team multisig
+
+Set up one Tempo account that three approvers share, where any two must approve each payment.
+
+When your team holds stablecoins together, such as a company's funds or a shared budget, no single person or key should move them. Here you create a multisig account on the Tempo Accounts devnet. Its three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself. Neither one stolen key nor your own backend can pay without a second approver.
+
+<span id="treasury-model" />
+
+Each approver's signer has a weight of 1, and the [threshold](/docs/accounts/policies/signing-thresholds) is 2. The same threshold covers configuration updates, so no single approver can add or remove a signer.
+
+<ConfigurableAccountsT14 />
+
+`client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+
+:::::steps
+
+<span id="create-the-treasury-account" />
+<span id="create-the-treasury" />
+
+### Create the multisig
+
+Keep each approver's key somewhere different, such as a hardware wallet, a separate KMS per team, or the approver's passkey, so one breach can't reach two of them. Here finance and operations sign with [private keys](/docs/accounts/authentication/private-keys), and the controller signs with a passkey on their own device, so your app knows only the controller's address.
+
+::::code-group
+
+```ts [multisig.ts]
+import { Account } from 'viem/tempo'
+import { client } from './client'
+
+const env = (name: string) => process.env[name] as `0x${string}`
+
+const finance = Account.fromSecp256k1(env('FINANCE_SIGNER_KEY'))
+const operations = Account.fromSecp256k1(env('OPERATIONS_SIGNER_KEY'))
+const controller = env('CONTROLLER_PASSKEY_ADDRESS') // the key stays on the controller's device
+
+const multisig = Account.fromConfig({ // [!code hl]
+  address: 'infer', // [!code hl]
+  owners: [ // [!code hl]
+    { owner: finance.address, weight: 1 }, // [!code hl]
+    { owner: operations.address, weight: 1 }, // [!code hl]
+    { owner: controller, weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
+}) // [!code hl]
+
+// Save with your multisig record.
+const saved = { address: multisig.address, config: multisig.config } // [!code hl]
+
+await client.faucet.fundSync({ account: saved.address }) // devnet test stablecoins
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+`address: 'infer'` computes the address from the first signers and threshold. Creating the multisig sends nothing. Tempo records the multisig with its first transaction. The address can receive stablecoins before then. On the devnet, the [faucet](/docs/accounts/create#fund-an-account-on-devnet) sends it test stablecoins. The multisig pays transaction fees from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
+
+Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version). The hash is enough to check approvals, but not to tell your app who the signers are. Save the address and configuration with your multisig record. The configuration contains bigints, so [encode it with `AccountConfig.toRpc`](/docs/development/configurable-accounts#keep-the-current-configuration). The address stays the same when signers change. Every approval is built from the saved configuration.
+
+<span id="collect-approvals" />
+
+### Approve a payment
+
+To pay, rebuild the multisig from its saved record and attach the keys of the approvers signing this payment. The other signers stay as addresses:
+
+```ts [multisig.ts]
+import { isAddressEqual, parseUnits } from 'viem'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+// Placeholder: the vendor's address
+const vendor = env('VENDOR_ADDRESS')
+
+/** Rebuilds the multisig from its saved record, with the approvers' keys attached. */
+function openMultisig(approvers: readonly Account.RootAccount[]) {
+  const { address, config } = saved
+  const owners = config.owners.map(({ owner, weight }) => ({
+    // other signers stay addresses
+    owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner, // [!code hl]
+    weight,
+  }))
+  // Never updated (version 0): the address still comes from the first signers.
+  if (config.version === 0n)
+    return Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
+  return Account.fromConfig({ ...config, address, owners })
+}
+
+// Finance and operations approve: 1 + 1 reaches the threshold of 2.
+await client.token.transferSync({ // [!code hl]
+  account: openMultisig([finance, operations]), // [!code hl]
+  // 1,200 of the stablecoin, in base units (6 decimals)
+  amount: parseUnits('1200', 6), // [!code hl]
+  to: vendor, // [!code hl]
+  token: stablecoin, // [!code hl]
+}) // [!code hl]
+```
+
+Viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openMultisig` for every action, not once at startup. A [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer) raises the configuration's version and returns the new `config`. Save it, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.
+
+This example holds two approvers' keys in one process, so that process could pay alone. In production, each approver checks the recipient and amount and signs on their own device. Your app [collects approvals from separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Your own contract can also [verify the multisig's approvals](/docs/accounts/policies/signing-thresholds#verify-approvals).
+
+:::::
+
+<span id="offboard-an-approver" />
+<span id="remove-a-departing-approver" />
+
+## Replace an approver
+
+When an approver leaves, swap their signer for their successor's in one configuration update, at the same weight and threshold. The two remaining approvers approve it, so the multisig stays 2 of 3 throughout:
+
+```ts [multisig.ts]
+const successor = env('NEW_CONTROLLER_PASSKEY_ADDRESS') // the successor's passkey, on their device
+
+const replaced = await client.accounts.updateConfigSync({ // [!code hl]
+  account: openMultisig([finance, operations]), // [!code hl]
+  nextConfig: { // [!code hl]
+    owners: saved.config.owners.map((entry) => // [!code hl]
+      isAddressEqual(entry.owner, controller) ? { owner: successor, weight: entry.weight } : entry, // [!code hl]
+    ), // [!code hl]
+    threshold: saved.config.threshold, // [!code hl]
+  }, // [!code hl]
+}) // [!code hl]
+// Save it with the multisig record.
+saved.config = replaced.config // [!code hl]
+```
+
+The multisig keeps its address and balance. The departing approver's key can no longer approve anything. A [configuration update](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) also removes a signer without a successor, or rotates the key of an approver who stays.
+
+Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). [List the keys the multisig has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change). Revoke every access key the departing approver held or managed with `client.accessKey.revokeSync`, and set to zero any token allowance one of those keys approved. If the key was an [admin access key](/docs/accounts/access-keys/admin-access-keys), revoke the keys it authorized too.
+
+<span id="treasury-limits" />
+<span id="give-a-team-a-budget" />
+<span id="rotate-an-approvers-key" />
+
+<span id="treasury-limits-and-changes" />
+
+## Limits and changes
+
+A multisig holds 1 to 48 signers, and a transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
+
+To let a team or a backend pay within a daily limit without two multisig approvals per payment, authorize an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits). A configuration update voids approvals collected for a payment that hasn't been sent, so collect them again. If another update landed first, rebuild the multisig from the latest saved configuration.
