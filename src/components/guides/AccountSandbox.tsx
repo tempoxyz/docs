@@ -551,13 +551,6 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
       : null
   /** Transactions need fees, so a created account needs test funds before it can act. */
   const funded = Boolean(account.devnet) && account.balance > 0
-  /** An account created from scratch with one signer offers a backup from its warning. */
-  const backup =
-    funded &&
-    !account.legacy &&
-    account.presetId === 'from-scratch' &&
-    configuredSigners(account).length === 1
-  const [choosingBackup, setChoosingBackup] = React.useState(false)
   /** A generated private-key access key, shown once while it's on the account. */
   const [keySecret, setKeySecret] = React.useState<{ id: string; value: string } | null>(null)
   const shownKeySecret =
@@ -585,7 +578,6 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   function change(next: SandboxAccount) {
     setSecret(null)
     setKeySecret(null)
-    setChoosingBackup(false)
     void network.commit(account, next).then(async ({ before, after }) => {
       setBefore(before)
       setAccount(after)
@@ -711,18 +703,6 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
         ),
         signersFooter: (
           <>
-            {backup && choosingBackup && (
-              <div className="as-backup">
-                <SignerChooser
-                  label="Backup signer"
-                  choices={choices}
-                  onChoose={(choice) => addSignerOf(choice.kind)}
-                />
-                <button type="button" className="as-link" onClick={() => setChoosingBackup(false)}>
-                  Cancel
-                </button>
-              </div>
-            )}
             {steps.length > 0 && (
               <div className="as-choices">
                 {steps.map((item) => (
@@ -795,7 +775,6 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
             terse
             edit={edit}
             secrets={secrets}
-            onAddBackup={backup ? () => setChoosingBackup(true) : undefined}
           />
         </fieldset>
 
@@ -985,7 +964,9 @@ export function AccountState(props: {
 
       {/* Before the first signer, the empty slots say what to do; blocked actions still show. */}
       <Notices
-        notices={created ? health.notices : []}
+        notices={
+          created ? health.notices.filter((notice) => !terse || notice.id !== 'no-backup') : []
+        }
         blocked={account.notice}
         terse={terse}
         onAddBackup={onAddBackup}

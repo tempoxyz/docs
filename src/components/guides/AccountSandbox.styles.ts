@@ -606,12 +606,6 @@ export const accountSandbox = style({
       opacity: 0,
       cursor: 'pointer',
     },
-    // The backup chooser, opened from the no-backup notice.
-    '& .as-backup': {
-      display: 'grid',
-      justifyItems: 'start',
-      gap: tokens.spacing['2'],
-    },
     '& .as-fund, & .as-upgrade': {
       display: 'flex',
       flexWrap: 'wrap',
