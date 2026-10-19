@@ -47,7 +47,7 @@ export function AccountDiagram({ name, alt }: { name: keyof typeof diagrams; alt
       role="img"
       aria-label={alt}
     >
-      <div className="ad-canvas">
+      <div className="dg-canvas">
         <Diagram />
       </div>
     </figure>
@@ -61,7 +61,7 @@ function Icon({ name }: { name: Glyph }) {
       : docsIcons[name as keyof typeof docsIcons]
   return (
     <Svg
-      className="ad-icon"
+      className="dg-icon"
       aria-hidden="true"
       focusable="false"
       width="16"
@@ -84,10 +84,10 @@ function Node({
   tone?: 'strong'
 }) {
   return (
-    <span className={tone ? `ad-node ad-node-${tone}` : 'ad-node'}>
+    <span className={tone ? `dg-node dg-node-${tone}` : 'dg-node'}>
       <Icon name={icon} />
-      <span className="ad-node-title">{title}</span>
-      {value !== undefined && <span className="ad-value">{value}</span>}
+      <span className="dg-node-title">{title}</span>
+      {value !== undefined && <span className="dg-value">{value}</span>}
     </span>
   )
 }
@@ -95,12 +95,12 @@ function Node({
 /** A drawn arrow with its verb above and an optional note below. */
 function Link({ label, note }: { label: string; note?: string }) {
   return (
-    <span className="ad-link">
-      <span className="ad-link-label">{label}</span>
-      <span className="ad-link-line">
-        <span className="ad-link-rule" />
+    <span className="dg-link">
+      <span className="dg-link-label">{label}</span>
+      <span className="dg-link-line">
+        <span className="dg-link-rule" />
         <svg
-          className="ad-link-head"
+          className="dg-link-head"
           viewBox="0 0 6 10"
           fill="none"
           stroke="currentColor"
@@ -113,7 +113,7 @@ function Link({ label, note }: { label: string; note?: string }) {
           <path d="M1 1l4 4-4 4" />
         </svg>
       </span>
-      <span className="ad-link-note">{note}</span>
+      <span className="dg-link-note">{note}</span>
     </span>
   )
 }
@@ -121,12 +121,12 @@ function Link({ label, note }: { label: string; note?: string }) {
 /** Rows of `from → to` on one grid, so arrows and cards line up across rows. */
 function Flow({ rows }: { rows: ReadonlyArray<readonly [ReactNode, ReactNode, ReactNode]> }) {
   return (
-    <div className="ad-flow">
+    <div className="dg-flow">
       {rows.map(([from, link, to], index) => (
         <Fragment key={index}>
-          <span className="ad-flow-from">{from}</span>
+          <span className="dg-flow-from">{from}</span>
           {link}
-          <span className="ad-flow-to">{to}</span>
+          <span className="dg-flow-to">{to}</span>
         </Fragment>
       ))}
     </div>
@@ -136,9 +136,9 @@ function Flow({ rows }: { rows: ReadonlyArray<readonly [ReactNode, ReactNode, Re
 /** Short labels for what a card has. */
 function Tags({ items }: { items: ReadonlyArray<string> }) {
   return (
-    <span className="ad-tags">
+    <span className="dg-tags">
       {items.map((item) => (
-        <span key={item} className="ad-tag">
+        <span key={item} className="dg-tag">
           {item}
         </span>
       ))}
@@ -159,8 +159,8 @@ function Panel({
   children: ReactNode
 }) {
   return (
-    <div className={tone ? `ad-panel ad-panel-${tone}` : 'ad-panel'}>
-      <div className="ad-panel-head">
+    <div className={tone ? `dg-panel dg-panel-${tone}` : 'dg-panel'}>
+      <div className="dg-panel-head">
         <Icon name={icon} />
         {title}
       </div>
@@ -180,10 +180,10 @@ function Fork({
   direction: 'join' | 'split'
 }) {
   return (
-    <div className={`ad-fork ad-fork-${direction}`}>
-      <div className="ad-fork-top">{top}</div>
-      <span className="ad-fork-bracket" aria-hidden="true" />
-      <div className="ad-fork-bottom">{bottom}</div>
+    <div className={`dg-fork dg-fork-${direction}`}>
+      <div className="dg-fork-top">{top}</div>
+      <span className="dg-fork-bracket" aria-hidden="true" />
+      <div className="dg-fork-bottom">{bottom}</div>
     </div>
   )
 }
@@ -196,7 +196,7 @@ function AccountAddress() {
       bottom={
         <>
           <Node icon="user" title="Single-key account" />
-          <span className="ad-or">or</span>
+          <span className="dg-or">or</span>
           <Node icon="sliders" title="Configurable account" />
         </>
       }
@@ -222,7 +222,7 @@ function SignerApproval() {
 
 function AccessKeyBounds() {
   return (
-    <div className="ad-panels">
+    <div className="dg-panels">
       <Panel icon="accessKey" title="Access key">
         <Tags items={['Spending limit', 'Expiry', 'Scopes']} />
       </Panel>
@@ -235,7 +235,7 @@ function AccessKeyBounds() {
 
 function AccountTypes() {
   return (
-    <div className="ad-stack ad-stack-shared">
+    <div className="dg-stack dg-stack-shared">
       <Flow
         rows={[
           [
@@ -252,10 +252,10 @@ function AccountTypes() {
 
 function SingleKeyAccount() {
   return (
-    <div className="ad-fan">
+    <div className="dg-fan">
       <Node icon="key" title="Private key" tone="strong" />
-      <span className="ad-fan-stem" aria-hidden="true" />
-      <div className="ad-fan-branches">
+      <span className="dg-fan-stem" aria-hidden="true" />
+      <div className="dg-fan-branches">
         <Link label="derives" />
         <Node icon="document" title="Address" />
         <Link label="authorizes" />
@@ -286,13 +286,13 @@ function ConfigurableAccount() {
 
 function KeychainAuthority() {
   return (
-    <div className="ad-chain">
+    <div className="dg-chain">
       <Node icon="wallet" title="Account" />
-      <span className="ad-then">
+      <span className="dg-then">
         <Link label="authorizes" />
         <Node icon="accessKey" title="Access key" tone="strong" />
       </span>
-      <span className="ad-then">
+      <span className="dg-then">
         <Link label="signs within" />
         <Tags items={['Spending limit', 'Expiry', 'Scopes']} />
       </span>
