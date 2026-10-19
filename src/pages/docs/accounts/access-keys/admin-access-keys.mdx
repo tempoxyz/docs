@@ -26,7 +26,9 @@ An admin key isn't a signer. It can't change the signers or the threshold, or lo
 <span id="when-to-avoid-admin-keys" />
 <span id="when-to-use-an-admin-key" />
 
-## When to use one
+<span id="when-to-use-one" />
+
+## Use cases
 
 Give an admin key only to a party you'd trust with the whole balance. On a configurable account (devnet until [T14](/docs/protocol/upgrades/t14)), an admin key also skips the [signing threshold](/docs/accounts/policies/signing-thresholds). It removes the protection of requiring several signers.
 
@@ -41,7 +43,9 @@ Protect an admin key like a signer. Keep it in a KMS or HSM, or as a [device key
 
 <span id="authorize-an-admin-key" />
 
-## Authorize one
+<span id="authorize-one" />
+
+## Authorize an admin access key
 
 Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key). Pass `admin: true` to Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). Viem ignores `limits`, `expiry`, and `scopes` on an admin key. Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
 

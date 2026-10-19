@@ -114,7 +114,9 @@ The customer isn't prompted. Tempo rejects a payout to an address outside `payee
 <span id="troubleshoot-backend-payments" />
 <span id="payout-limits" />
 
-## Before you go live
+<span id="before-you-go-live" />
+
+## Production checklist
 
 - **Concurrent payouts.** An account's transactions share one nonce, a counter that orders them, so payouts confirm one at a time by default. To send them concurrently, use [expiring nonces or nonce keys](/docs/guide/payments/send-parallel-transactions).
 - **New payees.** To add a payee, the signers or an [admin key](/docs/accounts/access-keys/admin-access-keys) update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls).

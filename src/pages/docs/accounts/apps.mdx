@@ -15,7 +15,9 @@ Use this setup for consumer apps, such as wallets, remittance apps, and savings 
 
 <span id="plan-recovery-that-doesnt-depend-on-the-provider" />
 
-## Give each user a self-custodial wallet
+<span id="give-each-user-a-self-custodial-wallet" />
+
+## Recommended app setup
 
 <ConfigurableAccountsT14 />
 
@@ -40,11 +42,15 @@ Day to day, the passkey and the provider sign each payment together. No payment 
 <span id="custody-test" />
 <span id="your-app-holds-the-key-through-a-provider" />
 
-## What your provider sets up today
+<span id="what-your-provider-sets-up-today" />
+
+## Existing provider wallets
 
 Each user gets one secp256k1 key. The provider holds it and unlocks it when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works on Tempo mainnet and testnet as it is. The key controls the whole balance. Anyone the provider lets request a signature can move it: the user after they log in, or your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
 
-## Keep your existing provider wallets
+<span id="keep-your-existing-provider-wallets" />
+
+## Migration from provider wallets
 
 If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains. Balances on other chains don't carry over. Sending and receiving stablecoins works as it is.
 
@@ -53,7 +59,9 @@ Fee tokens, batched calls, and access keys need the provider's Tempo integration
 <span id="which-tempo-features-does-my-setup-support" />
 <span id="what-tempo-adds" />
 
-## What your provider supports on Tempo
+<span id="what-your-provider-supports-on-tempo" />
+
+## Provider support on Tempo
 
 Any provider that signs Ethereum transactions can hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). Tempo Transaction features need more: paying fees in any stablecoin, batching payments, sponsoring fees, and authorizing [access keys](/docs/accounts/access-keys). For those, the provider sends Tempo Transactions itself, or signs a transaction's raw hash so your app can send it to a Tempo RPC. Privy, Turnkey, and Dynamic do both:
 

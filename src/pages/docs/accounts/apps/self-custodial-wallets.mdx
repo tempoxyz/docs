@@ -17,7 +17,9 @@ Use this setup if your consumer app signs users in with its own login and holds 
 
 Each user's account has three signers, the keys that approve its transactions: the user's passkey, a key your provider manages, and a backup key the user keeps. Any two approve. The user's passkey and backup still reach the [threshold](/docs/accounts/policies/signing-thresholds) if your app or the provider is down or breached.
 
-## Who can move the funds
+<span id="who-can-move-the-funds" />
+
+## Fund control
 
 | Who | What they can do alone |
 | --- | --- |
@@ -99,7 +101,9 @@ Before the user funds the account, have them confirm their backup works: sign a 
 
 :::::
 
-## If something goes wrong
+<span id="if-something-goes-wrong" />
+
+## Failure cases
 
 | What happened | Who approves | What they do |
 | --- | --- | --- |

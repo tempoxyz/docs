@@ -24,7 +24,9 @@ Say you run a payments app and give each customer a Tempo account. The customer'
 <span id="signers-change-the-address-doesnt" />
 <span id="address" />
 
-## The address holds the funds
+<span id="the-address-holds-the-funds" />
+
+## Addresses
 
 <AccountDiagram
   name="address"
@@ -41,9 +43,9 @@ Single-key accounts and their access keys work on mainnet and testnet today: in 
 
 <span id="what-tempo-checks-on-every-transaction" />
 <span id="how-tempo-approves-a-transaction" />
-<span id="signers" />
+<span id="signers-approve-together" />
 
-## Signers approve together
+## Signers
 
 <AccountDiagram
   name="signers"
@@ -54,9 +56,9 @@ Each signer is a [private key](/docs/accounts/authentication/private-keys), a [d
 
 In the example, the passkey has weight 2, the backup and recovery keys have weight 1 each, and the threshold is 2. The passkey pays alone. Your recovery key alone reaches 1 of 2, so you can't move the customer's funds. If the customer loses their phone, the backup and recovery keys together [replace the passkey](/docs/accounts/apps/recover-an-account).
 
-<span id="access-keys" />
+<span id="access-keys-pay-alone" />
 
-## Access keys pay alone
+## Access keys
 
 <AccountDiagram
   name="access-keys"

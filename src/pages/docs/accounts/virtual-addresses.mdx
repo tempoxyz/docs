@@ -12,7 +12,9 @@ Give each customer their own deposit address while every payment lands in one Te
 
 Virtual addresses turn one Tempo account into an omnibus account. You register the account once, then hand each customer a deposit address derived from it. Stablecoins sent to any of those addresses land in your account. Each deposit names the address it was sent to, and that address carries your customer tag. You credit the right customer without per-customer wallets or sweep jobs. The tag tells you whose address received the deposit, not who sent it.
 
-## When to use virtual addresses
+<span id="when-to-use-virtual-addresses" />
+
+## Virtual address use cases
 
 Use virtual addresses when your business holds funds for many customers in one account:
 
@@ -22,7 +24,9 @@ Use virtual addresses when your business holds funds for many customers in one a
 
 If each customer controls their own funds, give them their own [Tempo account](/docs/accounts/apps) instead.
 
-## Choose the account that receives deposits
+<span id="choose-the-account-that-receives-deposits" />
+
+## Receiving account
 
 Deposit addresses stay bound to the account you register, so register one whose keys can change. A [configurable account](/docs/accounts/account-configuration/configuration-updates) adds or removes signers at the same address, and runs on the devnet until [T14](/docs/protocol/upgrades/t14). On mainnet, register a multisig or upgradeable contract instead of a single-key account if you expect to rotate keys.
 
@@ -44,7 +48,9 @@ Every deposit to a customer's address shows up in your account's transfer histor
 
 :::::
 
-## Your account's rules still apply
+<span id="your-accounts-rules-still-apply" />
+
+## Account rules
 
 Deposits to a virtual address are deposits to your account. Your account's [receive policy](/docs/accounts/policies/receive-policies#virtual-address-behavior) decides which stablecoins and senders it accepts. Tempo holds anything else instead of crediting it. Confirm each deposit reached your account before you credit the customer.
 

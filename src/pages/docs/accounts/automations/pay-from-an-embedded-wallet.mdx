@@ -12,7 +12,9 @@ Use this when your users hold Privy or Turnkey embedded wallets and your backend
 
 The example funds a card program. Your card backend gets a key that can send up to 100 OUSD a day, only to the card program's funding address from your [card issuing partner](/docs/partners/cards), for 30 days. Size the daily limit to the card's daily spend limit plus fees. Show the user the card program, limit, and expiry before they approve. The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
 
-## Who holds which key
+<span id="who-holds-which-key" />
+
+## Key holders
 
 On each card swipe, your card backend pulls the purchase amount from the user's balance in seconds, without asking the wallet provider to sign. Each party can do only what its own key allows:
 
