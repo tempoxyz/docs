@@ -900,9 +900,12 @@ test('developer chapters expand in place and retain their tree across client nav
   await expect(tokenLists).toBeHidden()
   await expectOnlyActiveLeaf(sidebar, '/docs/development')
 
-  await tokens.click()
+  // Retry until hydration attaches the toggle; an early click is a no-op.
+  await expect(async () => {
+    if (!(await tokenIntro.isVisible())) await tokens.click()
+    await expect(tokenIntro).toBeVisible({ timeout: 1000 })
+  }).toPass()
   await expect(page).toHaveURL(/\/docs\/development\/?$/)
-  await expect(tokenIntro).toBeVisible()
   await expect(sidebar.getByRole('link', { name: 'Manage tokens', exact: true })).toBeVisible()
   await tokenIntro.click()
   await expect(page).toHaveURL(/\/docs\/network\/tokens\/?$/)

@@ -93,7 +93,6 @@ function overLimitAmount(key: AccessKey) {
   return Math.floor(remainingLimit(key) / 100) * 100 + 100
 }
 
-type Tab = 'pay' | 'signers' | 'keys'
 type Payer = { type: 'signers'; ids: string[] } | { type: 'key'; id: string; members: string[] }
 
 export type AccountSandboxProps = {
@@ -521,8 +520,6 @@ function SignerChooser(props: {
 function Playground(props: { network: Network; showLog: boolean; variant: 'full' | 'compact' }) {
   const { network, showLog, variant } = props
   const [account, setAccount] = React.useState(() => loadPreset('from-scratch'))
-  // After the first signer, "Add a backup signer" is the next step.
-  const [tab, setTab] = React.useState<Tab>('signers')
   const [before, setBefore] = React.useState<SandboxAccount | null>(null)
   const health = React.useMemo(() => analyzeAccount(account), [account])
   const diff = before ? diffAccounts(before, account) : undefined
@@ -544,12 +541,26 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
     !account.legacy &&
     account.presetId === 'from-scratch' &&
     configuredSigners(account).length === 1
-  /** A plain key account pays only; signers and keys wait for its upgrade. */
-  const shownTab: Tab = account.legacy ? 'pay' : tab
   const [choosingBackup, setChoosingBackup] = React.useState(false)
+  /** A generated private-key access key, shown once while it's on the account. */
+  const [keySecret, setKeySecret] = React.useState<{ id: string; value: string } | null>(null)
+  const shownKeySecret =
+    keySecret &&
+    account.accessKeys.some((key) => key.id === keySecret.id && key.status !== 'revoked')
+      ? keySecret.value
+      : null
+  /** Signers and keys are edited on their cards once the account takes signers. */
+  const editable = created && !account.legacy
+  const owners = configuredSigners(account)
+  // An example's own step, each a real update. Adding a backup is the same as Add signer, and
+  // losing a passkey sends nothing, so neither is offered here.
+  const steps = guidedActions(account).filter(
+    (item) => item.id !== 'add-backup' && item.id !== 'lose-passkey',
+  )
 
   function change(next: SandboxAccount) {
     setSecret(null)
+    setKeySecret(null)
     setChoosingBackup(false)
     void network.commit(account, next).then(({ before, after }) => {
       setBefore(before)
@@ -576,15 +587,26 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
     const [key] = next.signers
     change(next)
     if (key?.privateKey === privateKey) setSecret({ id: key.id, value: privateKey })
-    setTab('pay')
   }
 
   async function upgrade() {
     const { before, after } = await network.upgrade(account)
     setBefore(before)
     setAccount(after)
-    // Next: a backup signer, now that the account takes signers.
-    if (!after.legacy) setTab('signers')
+  }
+
+  /** A private-key access key is generated in this click and shown once. */
+  async function addKey(template: AccessKeyTemplateId) {
+    if (template !== 'private-key') {
+      change(addAccessKey(account, template))
+      return
+    }
+    const { generatePrivateKey } = await import('viem/accounts')
+    const privateKey = generatePrivateKey()
+    const next = addAccessKey(account, template, { privateKey })
+    const added = next.accessKeys.at(-1)
+    change(next)
+    if (added?.privateKey === privateKey) setKeySecret({ id: added.id, value: privateKey })
   }
 
   /** A private-key signer is generated in this click and shown once. */
@@ -610,11 +632,113 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
     return outcome.result
   }
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'pay', label: 'Send a payment' },
-    { id: 'signers', label: 'Change signers' },
-    { id: 'keys', label: 'Access keys' },
-  ]
+  const edit: AccountEdit | undefined = editable
+    ? {
+        threshold: (
+          <Stepper
+            label="threshold"
+            prefix="threshold "
+            value={account.threshold}
+            min={1}
+            max={sandboxLimits.maxThreshold}
+            onChange={(value) => change(setThreshold(account, value))}
+          />
+        ),
+        signerControls: (signer) => (
+          <>
+            <Stepper
+              label={`${signer.name} weight`}
+              prefix="weight "
+              value={signer.weight}
+              min={1}
+              max={sandboxLimits.maxWeight}
+              onChange={(value) => change(setSignerWeight(account, signer.id, value))}
+            />
+            <button
+              type="button"
+              className="as-link"
+              aria-label={`Remove ${signer.name}`}
+              onClick={() => change(removeSigner(account, signer.id))}
+            >
+              Remove
+            </button>
+          </>
+        ),
+        keyControls: (key) => (
+          <button
+            type="button"
+            className="as-link"
+            aria-label={`Revoke ${key.name}`}
+            onClick={() => change(revokeAccessKey(account, key.id))}
+          >
+            Revoke
+          </button>
+        ),
+        signersFooter: (
+          <>
+            {backup && choosingBackup && (
+              <div className="as-backup">
+                <SignerChooser
+                  label="Backup signer"
+                  choices={choices}
+                  onChoose={(choice) => addSignerOf(choice.kind)}
+                />
+                <button type="button" className="as-link" onClick={() => setChoosingBackup(false)}>
+                  Cancel
+                </button>
+              </div>
+            )}
+            {steps.length > 0 && (
+              <div className="as-choices">
+                {steps.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className="as-button"
+                    onClick={() => change(runGuidedAction(account, item.id))}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <AddSelect
+              label="Add signer"
+              disabled={owners.length >= sandboxLimits.maxSandboxOwners}
+              groups={[
+                {
+                  label: 'Signers',
+                  options: choices.map((choice) => ({
+                    value: choice.kind,
+                    label: choice.reason ? `${choice.label} (unavailable)` : choice.label,
+                    disabled: Boolean(choice.reason),
+                  })),
+                },
+              ]}
+              onSelect={(kind) => addSignerOf(kind as SignerKind)}
+            />
+          </>
+        ),
+        keysFooter: (
+          <>
+            {shownKeySecret && <SecretField label="Test key · shown once" value={shownKeySecret} />}
+            <AddSelect
+              label="Add access key"
+              groups={[
+                {
+                  label: 'Keys',
+                  // Keys that sign without a prompt: not the passkey template (`device`).
+                  options: accessKeyTemplateOptions
+                    .filter((id) => id !== 'device')
+                    .map((id) => ({ value: id, label: accessKeyTemplateName(account, id) })),
+                },
+              ]}
+              onSelect={(id) => void addKey(id as AccessKeyTemplateId)}
+            />
+          </>
+        ),
+      }
+    : undefined
 
   return (
     <div
@@ -625,21 +749,19 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
       <fieldset className="as-lock" disabled={Boolean(network.status)}>
         <legend className="as-hidden">Your account</legend>
 
-        <AccountState
-          account={account}
-          health={health}
-          diff={diff}
-          badge={networkBadge(network, account)}
-          terse
-          onAddBackup={
-            backup
-              ? () => {
-                  setTab('signers')
-                  setChoosingBackup(true)
-                }
-              : undefined
-          }
-        />
+        {/* Signers and keys change on their cards once the account has test funds for fees. */}
+        <fieldset className="as-lock" disabled={created && !funded}>
+          <legend className="as-hidden">Signers and access keys</legend>
+          <AccountState
+            account={account}
+            health={health}
+            diff={diff}
+            badge={networkBadge(network, account)}
+            terse
+            edit={edit}
+            onAddBackup={backup ? () => setChoosingBackup(true) : undefined}
+          />
+        </fieldset>
 
         <section className="as-panel" aria-label="Try it">
           {shownSecret && <SecretField label="Test key · shown once" value={shownSecret} />}
@@ -669,37 +791,10 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
                   <span className="as-note">Same address</span>
                 </div>
               ) : (
-                <>
-                  <div className="as-tabs">
-                    <fieldset>
-                      <legend className="as-hidden">Action</legend>
-                      {tabs.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          aria-pressed={shownTab === item.id}
-                          onClick={() => setTab(item.id)}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </fieldset>
-                  </div>
-                  {shownTab === 'pay' && (
-                    <PayPanel key={account.presetId} account={account} onSubmit={submit} />
-                  )}
-                  {shownTab === 'signers' && (
-                    <SignersPanel
-                      account={account}
-                      choices={choices}
-                      choosingBackup={backup && choosingBackup}
-                      onCancelBackup={() => setChoosingBackup(false)}
-                      onAdd={addSignerOf}
-                      onChange={change}
-                    />
-                  )}
-                  {shownTab === 'keys' && <KeysPanel account={account} onChange={change} />}
-                </>
+                <div className="as-panel-body">
+                  <span className="as-label">Send a payment</span>
+                  <PayPanel key={account.presetId} account={account} onSubmit={submit} />
+                </div>
               )}
             </fieldset>
           )}
@@ -730,7 +825,18 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
   )
 }
 
-/** Read-only: what the account looks like now, with changes emphasized. */
+/** Controls placed on the account's own cards: a stepper per signer, Revoke per key. */
+type AccountEdit = {
+  threshold: React.ReactNode
+  signerControls: (signer: Signer) => React.ReactNode
+  keyControls: (key: AccessKey) => React.ReactNode
+  /** Under the signers, such as Add signer. */
+  signersFooter: React.ReactNode
+  /** Under the access keys, such as Add access key. */
+  keysFooter: React.ReactNode
+}
+
+/** What the account looks like now, with changes emphasized; editable in place with `edit`. */
 export function AccountState(props: {
   account: SandboxAccount
   health: AccountHealth
@@ -741,8 +847,9 @@ export function AccountState(props: {
   terse?: boolean | undefined
   /** Offered after the no-backup notice. */
   onAddBackup?: (() => void) | undefined
+  edit?: AccountEdit | undefined
 }) {
-  const { account, health, diff, badge, terse, onAddBackup } = props
+  const { account, health, diff, badge, terse, onAddBackup, edit } = props
   const signers = account.signers.filter(
     (signer) => !signer.revoked || diff?.signers[signer.id]?.change === 'removed',
   )
@@ -772,12 +879,18 @@ export function AccountState(props: {
 
       <div className="as-state-columns">
         <div>
-          <span className="as-label">
-            Signers
-            {created && !account.legacy && (
-              <span data-changed={Boolean(diff?.threshold)}> · threshold {account.threshold}</span>
-            )}
-          </span>
+          <div className="as-column-head">
+            <span className="as-label">
+              Signers
+              {created && !account.legacy && !edit && (
+                <span data-changed={Boolean(diff?.threshold)}>
+                  {' '}
+                  · threshold {account.threshold}
+                </span>
+              )}
+            </span>
+            {edit?.threshold}
+          </div>
           {signers.length > 0 ? (
             <ul className="as-state-list">
               {signers.map((signer) => (
@@ -786,24 +899,38 @@ export function AccountState(props: {
                   account={account}
                   signer={signer}
                   change={diff?.signers[signer.id]}
+                  controls={
+                    edit && !signer.revoked && diff?.signers[signer.id]?.change !== 'removed'
+                      ? edit.signerControls(signer)
+                      : undefined
+                  }
                 />
               ))}
             </ul>
           ) : (
-            <p className="as-slot">No signers</p>
+            !edit && <p className="as-slot">No signers</p>
           )}
+          {edit?.signersFooter}
         </div>
         <div>
-          <span className="as-label">Access keys</span>
+          <div className="as-column-head">
+            <span className="as-label">Access keys</span>
+          </div>
           {keys.length > 0 ? (
             <ul className="as-state-list">
               {keys.map((key) => (
-                <StateKey key={key.id} accessKey={key} change={diff?.keys[key.id]} />
+                <StateKey
+                  key={key.id}
+                  accessKey={key}
+                  change={diff?.keys[key.id]}
+                  controls={edit && key.status !== 'revoked' ? edit.keyControls(key) : undefined}
+                />
               ))}
             </ul>
           ) : (
-            <p className="as-slot">No access keys</p>
+            !edit && <p className="as-slot">No access keys</p>
           )}
+          {edit?.keysFooter}
         </div>
       </div>
 
@@ -822,8 +949,10 @@ function StateSigner(props: {
   account: SandboxAccount
   signer: Signer
   change: AccountDiff['signers'][string] | undefined
+  /** Weight stepper and Remove, in place of the read-only weight. */
+  controls?: React.ReactNode
 }) {
-  const { account, signer, change } = props
+  const { account, signer, change, controls } = props
   const status = signerStatus(account, signer)
   const Icon = signerIcons[signer.kind]
   // A new signer gets a stronger border, not a badge.
@@ -840,11 +969,15 @@ function StateSigner(props: {
         </span>
         <span className="as-item-detail">{signerDetail(signer)}</span>
       </span>
-      <span className="as-weight" data-changed={change?.change === 'weight'}>
-        {change?.change === 'weight'
-          ? `weight ${change.from} → ${signer.weight}`
-          : `weight ${signer.weight}`}
-      </span>
+      {controls ? (
+        <span className="as-item-controls">{controls}</span>
+      ) : (
+        <span className="as-weight" data-changed={change?.change === 'weight'}>
+          {change?.change === 'weight'
+            ? `weight ${change.from} → ${signer.weight}`
+            : `weight ${signer.weight}`}
+        </span>
+      )}
     </li>
   )
 }
@@ -852,8 +985,10 @@ function StateSigner(props: {
 function StateKey(props: {
   accessKey: AccessKey
   change: AccountDiff['keys'][string] | undefined
+  /** Revoke, at the card's end. */
+  controls?: React.ReactNode
 }) {
-  const { accessKey: key, change } = props
+  const { accessKey: key, change, controls } = props
   const status = key.status
   const Icon = keyIcons[key.kind]
   const left = remainingLimit(key)
@@ -880,6 +1015,7 @@ function StateKey(props: {
           </span>
         </span>
       </span>
+      {controls && <span className="as-item-controls">{controls}</span>}
     </li>
   )
 }
@@ -1055,106 +1191,6 @@ function PayPanel(props: {
   )
 }
 
-function SignersPanel(props: {
-  account: SandboxAccount
-  /** Signers devnet can back, with why any of them can't be added now. */
-  choices: SignerChoice[]
-  /** Opened from the no-backup warning. */
-  choosingBackup: boolean
-  onCancelBackup: () => void
-  onAdd: (kind: SignerKind) => void
-  onChange: (account: SandboxAccount) => void
-}) {
-  const { account, choices, choosingBackup, onCancelBackup, onAdd, onChange } = props
-  const owners = configuredSigners(account)
-  // An example's own step, each a real update. Adding a backup is the same as Add signer, and
-  // losing a passkey sends nothing, so neither is offered here.
-  const steps = guidedActions(account).filter(
-    (item) => item.id !== 'add-backup' && item.id !== 'lose-passkey',
-  )
-  return (
-    <div className="as-panel-body">
-      {choosingBackup && (
-        <div className="as-backup">
-          <SignerChooser
-            label="Backup signer"
-            choices={choices}
-            onChoose={(choice) => onAdd(choice.kind)}
-          />
-          <button type="button" className="as-link" onClick={onCancelBackup}>
-            Cancel
-          </button>
-        </div>
-      )}
-      {steps.length > 0 && (
-        <Field label="Example">
-          <div className="as-choices">
-            {steps.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="as-button"
-                onClick={() => onChange(runGuidedAction(account, item.id))}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </Field>
-      )}
-
-      <Field label="Threshold">
-        <Stepper
-          label="threshold"
-          value={account.threshold}
-          min={1}
-          max={sandboxLimits.maxThreshold}
-          onChange={(value) => onChange(setThreshold(account, value))}
-        />
-      </Field>
-
-      <ul className="as-edit-list">
-        {owners.map((signer) => (
-          <li key={signer.id}>
-            <span className="as-edit-name">{signer.name}</span>
-            <Stepper
-              label={`${signer.name} weight`}
-              prefix="weight "
-              value={signer.weight}
-              min={1}
-              max={sandboxLimits.maxWeight}
-              onChange={(value) => onChange(setSignerWeight(account, signer.id, value))}
-            />
-            <button
-              type="button"
-              className="as-link"
-              onClick={() => onChange(removeSigner(account, signer.id))}
-            >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <AddSelect
-        label="Add signer"
-        disabled={owners.length >= sandboxLimits.maxSandboxOwners}
-        groups={[
-          {
-            label: 'Signers',
-            options: choices.map((choice) => ({
-              value: choice.kind,
-              label: choice.reason ? `${choice.label} (unavailable)` : choice.label,
-              disabled: Boolean(choice.reason),
-            })),
-          },
-        ]}
-        onSelect={(kind) => onAdd(kind as SignerKind)}
-      />
-    </div>
-  )
-}
-
 /** On devnet, keys the reader adds say how they sign. */
 function keyDetail(key: AccessKey) {
   if (key.kind === 'private-key') return 'secp256k1 · test key'
@@ -1164,66 +1200,6 @@ function keyDetail(key: AccessKey) {
     return `${unlock} · this ${name}`
   }
   return accessKeyDetail(key)
-}
-
-function KeysPanel(props: {
-  account: SandboxAccount
-  onChange: (account: SandboxAccount) => void
-}) {
-  const { account, onChange } = props
-  const keys = account.accessKeys.filter((key) => key.status !== 'revoked')
-  const [revealed, setRevealed] = React.useState<{ id: string; privateKey: string } | null>(null)
-  // Shown once: only while the key it belongs to is on the account and this panel is open.
-  const secret = revealed && keys.some((key) => key.id === revealed.id) ? revealed.privateKey : null
-
-  async function add(template: AccessKeyTemplateId) {
-    if (template !== 'private-key') {
-      setRevealed(null)
-      onChange(addAccessKey(account, template))
-      return
-    }
-    const { generatePrivateKey } = await import('viem/accounts')
-    const privateKey = generatePrivateKey()
-    const next = addAccessKey(account, template, { privateKey })
-    const added = next.accessKeys.at(-1)
-    setRevealed(added?.privateKey === privateKey ? { id: added.id, privateKey } : null)
-    onChange(next)
-  }
-
-  return (
-    <div className="as-panel-body">
-      {keys.length > 0 && (
-        <ul className="as-edit-list">
-          {keys.map((key) => (
-            <li key={key.id}>
-              <span className="as-edit-name">{key.name}</span>
-              <button
-                type="button"
-                className="as-link"
-                onClick={() => onChange(revokeAccessKey(account, key.id))}
-              >
-                Revoke
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {secret && <SecretField label="Test key · shown once" value={secret} />}
-      <AddSelect
-        label="Add access key"
-        groups={[
-          {
-            label: 'Keys',
-            // Keys that sign without a prompt: not the passkey template (`device`).
-            options: accessKeyTemplateOptions
-              .filter((id) => id !== 'device')
-              .map((id) => ({ value: id, label: accessKeyTemplateName(account, id) })),
-          },
-        ]}
-        onSelect={(id) => void add(id as AccessKeyTemplateId)}
-      />
-    </div>
-  )
 }
 
 function Field({ label, children }: React.PropsWithChildren<{ label: string }>) {

@@ -182,6 +182,40 @@ export const accountSandbox = style({
       fontSize: tokens.fontSize.xs,
       fontWeight: tokens.fontWeight.normal,
     },
+    // A column's label, with its control (the threshold) at the end.
+    '& .as-column-head': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: tokens.spacing['3'],
+      minHeight: '28px',
+    },
+    // Controls on a signer or key card: its weight stepper, Remove, or Revoke.
+    '& .as-item-controls': {
+      display: 'inline-flex',
+      flexShrink: 0,
+      alignItems: 'center',
+      gap: tokens.spacing['3'],
+    },
+    '& :is(.as-item-controls, .as-column-head) .as-stepper button': {
+      width: '26px',
+      height: '26px',
+    },
+    '& :is(.as-item-controls, .as-column-head) .as-stepper-value': {
+      minWidth: tokens.spacing['14'],
+      fontSize: tokens.fontSize.xs,
+    },
+    // Add signer and Add access key: a ghost card under the column.
+    '& .as-state-columns .as-add': {
+      justifySelf: 'stretch',
+      justifyContent: 'center',
+      minHeight: '44px',
+      borderRadius: tokens.radius.lg,
+    },
+    '& .as-state-columns .as-add:has(select:disabled)': {
+      opacity: 0.5,
+      cursor: 'not-allowed',
+    },
     '& .as-weight': {
       flexShrink: 0,
       color: tokens.color.muted,
@@ -241,11 +275,7 @@ export const accountSandbox = style({
       borderTopStyle: 'solid',
       borderTopColor: tokens.color.line,
     },
-    '& .as-tabs': {
-      display: 'flex',
-      minWidth: 0,
-    },
-    '& .as-tabs fieldset, & .as-segmented': {
+    '& .as-segmented': {
       display: 'inline-flex',
       flexWrap: 'wrap',
       gap: tokens.spacing['0_5'],
@@ -257,7 +287,7 @@ export const accountSandbox = style({
       borderColor: tokens.color.line,
       borderRadius: tokens.radius.lg,
     },
-    '& .as-tabs fieldset button, & .as-segmented button': {
+    '& .as-segmented button': {
       minHeight: '28px',
       paddingBlock: 0,
       paddingInline: tokens.spacing['3'],
@@ -268,14 +298,13 @@ export const accountSandbox = style({
       fontSize: tokens.fontSize.compact,
       whiteSpace: 'nowrap',
     },
-    '& .as-tabs fieldset button:hover, & .as-segmented button:hover': {
+    '& .as-segmented button:hover': {
       color: tokens.color.foreground,
     },
-    '& .as-tabs fieldset button[aria-pressed="true"], & .as-segmented button[aria-pressed="true"]':
-      {
-        backgroundColor: tokens.color.container,
-        color: tokens.color.foreground,
-      },
+    '& .as-segmented button[aria-pressed="true"]': {
+      backgroundColor: tokens.color.container,
+      color: tokens.color.foreground,
+    },
     '& .as-panel-body': {
       display: 'grid',
       gap: tokens.spacing['4'],
@@ -718,16 +747,9 @@ export const accountSandbox = style({
       '& .as-edit-list li': {
         gridTemplateColumns: 'minmax(0, 1fr) auto auto',
       },
-      // The three tabs share the row equally instead of wrapping onto a second one.
-      '& .as-tabs fieldset': {
-        display: 'grid',
-        flex: 1,
-        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-      },
-      '& .as-tabs fieldset button': {
-        paddingInline: tokens.spacing['1_5'],
-        fontSize: tokens.fontSize.xs,
-        whiteSpace: 'normal',
+      // On a phone, a card with controls keeps its detail on one line beside them.
+      '& .as-item:has(.as-item-controls) .as-item-detail': {
+        whiteSpace: 'nowrap',
       },
     },
   },
