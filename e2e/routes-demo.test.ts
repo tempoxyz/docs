@@ -517,9 +517,15 @@ test.describe('Routes demo', () => {
 
     // A single valid continuation fills itself in.
     await pick(fromSelect(page, 'Network'), 'Tempo')
-    await expect(fromSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.sourceToken.tokenKey)
+    await expect(fromSelect(page, 'Asset')).toHaveAttribute(
+      'data-value',
+      tempoToTron.sourceToken.tokenKey,
+    )
     await expect(toSelect(page, 'Network')).toHaveAttribute('data-value', chains.tron.id)
-    await expect(toSelect(page, 'Asset')).toHaveAttribute('data-value', tempoToTron.destinationToken.tokenKey)
+    await expect(toSelect(page, 'Asset')).toHaveAttribute(
+      'data-value',
+      tempoToTron.destinationToken.tokenKey,
+    )
     await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
     await expect(button(page, 'Deposit address')).toBeDisabled()
 
@@ -691,9 +697,11 @@ test.describe('Routes demo', () => {
 
     // Tempo covers the gap between the routed amount (0.9591) and 1:1 delivery.
     await expect(lifecycle(page)).toContainText(
-      'Recipient gets1 USDC.eCovered by Tempo0.0409 USDC.eFeesNone',
+      'Recipient gets1 USDC.eRoute fees covered0.0409 USDC.eFeesNone',
     )
-    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
+    await expect(lifecycle(page)).not.toContainText(
+      'Example 1:1 delivery from the docs demo organization.',
+    )
     const quoteQuery = Object.fromEntries(
       api.to('GET', '/v1/routes/deposit-addresses/quote')[0].query,
     )
@@ -1209,9 +1217,9 @@ test.describe('Routes demo without a key', () => {
 
     // Only an approved organization can quote 1:1 delivery, so the docs key prices the preview.
     await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
-    await expect(lifecycle(page)).toContainText('Covered by Tempo0.0409 USDC.e')
+    await expect(lifecycle(page)).toContainText('Route fees covered0.0409 USDC.e')
     await expect(lifecycle(page)).toContainText(
-      '1:1 delivery preview from the docs demo organization. Creating a 1:1 route needs subsidy approval for your organization.',
+      'Example 1:1 delivery from the docs demo organization. Your organization’s pricing and eligibility apply when you add your API key.',
     )
     await expect(lifecycle(page)).toContainText(
       'Add your Tempo API key here to create routes with configured pricing. Get yours in the Tempo API console.',
@@ -1231,8 +1239,10 @@ test.describe('Routes demo without a key', () => {
     await expect(page.getByLabel('Project API key')).toBeFocused()
     await page.getByLabel('Project API key').fill(key)
     await button(page, 'Use key').click()
-    await expect(lifecycle(page)).toContainText('Covered by Tempo0.0009 USDC.e')
-    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
+    await expect(lifecycle(page)).toContainText('Route fees covered0.0009 USDC.e')
+    await expect(lifecycle(page)).not.toContainText(
+      'Example 1:1 delivery from the docs demo organization.',
+    )
     const keyed = api.to('GET', '/v1/routes/deposit-addresses/quote').at(-1)
     expect(keyed?.headers['tempo-api-key']).toBe(key)
     expect(keyed?.query.get('subsidize')).toBe('true')
@@ -1262,7 +1272,9 @@ test.describe('Routes demo without a key', () => {
     await expect(lifecycle(page)).toContainText(
       'Quoted without 1:1 delivery. This organization is not approved for 1:1 delivery on this route. (routes_subsidy_not_allowed · request req_sub)',
     )
-    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
+    await expect(lifecycle(page)).not.toContainText(
+      'Example 1:1 delivery from the docs demo organization.',
+    )
     expect(
       api.to('GET', '/v1/routes/deposit-addresses/quote').map((q) => q.query.get('subsidize')),
     ).toEqual(['true', 'false'])

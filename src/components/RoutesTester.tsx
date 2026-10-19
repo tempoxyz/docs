@@ -1279,8 +1279,8 @@ function RouteLifecycle({
               )}
               {!quoteKeyed && subsidizedTerms && (
                 <p {...cx(stepBody(), noteStyle())}>
-                  1:1 delivery preview from the docs demo organization. Creating a 1:1 route needs
-                  subsidy approval for your organization.
+                  Example 1:1 delivery from the docs demo organization. Your organization’s pricing
+                  and eligibility apply when you add your API key.
                 </p>
               )}
             </>
@@ -1705,7 +1705,7 @@ function QuoteSummary({ data, route }: { data: Record<string, unknown>; route: T
         {received} {symbol}
       </Row>
       {delivery && delivery.covered > 0n && (
-        <Row label="Covered by Tempo">
+        <Row label="Route fees covered">
           {formatUnits(delivery.covered, decimals)} {symbol}
         </Row>
       )}

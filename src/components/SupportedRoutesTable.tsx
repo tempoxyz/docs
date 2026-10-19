@@ -88,8 +88,9 @@ export function SupportedRoutesTable() {
         }
         footer={
           <span>
-            Fee coverage means the route supports 1:1 delivery. Eligibility depends on your
-            organization, billing, and transfer details.
+            Fee coverage means the route supports 1:1 delivery. Your organization pays covered fees
+            unless a separate Tempo pricing agreement applies. Eligibility depends on your
+            organization, billing, coverage policy, and transfer details.
           </span>
         }
       >

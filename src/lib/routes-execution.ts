@@ -14,7 +14,8 @@ export type ApiRequest = {
 export type ApiResult = { status: number; data: Record<string, unknown> }
 const subsidyHints: Record<string, string> = {
   routes_subsidy_not_allowed: 'This organization is not approved for 1:1 delivery on this route.',
-  routes_subsidy_not_enabled: 'Subsidies are not enabled for this organization.',
+  routes_subsidy_not_enabled:
+    'Route fee coverage is not enabled for this organization. Billing and coverage policy are separate requirements; contact Tempo to enable coverage or discuss pricing.',
   routes_subsidy_limit_exceeded: 'This amount exceeds the organization’s subsidy limit.',
   routes_subsidy_pending_limit_exceeded:
     'Too many subsidized payments are pending. Wait for them to complete.',
@@ -47,7 +48,8 @@ const errorGuides: Record<string, string> = {
     'This key cannot make this request. Quotes and reads need routes:read; creating and registering need routes:write.',
   api_key_ip_forbidden:
     'This key only accepts requests from approved IP addresses, and this browser is not one of them.',
-  billing_required: 'Billing for this organization needs attention in the API console.',
+  billing_required:
+    'Ask an organization owner to enable billing in Tempo Console (https://console.tempo.xyz/?to=/:org/billing). Your organization pays covered route fees unless a separate Tempo pricing agreement applies.',
   billing_past_due: 'Billing for this organization needs attention in the API console.',
   routes_suspended: 'Routes is suspended for this organization. Contact Tempo.',
   routes_not_allowed:
