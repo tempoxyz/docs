@@ -26,16 +26,15 @@ Give every customer a stablecoin account with security rules that Tempo enforces
 
 ## Why Tempo Accounts
 
-- **Customers hold their keys.** Customers approve payments with a [passkey](/docs/accounts/authentication/passkeys), a [device key](/docs/accounts/authentication/device-keys), or a [private key](/docs/accounts/authentication/private-keys). When the customer holds the signing key, neither you nor Tempo can move their funds.
-- **Rules run onchain.** Tempo checks every transaction against the account's rules. No one, including Tempo, can override them.
+- **Native account abstraction.** Passkey signatures, access keys, batched calls, and [fee sponsorship](/docs/accounts/fees/fee-sponsorship) are built into every [Tempo Transaction](/docs/guide/tempo-transaction), with no wallet contracts, bundlers, or paymasters to run.
+- **Self-custodial.** Signing rules live onchain and Tempo checks every transaction against them, so when the customer holds the [passkey](/docs/accounts/authentication/passkeys) or [private key](/docs/accounts/authentication/private-keys), neither you nor Tempo can move their funds.
 - **Your wallet stack works.** Tempo is [EVM compatible](/docs/quickstart/evm-compatibility), so [wallet providers](/docs/accounts/apps) and [custodians](/docs/accounts/custodians) such as Privy, Turnkey, Dynamic, and Fireblocks work, along with browser wallets like MetaMask.
 
 ## What you can build
 
-- **Automated payments.** Your backend, card program, or AI agent pays with its own [access key](/docs/accounts/access-keys). Tempo rejects any payment over its limit, to an unlisted payee, or after it expires. You can revoke the key at any time.
-- **Recovery and approvals.** Add a backup key so a lost phone doesn't lock anyone out. Require two of three approvers in a [team multisig](/docs/accounts/custodians/team-multisig).
-- **Customer deposits.** Give each customer a [deposit address](/docs/accounts/virtual-addresses) that pays into one account. A [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you choose.
-- **Stablecoin fees.** Accounts pay network fees in stablecoins, and you can [cover them for your customers](/docs/accounts/fees/fee-sponsorship).
+- **Automated payments.** Your backend, card program, or AI agent pays with its own revocable [access key](/docs/accounts/access-keys), and Tempo rejects any payment over its limit, to an unlisted payee, or after it expires.
+- **Customer deposits.** Each customer gets a [deposit address](/docs/accounts/virtual-addresses) that pays straight into one account, with no sweep transactions, and a [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you choose.
+- **Gasless payments for customers.** Your app pays network fees in stablecoins through a [fee payer](/docs/accounts/fees/fee-sponsorship), so customers never hold a gas token.
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
@@ -69,6 +68,15 @@ Whoever holds the signing keys holds the funds.
 On mainnet and testnet, an account is a single-key account. One key approves its payments and authorizes its access keys, like a standard Ethereum account. Access keys, fee tokens, fee sponsorship, receive policies, and virtual addresses all work there.
 
 On the devnet, a [configurable account](/docs/development/configurable-accounts) can have several signers. A single-key account can [upgrade in place](/docs/accounts/account-configuration/account-upgrade) and keep its address and balance.
+
+<span id="roadmap" />
+
+## Roadmap
+
+- **Configurable accounts (T14).** Several weighted signers and a threshold let a wallet provider's key, the customer's passkey, and a recovery provider share one account, and replace a lost key at the same address.
+- **In-place upgrades (T14).** A single-key account becomes a configurable account and keeps its address, balances, and approvals.
+
+Both run on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) today.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />

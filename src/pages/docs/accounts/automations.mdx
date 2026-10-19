@@ -10,16 +10,17 @@ import { Card, Cards } from 'vocs'
 
 Let a backend or an agent pay from an account without holding the account's key.
 
-If you run payouts or payroll, fund cards, or build an AI agent that pays for things, your code has to send stablecoins without a person approving each payment. Give that code its own [access key](/docs/accounts/access-keys) instead of the account's key. The account's signers authorize the key once, and Tempo rejects any payment over its [spending limit](/docs/accounts/access-keys/spending-limits), outside its [scopes](/docs/accounts/access-keys/scopes), or after its [expiry](/docs/accounts/access-keys/expiry).
+If you run payouts or payroll, fund cards, or build an AI agent that pays for things, your code has to send stablecoins without a person approving each payment. Give that code its own [access key](/docs/accounts/access-keys) instead of the account's key. The account's signers authorize the key once, and Tempo rejects any payment over its [spending limit](/docs/accounts/access-keys/spending-limits), outside its [scopes](/docs/accounts/access-keys/scopes), or after its [expiry](/docs/accounts/access-keys/expiry). Access keys are part of the protocol, so you don't add session-key modules or wallet contracts.
 
 Access keys are live on mainnet and testnet with a single-key account, so none of these setups needs a configurable account.
 
 ## Recommended automation setup
 
 - **One key per service or agent.** Generate it where it runs or in your KMS. Only the key's address leaves it.
-- **All three bounds.** Set a daily limit sized to the job, scopes that list the only recipients or contracts it pays, and an expiry.
+- **All three bounds.** Set a daily limit per stablecoin sized to the job, scopes that list the only recipients or contracts it pays, and an expiry.
 - **The account's key stays put.** Keep it with the user, their wallet provider, or your own approvers for a business account.
 - **A saved address per key.** Save each key's address with the service that holds it, so you can [revoke](/docs/accounts/access-keys/revocation) one without stopping the others.
+- **Fees in stablecoins.** The key pays fees in a stablecoin, or a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them, so the service never holds a gas token.
 
 ## Automation guides
 
@@ -36,7 +37,7 @@ Access keys are live on mainnet and testnet with a single-key account, so none o
 ## Access keys and account keys
 
 - **Account key on the server.** A breach lets the attacker move the whole balance.
-- **Access key on the server.** A breach lets the attacker pay only within that key's limit, recipients, and expiry. The signers can [revoke](/docs/accounts/access-keys/revocation) the key.
+- **Access key on the server.** A breach lets the attacker pay only within that key's limit, recipients, and expiry. The account can [revoke](/docs/accounts/access-keys/revocation) the key.
 
 Any key that signs Ethereum transactions can send stablecoins on Tempo. A backend that already signs with a KMS key or a provider's server wallet can keep that key. Authorize it as an access key to add the limits.
 
