@@ -791,6 +791,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
             health={health}
             diff={diff}
             badge={networkBadge(network, account)}
+            pending={Boolean(network.status)}
             terse
             edit={edit}
             secrets={secrets}
@@ -884,8 +885,10 @@ export function AccountState(props: {
   edit?: AccountEdit | undefined
   /** A generated private key by signer or key id, shown once on its card. */
   secrets?: Record<string, string> | undefined
+  /** A devnet request is running, such as getting test funds. */
+  pending?: boolean | undefined
 }) {
-  const { account, health, diff, badge, terse, onAddBackup, edit, secrets } = props
+  const { account, health, diff, badge, terse, onAddBackup, edit, secrets, pending } = props
   const signers = account.signers.filter(
     (signer) => !signer.revoked || diff?.signers[signer.id]?.change === 'removed',
   )
@@ -900,7 +903,11 @@ export function AccountState(props: {
             <span className="as-address">
               {account.address && <code>{shortAddress(account.address)}</code>}
               {badge && (
-                <span className="as-badge" data-network={account.devnet ? 'devnet' : undefined}>
+                <span
+                  className="as-badge"
+                  data-network={account.devnet ? 'devnet' : undefined}
+                  data-pending={pending || undefined}
+                >
                   {badge}
                 </span>
               )}
@@ -908,7 +915,11 @@ export function AccountState(props: {
             </span>
           )}
         </div>
-        <span className="as-balance" data-changed={Boolean(diff?.balance)}>
+        <span
+          className="as-balance"
+          data-changed={Boolean(diff?.balance)}
+          data-pending={pending || undefined}
+        >
           {formatBalance(account.balance)}
         </span>
       </header>

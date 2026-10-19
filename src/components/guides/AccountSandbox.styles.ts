@@ -1,4 +1,5 @@
 import { inherited } from '../../styles/inherited'
+import { pulse as pulseMotion } from '../../styles/motion'
 import { style } from '../../styles/scoped'
 import { vars as tokens } from '../../styles/theme'
 
@@ -91,6 +92,33 @@ export const accountSandbox = style({
     '& .as-address > * + *::before': {
       content: '" · "',
       whiteSpace: 'pre',
+    },
+    // While a devnet request runs: the status after the address and the balance pulse, and the
+    // locked cards dim.
+    '& :is(.as-badge, .as-balance)[data-pending="true"]': {
+      animation: `${pulseMotion} 1.4s ease-in-out infinite`,
+    },
+    '& .as-badge[data-pending="true"]': {
+      display: 'inline-flex',
+      alignItems: 'center',
+      alignSelf: 'center',
+      gap: tokens.spacing['1_5'],
+      marginInlineStart: tokens.spacing['2'],
+      color: tokens.color.foreground,
+    },
+    '& .as-badge[data-pending="true"]::before': {
+      content: '""',
+      width: '6px',
+      height: '6px',
+      borderRadius: tokens.radius.round,
+      backgroundColor: tokens.color.foreground,
+    },
+    '&[aria-busy="true"] :is(.as-state-columns, .as-panel)': {
+      opacity: 0.55,
+    },
+    '& :is(.as-state-columns, .as-panel)': {
+      transitionProperty: 'opacity',
+      transitionDuration: '150ms',
     },
     '& .as-balance': {
       fontWeight: tokens.fontWeight.medium,
@@ -770,6 +798,13 @@ export const accountSandbox = style({
     // Last, so a just-changed value steps up from muted to the foreground color.
     '& [data-changed="true"]': {
       color: tokens.color.foreground,
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    selectors: {
+      '& :is(.as-badge, .as-balance)[data-pending="true"]': {
+        animation: 'none',
+      },
     },
   },
   '@media (width <= 640px)': {
