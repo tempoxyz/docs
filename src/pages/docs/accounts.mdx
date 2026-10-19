@@ -1,7 +1,7 @@
 ---
 title: Tempo Accounts
 seoTitle: "Tempo Accounts | Tempo Docs"
-description: Give every customer a stablecoin account with its security rules built in. Customers approve with a passkey, your backend and agents pay within limits, and Tempo enforces every rule onchain.
+description: Give every customer and business a stablecoin account with its security rules built in. Users hold their keys, backends and agents pay within limits, and Tempo enforces every rule onchain.
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
 ---
 
@@ -15,7 +15,7 @@ import ConfigurableAccountsT14 from '../../snippets/configurable-accounts-t14.md
 
 # Tempo Accounts
 
-Give every customer a stablecoin account with security rules that Tempo enforces onchain.
+Give every customer and business a stablecoin account with security rules that Tempo enforces onchain.
 
 [Create an account →](/docs/accounts/create)
 
@@ -34,8 +34,7 @@ Give every customer a stablecoin account with security rules that Tempo enforces
 
 - **Stablecoin accounts for your users.** Each user gets their own account in your app, approved with a key they hold, such as a [passkey](/docs/accounts/authentication/passkeys) or a key from a provider like Privy or Turnkey, so you never hold their funds.
 - **Automated payments.** Your backend, card program, or AI agent pays with its own revocable [access key](/docs/accounts/access-keys), and Tempo rejects any payment over its limit, to an unlisted payee, or after it expires.
-- **Customer deposits.** Each customer gets a [deposit address](/docs/accounts/virtual-addresses) that pays straight into one account, with no sweep transactions, and a [receive policy](/docs/accounts/policies/receive-policies) accepts only the stablecoins and senders you choose.
-- **Gasless payments for customers.** Your app pays network fees in stablecoins through a [fee payer](/docs/accounts/fees/fee-sponsorship), so customers never hold a gas token.
+- **Business accounts.** Hold customer funds in one [omnibus account](/docs/accounts/custodians/omnibus-accounts) with a [deposit address](/docs/accounts/virtual-addresses) per customer and no sweep transactions, or run a treasury from a [custodian](/docs/accounts/custodians) like Fireblocks.
 
 <span id="choose-an-account-model" />
 <span id="choose-who-controls-signing" />
@@ -69,15 +68,6 @@ Whoever holds the signing keys holds the funds.
 On mainnet and testnet, an account is a single-key account. One key approves its payments and authorizes its access keys, like a standard Ethereum account. Access keys, fee tokens, fee sponsorship, receive policies, and virtual addresses all work there.
 
 On the devnet, a [configurable account](/docs/development/configurable-accounts) can have several signers. A single-key account can [upgrade in place](/docs/accounts/account-configuration/account-upgrade) and keep its address and balance.
-
-<span id="roadmap" />
-
-## Roadmap
-
-- **Configurable accounts (T14).** Several weighted signers and a threshold let a wallet provider's key, the customer's passkey, and a recovery provider share one account, and replace a lost key at the same address.
-- **In-place upgrades (T14).** A single-key account becomes a configurable account and keeps its address, balances, and approvals.
-
-Both run on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) today.
 
 <span id="tempo-account-use-cases" />
 <span id="what-you-can-build-with-tempo-accounts" />
