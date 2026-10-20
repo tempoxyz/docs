@@ -6,7 +6,7 @@ description: Choose direct charges, payment sessions, or recurring billing for s
 
 # Microtransactions and metered billing
 
-Start by defining the unit your customer buys, then choose how to collect payment. A small API request, an article, or a minute of service can use a direct charge, a payment session, or a recurring billing flow. The viable price depends on service delivery and collection costs together.
+Microtransactions are small payments for individual resources or units of service, such as an API result, article, or minute of usage. On Tempo, collect them as direct charges, payment sessions, or aggregated recurring bills. Define the purchased unit and compare delivery and collection costs before setting the price.
 
 ## Choose how to collect small charges
 
@@ -49,7 +49,7 @@ Request another voucher when more usage needs authorization. Add channel funds w
 
 ## Constrain delegated spending
 
-[Access keys](/docs/accounts/access-keys) let a device, backend, or agent sign within defined spending limits, scopes, and expiry. A spending limit constrains token outflows; it does not measure API usage or schedule invoices.
+[Access keys](/docs/accounts/access-keys) let a device, backend, or agent sign within defined spending limits, scopes, and expiry. A [spending limit](/docs/accounts/access-keys/spending-limits) caps the TIP-20 spending counted by the keychain; it does not measure API usage or schedule invoices. Transfers that use an existing allowance and assets other than TIP-20 tokens fall outside that limit, so review existing approvals as well as the key's bounds.
 
 Set scopes for the contracts and functions the integration needs. Add recipient restrictions where the supported function allows them. Scopes check direct calls, so permit only contracts you trust. Fees the account pays consume its access-key limit; [fee sponsorship](/docs/guide/payments/sponsor-user-fees) moves that network expense to a separate fee payer.
 

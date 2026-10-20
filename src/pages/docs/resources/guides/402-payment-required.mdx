@@ -6,7 +6,7 @@ description: Understand how HTTP 402 payment challenges work, choose an MPP paym
 
 # HTTP 402 Payment Required
 
-Use HTTP `402 Payment Required` with a payment protocol when an application or agent needs to pay for an API, dataset, or other digital resource inside the request flow. On Tempo, start with [Machine Payments Protocol integrations](/docs/guide/machine-payments) rather than defining your own payment challenge format.
+HTTP `402 Payment Required` is a status code that payment protocols use to request payment for a resource. The HTTP standard reserves the code without defining a payment flow. On Tempo, use [Machine Payments Protocol integrations](/docs/guide/machine-payments) to let applications and agents pay for APIs, datasets, or other digital resources inside the request flow.
 
 ## What HTTP 402 specifies
 
@@ -21,8 +21,10 @@ The [Machine Payments Protocol](https://mpp.dev/) (MPP) supplies a challenge, cr
 | Request a resource | The application or agent sends its HTTP request. |
 | Receive a challenge | The server returns `402` with payment terms in `WWW-Authenticate: Payment`. |
 | Authorize payment | The client checks the terms against its budget and permissions, then creates a credential for a supported method. |
-| Retry with a credential | The client supplies payment authorization in `Authorization: Payment`. |
+| Retry with a credential | The client supplies payment authorization in `Authorization: Payment` by default, or the credential header selected by the challenge. |
 | Verify and respond | The server verifies the credential according to the payment method and returns the resource with a `Payment-Receipt`. |
+
+The [Payment authentication draft](https://paymentauth.org/draft-httpauth-payment-01.html#name-credentials) lets a challenge select `Payment-Authorization` instead of the default `Authorization` header. Keep payment credentials separate from any application authentication the endpoint requires.
 
 On Tempo, a credential can carry a signed transaction, a transaction reference, or a payment-channel voucher, depending on the intent. A voucher and an onchain transfer are different evidence. Follow the [MPP request flow](/docs/guide/machine-payments) and the selected method's verification rules.
 

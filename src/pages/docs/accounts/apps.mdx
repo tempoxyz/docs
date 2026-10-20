@@ -54,7 +54,7 @@ Each user gets one secp256k1 key. The provider holds it and unlocks it when the 
 
 If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains. Balances on other chains don't carry over. Sending and receiving stablecoins works as it is.
 
-Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends [Tempo Transactions](/docs/guide/tempo-transaction). Privy's standard EVM `sponsor: true` option isn't available for Tempo Transactions ([Wallet partners](/docs/partners/wallets)). Sponsor fees with your own [fee payer](/docs/accounts/fees/fee-sponsorship).
+Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends [Tempo Transactions](/docs/guide/tempo-transaction). Privy's Tempo-specific React hook supports `sponsor: true`; follow its [Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) for SDK and project requirements. To operate your own sponsorship service, use a [fee payer](/docs/accounts/fees/fee-sponsorship).
 
 <span id="which-tempo-features-does-my-setup-support" />
 <span id="what-tempo-adds" />

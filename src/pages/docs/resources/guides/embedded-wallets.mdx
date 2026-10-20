@@ -33,9 +33,9 @@ Compare the product and SDK you will use. A provider’s general chain support d
 
 ## Check wallet features for your payment
 
-Specify your network, token contract, and fee-payment approach before selecting an SDK. Keep the wallet and RPC client on the same network. Tempo has no native gas token, so a generic Ethereum native-balance check does not measure a customer’s spendable stablecoin balance.
+Specify your network, token contract, and fee-payment approach before selecting an SDK. Keep the wallet and RPC client on the same network. Tempo fees are paid in eligible USD-denominated TIP-20 tokens. Read the balance from the actual token contract; an Ethereum native-balance check does not measure spendable stablecoins.
 
-Check batching, fee-token selection, sponsorship, and delegated signing individually. Privy documents sponsorship prerequisites. Dynamic uses a separate Tempo extension and network registry. Turnkey exposes Tempo-specific policy fields. Use each provider’s Tempo instructions rather than inferring feature support from EVM compatibility.
+Check batching, fee-token selection, sponsorship, and delegated signing individually. Privy's Tempo-specific React hook supports `sponsor: true`. Dynamic uses a separate Tempo extension and network registry. Turnkey exposes Tempo-specific policy fields. Follow the linked provider instructions for SDK and project prerequisites rather than inferring feature support from EVM compatibility.
 
 - **Provider-specific instructions.** Start with Privy’s Tempo transaction guide, then use each shortlisted provider’s linked reference to check your requirements. [Read the Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction).
 
@@ -63,7 +63,7 @@ Check that separately. Wallet creation and signing are different capabilities fr
 
 ## Wallet provider documentation
 
-Source review: October 12, 2026.
+Source review: October 19, 2026.
 
 - [Tempo: wallet providers](/docs/accounts/apps/self-custodial-wallets)
 - [Tempo: EVM differences](/docs/quickstart/evm-compatibility)

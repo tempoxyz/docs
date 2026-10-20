@@ -1,12 +1,12 @@
 ---
 title: "Plan payment reconciliation"
-seoTitle: "Plan payment reconciliation | Tempo Docs"
+seoTitle: "Stablecoin Payment Reconciliation and ERP Integration | Tempo Docs"
 description: "Connect confirmed stablecoin transfers to invoices, payables, treasury records, and ERP entries without duplicate credits."
 ---
 
 # Plan payment reconciliation
 
-Use the [Receive payments guide](/docs/guide/payments/accept-a-payment) to verify delivery and [Payment references](/docs/guide/payments/transfer-memos) to encode and find invoice references. This guide explains how to connect that evidence to accounts receivable, accounts payable, treasury, and ERP records.
+Stablecoin payment reconciliation matches verified token transfers to invoices, payables, treasury movements, and finance entries. Use [Receive payments](/docs/guide/payments/accept-a-payment) to verify delivery and [Payment references](/docs/guide/payments/transfer-memos) to encode and find the business reference.
 
 A confirmed onchain transfer is settlement evidence, not a journal entry. Your integration supplies the business context and accounting mapping. Keep your existing finance controls and introduce onchain activity as another settlement source.
 
@@ -29,7 +29,7 @@ Reconciliation connects a verified transfer to a business obligation. Define tha
 | -------------------- | ---------------------------------------------------------------------------------- |
 | Business obligation  | Invoice or payout ID, customer or vendor, legal entity, and expected amount.       |
 | Payment instructions | Network, token contract, recipient, and the requested reference.                   |
-| Settlement evidence  | Transaction hash, transfer log index, delivered amount, and confirmation status.   |
+| Settlement evidence  | Network, token contract, transaction hash, transfer log index, delivered amount, and confirmation status. |
 | Accounting outcome   | Amount applied, remaining balance, fees, ERP record ID, and unresolved exceptions. |
 
 Use a short reference in the [32-byte transfer memo](/docs/guide/payments/transfer-memos) and retain the rest in your database. Customer details, purchase orders, and GL codes do not need to appear in public transaction data. A shared transaction hash can contain several transfers, so the hash alone is not a unique payment identifier.
@@ -54,7 +54,7 @@ At close, compare expected payments, confirmed transfers, and posted ERP records
 
 ## Connect events to finance entries
 
-Use a short reference in the memo and keep invoice contents, customer information, purchase orders, and GL codes offchain. The memo identifies a candidate business record; it does not establish successful delivery.
+Treat a memo as a candidate match, then connect the verified transfer to the finance entry. Keep invoice contents, customer information, purchase orders, and GL codes offchain.
 
 Connectors can synchronize through event-driven updates, polling, or scheduled batches. Whichever approach you use, retain a checkpoint for historical recovery and make retries safe. Read [account activity](/docs/api/activities), [transfers](/docs/api/transfers), and [API pagination](/docs/api/pagination) for the maintained API surface.
 
@@ -77,6 +77,10 @@ The obligation-matching process is similar. The settlement source changes to onc
 ### Do stablecoins replace treasury or ERP systems?
 
 No. The onchain records flow into the systems finance uses for cash management, financial controls, and reporting.
+
+### Can a successful transaction still leave an invoice unpaid?
+
+Yes. A successful transaction can deliver the wrong asset or amount, or a receive policy can hold funds rather than credit the intended recipient. Verify the expected delivered transfer before applying it to the invoice. A provider's fiat payout needs separate completion evidence.
 
 ### Can an existing ERP or TMS handle the activity?
 

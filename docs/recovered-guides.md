@@ -53,3 +53,9 @@ This change uses the reviewed recovery rather than importing the raw archive. It
 ## Verification
 
 Validation results are recorded in the pull request. Publication requires a successful deployment and verification at the canonical `/developers` mount. Local output and a preview are not production proof.
+
+## Editorial and claim review
+
+The October 19, 2026 follow-up review checks the 26 recovered guides, their index, and the implementation content incorporated during recovery against Tempo's writing guidance and current primary sources. It distinguishes token permissions from regulatory authorization, issuer redemption access from minting functions, and onchain delivery from provider or bank completion.
+
+The corrections clarify access-key allowances and scopes, Fee AMM conversion, payroll eligibility, deposit-insurance conditions, screening coverage, and sandbox limitations. Search titles and opening answers identify each guide's subject and task; relevant FAQs address operating decisions. Existing routes, heading anchors, and the collapsed navigation remain in place. This editorial review does not establish legal approval of a particular customer arrangement.

@@ -6,7 +6,7 @@ description: Choose a Tempo fee token, check conversion liquidity, separate spon
 
 # Stablecoin fee operations
 
-Set an explicit fee token for the account or transaction, maintain its balance, and monitor any required fee-conversion liquidity. Tempo accepts eligible USD-denominated TIP-20 tokens for network fees, so a payment integration does not need a separate volatile gas token.
+Tempo network fees are paid in eligible USD-denominated TIP-20 tokens. Set an explicit fee token for the account or transaction, maintain its balance, and monitor any required fee-conversion liquidity.
 
 For implementation, start with [choosing a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin). This guide explains the operating decisions around that configuration.
 
@@ -32,7 +32,7 @@ The [Fee AMM](/docs/protocol/fees/fee-amm) converts network fees when the payer'
 
 Fee pools are directional. The protocol checks the direct pool and, when that pool lacks sufficient liquidity, tries the documented two-hop route through the selected token's quote token. Both hops must have sufficient liquidity.
 
-Each fee swap uses a fixed output rate of `0.997` validator-token units per payer-token unit before integer rounding. A two-hop route applies the rate twice. No conversion is needed when payer and validator use the same fee token. Read the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm) for routing and rounding.
+Each fee-swap hop outputs `0.997` units of its output token per unit of its input token before integer rounding. A direct route converts the payer's token to the validator's token; a two-hop route passes through the quote token and applies the rate twice. No conversion is needed when payer and validator use the same fee token. Read the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm) for routing and rounding.
 
 ## Separate invalid funding from reverted execution
 

@@ -6,7 +6,7 @@ description: Design a treasury pilot with entity-owned accounts, payment approva
 
 # Corporate treasury operations
 
-Start with one intercompany funding or supplier-payment flow. Define the entity that owns each account, the authority to move funds, and the evidence your finance system needs before adding an onchain settlement leg.
+Stablecoin treasury operations connect intercompany funding and supplier payments to onchain settlement and finance records. Start with one flow, then define the entity that owns each account, who can authorize payments, and the evidence your finance system needs.
 
 ## Define the treasury operating model
 
@@ -21,7 +21,7 @@ Stablecoin balances add another asset and account type to cash positioning. Keep
 | Reconciliation | Business reference, delivered transfer, internal ledger entry, and exception status. |
 | Recovery | How to stop new submissions and investigate unknown or failed payments. |
 
-Tempo's [account integration guide](/docs/accounts/use-cases) distinguishes account ownership from signing authority. A platform API credential or wallet login does not replace the payment authority required by your operating model.
+Tempo's [account model](/docs/accounts/how-it-works) explains signers and delegated access keys; the [custodian and treasury setups](/docs/accounts/custodians) help you choose who holds them. Record legal entity ownership separately. A platform API credential or wallet login does not replace the payment authority required by your operating model.
 
 ## Pilot an intercompany funding flow
 

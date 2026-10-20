@@ -1,14 +1,12 @@
 ---
 title: "Evaluate stablecoin settlement"
-seoTitle: "Evaluate stablecoin settlement | Tempo Docs"
+seoTitle: "Stablecoin Settlement: Finality, Fees, and Delivery | Tempo Docs"
 description: "Compare stablecoin assets, finality signals, delivered transfers, actual fees, liquidity, and reconciliation before selecting a settlement rail."
 ---
 
 # Evaluate stablecoin settlement
 
-Use the [receiving guide](/docs/guide/payments/accept-a-payment) to implement delivery verification. This evaluation checklist explains which asset, settlement, cost, liquidity, and operating evidence to collect before relying on a stablecoin payment.
-
-Choosing a stablecoin settlement network is an operating decision. A fast onchain transfer is useful when the rest of the payment flow can fund it, authorize it, identify the recipient, and reconcile the result.
+Stablecoin settlement records a token transfer on a blockchain under that network's finality rules. A complete business payment can also require funding, conversion, provider credit, or bank delivery. Use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify the onchain transfer, then evaluate the other legs before marking the payment complete.
 
 Start with the payment you need to complete. A supplier retaining a stablecoin balance, a contractor requesting a bank deposit, and a transfer between treasury accounts have different requirements. Evaluate the network within that complete workflow.
 
@@ -56,7 +54,7 @@ Finality alone does not establish that the correct payment succeeded. The [Tempo
 
 Budget for the actual transaction types in the application. A simple token transfer, a batch, and a contract call can consume different resources. Include any provider, custody, conversion, and payout charges when calculating the cost of the complete payment.
 
-Tempo has no native gas token. Its [fee system](/docs/protocol/fees) lets transactions pay in eligible stablecoins and uses a bounded dynamic base fee. Standard stablecoin transfers have sub-cent fees, but a fixed fee should not be assumed for every operation.
+Tempo's [fee system](/docs/protocol/fees) charges fees in eligible stablecoins and uses a bounded dynamic base fee. No separate gas token is required. Standard stablecoin transfers have sub-cent fees; the actual fee varies with the operation and base fee.
 
 [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) can make the application responsible for network fees. Decide which account pays, which operations qualify, and how the application handles a depleted sponsor balance or an unavailable fee token. This is an operating requirement even when the recipient sees no network-fee prompt.
 

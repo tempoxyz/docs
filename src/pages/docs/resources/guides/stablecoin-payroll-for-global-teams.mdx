@@ -1,12 +1,12 @@
 ---
 title: "Plan stablecoin payroll"
-seoTitle: "Plan stablecoin payroll | Tempo Docs"
+seoTitle: "Stablecoin Payroll and Contractor Payouts | Tempo Docs"
 description: "Connect approved payroll and contractor obligations to verified stablecoin payouts, recipient preferences, and finance records."
 ---
 
 # Plan stablecoin payroll
 
-Keep compensation calculation and approval in your payroll system, then use stablecoin transfers as a payment path for eligible workers. Start with [Send payments](/docs/guide/payments/send-a-payment) and use [batch payouts](/docs/resources/guides/batch-payments) when several approved obligations belong in one run.
+Stablecoin payroll connects approved compensation to a token transfer or provider-mediated local payout. Keep calculation, deductions, and approval in your payroll system, and enable the payment method only where the worker and compensation are eligible. Start with [Send payments](/docs/guide/payments/send-a-payment) and use [batch payouts](/docs/resources/guides/batch-payments) for an approved run.
 
 A production workflow needs worker onboarding, payment preferences, treasury funding, destination validation, error handling, reconciliation, and support. The network does not supply those business processes automatically.
 
@@ -14,7 +14,9 @@ A production workflow needs worker onboarding, payment preferences, treasury fun
 
 The payroll system determines the worker, amount, pay period, classification, and approval status. Your application or provider funds and executes the approved payment. A worker can receive a supported stablecoin directly, or a payout provider can convert it to a supported local payment method.
 
-Define which route is available for each worker before offering it. Wallet availability, employment or contractor status, country, supported asset, and local delivery requirements can change the operating model. Use the appropriate payroll and reporting process for the compensation; changing its payment rail does not settle those requirements.
+Define which route is available for each worker before offering it. Check permitted payment forms and currencies, any required consent, worker classification, supported assets, and local delivery requirements. An employee's preference for stablecoins does not by itself establish that the method meets applicable wage-payment rules.
+
+Keep withholding, reporting, and payroll records in the applicable process. For example, the [IRS digital-asset guidance](https://www.irs.gov/individuals/international-taxpayers/frequently-asked-questions-on-digital-asset-transactions) treats digital assets paid as employee remuneration as wages for U.S. federal employment tax purposes. Contractor payments have a separate treatment. Tax treatment does not establish whether the wage-payment method is permitted.
 
 ## Capture worker payment preferences
 
@@ -32,7 +34,7 @@ A dollar-denominated balance may fit a worker's preference, but it still involve
 
 Set the balances needed for principal, network fees, provider charges, and any conversion. Funding too late can delay a run; funding early ties up liquidity. Measure both before selecting a funding cadence.
 
-Choose an atomic batch when the calls must succeed together. Choose [independent transactions](/docs/guide/payments/send-parallel-transactions) when one worker's failure must not block other payments. A reverting call reverts an atomic batch. Each approach still requires verifying the delivered transfers.
+Choose an atomic batch when the calls must succeed together. Choose [independent transactions](/docs/guide/payments/send-parallel-transactions) when a failure in one worker's transaction must not revert another worker's payment. A reverting call reverts an atomic batch. Each approach still requires verifying the delivered transfers; a receive-policy hold can occur without reverting the call.
 
 Your application or provider schedules and submits recurring runs. [Transaction validity windows](/docs/protocol/transactions#scheduled-transactions) constrain when a transaction can be included; they do not create a recurring job or guarantee execution.
 

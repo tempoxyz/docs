@@ -1,12 +1,12 @@
 ---
 title: "Plan stablecoin payment acceptance"
-seoTitle: "Plan stablecoin payment acceptance | Tempo Docs"
+seoTitle: "How to Accept Stablecoin Payments for B2B Invoices | Tempo Docs"
 description: "Plan B2B payment requests, verify stablecoin delivery, connect invoices to transfer events, and handle refunds and exceptions."
 ---
 
 # Plan stablecoin payment acceptance
 
-Start with the [Receive payments guide](/docs/guide/payments/accept-a-payment) for the maintained implementation. Use this checklist to decide how your B2B application requests payment, verifies delivery, updates finance records, and handles exceptions.
+To accept stablecoin payments, give the customer the correct network, token, receiving address, amount, and payment reference. Verify the delivered transfer before updating an invoice or fulfilling an order. Follow the [Receive payments guide](/docs/guide/payments/accept-a-payment) for implementation, then use this checklist to connect it to your B2B checkout and finance workflow.
 
 Stablecoin payments can operate alongside ACH and wires. Tempo supplies the onchain settlement layer; your application or provider supplies checkout, customer records, custody controls, and any bank funding or payout steps.
 
@@ -32,7 +32,7 @@ If you need customer-specific destinations, [customer deposit addresses](/docs/g
 
 Use the [Stablecoin DEX](/docs/guide/stablecoin-dex/executing-swaps) if you need to convert a delivered stablecoin. Quote the actual amount and verify the output. Supporting two tokens does not guarantee conversion at par or enough liquidity for the payment.
 
-Tempo has no native gas token. Eligible stablecoins can pay [network fees](/docs/protocol/fees), subject to fee-token and Fee AMM liquidity requirements. [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) lets your application pay transaction fees. Include provider, conversion, and bank-delivery charges when calculating the complete payment cost.
+Tempo charges [network fees](/docs/protocol/fees) in eligible stablecoins, subject to fee-token and Fee AMM liquidity requirements. Your application does not need to acquire a separate gas token. [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) lets your application pay transaction fees. Include provider, conversion, and bank-delivery charges when calculating the complete payment cost.
 
 ## Build a payment request that finance can reconcile
 

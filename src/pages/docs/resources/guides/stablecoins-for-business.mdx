@@ -1,12 +1,12 @@
 ---
 title: "Evaluate stablecoins for business"
-seoTitle: "Evaluate stablecoins for business | Tempo Docs"
+seoTitle: "Stablecoins for Business Payments and Treasury | Tempo Docs"
 description: "Choose a bounded business payment pilot and evaluate funding, custody, recipient access, costs, integration, and operating risks."
 ---
 
 # Evaluate stablecoins for business
 
-Start with one payment flow and a measurable operating problem. Use the [payment guides](/docs/guide/payments) for a direct integration and [payments and ramps](/docs/partners/payments-and-ramps) for provider research. This checklist connects that choice to funding, recipient access, controls, and finance records.
+Businesses can use stablecoins for treasury transfers, supplier payments, payroll, and platform payouts. Start with one supported payment flow and a measurable operating problem. Use the [payment guides](/docs/guide/payments) for a direct integration and [payments and ramps](/docs/partners/payments-and-ramps) for provider research.
 
 A business can hold stablecoins directly or use a provider that converts between fiat and stablecoins. The right model depends on the recipient's needs, available funding and payout services, and your operating responsibilities. Network capabilities alone do not determine a provider's eligibility, legal coverage, or bank delivery time.
 
@@ -26,7 +26,7 @@ Stablecoins can replace part of a correspondent banking route with an onchain tr
 
 ### Payroll and contractor payments
 
-Companies with distributed teams can use stablecoins to pay international contractors. Recipients can hold dollar-denominated value and choose when to convert through the services available to them. Read the [stablecoin payroll guide](/docs/resources/guides/stablecoin-payroll-for-global-teams).
+Companies with distributed teams can offer stablecoin payments to eligible international contractors. Confirm the permitted payment method and terms before enabling it. Recipients can hold dollar-denominated value and convert through the services available to them. Read the [stablecoin payroll guide](/docs/resources/guides/stablecoin-payroll-for-global-teams).
 
 ### Marketplace and platform payouts
 
@@ -89,13 +89,13 @@ Decide which responsibilities your team will operate and which a provider will h
 
 Payment and orchestration providers can connect funding, conversion, stablecoin transfers, and local payouts through an API. Confirm the supported assets, markets, custody model, controls, and approval requirements for the specific service. Explore [payment and ramp providers](/docs/partners/payments-and-ramps) as a starting point.
 
-**Best for:** Companies that want to test stablecoins quickly without building blockchain expertise in-house.
+This model can fit a team that wants a provider to operate the agreed funding, settlement, and payout services. Verify onboarding and route support before estimating implementation time.
 
 ### Build: direct integration
 
-Building directly on stablecoin infrastructure gives you more control over the payment flow and the ability to customize for your specific use case. Compare its operating and engineering costs with the provider model. This requires managing wallets, custody, banking relationships, and compliance tooling.
+Building directly on stablecoin infrastructure gives you more control over payment logic and integration choices. Compare its operating and engineering costs with the provider model, and decide who operates accounts, key management, funding, payouts, and compliance processes.
 
-**Best for:** Companies with high transaction volumes, technical teams, and specific requirements that off-the-shelf solutions don't meet.
+This model can fit a team with the engineering and operating capacity to manage those responsibilities. Payment volume alone does not determine the right integration model.
 
 ### Hybrid
 
@@ -105,7 +105,7 @@ A hybrid model can combine your own accounts and payment logic with providers fo
 
 ### Counterparty risk
 
-Not all stablecoins are created equal. Evaluate the issuer's reserve composition, attestation frequency, regulatory status, and track record. Understand the distinction between issuer requirements and the obligations of a business using stablecoins. Our [GENIUS Act overview](/docs/resources/guides/genius-act) explains the US framework and its scope. If you use direct issuance or redemption, confirm the issuer's [mint and burn process](/docs/guide/issuance/mint-stablecoins) and access requirements.
+Evaluate the issuer's reserve composition, attestation frequency, regulatory status, and redemption terms. Understand the distinction between issuer requirements and the obligations of a business using stablecoins. Our [GENIUS Act overview](/docs/resources/guides/genius-act) explains the U.S. framework and its scope. Direct issuance or redemption also requires the issuer's acceptance of your entity and the relevant funding or payout method. Protocol [minting functions](/docs/guide/issuance/mint-stablecoins) do not establish that commercial access.
 
 ### Operational risk
 
@@ -117,7 +117,7 @@ Document the permitted activities, customer eligibility, reporting, and other op
 
 ## Implement the Tempo payment leg
 
-Use [Send payments](/docs/guide/payments/send-a-payment) and [Receive payments](/docs/guide/payments/accept-a-payment) for supported stablecoin transfers. Check the [token guide](/docs/guide/ousd) and token list for asset choices rather than relying on a symbol alone.
+Use [Send payments](/docs/guide/payments/send-a-payment) and [Receive payments](/docs/guide/payments/accept-a-payment) for supported stablecoin transfers. Check the [OUSD guide](/docs/guide/ousd) and [stablecoin registry](/docs/partners/stablecoins) for asset choices rather than relying on a symbol alone.
 
 Tempo supplies near-instant onchain settlement and fees in eligible stablecoins, subject to fee-token and Fee AMM liquidity requirements. [Token policies](/docs/protocol/tip403/overview), [fee sponsorship](/docs/guide/payments/sponsor-user-fees), and [payment references](/docs/guide/payments/transfer-memos) are primitives for the application to integrate. They do not supply the full funding, approval, screening, payout, or accounting process.
 

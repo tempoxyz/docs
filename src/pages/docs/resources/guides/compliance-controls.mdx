@@ -47,7 +47,7 @@ Start with [managing an issued stablecoin](/docs/guide/issuance/manage-stablecoi
 
 A [receive policy](/docs/accounts/policies/receive-policies) controls which senders and TIP-20 tokens an account accepts. It is an inbound control, not a general outbound transaction policy.
 
-Token-level checks run first and revert on failure. If those checks pass but the receiver's policy blocks delivery, the call succeeds while funds are held in `ReceivePolicyGuard`. The intended receiver has not received the funds.
+Token-level checks run first and revert on failure. If those checks pass but the receiver's policy blocks delivery, the call succeeds while funds are held in `ReceivePolicyGuard`. The token's `Transfer` event names the guard as the recipient, so transaction success alone must not credit the intended receiver.
 
 Integrations must distinguish these outcomes:
 
@@ -63,7 +63,7 @@ Each blocked inbound creates a receipt. The receipt captures the recovery author
 
 [Transfer memos](/docs/guide/payments/transfer-memos) carry a 32-byte reference through supported TIP-20 methods. Use an opaque identifier to connect a payment to internal records. Do not put names, identity documents, account details, or other personal data in a public memo.
 
-A memo is not a complete information-sharing message. [FATF describes the Travel Rule](https://www.fatf-gafi.org/en/topics/virtual-assets.html) as involving secure collection and transmission of originator and beneficiary information. Determine the applicable local requirements and the responsibilities of each participating service. Store the required information and exchange evidence through the appropriate offchain systems.
+A memo is not a complete information-sharing message. [FATF's virtual-asset standards](https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Regulation-virtual-assets-interpretive-note.html) call for covered providers to obtain, retain, and transmit originator and beneficiary information; that information need not be attached to the onchain transfer. Determine the applicable local requirements and each service's responsibilities, then preserve the information and exchange evidence in the appropriate offchain systems.
 
 A matching reference is also not proof of payment. Use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify delivery before updating a customer or case ledger.
 

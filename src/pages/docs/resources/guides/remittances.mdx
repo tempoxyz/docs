@@ -6,7 +6,7 @@ description: Map a remittance corridor from sender funding to recipient payout, 
 
 # Remittance payment operations
 
-Begin with one corridor and a defined recipient payout. Map sender funding, conversion, onchain settlement, and delivery as separate stages before selecting a provider or integrating Tempo.
+A stablecoin remittance uses an onchain transfer for part of a cross-border payment to a recipient. Sender funding and final delivery can still use bank accounts, wallets, or cash services. Begin with one corridor and map funding, conversion, settlement, and payout separately before selecting a provider or integrating Tempo.
 
 ## Map the complete remittance route
 
@@ -34,7 +34,7 @@ Where information-sharing requirements apply, identify who collects and exchange
 
 Hold the source currency, funding method, transfer amount, recipient currency, and payout method constant. Decide whether the comparison fixes the sender's total budget or the recipient's net amount.
 
-Include collection charges, stablecoin acquisition, network fees, custody or orchestration charges, FX spreads, off-ramp charges, and local payout fees. Record quote expiry and the handling of failed, returned, or delayed payouts. The [World Bank's Remittance Prices Worldwide](https://remittanceprices.worldbank.org/) provides comparison context; a benchmark is not an executable quote for your route.
+Include collection charges, stablecoin acquisition, network fees, custody or orchestration charges, FX spreads, off-ramp charges, and local payout fees. Record quote expiry and the handling of failed, returned, or delayed payouts. The [World Bank's Remittance Prices Worldwide](https://remittanceprices.worldbank.org/) provides comparison context for relatively small transfers between countries. Check the corridor, transfer amount, and observation date before using its data; a benchmark is not an executable quote for your route.
 
 Sub-cent network fees cover a standard Tempo transfer's onchain expense. They do not establish the cost of the remittance or guarantee savings over an existing provider.
 
