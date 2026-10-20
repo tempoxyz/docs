@@ -4,11 +4,17 @@ seoTitle: Stablecoin Remittance Integration and Operations | Tempo Docs
 description: Map a remittance corridor from sender funding to recipient payout, verify provider responsibilities, and reconcile a stablecoin settlement pilot.
 ---
 
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Remittance payment operations
+
 # Remittance payment operations
 
 A stablecoin remittance uses an onchain transfer for part of a cross-border payment to a recipient. Sender funding and final delivery can still use bank accounts, wallets, or cash services. Begin with one corridor and map funding, conversion, settlement, and payout separately before selecting a provider or integrating Tempo.
 
 ## Map the complete remittance route
+
+<span id="remittance-corridor" />
+
+A remittance corridor identifies a sending and receiving country, such as the United States to Mexico. Add the funding currency, payout currency, and delivery method when defining an operational route. The [World Bank's country-corridor comparisons](https://remittanceprices.worldbank.org/) show why a global average is insufficient for evaluating one route.
 
 A remittance can use local-currency collection, a stablecoin transfer between providers, and local-currency payout. This is sometimes called a stablecoin sandwich. A recipient can also receive a supported stablecoin directly where the product and recipient support that outcome.
 
@@ -37,6 +43,20 @@ Hold the source currency, funding method, transfer amount, recipient currency, a
 Include collection charges, stablecoin acquisition, network fees, custody or orchestration charges, FX spreads, off-ramp charges, and local payout fees. Record quote expiry and the handling of failed, returned, or delayed payouts. The [World Bank's Remittance Prices Worldwide](https://remittanceprices.worldbank.org/) provides comparison context for relatively small transfers between countries. Check the corridor, transfer amount, and observation date before using its data; a benchmark is not an executable quote for your route.
 
 Sub-cent network fees cover a standard Tempo transfer's onchain expense. They do not establish the cost of the remittance or guarantee savings over an existing provider.
+
+## Choose the local payout rail
+
+### Philippines: distinguish InstaPay, business access, and PESONet
+
+For a proposed PHP payout, identify the provider's actual domestic delivery service:
+
+| Service | What to verify with the payout provider |
+| --- | --- |
+| [InstaPay](https://www.bsp.gov.ph/PaymentAndSettlement/FAQ_Instapay.pdf) | Real-time PHP transfers between participating Philippine accounts, available around the clock. The standard FAQ specifies PHP50,000 per transfer; institutions can impose other account or daily limits. |
+| [InstaPay for Business](https://www.bsp.gov.ph/Media_And_Research/Primers%20Faqs/FAQs-InstaPay-for-Business.pdf) | The BSP's July 29, 2026 FAQ describes transfers up to PHP500,000 for business or corporate accounts through participating institutions. Confirm that the sending account has this access and check institution-specific limits. |
+| [PESONet](https://www.bsp.gov.ph/PaymentAndSettlement/FAQ_PESONet.pdf) | Batch processing with same-banking-day credit subject to the applicable cutoff and clearing cycle. Obtain the provider's actual submission deadline. |
+
+These are local PHP services. They do not establish a supported Tempo-to-Philippines payment route. Verify the provider's accepted stablecoin and network, conversion quote, beneficiary institution, charges, and evidence of recipient credit separately.
 
 ## Plan payout liquidity
 

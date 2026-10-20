@@ -555,6 +555,8 @@ export default defineConfig({
                     text: 'Accept stablecoin payments',
                     link: '/docs/resources/guides/how-to-accept-stablecoin-payments',
                   },
+                  { text: 'Create payment links', link: '/docs/resources/guides/payment-links' },
+                  { text: 'Handle refunds', link: '/docs/resources/guides/refunds' },
                   {
                     text: 'Reconcile payments',
                     link: '/docs/resources/guides/payment-reconciliation',

@@ -1,7 +1,7 @@
 'use client'
 
 import { formatUnits, parseUnits } from 'viem'
-import { Actions, Addresses } from 'viem/tempo'
+import { Actions } from 'viem/tempo'
 import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink } from '../../Demo'
@@ -49,11 +49,6 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
   })
 
   const calls = [
-    Actions.token.approve.call({
-      spender: Addresses.stablecoinDex,
-      amount: maxAmountIn,
-      token: betaUsd,
-    }),
     Actions.dex.buy.call({
       amountOut: amount,
       maxAmountIn,

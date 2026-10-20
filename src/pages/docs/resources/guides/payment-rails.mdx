@@ -4,6 +4,8 @@ seoTitle: Compare ACH, Wires, Instant Payments, and Stablecoin Rails | Tempo Doc
 description: Compare funding, settlement, recipient delivery, costs, and exception handling before adding a stablecoin payment route.
 ---
 
+[Guides](/docs/resources/guides) / [Payment infrastructure](/docs/resources/guides#payment-infrastructure) / Compare payment rails
+
 # Compare payment rails
 
 A payment rail is the infrastructure used to move or settle value between accounts. ACH, wires, instant bank payments, and blockchains supply different parts of that process; SWIFT supplies financial messaging. Compare the complete funding, settlement, and recipient-delivery flow for the outcome you need.
@@ -27,6 +29,22 @@ Record the source account and currency, the asset used between providers, and th
 [Nacha documents Same Day ACH and scheduled processing](https://www.nacha.org/content/ach-payments-fact-sheet). [Fedwire provides real-time gross settlement](https://www.frbservices.org/financial-services/fedwire-funds-service/). [FedNow operates around the clock through participating institutions](https://www.frbservices.org/financial-services/fednow-service/about-fednow-service/). [SWIFT describes its financial messaging role](https://www.swift.com/about-us/who-we-are/what-swift).
 
 These are system capabilities. Your bank or provider sets the access conditions, product limits, pricing, and operating procedures for your account.
+
+## Read settlement timing and netting terms
+
+### Real-time gross settlement and net settlement
+
+Real-time gross settlement (RTGS) processes payments individually as they arrive, rather than settling only the difference between amounts owed. For example, the [Federal Reserve describes Fedwire](https://www.frbservices.org/wp-content/uploads/funds.pdf) as processing each payment order individually and, when accepted, settling to the receiving participant's Federal Reserve account in central bank money.
+
+In [deferred net settlement](https://www.bis.org/publications/innovations-payments), obligations are combined and the net positions settle at scheduled times. A batch can contain many payment instructions while the settlement system moves a smaller set of net amounts. Check the actual service's funding requirements and completion rules; an application's batch of blockchain calls is a different concept.
+
+<span id="t-plus-settlement" />
+
+### T+0, T+1, and T+2 settlement
+
+`T` identifies the transaction or trade date. `T+1` means one business day later; `T+2` means two. A Friday `T+2` settlement normally falls on Tuesday if Monday is a business day. Check the relevant calendar and cutoff before promising a recipient date.
+
+The [SEC's explanation of the U.S. securities transition to T+1](https://www.sec.gov/newsroom/press-releases/2024-62) illustrates this convention. Securities settlement cycles are not bank-payout guarantees. `T+0` means same-day settlement, which can still involve a processing window; it does not establish immediate recipient access.
 
 ## Match the rail to the payment workflow
 

@@ -9,7 +9,6 @@ ogImage: /og/2026-q4/og_2026-q4_docs_guide-stablecoin-dex-providing-liquidity_ti
 import { Cards, Card } from 'vocs'
 import * as Demo from '../../../../components/guides/Demo.tsx'
 import { AddFunds } from '../../../../components/guides/steps/payments/AddFunds.tsx'
-import { ApproveSpend } from '../../../../components/guides/steps/exchange/ApproveSpend.tsx'
 import { CancelOrder } from '../../../../components/guides/steps/exchange/CancelOrder.tsx'
 import { Connect } from '../../../../components/guides/steps/auth/Connect.tsx'
 import { PlaceOrder } from '../../../../components/guides/steps/exchange/PlaceOrder.tsx'
@@ -40,68 +39,20 @@ Active makers may pay less gas when they cancel eligible orders or have eligible
 
 Ensure that you have set up your client by following the [guide](/docs/sdk/typescript).
 
-### Approve stablecoin spend
+<span id="approve-stablecoin-spend" />
 
-To place an order, you need to approve the Stablecoin DEX contract to spend the order's "spend" token.
+### Check the order's funding
 
-:::info
-The code samples place orders on the `AlphaUSD` / `pathUSD` pair on Moderato testnet.
+The examples place orders on the `AlphaUSD` / `pathUSD` pair on Moderato testnet. Buying `AlphaUSD` spends its quote token, `pathUSD`; selling `AlphaUSD` spends `AlphaUSD`.
 
-The "spend" token is the token that will be spent to place the order.
-- buying `AlphaUSD` spends `pathUSD`
-- selling `AlphaUSD` spends `AlphaUSD`
-:::
-
-<Demo.Container name="Approve Spend">
-  <Connect stepNumber={1} />
-  <ApproveSpend stepNumber={2} last />
-</Demo.Container>
-
-:::code-group
-
-```tsx twoslash [ApproveSpend.tsx]
-// @noErrors
-import { parseUnits } from 'viem'
-import { Addresses } from 'viem/tempo'
-import { Hooks } from 'wagmi/tempo'
-
-const pathUsd = '0x20c0000000000000000000000000000000000000'
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-
-function ApproveSpend(props: { orderType: 'buy' | 'sell' }) {
-  const { orderType } = props
-  // buying AlphaUSD requires we spend pathUSD // [!code hl]
-  const spendToken = orderType === 'buy' ? pathUsd : alphaUsd // [!code hl]
-  // [!code hl]
-  const { mutate: approve } = Hooks.token.useApproveSync() // [!code hl]
-
-  return (
-    <button type="button" onClick={() => {
-      approve({ // [!code hl]
-        amount: parseUnits('100', 6), // [!code hl]
-        spender: Addresses.stablecoinDex, // [!code hl]
-        token: spendToken, // [!code hl]
-      }) // [!code hl]
-  }}>
-      Approve Spend
-    </button>
-  )
-}
-```
-
-```ts [wagmi.config.ts]
-// [!include ~/snippets/wagmi.moderato.config.ts:setup]
-```
-
-:::
-
+The DEX uses available [DEX balances](/docs/protocol/exchange/exchange-balance) first and pulls any required TIP-20 shortfall from your account through [implicit approval](/docs/protocol/tip20/spec#implicit-approvals-for-listed-precompiles). No separate token approval is required. Balance checks, token transfer policies, and access-key spending limits still apply. Fund network fees separately from the order amount.
 
 ### Place a liquidity order
 
-Once the spend is approved, you can place an order by calling the `place` action on the Stablecoin DEX.
+Place an order by calling the `place` action on the Stablecoin DEX.
 
 :::info
-In the code sample below, we use the `useSendCallsSync` hook to batch the approve and place order calls in a single transaction for efficiency. 
+The code sample submits the order call with `useSendCallsSync`.
 :::
 
 <Demo.Container name="Place Order">
@@ -113,28 +64,19 @@ In the code sample below, we use the `useSendCallsSync` hook to batch the approv
 
 ```tsx twoslash [PlaceOrder.tsx]
 // @noErrors
-import { Actions, Addresses } from 'viem/tempo'
+import { Actions } from 'viem/tempo'
 import { parseUnits } from 'viem'
 import { useSendCallsSync } from 'wagmi' // [!code hl]
 
-const pathUsd = '0x20c0000000000000000000000000000000000000'
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
 function PlaceOrder(props: { orderType: 'buy' | 'sell' }) {
   const { orderType } = props
-  // buying AlphaUSD requires we spend pathUSD
-  const spendToken = orderType === 'buy' ? pathUsd : alphaUsd
-
   const sendCalls = useSendCallsSync() // [!code hl]
 
   return (
     <button type="button" onClick={() => {
       const calls = [ // [!code hl]
-        Actions.token.approve.call({ // [!code hl]
-          spender: Addresses.stablecoinDex, // [!code hl]
-          amount: parseUnits('100', 6), // [!code hl]
-          token: spendToken, // [!code hl]
-        }), // [!code hl]
         Actions.dex.place.call({ // [!code hl]
           token: alphaUsd, // [!code hl]
           amount: parseUnits('100', 6), // [!code hl]
@@ -220,12 +162,11 @@ When you cancel an order, remaining funds are credited to your DEX balance. [Wit
 
 ```tsx twoslash [ManageOrder.tsx]
 // @noErrors
-import { Actions, Addresses } from 'viem/tempo'
+import { Actions } from 'viem/tempo'
 import { Hooks } from 'wagmi/tempo'
 import { parseUnits } from 'viem'
 import { useSendCallsSync } from 'wagmi'
 
-const pathUsd = '0x20c0000000000000000000000000000000000000'
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
 function ManageOrder() {
@@ -234,11 +175,6 @@ function ManageOrder() {
 
   const placeOrder = () => {
     const calls = [
-      Actions.token.approve.call({
-        spender: Addresses.stablecoinDex,
-        amount: parseUnits('100', 6),
-        token: pathUsd,
-      }),
       Actions.dex.place.call({
         token: alphaUsd,
         amount: parseUnits('100', 6),
@@ -326,28 +262,19 @@ A flip order can re-list on the opposite side at the same tick (`flipTick == tic
 
 ```tsx twoslash [PlaceFlipOrder.tsx]
 // @noErrors
-import { Actions, Addresses } from 'viem/tempo'
+import { Actions } from 'viem/tempo'
 import { parseUnits } from 'viem'
 import { useSendCallsSync } from 'wagmi'
 
-const pathUsd = '0x20c0000000000000000000000000000000000000'
 const alphaUsd = '0x20c0000000000000000000000000000000000001'
 
 function PlaceFlipOrder(props: { orderType: 'buy' | 'sell' }) {
   const { orderType } = props
-  // buying AlphaUSD requires we spend pathUSD
-  const spendToken = orderType === 'buy' ? pathUsd : alphaUsd
-
   const sendCalls = useSendCallsSync()
 
   return (
     <button type="button" onClick={() => {
       const calls = [
-        Actions.token.approve.call({
-          spender: Addresses.stablecoinDex,
-          amount: parseUnits('100', 6),
-          token: spendToken,
-        }),
         Actions.dex.placeFlip.call({ // [!code focus]
           token: alphaUsd,
           amount: parseUnits('100', 6),
@@ -411,7 +338,7 @@ For more details including tick precision, limits, and calculation examples, see
 ## Liquidity provider best practices
 
 ### Batch liquidity calls
-You can batch the calls to approve spend and place the order in a single transaction for efficiency. See the [Tempo Transactions guide](/docs/guide/tempo-transaction) for more details.
+Batch the DEX operations your workflow requires as calls in one transaction. A reverting call reverts the batch; no separate token approval is required for the native TIP-20 DEX. See [Tempo Transactions](/docs/guide/tempo-transaction) for execution details.
 
 ## Liquidity learning resources
 

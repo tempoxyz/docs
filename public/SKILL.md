@@ -30,6 +30,8 @@ Accounts covers account setup and its guides; Tempo EVM covers payments and the 
 
 Choose providers through the task guides for [wallets](https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md), [funding and payouts](https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts.md), [payment screening](https://tempo.xyz/developers/docs/resources/guides/payment-screening.md), and [reconciliation](https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md). Use [node providers](https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md) for hosted RPC access.
 
+For application checkout and returns, use [payment links](https://tempo.xyz/developers/docs/resources/guides/payment-links.md) and [refunds](https://tempo.xyz/developers/docs/resources/guides/refunds.md). These workflows connect trusted request records and amount reservations to the maintained payment primitives.
+
 Within Tempo EVM, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
 
 Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in the limited preview.
