@@ -6,13 +6,15 @@ description: Evaluate Blockaid transaction previews and security assessments for
 
 # Blockaid on Tempo
 
-Evaluate Blockaid for transaction simulation and security validation before a user signs a Tempo payment. Blockaid has announced Tempo network support for these capabilities within its partner wallet and exchange network. Confirm the exact endpoint, environment, and transaction format with Blockaid before implementing a Tempo integration.
+Use Blockaid to simulate a proposed Tempo payment and assess security findings before requesting a signature. Its official TypeScript client lists Tempo identifiers for individual transaction scans. Confirm account access and support for the transaction format your application submits.
 
 ## Blockaid's documented Tempo coverage
 
 Blockaid's [Tempo announcement](https://blockaid.io/blog/blockaid-expands-protection-to-the-tempo-network), published December 9, 2025, describes transaction simulation and validation for wallets and exchanges in its partner network. It discusses additional monitoring, fraud-prevention, and cosigner capabilities as potential adoption paths. That announcement does not establish that every Blockaid product or public endpoint is available for every Tempo application.
 
-The [official transaction scan request types](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts) reviewed for this page do not explicitly identify Tempo in their network choices. A generic EVM endpoint or an arbitrary chain value is not proof of Tempo support. Obtain the supported endpoint, network identifier, account entitlement, and mainnet or testnet scope from Blockaid rather than guessing a request.
+The [individual transaction scan method](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts), `client.evm.transaction.scan`, sends requests to `POST /v0/evm/transaction/scan`. Its imported [supported-chain type](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/evm.ts) explicitly includes `tempo` and `tempo-testnet`. These identifiers are present in the published `@blockaid/client` version `1.8.0` reviewed for this page.
+
+The bulk transaction API has a separate, narrower supported-chain type that does not list Tempo. Do not infer bulk scanning or native Tempo batch and sponsorship support from the individual scan's network list. Confirm the relevant transaction format and the testnet environment before using that flow.
 
 ## Distinguish simulation from validation
 
@@ -25,21 +27,25 @@ The [official transaction scan request types](https://github.com/blockaid-offici
 
 These outputs support a signing decision. They do not establish that the recipient has passed sanctions screening, that a customer has completed identity checks, or that a proposed transaction will execute successfully under later network conditions.
 
+The transaction scan defaults to validation output. Set `options: ['simulation', 'validation']` when the application needs both a transaction preview and security findings.
+
 ## Prepare a confirmed Blockaid integration
 
 :::::steps
 
-### Confirm the Tempo endpoint and access
+### Confirm access and transaction format
 
-Ask Blockaid for the supported scanning path and environment for your application. Confirm the transaction formats and outputs it covers, including any batch or sponsored payment flow you intend to submit. Product coverage must be verified for that flow.
+Obtain Blockaid API access for individual transaction scanning. Select the documented Tempo chain identifier and confirm which testnet it refers to if using `tempo-testnet`. Check support for the exact transaction format, including any native batch or sponsored payment flow you intend to submit.
 
 ### Use the maintained request schema
 
-Obtain API access and use the [official TypeScript client](https://github.com/blockaid-official/blockaid-client-node) or current API documentation for authentication and request fields. Prepare the proposed transaction, account context, and metadata required by the confirmed endpoint. Do not copy a network identifier from a different chain's example.
+Use the [official TypeScript client](https://github.com/blockaid-official/blockaid-client-node) or current API documentation for authentication and request fields. The individual scan requires `account_address`, `chain`, transaction `data`, and `metadata`. Follow its current schema and explicitly request the outputs your application needs.
 
 ### Define the signing response
 
 Decide how the application handles a warning, a security finding, an unsupported request, or a scan error. Present the relevant effects and findings before requesting a signature. Keep the assessment and the transaction it evaluated together.
+
+Inspect `validation.result_type`, not just HTTP success or `validation.status`. The documented response can have `status: 'Success'` with `result_type: 'Error'`; that is an assessment error, not a benign finding.
 
 :::::
 
@@ -53,11 +59,11 @@ Keep wallet security checks distinct from [payment screening](/docs/resources/gu
 
 ### Does Blockaid support Tempo?
 
-Blockaid announces Tempo network support for transaction simulation and validation in its partner network. The public transaction request types reviewed here do not independently establish the exact Tempo endpoint. Confirm the implementation path and environment for your account before integrating.
+Yes. Its individual transaction scan's supported-chain type lists `tempo` and `tempo-testnet`. Confirm account access, the selected environment, and support for the exact transaction format before integrating.
 
 ### Can I use any Blockaid EVM scanning endpoint on Tempo?
 
-Do not assume that. Check support for the specific endpoint and transaction format. Support for an individual scan does not establish support for bulk scanning, monitoring, or another product.
+Use the documented individual transaction scan. Its Tempo identifiers do not establish support for the bulk endpoint, monitoring products, or every native Tempo transaction format.
 
 ### Are simulation and address screening interchangeable?
 
@@ -65,11 +71,12 @@ No. Simulation examines a proposed transaction's effects. Address screening asse
 
 ## Blockaid documentation and related guides
 
-Source review: October 19, 2026. Tempo endpoint and environment confirmation remains an integration prerequisite.
+Source review: October 20, 2026, including published `@blockaid/client` version `1.8.0`. API access and transaction-format verification remain integration prerequisites.
 
 - [Blockaid: Tempo network announcement](https://blockaid.io/blog/blockaid-expands-protection-to-the-tempo-network)
 - [Blockaid: Transaction Security](https://blockaid.io/transaction-security)
 - [Blockaid: official TypeScript API client](https://github.com/blockaid-official/blockaid-client-node)
 - [Blockaid: transaction scan request and response types](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts)
+- [Blockaid: supported chain types for individual and bulk scans](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/evm.ts)
 - [Choose payment screening tools](/docs/resources/guides/payment-screening)
 - [Security and compliance providers](/docs/partners/security-and-compliance)

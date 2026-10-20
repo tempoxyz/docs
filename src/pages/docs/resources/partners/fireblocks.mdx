@@ -12,7 +12,7 @@ description: Check Tempo assets in your Fireblocks workspace, configure vault wa
 
 Fireblocks distinguishes [globally and locally supported assets](https://developers.fireblocks.com/docs/list-supported-assets-1). Global assets are available by default when creating new asset wallets. Local assets appear only in workspaces that added or requested them; a receiving counterparty must also support the asset.
 
-A network listing does not establish that every Tempo token or Fireblocks product is enabled. Record the workspace asset ID, network, token contract, and intended transfer direction. Use the provider's asset API to inspect workspace availability and the [Tempo stablecoin registry](/docs/partners/stablecoins) to confirm the onchain asset.
+A network listing does not establish that every Tempo token or Fireblocks product is enabled. Query Fireblocks' [List assets endpoint](https://developers.fireblocks.com/api-reference/blockchains-&-assets/list-assets) to inspect workspace availability. Record the network, token contract, intended transfer direction, and legacy API ID (`legacyId`). The current asset reference instructs integrations to use that legacy ID where a transaction expects `assetId`, because not every service supports the new asset UUID. Confirm the onchain asset against the [Tempo stablecoin registry](/docs/partners/stablecoins).
 
 ## Use vault accounts and transaction policies
 
@@ -46,7 +46,7 @@ Define who can initiate payments, the source vault, allowed destinations, and re
 
 ### Submit and track a payment
 
-Use Fireblocks' documented transaction API for the enabled asset. Save the returned Fireblocks transaction ID with the invoice, payout, or treasury instruction. Follow its status and retain any onchain transaction references rather than treating creation as completed delivery.
+Follow Fireblocks' [Create Transactions guide](https://developers.fireblocks.com/transactions/create-transactions) for the enabled asset. Supply its `assetId`, source vault, destination, and amount in the asset's units. Use a unique `externalTxId` for the business instruction so Fireblocks can reject duplicate submissions. Save the returned Fireblocks transaction ID with the invoice, payout, or treasury instruction. Follow its status and retain any onchain transaction references rather than treating creation as completed delivery.
 
 ### Reconcile the recipient outcome
 
@@ -80,4 +80,4 @@ Yes. Its workspace policies can govern transaction initiators, sources, destinat
 
 No. It identifies the provider operation. Track its outcome and verify the relevant delivered transfer or additional payout evidence before fulfilling the business obligation.
 
-Provider documentation reviewed October 19, 2026.
+Provider documentation reviewed October 20, 2026.
