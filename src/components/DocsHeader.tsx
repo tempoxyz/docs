@@ -859,6 +859,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
       <nav
         className={`docs-header-nav ${docsHeaderNav().className}`}
         aria-label="Developer navigation"
+        data-surface={surface}
       >
         {brand}
         {destinations}
