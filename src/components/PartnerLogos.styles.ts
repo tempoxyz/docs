@@ -539,3 +539,8 @@ export const partnerLogoFigure = style({
 export const partnerLogoHastra = style({
   backgroundImage: 'url("/assets/partners/directory/hastra.ico")',
 })
+
+export const partnerLogoDwellir = style({
+  width: '84px',
+  backgroundImage: 'url("/assets/partners/directory/dwellir.svg")',
+})
