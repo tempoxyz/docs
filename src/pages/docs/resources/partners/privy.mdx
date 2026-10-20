@@ -1,0 +1,84 @@
+---
+title: Privy on Tempo
+seoTitle: Privy Embedded Wallets and Sponsored Payments on Tempo | Tempo Docs
+description: Create embedded customer wallets with Privy, send native Tempo transactions, configure fee sponsorship, and verify stablecoin payments.
+---
+
+# Privy on Tempo
+
+[Privy](https://www.privy.io/) provides embedded wallets and signing for applications accepting and sending payments on Tempo. Use its Ethereum-type wallets for customer accounts and its Tempo transaction APIs for batching, fee-token selection, and sponsored payments.
+
+## What Privy supports on Tempo
+
+Privy's [Tempo integration recipe](https://docs.privy.io/recipes/tempo/send-transactions) covers wallet creation, token transfers, custom transactions, and fee sponsorship. Its [Tempo transaction reference](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) documents mainnet and Moderato testnet.
+
+| Capability | Integration path |
+| --- | --- |
+| Customer wallets | Create an Ethereum-type embedded wallet and associate it with the customer's application record. |
+| Stablecoin transfers | Use Privy's transfer API for supported assets, or construct the token call through its Tempo transaction API. |
+| Batched contract calls | Use the native Tempo envelope and its `calls` array. |
+| Fee-token selection | Set the supported TIP-20 fee token through the selected SDK's documented transaction fields. |
+| Fee sponsorship | Use Privy's sponsorship configuration and the SDK-specific sponsorship option. |
+| Transaction validity | Specify the allowed inclusion window when the application needs an expiry or earliest inclusion time. |
+
+The application still decides what a customer can purchase, when to request a signature, and which payment record to update. Privy manages the selected wallet and signing path; Tempo validates the submitted transaction.
+
+## Prepare the Privy integration
+
+:::::steps
+
+### Configure the application and wallet
+
+Create a Privy application and follow the [Tempo wallet recipe](https://docs.privy.io/recipes/tempo/send-transactions) for your SDK. Privy uses its Ethereum wallet type for Tempo; a separate Tempo-specific wallet type is unnecessary.
+
+Choose the login, recovery, export, and backend-signing permissions your product requires. The [embedded-wallet account model](/docs/accounts/apps) explains the distinction between the provider's signing setup and a Tempo account.
+
+### Match the wallet and network
+
+Use chain ID `4217` for mainnet or `42431` for Moderato. Privy's server requests use the corresponding CAIP-2 identifiers, `eip155:4217` and `eip155:42431`. Match the client, funds, and recipient instructions to the same network. See [connection details](/docs/quickstart/connection-details).
+
+### Choose the transaction path
+
+Use the transfer API for a supported token transfer. For custom Tempo features, follow the native transaction reference rather than assuming a standard EVM send request exposes them. Native Tempo transactions use type `118` and a `calls` array.
+
+Use the [stablecoin registry](/docs/partners/stablecoins) and current provider instructions to identify the exact token contract. Follow [sending payments](/docs/guide/payments/send-a-payment) for the corresponding Tempo workflow.
+
+### Configure fee payment
+
+For user-paid fees, select an eligible fee token and fund it under the [fee-token rules](/docs/guide/payments/pay-fees-in-any-stablecoin). For Privy-sponsored fees, enable sponsorship in the Privy Dashboard and satisfy its documented TEE execution requirement.
+
+The Tempo-specific React transaction method supports `sponsor: true` in its options. Server and REST requests have their own parameter placement. Use the [current transaction reference](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) for your SDK; Privy's transfer API automatically sponsors eligible transfers when dashboard sponsorship is enabled.
+
+### Verify the delivered payment
+
+Preserve the transaction hash and business reference. Confirm the successful transaction and expected delivered transfer before crediting a customer. Follow [receiving payments](/docs/guide/payments/accept-a-payment); a broadcast hash alone does not establish delivery.
+
+:::::
+
+## Keep signing policies and access keys separate
+
+Privy's [Tempo recipe](https://docs.privy.io/recipes/tempo/send-transactions#controlling-transactions-with-policies) describes provider policies for fee tokens, sponsorship, and validity windows. These govern requests handled through Privy.
+
+A separately authorized [Tempo access key](/docs/accounts/access-keys) has its own onchain spending limits, scopes, and expiry. Configure those bounds independently. For a backend that needs delegated payment authority, use [Pay from a user's embedded wallet](/docs/accounts/automations/pay-from-an-embedded-wallet).
+
+Fee sponsorship covers the network expense, not the payment principal or a bank payout. A validity window constrains inclusion; the application still schedules and submits the payment. See [fee sponsorship](/docs/guide/payments/sponsor-user-fees) and [subscription billing](/docs/resources/guides/subscriptions-on-tempo).
+
+## Privy integration questions
+
+### Does Privy support Tempo mainnet and testnet?
+
+Yes. Privy documents mainnet and Moderato. Configure the matching chain ID and fund the account on that network.
+
+### Can a React application sponsor Tempo transaction fees?
+
+Yes. Privy's Tempo-specific React method supports `sponsor: true`. Enable sponsorship for the Privy application and follow its execution and SDK requirements; do not infer the same parameter shape for every API.
+
+### Does a Privy wallet require a Tempo access key?
+
+No. The wallet can sign payments through the provider. Authorize a bounded access key when a separate device, backend, or agent needs delegated authority.
+
+### Where is the published browser example?
+
+Privy's [Tempo example application](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) covers embedded wallets and browser payments. Check its dependencies and network configuration before adapting it.
+
+Provider documentation reviewed October 19, 2026.

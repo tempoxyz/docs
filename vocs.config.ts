@@ -632,6 +632,54 @@ export default defineConfig({
               },
             ],
           },
+          {
+            text: 'Partner guides',
+            collapsed: true,
+            items: [
+              { text: 'All partner guides', link: '/docs/resources/partners' },
+              {
+                text: 'Wallets and custody',
+                collapsed: true,
+                items: [
+                  { text: 'Privy', link: '/docs/resources/partners/privy' },
+                  { text: 'Dynamic', link: '/docs/resources/partners/dynamic' },
+                  { text: 'Turnkey', link: '/docs/resources/partners/turnkey' },
+                  { text: 'Fireblocks', link: '/docs/resources/partners/fireblocks' },
+                ],
+              },
+              {
+                text: 'Funding and payouts',
+                collapsed: true,
+                items: [{ text: 'Bridge', link: '/docs/resources/partners/bridge' }],
+              },
+              {
+                text: 'RPC providers',
+                collapsed: true,
+                items: [
+                  { text: 'Alchemy', link: '/docs/resources/partners/alchemy' },
+                  { text: 'QuickNode', link: '/docs/resources/partners/quicknode' },
+                ],
+              },
+              {
+                text: 'Data and indexing',
+                collapsed: true,
+                items: [
+                  { text: 'Allium', link: '/docs/resources/partners/allium' },
+                  { text: 'Goldsky', link: '/docs/resources/partners/goldsky' },
+                ],
+              },
+              {
+                text: 'Screening and security',
+                collapsed: true,
+                items: [
+                  { text: 'TRM', link: '/docs/resources/partners/trm' },
+                  { text: 'Chainalysis', link: '/docs/resources/partners/chainalysis' },
+                  { text: 'Elliptic', link: '/docs/resources/partners/elliptic' },
+                  { text: 'Blockaid', link: '/docs/resources/partners/blockaid' },
+                ],
+              },
+            ],
+          },
         ],
       },
     ]

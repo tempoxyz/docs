@@ -81,7 +81,13 @@ describe('resource guide navigation', () => {
     const resources = sidebar.at(-1)
     expect(resources?.text).toBe('Resources')
     expect(resources?.items?.[0]).toMatchObject({ text: 'Guides', collapsed: true })
+    const partnerGuides = resources?.items?.find(({ text }) => text === 'Partner guides')
+    expect(partnerGuides).toMatchObject({ collapsed: true })
+    expect(
+      partnerGuides?.items?.filter(({ items }) => items).every(({ collapsed }) => collapsed),
+    ).toBe(true)
     expect(links(resources)).toContain('/docs/resources/guides')
+    expect(links(partnerGuides)).toContain('/docs/resources/partners')
     expect(sidebar[0].items?.some(({ text }) => text === 'Guides')).toBe(false)
   })
 

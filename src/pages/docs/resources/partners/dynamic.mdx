@@ -1,0 +1,84 @@
+---
+title: Dynamic on Tempo
+seoTitle: Dynamic Wallets and TIP-20 Payments on Tempo | Tempo Docs
+description: Configure Dynamic's Tempo SDK, create embedded wallets, send TIP-20 payments, and check platform-specific support and limitations.
+---
+
+# Dynamic on Tempo
+
+[Dynamic](https://www.dynamic.xyz/) combines authentication and embedded wallets for applications using Tempo. Its JavaScript SDK provides a dedicated Tempo package for wallet accounts, TIP-20 transfers, native transactions, and chain reads. Customers can use the wallet inside your application.
+
+## Choose Dynamic's Tempo SDK path
+
+Use the [current Tempo reference](https://www.dynamic.xyz/docs/javascript/reference/evm/tempo) for the JavaScript SDK. Install `@dynamic-labs-sdk/tempo` with its `viem` peer dependency. The older `@dynamic-labs-sdk/evm/tempo` entry point has been removed.
+
+Dynamic's Tempo integration has its own network registry and wallet-account type. Generic EVM helpers do not cover every Tempo operation.
+
+| Task | Documented Tempo path |
+| --- | --- |
+| Register Tempo network support | `addTempoExtension` from the Tempo package. |
+| Add embedded Tempo wallets | `addWaasTempoExtension` from the package's `/waas` entry point; this replaces the network-only extension. |
+| Identify a Tempo account | `isTempoWalletAccount`; Tempo accounts use `chain: 'TEMPO'`. |
+| Read chain state | `getTempoPublicClient` for the active Tempo network. |
+| Send a token payment | `sendTip20Transaction` with an explicit token address and decimal precision. |
+| Use native transaction fields | `sendTempoTransaction` for batches, fee tokens, nonce keys, or validity windows. |
+
+Use the provider's reference for current signatures and SDK setup. The table identifies the integration path; it is not a substitute for a complete client configuration.
+
+## Configure authentication and embedded wallets
+
+:::::steps
+
+### Configure the Dynamic environment
+
+Obtain the application's environment ID and enable Tempo, the intended login method, and embedded wallets. Allow the application's exact origin. The [React quickstart](https://www.dynamic.xyz/docs/javascript/reference/react-quickstart) documents environment configuration and initialization.
+
+### Register the Tempo extension
+
+Register the extension at module level before components use the client. For embedded wallets, use the `/waas` extension. Follow the Tempo reference for the wallet provider and its viem wallet client; the generic EVM wallet-client helper does not accept Tempo accounts.
+
+### Build the application interface
+
+The current JavaScript SDK is headless. Supply the authentication and wallet screens your product needs, including applicable step-up authentication and device-registration flows. React integrations use Dynamic's React hooks and the providers required by its quickstart.
+
+### Specify the payment asset and network
+
+Identify the exact token through the [stablecoin registry](/docs/partners/stablecoins). Dynamic's `sendTip20Transaction` expects a token address and a human-readable amount; its decimal parameter defaults to `18`, so pass the actual token precision explicitly.
+
+Match the selected Tempo network to the account's funds and recipient instructions. Use [connection details](/docs/quickstart/connection-details) and [sending payments](/docs/guide/payments/send-a-payment) alongside Dynamic's provider-specific API.
+
+### Confirm delivery after submission
+
+The native send method returns a transaction hash after submission. Wait for its receipt, then verify the intended delivered transfer using [receiving payments](/docs/guide/payments/accept-a-payment). Record the network, transaction hash, and transfer log index to process the payment once.
+
+:::::
+
+## Check Dynamic's platform support
+
+The [chain-support matrix](https://www.dynamic.xyz/docs/embedded-wallets/chains/overview) lists Tempo sending, signing, gasless transactions, and delegated access for JavaScript, React, and React Native. It does not list Tempo onchain-event webhooks, and other SDKs have different support.
+
+Use Tempo's [activity and payment verification workflow](/docs/guide/payments/accept-a-payment) when designing event ingestion. A provider authentication event and an onchain payment event serve different purposes.
+
+The Tempo JavaScript reference also states that embedded Tempo wallets do not support typed-data signing, and wallets belonging to a Dynamic business account cannot send transactions. Check those restrictions before selecting the wallet model for a backend or treasury flow.
+
+For sponsored payments, follow Dynamic's [fee-sponsor signing guide](https://www.dynamic.xyz/docs/javascript/reference/tempo/sign-for-a-fee-sponsor) and configure the corresponding [Tempo fee payer](/docs/guide/payments/sponsor-user-fees). A support-matrix entry does not supply your application's sponsorship budget or approval policy.
+
+## Dynamic integration questions
+
+### Do customers need another wallet application?
+
+No. Dynamic's embedded wallets work inside your application and can use its configured login methods. Your application supplies the interface for the headless JavaScript SDK.
+
+### Can an existing EVM integration handle Tempo unchanged?
+
+Follow the dedicated Tempo path. It has its own package, network registry, account guard, and wallet-client construction. Do not use the removed `@dynamic-labs-sdk/evm/tempo` import.
+
+### Does Dynamic provide Tempo payment webhooks?
+
+Its current chain matrix marks Tempo onchain events as unsupported. Plan an independent payment-event ingestion and recovery path rather than relying on that webhook product.
+
+### Does Dynamic's Node SDK have the same Tempo support?
+
+No. The current support matrix lists no Tempo sending or signing for the Node SDK. Check the exact SDK and wallet model instead of applying the browser JavaScript capabilities to another product.
+
+Provider documentation reviewed October 19, 2026.

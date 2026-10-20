@@ -28,6 +28,8 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 
 Accounts covers account setup and its guides; Tempo EVM covers payments and the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.
 
+For a provider's documented capabilities and access requirements, use the [partner integration guides](https://tempo.xyz/developers/docs/resources/partners.md) under Get Started resources. Follow their links to the provider's current implementation instructions and verify support for the particular network, asset, SDK, and operation.
+
 Within Tempo EVM, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
 
 Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in the limited preview.

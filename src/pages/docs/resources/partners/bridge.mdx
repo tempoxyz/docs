@@ -1,0 +1,84 @@
+---
+title: Bridge on Tempo
+seoTitle: Bridge Bank Funding, Stablecoin Wallets, and Payouts on Tempo | Tempo Docs
+description: Connect supported bank funding and payouts to Tempo through Bridge virtual accounts, transfers, liquidation addresses, and custodial wallets.
+---
+
+# Bridge on Tempo
+
+[Bridge](https://www.bridge.xyz/) connects supported bank funding, stablecoin transfers, and payouts through its APIs. Its Tempo integration includes virtual accounts, transfers, liquidation addresses, and custodial wallets, with OUSD funding and payout examples. Bridge manages the network connection for this provider-led flow.
+
+## Choose the Bridge component for the flow
+
+The [Tempo integration guide](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide) describes how these components connect. Product access, supported assets, customer eligibility, and payment rails determine the flow your application can operate.
+
+| Component | Use it to |
+| --- | --- |
+| Virtual account | Provide fiat deposit instructions that deliver a supported stablecoin to a configured Tempo destination. |
+| Transfer | Initiate a supported movement between funding and payout endpoints. |
+| Liquidation address | Convert incoming supported stablecoin deposits to the configured fiat or token destination. |
+| Custodial wallet | Create a supported Tempo wallet, read its balances, and move funds through Bridge's orchestration APIs. |
+
+Near-instant Tempo settlement applies to the onchain leg. Bank funding, currency conversion, provider processing, and bank delivery have separate requirements and timing. Use [payment rail comparisons](/docs/resources/guides/payment-rails) to evaluate the complete recipient outcome.
+
+## Prepare Bridge access and customer onboarding
+
+:::::steps
+
+### Set up the developer account
+
+Bridge's [account setup guide](https://apidocs.bridge.xyz/get-started/introduction/quick-start/get-set-up-with-bridge) directs new developers to its sales team. Existing developers generate API keys through the Bridge Dashboard. Keep sandbox and production credentials and resource identifiers separate.
+
+### Onboard the customer and required rails
+
+Follow [customer onboarding](https://apidocs.bridge.xyz/get-started/introduction/quick-start/create-your-first-customer) for the relevant individual or business. Confirm the applicable identity verification, terms acceptance, and rail endorsements before attempting the production flow. A customer resource existing in the API does not establish all required approvals.
+
+### Confirm asset and route support
+
+Use the [supported-route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes) for the intended direction, asset, currency, and payment rail. Match token identifiers to the actual network and contract, using the [Tempo stablecoin registry](/docs/partners/stablecoins) and [OUSD guide](/docs/guide/ousd) alongside Bridge's instructions. Do not infer contract identity from a ticker or a copied example response.
+
+### Obtain production wallet approval where needed
+
+The [custodial-wallet guide](https://apidocs.bridge.xyz/platform/wallets/overview) requires Bridge's review and approval of the fund flow before production wallet access. Check its geographic eligibility and supported-chain table for the customer and product. Use orchestration APIs for wallet transfers and follow the supported direct-deposit rules.
+
+### Define payment completion and records
+
+Save the customer, virtual-account or wallet identifier, transfer identifier, business reference, expected asset, and recipient amount. Keep onchain receipt, conversion, payout submission, and completed delivery distinct. A completed token transfer does not prove that a recipient's bank account was credited.
+
+:::::
+
+## Test with the correct environment
+
+Bridge's [sandbox](https://apidocs.bridge.xyz/get-started/introduction/quick-start/setting-up-sandbox) simulates customer checks, bank activity, and blockchain operations. It does not move real funds or send wallet transactions to a blockchain testnet. Generated sandbox addresses and identifiers are representative data.
+
+Use it to develop resource creation, supported lifecycle transitions, webhooks, retries, and reconciliation. Sandbox resources are managed through the API; the dashboard manages sandbox keys rather than providing the full resource interface. It is not a test of live bank availability, network timing, or production route access.
+
+Before production traffic, validate the enabled route with controlled production tests under Bridge's instructions. Reconcile existing operation identifiers before retrying an uncertain payment.
+
+## Account for provider precision and fees
+
+Bridge's custodial-wallet documentation specifies whole-cent processing and representation. This provider precision is different from a token contract's base-unit precision. Check the product's rounding rules before using it for [microtransactions](/docs/resources/guides/microtransactions).
+
+Record the full sender debit, conversion terms, separately charged fees, recipient net amount, and any provider-held balances. Protocol network fees alone do not establish the cost of the funding or payout flow. See [stablecoin fee operations](/docs/resources/guides/stablecoin-fees).
+
+Use [payment reconciliation](/docs/resources/guides/payment-reconciliation) to connect provider records to invoices and finance entries. For a direct onchain recipient, verify the delivered transfer through [receiving payments](/docs/guide/payments/accept-a-payment). Preserve provider payout evidence when the promised outcome is bank delivery.
+
+## Bridge integration questions
+
+### Do I need a separate Tempo integration to use Bridge?
+
+Bridge's Tempo guide says it manages the network connection, so its provider-led flow operates through Bridge's dashboard and APIs. Your application still handles its business records, customer experience, and any responsibilities outside the contracted service.
+
+### Is the documentation enough to begin production payments?
+
+No. Developer access, customer onboarding, required rail endorsements, supported routes, and any product-specific production approval must be in place. Confirm the actual customer and flow rather than inferring access from a public example.
+
+### Which Tempo assets are supported?
+
+Bridge publishes a current route explorer and custodial-wallet token table. Its Tempo guide uses OUSD examples. Check the exact asset, network, direction, product, and contract for your flow; wallet support and payout-route support are different checks.
+
+### Does the sandbox send testnet payments?
+
+No. Bridge's sandbox simulates payment and wallet behavior without sending transactions to live bank or blockchain networks. Testnet compatibility must not be inferred from its sample addresses.
+
+Provider documentation reviewed October 19, 2026.
