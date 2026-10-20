@@ -9,6 +9,7 @@ import re
 import urllib.error
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -51,6 +52,20 @@ class Page(HTMLParser):
 
 def urls(value):
     return [item.strip() for item in value.split(";") if item.strip()]
+
+
+@lru_cache(maxsize=4)
+def indexed_pages(sitemap, ai_index):
+    sitemap_urls = {
+        element.text.rstrip("/")
+        for element in ET.fromstring(sitemap).iter()
+        if element.tag.rsplit("}", 1)[-1] == "loc" and element.text
+    }
+    ai_urls = {
+        urllib.parse.urldefrag(url)[0].removesuffix(".md").rstrip("/")
+        for url in re.findall(r"\]\((https?://[^)\s]+)\)", ai_index)
+    }
+    return sitemap_urls, ai_urls
 
 
 @lru_cache(maxsize=None)
@@ -98,7 +113,9 @@ def verify_destination(url, live, build):
             else:
                 sitemap = (build / "sitemap.xml").read_text()
                 ai_index = (build / "llms.txt").read_text()
-            if PUBLIC_DOCS + route not in sitemap or route not in ai_index:
+            sitemap_urls, ai_urls = indexed_pages(sitemap, ai_index)
+            expected_url = (PUBLIC_DOCS + route).rstrip("/")
+            if expected_url not in sitemap_urls or expected_url not in ai_urls:
                 raise ValueError("Docs page is absent from the sitemap or AI index")
             if live:
                 _, _, md_headers, markdown = fetch(base + ".md", "text/markdown")
