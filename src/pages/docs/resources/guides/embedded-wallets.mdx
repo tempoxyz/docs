@@ -1,0 +1,80 @@
+---
+title: "Choose embedded wallets"
+seoTitle: "Choose Embedded Wallets for Tempo | Tempo Docs"
+description: "Compare wallet providers by customer experience, signing authority, Tempo features, and recovery requirements."
+---
+
+# Choose embedded wallets
+
+Choose an embedded wallet provider by deciding who can authorize payments, how customers recover access, and which Tempo features your application needs. Start with one complete customer flow, from sign-in through payment confirmation, then compare providers against that flow.
+
+<span id="signing-authority" />
+
+## Define who can authorize a payment
+
+Separate customer authentication from permission to move funds. Your application connects customer records to wallet addresses and requests payments. The provider manages keys and applies its signing policies. Tempo validates the resulting transaction and any onchain access-key permissions.
+
+Write down whether each payment requires customer approval or can be requested by your backend. Include who can change those permissions and what happens after account recovery. These decisions determine the authentication and wallet model you need.
+
+- **Wallet provider responsibilities.** Review the boundary between application, provider, and onchain controls. [Read Tempo’s provider guide](/docs/accounts/apps/self-custodial-wallets).
+
+<span id="integration-model" />
+
+## Shortlist wallet providers by integration model
+
+Compare the product and SDK you will use. A provider’s general chain support does not establish that every SDK exposes the same payment features.
+
+- **Privy.** Evaluate its embedded-wallet flow and Tempo transaction APIs for customer payments, batches, and fee-token controls. [Explore Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction).
+- **Dynamic.** Evaluate authentication and embedded wallets with its dedicated JavaScript Tempo extension. The current JavaScript SDK requires your own interface. [Explore Dynamic](https://www.dynamic.xyz/docs/javascript/reference/tempo/overview).
+- **Turnkey.** Evaluate managed signing and policies for Tempo calls, fee tokens, and batches, alongside the authentication model your application needs. [Explore Turnkey](https://docs.turnkey.com/features/networks/tempo).
+- **Fireblocks.** Evaluate separately for vault operations and transaction approvals. Confirm the exact Tempo asset and workspace permissions. [Explore Fireblocks](https://developers.fireblocks.com/docs/list-supported-assets-1).
+
+<span id="tempo-requirements" />
+
+## Check wallet features for your payment
+
+Specify your network, token contract, and fee-payment approach before selecting an SDK. Keep the wallet and RPC client on the same network. Tempo has no native gas token, so a generic Ethereum native-balance check does not measure a customer’s spendable stablecoin balance.
+
+Check batching, fee-token selection, sponsorship, and delegated signing individually. Privy documents sponsorship prerequisites. Dynamic uses a separate Tempo extension and network registry. Turnkey exposes Tempo-specific policy fields. Use each provider’s Tempo instructions rather than inferring feature support from EVM compatibility.
+
+- **Provider-specific instructions.** Start with Privy’s Tempo transaction guide, then use each shortlisted provider’s linked reference to check your requirements. [Read the Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction).
+
+<span id="operational-fit" />
+
+## Evaluate recovery and failure handling
+
+Before committing, confirm recovery and key-export options for your chosen account model. Ask how revoked access, rejected signatures, an unavailable provider, and expired permissions appear to the customer and your support team.
+
+Use the provider’s supported test environment to evaluate those cases. Agree what evidence your application needs before displaying a completed payment. A successful login or signature alone does not confirm that funds arrived.
+
+## Embedded wallet questions
+
+### Does every EVM wallet expose Tempo’s native features?
+
+No. Check the provider’s Tempo integration for the specific SDK and features you need, including batches, fee tokens, and sponsorship.
+
+### Do embedded wallets require a Tempo access key?
+
+No. Access keys are optional. If you authorize one for another signer, configure its onchain permissions separately from the wallet provider’s signing policies.
+
+### Does an embedded wallet include bank funding?
+
+Check that separately. Wallet creation and signing are different capabilities from converting bank deposits or delivering fiat payouts.
+
+## Wallet provider documentation
+
+Source review: October 12, 2026.
+
+- [Tempo: wallet providers](/docs/accounts/apps/self-custodial-wallets)
+- [Tempo: EVM differences](/docs/quickstart/evm-compatibility)
+- [Privy: using Tempo](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction)
+- [Dynamic: Tempo extension](https://www.dynamic.xyz/docs/javascript/reference/tempo/overview)
+- [Dynamic: React quickstart](https://www.dynamic.xyz/docs/javascript/reference/react-quickstart)
+- [Turnkey: Tempo support](https://docs.turnkey.com/features/networks/tempo)
+- [Fireblocks: asset availability](https://developers.fireblocks.com/docs/list-supported-assets-1)
+
+## Related wallet and payment guides
+
+- [Session keys and delegated payments](https://tempo.xyz/learn/session-keys/): Understand limited authority for automated payments.
+- [Stablecoin payment infrastructure](/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale): Evaluate the wider payment stack around a wallet.
+- [Partner integrations](/docs/partners): Browse providers for the rest of your payment flow.

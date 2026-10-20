@@ -52,7 +52,7 @@ Get started by signing up through the [Para Dev Portal](https://developer.getpar
 
 [Privy](https://www.privy.io/) builds secure key management and embedded wallets so any developer can easily build secure, scalable wallets into their app. Easily spin up self-custodial wallets for users, manage your treasury wallets and more.
 
-Privy's Tempo integration supports native transaction features such as batched calls and fee-token selection. Privy's standard EVM `sponsor: true` option is not available for Tempo Transactions; follow its [Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) for supported signing and sponsorship paths.
+Privy's Tempo integration supports native transaction features such as batched calls and fee-token selection. Privy's Tempo-specific React hook supports `sponsor: true`; follow its [Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) for SDK-specific signing and sponsorship requirements.
 
 [Create an Ethereum-type wallet](https://docs.privy.io/wallets/wallets/create/create-a-wallet#param-chain-type-1) in Privy. For Tempo mainnet, the CAIP-2 identifier is `eip155:4217`; use the [Tempo-specific transaction instructions](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) when adding batching, memos, or fee-token selection.
 

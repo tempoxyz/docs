@@ -1,0 +1,69 @@
+---
+title: "FBO accounts in payment operations"
+seoTitle: "FBO accounts in payment operations | Tempo Docs"
+description: "Understand for-benefit-of accounts, beneficial-owner records, deposit insurance conditions, and how bank balances differ from stablecoin balances."
+---
+
+# FBO accounts in payment operations
+
+FBO means for benefit of. In payment operations, an FBO account commonly describes a bank account held by an intermediary for the benefit of its customers or other owners of the funds. The account may hold one owner's funds or pool funds for several owners.
+
+The name alone does not establish who owns the money, what protections apply, or whether every customer can access funds immediately. Those answers depend on the arrangement and its records.
+
+## The bank balance and the customer ledger
+
+Consider an illustrative platform collecting payments for several merchants. A bank account holds the funds, while the platform's ledger records the amount attributable to each merchant. Pending settlements, fees, reserves, and payout instructions can make that ledger more detailed than a simple list of balances.
+
+| Record                         | Question it helps answer                                         |
+| ------------------------------ | ---------------------------------------------------------------- |
+| Bank statement                 | How much is held at the bank?                                    |
+| Beneficial-owner records       | Whose funds are represented by that balance?                     |
+| Payment and payout ledger      | Which movements are pending, complete, or under investigation?   |
+| Account and service agreements | Who can give instructions, and what happens during a disruption? |
+
+A useful operational review checks how these records reconcile and who can produce them if an intermediary becomes unavailable. The [payment reconciliation guide](/docs/resources/guides/payment-reconciliation) describes connecting payments to internal records.
+
+## Deposit insurance depends on the arrangement
+
+For U.S. accounts, the [FDIC's pass-through insurance guidance](https://www.fdic.gov/financial-institution-employees-guide-deposit-insurance/pass-through-deposit-insurance-coverage) explains the conditions for recognizing the actual owners of funds held through a third party. These include actual ownership, disclosure of the agency relationship in bank records, and records identifying owners and their interests.
+
+Pass-through coverage is not a separate insurance category. Eligible funds are aggregated with the same owner's other deposits in the same ownership category at the same bank. An FBO label does not create an additional insurance limit.
+
+The FDIC also explains that a [nonbank payment app is not itself FDIC-insured](https://www.fdic.gov/consumer-resource-center/2024-06/banking-third-party-apps). Deposit insurance concerns the failure of an insured bank, not every failure or access problem at an intermediary. This overview is general information; the account's actual treatment requires review of its structure and applicable rules.
+
+## What to confirm before using an FBO arrangement
+
+For a proposed payment flow, document the bank and intermediary, the legal owner of the funds, how customer interests are recorded, and the path for resolving a mismatch. Determine when funds reach the bank, when payouts become available, and which party reports completion.
+
+An illustrative exception is a payout marked complete in the platform ledger while the bank reports it rejected. The operating process needs to identify the mismatch, restore the correct available balance, and avoid paying the recipient twice.
+
+FBO terminology also does not determine licensing requirements. The parties' activities and jurisdictions matter; opening the account does not by itself authorize every payment service.
+
+## How stablecoin balances differ
+
+A stablecoin wallet is not automatically a bank deposit or an FBO account. Moving funds into tokens changes the assets held and introduces issuer, custody, and redemption considerations. The public token balance does not replace customer ownership records or the ledger of amounts the platform owes.
+
+Tempo can support the onchain leg of a payment flow while a bank account supports collection or payout. Review both together. The guides to [minting and burning](/docs/guide/issuance/mint-stablecoins) and [stablecoins and tokenized deposits](https://tempo.xyz/learn/stablecoins-and-tokenized-deposits/) explain the distinctions.
+
+## FBO accounts in payment operations FAQ
+
+<details>
+<summary>Is every FBO account a pooled account?</summary>
+
+No. An account can hold funds for one owner or multiple owners. The account documents and ownership records determine the arrangement.
+
+</details>
+
+<details>
+<summary>Does FBO mean every balance is FDIC-insured?</summary>
+
+No. In the United States, coverage depends on the insured bank, ownership category, applicable limits, and pass-through requirements. The label alone is insufficient.
+
+</details>
+
+<details>
+<summary>Does a stablecoin wallet replace an FBO account?</summary>
+
+It may replace or complement a step in a payment flow, but it changes the asset and operating model. Fiat access, customer liabilities, ownership records, and reconciliation still need to be designed.
+
+</details>

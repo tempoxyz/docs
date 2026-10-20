@@ -1,0 +1,100 @@
+---
+title: Token and receive controls
+seoTitle: Stablecoin Token Permissions and Receive Controls | Tempo Docs
+description: Map TIP-20 roles, TIP-403 token policies, receive-policy holds, and payment references to your application's operating controls.
+---
+
+# Token and receive controls
+
+Use TIP-20 roles for privileged token operations, TIP-403 policies for token access rules, and receive policies for an account's incoming assets. Keep the institution's screening decisions and case records separate from the technical controls that enforce them.
+
+## Choose the control for each responsibility
+
+| Responsibility | Tempo control | Application or institution responsibility |
+| --- | --- | --- |
+| Restrict token circulation | TIP-403 token policies. | Supply, review, and maintain the underlying address decisions. |
+| Limit incoming transfers | Account-level receive policy. | Set accepted senders and tokens, choose recovery authority, and handle held receipts. |
+| Pause token movement | TIP-20 pause and unpause roles. | Approve the action, protect the role holders, and document its basis. |
+| Burn eligible balances | Dedicated TIP-20 burn authorities and guard receipt rules. | Establish authority for the action and preserve the approval and case evidence. |
+| Connect a transfer to a case | A supported 32-byte transfer memo. | Store personal and case information offchain and control access to it. |
+
+These controls do not perform identity checks or sanctions screening by themselves. An allowlisted address proves membership in a policy, not that the address-to-customer mapping is current or that every obligation has been met.
+
+## Separate issuer roles
+
+[TIP-20 roles](/docs/protocol/tip20/spec#tip-20-roles) separate minting, pause controls, and burn authorities. Give each role only to the accounts authorized for that operation and protect the ability to grant or revoke roles.
+
+- `ISSUER_ROLE` controls minting and issuer burning operations.
+- `PAUSE_ROLE` and `UNPAUSE_ROLE` control the token's paused state.
+- `BURN_BLOCKED_ROLE` permits burning eligible, unprotected balances from addresses that fail the TIP-403 sender check.
+- `BURN_AT_ROLE` permits burning an unprotected balance without TIP-403 authorization, subject to the specification's checks.
+
+Own-balance burning, burning a blocked balance, and `burnAt` are different operations. Burning reduces supply; it does not transfer recovered funds to another account or establish legal authority for the action. Guard-held funds have [separate receipt-level burn rules](/docs/protocol/tip403/receive-policies#burns).
+
+Pausing affects token movement, while administrative functions and protocol operations have their own rules. Read the [pause controls](/docs/protocol/tip20/spec#pause-controls) before relying on a pause as an emergency response.
+
+## Configure token-level policies
+
+The [Tempo Policy Registry](/docs/protocol/tip403/spec) supports simple allowlist and blocklist policies and compound policies. A compound policy can select different rules for senders, transfer recipients, and mint recipients.
+
+An issuer associates a policy with its token. Policies can be shared across tokens, so a change to a shared underlying policy can affect several assets. Record that dependency when approving a policy update.
+
+For customer-based restrictions, maintain the customer-to-address mapping offchain and update policy membership through an authorized workflow. Preserve who approved the change, the affected addresses and tokens, the transaction, and the internal case reference.
+
+Start with [managing an issued stablecoin](/docs/guide/issuance/manage-stablecoin) and the [TIP-403 specification](/docs/protocol/tip403/spec).
+
+## Handle receive-policy holds as a separate outcome
+
+A [receive policy](/docs/accounts/policies/receive-policies) controls which senders and TIP-20 tokens an account accepts. It is an inbound control, not a general outbound transaction policy.
+
+Token-level checks run first and revert on failure. If those checks pass but the receiver's policy blocks delivery, the call succeeds while funds are held in `ReceivePolicyGuard`. The intended receiver has not received the funds.
+
+Integrations must distinguish these outcomes:
+
+| Outcome | Payment handling |
+| --- | --- |
+| Token policy rejects the operation | Record the failed attempt; do not credit delivery. |
+| Receive policy holds the inbound | Index the blocked receipt and route it through the authorized recovery process. |
+| Expected transfer reaches the receiver | Verify the token, recipient, amount, and successful transaction before crediting it. |
+
+Each blocked inbound creates a receipt. The receipt captures the recovery authority in effect for that inbound; changing the account's authority affects future receipts. Claims consume a full receipt, and the allowed destination and current policy checks depend on the claim path. Follow the [receive-policy specification](/docs/protocol/tip403/receive-policies) rather than treating held funds as an ordinary account balance.
+
+## Keep compliance records offchain
+
+[Transfer memos](/docs/guide/payments/transfer-memos) carry a 32-byte reference through supported TIP-20 methods. Use an opaque identifier to connect a payment to internal records. Do not put names, identity documents, account details, or other personal data in a public memo.
+
+A memo is not a complete information-sharing message. [FATF describes the Travel Rule](https://www.fatf-gafi.org/en/topics/virtual-assets.html) as involving secure collection and transmission of originator and beneficiary information. Determine the applicable local requirements and the responsibilities of each participating service. Store the required information and exchange evidence through the appropriate offchain systems.
+
+A matching reference is also not proof of payment. Use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify delivery before updating a customer or case ledger.
+
+## Test control changes before operating them
+
+:::::steps
+
+### Map the authorities
+
+List each token, policy, role holder, receive account, recovery authority, and offchain decision owner. Identify shared policies and the accounts that can change permissions.
+
+### Exercise permitted and blocked paths
+
+Test allowed transfers, issuer-policy rejections, receiver holds, authorized claims, and the pause behavior your application depends on. Confirm that a successful held transfer cannot credit a customer as delivered.
+
+### Preserve action and decision evidence
+
+Link policy and role changes, blocked receipts, claims, and burns to internal approvals and case records. Monitor changes to privileged authority and provide a way to stop new application submissions during an incident.
+
+:::::
+
+## Token control questions
+
+### Does TIP-403 perform KYC or sanctions screening?
+
+No. It enforces configured address policies. Your institution or provider supplies the identity, screening, and review workflow behind those decisions.
+
+### Can an account reject an unsupported token?
+
+It can configure a receive-policy token filter. A blocked inbound is held by the guard rather than credited to the account. Index and handle the resulting receipt.
+
+### Does an onchain control establish legal compliance?
+
+No. Technical authority, the institution's decisions, applicable requirements, and evidence of the surrounding workflow are distinct. Document the responsibilities for the specific entity, asset, and service.

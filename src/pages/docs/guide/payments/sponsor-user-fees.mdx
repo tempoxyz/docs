@@ -157,6 +157,12 @@ function SendSponsoredPayment() {
 
 Configure the fee payer service to check the sender, target contracts, allowed methods, and spending budget before signing. Track sponsored fees against your application or customer records, and show the sender when your application covers the fee.
 
+### Set sponsorship limits and handle declines
+
+Define eligible users, approved contracts and methods, per-user limits, and the application's total fee budget. Decide whether a declined sponsorship request stops submission or offers a user-paid option. Check that your wallet and client support the chosen flow before requesting a signature.
+
+Sponsorship covers the network fee. It does not fund the transfer amount, an FX spread, or a receiving provider's charges. Display those separately and record the actual sponsored fee against the payment. A fee authorization does not establish that the recipient received the payment.
+
 ### Fee sponsorship security considerations
 
 A fee payer signs a specific transaction; sponsorship does not grant authority to sign other transactions from the sender’s account. See [fee payer signature details](/docs/protocol/transactions/spec-tempo-transaction#fee-payer-signature-details) for the fields each signer commits to.
