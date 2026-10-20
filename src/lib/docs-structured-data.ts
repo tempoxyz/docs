@@ -11,6 +11,10 @@ type DocsStructuredDataContext = {
 type DocsHeadTags = {
   base: false
   canonical?: string
+  link?: (
+    | { rel: 'alternate'; type: 'text/markdown'; href: string; title: string }
+    | { rel: 'help'; type: 'text/plain'; href: string; title: string }
+  )[]
   meta: {
     ogType?: 'article'
     ogImage?: string
@@ -98,9 +102,31 @@ export function docsStructuredDataHead(
   // The public mount has no trailing slash. Match its redirect policy and the
   // URLs used by the docs graph instead of Vocs' default baseUrl + "/".
   const canonical = pagePath === '/' ? { canonical: developersUrl } : {}
+  // Advertise the existing generated text without requiring hydration or a
+  // reader to discover the page-tools menu. Use the canonical public mount.
+  const markdownRoute = pagePath === '/' ? '/index' : pagePath.replace(/\/$/, '')
+  const link: DocsHeadTags['link'] = [
+    {
+      rel: 'alternate',
+      type: 'text/markdown',
+      href: `${developersUrl}/assets/md${markdownRoute}.md`,
+      title: 'Markdown version of this page',
+    },
+    {
+      rel: 'help',
+      type: 'text/plain',
+      href: `${developersUrl}/llms.txt`,
+      title: 'Tempo documentation index',
+    },
+  ]
   const title = frontmatter?.title?.trim()
   if (!title)
-    return { base: false, ...canonical, meta: { articleModifiedTime: false as const, ...ogImage } }
+    return {
+      base: false,
+      ...canonical,
+      link,
+      meta: { articleModifiedTime: false as const, ...ogImage },
+    }
 
   const docsUrl = developersUrl
   const organizationId = 'https://tempo.xyz/#organization'
@@ -198,6 +224,7 @@ export function docsStructuredDataHead(
   return {
     base: false,
     ...canonical,
+    link,
     meta: { articleModifiedTime: false as const, ...ogImage },
     script: [{ type: 'application/ld+json', innerHTML }],
   }

@@ -53,6 +53,12 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: [
+        // Vocs' router path omits the production /developers mount. With our
+        // base:false head, its native skip link must use an in-page fragment.
+        {
+          find: './internal/SkipToContent.client.js',
+          replacement: path.resolve(process.cwd(), 'src/components/DocsSkipToContent.tsx'),
+        },
         {
           find: 'next/image',
           replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),

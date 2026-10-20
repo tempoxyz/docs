@@ -109,6 +109,11 @@ for (const c of cases) {
     if (c.path === '/' || c.path === '/get-started' || c.path.startsWith('/docs/')) {
       expect(metaContent(head, 'article:published_time')).toBeUndefined()
       expect(metaContent(head, 'article:modified_time')).toBeUndefined()
+      const markdownRoute = c.path === '/' ? '/index' : c.path
+      expect(head).toContain('rel="alternate"')
+      expect(head).toContain('type="text/markdown"')
+      expect(head).toContain(`href="https://tempo.xyz/developers/assets/md${markdownRoute}.md"`)
+      expect(head).toContain('href="https://tempo.xyz/developers/llms.txt"')
     }
   })
 }

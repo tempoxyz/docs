@@ -20,6 +20,28 @@ function node(schema: ReturnType<typeof graph>, type: string) {
 }
 
 describe('docs structured data', () => {
+  test.each([
+    ['/', '/index'],
+    ['/get-started', '/get-started'],
+    ['/docs/guide/payments/send-a-payment', '/docs/guide/payments/send-a-payment'],
+    ['/docs/api/activities', '/docs/api/activities'],
+  ])('advertises existing text exports for %s before hydration', (route, markdownRoute) => {
+    expect(docsStructuredDataHead(route, {})?.link).toEqual([
+      {
+        rel: 'alternate',
+        type: 'text/markdown',
+        href: `https://tempo.xyz/developers/assets/md${markdownRoute}.md`,
+        title: 'Markdown version of this page',
+      },
+      {
+        rel: 'help',
+        type: 'text/plain',
+        href: 'https://tempo.xyz/developers/llms.txt',
+        title: 'Tempo documentation index',
+      },
+    ])
+  })
+
   test('uses the no-slash homepage canonical in both head and structured data', () => {
     const head = docsStructuredDataHead('/', { frontmatter: { title: 'Documentation' } })
     expect(head).toMatchObject({ canonical: 'https://tempo.xyz/developers' })
@@ -141,7 +163,8 @@ describe('docs structured data', () => {
   })
 
   test('does not emit JSON-LD outside the page frontmatter context', () => {
-    expect(docsStructuredDataHead('/docs/api/activities', {})).toEqual({
+    expect(docsStructuredDataHead('/docs/api/activities', {})).not.toHaveProperty('script')
+    expect(docsStructuredDataHead('/docs/api/activities', {})).toMatchObject({
       base: false,
       meta: {
         articleModifiedTime: false,
