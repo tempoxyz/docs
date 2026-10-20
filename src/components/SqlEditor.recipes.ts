@@ -10,6 +10,8 @@ export const sqlEditorLayout = style({
     'var(--tempo-style-inset-shadow), var(--tempo-style-inset-ring-shadow), var(--tempo-style-ring-offset-shadow), var(--tempo-style-ring-shadow), var(--tempo-style-shadow) !custom',
 })
 export const sqlEditorLayout2 = style({
+  width: '100%',
+  boxSizing: 'border-box',
   overflow: 'auto',
   padding: tokens.spacing['3'],
   backgroundColor: tokens.color.gray2,

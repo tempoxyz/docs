@@ -6,6 +6,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
+import { vocsSkipLinkPlugin } from './scripts/vocs-skip-link-plugin'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
@@ -45,6 +46,7 @@ export default defineConfig(({ mode }) => {
       blogPostsPlugin(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),
+      vocsSkipLinkPlugin(),
       vocsWithZyzz(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),
@@ -53,12 +55,6 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: [
-        // Vocs' router path omits the production /developers mount. With our
-        // base:false head, its native skip link must use an in-page fragment.
-        {
-          find: './internal/SkipToContent.client.js',
-          replacement: path.resolve(process.cwd(), 'src/components/DocsSkipToContent.tsx'),
-        },
         {
           find: 'next/image',
           replacement: path.resolve(process.cwd(), 'src/marketing/next-shims.tsx'),
