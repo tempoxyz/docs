@@ -3,7 +3,7 @@
   "redirects": [
     {
       "source": "/docs/resources/partners.md",
-      "destination": "/docs/resources/guides.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides.md",
       "permanent": true
     },
     {
@@ -13,7 +13,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners.md",
-      "destination": "/assets/md/docs/resources/guides.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides.md",
       "permanent": true
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "source": "/docs/resources/partners/privy.md",
-      "destination": "/docs/resources/guides/embedded-wallets.md#privy",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#privy",
       "permanent": true
     },
     {
@@ -33,7 +33,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/privy.md",
-      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#privy",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#privy",
       "permanent": true
     },
     {
@@ -43,7 +43,7 @@
     },
     {
       "source": "/docs/resources/partners/dynamic.md",
-      "destination": "/docs/resources/guides/embedded-wallets.md#dynamic",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#dynamic",
       "permanent": true
     },
     {
@@ -53,7 +53,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/dynamic.md",
-      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
       "permanent": true
     },
     {
@@ -63,7 +63,7 @@
     },
     {
       "source": "/docs/resources/partners/turnkey.md",
-      "destination": "/docs/resources/guides/embedded-wallets.md#turnkey",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#turnkey",
       "permanent": true
     },
     {
@@ -73,7 +73,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/turnkey.md",
-      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
       "permanent": true
     },
     {
@@ -83,7 +83,7 @@
     },
     {
       "source": "/docs/resources/partners/fireblocks.md",
-      "destination": "/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#fireblocks",
       "permanent": true
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/fireblocks.md",
-      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
       "permanent": true
     },
     {
@@ -103,7 +103,7 @@
     },
     {
       "source": "/docs/resources/partners/bridge.md",
-      "destination": "/docs/resources/guides/funding-and-payouts.md#bridge",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts.md#bridge",
       "permanent": true
     },
     {
@@ -113,7 +113,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/bridge.md",
-      "destination": "/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
       "permanent": true
     },
     {
@@ -123,7 +123,7 @@
     },
     {
       "source": "/docs/resources/partners/alchemy.md",
-      "destination": "/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#alchemy",
       "permanent": true
     },
     {
@@ -133,7 +133,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/alchemy.md",
-      "destination": "/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
       "permanent": true
     },
     {
@@ -143,7 +143,7 @@
     },
     {
       "source": "/docs/resources/partners/quicknode.md",
-      "destination": "/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#quicknode",
       "permanent": true
     },
     {
@@ -153,7 +153,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/quicknode.md",
-      "destination": "/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
       "permanent": true
     },
     {
@@ -163,7 +163,7 @@
     },
     {
       "source": "/docs/resources/partners/allium.md",
-      "destination": "/docs/resources/guides/payment-reconciliation.md#allium",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md#allium",
       "permanent": true
     },
     {
@@ -173,7 +173,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/allium.md",
-      "destination": "/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
       "permanent": true
     },
     {
@@ -183,7 +183,7 @@
     },
     {
       "source": "/docs/resources/partners/goldsky.md",
-      "destination": "/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md#goldsky",
       "permanent": true
     },
     {
@@ -193,7 +193,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/goldsky.md",
-      "destination": "/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
       "permanent": true
     },
     {
@@ -203,7 +203,7 @@
     },
     {
       "source": "/docs/resources/partners/trm.md",
-      "destination": "/docs/resources/guides/payment-screening.md#trm",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#trm",
       "permanent": true
     },
     {
@@ -213,7 +213,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/trm.md",
-      "destination": "/assets/md/docs/resources/guides/payment-screening.md#trm",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#trm",
       "permanent": true
     },
     {
@@ -223,7 +223,7 @@
     },
     {
       "source": "/docs/resources/partners/chainalysis.md",
-      "destination": "/docs/resources/guides/payment-screening.md#chainalysis",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#chainalysis",
       "permanent": true
     },
     {
@@ -233,7 +233,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/chainalysis.md",
-      "destination": "/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
       "permanent": true
     },
     {
@@ -243,7 +243,7 @@
     },
     {
       "source": "/docs/resources/partners/elliptic.md",
-      "destination": "/docs/resources/guides/payment-screening.md#elliptic",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#elliptic",
       "permanent": true
     },
     {
@@ -253,7 +253,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/elliptic.md",
-      "destination": "/assets/md/docs/resources/guides/payment-screening.md#elliptic",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#elliptic",
       "permanent": true
     },
     {
@@ -263,7 +263,7 @@
     },
     {
       "source": "/docs/resources/partners/blockaid.md",
-      "destination": "/docs/resources/guides/payment-screening.md#blockaid",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#blockaid",
       "permanent": true
     },
     {
@@ -273,7 +273,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/blockaid.md",
-      "destination": "/assets/md/docs/resources/guides/payment-screening.md#blockaid",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#blockaid",
       "permanent": true
     },
     {
@@ -283,7 +283,7 @@
     },
     {
       "source": "/docs/resources/partners",
-      "destination": "/docs/resources/guides",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides",
       "permanent": true
     },
     {
@@ -293,7 +293,7 @@
     },
     {
       "source": "/docs/resources/partners/privy",
-      "destination": "/docs/resources/guides/embedded-wallets#privy",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#privy",
       "permanent": true
     },
     {
@@ -303,7 +303,7 @@
     },
     {
       "source": "/docs/resources/partners/dynamic",
-      "destination": "/docs/resources/guides/embedded-wallets#dynamic",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#dynamic",
       "permanent": true
     },
     {
@@ -313,7 +313,7 @@
     },
     {
       "source": "/docs/resources/partners/turnkey",
-      "destination": "/docs/resources/guides/embedded-wallets#turnkey",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#turnkey",
       "permanent": true
     },
     {
@@ -323,7 +323,7 @@
     },
     {
       "source": "/docs/resources/partners/fireblocks",
-      "destination": "/docs/resources/guides/embedded-wallets#fireblocks",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#fireblocks",
       "permanent": true
     },
     {
@@ -333,7 +333,7 @@
     },
     {
       "source": "/docs/resources/partners/bridge",
-      "destination": "/docs/resources/guides/funding-and-payouts#bridge",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts#bridge",
       "permanent": true
     },
     {
@@ -343,7 +343,7 @@
     },
     {
       "source": "/docs/resources/partners/alchemy",
-      "destination": "/docs/partners/rpc-and-nodes#alchemy",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#alchemy",
       "permanent": true
     },
     {
@@ -353,7 +353,7 @@
     },
     {
       "source": "/docs/resources/partners/quicknode",
-      "destination": "/docs/partners/rpc-and-nodes#quicknode",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#quicknode",
       "permanent": true
     },
     {
@@ -363,7 +363,7 @@
     },
     {
       "source": "/docs/resources/partners/allium",
-      "destination": "/docs/resources/guides/payment-reconciliation#allium",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation#allium",
       "permanent": true
     },
     {
@@ -373,7 +373,7 @@
     },
     {
       "source": "/docs/resources/partners/goldsky",
-      "destination": "/docs/resources/guides/payment-reconciliation#goldsky",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation#goldsky",
       "permanent": true
     },
     {
@@ -383,7 +383,7 @@
     },
     {
       "source": "/docs/resources/partners/trm",
-      "destination": "/docs/resources/guides/payment-screening#trm",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#trm",
       "permanent": true
     },
     {
@@ -393,7 +393,7 @@
     },
     {
       "source": "/docs/resources/partners/chainalysis",
-      "destination": "/docs/resources/guides/payment-screening#chainalysis",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#chainalysis",
       "permanent": true
     },
     {
@@ -403,7 +403,7 @@
     },
     {
       "source": "/docs/resources/partners/elliptic",
-      "destination": "/docs/resources/guides/payment-screening#elliptic",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#elliptic",
       "permanent": true
     },
     {
@@ -413,7 +413,7 @@
     },
     {
       "source": "/docs/resources/partners/blockaid",
-      "destination": "/docs/resources/guides/payment-screening#blockaid",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#blockaid",
       "permanent": true
     },
     {
