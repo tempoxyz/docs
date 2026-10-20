@@ -10,7 +10,7 @@ description: Configure Dynamic's Tempo SDK, create embedded wallets, send TIP-20
 
 ## Choose Dynamic's Tempo SDK path
 
-Use the [current Tempo reference](https://www.dynamic.xyz/docs/javascript/reference/evm/tempo) for the JavaScript SDK. Install `@dynamic-labs-sdk/tempo` with its `viem` peer dependency. The older `@dynamic-labs-sdk/evm/tempo` entry point has been removed.
+Use the [current Tempo reference](https://www.dynamic.xyz/docs/javascript/reference/tempo/overview) for the JavaScript SDK. Install `@dynamic-labs-sdk/tempo` with its `viem` peer dependency. The older `@dynamic-labs-sdk/evm/tempo` entry point has been removed.
 
 Dynamic's Tempo integration has its own network registry and wallet-account type. Generic EVM helpers do not cover every Tempo operation.
 
@@ -21,7 +21,7 @@ Dynamic's Tempo integration has its own network registry and wallet-account type
 | Identify a Tempo account | `isTempoWalletAccount`; Tempo accounts use `chain: 'TEMPO'`. |
 | Read chain state | `getTempoPublicClient` for the active Tempo network. |
 | Send a token payment | `sendTip20Transaction` with an explicit token address and decimal precision. |
-| Use native transaction fields | `sendTempoTransaction` for batches, fee tokens, nonce keys, or validity windows. |
+| Use native transaction fields | `sendTempoTransaction` from `/waas` for embedded-wallet batches, fee tokens, nonce keys, or validity windows. |
 
 Use the provider's reference for current signatures and SDK setup. The table identifies the integration path; it is not a substitute for a complete client configuration.
 
@@ -61,7 +61,7 @@ Use Tempo's [activity and payment verification workflow](/docs/guide/payments/ac
 
 The Tempo JavaScript reference also states that embedded Tempo wallets do not support typed-data signing, and wallets belonging to a Dynamic business account cannot send transactions. Check those restrictions before selecting the wallet model for a backend or treasury flow.
 
-For sponsored payments, follow Dynamic's [fee-sponsor signing guide](https://www.dynamic.xyz/docs/javascript/reference/tempo/sign-for-a-fee-sponsor) and configure the corresponding [Tempo fee payer](/docs/guide/payments/sponsor-user-fees). A support-matrix entry does not supply your application's sponsorship budget or approval policy.
+For sponsored payments, follow Dynamic's [fee-sponsor signing guide](https://www.dynamic.xyz/docs/javascript/reference/tempo/sign-for-a-fee-sponsor). Call `signTempoTransaction` with `awaitingFeePayer: true`, then send the returned `signedTransaction` to your sponsor service for its signature and broadcast. Dynamic signs for the sender; your application supplies the [Tempo fee payer](/docs/guide/payments/sponsor-user-fees), budget, and approval policy.
 
 ## Dynamic integration questions
 
@@ -81,4 +81,4 @@ Its current chain matrix marks Tempo onchain events as unsupported. Plan an inde
 
 No. The current support matrix lists no Tempo sending or signing for the Node SDK. Check the exact SDK and wallet model instead of applying the browser JavaScript capabilities to another product.
 
-Provider documentation reviewed October 19, 2026.
+Provider documentation reviewed October 20, 2026.

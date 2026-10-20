@@ -33,6 +33,16 @@ Match the endpoint to [Tempo's current network details](/docs/quickstart/connect
 
 QuickNode's API overview currently lists a testnet chain ID of `42429`, which differs from current Moderato. Confirm a Moderato endpoint with QuickNode before using it for that network; do not assume an endpoint labeled testnet has the required chain ID.
 
+Replace `<QUICKNODE_TEMPO_HTTP_URL>` with your HTTP endpoint and run this read-only network check:
+
+```bash [Terminal]
+curl --fail --silent --show-error '<QUICKNODE_TEMPO_HTTP_URL>' \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
+```
+
+Expect `result: "0x1079"` for mainnet or `result: "0xa5bf"` for current Moderato. Stop if the result differs from the intended network. A matching chain ID confirms network identity, not support for every historical or diagnostic method.
+
 ### Connect the signing and payment flow
 
 Use [Tempo SDK setup](/docs/sdk) for the application's client and [Send payments](/docs/guide/payments/send-a-payment) for signing and submission. Match the token contract, fee configuration, and account to the endpoint's network.
@@ -73,7 +83,7 @@ Verify the endpoint first. The overview's listed testnet chain ID differs from T
 
 ## QuickNode documentation
 
-Source review: October 19, 2026.
+Source review: October 20, 2026.
 
 - [QuickNode: Tempo RPC quickstart](https://www.quicknode.com/docs/tempo/quickstart)
 - [QuickNode: Tempo APIs and networks](https://www.quicknode.com/docs/tempo/api-overview)

@@ -39,7 +39,7 @@ Use chain ID `4217` for mainnet or `42431` for Moderato. Privy's server requests
 
 ### Choose the transaction path
 
-Use the transfer API for a supported token transfer. For custom Tempo features, follow the native transaction reference rather than assuming a standard EVM send request exposes them. Native Tempo transactions use type `118` and a `calls` array.
+Use the [transfer API](https://docs.privy.io/wallets/actions/transfer/usage) for a supported token transfer. For custom Tempo features, follow the native transaction reference rather than assuming a standard EVM send request exposes them. Native Tempo transactions use type `118` and a `calls` array.
 
 Use the [stablecoin registry](/docs/partners/stablecoins) and current provider instructions to identify the exact token contract. Follow [sending payments](/docs/guide/payments/send-a-payment) for the corresponding Tempo workflow.
 
@@ -51,7 +51,9 @@ The Tempo-specific React transaction method supports `sponsor: true` in its opti
 
 ### Verify the delivered payment
 
-Preserve the transaction hash and business reference. Confirm the successful transaction and expected delivered transfer before crediting a customer. Follow [receiving payments](/docs/guide/payments/accept-a-payment); a broadcast hash alone does not establish delivery.
+For a transfer API request, save the returned wallet action ID and [track the action](https://docs.privy.io/wallets/actions/status) to a terminal state. Fetch it through the REST API with `include=steps` when you need step-level chain IDs and transaction hashes. For a low-level transaction request, save the returned broadcast hash.
+
+Preserve these identifiers with the business reference. Confirm the successful transaction and expected delivered transfer before crediting a customer. Follow [receiving payments](/docs/guide/payments/accept-a-payment); an action ID or broadcast hash alone does not establish delivery. [Inspect failed action steps](https://docs.privy.io/wallets/actions/lifecycle) before retrying because an action can have partial onchain effects.
 
 :::::
 
@@ -79,6 +81,6 @@ No. The wallet can sign payments through the provider. Authorize a bounded acces
 
 ### Where is the published browser example?
 
-Privy's [Tempo example application](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) covers embedded wallets and browser payments. Check its dependencies and network configuration before adapting it.
+Privy's [Tempo example application](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo) shows embedded wallets and browser payments with alphaUSD test tokens. Its [lockfile](https://github.com/privy-io/examples/blob/main/examples/privy-next-tempo/pnpm-lock.yaml) uses `tempo.ts` version `0.10.5`, whose default Tempo chain is the older testnet `42429`. Start new integrations from the [current Tempo transaction reference](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction); update the example's SDK, network, and token configuration before adapting it to mainnet or Moderato.
 
-Provider documentation reviewed October 19, 2026.
+Provider documentation reviewed October 20, 2026.

@@ -30,6 +30,16 @@ Use the [Alchemy dashboard](https://dashboard.alchemy.com/) to obtain an API key
 
 Choose the mainnet or Moderato endpoint and configure the client for the same network. Tempo mainnet uses chain ID `4217`; Moderato uses `42431`. Mainnet and testnet have separate assets and transaction histories.
 
+Replace `<ALCHEMY_TEMPO_HTTP_URL>` with the HTTP endpoint from your dashboard and run this read-only network check:
+
+```bash [Terminal]
+curl --fail --silent --show-error '<ALCHEMY_TEMPO_HTTP_URL>' \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
+```
+
+The response's `result` must be `0x1079` for mainnet or `0xa5bf` for Moderato. Stop and correct the endpoint or client configuration if it differs. This verifies network identity; it does not verify every RPC method or product entitlement.
+
 ### Validate reads before submitting a payment
 
 Alchemy's [Tempo quickstart](https://www.alchemy.com/docs/reference/tempo-api-quickstart) demonstrates Viem chain reads. Use the current [Tempo SDK setup](/docs/sdk) and [network details](/docs/quickstart/connection-details) for Tempo-specific configuration, then follow [Send payments](/docs/guide/payments/send-a-payment) for signing and submission.
@@ -64,7 +74,7 @@ No. Check the Tempo product-support matrix and the exact method you need. Readin
 
 ## Alchemy documentation
 
-Source review: October 19, 2026.
+Source review: October 20, 2026.
 
 - [Alchemy: Tempo endpoints and product support](https://www.alchemy.com/rpc/tempo)
 - [Alchemy: Tempo API quickstart](https://www.alchemy.com/docs/reference/tempo-api-quickstart)

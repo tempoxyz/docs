@@ -62,7 +62,9 @@ Turnkey policies govern signing performed through Turnkey. A [Tempo access key](
 
 Define the key's token limits, permitted calls, recipients where supported, and expiry separately. Use [Pay from a user's embedded wallet](/docs/accounts/automations/pay-from-an-embedded-wallet) for the documented Turnkey authorization path, and preserve both provider approval records and key lifecycle records.
 
-Fee sponsorship also requires an actual funded fee payer and its policy. A reference example does not make every Turnkey transaction automatically sponsored. See [Tempo fee sponsorship](/docs/guide/payments/sponsor-user-fees).
+For [Tempo-native fee sponsorship](/docs/guide/payments/sponsor-user-fees), configure a funded fee payer and its policy. Turnkey also documents [managed sponsorship](https://docs.turnkey.com/features/transaction-management) for mainnet and Moderato through its transaction-management service. That path requires an Enterprise plan, Gas Sponsorship enabled in the dashboard, and `sponsor: true`. Configure the organization's spend limits and track the returned transaction status.
+
+Choose the signing and submission path before configuring its policies. The native `tempo.tx` rules described above govern native Tempo transaction signing; use the provider's documented policy fields for its managed transaction service.
 
 ## Turnkey integration questions
 
@@ -82,4 +84,4 @@ Yes. Turnkey's Tempo examples include approver-specific signing conditions. Conf
 
 The access key has separate Tempo-enforced bounds. Configure and revoke those permissions onchain; changing a Turnkey policy alone does not revoke the key.
 
-Provider documentation reviewed October 19, 2026.
+Provider documentation reviewed October 20, 2026.
