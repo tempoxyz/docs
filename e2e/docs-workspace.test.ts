@@ -58,7 +58,7 @@ test('seven sections expose product tasks and expandable developer chapters', as
   const utilities = page.locator('.docs-section-utilities')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(navigation.getByRole('link')).toHaveText(sectionLabels)
-  await expect(utilities.getByRole('link')).toHaveText(utilityLabels)
+  await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
   for (const section of [
     {
       label: 'Get Started',
@@ -443,7 +443,22 @@ for (const path of ['/', '/blog']) {
       await expect(
         navigation.getByRole('combobox', { name: 'Color theme', includeHidden: true }),
       ).toHaveCount(0)
-      const destinations = [navigation.getByRole('link', { name: 'Blog', exact: true })]
+      const headerBlog = navigation.getByRole('link', { name: 'Blog', exact: true })
+      const destinations = path === '/blog' ? [headerBlog] : []
+      if (path === '/') {
+        await expect(headerBlog).toBeHidden()
+        const utilities = page.locator('.docs-section-utilities')
+        await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
+        const blog = utilities.getByRole('link', { name: 'Blog', exact: true })
+        await expect(blog).toBeVisible()
+        await expect(blog).toHaveAttribute('href', '/blog')
+        const partnersBox = await utilities
+          .getByRole('link', { name: 'Partners', exact: true })
+          .boundingBox()
+        const blogBox = await blog.boundingBox()
+        if (!partnersBox || !blogBox) throw new Error('Utility links have no visible bounds')
+        expect(blogBox.x).toBeGreaterThanOrEqual(partnersBox.x + partnersBox.width)
+      }
       const search = navigation.getByRole('button', { name: 'Search documentation', exact: true })
       const agents = navigation.getByRole('button', { name: 'Agent setup', exact: true })
       await expect(agents).toBeEnabled()
@@ -457,13 +472,16 @@ for (const path of ['/', '/blog']) {
           return box
         }),
       )
-      // Blog sits centered in the bar; Agent setup, then search, at the inline end.
-      const [blogBox, searchBox, agentsBox] = boxes
-      const navBox = await navigation.boundingBox()
-      if (!navBox) throw new Error('Header has no visible bounds')
-      const destinationsCenter = blogBox.x + blogBox.width / 2
-      expect(Math.abs(destinationsCenter - (navBox.x + navBox.width / 2))).toBeLessThanOrEqual(2)
-      expect(agentsBox.x).toBeGreaterThan(blogBox.x + blogBox.width)
+      // Blog pages retain the centered destination; docs use the utility row.
+      const [searchBox, agentsBox] = boxes.slice(-2)
+      if (path === '/blog') {
+        const blogBox = boxes[0]
+        const navBox = await navigation.boundingBox()
+        if (!navBox) throw new Error('Header has no visible bounds')
+        const destinationsCenter = blogBox.x + blogBox.width / 2
+        expect(Math.abs(destinationsCenter - (navBox.x + navBox.width / 2))).toBeLessThanOrEqual(2)
+        expect(agentsBox.x).toBeGreaterThan(blogBox.x + blogBox.width)
+      }
       expect(searchBox.x).toBeGreaterThan(agentsBox.x + agentsBox.width)
       expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(width)
       for (const [index, a] of boxes.entries()) {
