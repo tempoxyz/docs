@@ -1,0 +1,1016 @@
+{
+  "schema_version": 1,
+  "scope": "Every added guide/article/index and supporting note in Docs PR36 and tempo-web PR483. Modified protocol, build, and analytics files are listed separately and do not add article drafts.",
+  "sources": [
+    {
+      "repo": "tempoxyz/docs",
+      "pr": 36,
+      "url": "https://github.com/tempoxyz/docs/pull/36",
+      "ref": "6fd45c89ead49e05df826a648f500e3a9d82257f",
+      "changed_files": 214,
+      "draft_files": 210,
+      "other_changes": [
+        {
+          "path": "package.json",
+          "status": "modified"
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "status": "modified"
+        },
+        {
+          "path": "src/pages/protocol/tips/tip-1009.mdx",
+          "status": "modified"
+        },
+        {
+          "path": "src/pages/protocol/tips/tip-1010.mdx",
+          "status": "modified"
+        }
+      ],
+      "archive_directory": "docs-pr36",
+      "content_files": [
+        {
+          "path": "src/pages/guides/accept-stablecoin-payments-for-business.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/accept-stablecoin-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/ach-alternatives.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/add-payments-to-your-app.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/ai-agent-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/aml-kyc-for-crypto-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/autonomous-agent-wallets.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/b2b-crypto-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/best-chain-for-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/best-stablecoin-exchange.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/blockchain-for-banks.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/bridging-stablecoins-to-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/cheapest-way-to-swap-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/circle-mint-vs-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/content-monetization-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/convert-stablecoins-without-fees.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/convert-usd-to-eur-without-bank-fees.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/correspondent-banking-alternatives.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/creator-economy-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/cross-border-b2b-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/cross-border-payments-without-swift.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/crypto-payment-gateway.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/crypto-payments-for-ecommerce.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/crypto-payments-for-regulated-businesses.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/crypto-payments-for-saas.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/crypto-payroll-software.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/dai-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/dedicated-payment-lanes.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/developer-payment-integration.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/education-tuition-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/enterprise-treasury-guide.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/eurc-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/freelancer-crypto-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/gaming-micropayments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/healthcare-payments-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/hold-dollars-without-us-bank.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-accept-crypto-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-add-payment-metadata.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-batch-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-build-a-payment-link.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-create-recurring-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-handle-refunds.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-pay-with-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-send-stablecoins-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-swap-stablecoins-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/how-to-verify-payment-status.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/index.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/instant-finality-blockchain.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/instant-remittance-with-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/across.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/alchemy.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/allium.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/anchorage.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/artemis.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/axelar.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/bitgo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/blockaid.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/blockdaemon.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/blockscout.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/bridge.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/chainalysis.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/chainlink.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/chainstack.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/coinbase-wallet.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/coingecko.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/conduit.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/crossmint.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/cybrid.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/dfns.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/due.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/dynamic.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/elliptic.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/fireblocks.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/fonbnk.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/foundry.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/gelato.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/goldsky.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/hardhat.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/hyperlane.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/index.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/layerzero.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/lifi.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/mesh.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/metamask.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/nillion.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/openfx.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/para.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/phantom.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/plaid.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/privy.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/quicknode.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/rainbow.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/relay.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/safe.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/sardine.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/splits.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/stripe.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/tempo-rpc.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/tenderly.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/thirdweb.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/thunes.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/trm.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/turnkey.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/walletconnect.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/yellowcard.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/zerion.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/integrations/zerodev.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/invoice-payments-with-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/iot-payments-blockchain.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/legal-services-crypto-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/llm-app-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/machine-to-machine-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/mass-payout-platform-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/micropayments-for-apis.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/ngo-cross-border-donations.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/passkey-wallet-authentication.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/pay-contractors-with-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/pay-per-inference-api.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/payment-metadata-blockchain.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/payment-rails-for-fintech.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/paypal-alternatives.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/pyusd-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/real-estate-crypto-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/real-time-bank-settlement.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/reconcile-crypto-payments-with-erp.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/remittance-alternatives.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-internationally-with-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-argentina-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-australia-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-bangladesh-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-brazil-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-cambodia-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-canada-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-chile-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-china-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-colombia-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-dominican-republic-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-egypt-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-el-salvador-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-france-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-germany-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-ghana-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-guatemala-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-honduras-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-india-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-indonesia-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-italy-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-jamaica-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-japan-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-kenya-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-latin-america.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-malaysia-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-mexico-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-morocco-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-myanmar-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-nepal-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-nigeria-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-pakistan-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-peru-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-philippines-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-poland-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-portugal-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-romania-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-singapore-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-south-africa-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-south-korea-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-spain-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-sri-lanka-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-taiwan-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-thailand-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-turkey-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-uae-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-uk-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-money-to-vietnam-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/send-stablecoins-to-europe.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-accounts-payable.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-accounts-receivable.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-dex.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-native-gas.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-payment-rails.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-payments-compliance-guide.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-payroll-for-remote-teams.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-savings-account.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-swaps-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-treasury-management.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoin-vendor-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoins-vs-ach.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoins-vs-paypal.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoins-vs-wire-transfer.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/stablecoins-vs-wise.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/startup-crypto-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/streaming-payments-crypto.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/sub-cent-transaction-fees.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/swift-alternatives.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-base.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-ethereum-for-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-paypal.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-solana-for-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-swift.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-tron-usdt.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-venmo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/tempo-vs-wise.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/travel-rule-compliance-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/usdc-alternatives-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/usdc-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/usdt-on-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/western-union-alternatives.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/where-to-hold-stablecoins.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/wire-transfer-alternatives.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/guides/wise-alternatives.mdx",
+          "kind": "page"
+        }
+      ]
+    },
+    {
+      "repo": "tempoxyz/tempo-web",
+      "pr": 483,
+      "url": "https://github.com/tempoxyz/tempo-web/pull/483",
+      "ref": "d5456a5f89e6e6b05e7f4028dafec9beffd10d30",
+      "changed_files": 32,
+      "draft_files": 29,
+      "other_changes": [
+        {
+          "path": "src/lib/analytics/context.test.ts",
+          "status": "modified"
+        },
+        {
+          "path": "src/lib/analytics/context.ts",
+          "status": "modified"
+        },
+        {
+          "path": "src/lib/content-integrity.test.ts",
+          "status": "modified"
+        }
+      ],
+      "archive_directory": "tempo-web-pr483",
+      "content_files": [
+        {
+          "path": "src/pages/corridors/_TEMPLATE.md",
+          "kind": "support_note"
+        },
+        {
+          "path": "src/pages/corridors/us-to-mexico.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/corridors/us-to-philippines.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/agentic-payments.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/does-tempo-have-a-token.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/genius-act.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/_README.md",
+          "kind": "support_note"
+        },
+        {
+          "path": "src/pages/learn/glossary/correspondent-banking.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/fbo-account.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/fee-sponsorship.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/mint-and-burn.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/nostro-account.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/prefunding.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/remittance-corridor.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/rtgs.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/settlement-finality.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/t-plus-2.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/transfer-memo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/glossary/vostro-account.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/mpp-vs-x402.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/nostro-vostro-accounts.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/prefunding.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/stablecoin-settlement.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/stablecoins-vs-swift.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/tip-20.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/what-is-mpp.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/learn/what-is-tempo.mdx",
+          "kind": "page"
+        },
+        {
+          "path": "src/pages/press/_entity-fact-sheet.md",
+          "kind": "support_note"
+        },
+        {
+          "path": "src/pages/press/_press-page.md",
+          "kind": "support_note"
+        }
+      ]
+    }
+  ]
+}

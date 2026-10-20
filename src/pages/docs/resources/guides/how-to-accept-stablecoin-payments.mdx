@@ -4,6 +4,8 @@ seoTitle: "How to Accept Stablecoin Payments for B2B Invoices | Tempo Docs"
 description: "Plan B2B payment requests, verify stablecoin delivery, connect invoices to transfer events, and handle refunds and exceptions."
 ---
 
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Plan stablecoin payment acceptance
+
 # Plan stablecoin payment acceptance
 
 To accept stablecoin payments, give the customer the correct network, token, receiving address, amount, and payment reference. Verify the delivered transfer before updating an invoice or fulfilling an order. Follow the [Receive payments guide](/docs/guide/payments/accept-a-payment) for implementation, then use this checklist to connect it to your B2B checkout and finance workflow.
@@ -38,6 +40,8 @@ Tempo charges [network fees](/docs/protocol/fees) in eligible stablecoins, subje
 
 A payment link, QR code, or invoice should state which network and token to use, where to send it, how much is due, and which reference identifies the order. The checkout interface belongs to your application or provider. Test that customer wallets preserve the requested reference.
 
+Follow [Create payment links](/docs/resources/guides/payment-links) to store trusted request terms, share a link or QR code, and recover an interrupted checkout.
+
 | Request field | What to establish before sharing it |
 | --- | --- |
 | Network and asset | Specify Tempo and the accepted token contract, not only a ticker. |
@@ -60,9 +64,9 @@ Route underpayments, overpayments, expired requests, and missing references to a
 
 ## Treat refunds as a separate payment
 
-A merchant refund for a direct onchain payment is a new outbound transfer linked to the original payment. Verify the refund destination, especially when the original payment came from an exchange or shared wallet. Its sending address may not be suitable for a refund.
+A merchant refund is a new outbound transfer linked to the original payment. Verify the destination independently; an exchange or shared wallet's sending address may not credit a return to the customer.
 
-Track approved, submitted, and confirmed refund amounts against the invoice, including earlier partial refunds. Keep a refund ID and use a [payment reference](/docs/guide/payments/transfer-memos#link-refunds-to-the-original-payment) to connect the new transfer. If submission times out, inspect the existing transaction before retrying. For Routes, distinguish provider refunds from merchant refunds and follow the [delivery and refund states](/docs/routes/delivery).
+Follow [Handle stablecoin refunds](/docs/resources/guides/refunds) to reserve partial amounts, prevent concurrent over-refunds, and resolve uncertain submissions. For Routes provider returns, follow the [delivery and refund states](/docs/routes/delivery).
 
 ## Test the complete acceptance flow
 
