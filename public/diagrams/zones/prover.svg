@@ -1,74 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
-  <title>From private Zone execution to verified settlement</title>
-  <desc>The sequencer sends a batch and state witness to the prover. Inside an AWS Nitro Enclave, the stateless proof function replays execution and Nitro attests the batch result. The sequencer submits the attestation and a quorum-signed batch to Tempo, where the portal checks quorum and continuity and the native verifier authenticates the attestation. On acceptance, the portal records commitments and queues withdrawals. Temporary NoProof mode skips Nitro verification.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+  <title>Zone prover: prepare, prove, and settle</title>
+  <desc>The Zone sequencer prepares a batch and sends it with a private state witness to the Nitro prover. Approved code replays execution inside AWS Nitro. Via the sequencer, the batch, attestation, and quorum signatures reach the ZonePortal on Tempo. The portal checks authorization and continuity, calls the native verifier, records commitments, and queues withdrawals. T13 also permits a separate NoProof fallback: quorum signatures authorize settlement while Nitro verification is skipped.</desc>
   <defs>
     <marker id="zones-prover-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M1 1L7 4L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
   </defs>
 
-  <g fill="var(--foreground-secondary, #606060)" font-size="15" font-weight="600" letter-spacing="1.5">
-    <text x="32" y="32">PRIVATE ZONE EXECUTION</text>
-    <text x="32" y="342">PUBLIC TEMPO SETTLEMENT</text>
+  <!-- Preserve the PRD's private Zone / public Tempo layout. -->
+  <rect x="32" y="24" width="896" height="228" rx="10" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <rect x="32" y="370" width="896" height="166" rx="10" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <g fill="var(--foreground-secondary, #606060)" font-size="16" font-weight="500" letter-spacing="1">
+    <text x="56" y="62">ZONE · PRIVATE EXECUTION</text>
+    <text x="56" y="408">TEMPO · PUBLIC SETTLEMENT</text>
   </g>
-
-  <rect x="32" y="58" width="260" height="214" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
-  <rect x="350" y="58" width="578" height="214" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5" stroke-dasharray="6 5"/>
-
-  <g fill="currentColor" font-size="21" font-weight="600">
-    <text x="56" y="98">1. Build batch</text>
-    <text x="374" y="98">2. Replay and attest</text>
-  </g>
-  <g fill="var(--foreground-secondary, #606060)" font-size="17">
-    <text x="56" y="135">Zone sequencer</text>
-    <text x="56" y="174">Private transactions</text>
-    <text x="56" y="203">Zone + Tempo witness</text>
-    <text x="374" y="130">AWS NITRO ENCLAVE</text>
-  </g>
-
-  <path d="M302 165H340" stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-prover-arrow)"/>
-  <path d="M639 155V242" stroke="var(--diagram-box-border, #d4d4d4)"/>
-  <g fill="currentColor" font-size="19" font-weight="600">
-    <text x="374" y="174">SPF replay</text>
-    <text x="665" y="174">Nitro attestation</text>
-  </g>
-  <g fill="var(--foreground-secondary, #606060)" font-size="17">
-    <text x="374" y="204">Check state transitions</text>
-    <text x="374" y="233">Recompute commitments</text>
-    <text x="665" y="204">Approved enclave code</text>
-    <text x="665" y="233">Digest of batch result</text>
-  </g>
-
-  <path d="M798 282V356" stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-prover-arrow)"/>
-  <text x="778" y="306" text-anchor="end" fill="var(--foreground-secondary, #606060)" font-size="16">Attestation + commitments</text>
 
   <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
-    <rect x="668" y="366" width="260" height="176" rx="10"/>
-    <rect x="350" y="366" width="260" height="176" rx="10"/>
-    <rect x="32" y="366" width="260" height="176" rx="10"/>
+    <rect x="200" y="100" width="260" height="104" rx="10"/>
+    <rect x="630" y="100" width="270" height="104" rx="10"/>
+    <rect x="600" y="414" width="300" height="98" rx="10"/>
   </g>
-  <g stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-prover-arrow)">
-    <path d="M658 454H620"/>
-    <path d="M340 454H302"/>
+  <g fill="currentColor" font-size="21" font-weight="600" text-anchor="middle">
+    <text x="330" y="138">Zone sequencer</text>
+    <text x="765" y="138">Nitro prover</text>
+    <text x="750" y="450">3. Settle on Tempo</text>
   </g>
-  <g fill="currentColor" font-size="21" font-weight="600">
-    <text x="692" y="406">3. Submit batch</text>
-    <text x="374" y="406">4. Verify on Tempo</text>
-    <text x="56" y="406">5. Settle</text>
-  </g>
-  <g fill="var(--foreground-secondary, #606060)" font-size="17">
-    <text x="692" y="446">Sequencer submits</text>
-    <text x="692" y="475">Quorum-signed batch</text>
-    <text x="692" y="504">Nitro attestation</text>
-    <text x="374" y="446">Quorum + continuity</text>
-    <text x="374" y="475">Attestation + enclave</text>
-    <text x="374" y="504">Match batch digest</text>
-    <text x="56" y="446">Record commitments</text>
-    <text x="56" y="475">Advance Zone tip</text>
-    <text x="56" y="504">Queue withdrawals</text>
+  <g fill="var(--foreground-secondary, #606060)" font-size="17" text-anchor="middle">
+    <text x="330" y="174">1. Prepare the batch</text>
+    <text x="765" y="174">2. Replay and attest</text>
+    <text x="765" y="232">Approved code in AWS Nitro</text>
+    <text x="750" y="477">Portal verifies + records state</text>
+    <text x="750" y="500">Queue withdrawals</text>
   </g>
 
-  <path d="M32 574H928" stroke="var(--diagram-box-border, #d4d4d4)"/>
-  <text x="32" y="604" fill="var(--foreground-secondary, #606060)" font-size="17">Nitro path shown. Temporary NoProof mode skips attestation verification.</text>
-  <text x="32" y="630" fill="var(--foreground-secondary, #606060)" font-size="17">Nitro acceptance requires approved enclave measurements for the active hardfork.</text>
+  <!-- Private inputs remain off the public chain. -->
+  <path d="M470 152H620" stroke="currentColor" stroke-width="1.75" stroke-dasharray="6 5" marker-end="url(#zones-prover-arrow)"/>
+  <text x="545" y="126" text-anchor="middle" fill="var(--foreground-secondary, #606060)" font-size="16">Batch + witness</text>
+
+  <!-- Public submission is relayed by the sequencer, as in the PRD. -->
+  <path d="M765 252V404" stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-prover-arrow)"/>
+  <g fill="var(--foreground-secondary, #606060)" font-size="16">
+    <text x="785" y="288">Via sequencer:</text>
+    <text x="785" y="313">batch, proof</text>
+    <text x="785" y="338">+ signatures</text>
+  </g>
+
+  <!-- Temporary fallback bypasses the prover, not the portal checks. -->
+  <path d="M330 204V266Q330 282 346 282H514Q530 282 530 298V447Q530 463 546 463H590" stroke="var(--foreground-secondary, #606060)" stroke-width="1.75" stroke-dasharray="5 5" marker-end="url(#zones-prover-arrow)"/>
+  <text x="56" y="316" fill="currentColor" font-size="18" font-weight="600">T13 fallback: NoProof</text>
+  <text x="56" y="342" fill="var(--foreground-secondary, #606060)" font-size="16">Quorum signatures; Nitro check skipped</text>
+
+  <g fill="var(--foreground-secondary, #606060)" font-size="15">
+    <path d="M56 448H92" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <text x="106" y="453">Private batch + witness</text>
+    <path d="M56 480H92" stroke="currentColor" stroke-width="1.5"/>
+    <text x="106" y="485">Public settlement</text>
+  </g>
 </svg>
