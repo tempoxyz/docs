@@ -2,6 +2,426 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/docs/resources/partners.md",
+      "destination": "/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners.md",
+      "destination": "/developers/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners.md",
+      "destination": "/assets/md/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners.md",
+      "destination": "/developers/assets/md/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/privy.md",
+      "destination": "/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/privy.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/privy.md",
+      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/privy.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/dynamic.md",
+      "destination": "/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/dynamic.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/dynamic.md",
+      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/dynamic.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/turnkey.md",
+      "destination": "/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/turnkey.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/turnkey.md",
+      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/turnkey.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/fireblocks.md",
+      "destination": "/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/fireblocks.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/fireblocks.md",
+      "destination": "/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/fireblocks.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/bridge.md",
+      "destination": "/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/bridge.md",
+      "destination": "/developers/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/bridge.md",
+      "destination": "/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/bridge.md",
+      "destination": "/developers/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/alchemy.md",
+      "destination": "/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/alchemy.md",
+      "destination": "/developers/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/alchemy.md",
+      "destination": "/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/alchemy.md",
+      "destination": "/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/quicknode.md",
+      "destination": "/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/quicknode.md",
+      "destination": "/developers/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/quicknode.md",
+      "destination": "/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/quicknode.md",
+      "destination": "/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/allium.md",
+      "destination": "/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/allium.md",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/allium.md",
+      "destination": "/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/allium.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/goldsky.md",
+      "destination": "/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/goldsky.md",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/goldsky.md",
+      "destination": "/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/goldsky.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/trm.md",
+      "destination": "/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/trm.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/trm.md",
+      "destination": "/assets/md/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/trm.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/chainalysis.md",
+      "destination": "/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/chainalysis.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/chainalysis.md",
+      "destination": "/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/chainalysis.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/elliptic.md",
+      "destination": "/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/elliptic.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/elliptic.md",
+      "destination": "/assets/md/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/elliptic.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/blockaid.md",
+      "destination": "/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/blockaid.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/blockaid.md",
+      "destination": "/assets/md/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/blockaid.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners",
+      "destination": "/docs/resources/guides",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners",
+      "destination": "/developers/docs/resources/guides",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/privy",
+      "destination": "/docs/resources/guides/embedded-wallets#privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/privy",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#privy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/dynamic",
+      "destination": "/docs/resources/guides/embedded-wallets#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/dynamic",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/turnkey",
+      "destination": "/docs/resources/guides/embedded-wallets#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/turnkey",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/fireblocks",
+      "destination": "/docs/resources/guides/embedded-wallets#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/fireblocks",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/bridge",
+      "destination": "/docs/resources/guides/funding-and-payouts#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/bridge",
+      "destination": "/developers/docs/resources/guides/funding-and-payouts#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/alchemy",
+      "destination": "/docs/partners/rpc-and-nodes#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/alchemy",
+      "destination": "/developers/docs/partners/rpc-and-nodes#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/quicknode",
+      "destination": "/docs/partners/rpc-and-nodes#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/quicknode",
+      "destination": "/developers/docs/partners/rpc-and-nodes#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/allium",
+      "destination": "/docs/resources/guides/payment-reconciliation#allium",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/allium",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation#allium",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/goldsky",
+      "destination": "/docs/resources/guides/payment-reconciliation#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/goldsky",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/trm",
+      "destination": "/docs/resources/guides/payment-screening#trm",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/trm",
+      "destination": "/developers/docs/resources/guides/payment-screening#trm",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/chainalysis",
+      "destination": "/docs/resources/guides/payment-screening#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/chainalysis",
+      "destination": "/developers/docs/resources/guides/payment-screening#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/elliptic",
+      "destination": "/docs/resources/guides/payment-screening#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/elliptic",
+      "destination": "/developers/docs/resources/guides/payment-screening#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/blockaid",
+      "destination": "/docs/resources/guides/payment-screening#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/blockaid",
+      "destination": "/developers/docs/resources/guides/payment-screening#blockaid",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/api/routes/quotes",
       "destination": "/developers/docs/api/routes/transfers#quoteroutestransfer",
       "permanent": true
