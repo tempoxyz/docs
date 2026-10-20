@@ -1,0 +1,81 @@
+---
+title: Goldsky on Tempo
+seoTitle: Goldsky Tempo Indexing and Payment Reconciliation | Tempo Docs
+description: Stream Tempo data with Goldsky Turbo Pipelines or query it through subgraphs, then connect verified transfers and memos to your payment ledger.
+---
+
+# Goldsky on Tempo
+
+Goldsky supports Tempo mainnet and Moderato testnet with data pipelines and subgraph indexing. Use Turbo Pipelines to deliver selected chain records to a database or message queue, or deploy a subgraph for a GraphQL interface. Its [Tempo reconciliation guide](https://docs.goldsky.com/solutions/real-time-reconciliation) shows a workflow that decodes TIP-20 transfer memos and writes records to PostgreSQL.
+
+## Choose a Goldsky integration
+
+| Integration | Use it when |
+| --- | --- |
+| Turbo Pipelines | Your application needs transformed Tempo records in a supported destination such as PostgreSQL, ClickHouse, or Kafka. |
+| Subgraphs | Your application needs a GraphQL model over indexed contract activity. |
+| Edge RPC | You need a managed Tempo RPC endpoint alongside indexing. Confirm its supported methods for your workload. |
+
+Goldsky's [Tempo chain page](https://goldsky.com/chains/tempo) lists its supported networks and products. Check the selected dataset and deployment rather than assuming every product exposes identical records or refresh behavior. Turbo Pipelines succeeds Mirror; use the Turbo documentation when planning a new pipeline.
+
+## Prepare the Tempo reconciliation workflow
+
+The published example requires a Goldsky project, the Turbo CLI extension, a PostgreSQL database, and a Goldsky secret containing its database connection string. It also needs the token contract and ABI for decoding events. Keep database credentials in the provider's secret mechanism rather than in a public pipeline definition.
+
+:::::steps
+
+### Select the network, dataset, and history
+
+Confirm the exact Tempo dataset in Goldsky's datasource explorer or documented CLI tooling. Set the token-contract filter and the historical start required by your application. The example's `start_at: latest` processes new activity; it does not backfill earlier payments.
+
+### Decode the relevant transfer events
+
+Use the [Tempo reconciliation guide](https://docs.goldsky.com/solutions/real-time-reconciliation) for its `TransferWithMemo` mapping and PostgreSQL destination. Use the same [32-byte memo encoding](/docs/guide/payments/transfer-memos) in payment instructions and offchain invoice records. Keep customer and invoice contents out of public memos.
+
+### Verify records before applying payments
+
+Match the network, token contract, recipient, amount, and successful delivered transfer. Store the network, transaction hash, and transfer log index as a unique event key, then update the invoice once. Preserve unmatched references, short payments, excess payments, and held receipts for exception handling.
+
+:::::
+
+## Keep indexing separate from payment completion
+
+A pipeline supplies records for your application's matching rules. A memo match alone does not establish successful recipient delivery. A receive policy can hold funds instead of crediting the intended recipient; follow [Receive payments](/docs/guide/payments/accept-a-payment) for the full checks.
+
+The application also owns the relationship between an onchain transfer and a business obligation. Keep the invoice, expected amount, customer, and accounting outcome in the finance system. For local-currency payouts, retain provider completion evidence separately from the stablecoin transfer.
+
+Monitor ingestion progress and destination writes, and define how to recover after interruptions or replay historical records. A checkpoint or an empty result only describes the range processed; it is not evidence that every expected payment has arrived. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) for the broader operating model.
+
+## Deploy a pipeline or subgraph
+
+Follow the [Turbo quickstart](https://docs.goldsky.com/turbo-pipelines/quickstart) for project access, sources, transformations, and destinations. Goldsky supports a visual Flow editor and a CLI workflow; the Tempo reconciliation example uses the latter.
+
+For GraphQL access, follow [Deploy a subgraph](https://docs.goldsky.com/subgraphs/deploying-subgraphs). Prepare the indexed contracts, data model, and mappings for your application. A subgraph is a separate query interface, not a prerequisite for streaming data through Turbo.
+
+## Goldsky questions
+
+### Does Goldsky support mainnet and Moderato?
+
+Yes. Goldsky's Tempo page lists both networks. Match the pipeline dataset, contracts, and client to the intended network.
+
+### Do I need a subgraph to stream Tempo data?
+
+No. Turbo Pipelines can read a chain dataset and send transformed records to a supported destination. A subgraph supplies a separate GraphQL interface.
+
+### Does a matching memo mean an invoice is paid?
+
+No. Verify the expected delivered token, recipient, and amount, then apply the transfer once. Keep missing references and other exceptions visible for resolution.
+
+### What happened to Goldsky Mirror?
+
+Turbo Pipelines is its successor. Follow current Turbo setup and migration instructions for new pipeline work.
+
+## Goldsky documentation
+
+Source review: October 19, 2026.
+
+- [Goldsky: Tempo networks and products](https://goldsky.com/chains/tempo)
+- [Goldsky: Tempo payment reconciliation](https://docs.goldsky.com/solutions/real-time-reconciliation)
+- [Goldsky: Turbo Pipelines quickstart](https://docs.goldsky.com/turbo-pipelines/quickstart)
+- [Goldsky: deploy a subgraph](https://docs.goldsky.com/subgraphs/deploying-subgraphs)
+- [Tempo: data providers](/docs/partners/data-and-oracles)

@@ -1,12 +1,14 @@
 # Recovered payment and integration guides
 
-The source conversation is **Build Tempo ecosystem pages** (`01a12d2d-fef6-7bc2-ac99-f64757946bad`). This change adapts the reviewed educational recovery from [website PR #158](https://github.com/tempoxyz/tempo.xyz/pull/158) and the three provider-selection guides from [website PR #155](https://github.com/tempoxyz/tempo.xyz/pull/155) into native documentation. The website partner profiles remain a separate team workstream.
+The source conversation is **Build Tempo ecosystem pages** (`01a12d2d-fef6-7bc2-ac99-f64757946bad`). The initial recovery adapts the reviewed educational content from [website PR #158](https://github.com/tempoxyz/tempo.xyz/pull/158) and the three provider-selection guides from [website PR #155](https://github.com/tempoxyz/tempo.xyz/pull/155) into native documentation. The follow-up also adapts the 13 partner profiles from [website PR #150](https://github.com/tempoxyz/tempo.xyz/pull/150) into provider-specific Docs guides. This lets the documentation ship independently of the website ecosystem work.
 
 ## Scope and navigation
 
 - 26 substantive educational and provider-selection pages, plus their index.
+- 13 partner-specific integration guides, plus their index at `/docs/resources/partners`.
 - Three existing implementation guides absorb recovered fee-sponsorship, transfer-memo, and mint/burn operating details.
 - Get Started → Resources → Guides is collapsed by default. Its topic groups are also collapsed. No primary navigation section is added.
+- Get Started → Resources → Partner guides is also collapsed by default, with collapsed provider categories. Existing Partners and educational guide indexes link to it.
 - Every published page remains in the normal search, sitemap, and generated Markdown/AI inventory. The submenu changes visual prominence, not crawler access.
 - No marketing website pages, ecosystem cards, or historical redirects are changed.
 
@@ -49,6 +51,28 @@ This change uses the reviewed recovery rather than importing the raw archive. It
 | fee-sponsorship | [/docs/guide/payments/sponsor-user-fees](/docs/guide/payments/sponsor-user-fees) |
 | transfer-memos | [/docs/guide/payments/transfer-memos](/docs/guide/payments/transfer-memos) |
 | mint-and-burn | [/docs/guide/issuance/mint-stablecoins](/docs/guide/issuance/mint-stablecoins) |
+
+## Partner profile recovery
+
+The partner guides retain the original profiles' capability, prerequisite, operating-consideration, FAQ, and primary-source content, refreshed against current provider instructions. They use native MDX rather than the marketing website's generated components. General provider coverage does not imply support for every SDK, asset, or endpoint.
+
+| Original profile | Documentation destination |
+| --- | --- |
+| Privy | `/docs/resources/partners/privy` |
+| Dynamic | `/docs/resources/partners/dynamic` |
+| Turnkey | `/docs/resources/partners/turnkey` |
+| Fireblocks | `/docs/resources/partners/fireblocks` |
+| Bridge | `/docs/resources/partners/bridge` |
+| Alchemy | `/docs/resources/partners/alchemy` |
+| QuickNode | `/docs/resources/partners/quicknode` |
+| Allium | `/docs/resources/partners/allium` |
+| Goldsky | `/docs/resources/partners/goldsky` |
+| TRM | `/docs/resources/partners/trm` |
+| Chainalysis | `/docs/resources/partners/chainalysis` |
+| Elliptic | `/docs/resources/partners/elliptic` |
+| Blockaid | `/docs/resources/partners/blockaid` |
+
+The website draft and its directory cards are unchanged. No unpublished ecosystem route is required to read or use these Docs guides.
 
 ## Verification
 
