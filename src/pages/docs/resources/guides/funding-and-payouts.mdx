@@ -1,0 +1,84 @@
+---
+title: "Funding and payout infrastructure"
+seoTitle: "Funding and Payout Infrastructure for Tempo | Tempo Docs"
+description: "Plan bank funding, stablecoin conversion, payout delivery, and reconciliation around a supported payment route."
+---
+
+# Funding and payout infrastructure
+
+Choose funding and payout infrastructure around a specific payment route: who sends, what currency they use, which asset moves on Tempo, and how the recipient receives funds. Confirm that complete route before comparing API features or making a delivery promise.
+
+<span id="define-route" />
+
+## Specify both ends of the payment
+
+Record the sender and recipient locations, customer type, source currency and rail, Tempo asset, and destination currency and rail. Check the route in its intended direction, including transaction minimums and customer eligibility. Support for a blockchain alone does not establish every asset or bank route.
+
+Bridge’s Tempo guide provides OUSD funding and payout examples. Its route explorer is the starting point for checking an actual asset-and-rail combination. Keep the exact asset identity in your payment records rather than relying on a ticker alone.
+
+- **Supported payment routes.** Check currencies, rails, direction, and minimums. [Open Bridge’s route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes).
+
+<span id="select-flow" />
+
+## Match the product to the flow
+
+For recurring bank deposits, evaluate reusable virtual account instructions. For individual payments, evaluate transfers. For stablecoin deposits that should automatically continue to a fixed destination, evaluate liquidation addresses. Add a custodial wallet when your product needs to hold a balance between those movements.
+
+- **Bridge.** Compare its documented Tempo funding, payout, and wallet capabilities with your intended flow and access requirements. [Explore Bridge](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide).
+- **Tempo integration instructions.** Review Bridge’s examples for virtual accounts, wallets, transfers, and liquidation addresses. [Read the official guide](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide).
+
+<span id="access-requirements" />
+
+## Confirm onboarding before planning launch
+
+Bridge directs new developers to sales for account setup. Sandbox access also requires a developer account through Bridge support. Customers need the applicable identity or business verification, accepted terms, and approval for the payment rails they use. Production custodial wallet flows require an additional Bridge review.
+
+Use the sandbox to assess request and response handling. Bridge Wallet and orchestration simulations do not submit transactions to live bank or blockchain networks. Check the product-specific documentation before assuming that a blockchain testnet is used. Plan separate acceptance checks for the production route once access is approved.
+
+- **Account and customer prerequisites.** Review the documented access path before estimating integration work. [Read Bridge’s setup requirements](https://apidocs.bridge.xyz/get-started/introduction/quick-start/get-set-up-with-bridge).
+
+<span id="delivery-and-records" />
+
+## Track delivery and reconcile each leg
+
+Treat bank processing, conversion, and onchain settlement as distinct stages. Check the selected bank rail’s processing windows and recipient-bank conditions. Display the provider’s documented payment state rather than treating an API response or preliminary transaction hash as completed delivery.
+
+Link your internal payment ID to the provider transfer ID, final transaction reference, token, amount, fees, and any return. Bridge distinguishes processed transfers from submitted and exception states. For onchain reporting, Allium provides indexed Tempo datasets; Goldsky documents streaming Tempo events into a database. Your application still defines matching and exception handling.
+
+- **Transfer lifecycle.** Understand submitted, processed, returned, and other transfer states. [Review Bridge transfer states](https://apidocs.bridge.xyz/platform/orchestration/transfers/transfer-states).
+
+## Funding and payout questions
+
+### Does near-instant Tempo settlement mean instant bank delivery?
+
+No. Tempo settlement describes the onchain leg. Bank delivery also depends on the provider, payment rail, processing windows, and recipient bank.
+
+### Can I test real payouts in Bridge’s sandbox?
+
+No. Bridge Wallet and orchestration simulations do not submit transactions to live bank or blockchain networks. Use them to evaluate API behavior, then confirm the production route separately.
+
+### Is a data provider required for funding or payouts?
+
+No. Evaluate one when your reporting or reconciliation needs extend beyond the records available from your payment provider. Indexed data still needs to be matched to your internal payment records.
+
+## Funding and payout documentation
+
+Source review: October 12, 2026.
+
+- [Bridge: Tempo integration](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide)
+- [Bridge: route coverage](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes)
+- [Bridge: virtual accounts](https://apidocs.bridge.xyz/platform/orchestration/virtual_accounts/virtual-account)
+- [Bridge: liquidation addresses](https://apidocs.bridge.xyz/platform/orchestration/liquidation_address/liquidation_address)
+- [Bridge: account setup](https://apidocs.bridge.xyz/get-started/introduction/quick-start/get-set-up-with-bridge)
+- [Bridge: wallet requirements](https://apidocs.bridge.xyz/platform/wallets/overview)
+- [Bridge: sandbox limitations](https://apidocs.bridge.xyz/get-started/introduction/quick-start/setting-up-sandbox)
+- [Bridge: transfer states](https://apidocs.bridge.xyz/platform/orchestration/transfers/transfer-states)
+- [Bridge: processing windows](https://apidocs.bridge.xyz/platform/orchestration/more/cutoffs)
+- [Allium: Tempo data](https://docs.allium.so/historical-data/supported-blockchains/evm/tempo)
+- [Goldsky: payment reconciliation](https://docs.goldsky.com/solutions/real-time-reconciliation)
+
+## Related payment operations guides
+
+- [Payment rails compared](/docs/resources/guides/payment-rails): Understand the bank and onchain legs of a payment.
+- [Payment reconciliation](/docs/resources/guides/payment-reconciliation): Connect onchain transfers to your payment records.
+- [Partner integrations](/docs/partners): Browse supporting wallets, data, and risk tools.

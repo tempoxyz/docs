@@ -19,6 +19,14 @@ import { Cards, Card } from 'vocs'
 
 Mint tokens to a recipient using an account with the issuer role. These examples use a token created on Moderato testnet.
 
+## Separate token supply from issuance and redemption
+
+Minting increases token supply; burning decreases it. An onchain event does not prove reserve funding or completion of a fiat redemption. Keep the issuer's approved request, token operation, and confirmed bank movement as separate records.
+
+For each operation, retain the network, token contract, amount in base units, authorized account, request ID, transaction hash, and final outcome. Before retrying after a timeout, check whether the original transaction completed. Repeating a completed mint creates additional supply.
+
+Issuer eligibility, reserve management, and redemption access depend on the issuer and its terms. A TIP-20 role authorizes a contract operation; it does not establish regulatory approval. See the [GENIUS Act guide](/docs/resources/guides/genius-act) for the U.S. statutory framework and [payment reconciliation](/docs/resources/guides/payment-reconciliation) for payment records.
+
 ## Stablecoin minting steps
 
 :::::steps

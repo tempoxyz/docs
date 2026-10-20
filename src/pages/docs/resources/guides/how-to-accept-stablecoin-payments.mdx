@@ -1,0 +1,97 @@
+---
+title: "Plan stablecoin payment acceptance"
+seoTitle: "Plan stablecoin payment acceptance | Tempo Docs"
+description: "Plan B2B payment requests, verify stablecoin delivery, connect invoices to transfer events, and handle refunds and exceptions."
+---
+
+# Plan stablecoin payment acceptance
+
+Start with the [Receive payments guide](/docs/guide/payments/accept-a-payment) for the maintained implementation. Use this checklist to decide how your B2B application requests payment, verifies delivery, updates finance records, and handles exceptions.
+
+Stablecoin payments can operate alongside ACH and wires. Tempo supplies the onchain settlement layer; your application or provider supplies checkout, customer records, custody controls, and any bank funding or payout steps.
+
+## Define the payment and integration model
+
+Choose one initial flow, such as invoice collection, marketplace deposits, or funding an embedded account. Decide whether your application receives stablecoins directly or relies on a provider for funding, custody, conversion, and reporting.
+
+| Decision | Establish before accepting funds |
+| --- | --- |
+| Recipient outcome | Retain the stablecoin, convert to another supported token, or request a provider bank payout. |
+| Asset | Specify the token contract and network. Use the [token guide](/docs/guide/ousd) and [token list](/docs/quickstart/tokenlist) rather than assuming ticker equivalence. |
+| Custody and signing | Identify who controls the receiving account and authorizes withdrawals or refunds. |
+| Payment controls | Decide which senders and tokens are eligible and how exceptions are reviewed. |
+| Finance integration | Define the invoice, event, and ledger records that establish a completed payment. |
+
+Direct integrations use the [Tempo SDK](/docs/sdk) and read onchain transfer events. A receiving account does not need to call an API to accept each ordinary transfer. Provider-led integrations can expose higher-level payment APIs or a hosted interface; confirm the precise services supplied for your flow.
+
+## Configure accounts, assets, and fees
+
+[Token policies](/docs/protocol/tip403/overview) enforce issuer-defined transfer rules. [Account receive policies](/docs/accounts/policies/receive-policies) control which receipts an account accepts. These are distinct from identity checks, screening decisions, and your application's payment approvals.
+
+If you need customer-specific destinations, [customer deposit addresses](/docs/guide/payments/virtual-addresses) can attribute incoming funds while crediting a shared account. They do not create separate onchain customer balances; your application maintains that ledger.
+
+Use the [Stablecoin DEX](/docs/guide/stablecoin-dex/executing-swaps) if you need to convert a delivered stablecoin. Quote the actual amount and verify the output. Supporting two tokens does not guarantee conversion at par or enough liquidity for the payment.
+
+Tempo has no native gas token. Eligible stablecoins can pay [network fees](/docs/protocol/fees), subject to fee-token and Fee AMM liquidity requirements. [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) lets your application pay transaction fees. Include provider, conversion, and bank-delivery charges when calculating the complete payment cost.
+
+## Build a payment request that finance can reconcile
+
+A payment link, QR code, or invoice should state which network and token to use, where to send it, how much is due, and which reference identifies the order. The checkout interface belongs to your application or provider. Test that customer wallets preserve the requested reference.
+
+| Request field | What to establish before sharing it |
+| --- | --- |
+| Network and asset | Specify Tempo and the accepted token contract, not only a ticker. |
+| Recipient | Use an account you control or a supported customer deposit address. |
+| Amount | Store the expected amount and token precision in the payment system. |
+| Reference | Assign a short, unique ID that maps to an invoice or order in your database. |
+| Payment terms | Define expiry, partial payments, overpayments, and the refund process. |
+
+For an illustrative invoice requesting 1,000 USDC.e on Tempo, the payment could use `INV-2048` as its reference. Customer details, purchase orders, and billing information stay in your database. If the wallet cannot supply a memo, consider customer deposit addresses for attribution.
+
+[Transfer memos](/docs/guide/payments/transfer-memos) hold a 32-byte reference. The limit is bytes, not characters, and memos are public transaction data. Use the same encoding when requesting a reference and matching incoming events.
+
+## Verify delivery before fulfilling an order
+
+A wallet confirmation screen, matching memo, or successful API request is not enough. Follow the [receiving guide](/docs/guide/payments/accept-a-payment#match-payments-to-customers) to verify the network, token contract, recipient, amount, successful receipt, and delivered transfer events. A receive policy can hold funds instead of delivering them to the intended recipient.
+
+Store the network, transaction hash, and transfer log index as a unique event key. Record the event and update the invoice in one database transaction so a repeated notification cannot credit the customer twice. Recover missed activity after a connection interruption and follow pagination through historical records.
+
+Route underpayments, overpayments, expired requests, and missing references to an exception queue. A shared transaction hash can contain several transfers; a balance increase alone cannot identify an invoice.
+
+## Treat refunds as a separate payment
+
+A merchant refund for a direct onchain payment is a new outbound transfer linked to the original payment. Verify the refund destination, especially when the original payment came from an exchange or shared wallet. Its sending address may not be suitable for a refund.
+
+Track approved, submitted, and confirmed refund amounts against the invoice, including earlier partial refunds. Keep a refund ID and use a [payment reference](/docs/guide/payments/transfer-memos#link-refunds-to-the-original-payment) to connect the new transfer. If submission times out, inspect the existing transaction before retrying. For Routes, distinguish provider refunds from merchant refunds and follow the [delivery and refund states](/docs/routes/delivery).
+
+## Test the complete acceptance flow
+
+:::::steps
+
+### Verify the testnet payment path
+
+Use the test token and network named in the implementation guide. Confirm the correct token, amount, recipient, memo, and receipt before marking a test invoice paid.
+
+### Exercise payment exceptions
+
+Test repeated notifications, missed events, wrong assets, partial payments, blocked receipts, refund requests, and unresolved submissions.
+
+### Connect the finance close
+
+Confirm that each delivered payment maps to one invoice and ERP record, with fees recorded separately. Define who investigates exceptions and what evidence closes them.
+
+:::::
+
+## Payment acceptance questions
+
+### Do stablecoin payments replace ACH and wires?
+
+No. Keep those methods where they fit the workflow. Stablecoins add an onchain rail with separate funding, conversion, and delivery responsibilities.
+
+### What does a B2B company need to accept stablecoin payments?
+
+Define the payment flow, account model, asset, controls, finance integration, and exception process. Build directly with the maintained receiving guide or confirm the exact services supplied by a provider.
+
+### Can an application sponsor network fees?
+
+Yes. Configure fee sponsorship and monitor the sponsor's balance and fee-token availability. Sponsorship changes who pays network fees; it does not remove them.

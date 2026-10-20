@@ -11,7 +11,7 @@ export const aiDocsDescription =
 
 const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   overview:
-    'Choose a starting point, send a test payment, get testnet funds, connect a coding agent, and find the SDKs and CLI.',
+    'Choose a starting point, send a test payment, get testnet funds, connect a coding agent, find the SDKs and CLI, and use the resource guides to plan payment workflows, liquidity, and provider selection.',
   accounts:
     'Create accounts, set up signing methods, policies, access keys, key rotation, and fees, and follow guides for users, automations, agents, and teams.',
   earn: 'Choose a vault, deposit stablecoins, read positions, and withdraw. Earn is in beta; see the introduction for access.',

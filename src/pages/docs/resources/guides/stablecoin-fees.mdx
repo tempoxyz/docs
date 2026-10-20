@@ -1,0 +1,75 @@
+---
+title: Stablecoin fee operations
+seoTitle: Stablecoin Network Fees and Fee Token Operations | Tempo Docs
+description: Choose a Tempo fee token, check conversion liquidity, separate sponsorship from payment amounts, and reconcile actual network expenses.
+---
+
+# Stablecoin fee operations
+
+Set an explicit fee token for the account or transaction, maintain its balance, and monitor any required fee-conversion liquidity. Tempo accepts eligible USD-denominated TIP-20 tokens for network fees, so a payment integration does not need a separate volatile gas token.
+
+For implementation, start with [choosing a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin). This guide explains the operating decisions around that configuration.
+
+## Check fee-token eligibility
+
+A fee token must be a USD-denominated TIP-20 token and satisfy the [fee system's requirements](/docs/protocol/fees). When the payer and validator use different tokens, the required conversion route needs sufficient Fee AMM liquidity.
+
+A token name, custom issuance, or DEX pair does not establish fee eligibility. Check the exact contract, currency denomination, balance, applicable permissions, and conversion liquidity. Technical eligibility also does not establish a redemption service or fiat payout route.
+
+## Choose a fee token deliberately
+
+The [fee-token preference rules](/docs/protocol/fees/spec-fee#fee-token-preferences) check explicit transaction preferences, account preferences, qualifying token or DEX calls, and the documented fallback.
+
+For an application, prefer an explicit transaction-level or persistent account setting. It makes the fee asset you need to fund and reconcile clear. Same-token selection for a payment is conditional on the transaction's calls and the applicable selection rules.
+
+Once a preference selects a token, a failed eligibility, balance, or liquidity check does not cause the protocol to try every later preference. Do not rely on holding another stablecoin to rescue an invalid explicit selection.
+
+Follow [the fee-token guide](/docs/guide/payments/pay-fees-in-any-stablecoin) to configure and inspect the selected asset. For a sponsored transaction, the fee payer chooses the fee token.
+
+## Understand fee conversion
+
+The [Fee AMM](/docs/protocol/fees/fee-amm) converts network fees when the payer's token differs from the validator's preferred token. It does not convert the payment principal. User-facing stablecoin trades use the separate [Stablecoin DEX](/docs/protocol/exchange).
+
+Fee pools are directional. The protocol checks the direct pool and, when that pool lacks sufficient liquidity, tries the documented two-hop route through the selected token's quote token. Both hops must have sufficient liquidity.
+
+Each fee swap uses a fixed output rate of `0.997` validator-token units per payer-token unit before integer rounding. A two-hop route applies the rate twice. No conversion is needed when payer and validator use the same fee token. Read the [Fee AMM specification](/docs/protocol/fees/spec-fee-amm) for routing and rounding.
+
+## Separate invalid funding from reverted execution
+
+Before execution, the protocol checks fee funding and conversion liquidity and collects the maximum fee. After execution, it refunds the unused amount and handles the actual fee under the [fee lifecycle](/docs/protocol/fees/spec-fee#fee-payment).
+
+| Outcome | Operational meaning |
+| --- | --- |
+| Insufficient fee balance or liquidity | The transaction is invalid in that state and cannot be included. Investigate funding, configuration, and liquidity. |
+| Included transaction whose application call reverts | The application operation failed, but the transaction still incurs fees. Record the failed payment separately from its network expense. |
+| Successful payment | Verify the intended transfer and record the actual fee separately from the amount delivered. |
+
+Tempo uses a bounded dynamic base fee. The actual network expense depends on gas used, applicable gas price, and fee-token conversion. Do not budget every operation as one fixed transfer fee; authorization, contract calls, and other operations can have different costs.
+
+## Configure fee sponsorship separately
+
+[Fee sponsorship](/docs/guide/payments/sponsor-user-fees) allows a distinct account to pay the network fee while the sender authorizes the application calls. Sponsorship does not fund the payment principal or make the transaction costless.
+
+Set an application policy for which transactions to sponsor, then monitor the sponsor's balance and expense. Preserve the sender, sponsor, fee token, actual fee, and related business operation in your records.
+
+If an access key signs the payment, fees paid from its account consume its token spending limit. A separate fee payer pays the sponsored fee. See [access-key spending limits](/docs/accounts/access-keys/spending-limits).
+
+## Reconcile the network fee budget
+
+Track fee funding and actual expenses independently of customer payment amounts. Include successful and reverted transactions, sponsored operations, and any fee-conversion effects. An unused-fee refund is part of the network fee lifecycle, not a refund of the underlying purchase.
+
+For the complete payment cost, also include asset acquisition, custody, service-provider charges, currency conversion, and recipient delivery. Use [payment rail comparisons](/docs/resources/guides/payment-rails) when comparing a stablecoin route with another payment service.
+
+## Stablecoin fee questions
+
+### Can every stablecoin pay fees?
+
+No. Check USD-denominated TIP-20 eligibility and the required conversion liquidity. A similar ticker or support on another network does not establish support on Tempo.
+
+### Does the Fee AMM exchange the amount being paid?
+
+No. It handles network fee conversion. Use a separate exchange or provider flow when the recipient needs another asset or currency.
+
+### Does sponsoring a fee let the sponsor spend the customer's balance?
+
+Sponsorship authorizes the sponsor to pay the transaction's network fee. The customer's signing authority still authorizes the transaction calls. Keep those roles separate in the integration.

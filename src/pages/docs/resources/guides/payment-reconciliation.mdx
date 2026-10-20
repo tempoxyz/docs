@@ -1,0 +1,83 @@
+---
+title: "Plan payment reconciliation"
+seoTitle: "Plan payment reconciliation | Tempo Docs"
+description: "Connect confirmed stablecoin transfers to invoices, payables, treasury records, and ERP entries without duplicate credits."
+---
+
+# Plan payment reconciliation
+
+Use the [Receive payments guide](/docs/guide/payments/accept-a-payment) to verify delivery and [Payment references](/docs/guide/payments/transfer-memos) to encode and find invoice references. This guide explains how to connect that evidence to accounts receivable, accounts payable, treasury, and ERP records.
+
+A confirmed onchain transfer is settlement evidence, not a journal entry. Your integration supplies the business context and accounting mapping. Keep your existing finance controls and introduce onchain activity as another settlement source.
+
+## Assign a role to each finance system
+
+| Layer | Responsibility |
+| --- | --- |
+| Digital-asset subledger | Map transfers to business events, preserve settlement evidence, and prepare entries for the chart of accounts. |
+| Treasury system | Track usable balances and internal transfers across entities, accounts, custodians, and networks. |
+| ERP or accounting system | Apply approved accounting rules, maintain invoice balances, and record financial outcomes. |
+| Event ingestion | Read transfer activity, recover missed events, prevent duplicate processing, and expose exceptions. |
+
+One provider may supply several layers. Confirm the actual connector, fields, supported networks, and ownership of the ERP mapping. Protocol-level payment references do not constitute a built-in ERP integration.
+
+## Define the records before moving funds
+
+Reconciliation connects a verified transfer to a business obligation. Define that connection before sending payment instructions or releasing a vendor run. The following is an implementation pattern for your finance system, not a built-in ERP connector.
+
+| Record               | Keep in your application                                                           |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| Business obligation  | Invoice or payout ID, customer or vendor, legal entity, and expected amount.       |
+| Payment instructions | Network, token contract, recipient, and the requested reference.                   |
+| Settlement evidence  | Transaction hash, transfer log index, delivered amount, and confirmation status.   |
+| Accounting outcome   | Amount applied, remaining balance, fees, ERP record ID, and unresolved exceptions. |
+
+Use a short reference in the [32-byte transfer memo](/docs/guide/payments/transfer-memos) and retain the rest in your database. Customer details, purchase orders, and GL codes do not need to appear in public transaction data. A shared transaction hash can contain several transfers, so the hash alone is not a unique payment identifier.
+
+### Apply incoming payments to receivables
+
+Consider an illustrative invoice for 1,000 USDC.e. A payment carrying its reference is a candidate match. Before crediting the invoice, verify the network, token contract, recipient, amount, and successful delivery using the [receiving guide](/docs/guide/payments/accept-a-payment). If only 600 arrives, apply it as a partial payment or send it for review according to your policy; do not silently mark the invoice paid.
+
+Store the network, transaction hash, and transfer log index as a unique event key. Save that event and its invoice update together. This prevents a repeated webhook or replayed event from applying the same payment twice. After an interruption, read historical activity and continue through pagination to recover missed events.
+
+### Close the loop on payables
+
+For an approved supplier run, preserve each vendor's invoice ID, authorized destination, and expected amount before submission. Assign a distinct reference to each transfer, even when several transfers share one batch transaction. Match the receipt's delivered transfers back to those records before marking invoices paid.
+
+Track network fees separately from invoice principal. If the recipient needs local currency, retain the payout provider's delivery reference and status as well: the onchain transfer does not prove that the vendor's bank account was credited. See the [batch payment workflow](/docs/resources/guides/batch-payments) for validation and release controls.
+
+### Make exceptions visible
+
+Maintain a queue for unmatched references, wrong assets, partial or excess payments, blocked receipts, and refunds. Keep the original evidence when a reviewer resolves an exception. Link a refund to the original receivable and record its own confirmed transfer; changing the invoice status does not send money back.
+
+At close, compare expected payments, confirmed transfers, and posted ERP records. Investigate differences rather than treating a wallet's total balance as proof that individual invoices have been paid.
+
+## Connect events to finance entries
+
+Use a short reference in the memo and keep invoice contents, customer information, purchase orders, and GL codes offchain. The memo identifies a candidate business record; it does not establish successful delivery.
+
+Connectors can synchronize through event-driven updates, polling, or scheduled batches. Whichever approach you use, retain a checkpoint for historical recovery and make retries safe. Read [account activity](/docs/api/activities), [transfers](/docs/api/transfers), and [API pagination](/docs/api/pagination) for the maintained API surface.
+
+Your mapping should distinguish customer receipts, supplier payments, internal transfers, conversion, and fees. A transfer between two company accounts is not automatically revenue or an expense. Record the entity that owns the balance and preserve the provider's records when a custodian or payout service participates.
+
+## Keep settlement evidence and accounting outcomes separate
+
+Once a block is finalized on Tempo, it is not reversed by chain reorganizations. Read the [consensus documentation](/docs/protocol/blockspace/consensus) for the network assumptions. This does not eliminate operational errors, account restrictions, or the need to verify that the intended transfer succeeded.
+
+[Network fees](/docs/protocol/fees) use eligible stablecoins and a bounded dynamic base fee. Record the actual fee separately from principal. Standard stablecoin transfers have sub-cent fees, but contract calls, batches, provider charges, conversion, and bank delivery affect the complete payment cost.
+
+At close, reconcile opening balances, verified transfers, conversions, fees, and closing balances with the subledger and ERP. Keep unresolved items visible rather than making the wallet balance stand in for invoice-level evidence.
+
+## Reconciliation questions
+
+### How does stablecoin reconciliation differ from bank reconciliation?
+
+The obligation-matching process is similar. The settlement source changes to onchain events, which need network, token, recipient, amount, and event identifiers. Your application adds the invoice and accounting context.
+
+### Do stablecoins replace treasury or ERP systems?
+
+No. The onchain records flow into the systems finance uses for cash management, financial controls, and reporting.
+
+### Can an existing ERP or TMS handle the activity?
+
+Evaluate the specific connector or API mapping. Confirm its support for the intended network, assets, event identifiers, historical recovery, and exceptions. Structured references help that integration; they do not create it automatically.

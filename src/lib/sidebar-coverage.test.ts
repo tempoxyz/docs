@@ -74,6 +74,25 @@ describe('documentation sidebar coverage', () => {
   })
 })
 
+describe('resource guide navigation', () => {
+  it('keeps guides in a collapsed submenu below the main onboarding content', () => {
+    type SidebarNode = { text?: string; link?: string; collapsed?: boolean; items?: SidebarNode[] }
+    const sidebar = sidebarFor('/get-started') as SidebarNode[]
+    const resources = sidebar.at(-1)
+    expect(resources?.text).toBe('Resources')
+    expect(resources?.items?.[0]).toMatchObject({ text: 'Guides', collapsed: true })
+    expect(links(resources)).toContain('/docs/resources/guides')
+    expect(sidebar[0].items?.some(({ text }) => text === 'Guides')).toBe(false)
+  })
+
+  it('assigns resource guides to Get Started without a new primary section', () => {
+    for (const route of routes.filter((route) => route.startsWith('/docs/resources/'))) {
+      expect(getActiveDocsSection(route)?.id).toBe('overview')
+      expect(sidebarFor(route)).toBe(sidebarFor('/get-started'))
+    }
+  })
+})
+
 describe('specification navigation ownership', () => {
   it('assigns each route prefix to only one section', () => {
     const prefixes = [...docsSections, ...docsUtilitySections].flatMap(({ matches }) => matches)

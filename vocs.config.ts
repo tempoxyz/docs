@@ -515,6 +515,125 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Resources',
+        items: [
+          {
+            text: 'Guides',
+            collapsed: true,
+            items: [
+              { text: 'All guides', link: '/docs/resources/guides' },
+              {
+                text: 'Payment infrastructure',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Blockchain payment flows',
+                    link: '/docs/resources/guides/blockchain-payments',
+                  },
+                  {
+                    text: 'Stablecoins for business',
+                    link: '/docs/resources/guides/stablecoins-for-business',
+                  },
+                  {
+                    text: 'Plan a payment stack',
+                    link: '/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale',
+                  },
+                  {
+                    text: 'Stablecoin settlement',
+                    link: '/docs/resources/guides/stablecoin-settlement',
+                  },
+                  { text: 'Compare payment rails', link: '/docs/resources/guides/payment-rails' },
+                  { text: 'Estimate payment fees', link: '/docs/resources/guides/stablecoin-fees' },
+                ],
+              },
+              {
+                text: 'Payment workflows',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Accept stablecoin payments',
+                    link: '/docs/resources/guides/how-to-accept-stablecoin-payments',
+                  },
+                  {
+                    text: 'Reconcile payments',
+                    link: '/docs/resources/guides/payment-reconciliation',
+                  },
+                  { text: 'Plan batch payments', link: '/docs/resources/guides/batch-payments' },
+                  { text: 'Global payouts', link: '/docs/resources/guides/global-payouts' },
+                  {
+                    text: 'Global payroll',
+                    link: '/docs/resources/guides/stablecoin-payroll-for-global-teams',
+                  },
+                  {
+                    text: 'Cross-border payments',
+                    link: '/docs/resources/guides/cross-border-payments',
+                  },
+                  {
+                    text: 'Latin America payment routes',
+                    link: '/docs/resources/guides/cross-border-payments-latin-america',
+                  },
+                  { text: 'Remittance operations', link: '/docs/resources/guides/remittances' },
+                  {
+                    text: 'Recurring payments',
+                    link: '/docs/resources/guides/subscriptions-on-tempo',
+                  },
+                ],
+              },
+              {
+                text: 'Liquidity and issuance',
+                collapsed: true,
+                items: [
+                  { text: 'Corporate treasury', link: '/docs/resources/guides/corporate-treasury' },
+                  {
+                    text: 'Nostro and vostro accounts',
+                    link: '/docs/resources/guides/nostro-vostro-accounts',
+                  },
+                  { text: 'Plan prefunding', link: '/docs/resources/guides/prefunding' },
+                  { text: 'FBO accounts', link: '/docs/resources/guides/fbo-accounts' },
+                  { text: 'The GENIUS Act', link: '/docs/resources/guides/genius-act' },
+                ],
+              },
+              {
+                text: 'Machine payment models',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'HTTP 402 payment flows',
+                    link: '/docs/resources/guides/402-payment-required',
+                  },
+                  {
+                    text: 'Microtransactions and sessions',
+                    link: '/docs/resources/guides/microtransactions',
+                  },
+                ],
+              },
+              {
+                text: 'Provider selection and controls',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Choose embedded wallets',
+                    link: '/docs/resources/guides/embedded-wallets',
+                  },
+                  {
+                    text: 'Choose funding and payouts',
+                    link: '/docs/resources/guides/funding-and-payouts',
+                  },
+                  {
+                    text: 'Choose screening tools',
+                    link: '/docs/resources/guides/payment-screening',
+                  },
+                  {
+                    text: 'Design payment controls',
+                    link: '/docs/resources/guides/compliance-controls',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ]
     const accountsSidebar = [
       {

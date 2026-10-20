@@ -1,0 +1,76 @@
+---
+title: "The GENIUS Act and stablecoin payments"
+seoTitle: "The GENIUS Act and stablecoin payments | Tempo Docs"
+description: "A practical overview of the U.S. payment stablecoin law, its reserve and issuer requirements, effective-date provisions, and implications for payment teams."
+---
+
+# The GENIUS Act and stablecoin payments
+
+The GENIUS Act is a U.S. federal law establishing a regulatory framework for payment stablecoins. Signed on July 18, 2025, it sets requirements for permitted issuers, reserve assets, redemption policies, disclosures, and supervision.
+
+For a payment team, it provides a framework for evaluating issuers and assets. It does not certify a blockchain, approve every stablecoin, or replace the obligations associated with operating a payment business.
+
+This overview was reviewed on October 19, 2026. It summarizes the enacted law and links to implementation sources; it is general information, not legal advice.
+
+## What the law covers
+
+The [enacted text of Public Law 119-27](https://www.govinfo.gov/content/pkg/PLAW-119publ27/html/PLAW-119publ27.htm) defines payment stablecoins and establishes federal and state paths for permitted issuers. Its scope also includes certain activities by digital asset service providers and a framework for qualifying foreign issuers.
+
+The issuer's identity and regulatory status matter separately from the network on which a token moves. A token contract, a wallet integration, or a successful payment is not evidence of authorization under the Act.
+
+## Requirements relevant to payment teams
+
+| Area                     | What the statute provides                                              | Evidence to request for an evaluation                                   |
+| ------------------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Issuer authorization     | Federal and qualifying state pathways for permitted issuers            | The issuing legal entity, regulator, and applicable authorization       |
+| Reserves                 | Backing of at least one-to-one using specified eligible reserve assets | Current reserve disclosures and supporting reports                      |
+| Redemption               | A public redemption policy and disclosure of applicable fees           | Eligibility, supported redemption routes, timing, and fees              |
+| Reporting                | Monthly reserve disclosures and examination requirements               | Dated disclosures tied to the exact issuer and asset                    |
+| Financial crime controls | Bank Secrecy Act treatment and compliance with lawful orders           | The issuer's controls and the responsibilities of each service provider |
+
+These are summaries of statutory provisions, not findings that any particular issuer satisfies them. Read the relevant sections alongside applicable implementing regulations and issuer documentation.
+
+## Effective dates and implementing rules
+
+Section 20 makes the Act generally effective on the earlier of 18 months after enactment, January 18, 2027, or 120 days after primary federal payment stablecoin regulators issue final implementing regulations. Some provisions have their own timing, including the separate restriction on certain offers and sales by digital asset service providers three years after enactment.
+
+Do not treat a proposed rule as an operative final requirement. Treasury's [August 17, 2026 notice](https://home.treasury.gov/news/press-releases/sb0605/) describes a proposal addressing issuance, offers, and sales, and identifies January 18, 2027 as the expected general effective date.
+
+Implementation has continued since that notice. A [September 30, 2026 interim final rule](https://www.govinfo.gov/content/pkg/FR-2026-09-30/html/2026-19966.htm) establishes forms and procedures for reviewing state certifications. It is effective for that procedural purpose, while acceptance of certifications depends on the information-collection approval described in the rule. Use current regulator materials to determine the provision and date that apply to a specific activity.
+
+The statutory date mechanism and a rule's own effective date are different questions. This guide does not establish that every implementation rule is final or that one date governs every business activity.
+
+## Yield and deposit insurance are separate questions
+
+Section 4 prohibits covered issuers from paying interest or yield solely for holding, using, or retaining a payment stablecoin. That text should not be summarized as a blanket conclusion about every third-party reward, lending, or investment product. Those arrangements require their own analysis under applicable rules.
+
+The law also restricts representations that stablecoins are government guaranteed, legal tender, or federally insured. A stablecoin is different from a bank deposit. For the bank-account side of a payment flow, see [FBO accounts](/docs/resources/guides/fbo-accounts); for the asset distinction, see [stablecoins and tokenized deposits](https://tempo.xyz/learn/stablecoins-and-tokenized-deposits/).
+
+## Applying the framework to a payment flow
+
+Build an asset record that identifies the issuer, exact token and network, available redemption route, and supporting documents. Then map the parties handling custody, conversion, transfers, and bank delivery. Authorization for one activity does not automatically cover the others.
+
+Tempo provides payment infrastructure. Features such as issuer roles and transfer policies can support an implementation, but technical controls do not establish legal compliance. The [minting and burning guide](/docs/guide/issuance/mint-stablecoins) explains that separation, while [stablecoin payment infrastructure](/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale) covers the broader operating model.
+
+## The GENIUS Act and stablecoin payments FAQ
+
+<details>
+<summary>Is the GENIUS Act a law or a proposal?</summary>
+
+The Act is an enacted federal law signed July 18, 2025. Implementing agency proposals and final rules are separate documents with their own scope and dates.
+
+</details>
+
+<details>
+<summary>When does the GENIUS Act take effect?</summary>
+
+Its general effective-date provision is the earlier of January 18, 2027 or 120 days after the specified final implementing regulations. Some provisions use separate dates, so check the rule and activity involved.
+
+</details>
+
+<details>
+<summary>Does using Tempo make a stablecoin compliant with the Act?</summary>
+
+No. A blockchain integration does not establish an issuer's authorization, reserve compliance, redemption obligations, or the legal status of a particular payment service.
+
+</details>

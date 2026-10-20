@@ -23,6 +23,7 @@ export const docsSections: DocsSection[] = [
     href: '/get-started',
     matches: [
       '/get-started',
+      '/docs/resources',
       '/docs/quickstart/faucet',
       '/docs/guide/using-tempo-with-ai',
       '/docs/tools',

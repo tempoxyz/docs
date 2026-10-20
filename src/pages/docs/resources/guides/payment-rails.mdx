@@ -1,0 +1,90 @@
+---
+title: Compare payment rails
+seoTitle: Compare ACH, Wires, Instant Payments, and Stablecoin Rails | Tempo Docs
+description: Compare funding, settlement, recipient delivery, costs, and exception handling before adding a stablecoin payment route.
+---
+
+# Compare payment rails
+
+Choose a payment rail by the result your recipient needs, then compare the complete funding, settlement, and delivery flow. A stablecoin transfer can supply the onchain leg while bank systems handle collection or local-currency payout.
+
+## Separate the legs of a payment
+
+A business can use several rails for one payment. An ACH credit can fund an account, a stablecoin transfer can move value between providers, and a local bank payment can deliver the recipient's currency. The performance of one leg does not describe the whole payment.
+
+Record the source account and currency, the asset used between providers, and the recipient account and currency. Specify which organization confirms each stage. A message, network settlement, provider balance credit, and recipient bank deposit are different events.
+
+## Compare the main rail types
+
+| Option | Role | Integration checks |
+| --- | --- | --- |
+| ACH | U.S. bank-account credits and debits, including scheduled and recurring payments. | Account validation, debit authorization where applicable, deadlines, settlement windows, returns, and charges. |
+| Domestic wire | A bank payment using a service such as Fedwire. | Participating banks, customer cutoffs, beneficiary details, fees, and evidence of recipient credit. |
+| Domestic instant payment | Around-the-clock payments through participating institutions, such as FedNow. | Availability for both accounts, product limits, fraud controls, pricing, and recipient access. |
+| SWIFT-enabled international payment | Financial messages coordinate a payment between institutions. | Currency route, banks and providers moving funds, deductions, FX, tracking, and beneficiary delivery. |
+| Stablecoin payment | A specified token moves between supported accounts on a blockchain. | Network and token support, custody, signing, fee funding, delivery evidence, conversion, and recipient access. |
+
+[Nacha documents Same Day ACH and scheduled processing](https://www.nacha.org/content/ach-payments-fact-sheet). [Fedwire provides real-time gross settlement](https://www.frbservices.org/financial-services/fedwire-funds-service/). [FedNow operates around the clock through participating institutions](https://www.frbservices.org/financial-services/fednow/about.html). [SWIFT describes its financial messaging role](https://www.swift.com/about-us/who-we-are/what-swift).
+
+These are system capabilities. Your bank or provider sets the access conditions, product limits, pricing, and operating procedures for your account.
+
+## Match the rail to the payment workflow
+
+ACH can fit predictable domestic credits or authorized recurring debits. Sending a credit and collecting a debit require different application and authorization flows. Same Day ACH uses banking-day settlement windows; it is different from an instant payment service.
+
+A wire can fit a time-sensitive bank payment when the banks, deadlines, and beneficiary requirements fit. Interbank settlement still needs to be distinguished from credit to the intended customer's account.
+
+For an out-of-hours domestic payment, evaluate available instant bank services alongside stablecoins. Confirm whether both accounts can use the service for the payment. Avoid assuming every bank payment stops on weekends.
+
+A stablecoin route can fit a recipient that accepts the exact token, or a provider that converts and delivers it. Receiving a dollar-denominated token and receiving local currency in a bank account are different outcomes.
+
+## Compare the same amount and recipient outcome
+
+Hold the funding method, source currency, recipient currency, and delivery method constant. Decide whether you are fixing the sender's total budget or the recipient's net amount.
+
+| Comparison field | Record for each route |
+| --- | --- |
+| Sender funding | Total debit, including charges outside the payment amount. |
+| Recipient outcome | Net amount, currency, account type, and delivery method. |
+| FX terms | Executable rate, conversion charges, and quote expiry. |
+| Delivery | Expected completion and evidence for each payment stage. |
+| Exceptions | Failed-payment, return, investigation, support, and recovery costs. |
+| Liquidity | Required balances, replenishment time, and withdrawal access. |
+
+For example, if a supplier expects a local-currency bank deposit, compare a bank deposit for every route. A network fee alone cannot establish the lower-cost way to deliver that result. Use the [cross-border payment guide](/docs/resources/guides/cross-border-payments) to document the route.
+
+## Compare services at the same layer
+
+A payment service may bundle funding, recipient lookup, currency conversion, account records, support, and delivery. A blockchain network supplies a different part of the flow.
+
+Before replacing a service, list the features your application needs: bank or wallet delivery, signing and recovery, identity checks, invoices, recurring collections, accounting records, refunds, and error handling. Establish which component supplies each feature in the proposed route.
+
+Do not assume a settlement network provides the complete customer product. Similarly, confirm a payment provider's current account and country support rather than relying on its brand or a general coverage statement.
+
+## Define returns and refunds separately from settlement
+
+Settlement finality describes when a system considers a transfer settled. It does not describe every provider policy, customer right, or remedy that may apply to the underlying purchase.
+
+For onchain payments, define the successful delivery event and the network's completion rule. Then specify how to handle a mistaken beneficiary, held receipt, refund, or disputed purchase. A refund can require a new payment and separate business approval.
+
+For bank payments, follow the applicable return and investigation process. A single “reversible” label can hide differences between the rail, account product, and reason for a return.
+
+## Add a Tempo settlement leg
+
+Tempo supports near-instant onchain settlement, [stablecoin network fees](/docs/resources/guides/stablecoin-fees), [fee sponsorship](/docs/guide/payments/sponsor-user-fees), and [payment references](/docs/guide/payments/transfer-memos). These capabilities support the onchain integration; they do not establish bank payout coverage.
+
+Start with [sending payments](/docs/guide/payments/send-a-payment) and [verifying received payments](/docs/guide/payments/accept-a-payment). Confirm any funding and delivery providers before offering the route to customers.
+
+## Payment rail questions
+
+### Can stablecoins replace ACH?
+
+The choice depends on the payment. ACH supports bank-account credits and debits. Stablecoins provide an onchain option when the asset, recipient, funding, and payout services are supported. Compare the complete workflow for the payment you need to make.
+
+### Is SWIFT a settlement network?
+
+SWIFT provides financial messaging between institutions. Banks and providers move and credit the funds. A SWIFT message, interbank settlement, and recipient account credit are separate events.
+
+### Are stablecoin payments always cheaper?
+
+No. Obtain quotes for the same funding, conversion, and recipient delivery. A small network fee can be one component of a larger payment cost.
