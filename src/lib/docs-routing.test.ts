@@ -180,6 +180,18 @@ describe('docs routing redirects', () => {
     })
   })
 
+  it.each(
+    vocsRedirects.filter(({ source }) => source.includes('/docs/resources/partners')),
+  )('preserves the public mount when the proxy strips it before redirecting $source', ({
+    source,
+    destination,
+  }) => {
+    expect(findRedirect(source)).toMatchObject({
+      destination: `${canonicalDevelopersOrigin}${destination}`,
+      permanent: true,
+    })
+  })
+
   it('keeps the developer tools compatibility page and its provider anchors reachable', () => {
     expect(findRedirect('/developers/docs/quickstart/developer-tools')).toBeUndefined()
   })
