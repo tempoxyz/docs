@@ -5,10 +5,10 @@ The source conversation is **Build Tempo ecosystem pages** (`01a12d2d-fef6-7bc2-
 ## Scope and navigation
 
 - 26 substantive educational and provider-selection pages, plus their index.
-- 13 partner-specific integration guides, plus their index at `/docs/resources/partners`.
+- Provider-specific implementation notes are incorporated into wallet selection, funding and payouts, payment screening, reconciliation, and RPC provider pages. The 13 former standalone profiles and their index redirect to those task destinations.
 - Three existing implementation guides absorb recovered fee-sponsorship, transfer-memo, and mint/burn operating details.
 - Get Started → Resources → Guides is collapsed by default. Its topic groups are also collapsed. No primary navigation section is added.
-- Get Started → Resources → Partner guides is also collapsed by default, with collapsed provider categories. Existing Partners and educational guide indexes link to it.
+- Get Started → Resources → Guides groups wallets and funding separately from compliance and security. The separate Partner guides submenu is removed. Visible breadcrumbs connect the task pages to these categories.
 - Every published page remains in the normal search, sitemap, and generated Markdown/AI inventory. The submenu changes visual prominence, not crawler access.
 - No marketing website pages, ecosystem cards, or historical redirects are changed.
 
@@ -54,25 +54,23 @@ This change uses the reviewed recovery rather than importing the raw archive. It
 
 ## Partner profile recovery
 
-The partner guides retain the original profiles' capability, prerequisite, operating-consideration, FAQ, and primary-source content, refreshed against current provider instructions. They use native MDX rather than the marketing website's generated components. General provider coverage does not imply support for every SDK, asset, or endpoint.
+The October 20 task-first revision removes the 13 standalone overviews. It retains provider-specific SDK, asset, API, and operating details in the relevant task page and cuts repeated introductions, generic prerequisites, FAQs, and source-review prose. The original URLs redirect directly to the matching provider section.
 
-| Original profile | Documentation destination |
+| Former profile | Task destination |
 | --- | --- |
-| Privy | `/docs/resources/partners/privy` |
-| Dynamic | `/docs/resources/partners/dynamic` |
-| Turnkey | `/docs/resources/partners/turnkey` |
-| Fireblocks | `/docs/resources/partners/fireblocks` |
-| Bridge | `/docs/resources/partners/bridge` |
-| Alchemy | `/docs/resources/partners/alchemy` |
-| QuickNode | `/docs/resources/partners/quicknode` |
-| Allium | `/docs/resources/partners/allium` |
-| Goldsky | `/docs/resources/partners/goldsky` |
-| TRM | `/docs/resources/partners/trm` |
-| Chainalysis | `/docs/resources/partners/chainalysis` |
-| Elliptic | `/docs/resources/partners/elliptic` |
-| Blockaid | `/docs/resources/partners/blockaid` |
-
-The website draft and its directory cards are unchanged. No unpublished ecosystem route is required to read or use these Docs guides.
+| privy | `/docs/resources/guides/embedded-wallets#privy` |
+| dynamic | `/docs/resources/guides/embedded-wallets#dynamic` |
+| turnkey | `/docs/resources/guides/embedded-wallets#turnkey` |
+| fireblocks | `/docs/resources/guides/embedded-wallets#fireblocks` |
+| bridge | `/docs/resources/guides/funding-and-payouts#bridge` |
+| alchemy | `/docs/partners/rpc-and-nodes#alchemy` |
+| quicknode | `/docs/partners/rpc-and-nodes#quicknode` |
+| allium | `/docs/resources/guides/payment-reconciliation#allium` |
+| goldsky | `/docs/resources/guides/payment-reconciliation#goldsky` |
+| trm | `/docs/resources/guides/payment-screening#trm` |
+| chainalysis | `/docs/resources/guides/payment-screening#chainalysis` |
+| elliptic | `/docs/resources/guides/payment-screening#elliptic` |
+| blockaid | `/docs/resources/guides/payment-screening#blockaid` |
 
 ## Verification
 

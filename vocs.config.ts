@@ -609,7 +609,7 @@ export default defineConfig({
                 ],
               },
               {
-                text: 'Provider selection and controls',
+                text: 'Wallets and funding',
                 collapsed: true,
                 items: [
                   {
@@ -620,62 +620,20 @@ export default defineConfig({
                     text: 'Choose funding and payouts',
                     link: '/docs/resources/guides/funding-and-payouts',
                   },
+                ],
+              },
+              {
+                text: 'Compliance and security',
+                collapsed: true,
+                items: [
                   {
-                    text: 'Choose screening tools',
+                    text: 'Screen blockchain payments',
                     link: '/docs/resources/guides/payment-screening',
                   },
                   {
                     text: 'Design payment controls',
                     link: '/docs/resources/guides/compliance-controls',
                   },
-                ],
-              },
-            ],
-          },
-          {
-            text: 'Partner guides',
-            collapsed: true,
-            items: [
-              { text: 'All partner guides', link: '/docs/resources/partners' },
-              {
-                text: 'Wallets and custody',
-                collapsed: true,
-                items: [
-                  { text: 'Privy', link: '/docs/resources/partners/privy' },
-                  { text: 'Dynamic', link: '/docs/resources/partners/dynamic' },
-                  { text: 'Turnkey', link: '/docs/resources/partners/turnkey' },
-                  { text: 'Fireblocks', link: '/docs/resources/partners/fireblocks' },
-                ],
-              },
-              {
-                text: 'Funding and payouts',
-                collapsed: true,
-                items: [{ text: 'Bridge', link: '/docs/resources/partners/bridge' }],
-              },
-              {
-                text: 'RPC providers',
-                collapsed: true,
-                items: [
-                  { text: 'Alchemy', link: '/docs/resources/partners/alchemy' },
-                  { text: 'QuickNode', link: '/docs/resources/partners/quicknode' },
-                ],
-              },
-              {
-                text: 'Data and indexing',
-                collapsed: true,
-                items: [
-                  { text: 'Allium', link: '/docs/resources/partners/allium' },
-                  { text: 'Goldsky', link: '/docs/resources/partners/goldsky' },
-                ],
-              },
-              {
-                text: 'Screening and security',
-                collapsed: true,
-                items: [
-                  { text: 'TRM', link: '/docs/resources/partners/trm' },
-                  { text: 'Chainalysis', link: '/docs/resources/partners/chainalysis' },
-                  { text: 'Elliptic', link: '/docs/resources/partners/elliptic' },
-                  { text: 'Blockaid', link: '/docs/resources/partners/blockaid' },
                 ],
               },
             ],
@@ -1391,6 +1349,212 @@ export default defineConfig({
     { text: 'Blog', link: '/blog' },
   ],
   redirects: [
+    {
+      source: '/docs/resources/partners.md',
+      destination: '/docs/resources/guides.md',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners.md',
+      destination: '/assets/md/docs/resources/guides.md',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/privy.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#privy',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/privy.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#privy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/dynamic.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#dynamic',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/dynamic.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#dynamic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/turnkey.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#turnkey',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/turnkey.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#turnkey',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/fireblocks.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#fireblocks',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/fireblocks.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/bridge.md',
+      destination: '/docs/resources/guides/funding-and-payouts.md#bridge',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/bridge.md',
+      destination: '/assets/md/docs/resources/guides/funding-and-payouts.md#bridge',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/alchemy.md',
+      destination: '/docs/partners/rpc-and-nodes.md#alchemy',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/alchemy.md',
+      destination: '/assets/md/docs/partners/rpc-and-nodes.md#alchemy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/quicknode.md',
+      destination: '/docs/partners/rpc-and-nodes.md#quicknode',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/quicknode.md',
+      destination: '/assets/md/docs/partners/rpc-and-nodes.md#quicknode',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/allium.md',
+      destination: '/docs/resources/guides/payment-reconciliation.md#allium',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/allium.md',
+      destination: '/assets/md/docs/resources/guides/payment-reconciliation.md#allium',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/goldsky.md',
+      destination: '/docs/resources/guides/payment-reconciliation.md#goldsky',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/goldsky.md',
+      destination: '/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/trm.md',
+      destination: '/docs/resources/guides/payment-screening.md#trm',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/trm.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#trm',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/chainalysis.md',
+      destination: '/docs/resources/guides/payment-screening.md#chainalysis',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/chainalysis.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#chainalysis',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/elliptic.md',
+      destination: '/docs/resources/guides/payment-screening.md#elliptic',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/elliptic.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#elliptic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/blockaid.md',
+      destination: '/docs/resources/guides/payment-screening.md#blockaid',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/blockaid.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#blockaid',
+      status: 301,
+    },
+    { source: '/docs/resources/partners', destination: '/docs/resources/guides', status: 301 },
+    {
+      source: '/docs/resources/partners/privy',
+      destination: '/docs/resources/guides/embedded-wallets#privy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/dynamic',
+      destination: '/docs/resources/guides/embedded-wallets#dynamic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/turnkey',
+      destination: '/docs/resources/guides/embedded-wallets#turnkey',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/fireblocks',
+      destination: '/docs/resources/guides/embedded-wallets#fireblocks',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/bridge',
+      destination: '/docs/resources/guides/funding-and-payouts#bridge',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/alchemy',
+      destination: '/docs/partners/rpc-and-nodes#alchemy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/quicknode',
+      destination: '/docs/partners/rpc-and-nodes#quicknode',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/allium',
+      destination: '/docs/resources/guides/payment-reconciliation#allium',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/goldsky',
+      destination: '/docs/resources/guides/payment-reconciliation#goldsky',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/trm',
+      destination: '/docs/resources/guides/payment-screening#trm',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/chainalysis',
+      destination: '/docs/resources/guides/payment-screening#chainalysis',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/elliptic',
+      destination: '/docs/resources/guides/payment-screening#elliptic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/blockaid',
+      destination: '/docs/resources/guides/payment-screening#blockaid',
+      status: 301,
+    },
     { source: '/docs/ecosystem/assets', destination: '/docs/partners/stablecoins', status: 301 },
     { source: '/docs/partners/assets', destination: '/docs/partners/stablecoins', status: 301 },
     { source: '/docs/ecosystem/wallets', destination: '/docs/partners/wallets', status: 301 },
