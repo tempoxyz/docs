@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+  <title>From private Zone execution to verified settlement</title>
+  <desc>The sequencer sends a batch and state witness to the prover. Inside an AWS Nitro Enclave, the stateless proof function replays execution and Nitro attests the batch result. The sequencer submits the attestation and a quorum-signed batch to Tempo, where the portal checks quorum and continuity and the native verifier authenticates the attestation. On acceptance, the portal records commitments and queues withdrawals. Temporary NoProof mode skips Nitro verification.</desc>
+  <defs>
+    <marker id="zones-prover-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M1 1L7 4L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <g fill="var(--foreground-secondary, #606060)" font-size="15" font-weight="600" letter-spacing="1.5">
+    <text x="32" y="32">PRIVATE ZONE EXECUTION</text>
+    <text x="32" y="342">PUBLIC TEMPO SETTLEMENT</text>
+  </g>
+
+  <rect x="32" y="58" width="260" height="214" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <rect x="350" y="58" width="578" height="214" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5" stroke-dasharray="6 5"/>
+
+  <g fill="currentColor" font-size="21" font-weight="600">
+    <text x="56" y="98">1. Build batch</text>
+    <text x="374" y="98">2. Replay and attest</text>
+  </g>
+  <g fill="var(--foreground-secondary, #606060)" font-size="17">
+    <text x="56" y="135">Zone sequencer</text>
+    <text x="56" y="174">Private transactions</text>
+    <text x="56" y="203">Zone + Tempo witness</text>
+    <text x="374" y="130">AWS NITRO ENCLAVE</text>
+  </g>
+
+  <path d="M302 165H340" stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-prover-arrow)"/>
+  <path d="M639 155V242" stroke="var(--diagram-box-border, #d4d4d4)"/>
+  <g fill="currentColor" font-size="19" font-weight="600">
+    <text x="374" y="174">SPF replay</text>
+    <text x="665" y="174">Nitro attestation</text>
+  </g>
+  <g fill="var(--foreground-secondary, #606060)" font-size="17">
+    <text x="374" y="204">Check state transitions</text>
+    <text x="374" y="233">Recompute commitments</text>
+    <text x="665" y="204">Approved enclave code</text>
+    <text x="665" y="233">Digest of batch result</text>
+  </g>
+
+  <path d="M798 282V356" stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-prover-arrow)"/>
+  <text x="778" y="306" text-anchor="end" fill="var(--foreground-secondary, #606060)" font-size="16">Attestation + commitments</text>
+
+  <g fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5">
+    <rect x="668" y="366" width="260" height="176" rx="10"/>
+    <rect x="350" y="366" width="260" height="176" rx="10"/>
+    <rect x="32" y="366" width="260" height="176" rx="10"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.75" marker-end="url(#zones-prover-arrow)">
+    <path d="M658 454H620"/>
+    <path d="M340 454H302"/>
+  </g>
+  <g fill="currentColor" font-size="21" font-weight="600">
+    <text x="692" y="406">3. Submit batch</text>
+    <text x="374" y="406">4. Verify on Tempo</text>
+    <text x="56" y="406">5. Settle</text>
+  </g>
+  <g fill="var(--foreground-secondary, #606060)" font-size="17">
+    <text x="692" y="446">Sequencer submits</text>
+    <text x="692" y="475">Quorum-signed batch</text>
+    <text x="692" y="504">Nitro attestation</text>
+    <text x="374" y="446">Quorum + continuity</text>
+    <text x="374" y="475">Attestation + enclave</text>
+    <text x="374" y="504">Match batch digest</text>
+    <text x="56" y="446">Record commitments</text>
+    <text x="56" y="475">Advance Zone tip</text>
+    <text x="56" y="504">Queue withdrawals</text>
+  </g>
+
+  <path d="M32 574H928" stroke="var(--diagram-box-border, #d4d4d4)"/>
+  <text x="32" y="604" fill="var(--foreground-secondary, #606060)" font-size="17">Nitro path shown. Temporary NoProof mode skips attestation verification.</text>
+  <text x="32" y="630" fill="var(--foreground-secondary, #606060)" font-size="17">Nitro acceptance requires approved enclave measurements for the active hardfork.</text>
+</svg>

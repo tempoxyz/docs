@@ -13,11 +13,19 @@ Tempo Zone settlement records commitments to private Zone execution on Tempo and
 
 ## Implementation status
 
-This page follows Zones source at [`ac49071f`](https://github.com/tempoxyz/zones/tree/ac49071f) and Tempo source at [`3c4db7f843`](https://github.com/tempoxyz/tempo/tree/3c4db7f843), reviewed September 23, 2026. Source support does not establish which runtime a deployed Zone uses.
+This page follows the [Tempo monorepo implementation](https://github.com/tempoxyz/tempo/tree/02734c478682980be6993c1fdf07355e0cd22882/crates/zones), reviewed October 20, 2026. Source support does not establish which runtime a deployed Zone uses.
 
-The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. At the reviewed commit, its approved enclave measurements are unset, so it rejects Nitro proofs. During rollout, T13 also accepts the `NoProof` mode, which keeps the quorum and continuity checks but skips attestation; a later upgrade removes it. Check the network's active hardfork, verifier implementation, and approved measurements before relying on execution-proof enforcement.
+[T13](/docs/protocol/upgrades/t13) introduces the Zone prover and a native Nitro attestation verifier. The prover checks the execution behind settlement commitments; the verifier authenticates the enclave and binds its attestation to the submitted batch. This uses trusted execution in AWS Nitro, not a zero-knowledge proof.
 
-The sequencer implementation can be configured to wait for a Nitro-attested batch before submitting it. This node-side requirement is separate from onchain enforcement. Forced exits remain unfinished; withdrawal settlement depends on the operator continuing to process and submit batches.
+The [approved release measurement registry](https://github.com/tempoxyz/tempo/blob/main/crates/precompiles/src/zone_verifier/pcrs.json) is currently empty, so Nitro proofs are rejected until approved enclave measurements are added. During rollout, T13 also accepts `NoProof`, which preserves quorum and continuity checks but skips attestation verification. The sequencer can fall back when proving is unavailable, verification fails, or settlement simulation fails. Without a configured prover, it submits `NoProof` with an empty proof.
+
+T13 ships the prover with this temporary fallback. Mandatory proofs and forced exits are planned for the later non-custodial upgrade. Withdrawals still depend on the operator processing and submitting batches. Check the active hardfork, verifier implementation, and approved measurements before relying on proof enforcement.
+
+<ZoneDiagram
+  name="prover"
+  alt="Nitro settlement path: a sequencer sends the batch and state witness to the enclave prover for SPF replay and Nitro attestation. It submits the attested commitments with sequencer-quorum signatures. On Tempo, the portal checks quorum and continuity and the native verifier checks the attestation, approved enclave measurements, and batch digest before commitments are recorded and withdrawals queued. Temporary NoProof mode skips Nitro verification."
+  caption="The normal Nitro path. T13 retains a temporary proofless fallback, so a settlement certificate alone does not establish that execution was attested."
+/>
 
 ## Batch submission
 
@@ -32,7 +40,7 @@ The sequencer calls `ZonePortal.submitBatch` on Tempo. Each batch covers one or 
 | `tokenEnablementTransition` | Previous and next processed enabled-token counts (T13) |
 | `withdrawalQueueHash` | Hash chain of withdrawals for this batch (`0` if none) |
 | `verifierConfig` | `0x01` for the Nitro verifier policy; `0x02` for the temporary T13 `NoProof` fallback, which requires an empty `proof` |
-| `proof` | Nitro attestation when a settlement prover is configured; empty on the unconfigured compatibility path |
+| `proof` | Nitro attestation in Nitro mode; empty in the temporary `NoProof` fallback |
 | `zoneHeight` | Height of the submitted zone tip |
 | `signatures` | Distinct sequencer signatures forming the settlement certificate |
 
@@ -93,15 +101,15 @@ pub fn prove_zone_batch(
 3. **Recompute commitments.** Rebuild state roots and canonical Tempo-format zone headers, then read deposit progress, enabled-token progress, and withdrawal batch commitments from the resulting state.
 4. **Validate the anchor.** Match the final Tempo checkpoint to the public inputs, directly or through the supplied ancestry headers.
 
-The SPF can replay an open zone tip without withdrawal finalization. Settlement policy imposes its batch boundaries separately.
+Under the T13 batch rules, the SPF requires the batch to end at a full block with withdrawal finalization. Intermediate blocks can advance Tempo headers without execution; a full block processes pending deposits and token enablements against the final imported checkpoint.
 
 <span id="deployment-modes" />
 
 ### Validation deployment modes
 
-On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HOST:PORT`. The sequencer waits for the remote prover’s successful batch result and nonempty Nitro attestation before submission, while collecting the settlement certificate in parallel.
+On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HOST:PORT`. On the normal Nitro path, the sequencer waits for the remote prover’s successful batch result and nonempty Nitro attestation before submission, while collecting the settlement certificate in parallel. T13 permits fallback to `NoProof` when proving or verification fails.
 
-On an `rpc_only` follower, the same flag enables observational validation. Without a remote address, this runs in-process. A follower’s observational results do not control settlement. The unconfigured sequencer compatibility path submits empty proof bytes and cannot satisfy an enforcing verifier.
+On an `rpc_only` follower, the same flag enables observational validation. Without a remote address, this runs in-process. A follower’s observational results do not control settlement. Without a configured prover, the sequencer submits an empty proof in `NoProof` mode. This path cannot satisfy Nitro verification.
 
 The remote service runs inside AWS Nitro Enclaves over AF_VSOCK. After replay, it places the canonical batch digest in a Nitro attestation document’s `user_data` and returns `BatchOutput` with a proof bundle: `verifierConfig = 0x01` and the raw COSE/CBOR document as `proof`.
 
