@@ -21,6 +21,8 @@ The [approved release measurement registry](https://github.com/tempoxyz/tempo/bl
 
 T13 ships the prover with this temporary fallback. Mandatory proofs and forced exits are planned for the later non-custodial upgrade. Withdrawals still depend on the operator processing and submitting batches. Check the active hardfork, verifier implementation, and approved measurements before relying on proof enforcement.
 
+`NoProof` remains permitted even when a prover is available and working. For batches settled through it, execution correctness relies on the sequencer quorum. Proving does not guarantee uptime, transaction inclusion, or completed withdrawals, and Zone operators still see plaintext transaction data.
+
 <ZoneDiagram
   name="prover"
   alt="Nitro settlement path: a sequencer sends the batch and state witness to the enclave prover for SPF replay and Nitro attestation. It submits the attested commitments with sequencer-quorum signatures. On Tempo, the portal checks quorum and continuity and the native verifier checks the attestation, approved enclave measurements, and batch digest before commitments are recorded and withdrawals queued. Temporary NoProof mode skips Nitro verification."
@@ -107,13 +109,19 @@ Under the T13 batch rules, the SPF requires the batch to end at a full block wit
 
 ### Validation deployment modes
 
-On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HOST:PORT`. On the normal Nitro path, the sequencer waits for the remote prover’s successful batch result and nonempty Nitro attestation before submission, while collecting the settlement certificate in parallel. T13 permits fallback to `NoProof` when proving or verification fails.
+On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HARDFORK=HOST:PORT` and `--sequencer.prover-attestation-policy PATH`. Repeat the address assignment for each supported Tempo hardfork, with measurements independently approved for the corresponding release. On the normal Nitro path, the sequencer waits for the remote prover’s successful batch result and nonempty Nitro attestation before submission, while collecting the settlement certificate in parallel. T13 permits fallback to `NoProof` when proving or verification fails.
 
 On an `rpc_only` follower, the same flag enables observational validation. Without a remote address, this runs in-process. A follower’s observational results do not control settlement. Without a configured prover, the sequencer submits an empty proof in `NoProof` mode. This path cannot satisfy Nitro verification.
 
 The remote service runs inside AWS Nitro Enclaves over AF_VSOCK. After replay, it places the canonical batch digest in a Nitro attestation document’s `user_data` and returns `BatchOutput` with a proof bundle: `verifierConfig = 0x01` and the raw COSE/CBOR document as `proof`.
 
 TCP mode supports local transport testing, but successful replay still requires the Nitro Secure Module. Outside an enclave, the service returns `attestation_unavailable` rather than an unattested success. ZK proof generation is not implemented.
+
+### Prover upgrades and enclave measurements
+
+A new enclave image changes its PCR measurements, which identify the code approved to attest execution. A Tempo hardfork approves the new measurements. Sequencers select the prover configured for the active Tempo hardfork; operators must deploy the matching image and configure its endpoint before activation. A proof generated under a different hardfork policy must be regenerated before settlement.
+
+Each proof binds the parent chain, Zone, and batch. Zones can use the same prover version without making their proofs interchangeable.
 
 ## Ancestry proofs
 

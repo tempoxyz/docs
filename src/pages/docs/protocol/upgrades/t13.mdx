@@ -58,9 +58,15 @@ The normal Nitro settlement path has three parts:
 
 This is a **TEE-based prover**, whose security relies on AWS Nitro and approved enclave code. It does not generate a zero-knowledge proof. Sequencer signatures authorize a batch; the Nitro attestation authenticates its execution result.
 
+The prover checks execution correctness, including balances and authorized transfers. It does not guarantee uptime, transaction inclusion, or completed withdrawals. Zone operators still see plaintext transaction data.
+
+#### Coordinated prover upgrades
+
+A new enclave image changes its PCR measurements: fingerprints of the approved code. A Tempo hardfork approves the new measurements, and sequencers select the corresponding prover for the active Tempo hardfork. Operators must prepare the matching prover image and sequencer configuration before activation. Each attestation binds its own Zone and batch, even when Zones use the same prover version.
+
 #### Prover rollout and trust assumptions
 
-During rollout, a sequencer can also submit a batch with the `NoProof` mode (`verifierConfig = 0x02`) and an empty proof. This fallback preserves quorum, continuity, canonical-portal, and settlement checks but skips Nitro validation. It allows settlement to continue when proving is unavailable or verification fails. A later upgrade removes it.
+During rollout, a sequencer can also submit a batch with the `NoProof` mode (`verifierConfig = 0x02`) and an empty proof. This fallback preserves quorum, continuity, canonical-portal, and settlement checks but skips Nitro validation. It allows settlement to continue when proving is unavailable or verification fails. The protocol also permits `NoProof` when proving works, so execution correctness still relies on the sequencer quorum for any batch settled through this path. A later upgrade removes it.
 
 Nitro mode (`0x01`) requires approved enclave measurements. The current [release measurement registry](https://github.com/tempoxyz/tempo/blob/main/crates/precompiles/src/zone_verifier/pcrs.json) is empty, so Nitro proofs are rejected until those measurements are approved. Shipping the prover does not by itself make every Zone settlement proof-enforced. T13 also does not introduce forced exits; withdrawals still depend on the operator processing and submitting batches.
 
