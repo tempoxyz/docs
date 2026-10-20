@@ -1,14 +1,14 @@
 ---
 title: "Plan batch and scheduled payouts"
-seoTitle: "Plan batch and scheduled payouts | Tempo Docs"
+seoTitle: "Batch and Scheduled Stablecoin Payments | Tempo Docs"
 description: "Choose atomic batches or independent payments, schedule submission, validate payout runs, and reconcile each delivered transfer."
 ---
 
 # Plan batch and scheduled payouts
 
-Use [Send payments](/docs/guide/payments/send-a-payment#batch-payment-transactions) for the maintained batch implementation. Start by deciding which calls must succeed together and which payments need independent outcomes.
+Batch payments group multiple obligations into a payout run. On Tempo, an atomic batch executes several calls in one transaction; independent transactions have separate receipts and outcomes. Your application schedules and submits recurring runs.
 
-A business payout run can group many obligations, but it does not have to be one onchain transaction. Atomic batches, concurrent transactions, and application scheduling solve different problems.
+Start by choosing which calls must succeed together, then follow [Send payments](/docs/guide/payments/send-a-payment#batch-payment-transactions) for the implementation.
 
 ## Choose the payout failure boundary
 

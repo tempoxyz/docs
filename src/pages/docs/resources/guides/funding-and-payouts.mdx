@@ -24,8 +24,7 @@ Bridge’s Tempo guide provides OUSD funding and payout examples. Its route expl
 
 For recurring bank deposits, evaluate reusable virtual account instructions. For individual payments, evaluate transfers. For stablecoin deposits that should automatically continue to a fixed destination, evaluate liquidation addresses. Add a custodial wallet when your product needs to hold a balance between those movements.
 
-- **Bridge.** Compare its documented Tempo funding, payout, and wallet capabilities with your intended flow and access requirements. [Explore Bridge](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide).
-- **Tempo integration instructions.** Review Bridge’s examples for virtual accounts, wallets, transfers, and liquidation addresses. [Read the official guide](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide).
+Use [Bridge's Tempo integration guide](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide) to compare its documented virtual-account, transfer, liquidation-address, and wallet flows with your requirements.
 
 <span id="access-requirements" />
 
@@ -33,7 +32,7 @@ For recurring bank deposits, evaluate reusable virtual account instructions. For
 
 Bridge directs new developers to sales for account setup. Sandbox access also requires a developer account through Bridge support. Customers need the applicable identity or business verification, accepted terms, and approval for the payment rails they use. Production custodial wallet flows require an additional Bridge review.
 
-Use the sandbox to assess request and response handling. Bridge Wallet and orchestration simulations do not submit transactions to live bank or blockchain networks. Check the product-specific documentation before assuming that a blockchain testnet is used. Plan separate acceptance checks for the production route once access is approved.
+Use the sandbox to assess request and response handling. Bridge Wallet and orchestration simulations do not submit transactions to live bank or blockchain networks. Sandbox customer approval simulates KYC or KYB; it does not test real verification or compliance exceptions. Check the product-specific documentation before assuming that a blockchain testnet is used, then validate onboarding and the production route separately.
 
 - **Account and customer prerequisites.** Review the documented access path before estimating integration work. [Read Bridge’s setup requirements](https://apidocs.bridge.xyz/get-started/introduction/quick-start/get-set-up-with-bridge).
 
@@ -63,7 +62,7 @@ No. Evaluate one when your reporting or reconciliation needs extend beyond the r
 
 ## Funding and payout documentation
 
-Source review: October 12, 2026.
+Source review: October 19, 2026.
 
 - [Bridge: Tempo integration](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide)
 - [Bridge: route coverage](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes)

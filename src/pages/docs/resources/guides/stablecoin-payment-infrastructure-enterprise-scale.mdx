@@ -1,12 +1,12 @@
 ---
 title: "Evaluate enterprise payment infrastructure"
-seoTitle: "Evaluate enterprise payment infrastructure | Tempo Docs"
+seoTitle: "Enterprise Stablecoin Payment Infrastructure | Tempo Docs"
 description: "Evaluate settlement, accounts, liquidity, policy controls, fees, and reconciliation before operating stablecoin payments at scale."
 ---
 
 # Evaluate enterprise payment infrastructure
 
-Map the complete operating model before selecting a payment rail. Use the [payments implementation guides](/docs/guide/payments) for transaction submission and verification; this guide covers the infrastructure decisions around them.
+Enterprise stablecoin payment infrastructure combines settlement, accounts and signing, liquidity, controls, funding and payouts, and finance records. Assign each responsibility before selecting providers. Use the [payments implementation guides](/docs/guide/payments) for transaction submission and verification.
 
 At production volume, payment costs, delivery evidence, exceptions, and finance integration become product requirements. A network capability is useful only when the application and its providers can operate the complete flow.
 
@@ -47,7 +47,7 @@ Test representative payments and failure cases, including an unavailable provide
 
 ## Forecast actual payment costs
 
-Tempo has no native gas token. Eligible USD-denominated TIP-20 tokens can pay network fees when the fee-token requirements and sufficient Fee AMM liquidity are met. The network uses a bounded dynamic base fee; do not model every operation as a flat fee.
+Tempo network fees are paid in eligible USD-denominated TIP-20 tokens when the fee-token requirements and sufficient Fee AMM liquidity are met. The network uses a bounded dynamic base fee; model the gas used by each operation and its applicable fee rather than assuming one flat fee.
 
 A simple transfer, atomic batch, and contract call can consume different resources. Model the operations your application actually runs. Include custody, funding, conversion, provider charges, local payout, and operational work when evaluating unit economics.
 
@@ -86,3 +86,17 @@ Name the evidence that closes each payment and the owner of delayed, blocked, re
 Compare usable recipient funds, total cost, delivery time, prefunded balances, exception rates, and reconciliation work with the existing flow. Expand the parts that meet the operating case.
 
 :::::
+
+## Enterprise payment infrastructure questions
+
+### Does a payment gateway replace the settlement network?
+
+No. A gateway can connect checkout, payment instructions, and provider services. The network records the onchain transfer. Establish which component verifies delivery, manages accounts, funds fees, resolves exceptions, and supplies finance records.
+
+### What proves a stablecoin payment reached the recipient?
+
+Verify the successful transaction and expected delivered transfer, including the network, token contract, recipient, and amount. Transaction success alone is insufficient because a receive policy can hold funds. A local-currency bank payout needs separate provider completion evidence.
+
+### What should a provider cost comparison include?
+
+Compare the same funding and recipient outcome using executable quotes. Include network fees, funding, custody, conversion, provider charges, payout fees, and exception-handling work. Record quote expiry and any prefunded balances separately so the comparison captures liquidity as well as payment charges.

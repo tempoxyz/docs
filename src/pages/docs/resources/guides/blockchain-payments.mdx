@@ -6,13 +6,13 @@ description: Map funding, signing, onchain delivery, and reconciliation responsi
 
 # Blockchain payment workflows
 
-Start with the asset and account your recipient needs, then map the components that deliver it. A blockchain records the onchain transfer; your application and providers supply funding, signing, customer records, and any local-currency payout.
+A blockchain payment uses an onchain asset transfer as part of a payment workflow. The network records the transfer; your application and providers supply funding, signing, customer records, and any local-currency payout. Start with the asset and account your recipient needs, then map the components that deliver it.
 
 ## Define the recipient outcome
 
 A supported token in a wallet, a provider account balance, and local currency in a bank account are different results. Specify the network, exact token contract, recipient account, and usable amount before selecting infrastructure.
 
-Stablecoins reference an asset such as the U.S. dollar. That reference can help denominate payments, but does not remove issuer, redemption, custody, or conversion exposure. Verify the exact token representation and supported network; similar tickers do not establish compatibility. Use the [stablecoin registry](/docs/partners/stablecoins) when choosing an asset on Tempo.
+Stablecoins are tokens designed to track a reference value, often the U.S. dollar. That design can help denominate payments, but does not remove issuer, redemption, custody, or conversion exposure. Verify the exact token representation and supported network; similar tickers do not establish compatibility. Use the [stablecoin registry](/docs/partners/stablecoins) when choosing an asset on Tempo.
 
 ## Map the payment lifecycle
 
@@ -62,7 +62,7 @@ Assign operational responsibilities for identity checks, screening, monitoring, 
 - **Stablecoin fees:** pay network fees in eligible USD-denominated TIP-20 tokens under the [fee rules](/docs/resources/guides/stablecoin-fees).
 - **Fee sponsorship:** let an application [pay the network fee](/docs/guide/payments/sponsor-user-fees) while a customer authorizes the payment.
 - **Payment references:** use [32-byte memos](/docs/guide/payments/transfer-memos) to connect transfers to separately stored business records.
-- **Token permissions:** use [TIP-20 roles and TIP-403 policies](/docs/resources/guides/compliance-controls) for issuer and receiver controls.
+- **Transfer controls:** use [TIP-20 roles and TIP-403 policies](/docs/resources/guides/compliance-controls) for issuer-defined token rules. Configure [account receive policies](/docs/accounts/policies/receive-policies) separately to control incoming payments.
 - **Private account activity:** evaluate [Tempo Zones](/docs/zones) and their current availability. A Zone's operator can read its ledger, and deposits and withdrawals leave public records. See [Zone privacy](/docs/zones/privacy).
 
 These capabilities describe the onchain integration. Funding, conversion, and bank-delivery timing still depend on the providers and route used.

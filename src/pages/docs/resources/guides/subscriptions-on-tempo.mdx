@@ -1,6 +1,6 @@
 ---
 title: Subscription billing with access keys
-seoTitle: Stablecoin Subscription Billing with Periodic Access Key Limits | Tempo Docs
+seoTitle: Stablecoin Subscriptions with Periodic Access Keys | Tempo Docs
 description: Design recurring stablecoin billing with periodic spending limits, scoped access keys, charge scheduling, delivery checks, and cancellation records.
 ---
 
@@ -34,11 +34,13 @@ Fixed durations are different from calendar months. If the product bills on a mo
 
 A spending limit also covers fees paid by the account, approval increases, and other counted TIP-20 outflows. A charge equal to the whole limit can fail if the same limited balance must cover its network fee. Use a separately funded [fee payer](/docs/guide/payments/sponsor-user-fees) where appropriate, or make the fee allowance explicit. Read [what counts against a spending limit](/docs/accounts/access-keys/spending-limits#what-counts).
 
+A `transferFrom` that uses an allowance the account already granted does not count against the key's spending limit. Review existing token allowances separately; a periodic key limit does not cap every possible debit from the account.
+
 ## Scope the key to the billing operation
 
 Use the exact token contract and function selectors required by the charge. A scope for `transfer(address,uint256)` does not also allow `transferWithMemo(address,uint256,bytes32)`; a payment-reference flow needs the appropriate additional scope.
 
-Where supported, restrict the recipient to the billing account. The [scope guide](/docs/accounts/access-keys/scopes) describes the functions that support recipient restrictions. Scopes check direct calls signed by the key, so allowing an arbitrary contract can grant more practical authority than the contract address alone suggests.
+Where supported, restrict the recipient to the billing account. The [scope guide](/docs/accounts/access-keys/scopes) describes the functions that support recipient restrictions. Scopes check direct calls signed by the key. A permitted contract can make its own downstream calls, so review that contract and any existing token approvals before allowing it.
 
 Give each service its own key so it can be revoked independently. Protect the service's private key and preserve its authorization metadata alongside the subscription record.
 
@@ -76,7 +78,7 @@ Stop new billing when the subscription is canceled. Keep customer cancellation, 
 
 [Revoking a key](/docs/accounts/access-keys/revocation) ends its authority permanently. Prior payments remain final, and existing token approvals remain until changed separately. An expiry also ends future signing authority; a new billing period does not extend it.
 
-If a customer changes a spending limit, read back the resulting authorization. Updating a limit resets the remaining amount to the new value; it does not merely add the difference to what was left. Follow the [limit update rules](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) when implementing plan changes.
+If a customer changes a spending limit, read back the resulting authorization. Updating a limit resets the remaining amount to the new value; it does not merely add the difference to what was left. The period and its current end remain unchanged. Follow the [limit update rules](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) when implementing plan changes.
 
 Keep personal details and subscription terms offchain. Use an opaque [payment reference](/docs/guide/payments/transfer-memos) to connect the transfer to the billing record.
 
