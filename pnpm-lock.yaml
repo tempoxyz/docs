@@ -167,8 +167,8 @@ importers:
         specifier: ^4.4.3
         version: 4.6.5
       zyzz:
-        specifier: 0.0.33
-        version: 0.0.33(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.3.0)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1))
+        specifier: 0.0.36
+        version: 0.0.36(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.3.0)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1))
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.1
@@ -6410,11 +6410,12 @@ packages:
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
-  zyzz@0.0.33:
-    resolution: {integrity: sha512-auiwvTtF0cZyQmcEL0JIFXSSnd/WV6JD6nfoq8iTC9snBhMY+x/rUTYc8vIVBXQYYZIEwN72hBQqNrf90pRvpQ==}
+  zyzz@0.0.36:
+    resolution: {integrity: sha512-dYqK8omLlyKxrWvXIVbcaH7cgoj8xdUQ21pS4Xu/qrWP2SqI8VAVJe0mmX4Hsrq4Ms9gbpiYBJvzwlR/OIm66g==}
     hasBin: true
     peerDependencies:
       '@babel/core': ^7.29.7
+      '@base-ui/react': 1.8.0
       next: ^16.3.5
       react: ^19.0.0
       react-native: '>=0.86.0 <1.0.0'
@@ -6422,6 +6423,8 @@ packages:
       vite: ^8.0.0
     peerDependenciesMeta:
       '@babel/core':
+        optional: true
+      '@base-ui/react':
         optional: true
       next:
         optional: true
@@ -13079,7 +13082,7 @@ snapshots:
 
   zwitch@2.0.4: {}
 
-  zyzz@0.0.33(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.3.0)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)):
+  zyzz@0.0.36(@babel/core@7.29.7)(esbuild@0.28.1)(react@19.3.0)(rolldown@1.1.4)(rollup@4.60.1)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)):
     dependencies:
       '@emnapi/core': 2.0.0-alpha.6
       '@emnapi/runtime': 2.0.0-alpha.6
