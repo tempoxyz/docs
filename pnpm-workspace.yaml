@@ -6,6 +6,8 @@ ignoredBuiltDependencies:
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
+  # Vocs #670 tests this newly published tokenizer.
+  - '@pierre/highlights@0.2.0'
   - accounts
   - mppx
   - incur
@@ -28,7 +30,7 @@ onlyBuiltDependencies:
   - vue-demi
 
 overrides:
-  vocs: https://pkg.pr.new/vocs@a9fbc37
+  vocs: https://pkg.pr.new/vocs@1c023ba
   # accounts 0.18.5 was published with unresolved catalog dependencies.
   'tapimo>accounts': 0.18.4
   'baseline-browser-mapping@<2.11.0': 2.11.0

@@ -2072,6 +2072,7 @@ export default defineConfig({
     status: 301 as const,
   })),
   codeHighlight: {
+    engine: 'highlights',
     langAlias: {
       sol: 'solidity',
     },
