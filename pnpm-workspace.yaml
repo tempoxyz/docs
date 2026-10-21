@@ -31,6 +31,8 @@ onlyBuiltDependencies:
 
 overrides:
   vocs: https://pkg.pr.new/vocs@1c023ba
+  # Configurable account hash domains matching the t14-checkpoint devnet (wevm/ox#519).
+  'viem>ox': https://pkg.pr.new/ox@bf010ee
   # accounts 0.18.5 was published with unresolved catalog dependencies.
   'tapimo>accounts': 0.18.4
   'baseline-browser-mapping@<2.11.0': 2.11.0

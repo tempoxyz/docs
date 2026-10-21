@@ -1,6 +1,6 @@
 /**
  * Devnet adapter for the account sandbox. It sends the sandbox's actions as real transactions on
- * the internal multisig-1113 devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
+ * the internal t14-checkpoint devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
  * configurable access keys (TIP-1111).
  *
  * - Only real signing runs on devnet. Passkeys are real WebAuthn passkeys, so creating and signing
