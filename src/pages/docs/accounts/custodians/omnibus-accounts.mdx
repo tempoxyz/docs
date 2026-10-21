@@ -16,15 +16,16 @@ An omnibus account holds many customers' stablecoins in one account, such as an 
 
 On Tempo, you give each customer a [virtual address](/docs/accounts/virtual-addresses). It's a deposit address that pays straight into your account, with no per-customer wallet and no sweep job. Each deposit names the address it was sent to, so you know which customer to credit.
 
-Virtual addresses and receive policies are live on mainnet and testnet. The code below runs on Moderato testnet.
+Virtual addresses and receive policies are live on mainnet and testnet. The code on this page runs on Moderato testnet.
 
 ## Setup
 
 :::::steps
 
 <span id="choose-the-account" />
+<span id="choose-the-account-that-receives-deposits" />
 
-### Choose the Account That Receives Deposits
+### Choose the Receiving Account
 
 Registering an account binds every deposit address you derive from it to that account permanently. Pick one whose keys you can change without changing its address.
 
@@ -32,8 +33,9 @@ Registering an account binds every deposit address you derive from it to that ac
 - **Configurable Account:** [Add](/docs/accounts/account-configuration/configuration-updates#add-a-signer) and [remove signers](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) at the same address. Until T14, it runs only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 <span id="register-and-derive" />
+<span id="register-the-account-and-derive-deposit-addresses" />
 
-### Register the Account and Derive Deposit Addresses
+### Register and Derive Addresses
 
 Register the account once. From it, call `registerVirtualMaster` on the virtual-address registry, with a salt you mine offchain with `VirtualMaster.mineSaltAsync`. Registration returns a 4-byte master ID. Register more than once to get separate ranges of addresses, such as one per business line.
 
@@ -56,8 +58,9 @@ const virtualAddress = VirtualAddress.from({ // [!code hl]
 Keep the mapping from customer tag to customer in your own records. To try registration first, use the [live deposit address demo](/docs/guide/payments/virtual-addresses).
 
 <span id="set-a-receive-policy" />
+<span id="accept-only-the-stablecoins-you-list" />
 
-### Accept Only the Stablecoins You List
+### Accept Listed Stablecoins Only
 
 Set a [receive policy](/docs/accounts/policies/receive-policies) on the registered account. Tempo checks deposits to its virtual addresses against the account's policy, because a virtual address can't set its own. This policy accepts one stablecoin from any sender. With `claimer: 'self'`, your account claims anything the policy holds back.
 
@@ -87,17 +90,17 @@ await client.receivePolicy.setSync({
 
 ::::
 
-`account` is the registered account and `stablecoin` is the token contract address you accept. Only TIP-20 stablecoins are forwarded to your account. Other tokens sent to a virtual address can't be recovered, so tell customers to send only the stablecoins you list on Tempo.
+`account` is the registered account and `stablecoin` is the token contract address you accept. Only TIP-20 stablecoins are forwarded to your account. Other tokens sent to a virtual address can't be recovered. Tell customers to send only the stablecoins you list on Tempo.
 
 <span id="credit-each-deposit" />
 
 ### Credit Each Deposit Once
 
-A deposit to a virtual address emits [two `Transfer` events](/docs/protocol/tip20/virtual-addresses) in one transaction: sender to virtual address, then virtual address to your account. Treat the pair as one deposit to your account, not two. Then:
+A deposit to a virtual address emits [two `Transfer` events](/docs/protocol/tip20/virtual-addresses) in one transaction. The first goes from the sender to the virtual address. The second goes from the virtual address to your account. Treat the pair as one deposit to your account, not two. Then:
 
 - **Read the Customer Tag:** The virtual address's last 6 bytes are the tag you chose. Look up the customer in your records.
 - **Check the Recipient:** A deposit your receive policy blocks still succeeds and still emits `Transfer`. Its recipient is `ReceivePolicyGuard`, not your account. Credit only when the confirmed event names your account.
-- **Record It Once:** Store the network, transaction hash, and log index as a unique key, and credit the customer in the same database transaction.
+- **Record It Once:** Store the network, transaction hash, and log index as a unique key. Credit the customer in the same database transaction.
 
 Read live deposits with [webhooks](/docs/api/webhooks) or [transfer events](/docs/guide/payments/accept-a-payment#detect-payments), and history with the [transfers API](/docs/api/transfers).
 

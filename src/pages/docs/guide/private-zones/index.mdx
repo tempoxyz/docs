@@ -1,5 +1,5 @@
 ---
-title: "Tempo Zones testnet sandbox"
+title: Testnet Sandbox
 seoTitle: "Tempo Zones testnet sandbox | Tempo Docs"
 description: Try deposits, private transfers, swaps, and withdrawals on the earlier Zone A and Zone B testnet deployments.
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones_title-f5_v02.png
@@ -10,15 +10,15 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 <span id="build-with-tempo-zones" />
 
-# Tempo Zones testnet sandbox
+# Testnet Sandbox
 
 Try deposits, transfers, swaps, and withdrawals with test funds on Zone A and Zone B.
 
-:::info
-These demos use an earlier Zone deployment with plaintext deposits and direct transfers. The current preview uses encrypted deposits and restricts transfers. Use the named sandbox for these demos; follow [Tempo Zones](/docs/zones) for your integration.
-:::
+## Overview
 
-A deposit locks tokens on Tempo and credits a private balance in the Zone. A withdrawal moves funds back to a Tempo address. These operations settle in stages, so the guides show both the transaction being accepted and the balance arriving at its destination.
+The testnet sandbox is an earlier Tempo Zones deployment with two example Zones, Zone A and Zone B. It's a separate integration from current deployments. Use it to try Zone flows with test funds, and build your application against [Tempo Zones](/docs/zones).
+
+A Zone keeps a private ledger of stablecoin balances and account activity. A portal (`ZonePortal`) on public Tempo holds its backing assets. The deposit, withdrawal, and cross-Zone guides show each flow settle in stages, from accepted transaction to credited balance.
 
 <ZoneDiagram
   name="overview"
@@ -26,71 +26,74 @@ A deposit locks tokens on Tempo and credits a private balance in the Zone. A wit
 />
 
 <span id="connect-your-application" />
-
-## Connect to the sandbox
-
-Your application uses a public Tempo client alongside a client for the Zone. The Zone client authenticates as your Tempo account so it can access that account’s private data.
-
-To connect, you need the Zone’s RPC endpoint, chain ID, and access details from its operator. Start with [Connect to a Zone](/docs/guide/private-zones/connect-to-a-zone) to set up a client and make an authenticated request. For the underlying design, read the [Tempo Zones overview](/docs/protocol/zones).
-
+<span id="connect-to-the-sandbox" />
 <span id="before-you-start" />
+<span id="try-the-testnet-guides" />
 
-## Try the testnet guides
+## Sandbox Guides
 
-The interactive guides use two example Zones on Tempo Testnet, called Zone A and Zone B. Zone A is the starting point for deposits and withdrawals; Zone B lets you try moving funds between Zones. The examples use the testnet tokens `OUSD` and `betaUSD`.
+The guides use two example Zones on Tempo Testnet. Deposits and withdrawals start in Zone A. Zone B is the destination for cross-Zone transfers and swaps. The examples use the test tokens `OUSD` and `betaUSD`.
 
-Each demo walks you through signing in with a passkey, getting testnet funds, and authorizing access to your Zone account. The embedded demos handle the RPC connection for you. If you are writing your own application, use the connection guide first.
+Each demo signs you in with a passkey and gets you test funds. It then signs an [authorization token](/docs/zones/connect#authorize-access) for your Zone account and handles the RPC connection. To call the sandbox from your own code, start with Connect to the Sandbox.
 
 <span id="choose-the-right-guide" />
 
 <Cards>
   <Card
-    description="Set up a Zone client, authorize your account, and make your first RPC request."
+    description="Use for setting up a Zone client, authorizing your account, and making a first RPC request."
     icon="lucide:plug"
-    title="Connect to a Zone"
+    title="Connect to the Sandbox"
     to="/docs/guide/private-zones/connect-to-a-zone"
   />
   <Card
-    description="Move testnet funds from Tempo into a private balance and wait for the deposit to arrive."
+    description="Use for moving test funds from Tempo into a private balance."
     icon="lucide:shield-ellipsis"
-    title="Deposit to a Zone"
+    title="Deposit OUSD"
     to="/docs/guide/private-zones/deposit-to-a-zone"
   />
   <Card
-    description="Try a private transfer between accounts in the testnet sandbox."
+    description="Use for a private transfer between accounts in Zone A."
     icon="lucide:send-horizontal"
-    title="Send tokens within a zone"
+    title="Send Within a Zone"
     to="/docs/guide/private-zones/send-tokens-within-a-zone"
   />
   <Card
-    description="Move testnet funds between two Zones through Tempo."
+    description="Use for moving test funds from Zone A to Zone B through Tempo."
     icon="lucide:move-right"
-    title="Send tokens across zones"
+    title="Send Across Zones"
     to="/docs/guide/private-zones/send-tokens-across-zones"
   />
   <Card
-    description="Combine a withdrawal, a public-chain swap, and a deposit into another Zone."
+    description="Use for combining a withdrawal, a swap on Tempo, and a deposit into another Zone."
     icon="lucide:repeat-2"
-    title="Swap stablecoins across zones"
+    title="Swap Across Zones"
     to="/docs/guide/private-zones/swap-across-zones"
   />
   <Card
-    description="Withdraw stablecoins from a zone back to your public balance."
+    description="Use for withdrawing test funds from Zone A back to your Tempo balance."
     icon="lucide:arrow-up-right"
-    title="Withdraw from a Zone"
+    title="Withdraw OUSD"
     to="/docs/guide/private-zones/withdraw-from-a-zone"
   />
 </Cards>
 
 <span id="testnet-compatibility" />
+<span id="about-the-testnet-sandbox" />
 
-## About the testnet sandbox
+## Sandbox Compatibility
 
-These demos use an earlier testnet deployment through the legacy Zone A and Zone B interfaces in `viem/tempo`. Its interfaces and chain IDs differ from the current Zone protocol. The sandbox also supports plaintext deposits and direct in-Zone transfers; the current permissioned runtime uses encrypted deposits and does not yet enable those transfers.
+The sandbox runs the legacy Zone A and Zone B interfaces in `viem/tempo`. Its code doesn't carry over to current deployments. It differs in these ways:
 
-Use the guide’s connection details for this sandbox. For another Zone, get the endpoint, access credentials, and supported SDK version from its operator. The [protocol reference](/docs/protocol/zones) describes the current implementation; the [connection guide](/docs/guide/private-zones/connect-to-a-zone) explains direct RPC access and how the demos connect through the docs server.
+- **Deposits:** The sandbox accepts plaintext and encrypted deposits. Current portals accept only encrypted deposits with a Tempo refund recipient.
+- **Transfers:** The sandbox allows direct TIP-20 transfers inside a Zone. The current permissioned runtime disables `transfer`, `transferFrom`, and their memo variants.
+- **Routed Withdrawals:** The sandbox router takes a plaintext destination recipient in its callback payload. Current routers require an encrypted deposit payload and a Tempo refund recipient.
+- **Callback Interface:** The sandbox router uses an older callback signature. The latest protocol source defines a different one.
+- **SDK Version:** The sandbox examples use `viem@2.54.6`, which matches the deployed portal and outbox (`ZoneOutbox`) interfaces. New deployments use the current SDK.
+- **Chain IDs:** The chain IDs `4217000006` and `4217000007` belong to the sandbox. Other deployments have their own.
 
-## Sandbox router deployment
+For another Zone, get the endpoint, access credentials, chain configuration, and supported SDK version from its operator.
+
+## Sandbox Router Deployment
 
 Use this `SwapAndDepositRouter` deployment for the Zone A and Zone B sandbox on **Tempo Moderato testnet**. It supports both same-token transfers and swaps. The [shared demo configuration](https://github.com/tempoxyz/docs/blob/main/src/lib/private-zones.ts) supplies these addresses to the interactive guides.
 
@@ -102,16 +105,25 @@ Use this `SwapAndDepositRouter` deployment for the Zone A and Zone B sandbox on 
 | Zone A portal (Zone ID `6`) | `0x7069DeC4E64Fd07334A0933eDe836C17259c9B23` |
 | Zone B portal (Zone ID `7`) | `0x3F5296303400B56271b476F5A0B9cBF74350D6Ac` |
 
-The deployed router receives `onWithdrawalReceived(bytes32,address,uint128,bytes)` callbacks, with selector `0xbfea9490`. The Zone messenger invokes this callback; your application supplies the router address and callback data to the source Zone's withdrawal request. The six-field `(bool,address,address,address,bytes32,uint128)` payload in the [swap](/docs/guide/private-zones/swap-across-zones#code-example) and [same-token transfer](/docs/guide/private-zones/send-tokens-across-zones#code-example) examples selects a plaintext destination recipient.
+The deployed router receives `onWithdrawalReceived(bytes32,address,uint128,bytes)` callbacks, with selector `0xbfea9490`. The Zone messenger invokes this callback. Your application passes the router address and callback data in the source Zone's withdrawal request. In the [swap](/docs/guide/private-zones/swap-across-zones#code-example) and [same-token transfer](/docs/guide/private-zones/send-tokens-across-zones#code-example) examples, the six-field `(bool,address,address,address,bytes32,uint128)` payload selects a plaintext destination recipient.
 
 :::warning
-Older demo copies use `0x7ebaa4E28fbD892f5B0F152d40173034adE94714`. That deployment expects `onWithdrawalReceived(address,address,uint128,bytes)` (`0x0e9110a5`) and points to a different factory. It is incompatible with these sandbox portals. Use the address above for both transfers and swaps. The latest protocol source also has a different callback interface; match the ABI and payload to the deployed contracts instead of combining versions.
+Older demo copies use `0x7ebaa4E28fbD892f5B0F152d40173034adE94714`. That deployment expects `onWithdrawalReceived(address,address,uint128,bytes)` (`0x0e9110a5`) and points to a different factory. It's incompatible with these sandbox portals. Use the router in the deployment table for both transfers and swaps. Match the ABI and payload to the deployed contracts, and don't combine versions.
 :::
 
-### Check the full routed result
+### Check the Full Routed Result
 
-Before sending funds, check the router's `zoneFactory()` and `stablecoinDEX()` against the table, confirm the factory recognizes the portals, and confirm the target portal enables the output token. A swap also needs a fresh DEX quote and a minimum output bound.
+Before sending funds, check the router's `zoneFactory()` and `stablecoinDEX()` against the table. Confirm that the factory recognizes the portals. Confirm that the target portal enables the output token. A swap also needs a fresh DEX quote and a minimum output bound.
 
-A successful source Zone withdrawal receipt only confirms submission. Wait for the L1 portal's `WithdrawalProcessed` event and check `callbackSuccess`, then confirm the destination balance. A rejected callback can produce a successful L1 processing receipt while returning the principal to the source Zone's `fallbackRecipient`; check that balance as well.
+A successful source Zone withdrawal receipt confirms submission only. Wait for the portal's `WithdrawalProcessed` event on Tempo and check `callbackSuccess`. Then confirm the destination balance. A rejected callback can still produce a successful processing receipt on Tempo. In that case, the principal returns to the source Zone's `fallbackRecipient`, so check that balance as well.
 
-Live checks on **2026-10-14** confirmed a [1 PathUSD transfer from Zone A to Zone B](https://explore.testnet.tempo.xyz/tx/0x8ab7e4fbbbd1e26a8400b111c5726fd05c04359be7a858d62e134a6d600807d9) and a [1 PathUSD swap into 0.994035 AlphaUSD, deposited back into Zone A](https://explore.testnet.tempo.xyz/tx/0x7d95a62c3e94e1f1382c287967d1d7bb13cfc3a3e3b54b5cd32dad240b8b7ec5). Both destination balances were verified. These checks cover the sandbox's plaintext recipient flow, not the current preview's encrypted flow or mainnet.
+Two sandbox transactions show the routed flow end to end. One is a [1 PathUSD transfer from Zone A to Zone B](https://explore.testnet.tempo.xyz/tx/0x8ab7e4fbbbd1e26a8400b111c5726fd05c04359be7a858d62e134a6d600807d9). The other is a [1 PathUSD swap into 0.994035 AlphaUSD, deposited back into Zone A](https://explore.testnet.tempo.xyz/tx/0x7d95a62c3e94e1f1382c287967d1d7bb13cfc3a3e3b54b5cd32dad240b8b7ec5). Both credited their destination balances. They use the sandbox's plaintext recipient flow.
+
+## Related
+
+<Cards>
+  <Card title="Tempo Zones" description="Covers the current Zones limited preview to use for your integration." to="/docs/zones" />
+  <Card title="Connect to a Zone" description="Use for connecting your application to a current Zone deployment." to="/docs/zones/connect" />
+  <Card title="How Zones Work" description="Covers the current Zone protocol design, from portals to settlement." to="/docs/protocol/zones" />
+  <Card title="RPC Reference" description="Covers the authorization token format and the methods it scopes." to="/docs/protocol/zones/rpc" />
+</Cards>

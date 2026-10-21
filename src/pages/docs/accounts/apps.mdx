@@ -27,7 +27,7 @@ Each user keeps the same address when they recover the account or leave your app
 
 Provider wallets with one key each work on mainnet and testnet today ([what your provider sets up today](#what-your-provider-sets-up-today)).
 
-We recommend three signers per account, each at weight 1, with any two approving ([signing thresholds](/docs/accounts/policies/signing-thresholds)):
+Give each account three signers at weight 1, with any two approving ([signing thresholds](/docs/accounts/policies/signing-thresholds)):
 
 - **User Passkey:** The user's [passkey](/docs/accounts/authentication/passkeys) on their phone.
 - **Provider Key:** A key your provider manages. It signs only for a user your app has signed in.
@@ -44,7 +44,7 @@ The passkey and backup work without your app or the provider, even when either i
 
 ## Existing Provider Wallets
 
-Each user gets one secp256k1 key. The provider holds it and unlocks it when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works on Tempo mainnet and testnet as it is.
+Each user gets one secp256k1 key. The provider holds it and unlocks it when the user logs in. That key makes the user's wallet a [single-key account](/docs/accounts/how-it-works#address), which works unchanged on Tempo mainnet and testnet.
 
 The key controls the whole balance. Anyone the provider lets request a signature moves it. That includes the user after they log in, and your backend under the provider's policies. Because the key is secp256k1, the account's own key can't be a passkey or device key.
 
@@ -52,7 +52,7 @@ The key controls the whole balance. Anyone the provider lets request a signature
 
 ## Migration From Provider Wallets
 
-If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains. Balances on other chains don't carry over. Sending and receiving stablecoins works as it is.
+If your users already have wallets with Privy or another provider, you don't create new accounts. Each wallet's secp256k1 key gives it the same address on Tempo as on other EVM chains. Balances on other chains don't carry over. Sending and receiving stablecoins works unchanged.
 
 Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends [Tempo Transactions](/docs/guide/tempo-transaction). Privy's Tempo-specific React hook supports `sponsor: true`. Its [Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) lists the SDK and project requirements. To operate your own sponsorship service, use a [fee payer](/docs/accounts/fees/fee-sponsorship).
 
@@ -69,7 +69,7 @@ Fee tokens, batched calls, and access keys need the provider's Tempo integration
 
 Any provider that signs Ethereum transactions can hold and send stablecoins on Tempo ([EVM compatibility](/docs/quickstart/evm-compatibility)). Tempo Transaction features need more. They include paying fees in any stablecoin, batching payments, sponsoring fees, and authorizing [access keys](/docs/accounts/access-keys).
 
-For those, the provider sends Tempo Transactions itself, or signs a transaction's raw hash for your app to send to a Tempo RPC. Privy, Turnkey, and Dynamic do both.
+For those, the provider sends Tempo Transactions itself. Or it signs a transaction's raw hash, and your app sends the transaction to a Tempo RPC. Privy, Turnkey, and Dynamic do both.
 
 | Provider | Sends Tempo Transactions | Signs raw hashes |
 | --- | --- | --- |
@@ -77,9 +77,9 @@ For those, the provider sends Tempo Transactions itself, or signs a transaction'
 | [Turnkey](https://docs.turnkey.com/features/networks/overview) | Yes, through `sign_transaction`, which its policies can inspect | `sign_raw_payload` with no hash function |
 | [Dynamic](https://www.dynamic.xyz/docs) | Yes, through its Tempo SDK extension | `signRawMessage` |
 
-The provider's policy engine can't read a raw hash. It can't tell a payment or a key authorization from any other request. Route raw signing through one backend service that builds and checks each transaction, including any access key's limits, scopes, and expiry, before it calls the provider.
+The provider's policy engine can't read a raw hash. It can't tell a payment or a key authorization from any other request. Route raw signing through one backend service that builds and checks each transaction. It checks any access key's limits, scopes, and expiry before it calls the provider.
 
-To keep key authorization inside the policy engine instead, send a Tempo Transaction that calls `authorizeKey` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain) through the provider's transaction API.
+To keep key authorization inside the policy engine instead, use the provider's transaction API. Send a Tempo Transaction that calls `authorizeKey` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain).
 
 <span id="how-do-i-give-a-service-limited-spending-power" />
 <span id="wrap-the-providers-signing-as-an-account" />

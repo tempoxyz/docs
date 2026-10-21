@@ -23,8 +23,8 @@ Set the account's default fee token once. Override it on any transaction that sh
 Before a transaction runs, Tempo checks its fee token:
 
 - It's a [TIP-20 token](/docs/protocol/tip20/overview), Tempo's token standard, whose currency is USD.
-- The account paying the fee holds enough of it to cover the maximum fee, which is the gas limit times the gas price.
-- If the block's validator wants its fees in a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm), Tempo's built-in exchange pools, has enough liquidity to convert it.
+- The account paying the fee holds enough of it to cover the maximum fee. The maximum fee is the gas limit times the gas price.
+- If the block's validator wants a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) has enough liquidity to convert it. The Fee AMM is Tempo's built-in exchange pools.
 
 If any check fails, the transaction is invalid and isn't included. Tempo doesn't try another token.
 
@@ -32,7 +32,7 @@ If any check fails, the transaction is invalid and isn't included. Tempo doesn't
 
 ## Set a Default Fee Token
 
-The default covers every transaction the account pays the fee for, including ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token order](/docs/accounts/fees#fee-token-precedence). That order can fall back to pathUSD, a stablecoin the account might not hold.
+The default covers every transaction the account pays the fee for. That includes ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token order](/docs/accounts/fees#fee-token-precedence). That order can fall back to pathUSD, a stablecoin the account might not hold.
 
 In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet until T14. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). The examples pay fees in its faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
 

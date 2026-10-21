@@ -40,7 +40,7 @@ A standard stablecoin transfer costs about $0.00003 when the network is quiet. I
 
 Before the transaction runs, Tempo deducts its maximum fee from the fee payer's balance in the fee token. The maximum fee is the gas limit times the gas price. Afterward, Tempo refunds the unused part.
 
-The validator producing the block may want a different stablecoin. The [Fee AMM](/docs/protocol/fees/spec-fee-amm) then converts the fee to it. The Fee AMM is a set of built-in exchange pools.
+When the validator producing the block wants a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the fee to it. The Fee AMM is a set of built-in exchange pools.
 
 If the fee token fails any of [Tempo's fee token checks](/docs/accounts/fees/fee-tokens#supported-fee-tokens), the transaction is invalid. Tempo never includes it, so it costs nothing. A transaction that's included and then fails still pays its fee.
 
@@ -54,11 +54,11 @@ Tempo uses the first of these that applies:
 
 1. `feeToken` on the transaction.
 2. The fee payer's default fee token.
-3. The token being transferred, when every call is a `transfer` or `transferWithMemo` on the same USD token and the account pays its own fee.
+3. The token being transferred. This applies when every call is a `transfer` or `transferWithMemo` on the same USD token. The account must also pay its own fee.
 4. The input token of a single Stablecoin DEX swap.
 5. pathUSD, the first stablecoin deployed on Tempo.
 
-Tempo checks only that first token. If the fee payer can't pay in it, the transaction is invalid, even when a later token would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD. The fee payer may not hold pathUSD, so [set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each account that pays fees.
+Tempo checks only that first token. If the fee payer can't pay in it, the transaction is invalid, even when a later token would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD. If the fee payer can't pay in pathUSD, the transaction is invalid. [Set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each account that pays fees.
 
 ## Related
 

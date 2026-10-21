@@ -44,7 +44,7 @@ Assets other than TIP-20 tokens, such as NFTs, don't count. A `transferFrom` tha
 
 Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry covers one token, with the amount in base units (most USD stablecoins have 6 decimals). For example, `{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }` allows 500 OUSD a day.
 
-A key without `limits` spends any amount of any token. Once you pass `limits`, a token not in the list has a limit of zero, including for fees paid in it. `limits: []` lets the key spend no TIP-20 tokens.
+A key without `limits` spends any amount of any token. Once you pass `limits`, a token not in the list has a limit of zero. That includes fees paid in it. `limits: []` lets the key spend no TIP-20 tokens.
 
 `period` decides whether the limit renews:
 
@@ -65,7 +65,7 @@ Read what a key can still spend with Viem's [`accessKey.getRemainingLimit`](http
 
 A missing, revoked, or expired key reads as zero.
 
-Each payment an access key signs emits an `AccessKeySpend` event with the amount spent and the limit left, both in base units. The indexer shows that spend history for one key. Replace the account and key addresses with yours.
+Each payment an access key signs emits an `AccessKeySpend` event. It records the amount spent and the limit left, both in base units. The indexer shows that spend history for one key. Replace the account and key addresses with yours.
 
 <TidxQuery
   network="mainnet"
@@ -92,7 +92,7 @@ The update sets both the limit and what's left of it to the new value. Later per
 ## Limits
 
 - A limited access key can't change limits, including its own.
-- `updateLimit` reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)), an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)), or an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits.
+- `updateLimit` reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)) or an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)). It also reverts on an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits.
 
 Specification: [Account Keychain spending limits](/docs/protocol/transactions/AccountKeychain#spending-limit-enforcement).
 

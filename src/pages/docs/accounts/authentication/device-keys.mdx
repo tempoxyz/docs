@@ -19,7 +19,9 @@ A device key lets the customer's phone, computer, or browser pay without asking 
 
 A device key is a P-256 key that the device's own key store creates and never exports. The customer's passkey authorizes it once as an [access key](/docs/accounts/access-keys). Tempo rejects any payment it signs over its spending limit or after it expires. On a server, use a [private key](/docs/accounts/authentication/private-keys) in your KMS or HSM instead.
 
-## How It Works
+<span id="how-it-works" />
+
+## Key Stores
 
 Each platform keeps device keys in its own key store:
 
@@ -49,7 +51,7 @@ The demo makes the device key its own account on the Tempo Accounts devnet to sh
 
 In your app, add the key to the customer's account as an access key instead. The device creates the key. The customer's passkey authorizes it for up to 500 OUSD a day for 30 days. The first payment carries that authorization.
 
-On mainnet and testnet today, a device key can be an access key on a single-key account whose one key is the customer's passkey.
+On mainnet and testnet today, a device key can be an access key on a single-key account. That account's one key is the customer's passkey.
 
 <ConfigurableAccountsT14 />
 

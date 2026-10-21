@@ -12,13 +12,13 @@ Find the setup and guides for what you're building.
 
 ## Overview
 
-Each use case is a Tempo account setup for one kind of product. The setups differ in who holds which key, such as a customer's passkey, a provider's key, your backend's access key, or an approver's signer.
+Each use case is a Tempo account setup for one kind of product. The setups differ in who holds which key. A customer holds a passkey, and a provider holds its own key. Your backend holds an access key, and each approver holds a signer.
 
 <span id="consumer-wallets" />
 
 ## Apps
 
-For teams building a consumer app, such as a remittance or savings app, on embedded wallets from a provider such as Privy or Turnkey.
+For consumer apps, such as remittance or savings apps, built on embedded wallets from Privy, Turnkey, or a similar provider.
 
 <Cards>
   <Card title="Set Up a Self-Custodial Wallet With a Provider" description="The provider's key and the user's passkey approve together; the user can recover or leave without you. Devnet until T14." to="/docs/accounts/apps/self-custodial-wallets" />
@@ -42,7 +42,7 @@ For backends that pay out, fund cards, or charge subscriptions, and for AI agent
 
 ## Custodians
 
-For exchanges and payments processors that hold customer funds, businesses whose funds sit with a custodian such as Fireblocks, and companies running their own treasury.
+For exchanges and payments processors that hold customer funds. Also for businesses whose funds sit with a custodian such as Fireblocks, and companies running their own treasury.
 
 <Cards>
   <Card title="Hold Customer Funds in an Omnibus Account" description="A deposit address per customer, paying into one account that accepts only the stablecoins you list." to="/docs/accounts/custodians/omnibus-accounts" />

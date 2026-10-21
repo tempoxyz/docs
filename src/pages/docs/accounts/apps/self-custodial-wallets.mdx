@@ -16,7 +16,7 @@ Builds an account where your provider's key and the user's passkey approve each 
 
 This guide builds a three-signer Tempo account for each user of a consumer app with its own login. A wallet provider, such as Privy or Turnkey, holds one signer. Only the user can recover the account or leave without you.
 
-Self-custody rules in some markets require two things:
+Self-custody rules in some markets require two properties:
 
 - **No Unilateral Control:** Neither your app nor your provider can move or recover the funds alone.
 - **Access During Outages:** The user reaches the funds when your systems are down or breached.
@@ -59,11 +59,12 @@ Your provider signs through its own API, and only for a user your app has signed
 - [Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction): Start from the [Privy Tempo example](https://github.com/privy-io/examples/tree/main/examples/privy-next-tempo). Sign transaction hashes with `secp256k1_sign`, or `raw_sign` on server wallets.
 - [Turnkey](https://docs.turnkey.com/features/networks/tempo): Start from the [Turnkey Tempo example](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo). Sign transaction hashes with `sign_raw_payload` and no hash function.
 
-Create a wallet for the user with your provider. Wrap it as a Viem account that asks the provider for each signature, and call it `providerAccount`. [Pay from a user's embedded wallet](/docs/accounts/automations/pay-from-an-embedded-wallet#wrap-the-providers-signing-as-an-account) shows the wrapper.
+Create a wallet for the user with your provider. Wrap it as a Viem account that asks the provider to sign, as in [Pay from a user's embedded wallet](/docs/accounts/automations/pay-from-an-embedded-wallet#wrap-the-providers-signing-as-an-account). Call it `providerAccount`.
 
 <span id="make-the-providers-key-one-signer" />
+<span id="create-the-account-with-three-signers" />
 
-### Create the Account With Three Signers
+### Create the Account
 
 Give the [passkey](/docs/accounts/authentication/passkeys), the provider's key, and the backup key weight 1 each, with a [threshold](/docs/accounts/policies/signing-thresholds) of 2.
 
@@ -103,7 +104,9 @@ Save these with the user's record, and rebuild the account from them each time (
 - `account.config`
 - The passkey's [`credential.id` and `credential.publicKey`](/docs/accounts/authentication/passkeys#passkey-limits)
 
-### Pay With the Passkey and the Provider
+<span id="pay-with-the-passkey-and-the-provider" />
+
+### Sign Each Payment
 
 Viem signs with the account's attached keys until their weights reach the threshold. With the passkey and `providerAccount` attached, each payment prompts for the passkey and requests one provider signature.
 
@@ -121,7 +124,7 @@ await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recip
 
 The provider signs only the transaction's hash, so its policy engine can't read the payment. Build each transaction in your backend and check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)).
 
-To skip the passkey prompt on small payments, have the passkey and provider authorize a [device key](/docs/accounts/authentication/device-keys) with a spending limit.
+To skip the passkey prompt on small payments, authorize a [device key](/docs/accounts/authentication/device-keys) with a spending limit. The passkey and provider sign that authorization.
 
 ### Back Up the User's Account
 
@@ -143,7 +146,9 @@ Without the passkey and backup, the user depends on your provider. If the provid
 
 A configuration update keeps the account's address, balances, and [Earn](/docs/earn) positions. Save the new configuration each update returns.
 
-## Get Funds Out Without Your App
+<span id="get-funds-out-without-your-app" />
+
+## Leave Without Your App
 
 The passkey and backup sign from any Tempo client, not only your app. To leave, the user [withdraws from Earn](/docs/earn/withdraw), then sends their stablecoins to another account or an [offramp](/docs/partners/payments-and-ramps).
 

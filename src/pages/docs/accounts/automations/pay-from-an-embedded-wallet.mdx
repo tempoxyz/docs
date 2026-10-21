@@ -12,7 +12,7 @@ Lets your backend pay from a user's Privy or Turnkey wallet, within limits, with
 
 ## Overview
 
-This guide gives your backend an [access key](/docs/accounts/access-keys) that pays from a user's Privy or Turnkey embedded wallet on its own. Examples include card top-ups, subscriptions, and recurring transfers.
+This guide gives your backend an [access key](/docs/accounts/access-keys) that pays from a user's Privy or Turnkey embedded wallet. Examples include card top-ups, subscriptions, and recurring transfers.
 
 The provider keeps the account key and signs the key's authorization once. After that, your backend signs each payment with its own key. It stays within the limit, recipients, and expiry the user approved.
 
@@ -22,7 +22,7 @@ The example funds a card program. Your card backend gets a key that sends up to 
 
 ## Key Holders
 
-On each card swipe, your card backend pulls the purchase amount from the user's balance in seconds, without asking the wallet provider to sign. Each party does only what its own key allows.
+On each card swipe, your card backend pulls the purchase amount from the user's balance in seconds. It doesn't ask the wallet provider to sign. Each party does only what its own key allows.
 
 | Party | Holds | Can do on its own |
 | --- | --- | --- |
@@ -38,7 +38,9 @@ An agent or a partner can hold an access key the same way as the card backend.
 
 :::::steps
 
-### Wrap the Provider's Signing as an Account
+<span id="wrap-the-providers-signing-as-an-account" />
+
+### Wrap the Provider's Signing
 
 Tempo needs the account key to sign a 32-byte hash as is, with no message prefix. Both providers offer that.
 
@@ -75,7 +77,9 @@ if (!isAddressEqual(providerAccount.address, walletAddress)) throw new Error('Wr
 
 `providerAccount.address` is the user's account address. To fund it on Moderato, call `client.faucet.fundSync({ account: providerAccount.address })`.
 
-### Have the Holder Create Its Key
+<span id="have-the-holder-create-its-key" />
+
+### Create the Holder's Key
 
 The card backend generates its own key and sends the app only the key's address. The private key never leaves the backend.
 
@@ -119,7 +123,9 @@ export const message = JSON.stringify(KeyAuthorization.toRpc(keyAuthorization)) 
 
 The provider receives only a 32-byte hash of this authorization. It can't tell a key authorization from any other hash, so [your app decides what the provider signs](/docs/accounts/apps#route-raw-signing-through-one-backend).
 
-### Send It With the Holder's First Payment
+<span id="send-it-with-the-holders-first-payment" />
+
+### Send the First Payment
 
 The holder parses the app's `message` and attaches the authorization to its first payment. Tempo registers the key and checks the payment against the key's bounds in the same transaction.
 
@@ -191,10 +197,11 @@ Once the [revocation](/docs/accounts/access-keys/revocation) lands, Tempo reject
 :::::
 
 <span id="authorize-from-the-browser" />
+<span id="authorize-from-the-browser-with-the-accounts-sdk" />
 
-## Authorize From the Browser With the Accounts SDK
+## Authorize in the Browser
 
-When the account key is a Privy embedded wallet that the user unlocks in your app, the [Accounts SDK](https://accounts.tempo.xyz/docs) signs the authorization through Privy's `secp256k1_sign`. Its Privy adapter needs `@privy-io/react-auth` 3.25.0 or later. Mount `PrivyAccountsBridge` from `accounts/react/privy` under Privy's `PrivyProvider`. Then ask the provider to authorize the holder's key.
+When the account key is a Privy embedded wallet the user unlocks in your app, use the [Accounts SDK](https://accounts.tempo.xyz/docs). It signs the authorization through Privy's `secp256k1_sign`. Its Privy adapter needs `@privy-io/react-auth` 3.25.0 or later. Mount `PrivyAccountsBridge` from `accounts/react/privy` under Privy's `PrivyProvider`. Then ask the provider to authorize the holder's key.
 
 ```ts [connect.ts]
 import { parseUnits, toHex } from 'viem'
@@ -224,7 +231,7 @@ const { keyAuthorization, rootAddress } = await provider.request({ // [!code hl]
 // keyAuthorization is already JSON-safe: send it and rootAddress to the holder
 ```
 
-`rootAddress` is the account address the holder passes as `access`. The holder then submits `KeyAuthorization.fromRpc(keyAuthorization)` with its first payment, as in the steps above. The Accounts SDK's `turnkey` adapter, exported from `accounts`, does the same for Turnkey wallets. Both adapters are Tempo code, not Privy or Turnkey code. Privy publishes no guide for this flow.
+`rootAddress` is the account address the holder passes as `access`. The holder then submits `KeyAuthorization.fromRpc(keyAuthorization)` with its first payment, as in the setup steps. The Accounts SDK's `turnkey` adapter, exported from `accounts`, does the same for Turnkey wallets. Both adapters are Tempo code, not Privy or Turnkey code. Privy publishes no guide for this flow.
 
 ## Related
 

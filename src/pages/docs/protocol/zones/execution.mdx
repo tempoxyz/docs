@@ -1,21 +1,24 @@
 ---
-title: "Execution and gas costs within a Tempo Zone"
+title: Execution and Gas
 seoTitle: "Execution & Gas in Tempo Zones | Docs"
 description: Specification for gas accounting, fee tokens, fixed TIP-20 gas costs, contract creation limits, and token management on Tempo Zones.
 ogImage: /og/2026-q4/og_2026-q4_docs_protocol-zones-execution_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Execution and gas costs within a Tempo Zone
+# Execution and Gas
 
-A Tempo Zone executes transactions against its private state using Tempo's gas accounting and a fixed set of system contracts. Transactions pay gas in an enabled TIP-20 token; deposits and withdrawals also incur separate processing fees.
+A Zone executes transactions against its private state with Tempo's gas accounting.
 
-For deposit and withdrawal flows, see the [bridging specification](/docs/protocol/zones/bridging). For balance visibility and access control rules, see the [accounts specification](/docs/protocol/zones/accounts).
+## Overview
+
+A Zone runs a fixed set of system contracts. Transactions pay gas in an enabled TIP-20 token. [Deposits and withdrawals](/docs/protocol/zones/bridging) also incur separate processing fees.
 
 ## Fee Tokens
 
-Tempo Zones reuse Tempo fee units and gas accounting. A transaction can select an enabled, initialized TIP-20 token through `feeToken`. If it omits this field, the zone uses its creation-time default token. The zone fee manager accepts the selected token directly without Fee AMM conversion; it does not require USD currency. Token pause and compliance policies still apply.
+Zones reuse Tempo fee units and gas accounting. A transaction can select an enabled, initialized TIP-20 token through `feeToken`. If it omits this field, the Zone uses its creation-time default token. The Zone fee manager (`ZoneFeeManager`) accepts the selected token directly without Fee AMM conversion. It doesn't require USD currency. Token pause and compliance policies still apply.
 
 ## Deposit Fees
 
@@ -25,7 +28,7 @@ Deposits charge a fixed processing fee in the deposited token:
 fee = FIXED_DEPOSIT_GAS × zoneGasRate
 ```
 
-`FIXED_DEPOSIT_GAS` is fixed at 100,000 gas. The portal admin configures `zoneGasRate` through `ZonePortal.setZoneGasRate()`. The fee is deducted from the deposit amount and paid to the admin on Tempo. Deposits must also cover the configured failed-deposit bounce-back fee; use `calculateDepositFee()` and `calculateBouncebackFee()` on the portal to read both amounts.
+`FIXED_DEPOSIT_GAS` is fixed at 100,000 gas. The portal admin configures `zoneGasRate` through `ZonePortal.setZoneGasRate()`. The fee is deducted from the deposit amount and paid to the admin on Tempo. Deposits must also cover the configured failed-deposit bounce-back fee. To read both amounts, call `calculateDepositFee()` and `calculateBouncebackFee()` on the portal.
 
 ## Withdrawal Fees
 
@@ -35,11 +38,11 @@ Withdrawals charge a processing fee in the withdrawn token:
 fee = (WITHDRAWAL_BASE_GAS + gasLimit) × tempoGasRate
 ```
 
-`WITHDRAWAL_BASE_GAS` is 50,000 gas. The user specifies `gasLimit` for callback execution, with `0` for a plain withdrawal and a maximum of 10,000,000. The sequencer configures `tempoGasRate` through `ZoneOutbox.setTempoGasRate()`, bounded by the portal admin’s `maxTempoGasRate`. Use `calculateWithdrawalFee(gasLimit)` to read the fee. It is charged in addition to the requested withdrawal amount and is separate from the zone transaction gas fee.
+`WITHDRAWAL_BASE_GAS` is 50,000 gas. The user specifies `gasLimit` for callback execution. It's `0` for a plain withdrawal, with a maximum of 10,000,000. The sequencer configures `tempoGasRate` through `ZoneOutbox.setTempoGasRate()`. The portal admin's `maxTempoGasRate` bounds it. Use `calculateWithdrawalFee(gasLimit)` to read the fee. It's charged in addition to the requested withdrawal amount. It's separate from the Zone transaction gas fee.
 
 ## Fixed Gas Costs
 
-The TIP-20 selectors below have a fixed precompile charge of 100,000 gas, separate from transaction intrinsic gas. Fixed charges prevent gas-based information leaks tied to storage state. On a standard EVM chain, gas varies based on whether a transfer writes to a previously empty storage slot, revealing whether the recipient has received tokens before. During the current permissioned phase, public transfer calls still revert with `Unauthorized()`.
+These TIP-20 selectors have a fixed precompile charge of 100,000 gas, separate from transaction intrinsic gas. Fixed charges prevent gas-based information leaks tied to storage state. On a standard EVM chain, gas varies when a transfer writes to a previously empty storage slot. That reveals whether the recipient has received tokens before. During the current permissioned phase, public transfer calls still revert with `Unauthorized()`.
 
 | Function | Gas Cost |
 |----------|----------|
@@ -54,7 +57,7 @@ Inbox/outbox token movement and fee collection use internal system paths rather 
 
 ## Contract Creation Disabled
 
-Contract creation is restricted to protocol-allowlisted deployers. The allowlist is currently empty, so users cannot submit deployment transactions or execute `CREATE` or `CREATE2`. Each Tempo Zone runs a fixed set of system contracts and predeploys.
+Contract creation is restricted to protocol-allowlisted deployers. The allowlist is currently empty, so users can't submit deployment transactions or execute `CREATE` or `CREATE2`. Each Zone runs a fixed set of system contracts and predeploys.
 
 ## Token Management
 
@@ -63,7 +66,7 @@ Contract creation is restricted to protocol-allowlisted deployers. The allowlist
   alt="Issuer TIP-403 policy is anchored by the finalized Tempo checkpoint imported into TempoState. Zone execution reads and applies that checkpoint's policy to token operations."
 />
 
-The portal admin manages which TIP-20 tokens are available on a Tempo Zone:
+The portal admin manages which TIP-20 tokens are available on a Zone:
 
 | Function | Behavior |
 |----------|----------|
@@ -71,6 +74,26 @@ The portal admin manages which TIP-20 tokens are available on a Tempo Zone:
 | `pauseDeposits(token)` | Stops new deposits for the token. Withdrawal processing remains available unless the portal is paused. |
 | `resumeDeposits(token)` | Restarts deposits for a previously paused token. |
 
-In the T13 source, `enableToken` also requires a submitted batch to initialize the processed enabled-token cursor, and at most eight token enablements can remain unprocessed. Earlier runtimes use different admission limits.
+In the T13 source, `enableToken` also requires a submitted batch to initialize the processed enabled-token cursor. At most eight token enablements can remain unprocessed. Earlier runtimes use different admission limits.
 
-Once enabled, a token cannot be disabled. Withdrawal availability still depends on the portal pause state, access controls, and the token’s compliance policy. Tokens on the Tempo Zone use the same address as their Tempo Mainnet counterpart. `ZoneInbox` mints on deposit, `ZoneOutbox` burns on withdrawal. No mechanism exists to create new tokens on the Tempo Zone.
+Once enabled, a token can't be disabled. Withdrawal availability still depends on the portal pause state, access controls, and the token’s compliance policy. Tokens on a Zone use the same address as their Tempo counterpart. `ZoneInbox` mints on deposit, `ZoneOutbox` burns on withdrawal. No mechanism exists to create new tokens on a Zone.
+
+## Related
+
+<Cards>
+  <Card
+    title="Bridging"
+    description="Covers deposits, withdrawals, encrypted deposits, and composable withdrawal callbacks."
+    to="/docs/protocol/zones/bridging"
+  />
+  <Card
+    title="Accounts and Privacy"
+    description="Covers private balances, private allowances, and account-scoped access control."
+    to="/docs/protocol/zones/accounts"
+  />
+  <Card
+    title="Architecture"
+    description="Covers portals, private ledgers, contract roles, and the settlement lifecycle."
+    to="/docs/protocol/zones/architecture"
+  />
+</Cards>

@@ -43,7 +43,7 @@ const total = saved.config.owners.reduce((sum, { weight }) => sum + weight, 0)
 const recoverable = saved.config.owners.every(({ weight }) => total - weight >= saved.config.threshold)
 ```
 
-Tempo stores only a hash of the account's configuration. Your app rebuilds the account from the address and configuration it saved after the last update, `saved.address` and `saved.config` below.
+Tempo stores only a hash of the account's configuration. Your app rebuilds the account from the address and configuration it saved after the last update. The examples call them `saved.address` and `saved.config`.
 
 ## Recovery Demo
 
@@ -129,7 +129,7 @@ saved.config = config // [!code hl]
 
 ::::
 
-As with every payment, build the update in your backend and check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). Once the update lands, the lost passkey can't approve anything.
+As with every payment, build the update in your backend. Check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). Once the update lands, the lost passkey can't approve anything.
 
 If the attached keys don't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices), such as the backup on the user's laptop.
 
@@ -159,7 +159,7 @@ If you didn't save the lost key's address, [list the keys the account has author
 
 The passkey and the provider replace a lost backup the same way. Attach `passkey` and `providerAccount` to `openAccount`, and swap the lost backup's address for the new backup's. Have the user sign a test message or approve one small payment with the new backup before relying on it.
 
-The provider's key can't approve alone. If the user loses both the passkey and the backup, the account stays locked unless it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
+The provider's key can't approve alone. If the user loses both the passkey and the backup, the account stays locked. It recovers only if it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
 
 ## Related
 

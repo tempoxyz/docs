@@ -178,16 +178,16 @@ Prefer headings that name the product, API, command, protocol, or task:
 
 Exceptions are allowed for standards-format pages, especially TIP sections with required names such as `Abstract`, `Motivation`, `Specification`, and `Test Cases`.
 
-Before finishing docs changes, scan changed Markdown files for generic H2s. Accounts pages follow the Design System template below, so the scan skips them:
+Before finishing docs changes, scan changed Markdown files for generic H2s. Accounts and Zones pages follow the Design System template below, so the scan skips them:
 
 ```bash
-git diff --name-only -- '*.md' '*.mdx' | grep -v '^src/pages/docs/accounts' \
+git diff --name-only -- '*.md' '*.mdx' | grep -vE '^src/pages/docs/(accounts|zones|guide/private-zones|protocol/zones)' \
   | xargs rg -n '^## +(Overview|Usage|Parameters|Returns?|Examples|Setup|Configuration|Reference|Request|Response|Errors|Best Practices|Next Steps)( +\{#[^}]+\})?$'
 ```
 
-### Design System page template (Accounts)
+### Design System page template
 
-Accounts pages (`src/pages/docs/accounts.mdx` and `src/pages/docs/accounts/`) follow the [Tempo Design System docs](https://ds.tehq.dev/llms-full.txt) page by page. Other sections move to this template when they are rewritten. On these pages, the template overrides the generic-H2 ban, sentence-case headings, and period labels:
+Accounts and Zones pages follow the [Tempo Design System docs](https://ds.tehq.dev/llms-full.txt) page by page: `src/pages/docs/accounts.mdx`, `src/pages/docs/accounts/`, `src/pages/docs/zones.mdx`, `src/pages/docs/zones/`, `src/pages/docs/guide/private-zones/`, and `src/pages/docs/protocol/zones/`. Other sections move to this template when they are rewritten. On these pages, the template overrides the generic-H2 ban, sentence-case headings, and period labels:
 
 1. **Title:** Title Case `title` frontmatter and `#` heading, matching the sidebar label in `vocs.config.ts`.
 2. **Subhead:** One short sentence after the H1 that defines the page or states its outcome.
@@ -232,19 +232,23 @@ Follows the [Tempo Design System writing style](https://ds.tehq.dev/docs/foundat
 ### Sentences
 
 - Put one rule or fact in each sentence, so a reader or an agent can quote it alone.
-- Keep sentences under 20 words. Split any sentence over 25 words.
+- Keep sentences under 20 words and headings under six words.
 - Don't chain clauses with colons. A sentence with two colons is always two sentences or a list.
 - Put the important words first: the subject or outcome, then the conditions. "Once the update lands, the lost passkey can't approve anything" leads its paragraph, not ends it.
 - Define before explaining. Open a concept with one sentence that says what it is, then list its parts.
 - State rules as facts that Tempo checks, enforces, or rejects, not as warnings. Prefer "Tempo reverts the transaction" over "the transaction may fail".
 - State what an operation doesn't do, plainly: "It holds no funds." "A configuration update doesn't revoke it."
 - Add a concrete "such as" example to an abstract rule.
+- Use contractions: don't, can't, isn't, it's. Keep "cannot" only inside quoted error strings.
+- Name the thing, not its position. Write "the example" or name the step, not "the code below" or "the steps above".
+- State recommendations as instructions ("Use three signers"), not "we recommend". Use "we" only for Tempo as a company.
+- Keep "may", "might", "can", and "could" only for real permission or real uncertainty.
 
 ### Paragraphs and lists
 
 - The paragraph after the H1 renders as the subhead. Make it one short sentence that states the outcome.
 - Keep paragraphs to two or three sentences.
-- Turn a sentence that lists three or more items with explanations into a bold-label list: `- **Label.** Sentence.` outside Accounts, `- **Label:** Sentence.` on Accounts pages. A short plain list ("A, B, and C") stays in the sentence.
+- Turn a sentence that lists three or more items with explanations into a bold-label list: `- **Label.** Sentence.` outside the Design System template sections, `- **Label:** Sentence.` inside them. A short plain list ("A, B, and C") stays in the sentence.
 - Don't stack several lists back to back. Keep a sentence of prose between them.
 - Give the instruction, then the code, then at most one or two sentences on the result. Skip lead-ins such as "The following code…".
 - Don't write sentences whose only job is a link ("X covers Y", "See Z for more"). Link the meaningful words in a sentence that states a fact, and put navigation in Related cards.
@@ -254,7 +258,7 @@ Follows the [Tempo Design System writing style](https://ds.tehq.dev/docs/foundat
 - Use active voice, present tense, and second person.
 - Lead with the recommended path, then place alternatives under an advanced or reference section.
 - Keep intro paragraphs short. Avoid repeating sidebar or page titles.
-- Use sentence case for headings unless the product or protocol term requires capitalization. Accounts pages use Title Case (see Design System page template).
+- Use sentence case for headings unless the product or protocol term requires capitalization. Accounts and Zones pages use Title Case (see Design System page template).
 - Use code font for commands, file paths, parameters, status codes, object names, and literal values.
 - Use concrete nouns. Avoid vague labels like "things", "stuff", "various", and "etc." when a specific list is possible.
 - Avoid filler such as "simply", "just", "easy", "obviously", and "seamlessly".
@@ -277,6 +281,45 @@ Follows the [Tempo Design System writing style](https://ds.tehq.dev/docs/foundat
 - Use `Tempo Token Rewards` in sidebar, concept introductions, and rewards-specific resource cards. Do not append `(TIP-20)`.
 - Keep raw TIP references for technical/spec contexts, such as `TIP-20 ABI`, `TIP-403 policy check`, and links titled `TIP-20 Specification`.
 - Add the TIP number in parentheses only when it helps disambiguate.
+
+### Word list
+
+Use one term for one concept. Adapted from the [Design System word list](https://ds.tehq.dev/docs/foundations/content/word-list) for developer docs, where "sign" and code identifiers are expected.
+
+| Use | Avoid | Notes |
+| --- | --- | --- |
+| account | wallet (for what holds funds) | A wallet is the software or provider that signs for an account. |
+| address | public key, wallet ID, account number | The `0x` identifier of an account. |
+| single-key account | EOA (after first mention) | Introduce it once as "like a standard Ethereum account (an EOA)". |
+| configurable account | smart account, multisig account | An account with signers, weights, and a threshold. Use "multisig" only for the team multisig setup. |
+| signer | owner, co-signer, keyholder | `owners` stays in Viem code. |
+| threshold, weight | quorum, voting power | Approvals reach the threshold when their weights add up to it. |
+| approve | co-sign, vote | Signers approve a transaction. "Sign" is right for the cryptographic act and in code. |
+| access key | session key, delegate key, sub-key | Signs onchain within its bounds. Not an API key, which authenticates to the Tempo API. |
+| admin access key | root key, master key | An access key with no bounds. |
+| spending limit, scopes, expiry | allowance, permissions, expiration, TTL | An allowance is a TIP-20 approval, a different thing. |
+| authorize (an access key) | grant, issue, add | Signers authorize an access key. |
+| revoke (an access key or API key) | delete, disable | Remove or replace a signer; revoke a key. |
+| stablecoin | token, coin, crypto (for payment assets) | Use "TIP-20 token" in technical and spec contexts. |
+| OUSD | AlphaUSD, BetaUSD (in prose) | The example stablecoin in prose. Code keeps its own token names. |
+| base units | wei, atomic units | Integer token amounts. |
+| network fee | gas (in prose) | `gas` stays in RPC fields and code. |
+| fee token | gas token | Tempo has no native gas token. |
+| fee payer, sponsor | paymaster, gas station, cover (for fees) | A fee payer sponsors a transaction's network fee. |
+| transaction, transfer, payment | — | Execution, token movement, and the application's business operation. |
+| send | transmit, pay out (as a verb) | Send stablecoins. "Payout" is fine as a noun for a backend's payments. |
+| add funds | top up, load, on-ramp | Use "deposit" for a deposit address or a Zone deposit. |
+| withdraw | cash out, off-ramp | |
+| swap | trade, exchange (as a verb) | Through the Stablecoin DEX. |
+| sign in | log in, login | "Sign-in" as a noun or adjective. |
+| onchain, offchain | on-chain, on chain | |
+| mainnet, testnet, devnet | Mainnet, Testnet (mid-sentence) | Name the Tempo Accounts devnet where configurable accounts run until T14. |
+| Zone | zone, private chain, rollup | Capitalized, as in "Tempo Zones" and "Zone A". |
+| Tempo (the public chain) | public chain, L1, parent chain (in prose) | Say "public Tempo" only to contrast with a Zone's private ledger. Write "Tempo Mainnet" only for mainnet itself. |
+| Zone RPC, authorization token | zone endpoint, auth header, API key | The authenticated endpoint and the signed credential it requires (`X-Authorization-Token`). |
+| operator, sequencer | admin, validator (for Zones) | The operator runs a Zone deployment. The sequencer is the protocol component that orders and submits blocks. |
+| portal, outbox | bridge, gateway | `ZonePortal` on Tempo and `ZoneOutbox` on the Zone. Pair each word with its contract name on first mention. |
+| Tempo Transaction | AA transaction, smart transaction | The transaction type with passkeys, access keys, batches, and fee sponsorship. |
 
 ## Vocs and MDX Patterns
 

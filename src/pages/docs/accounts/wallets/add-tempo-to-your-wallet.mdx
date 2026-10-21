@@ -53,7 +53,9 @@ const balance = await client.token.getBalance({
 
 Pull token names, symbols, and icons from the [tokenlist](/docs/quickstart/tokenlist), at `tokenlist.tempo.xyz/list/4217` for mainnet and `tokenlist.tempo.xyz/list/42431` for testnet.
 
-### Let Users Pay Fees in Stablecoins
+<span id="let-users-pay-fees-in-stablecoins" />
+
+### Let Users Choose Fee Tokens
 
 Each transaction pays its fee in a USD stablecoin, its [fee token](/docs/accounts/fees/fee-tokens). Quote fees in the transaction's fee token, and let users choose it in your confirmation screen or account settings. Pass `feeToken` for one transaction, or set the account's default with `setUserTokenSync`.
 
@@ -82,7 +84,7 @@ await client.fee.setUserTokenSync({
 
 ::::
 
-Without a default, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence), which can fall back to pathUSD, a stablecoin the user might not hold. Setting a fee token for each transaction needs a Tempo Transaction.
+Without a default, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence). It can fall back to pathUSD, a stablecoin the user might not hold. Setting a fee token for each transaction needs a Tempo Transaction.
 
 ### Send Tempo Transactions
 
@@ -90,7 +92,7 @@ Replace your EIP-1559 (type 2) envelope with the Tempo Transaction envelope (typ
 
 - [Batch calls](/docs/guide/tempo-transaction#batch-calls) that succeed or fail together, such as an approval and a swap.
 - Accept [sponsored fees](/docs/accounts/fees/fee-sponsorship), so an app pays the fee for your user.
-- Authorize [access keys](/docs/accounts/access-keys), so an app or agent pays from the user's account within a spending limit, scopes, and an expiry.
+- Authorize [access keys](/docs/accounts/access-keys) that let an app or agent pay from the user's account. Each key has a spending limit, scopes, and an expiry.
 - Sign with a [passkey](/docs/accounts/authentication/passkeys), and send [concurrent transactions](/docs/guide/payments/send-parallel-transactions) or [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) without tracking one nonce sequence.
 
 If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Transactions [include both in the protocol](/docs/protocol/transactions/eip-7702#feature-comparison).
@@ -102,7 +104,7 @@ If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Trans
 
 ## Add Backup Signers
 
-Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. To let a user add backup signers at the same address, the wallet signs an [account upgrade](/docs/accounts/account-configuration/account-upgrade) as a Tempo Transaction. Until [T14](/docs/protocol/upgrades/t14), upgrades run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. A user adds backup signers at the same address through an [account upgrade](/docs/accounts/account-configuration/account-upgrade). The wallet signs it as a Tempo Transaction. Until [T14](/docs/protocol/upgrades/t14), upgrades run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 ## List Your Wallet
 

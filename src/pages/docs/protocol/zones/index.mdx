@@ -1,5 +1,5 @@
 ---
-title: "Tempo Zones"
+title: "How Zones Work"
 seoTitle: "Tempo Zones | Docs"
 description: Learn how Tempo Zones keep stablecoin balances and account activity private while connecting to Tempo for deposits, withdrawals, settlement, and liquidity.
 ogImage: /og/2026-q4/og_2026-q4_docs_protocol-zones_title-f5_v02.png
@@ -10,109 +10,101 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 <span id="tempo-zones-private-transaction-protocol" />
 
-# Tempo Zones
+# How Zones Work
 
-Tempo Zones are private stablecoin ledgers on Tempo. They let applications keep balances and account activity private while using Tempo for deposits, withdrawals, and settlement.
+Zones are private stablecoin ledgers that use Tempo for deposits, withdrawals, and settlement.
 
-Each Zone has a portal on Tempo that holds its backing assets and a private ledger maintained by its operator. A deposit locks tokens in the portal and credits an account inside the Zone. A withdrawal moves tokens back to a public Tempo address.
+## Overview
+
+A Zone keeps balances and account activity private. Each Zone has a portal (`ZonePortal`) on Tempo and a private ledger. The portal holds the Zone's backing assets. The Zone's operator maintains the ledger. A deposit locks tokens in the portal and credits a private account. A withdrawal moves tokens back to a Tempo address.
+
+The Technical Reference specifies each part of this model:
+
+- **[Architecture](/docs/protocol/zones/architecture):** Covers contracts, chain IDs, sequencer management, and the trust model.
+- **[Accounts and Privacy](/docs/protocol/zones/accounts):** Covers read restrictions on balances, allowances, and other account data.
+- **[Bridging](/docs/protocol/zones/bridging):** Covers deposits, withdrawals, encrypted deposits, and withdrawal callbacks.
+- **[RPC Reference](/docs/protocol/zones/rpc):** Covers authorization tokens, method access, redaction, and event filtering.
+- **[Execution and Gas](/docs/protocol/zones/execution):** Covers fee tokens, bridge fees, fixed gas costs, and token management.
+- **[Proving and Settlement](/docs/protocol/zones/proving):** Covers batch submission, verification, and current enforcement limits.
 
 <ZoneDiagram
   name="overview"
   alt="A public ZonePortal holds backing assets and bridge queues on Tempo. The operator runs a separate private account ledger. Deposits and withdrawals cross the boundary, while settlement submits commitments and sequencer certificates."
 />
 
-See the [architecture](/docs/protocol/zones/architecture) for contract roles and settlement.
-
 <span id="tempo-zones-are-private" />
 
-## Private accounts
+## Private Accounts
 
-Accounts connect through authenticated RPC access to read their own balances and activity. Other users and public block explorers cannot browse the Zone’s account ledger. The operator maintains that ledger and can see its full state.
-
-Bridge activity remains public on Tempo, including deposit amounts, withdrawal destinations, and settlement commitments. The privacy boundary is the account activity inside the Zone.
+Accounts read their own balances and activity through the authenticated Zone RPC. Other users and public block explorers can't browse the Zone's ledger. The operator can see its full state. Bridge activity stays public on Tempo, as the [Zone visibility model](/docs/zones/privacy) describes.
 
 <ZoneDiagram
   name="privacy"
   alt="Public observers see bridge amounts, withdrawal destinations, and settlement checkpoints. An authenticated account can read its own private balance and history. The operator can see the entire Zone state."
 />
 
-See [accounts](/docs/protocol/zones/accounts) for private balances and allowances, and [RPC](/docs/protocol/zones/rpc) for account-scoped access.
+The Zone restricts [account reads](/docs/protocol/zones/accounts), such as private balances and allowances. Its [RPC](/docs/protocol/zones/rpc) scopes each response to the authenticated account.
 
 <span id="tempo-zones-are-compliant-by-design" />
 
-## Issuer policies
+## Issuer Policies
 
-Tokens retain their issuer’s transfer policies inside a Zone. Zone execution reads those policies from a finalized Tempo checkpoint, so the same issuer rules govern which accounts can send or receive tokens.
+Tokens keep their issuer's transfer policies inside a Zone. Zone execution reads those policies from a finalized Tempo checkpoint. The same issuer rules govern which accounts can send or receive tokens.
 
 <ZoneDiagram
   name="policy"
   alt="The issuer updates its TIP-403 policy on Tempo. The Zone imports a finalized checkpoint through TempoState and applies the policy at that checkpoint during token execution."
 />
 
-The [TIP-403 registry](/docs/protocol/tip403/overview) defines the policies; [execution](/docs/protocol/zones/execution) explains how a Zone applies them.
+The [TIP-403 registry](/docs/protocol/tip403/overview) defines the policies. Zone [execution](/docs/protocol/zones/execution) applies them.
 
 <span id="tempo-zones-are-safe-from-theft" />
 <span id="tempo-zone-settlement-verification" />
 
 ## Settlement on Tempo
 
-The operator groups Zone blocks into batches and submits their commitments to the portal. When a batch is accepted, the portal records the Zone’s progress and makes its withdrawals available for processing on Tempo.
-
-[Proving and settlement](/docs/protocol/zones/proving) explains batch acceptance, execution validation, and the verification guarantees of the current implementation.
+The sequencer groups Zone blocks into batches and submits their commitments to the portal. When the portal accepts a batch, it records the Zone's progress. It then makes the batch's withdrawals available for processing on Tempo. [Proving and settlement](/docs/protocol/zones/proving) defines the checks and their current limits.
 
 <span id="tempo-zones-are-interoperable" />
 
-## Access to Tempo liquidity
+## Access to Tempo Liquidity
 
-Withdrawals can call Tempo contracts, allowing applications to combine token delivery with a Stablecoin DEX swap or a deposit into another Zone. The public part of the route uses Tempo’s liquidity; the destination Zone then processes its deposit into a private balance.
-
-See [bridging](/docs/protocol/zones/bridging) for deposit and withdrawal flows, including [composable withdrawals](/docs/protocol/zones/bridging#composable-withdrawals).
+Withdrawals can call Tempo contracts through [composable withdrawals](/docs/protocol/zones/bridging#composable-withdrawals). An application can combine token delivery with a Stablecoin DEX swap or a deposit into another Zone. The public part of the route uses Tempo's liquidity. The destination Zone then processes its deposit into a private balance.
 
 <span id="github-and-specifications" />
 
-## Source and specification
+## Source and Specification
 
-The [Zones repository](https://github.com/tempoxyz/zones) contains the implementation and [protocol specification](https://github.com/tempoxyz/zones/blob/main/specs/spec.md). For integration requirements, start with the [Zone integration guide](/docs/zones). The [interactive testnet sandbox](/docs/guide/private-zones) uses earlier interfaces; follow its named deployment and compatibility notes.
+The [Zones repository](https://github.com/tempoxyz/zones) contains the implementation and [protocol specification](https://github.com/tempoxyz/zones/blob/main/specs/spec.md).
 
 <span id="reference" />
+<span id="zone-protocol-references" />
 
-## Zone protocol references
+## Related
 
 <Cards>
   <Card
-    title="Architecture"
-    description="Portals, private ledgers, contract roles, and the settlement lifecycle."
-    to="/docs/protocol/zones/architecture"
-    icon="lucide:git-branch"
+    title="Tempo Zones"
+    description="Covers what a Zone is, who it's for, and the reading path through Build."
+    to="/docs/zones"
+    icon="lucide:layers"
   />
   <Card
-    title="Accounts"
-    description="Private balances, private allowances, and account-scoped access control."
-    to="/docs/protocol/zones/accounts"
-    icon="lucide:user-check"
+    title="Privacy"
+    description="Covers who can see Zone data and the trust assumptions behind it."
+    to="/docs/zones/privacy"
+    icon="lucide:eye-off"
   />
   <Card
-    title="Bridging"
-    description="Deposits, withdrawals, encrypted deposits, and composable withdrawal callbacks."
-    to="/docs/protocol/zones/bridging"
-    icon="lucide:arrow-right-left"
+    title="Connect to a Zone"
+    description="Use for authorizing your application's access to a Zone deployment."
+    to="/docs/zones/connect"
+    icon="lucide:plug"
   />
   <Card
-    title="RPC"
-    description="Authenticated JSON-RPC interface with per-account scoping and response redaction."
-    to="/docs/protocol/zones/rpc"
-    icon="lucide:server"
-  />
-  <Card
-    title="Execution & Gas"
-    description="Fee tokens, gas accounting, fixed gas costs, and token management."
-    to="/docs/protocol/zones/execution"
-    icon="lucide:gauge"
-  />
-  <Card
-    title="Proving"
-    description="Batch acceptance, execution validation, and verification guarantees."
-    to="/docs/protocol/zones/proving"
-    icon="lucide:shield-check"
+    title="Testnet Sandbox"
+    description="Use for trying Zone flows with test funds on earlier testnet deployments."
+    to="/docs/guide/private-zones"
+    icon="lucide:flask-conical"
   />
 </Cards>

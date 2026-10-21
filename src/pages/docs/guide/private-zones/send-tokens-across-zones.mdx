@@ -1,10 +1,12 @@
 ---
-title: Send tokens across zones
-description: Send OUSD from Zone A into Zone B by routing a same-token withdrawal through Tempo's L1 router and confirming the target deposit.
+title: Send Across Zones
+seoTitle: Send Tokens Across Zones | Tempo Docs
+description: Send OUSD from Zone A into Zone B by routing a same-token withdrawal through the router on Tempo and confirming the target deposit.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones-send-tokens-across-zones_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 import * as Demo from '../../../../components/guides/Demo.tsx'
@@ -15,11 +17,15 @@ export const crossZoneBalances = [
   { label: 'Zone B', token: Demo.ousd, zone: 7 },
 ]
 
-# Send tokens across zones
+# Send Across Zones
 
-Send `OUSD` test tokens from **Zone A** to **Zone B** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). The transfer settles through the public chain before Zone B credits the balance.
+Send `OUSD` test tokens from Zone A to Zone B through Tempo.
 
-The flow uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/private-zones#sandbox-router-deployment) on the public chain in same-token mode: withdraw from `Zone A`, skip the swap because the asset stays as `OUSD`, then deposit that `OUSD` into `Zone B`.
+## Overview
+
+A cross-Zone send moves `OUSD` test tokens from **Zone A** to **Zone B**. It uses the [testnet sandbox](/docs/guide/private-zones#testnet-compatibility), which differs from current deployments. The transfer settles on Tempo before Zone B credits the balance.
+
+The flow uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/private-zones#sandbox-router-deployment) on Tempo in same-token mode. It withdraws from `Zone A` and skips the swap, since the asset stays `OUSD`. Then it deposits that `OUSD` into `Zone B`.
 
 <ZoneDiagram
   name="cross-zone-send"
@@ -27,8 +33,9 @@ The flow uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/privat
 />
 
 <a id="sending-pathusd-from-zone-a-into-zone-b" />
+<span id="sending-ousd-from-zone-a-into-zone-b" />
 
-## Sending OUSD from Zone A into Zone B
+## Send OUSD to Zone B
 
 <Demo.Container
   name="Send tokens across zones"
@@ -39,13 +46,11 @@ The flow uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/privat
   <SendTokensAcrossZones />
 </Demo.Container>
 
-## Code example
+## Code Example
 
-This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token and portal constants used throughout the zone guides. The router address below is specific to Moderato's Zone A and Zone B sandbox.
+This snippet assumes a signed-in `rootClient` on Tempo and a `zoneAClient`. It also assumes the shared token and portal constants used throughout the Zone guides. The router address and callback encoding are specific to Moderato's Zone A and Zone B sandbox.
 
-The callback encoding below is specific to the legacy testnet router. Current routers require an encrypted deposit payload and a Tempo refund recipient. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this route to another deployment.
-
-It shows the core routed send submission path; use the demo above when you want to watch the routed deposit settle into Zone B.
+This code covers the routed send submission. Use the demo to watch the routed deposit settle into Zone B.
 
 ```ts
 import { encodeAbiParameters, parseUnits } from 'viem'
@@ -82,19 +87,30 @@ const { receipt } = await zoneAClient.zone.requestWithdrawalSync({
 console.log(receipt.blockNumber)
 ```
 
-## What this routed send does
+<span id="what-this-routed-send-does" />
 
-The cross-zone transfer path looks like this: the token leaves `Zone A`, briefly lands on the public chain, and is deposited back into `Zone B` as the same asset.
+## Routed Send Settlement
 
-Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to confirm destination credit. Source receipt success alone does not prove the transfer completed.
+The token leaves `Zone A`, briefly lands on Tempo, and arrives in `Zone B` as the same asset. The routed send:
 
-1. Withdraws `OUSD` from `Zone A` through `ZoneOutbox`.
+1. Withdraws `OUSD` from `Zone A` through the outbox (`ZoneOutbox`).
 2. Routes that withdrawal to `swapAndDepositRouter` on Tempo.
 3. Skips the DEX swap because the input and output token are both `OUSD`.
-4. Deposits the routed `OUSD` into `Zone B` through `ZonePortal`.
+4. Deposits the routed `OUSD` into `Zone B` through its portal (`ZonePortal`).
 
-The target deposit still pays the normal portal deposit fee, so the amount that arrives in `Zone B` is the routed `OUSD` minus that fee.
+The target deposit pays the normal [deposit fee](/docs/protocol/zones/execution#deposit-fees). `Zone B` receives the routed `OUSD` minus that fee.
+
+A successful source receipt doesn't prove the transfer completed. Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to confirm destination credit.
 
 :::warning
-  If the routed withdrawal fails on Tempo—for example because the callback reverts or the target deposit cannot be completed—the amount is bounced back to the withdrawal's `fallbackRecipient` inside `Zone A`. The fee is still paid to the sequencer.
+  If the routed withdrawal fails on Tempo, the amount [bounces back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) to the withdrawal's `fallbackRecipient` inside `Zone A`. Failures include a reverting callback or a target deposit that can't complete. The sequencer still collects the fee.
 :::
+
+## Related
+
+<Cards>
+  <Card title="Swap Across Zones" description="Use for trading OUSD in Zone A for betaUSD in Zone B." to="/docs/guide/private-zones/swap-across-zones" />
+  <Card title="Send Within a Zone" description="Use for a private transfer between accounts in Zone A." to="/docs/guide/private-zones/send-tokens-within-a-zone" />
+  <Card title="Withdraw From a Zone" description="Use for withdrawals and contract callbacks on a current Zone deployment." to="/docs/zones/withdraw" />
+  <Card title="Testnet Sandbox" description="Covers the sandbox router deployment and the routed-result checks." to="/docs/guide/private-zones" />
+</Cards>

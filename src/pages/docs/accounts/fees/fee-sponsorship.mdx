@@ -30,7 +30,7 @@ Tempo rejects the transaction if either signature fails or the fee payer can't c
 
 Your own fee payer is an account funded with stablecoins. Its key stays on your backend. How you use it depends on where the customer's transaction is signed:
 
-- **Your Backend Signs:** It signs with a key such as an [access key](/docs/accounts/access-keys) it holds for the account, and passes the fee payer as `feePayer`.
+- **Your Backend Signs:** It signs with a key it holds for the account, such as an [access key](/docs/accounts/access-keys). It passes the fee payer as `feePayer`.
 - **The Customer's Device Signs:** It signs with a key such as a passkey, then sends the transaction to your fee payer server. The server adds the fee payer's signature.
 
 ### When Your Backend Signs
@@ -69,7 +69,7 @@ await client.token.transferSync({
 
 ::::
 
-Your backend decides what to sponsor. The fee payer pays for every transaction your code passes it to, so authenticate and rate-limit the requests that trigger one.
+Your backend decides what to sponsor. The fee payer pays for every transaction your code passes it to. Authenticate and rate-limit the requests that trigger one.
 
 <span id="request-sponsorship" />
 
@@ -100,7 +100,7 @@ The server's URL ships in your app, so anyone can send it transactions. Each tra
 
 `validate` is your sponsorship policy. It receives the filled transaction, with the sending account's address as `request.from`. `isCustomer` stands for your own check, such as looking that address up in your user records. Only `true` sponsors the transaction. With `false`, the customer's call fails with `Sponsorship rejected.` and nothing is sent. Without `validate`, the server sponsors every transaction it receives. Add rate limits too, since one customer can send many transactions.
 
-`bun fee-payer-server.ts` serves this file as it is. Other servers can pass their requests to `relay.fetch`. It takes a standard `Request` and returns a `Response`. Set `FEE_PAYER_KEY` and `TEMPO_DEVNET_RPC_KEY` on the server. Fund the fee payer's address from the faucet.
+`bun fee-payer-server.ts` serves this file unchanged. Other servers can pass their requests to `relay.fetch`. It takes a standard `Request` and returns a `Response`. Set `FEE_PAYER_KEY` and `TEMPO_DEVNET_RPC_KEY` on the server. Fund the fee payer's address from the faucet.
 
 On the customer's device, route the client through your server with [`withRelay`](https://viem.sh/tempo/transports/withRelay). Set `feePayer: true` on each transaction you want sponsored. `devnet` is an `http` transport to the devnet with the RPC key, as in `client.ts`. It reads the key from your bundler's environment variables:
 

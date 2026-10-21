@@ -21,7 +21,7 @@ The account's signers, your approvers or your customer's, approve an [access key
 <span id="backend-services" />
 <span id="automations" />
 
-The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value. The demo's customer account is a configurable account whose one signer is a device key in this browser. On mainnet and testnet, a single-key account, such as one whose key is the customer's passkey, authorizes a payout key the same way.
+The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value. The demo's customer account is a configurable account whose one signer is a device key in this browser. On mainnet and testnet, a single-key account authorizes a payout key the same way. Its key can be the customer's passkey.
 
 <GuideDemo guide="backend-automation" />
 
@@ -71,7 +71,7 @@ await client.accessKey.authorizeSync({
 
 ::::
 
-Authorizing is one transaction the customer approves, for example with their passkey. Payouts then go out without prompting them, so show the customer the payees, daily limit, and expiry before they approve.
+Authorizing is one transaction the customer approves, for example with their passkey. Payouts then go out without prompting them. Show the customer the payees, daily limit, and expiry before they approve.
 
 Limits are in base units. The stablecoin has 6 decimals, so `parseUnits('1000', 6)` is 1,000 OUSD. Size the limit to your largest payout day plus fees. Fees count against the limit unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
@@ -94,7 +94,7 @@ export const payoutKey = Account.from({ // [!code hl]
 }) // [!code hl]
 ```
 
-Anyone who can sign with the KMS key can send payouts within its bounds. In your KMS, allow only the payout service to sign with the key, and log each signing request so you can match it to a payout.
+Anyone who can sign with the KMS key can send payouts within its bounds. In your KMS, allow only the payout service to sign with the key. Log each signing request so you can match it to a payout.
 
 ### Send Payouts
 

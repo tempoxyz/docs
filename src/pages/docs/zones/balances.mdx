@@ -1,23 +1,31 @@
 ---
-title: "Balances and activity"
+title: "Balances and Activity"
 seoTitle: "Private balances and activity | Tempo Docs"
 description: "Read token balances and filtered activity through an authenticated Zone RPC connection."
 ogImage: /og/2026-q4/og_2026-q4_docs_zones-balances_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
+
 <span id="private-balances-and-activity" />
 
-# Balances and activity
+# Balances and Activity
 
-Read Zone balances and activity through the [account-scoped, redacted RPC connection](/docs/zones/connect). The calls below apply to that interface; if you use a hosted provider, use its documented read API and account-scoping rules.
+Read a private account's token balances and transfer history from a Zone.
+
+## Overview
+
+Balance and activity reads show a private account's token balances and transfers. They go through the [account-scoped, redacted Zone RPC](/docs/zones/connect). The Zone RPC scopes results to the authenticated account.
+
+This page uses the authenticated `zone` client from [Connect to a Zone](/docs/zones/connect#check-the-connection) and `zoneConfig` from [Client Setup](/docs/zones/examples). If you use a hosted provider, use its documented read API and account-scoping rules.
 
 <span id="read-a-token-balance" />
 
-## Read balances
+## Read Balances
 
-Use the Zone token's `balanceOf` through `eth_call`. The RPC executes the call as the authenticated account, and execution-level privacy restricts which balances can be read. Do not substitute `eth_getBalance` for a token balance query.
+Use the Zone token's `balanceOf` through `eth_call`. The Zone RPC executes the call as the authenticated account. Execution-level privacy restricts which balances it can read. Don't substitute `eth_getBalance` for a token balance query.
 
-Reuse the authenticated `zone` client and [Wagmi `zoneConfig`](/docs/zones/examples) from [Connect](/docs/zones/connect#check-the-connection). Set `ZONE_ACCOUNT` to the authenticated account, `ZONE_TOKEN` to the enabled token, and `ZONE_TOKEN_DECIMALS` to its configured precision.
+Set `ZONE_ACCOUNT` to the authenticated account, `ZONE_TOKEN` to the enabled token, and `ZONE_TOKEN_DECIMALS` to its configured precision.
 
 ::::code-group
 
@@ -54,15 +62,15 @@ cast erc20 balance "$ZONE_TOKEN" "$ZONE_ACCOUNT" \
 
 ::::
 
-Viem and Wagmi return a formatted decimal string. Python and Cast return integer base units; format them with `ZONE_TOKEN_DECIMALS`. The Python example encodes `balanceOf(address)` with selector `0x70a08231` and the account as a 32-byte word. Check raw JSON-RPC responses for `error` before reading `result`.
+Viem and Wagmi return a formatted decimal string. Python and Cast return integer base units. Format them with `ZONE_TOKEN_DECIMALS`. The Python example encodes `balanceOf(address)` with selector `0x70a08231`. It passes the account as a 32-byte word. Check raw JSON-RPC responses for `error` before you read `result`.
 
-An empty, zero, or `null` response about another account does not establish that it has no balance or activity. Some restricted reads return silent values to avoid exposing another account's data. See [method access control](/docs/protocol/zones/rpc#method-access-control).
+An empty, zero, or `null` response about another account doesn't prove it has no balance or activity. Some restricted reads return silent values to avoid exposing another account's data. [Method access control](/docs/protocol/zones/rpc#method-access-control) lists which reads do this.
 
 <span id="read-account-activity" />
 
-## Read activity
+## Read Activity
 
-Use account-scoped `eth_getLogs` filters or log subscriptions for supported token events. Filters must identify the authenticated account in the appropriate indexed topic; broad filters are rejected. Query incoming and outgoing transfers separately, as described in [event filtering](/docs/protocol/zones/rpc#event-filtering).
+Use account-scoped `eth_getLogs` filters or log subscriptions for supported token events. Filters must identify the authenticated account in the appropriate indexed topic. The Zone RPC rejects broad filters. Query incoming and outgoing transfers separately, as [event filtering](/docs/protocol/zones/rpc#event-filtering) describes.
 
 Continue with the same `zone`, `account`, and `token`. Set `ZONE_FROM_BLOCK` to the first Zone block you need to reconcile. These examples read incoming transfers:
 
@@ -111,12 +119,21 @@ cast logs 'Transfer(address indexed from, address indexed to, uint256 amount)' \
 
 ::::
 
-For outgoing transfers, use `args: { from: account }` in Viem and Wagmi, swap the Cast arguments to `"$ZONE_ACCOUNT" ''`, or put the account in `topics[1]` instead of `topics[2]` in Python. Query incoming and outgoing separately, deduplicate shared events, and save the last processed block. Use bounded ranges for repeated history reads.
+For outgoing transfers, use `args: { from: account }` in Viem and Wagmi. In Cast, swap the arguments to `"$ZONE_ACCOUNT" ''`. In Python, put the account in `topics[1]` instead of `topics[2]`.
 
-Transaction and receipt reads are scoped to the sender. To verify an incoming deposit, use the recipient's permitted token events and balance reads rather than relying on access to the sender's receipt.
+Query incoming and outgoing transfers separately, and deduplicate shared events. Save the last processed block. Use bounded ranges for repeated history reads.
 
-## Preserve the privacy boundary
+Transaction and receipt reads are scoped to the sender. To verify an incoming deposit, use the recipient's permitted token events and balance reads. Don't rely on access to the sender's receipt.
 
-Keep cached responses and history tied to the authenticated customer and account in your application. Do not place private activity in shared logs or a public explorer link. Public deposit and withdrawal records remain visible on Tempo.
+## Preserve the Privacy Boundary
 
-When displaying funds returning to Tempo, follow [Withdraw](/docs/zones/withdraw). A submitted Zone transaction and a completed public delivery are different stages.
+Tie cached responses and saved history to the authenticated customer, as [Privacy](/docs/zones/privacy#keep-application-access-scoped) describes. Show a withdrawal as pending until Tempo delivers it, as [Withdraw From a Zone](/docs/zones/withdraw) describes.
+
+## Related
+
+<Cards>
+  <Card title="Withdraw From a Zone" description="Use for returning funds to Tempo and tracking delivery." to="/docs/zones/withdraw" />
+  <Card title="RPC Reference" description="Covers method access control, event filtering, and response redaction." to="/docs/protocol/zones/rpc" />
+  <Card title="Client Setup" description="Use for setting up the Wagmi client in these examples." to="/docs/zones/examples" />
+  <Card title="Connect to a Zone" description="Use for authenticating the Zone RPC client." to="/docs/zones/connect" />
+</Cards>

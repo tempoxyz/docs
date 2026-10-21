@@ -9,13 +9,13 @@ import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-
 
 # Private Keys
 
-A private key lets you sign for a Tempo account with a key you already hold in a wallet, KMS, or HSM.
+Signs for a Tempo account with a key you already hold in a wallet, KMS, or HSM.
 
 <span id="what-a-private-key-is" />
 
 ## Overview
 
-A private key is a secp256k1 or P-256 key that you hold in a wallet, a wallet provider, or your KMS or HSM. Tempo verifies each signature onchain. Use one for servers, scripts, treasury approvers, and backups. For a key that stays with the customer, use a [passkey](/docs/accounts/authentication/passkeys) or a [device key](/docs/accounts/authentication/device-keys) instead.
+A private key is a secp256k1 or P-256 key that you hold. It lives in a wallet, a wallet provider, or your KMS or HSM. Tempo verifies each signature onchain. Use one for servers, scripts, treasury approvers, and backups. For a key that stays with the customer, use a [passkey](/docs/accounts/authentication/passkeys) or a [device key](/docs/accounts/authentication/device-keys) instead.
 
 <span id="what-a-private-key-trusts" />
 <span id="where-private-keys-live" />
@@ -23,8 +23,9 @@ A private key is a secp256k1 or P-256 key that you hold in a wallet, a wallet pr
 <span id="private-key-sources" />
 <span id="choose-a-role-for-each-key" />
 <span id="roles" />
+<span id="how-it-works" />
 
-## How It Works
+## Key Roles
 
 Add each key as a signer or as an [access key](/docs/accounts/access-keys). A signer approves toward the account's [threshold](/docs/accounts/policies/signing-thresholds). An access key pays alone within its limits.
 
@@ -42,7 +43,7 @@ Anyone who can make the key sign approves at its weight, including anyone with s
 
 ## Add a Private Key
 
-On mainnet and testnet today, a private key can be a single-key account's one key, as in a standard Ethereum account. It can also be an access key on that account.
+On mainnet and testnet today, a private key can be a single-key account's one key. That works like a standard Ethereum account. It can also be an access key on that account.
 
 <ConfigurableAccountsT14 />
 
@@ -63,7 +64,7 @@ const account = Account.fromConfig({ // [!code hl]
 }) // [!code hl]
 ```
 
-The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the Viem account that source provides. For a raw P-256 key, use `Account.fromP256`. [Set up a team multisig](/docs/accounts/custodians/team-multisig) walks through the full setup.
+The example reads raw keys from the environment. To keep a key in its wallet, KMS, HSM, or provider, pass the Viem account that source provides. For a raw P-256 key, use `Account.fromP256`.
 
 <span id="private-key-limits" />
 

@@ -52,7 +52,7 @@ The threshold stays the same unless you change it, so each new signer adds a way
 
 A recovery signer can approve payments at its weight too. Give it enough weight that the account can [lose any one signer](/docs/accounts/account-configuration#plan-for-recovery) and still reach the threshold, and no more.
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). The remove and replace examples below use the same `account.ts` and `client.ts`.
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). The remove and replace examples use the same `account.ts` and `client.ts`.
 
 ::::code-group
 
@@ -106,7 +106,7 @@ export const account =
 
 ::::
 
-`account.ts` rebuilds the account from the record your app saved and attaches the approving keys. The new signer can be a passkey, a device key, a key in a KMS or hardware wallet, or an address from a recovery provider. Viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in Viem lists every option.
+`account.ts` rebuilds the account from the record your app saved and attaches the approving keys. The new signer can be a passkey, a device key, or a key in a KMS or hardware wallet. It can also be an address from a recovery provider. Viem sorts the signers by address, as Tempo requires. [`updateConfig`](https://viem.sh/tempo/actions/accounts.updateConfig) in Viem lists every option.
 
 Tempo can't tell whether a signer still holds its key. Have each new signer approve once before you rely on it.
 
@@ -200,7 +200,7 @@ Treat a compromised signer as an attacker. Leave it out of the approvers. If its
 - An account holds 1 to 48 signers, with total weight at most 255. A transaction carries at most 8 approvals, so the 8 largest weights must reach the threshold. Viem checks these limits before sending and throws `Invalid account config` with the reason. A signer already on the list fails with the reason `owners must be strictly ascending`.
 - The approving signers must reach the current threshold, and the new signer list must reach the new one. If the attached keys fall short, Viem throws `Local owners do not meet the threshold.` If the new list falls short, it throws `Invalid account config: threshold exceeds total owner weight.`
 - `multisig configuration commitment mismatch` means the account was built from an outdated configuration. It no longer matches the hash Tempo stores, for example because another configuration update landed first. Load the latest saved configuration and rebuild the update.
-- Rebuild with `address: 'infer'` only while the configuration is version 0. After a configuration update, the current signers no longer derive the address, so pass the saved `address`, as [Signing Thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals) does.
+- Rebuild with `address: 'infer'` only while the configuration is version 0. After a configuration update, the current signers no longer derive the address. Pass the saved `address`, as [Signing Thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals) does.
 
 ## Related
 
