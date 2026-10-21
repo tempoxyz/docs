@@ -41,7 +41,7 @@ async function loadDemo() {
     ]),
     // The configuration salt Tempo assigns an upgraded account.
     upgradeSalt: (address: Address) =>
-      viem.keccak256(viem.concat([viem.toHex('tempo:multisig:upgrade'), address])),
+      viem.keccak256(viem.concat([viem.toHex('tempo:configurable-account:upgrade'), address])),
   }
 }
 

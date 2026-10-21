@@ -488,7 +488,9 @@ describe('upgrading a plain key account', () => {
 
   it('uses Tempo’s upgrade salt for the address', async () => {
     const { concat, keccak256, toHex } = await import('viem')
-    expect(upgradeSalt(address)).toBe(keccak256(concat([toHex('tempo:multisig:upgrade'), address])))
+    expect(upgradeSalt(address)).toBe(
+      keccak256(concat([toHex('tempo:configurable-account:upgrade'), address])),
+    )
   })
 
   it('records owners sorted by address, at version 1', () => {

@@ -29,6 +29,7 @@ import {
   isAddressEqual,
   keccak256,
   parseAbi,
+  parseEventLogs,
   toHex,
 } from 'viem'
 import { generatePrivateKey } from 'viem/accounts'
@@ -256,10 +257,15 @@ const nativeMultisig: Address = '0xAACC000000000000000000000000000000000000'
 const upgradeAbi = parseAbi([
   'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
 ])
+// viem's `Abis.nativeMultisig` still names this event `MultisigConfigUpdated`, so
+// `accounts.updateConfigSync` can't find it. Remove once viem ships the renamed ABI.
+const configUpdatedAbi = parseAbi([
+  'event ConfigurableAccountConfigUpdated(address indexed account, bytes32 salt, uint64 version, uint8 threshold, (address owner, uint8 weight)[] owners)',
+])
 
 /** The configuration salt Tempo assigns an account upgraded in place. */
 export function upgradeSalt(address: Address) {
-  return keccak256(concat([toHex('tempo:multisig:upgrade'), address]))
+  return keccak256(concat([toHex('tempo:configurable-account:upgrade'), address]))
 }
 
 /**
@@ -997,11 +1003,18 @@ export function createDevnetAdapter(
     const next = { owners, threshold: account.committed.threshold }
     if (sameConfig(next, session.config)) return undefined
     const approvers = updateApprovers(session, account)
-    const { config, receipt } = await client.accounts.updateConfigSync({
+    const receipt = await client.writeContractSync({
       account: signingAccount(session, localAccounts(approvers)),
-      nextConfig: next,
+      ...Tempo.Actions.accounts.updateConfig.call({
+        currentConfig: session.config,
+        nextConfig: next,
+      }),
+      throwOnReceiptRevert: true,
     })
-    session.config = config
+    const [log] = parseEventLogs({ abi: configUpdatedAbi, logs: receipt.logs, strict: true })
+    if (!log)
+      throw new DevnetRejection('invalid-config', 'Devnet recorded no configuration update.')
+    session.config = Tempo.AccountConfig.from(log.args)
     session.lastUpdate = receipt.transactionHash
     return receipt.transactionHash
   }
