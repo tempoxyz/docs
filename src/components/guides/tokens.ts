@@ -1,5 +1,8 @@
-export const pathUsd = '0x20c0000000000000000000000000000000000000'
-export const ousd = '0x20c0000000000000000000006a37da5c996874be'
-export const alphaUsd = '0x20c0000000000000000000000000000000000001'
-export const betaUsd = '0x20c0000000000000000000000000000000000002'
-export const thetaUsd = '0x20c0000000000000000000000000000000000003'
+import type { Address } from 'viem'
+import { alphausd, betausd, ousd as core_ousd, pathusd, thetausd } from 'viem/tokens'
+
+export const pathUsd = pathusd(4217).address
+export const ousd = core_ousd(4217).address.toLowerCase() as Address
+export const alphaUsd = alphausd(42431).address
+export const betaUsd = betausd(42431).address
+export const thetaUsd = thetausd(42431).address

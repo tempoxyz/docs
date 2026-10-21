@@ -1,9 +1,10 @@
 import { type Address, type Hex, isAddressEqual, parseUnits } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { Account, createClient, EarnShares } from 'viem/tempo'
+import { pathusd } from 'viem/tokens'
 
 export const earnDemoVault = '0x20147491b5701dea880263241c335caca9be326d'
-export const earnDemoAsset = '0x20c0000000000000000000000000000000000000'
+export const earnDemoAsset = pathusd(42431).address
 export const earnDemoShare = '0x20c0000000000000000000006ac30cbdea0747fa'
 export const earnDemoEngine = '0x49c4600ba4f39c11006cb2269c371e8a19f26a26'
 export const earnDemoAmount = 1_000_000n

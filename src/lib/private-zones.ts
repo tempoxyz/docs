@@ -1,3 +1,4 @@
+import { alphausd } from 'viem/tokens'
 import { developersApiPath } from '../marketing/app/_lib/developersPaths'
 
 type ZoneTransportConfig = {
@@ -7,7 +8,7 @@ type ZoneTransportConfig = {
   ) => Promise<RequestInit | undefined> | RequestInit | undefined
 }
 
-export const feeToken = '0x20c0000000000000000000000000000000000001' as const
+export const feeToken = alphausd(42431).address
 export const stablecoinDex = '0xDEc0000000000000000000000000000000000000' as const
 export const moderatoZoneFactory = '0x7Cc496Dc634b718289c192b59CF90262C5228545' as const
 export const zoneOutbox = '0x1c00000000000000000000000000000000000002' as const
