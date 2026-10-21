@@ -154,12 +154,12 @@ export function UpgradeAccountDemo() {
       const hash = await pay(original)
       return { hash, message: 'Unexpectedly accepted.', ok: false }
     } catch (cause) {
-      // Tempo rejects the retired root key with "primitive root key retired".
+      // Tempo rejects the retired root key, for example "root key of 0x… is retired".
       const reason =
         cause instanceof Error
           ? `${cause.message} ${String((cause as { details?: unknown }).details ?? '')}`
           : ''
-      if (!/root key retired/i.test(reason)) throw cause
+      if (!/root key\b.*\bretired/i.test(reason)) throw cause
       return {
         message: 'Rejected by Tempo: the original key can’t sign as a single-key account anymore.',
         ok: true,
