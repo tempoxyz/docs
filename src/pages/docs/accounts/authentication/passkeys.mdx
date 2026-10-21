@@ -20,8 +20,9 @@ A passkey lets only the customer approve the account's transactions, with Face I
 A passkey is the WebAuthn credential behind passwordless sign-in. It's a P-256 key that stays on the customer's device or security key and signs only when the customer approves. Tempo checks each passkey signature onchain. For payments without a prompt, add a [device key](/docs/accounts/authentication/device-keys). On a server, use a [private key](/docs/accounts/authentication/private-keys) instead.
 
 <span id="passkey-authenticators" />
+<span id="how-it-works" />
 
-## How It Works
+## Supported Authenticators
 
 Passkeys work with Face ID and Touch ID, Windows Hello, an Android screen lock, and security keys such as YubiKey.
 

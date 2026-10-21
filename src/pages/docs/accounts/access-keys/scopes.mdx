@@ -12,7 +12,7 @@ Restricts an access key to the contracts, functions, and recipients its task nee
 
 ## Overview
 
-Scopes are an [access key](/docs/accounts/access-keys)'s allowlist of the contracts, functions, and addresses it may call or pay. They're one of the key's three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [expiry](/docs/accounts/access-keys/expiry).
+Scopes are an [access key](/docs/accounts/access-keys)'s allowlist of the contracts, functions, and addresses it can call or pay. They're one of the key's three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [expiry](/docs/accounts/access-keys/expiry).
 
 Tempo reverts any call outside the key's scopes, so a leaked payout key can pay only your payees. A spending limit caps how much the key spends. Scopes decide where it goes. Give every backend, agent, and card key both.
 
@@ -29,7 +29,7 @@ Each scope entry allows one contract, optionally narrowed to one function and a 
 | `selector` | Only this function, as a signature such as `transfer(address,uint256)` or a 4-byte selector. Omit it to allow every function on the contract. |
 | `recipients` | Only these addresses as the recipient of `transfer` or `transferWithMemo`, or as the spender of `approve`. Works with no other function. Omit it, or pass `[]`, to allow any address. |
 
-A call that matches no entry reverts with [`CallNotAllowed`](/docs/protocol/transactions/AccountKeychain#error-callnotallowed). A key without `scopes` calls anything. A key with `scopes: []` calls nothing.
+A call that matches no entry reverts with [`CallNotAllowed`](/docs/protocol/transactions/AccountKeychain#error-callnotallowed). A key without `scopes` can call anything. A key with `scopes: []` calls nothing.
 
 <span id="scopes" />
 <span id="scope-an-access-key" />
@@ -97,7 +97,7 @@ To read a key's current scopes, call `getAllowedCalls(account, keyId)`. It retur
 
 ## Limits
 
-- Scopes check only the calls the key signs directly. A contract the key may call can make any calls of its own. An allowed factory contract can deploy contracts, even though the key can't deploy one itself. Allow only contracts you trust.
+- Scopes check only the calls the key signs directly. A contract the key can call makes any calls of its own. An allowed factory contract can deploy contracts, even though the key can't deploy one itself. Allow only contracts you trust.
 - A limited access key can't change scopes, including its own.
 - `setAllowedCalls` reverts with [`InvalidCallScope`](/docs/protocol/transactions/AccountKeychain#error-invalidcallscope) when its list of contracts is empty, or on a zero address or a duplicate entry.
 - `setAllowedCalls` and `removeAllowedCalls` revert with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid) on an admin key, which has no scopes.

@@ -12,11 +12,11 @@ Lets a backend or an agent pay from an account without holding the account's key
 
 ## Overview
 
-An automation is code that sends stablecoins without a person approving each payment, such as payouts, payroll, card funding, and AI agents. Give that code its own [access key](/docs/accounts/access-keys) instead of the account's key.
+An automation is code that sends stablecoins without a person approving each payment. Examples include payouts, payroll, card funding, and AI agents. Give that code its own [access key](/docs/accounts/access-keys) instead of the account's key.
 
 The account's signers authorize the key once. Tempo rejects any payment over its [spending limit](/docs/accounts/access-keys/spending-limits), outside its [scopes](/docs/accounts/access-keys/scopes), or after its [expiry](/docs/accounts/access-keys/expiry). Access keys are part of the protocol, so you don't add session-key modules or wallet contracts.
 
-Access keys are live on mainnet and testnet with a single-key account, so none of these setups needs a configurable account.
+Access keys are live on mainnet and testnet with a single-key account. None of these setups needs a configurable account.
 
 <span id="give-the-backend-an-access-key-not-the-account-key" />
 
@@ -29,15 +29,17 @@ Access keys are live on mainnet and testnet with a single-key account, so none o
 
 Keep the account's key with the user, their wallet provider, or your own approvers for a business account.
 
-Any key that signs Ethereum transactions can send stablecoins on Tempo. A backend that already signs with a KMS key or a provider's server wallet can keep that key. Authorize it as an access key to add the limits. The key pays fees in a stablecoin, or a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them, so the service never holds a gas token.
+Any key that signs Ethereum transactions can send stablecoins on Tempo. A backend that already signs with a KMS key or a provider's server wallet can keep that key. Authorize it as an access key to add the limits. The key pays fees in a stablecoin, or a [fee payer](/docs/accounts/fees/fee-sponsorship) covers them. The service never holds a gas token.
 
 ## Sign With a KMS Key
 
-AWS KMS and Google Cloud KMS keys work as access keys. The private key never leaves the KMS. An access key signs the 32-byte digest of each [Tempo Transaction](/docs/guide/tempo-transaction), and both KMSs sign digests with secp256k1 and P-256 keys. Wrap the KMS signing call as a Viem account, as in [Keep the key in your KMS](/docs/accounts/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
+AWS KMS and Google Cloud KMS keys work as access keys. The private key never leaves the KMS. An access key signs the 32-byte digest of each [Tempo Transaction](/docs/guide/tempo-transaction). Both KMSs sign digests with secp256k1 and P-256 keys. Wrap the KMS signing call as a Viem account, as in [Keep the key in your KMS](/docs/accounts/automations/pay-out-from-a-backend#keep-the-key-in-your-kms).
 
 <span id="sign-with-a-server-wallet" />
 
-## Sign With a Server Wallet Provider
+<span id="sign-with-a-server-wallet-provider" />
+
+## Sign With Server Wallets
 
 Privy server wallets and Turnkey both sign Tempo Transactions and raw hashes.
 
@@ -46,7 +48,7 @@ Privy server wallets and Turnkey both sign Tempo Transactions and raw hashes.
 | [Privy](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) server wallets | Sends Tempo Transactions through its wallet API, or signs raw hashes with `raw_sign` |
 | [Turnkey](https://docs.turnkey.com/features/networks/overview) | Signs Tempo Transactions with `sign_transaction`, which its policies can inspect, or raw hashes with `sign_raw_payload` |
 
-To use one as an access key, wrap its raw-hash signing as a Viem account, as in [Pay from a user's embedded wallet](/docs/accounts/automations/pay-from-an-embedded-wallet#wrap-the-providers-signing-as-an-account).
+Either can act as an access key. Wrap its raw-hash signing as a Viem account, as in [Pay from a user's embedded wallet](/docs/accounts/automations/pay-from-an-embedded-wallet#wrap-the-providers-signing-as-an-account).
 
 ## Rotate and Revoke Backend Keys
 
@@ -56,13 +58,15 @@ To rotate, authorize a new key, switch the service to it, then [revoke](/docs/ac
 
 ## Guidelines
 
-### Give Each Service Its Own Key
+<span id="give-each-service-its-own-key" />
 
-A breach of one service then exposes only that key's limit, recipients, and expiry. Authorize a separate access key for each service or agent, and generate it where it runs or in your KMS, so only the key's address leaves it.
+### One Key per Service
+
+A breach of one service then exposes only that key's limit, recipients, and expiry. Authorize a separate access key for each service or agent. Generate it where it runs or in your KMS, so only the key's address leaves it.
 
 ### Set All Three Bounds
 
-A key with a limit, scopes, and an expiry can pay only for the job it does. Set a daily limit per stablecoin sized to the job, scopes that list the only recipients or contracts it pays, and an expiry.
+A key with a limit, scopes, and an expiry can pay only for the job it does. Set a daily limit per stablecoin sized to the job. Add scopes that list the only recipients or contracts it pays, and an expiry.
 
 <span id="automation-guides" />
 

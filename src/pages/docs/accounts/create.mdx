@@ -55,7 +55,7 @@ A single-key account can't change its key. Losing the key loses the account. Rea
 
 <ConfigurableAccountsT14 />
 
-A configurable account's signers can change while its address stays the same. Add a backup key, rotate keys, or require several approvals. Pick a first signer below to create one on the devnet.
+A configurable account's signers can change while its address stays the same. Add a backup key, rotate keys, or require several approvals. Pick a first signer in the sandbox to create one on the devnet.
 
 <AccountSandbox />
 
@@ -71,8 +71,9 @@ A configurable account's signers can change while its address stays the same. Ad
 
 <span id="create-an-account-in-code" />
 <span id="create-an-account-from-a-signing-key" />
+<span id="create-a-configurable-account-in-code" />
 
-### Create a Configurable Account in Code
+### Create the Account in Code
 
 ```ts [account.ts]
 import { generatePrivateKey } from 'viem/accounts'
@@ -93,7 +94,7 @@ For a passkey or device key, use [that signer](/docs/accounts/authentication) in
 
 The Accounts examples connect to the Tempo Accounts devnet, a test network that runs configurable accounts. The demos on these pages run against it with no setup.
 
-To build your own app against the devnet, [contact us](https://tempo.xyz/contact) for an RPC key and set it as the `TEMPO_DEVNET_RPC_KEY` environment variable.
+Your own app needs an RPC key to reach the devnet. [Contact us](https://tempo.xyz/contact) for one, and set it as the `TEMPO_DEVNET_RPC_KEY` environment variable.
 
 <span id="fund-an-account-on-devnet" />
 

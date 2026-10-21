@@ -15,7 +15,7 @@ Adds backup signers to a single-key account without changing its address.
 
 ## Overview
 
-An account upgrade turns a single-key account into a configurable account with several signers and a threshold, at the same address. A single-key account works like a standard Ethereum account (an EOA). One key controls it, so losing that key loses the account. The upgrade is permanent.
+An account upgrade turns a single-key account into a configurable account at the same address. A configurable account has several signers and a threshold. A single-key account works like a standard Ethereum account (an EOA). One key controls it, so losing that key loses the account. The upgrade is permanent.
 
 <ConfigurableAccountsT14 />
 
@@ -32,7 +32,7 @@ Until T14, the upgrade transaction does nothing on mainnet or testnet. It succee
 
 ## Upgrade Effects
 
-The upgrade gives the account a list of signers, each with a weight, and a threshold: the total weight an approval needs. From then on, signers whose weights reach the threshold approve for the account. The original key approves only if you list it, at its weight. The address, balances, token approvals, nonce, contract storage, and access keys with their limits stay the same.
+The upgrade gives the account a list of signers, each with a weight. It also sets a threshold, the total weight an approval needs. From then on, signers whose weights reach the threshold approve for the account. The original key approves only if you list it, at its weight. The address, balances, token approvals, nonce, contract storage, and access keys with their limits stay the same.
 
 Contracts that verify signatures themselves, such as Permit2, may still accept the original key. The original key also still controls the address on other EVM chains.
 
@@ -40,7 +40,7 @@ Contracts that verify signatures themselves, such as Permit2, may still accept t
 
 ## Choose Signers
 
-List the original key and at least one backup signer, such as a passkey on the user's device or a key your recovery provider holds.
+List the original key and at least one backup signer. A backup can be a passkey on the user's device or a key your recovery provider holds.
 
 | Setup | Threshold | Result |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ await client.writeContractSync({ // [!code hl]
 
 The upgraded configuration uses `version: 1n` and a salt Tempo derives from the address. `account.config` lists the signers sorted by address, as Tempo requires.
 
-After the upgrade, the record your app [saves](/docs/development/configurable-accounts#keep-the-current-configuration) is the account's only readable list of signers. Each time your app acts for the account, rebuild it from that record with `Account.fromConfig` and attach the keys that approve, such as `original`. The other signers stay as addresses.
+After the upgrade, the record your app [saves](/docs/development/configurable-accounts#keep-the-current-configuration) is the account's only readable list of signers. Each time your app acts for the account, rebuild it from that record with `Account.fromConfig`. Attach the keys that approve, such as `original`. The other signers stay as addresses.
 
 Viem signs with the attached keys until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 

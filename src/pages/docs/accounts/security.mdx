@@ -13,7 +13,7 @@ No one, including Tempo, can move an account's funds without the account's keys.
 
 ## Overview
 
-Tempo enforces each account's rules on every transaction. A breach of your app, your backend, or a wallet provider exposes only the keys that party holds, within those keys' bounds.
+Tempo enforces each account's rules on every transaction. A breach of your app, backend, or wallet provider exposes only that party's keys. Those keys still work only within their bounds.
 
 Your security decision is who holds which keys.
 
@@ -48,15 +48,20 @@ Whoever holds keys that reach an account's threshold can move its whole balance.
 | [Configurable account](/docs/accounts/policies/signing-thresholds) | Signers whose weights reach the threshold together. In the [recommended setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups), no outside party reaches it alone. |
 
 <span id="what-your-app-is-responsible-for" />
+<span id="guidelines" />
+<span id="store-keys-on-devices-and-in-a-kms" />
+<span id="give-your-backend-an-access-key" />
+<span id="keep-your-combined-weight-below-the-threshold" />
 
 ## App Responsibilities
 
-Tempo checks what a key signs, not whether the right person holds the key. Your app owns four decisions:
+Tempo checks what a key signs, not whether the right person holds the key. Your app owns five decisions:
 
-- **Where Keys Live:** Your app chooses where each passkey, device key, and backend key is stored.
-- **Which Signers Your App Holds:** A breach gives an attacker every signer your app or wallet provider holds. Their combined weight counts toward the threshold ([what a threshold protects against](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects)).
+- **Where Keys Live:** Your app chooses where each passkey, device key, and backend key is stored. Keep passkeys and device keys on the customer's device, and backend keys in a KMS or HSM. A key that never leaves them can't be copied out in a breach of your app's servers.
+- **How Your Backend Pays:** Authorize an [access key](/docs/accounts/access-keys) for each backend that pays. Don't give your backend the account's key. A breached backend then spends at most the key's remaining limit. You recover by revoking one key, not by changing the account's signers or moving its funds.
+- **Which Signers Your App Holds:** A breach gives an attacker every signer your app or wallet provider holds. Their combined weight counts toward the threshold ([what a threshold protects against](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects)). On a configurable account, keep that weight below the threshold. Count parties, not keys, when you add it up.
 - **Each Account's Configuration:** Tempo stores only a hash of a configurable account's signers, weights, threshold, and version. Without the full configuration, the signers can't approve ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
-- **What Gets Signed:** A wallet provider's policy engine can't read a raw hash. It can't tell a key authorization from a payment, so check the key, limits, scopes, and expiry in your backend before the provider signs ([who can move the funds](/docs/accounts/apps#who-can-move-the-funds)).
+- **What Gets Signed:** A wallet provider's policy engine can't read a raw hash. It can't tell a key authorization from a payment. Check the key, limits, scopes, and expiry in your backend before the provider signs ([who can move the funds](/docs/accounts/apps#who-can-move-the-funds)).
 
 <span id="if-a-key-or-service-is-compromised" />
 
@@ -106,10 +111,10 @@ A [single-key Tempo account](/docs/development/single-key-accounts#single-key-ad
 
 ### Migration to Quantum-Safe Keys
 
-1. **Upgrade the Account in Place:** A single-key account's original key signs one upgrade, and the account becomes a configurable account at the same address. From then on, the original key approves only if you list it as a signer.
+1. **Upgrade the Account in Place:** A single-key account's original key signs one upgrade. The account becomes a configurable account at the same address. From then on, the original key approves only if you list it as a signer.
 2. **Add a Quantum-Safe Signer:** Once Tempo supports a quantum-safe key type, [add a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) with that key type.
-3. **Remove the Old Keys in the Same Update:** The old keys approve one update that adds the new signer and [removes the old ones](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) together. No old key controls the account afterward. The address, balances, and token approvals don't change, and counterparties do nothing.
-4. **Replace Access Keys:** An [access key](/docs/accounts/access-keys) that signs with an old key type is as breakable as the account's old signers. Revoke each one, such as a backend's or an agent's, and authorize a quantum-safe replacement without touching the account's signers.
+3. **Swap Keys Together:** The old keys approve one update that adds the new signer and [removes the old ones](/docs/accounts/account-configuration/configuration-updates#remove-a-signer). No old key controls the account afterward. The address, balances, and token approvals don't change, and counterparties do nothing.
+4. **Replace Access Keys:** An [access key](/docs/accounts/access-keys) with an old key type is as breakable as the account's old signers. Revoke each one, such as a backend's or an agent's, and authorize a quantum-safe replacement without touching the account's signers.
 
 Tempo accounts already support upgrading, removing signers, and replacing access keys. Only step 2, adding a quantum-safe signer, isn't built yet.
 
@@ -129,34 +134,12 @@ Supporting a quantum-safe key type is a protocol change with three parts:
 
 ### Timing
 
-Changing keys protects an account only while its old keys are still safe. Once an attacker can work out a private key from its public key, the attacker and the real owner look the same to Tempo. Accounts must retire their old keys before those keys can be broken.
+Changing keys protects an account only while its old keys are still safe. An attacker with a large enough quantum computer can work out a private key from its public key. Tempo then can't tell the attacker from the real owner. Accounts must retire their old keys before those keys can be broken.
 
 A retired key can also still act outside the account's own rules:
 
 - **On Other Chains:** A secp256k1 key controls the same address on other EVM chains, whatever happens to it on Tempo.
 - **In Contracts That Check Signatures Themselves:** Contracts such as Permit2 verify signatures on their own. They may still accept the original key ([what an upgrade changes](/docs/accounts/account-configuration/account-upgrade#what-an-upgrade-changes)).
-
-## Guidelines
-
-### Store Keys on Devices and in a KMS
-
-A key that never leaves the customer's device or your KMS can't be copied out in a breach of your app's servers.
-
-**Do:** Keep a passkey or device key on the customer's device, and backend keys in a KMS or HSM.
-
-### Give Your Backend an Access Key
-
-A breached backend then spends at most the key's remaining limit, and you recover by revoking one key instead of changing the account's signers or moving its funds.
-
-**Do:** Authorize an [access key](/docs/accounts/access-keys) for each backend that pays.
-
-**Don't:** Give your backend the account's key.
-
-### Keep Your Combined Weight Below the Threshold
-
-On a configurable account, a breach of your app then can't reach the threshold.
-
-**Do:** Count parties, not keys, when you add up the weight your app and wallet provider hold.
 
 ## Related
 

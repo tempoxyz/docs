@@ -708,7 +708,7 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   for (const [path, destination] of [
     ['/docs/earn', '/docs/earn/how-it-works'],
     ['/docs/routes', '/docs/routes/quotes'],
-    ['/docs/zones', '/docs/guide/private-zones'],
+    ['/docs/zones', '/docs/zones/connect'],
   ]) {
     await page.goto(path)
     await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
@@ -744,12 +744,17 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
 })
 
-test('sandbox routes reveal their guides within the Zones sidebar', async ({ page }) => {
+test('sandbox guides stay collapsed under Testnet Sandbox until a sandbox page opens', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/docs/zones')
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-  await expect(drawer.getByText('Sandbox guides', { exact: true })).toHaveCount(0)
+  const sandbox = drawer.locator('summary').filter({ hasText: /^Testnet Sandbox$/ })
+  await expect(sandbox).toBeVisible()
+  await expect(drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]')).toBeHidden()
+  await sandbox.click()
   await drawer.locator('a[href="/docs/guide/private-zones"]').click()
   await expect(page).toHaveURL(/\/docs\/guide\/private-zones\/?$/)
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
@@ -1033,7 +1038,7 @@ for (const mobile of [false, true]) {
       name: 'Zone architecture reference',
       section: 'Zones',
       path: '/docs/protocol/zones/architecture',
-      group: 'Technical reference',
+      group: 'Technical Reference',
       sibling: '/docs/protocol/zones/proving',
       unrelated: '/docs/guide/private-zones/connect-to-a-zone',
     },

@@ -78,9 +78,9 @@ const updates = await client.getContractEvents({ // [!code hl]
 
 ## Plan for Recovery
 
-Only the other signers can replace a lost one. When you create the account, choose weights that reach the threshold without any one signer. An account survives losing any one signer when its total weight minus the largest signer's weight is at least the threshold.
+Only the other signers can replace a lost one. When you create the account, choose weights that reach the threshold without any one signer. The test is total weight minus the largest signer's weight. When that's at least the threshold, the account survives losing any one signer.
 
-For example, take a passkey at weight 2, plus a backup key and a recovery provider's key at weight 1 each, at threshold 2. It passes, because 4 minus 2 leaves 2. The two keys together replace a lost passkey. The passkey alone replaces either key. Other [recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) also pass. On an existing account, [add a recovery signer](/docs/accounts/account-configuration/configuration-updates#add-a-recovery-signer).
+For example, give a passkey weight 2, and a backup key and a recovery provider's key weight 1 each. Set the threshold to 2. It passes, because 4 minus 2 leaves 2. The two keys together replace a lost passkey. The passkey alone replaces either key. Other [recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) also pass. On an existing account, [add a recovery signer](/docs/accounts/account-configuration/configuration-updates#add-a-recovery-signer).
 
 <span id="key-management-limits" />
 <span id="account-recovery-limits" />
@@ -95,7 +95,7 @@ A recovery signer can approve payments at its weight too, so give it no more wei
 
 The account has the same address on other EVM chains. A sender can pay it on the wrong chain by mistake. Those funds can't be retrieved today.
 
-The [specification for configurable account addresses](/docs/development/configurable-accounts#configurable-account-address) defines a recovery factory contract for that chain. With it, the secp256k1 signers you created the account with could deploy a recovery wallet at the address and retrieve the funds. Those are standard Ethereum keys, such as KMS or hardware wallet keys. That works if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet.
+The [specification for configurable account addresses](/docs/development/configurable-accounts#configurable-account-address) defines a recovery factory contract for that chain. With it, the account's original secp256k1 signers could deploy a recovery wallet at the address. That wallet retrieves the funds. Those are standard Ethereum keys, such as KMS or hardware wallet keys. That works if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet.
 
 Passkeys and device keys don't count. Accounts [upgraded in place](/docs/accounts/account-configuration/account-upgrade) don't use the factory. On other chains, their original key still controls the address. To keep the option open, create the account with secp256k1 signers whose weights reach the threshold on their own.
 

@@ -1,10 +1,12 @@
 ---
-title: Swap stablecoins across zones
-description: Swap OUSD from Zone A into betaUSD on Zone B by routing a zone withdrawal through Tempo's L1 router and confirming the target deposit.
+title: Swap Across Zones
+seoTitle: Swap Stablecoins Across Zones | Tempo Docs
+description: Swap OUSD from Zone A into betaUSD on Zone B by routing a Zone withdrawal through the router on Tempo and confirming the target deposit.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones-swap-across-zones_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
 import * as Demo from '../../../../components/guides/Demo.tsx'
 import { SwapAcrossZones } from '../../../../components/guides/zones/SwapAcrossZones.tsx'
 
@@ -15,11 +17,15 @@ export const swapZoneBalances = [
 
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Swap across zones
+# Swap Across Zones
 
-Swap `OUSD` in **Zone A** for `betaUSD` in **Zone B**, using test tokens in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). The swap settles on the public chain before Zone B credits the balance.
+Swap `OUSD` in Zone A for `betaUSD` in Zone B through the Stablecoin DEX.
 
-The route uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/private-zones#sandbox-router-deployment) on the public chain: withdraw from `Zone A`, swap on the Stablecoin DEX, then deposit the output token into `Zone B`.
+## Overview
+
+A cross-Zone swap trades `OUSD` test tokens in **Zone A** for `betaUSD` in **Zone B**. It uses the [testnet sandbox](/docs/guide/private-zones#testnet-compatibility), which differs from current deployments. The swap settles on Tempo before Zone B credits the balance.
+
+The route uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/private-zones#sandbox-router-deployment) on Tempo. It withdraws from `Zone A` and swaps on the Stablecoin DEX. Then it deposits the output token into `Zone B`.
 
 <ZoneDiagram
   name="cross-zone-swap"
@@ -32,9 +38,11 @@ The route uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/priva
 
 ## Swap OUSD for betaUSD
 
+The demo runs the full route:
+
 1. Withdraws `OUSD` from `Zone A`.
-2. Routes it through the public chain and swaps it on the Stablecoin DEX.
-3. Deposits the output token into `Zone B` through `ZonePortal`.
+2. Routes it through Tempo and swaps it on the Stablecoin DEX.
+3. Deposits the output token into `Zone B` through its portal (`ZonePortal`).
 4. Confirms the credited `betaUSD` balance in `Zone B`.
 
 <Demo.Container
@@ -46,13 +54,11 @@ The route uses the sandbox's [SwapAndDepositRouter deployment](/docs/guide/priva
   <SwapAcrossZones />
 </Demo.Container>
 
-## Code example
+## Code Example
 
-This snippet assumes you already have a signed-in `rootClient` on the public chain plus `zoneAClient`, and the shared token and portal constants used throughout the zone guides. The router address below is specific to Moderato's Zone A and Zone B sandbox.
+This snippet assumes a signed-in `rootClient` on Tempo and a `zoneAClient`. It also assumes the shared token and portal constants used throughout the Zone guides. The router address and callback encoding are specific to Moderato's Zone A and Zone B sandbox.
 
-The callback encoding below is specific to the legacy testnet router. Current routers require an encrypted deposit payload and a Tempo refund recipient. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting this route to another deployment.
-
-It shows the core routed swap submission path; use the demo above when you want to watch the output deposit settle into Zone B.
+This code covers the routed swap submission. Use the demo to watch the output deposit settle into Zone B.
 
 ```ts
 import { encodeAbiParameters, parseUnits } from 'viem'
@@ -98,15 +104,25 @@ console.log(receipt.blockNumber)
 ```
 
 <span id="how-routed-zone-swaps-settle" />
+<span id="how-the-swap-settles" />
 
-## How the swap settles
+## Swap Settlement
 
-This guide's swap flow is asynchronous because the trade temporarily leaves the zone.
+The swap is asynchronous because the trade temporarily leaves the Zone.
 
-Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to distinguish destination credit from a callback failure and bounce-back. Source receipt success alone does not prove the swap completed.
+The source token exits through the outbox (`ZoneOutbox`) and transfers to `SwapAndDepositRouter` on Tempo. The router optionally swaps it on the Stablecoin DEX. It then deposits the output token through the destination portal. That routed deposit pays the normal [deposit fee](/docs/protocol/zones/execution#deposit-fees), so the destination Zone receives the post-fee output.
 
-The source token is withdrawn through `ZoneOutbox`, transferred to `SwapAndDepositRouter` on Tempo, optionally swapped on the Stablecoin DEX, and then deposited back through a `ZonePortal` as the output token. That routed deposit pays the normal portal deposit fee, so the amount that arrives on the zone is the post-fee output.
+A successful source receipt doesn't prove the swap completed. Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to tell destination credit apart from a callback failure and bounce-back.
 
 :::warning
-If the routed withdrawal fails on Tempo - for example because the swap fails, the transfer fails, the router callback reverts, or the target deposit cannot be completed—the amount is bounced back to the withdrawal's `fallbackRecipient` inside the source zone. The fee is still paid to the sequencer, so a failed routed swap still results in fees for the sender.
+If the routed withdrawal fails on Tempo, the amount [bounces back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) to the withdrawal's `fallbackRecipient` inside the source Zone. Failures include a failed swap or transfer, a reverting router callback, or a target deposit that can't complete. The sequencer still collects the fee, so a failed routed swap still costs the sender fees.
 :::
+
+## Related
+
+<Cards>
+  <Card title="Send Across Zones" description="Use for moving OUSD from Zone A into Zone B without a swap." to="/docs/guide/private-zones/send-tokens-across-zones" />
+  <Card title="Withdraw OUSD" description="Use for moving OUSD from Zone A back to your public balance." to="/docs/guide/private-zones/withdraw-from-a-zone" />
+  <Card title="Withdraw From a Zone" description="Use for withdrawals and contract callbacks on a current Zone deployment." to="/docs/zones/withdraw" />
+  <Card title="Testnet Sandbox" description="Covers the sandbox router deployment and the routed-result checks." to="/docs/guide/private-zones" />
+</Cards>

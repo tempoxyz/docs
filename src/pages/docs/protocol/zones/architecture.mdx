@@ -1,47 +1,60 @@
 ---
-title: Tempo Zone Architecture
+title: Architecture
+seoTitle: Tempo Zone Architecture | Tempo Docs
 description: Architecture of Tempo Zones, including contract layout, sequencer management, chain IDs, and the trust model.
 ogImage: /og/2026-q4/og_2026-q4_docs_protocol-zones-architecture_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
 import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
-# Tempo Zone Architecture
+# Architecture
 
-A Tempo Zone maintains a private account ledger connected to a `ZonePortal` contract on Tempo. The portal holds the backing assets, while the Zone executes transactions and tracks balances privately. Deposits move funds into this ledger; withdrawals release funds back on Tempo.
+A Zone is a private ledger of stablecoin balances and account activity, connected to a `ZonePortal` contract on Tempo.
+
+## Overview
+
+The portal holds the backing assets. The Zone executes transactions and tracks balances privately. Deposits move funds into this ledger. Withdrawals release funds back on Tempo.
 
 <span id="system-architecture" />
+<span id="how-funds-move-through-a-zone" />
 
-## How funds move through a Zone
+## Fund Flow
 
-- **Deposit.** A user deposits TIP-20 tokens into the portal on Tempo. After the deposit's Tempo block finalizes, `ZoneInbox` processes the deposit and mints the corresponding tokens to the recipient inside the Zone.
-- **Execute.** Users submit transactions to the Zone's authenticated RPC. The Zone updates its own account state; its transaction history and balances are not published on Tempo. See [accounts](/docs/protocol/zones/accounts) for account visibility and [execution](/docs/protocol/zones/execution) for supported operations.
-- **Withdraw.** `ZoneOutbox` burns the user's Zone tokens and queues a withdrawal. After Tempo accepts the batch containing that withdrawal, the portal processes it and releases the backing tokens to the Tempo recipient.
+- **Deposit:** A user deposits TIP-20 tokens into the portal on Tempo. After the deposit's Tempo block finalizes, `ZoneInbox` processes the deposit. It mints the corresponding tokens to the recipient inside the Zone.
+- **Execute:** Users submit transactions to the Zone RPC. The Zone updates its own account state. Its transaction history and balances aren't published on Tempo.
+- **Withdraw:** `ZoneOutbox` burns the user's Zone tokens and queues a withdrawal. Tempo then accepts the batch containing that withdrawal. The portal processes it and releases the backing tokens to the Tempo recipient.
 
 <ZoneDiagram
   name="contracts"
   alt="ZoneFactory deploys ZonePortal on Tempo. Finalized deposits flow from the portal to ZoneInbox; ZoneOutbox queues withdrawals back to the portal. ZoneMessenger executes callback withdrawals. TempoState provides the imported public checkpoint to Zone precompiles."
 />
 
-Withdrawals can also call a Tempo contract through `ZoneMessenger`, enabling a DEX swap or a deposit into another Zone when the portal's access and gateway settings permit it. See [bridging](/docs/protocol/zones/bridging) for deposit, withdrawal, and callback details.
+Withdrawals can also call a Tempo contract through `ZoneMessenger` with a [withdrawal callback](/docs/protocol/zones/bridging). This enables a DEX swap or a deposit into another Zone. The portal's access and gateway settings must permit it.
 
-`TempoState` records the finalized Tempo checkpoint used by Zone execution. Deposit queues and issuer policies are read at that checkpoint; a policy update becomes visible when the Zone imports its finalized Tempo block.
+`TempoState` records the finalized Tempo checkpoint used by Zone execution. Deposit queues and issuer policies are read at that checkpoint. A policy update becomes visible when the Zone imports its finalized Tempo block.
 
-## Batches and settlement
+## Batches and Settlement
 
-The operator groups Zone blocks into batches and submits their commitments to the portal. A batch records the Zone's progress, processed deposits, and withdrawal queue. The portal checks continuity with the previous batch, verifies signatures from the configured sequencer quorum, and calls its configured verifier. Accepting the batch makes its withdrawals available for processing on Tempo. Bridge activity and settlement commitments are public; the private ledger is not published.
+The sequencer groups Zone blocks into batches and submits their commitments to the portal. A batch records the Zone's progress, processed deposits, and withdrawal queue. Before accepting a batch, the portal checks:
 
-Sequencer certificates authenticate batch commitments but do not independently prove correct execution. Enforcement depends on the deployed verifier and its configuration. See [proving and settlement](/docs/protocol/zones/proving#implementation-status) for the reviewed implementations and deployment checks.
+- Continuity with the previous batch.
+- Signatures from the configured sequencer quorum.
+- The result of its configured verifier.
 
-## Contract architecture
+Accepting the batch makes its withdrawals available for processing on Tempo. Bridge activity and settlement commitments are public. The private ledger isn't published.
 
-The public contracts manage backing assets and settlement; Zone precompiles maintain the private ledger and its connection to Tempo.
+Sequencer certificates authenticate batch commitments but don't independently prove correct execution. Enforcement depends on the deployed verifier and its configuration. The reviewed implementations and deployment checks are in the [proving implementation status](/docs/protocol/zones/proving#implementation-status).
 
-### Tempo contracts
+## Contract Architecture
 
-- **`ZoneFactory`** creates zones and installs a deterministic `ZonePortal` proxy for each one. All portals use the same protocol-managed implementation, verifier, and messenger.
-- **`ZonePortal`** is the central bridge contract. It locks deposited tokens, checks settlement certificates, calls the configured verifier, and processes withdrawals. The Zone Portal contract maintains the authoritative state: which deposits have been made, which batches have been accepted, and which withdrawals are pending.
-- **`ZoneMessenger`** is shared by all zones and handles withdrawals that include callbacks. When a user wants to withdraw tokens and trigger a contract call atomically, the messenger executes both operations together. If the callback fails, the token delivery and callback revert together, and the portal enqueues a bounce-back to the zone.
+The public contracts manage backing assets and settlement. Zone precompiles maintain the private ledger and its connection to Tempo.
+
+### Tempo Contracts
+
+- **`ZoneFactory`:** Creates Zones and installs a deterministic `ZonePortal` proxy for each one. All portals use the same protocol-managed implementation, verifier, and messenger.
+- **`ZonePortal`:** The central bridge contract. It locks deposited tokens, checks settlement certificates, calls the configured verifier, and processes withdrawals. It maintains the authoritative state: deposits made, batches accepted, and withdrawals pending.
+- **`ZoneMessenger`:** Handles withdrawals that include callbacks, shared by all Zones. A user can withdraw tokens and trigger a contract call atomically. The messenger executes both operations together. If the callback fails, the token delivery and callback revert together. The portal then enqueues a bounce-back to the Zone.
 
 The protocol manages the shared Tempo contracts at these addresses:
 
@@ -52,61 +65,93 @@ The protocol manages the shared Tempo contracts at these addresses:
 | Zone verifier | `0x5a56000000000000000000000000000000000000` |
 | `ZoneMessenger` | `0x5A4d000000000000000000000000000000000000` |
 
-### Zone predeploys
+### Zone Predeploys
 
-Tempo Zones expose these zone-native system precompiles at fixed addresses:
+Zones expose these Zone-native system precompiles at fixed addresses:
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| `TempoState` | `0x1c00...0000` | Stores finalized Tempo block headers so zone execution can read deposit queues and issuer policies at the imported checkpoint. |
-| `ZoneInbox` | `0x1c00...0001` | Processes incoming deposits. Mints tokens to recipients and validates that processed deposits match what the Zone Portal contract expects. |
-| `ZoneOutbox` | `0x1c00...0002` | Handles withdrawal requests. Users burn their zone tokens here and specify a Tempo Mainnet recipient. |
+| `TempoState` | `0x1c00...0000` | Stores finalized Tempo block headers so Zone execution can read deposit queues and issuer policies at the imported checkpoint. |
+| `ZoneInbox` | `0x1c00...0001` | Processes incoming deposits. Mints tokens to recipients and validates that processed deposits match what the portal expects. |
+| `ZoneOutbox` | `0x1c00...0002` | Handles withdrawal requests. Users burn their Zone tokens here and specify a Tempo recipient. |
 | `ZoneFeeManager` | `0xfeec...0001` | Resolves the default fee token and settles gas charges directly in the selected token. |
 
-The portal admin enables TIP-20 tokens on the Zone. Any enabled, initialized TIP-20 token can pay for Zone gas; see [execution and gas](/docs/protocol/zones/execution).
+The portal admin enables TIP-20 tokens on the Zone. Any enabled, initialized TIP-20 token can pay for Zone gas, as described in [execution and gas](/docs/protocol/zones/execution).
 
 ## Creating a Zone
 
-Zone creation is currently restricted to `ZoneFactory.owner()`. The factory assigns a zone ID and initializes a deterministic `ZonePortal` proxy using the shared implementation, verifier, and messenger.
+Zone creation is currently restricted to `ZoneFactory.owner()`. The factory assigns a Zone ID. It initializes a deterministic `ZonePortal` proxy using the shared implementation, verifier, and messenger.
 
-See [TIP-1091](https://tips.sh/1091) for the factory specification and [T11](/docs/protocol/upgrades/t11#duplicate-checks) for role-list validation requirements.
+[TIP-1091](https://tips.sh/1091) specifies the factory. [T11](/docs/protocol/upgrades/t11#duplicate-checks) sets the role-list validation requirements.
 
 ### Chain ID
 
-Each Tempo Zone has a unique EIP-155 chain ID derived deterministically from its onchain zone ID:
+Each Zone has a unique EIP-155 chain ID derived deterministically from its onchain Zone ID:
 
 ```text
 chain_id = 421700000 + zone_id
 ```
 
-This is the mainnet formula. Moderato zones instead use `1424310000 + zone_id`; local networks use `(parent_chain_id << 32) | zone_id`. Read `eth_chainId` from your zone RPC rather than applying the mainnet formula to testnet. These separate ranges prevent replay between zones and parent networks.
+This is the mainnet formula. Moderato Zones instead use `1424310000 + zone_id`. Local networks use `(parent_chain_id << 32) | zone_id`. Read `eth_chainId` from your Zone RPC rather than applying the mainnet formula to testnet. These separate ranges prevent replay between Zones and the Tempo networks they connect to.
 
 <span id="sequencer-transfer" />
 
-## Sequencer management
+## Sequencer Management
 
-An operator runs a Tempo node alongside its Zone nodes. The active leader produces Zone blocks, while the configured sequencer set signs settlement commitments. The operator imports finalized Tempo checkpoints, processes deposits, and submits batches and withdrawals to Tempo.
+An operator runs a Tempo node alongside its Zone nodes. The active leader produces Zone blocks. The configured sequencer set signs settlement commitments. The operator imports finalized Tempo checkpoints, processes deposits, and submits batches and withdrawals to Tempo.
 
-The portal admin calls `ZonePortal.setSequencerSet(newSequencers, newThreshold)` to replace the sequencer set and settlement threshold atomically. A replacement increments the configuration nonce and invalidates settlement certificates from the previous configuration. Each certificate requires at least `threshold` distinct signatures from the active set.
+The portal admin calls `ZonePortal.setSequencerSet(newSequencers, newThreshold)`. This replaces the sequencer set and settlement threshold atomically. A replacement increments the configuration nonce. It invalidates settlement certificates from the previous configuration. Each certificate requires at least `threshold` distinct signatures from the active set.
 
-Use the portal ABI for the runtime installed on your network when updating this configuration. The factory’s `sequencers` and `threshold` fields describe the initial settlement configuration. The portal supports up to eight sequencers. `setLeader(newLeader, expectedEpoch)` changes the active block producer; leader epochs and finalized Tempo activation blocks fence the previous leader.
+Use the portal ABI for the runtime installed on your network when updating this configuration. The factory's `sequencers` and `threshold` fields describe the initial settlement configuration. The portal supports up to eight sequencers.
+
+`setLeader(newLeader, expectedEpoch)` changes the active block producer. Leader epochs and finalized Tempo activation blocks fence the previous leader.
 
 ## Trust Model
 
-Tempo Zones make explicit tradeoffs between trust and performance:
+Zones make explicit tradeoffs between trust and performance:
 
 | What You Trust | What Could Go Wrong |
 |---|---|
 | Operator nodes for liveness | Block production halts without an active leader; settlement stalls without the configured signature quorum. |
 | Sequencer for inclusion and ordering | Transactions (including withdrawals) can be excluded or reordered. |
-| Sequencer for privacy | The sequencer can see all transactions on the Tempo Zone. |
-| Sequencer for data | Reconstructing the state of the Tempo Zone without the sequencer is impossible. |
+| Sequencer for privacy | The sequencer can see all transactions on the Zone. |
+| Sequencer for data | Reconstructing the state of the Zone without the sequencer is impossible. |
 | Settlement quorum and deployed verifier for correctness | A signature quorum alone does not establish correct execution. Enforcement depends on the active verifier, approved enclave measurements, and attestation verification. |
 
-Failed withdrawal deliveries enqueue a bounce-back to the private `zoneFallbackRecipient`. If zone minting is also blocked, the inbox records a pending refund for later claiming. Token restrictions can delay recovery; they do not make a failed delivery block the withdrawal queue.
+Failed withdrawal deliveries [bounce back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) to the private `zoneFallbackRecipient`. If Zone minting is also blocked, the inbox records a pending refund for later claiming. Token restrictions can delay recovery. They don't make a failed delivery block the withdrawal queue.
 
-## Portal access and emergency controls
+<span id="portal-access-and-emergency-controls" />
 
-Portal admins manage account membership and callback gateways separately from sequencer membership. Closed access enforces account membership at the bridge and requires callbacks to deposit back into the source portal. Gateway enforcement restricts callbacks to registered targets. These settings determine whether a particular cross-zone flow is allowed.
+## Portal Access and Pausing
 
-The admin, a sequencer, or a registered pause guardian can pause the portal for 30 days. The pause blocks deposits, withdrawal requests, and withdrawal processing; settlement submissions remain available. The admin can resume it earlier or schedule permanent abdication of individual configuration capabilities after a 30-day delay.
+Portal admins manage account membership and callback gateways separately from sequencer membership. These settings determine whether a particular cross-Zone flow is allowed:
+
+- **Closed Access:** Enforces account membership at the bridge. It requires callbacks to deposit back into the source portal.
+- **Gateway Enforcement:** Restricts callbacks to registered targets.
+
+The admin, a sequencer, or a registered pause guardian can pause the portal for 30 days. The pause blocks deposits, withdrawal requests, and withdrawal processing. Settlement submissions remain available. The admin can resume it earlier. The admin can also schedule permanent abdication of individual configuration capabilities after a 30-day delay.
+
+## Related
+
+<Cards>
+  <Card
+    title="Bridging"
+    description="Covers deposits, withdrawals, encrypted deposits, and composable withdrawal callbacks."
+    to="/docs/protocol/zones/bridging"
+  />
+  <Card
+    title="Proving and Settlement"
+    description="Covers batch acceptance, execution validation, and verification guarantees."
+    to="/docs/protocol/zones/proving"
+  />
+  <Card
+    title="Execution and Gas"
+    description="Covers fee tokens, deposit and withdrawal fees, fixed gas costs, and token management."
+    to="/docs/protocol/zones/execution"
+  />
+  <Card
+    title="Accounts and Privacy"
+    description="Covers private balances, private allowances, and account-scoped access control."
+    to="/docs/protocol/zones/accounts"
+  />
+</Cards>

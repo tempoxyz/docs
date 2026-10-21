@@ -647,10 +647,10 @@ export default defineConfig({
       {
         text: 'Getting Started',
         items: [
-          { text: 'Overview', link: '/docs/accounts' },
+          { text: 'Introduction', link: '/docs/accounts' },
           { text: 'How It Works', link: '/docs/accounts/how-it-works' },
-          { text: 'Security', link: '/docs/accounts/security' },
           { text: 'Use Cases', link: '/docs/accounts/use-cases' },
+          { text: 'Security', link: '/docs/accounts/security' },
           { text: 'Create an Account', link: '/docs/accounts/create' },
           { text: 'Add Funds', link: '/docs/accounts/fund' },
         ],
@@ -663,9 +663,9 @@ export default defineConfig({
             link: '/docs/accounts/authentication',
             collapsed: true,
             items: [
-              { text: 'Private Keys', link: '/docs/accounts/authentication/private-keys' },
-              { text: 'Device Keys', link: '/docs/accounts/authentication/device-keys' },
               { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
+              { text: 'Device Keys', link: '/docs/accounts/authentication/device-keys' },
+              { text: 'Private Keys', link: '/docs/accounts/authentication/private-keys' },
             ],
           },
           {
@@ -683,10 +683,10 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Spending Limits', link: '/docs/accounts/access-keys/spending-limits' },
-              { text: 'Expiry', link: '/docs/accounts/access-keys/expiry' },
               { text: 'Scopes', link: '/docs/accounts/access-keys/scopes' },
-              { text: 'Admin Access Keys', link: '/docs/accounts/access-keys/admin-access-keys' },
+              { text: 'Expiry', link: '/docs/accounts/access-keys/expiry' },
               { text: 'Revocation', link: '/docs/accounts/access-keys/revocation' },
+              { text: 'Admin Access Keys', link: '/docs/accounts/access-keys/admin-access-keys' },
             ],
           },
           {
@@ -725,7 +725,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'Self-Custodial Wallets With a Provider',
+                text: 'Set Up a Self-Custodial Wallet With a Provider',
                 link: '/docs/accounts/apps/self-custodial-wallets',
               },
               { text: "Recover a User's Account", link: '/docs/accounts/apps/recover-an-account' },
@@ -840,46 +840,55 @@ export default defineConfig({
     ]
     const zonesSidebar = [
       {
-        text: 'Zones',
+        text: 'Getting Started',
         items: [
           { text: 'Introduction', link: '/docs/zones' },
           { text: 'Privacy', link: '/docs/zones/privacy' },
-          { text: 'Connect', link: '/docs/zones/connect' },
-          { text: 'Deposit', link: '/docs/zones/deposit' },
-          { text: 'Balances and activity', link: '/docs/zones/balances' },
-          { text: 'Withdraw', link: '/docs/zones/withdraw' },
-          { text: 'Client setup', link: '/docs/zones/examples' },
-          { text: 'Testnet sandbox', link: '/docs/guide/private-zones' },
+          {
+            text: 'Testnet Sandbox',
+            link: '/docs/guide/private-zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Connect to the Sandbox',
+                link: '/docs/guide/private-zones/connect-to-a-zone',
+              },
+              { text: 'Deposit OUSD', link: '/docs/guide/private-zones/deposit-to-a-zone' },
+              {
+                text: 'Send Within a Zone',
+                link: '/docs/guide/private-zones/send-tokens-within-a-zone',
+              },
+              {
+                text: 'Send Across Zones',
+                link: '/docs/guide/private-zones/send-tokens-across-zones',
+              },
+              { text: 'Swap Across Zones', link: '/docs/guide/private-zones/swap-across-zones' },
+              { text: 'Withdraw OUSD', link: '/docs/guide/private-zones/withdraw-from-a-zone' },
+            ],
+          },
         ],
       },
       {
-        text: 'Technical reference',
+        text: 'Build',
+        items: [
+          { text: 'Connect to a Zone', link: '/docs/zones/connect' },
+          { text: 'Client Setup', link: '/docs/zones/examples' },
+          { text: 'Deposit Into a Zone', link: '/docs/zones/deposit' },
+          { text: 'Balances and Activity', link: '/docs/zones/balances' },
+          { text: 'Withdraw From a Zone', link: '/docs/zones/withdraw' },
+        ],
+      },
+      {
+        text: 'Technical Reference',
         collapsed: true,
         items: [
-          { text: 'How Zones work', link: '/docs/protocol/zones' },
+          { text: 'How Zones Work', link: '/docs/protocol/zones' },
           { text: 'Architecture', link: '/docs/protocol/zones/architecture' },
-          { text: 'Accounts and privacy', link: '/docs/protocol/zones/accounts' },
+          { text: 'Accounts and Privacy', link: '/docs/protocol/zones/accounts' },
           { text: 'Bridging', link: '/docs/protocol/zones/bridging' },
-          { text: 'RPC reference', link: '/docs/protocol/zones/rpc' },
-          { text: 'Execution and gas', link: '/docs/protocol/zones/execution' },
-          { text: 'Proving and settlement', link: '/docs/protocol/zones/proving' },
-        ],
-      },
-    ]
-    const sandboxSidebar = [
-      ...zonesSidebar,
-      {
-        text: 'Sandbox guides',
-        items: [
-          { text: 'Connect', link: '/docs/guide/private-zones/connect-to-a-zone' },
-          { text: 'Deposit', link: '/docs/guide/private-zones/deposit-to-a-zone' },
-          {
-            text: 'Send within a Zone',
-            link: '/docs/guide/private-zones/send-tokens-within-a-zone',
-          },
-          { text: 'Send across Zones', link: '/docs/guide/private-zones/send-tokens-across-zones' },
-          { text: 'Swap across Zones', link: '/docs/guide/private-zones/swap-across-zones' },
-          { text: 'Withdraw', link: '/docs/guide/private-zones/withdraw-from-a-zone' },
+          { text: 'RPC Reference', link: '/docs/protocol/zones/rpc' },
+          { text: 'Execution and Gas', link: '/docs/protocol/zones/execution' },
+          { text: 'Proving and Settlement', link: '/docs/protocol/zones/proving' },
         ],
       },
     ]
@@ -1337,7 +1346,7 @@ export default defineConfig({
           section.matches.map((path) => [path, productSidebars[section.id]]),
         ),
       ),
-      '/docs/guide/private-zones': sandboxSidebar,
+      '/docs/guide/private-zones': zonesSidebar,
       '/docs/partners': partnerResourcesSidebar,
       '/docs/partners/join': partnerResourcesSidebar,
       '/docs/guide/ousd': partnerResourcesSidebar,

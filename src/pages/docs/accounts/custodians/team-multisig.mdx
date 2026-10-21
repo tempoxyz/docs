@@ -13,7 +13,7 @@ Set up one Tempo account that three approvers share, where any two must approve 
 
 ## Overview
 
-A team multisig is one account whose payments need approvals from several people. No single person or key should move stablecoins your team holds together, such as a company's funds or a shared budget.
+A team multisig is one account whose payments need approvals from several people. It's for stablecoins your team holds together, such as a company's funds or a shared budget. No single person or key moves them.
 
 Here you create a multisig account on the Tempo Accounts devnet. Its three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself. Neither one stolen key nor your own backend can pay without a second approver.
 
@@ -34,7 +34,7 @@ Each approver's signer has a weight of 1, and the [threshold](/docs/accounts/pol
 
 ### Create the Multisig
 
-Keep each approver's key somewhere different, such as a hardware wallet, a separate KMS per team, or the approver's passkey, so one breach can't reach two of them. Here finance and operations sign with [private keys](/docs/accounts/authentication/private-keys). The controller signs with a passkey on their own device, so your app knows only the controller's address.
+Keep each approver's key somewhere different, so one breach can't reach two of them. Use a hardware wallet, a separate KMS per team, or the approver's passkey. Here finance and operations sign with [private keys](/docs/accounts/authentication/private-keys). The controller signs with a passkey on their own device, so your app knows only the controller's address.
 
 ::::code-group
 
@@ -153,9 +153,9 @@ Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). [Lis
 
 ## Limits and Changes
 
-A multisig holds 1 to 48 signers, and a transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
+A multisig holds 1 to 48 signers. A transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
 
-To let a team or a backend pay within a daily limit without two multisig approvals per payment, authorize an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits).
+A team or a backend can pay within a daily limit without two approvals per payment. Authorize an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits) for it.
 
 A configuration update voids approvals collected for a payment that hasn't been sent, so collect them again. If another update landed first, rebuild the multisig from the latest saved configuration.
 

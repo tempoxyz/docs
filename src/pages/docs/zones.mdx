@@ -14,29 +14,34 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 # Tempo Zones
 
-Keep stablecoin balances and account activity in a private ledger connected to Tempo. Deposit funds from Tempo, read private balances, and withdraw to the public network.
+Keep stablecoin balances and account activity in a private ledger connected to Tempo.
 
 [Read the privacy model →](/docs/zones/privacy)
 
 </DocsProductOverview>
 
+<span id="understand-the-privacy-boundary" />
+<span id="how-zones-work" />
+<span id="check-the-capabilities-of-your-deployment" />
+<span id="supported-features" />
+
+## Overview
+
+A Zone is a private stablecoin ledger connected to Tempo. Use one when other Tempo users shouldn't see your customers' balances and payments, such as payroll or treasury accounts.
+
 :::warning
 Zones is in limited preview. [Contact Tempo](https://tempo.xyz/contact) to discuss access and the deployment your application needs.
 :::
 
-<span id="understand-the-privacy-boundary" />
+Each Zone runs its own network. Its portal (`ZonePortal`) on Tempo holds the backing assets. Each account reads only its own balances and activity. The operator can read the whole ledger, and deposit and withdrawal amounts stay public. Read [Privacy](/docs/zones/privacy) before you choose a deployment.
 
-## How Zones work
+With a Zone, your application can:
 
-Each Zone has its own network and a portal on Tempo that holds its backing assets. Account-scoped access lets your application read private balances and activity. The operator can read the ledger; deposit and withdrawal amounts remain public. Read [Privacy](/docs/zones/privacy) before choosing a deployment.
+- **Fund Private Accounts:** Deposit stablecoins from Tempo into an account in the Zone.
+- **Read Private Activity:** Read an account's balances and transfers with its authorization token.
+- **Withdraw to Tempo:** Return funds to a Tempo address, or call a contract on Tempo.
 
-<span id="check-the-capabilities-of-your-deployment" />
-
-## Supported features
-
-The current permissioned runtime supports funding through the inbox and outbox. General TIP-20 transfers and user contract deployment are disabled. Confirm the operator's supported assets, signing tools, read access, and funding rules before integrating.
-
-Execution-proof enforcement depends on the deployed verifier and network configuration. Review [proving and settlement](/docs/protocol/zones/proving) with the operator; forced exits are not a generally available recovery path.
+The current permissioned runtime moves tokens only through deposits and withdrawals. It disables general TIP-20 transfers and user contract deployment. Confirm the assets, signing tools, read access, and funding rules with the operator. Execution-proof enforcement depends on the deployed verifier and network configuration, as [proving and settlement](/docs/protocol/zones/proving) describes.
 
 <span id="integrate-a-zone" />
 <span id="confirm-the-deployment-details" />
@@ -45,15 +50,29 @@ Execution-proof enforcement depends on the deployed verifier and network configu
 <span id="read-the-private-balance" />
 <span id="withdraw-to-tempo" />
 
-## Start building
+## Start Building
+
+Read the Build pages in order. Each page uses the connection and client from the pages before it.
 
 <Cards>
-  <Card title="Connect" description="Configure and authenticate access to your Zone." to="/docs/zones/connect" icon="lucide:plug" />
-  <Card title="Deposit" description="Fund a private account through the portal on Tempo." to="/docs/zones/deposit" icon="lucide:arrow-down-left" />
-  <Card title="Balances and activity" description="Read the account's balances and filtered history." to="/docs/zones/balances" icon="lucide:list" />
-  <Card title="Withdraw" description="Return funds to Tempo and track delivery." to="/docs/zones/withdraw" icon="lucide:arrow-up-right" />
+  <Card title="Connect to a Zone" description="Get deployment details and sign the authorization token." to="/docs/zones/connect" icon="lucide:plug" />
+  <Card title="Client Setup" description="Configure the Zone chain and Wagmi client the guides import." to="/docs/zones/examples" icon="lucide:settings" />
+  <Card title="Deposit Into a Zone" description="Fund a private account through the portal on Tempo." to="/docs/zones/deposit" icon="lucide:arrow-down-left" />
+  <Card title="Balances and Activity" description="Read the account's balances and filtered history." to="/docs/zones/balances" icon="lucide:list" />
+  <Card title="Withdraw From a Zone" description="Return funds to Tempo and track delivery." to="/docs/zones/withdraw" icon="lucide:arrow-up-right" />
 </Cards>
 
 <span id="try-the-testnet-sandbox" />
+<span id="testnet-sandbox" />
 
-The [testnet sandbox](/docs/guide/private-zones) has interactive examples for an earlier deployment, including direct transfers. Its interfaces and capabilities differ from the current preview. Use those examples only with the named sandbox deployment.
+To try these flows with test funds, use the [Testnet Sandbox](/docs/guide/private-zones). It runs an earlier deployment with different interfaces. Use its guides only with the sandbox.
+
+## Related
+
+<Cards>
+  <Card title="Privacy" description="Covers what account holders, operators, and public observers can see." to="/docs/zones/privacy" />
+  <Card title="How Zones Work" description="Covers portals, private accounts, issuer policies, and settlement on Tempo." to="/docs/protocol/zones" />
+  <Card title="Architecture" description="Covers contract layout, sequencer management, chain IDs, and the trust model." to="/docs/protocol/zones/architecture" />
+  <Card title="Proving and Settlement" description="Covers settlement certificates and the current onchain verification limits." to="/docs/protocol/zones/proving" />
+  <Card title="Zones API" description="Use for reading deposit and withdrawal outcomes." to="/docs/api/zones" />
+</Cards>
