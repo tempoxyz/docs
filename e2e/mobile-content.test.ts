@@ -48,6 +48,7 @@ for (const width of [320, 375, 393, 430, 1280]) {
       })
       await solidity.click()
       await expect(solidity).toHaveAttribute('aria-selected', 'true')
+      expect(await tabs.evaluate((list) => getComputedStyle(list).overflowY)).toBe('hidden')
       const fits = await tabs.evaluate((list) => {
         const rect = list.getBoundingClientRect()
         return rect.right <= document.documentElement.clientWidth

@@ -1405,6 +1405,7 @@ global({
     'article[data-v-content] [role="tablist"]': {
       minWidth: 0,
       overflowX: 'auto',
+      overflowY: 'hidden',
     },
     'article[data-v-content] [role="tab"]': {
       flexShrink: 0,
