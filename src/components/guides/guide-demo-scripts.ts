@@ -590,7 +590,7 @@ const recover: DemoScript = {
   ],
   steps: [
     {
-      title: 'Create the replacement signer',
+      title: 'Create the Replacement Signer',
       action: () => 'Create device key',
       run: async (state, ctx) => {
         const { state: next, key } = await prepareDeviceKey(state, ctx, 'Replacement device key')
@@ -602,7 +602,7 @@ const recover: DemoScript = {
       },
     },
     {
-      title: 'Approve with the remaining signers',
+      title: 'Approve With the Remaining Signers',
       action: () => 'Replace the device key',
       run: async (state, ctx) => {
         const info = await ctx.adapter.inspect(addressOf(state.account))
@@ -628,7 +628,7 @@ const recover: DemoScript = {
       },
     },
     {
-      title: 'Revoke the lost device’s keys',
+      title: 'Revoke the Lost Device’s Keys',
       action: () => 'Revoke with the new device key',
       run: async (state, ctx) => {
         const key = state.account.accessKeys.find(
@@ -670,7 +670,7 @@ const backendAutomation: DemoScript = {
   setup: [deviceKeyAccount('Create your account')],
   steps: [
     {
-      title: 'Authorize a scoped, limited key',
+      title: 'Authorize a Scoped, Limited Key',
       action: () => 'Approve with the device key',
       run: async (state, ctx) => {
         const privateKey = ctx.chain.generatePrivateKey()
@@ -707,7 +707,7 @@ const backendAutomation: DemoScript = {
       },
     },
     {
-      title: 'Keep the key in your KMS',
+      title: 'Keep the Key in Your KMS',
       action: () => 'Check the key on Tempo',
       run: async (state, ctx) => {
         const privateKey = state.held.privateKeys.backend
@@ -724,7 +724,7 @@ const backendAutomation: DemoScript = {
       },
     },
     {
-      title: 'Send payouts',
+      title: 'Send Payouts',
       action: () => 'Send a $50 payout',
       run: async (state, ctx) => {
         const paid = await payWithKey(state, ctx, 'Backend key', 50)

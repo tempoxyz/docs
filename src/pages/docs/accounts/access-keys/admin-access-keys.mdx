@@ -1,18 +1,25 @@
 ---
-title: Admin access keys
+title: Admin Access Keys
 seoTitle: Admin Access Keys for Key Management on Tempo | Tempo Docs
 description: Let a customer's trusted device or your key-management service authorize, change, and revoke an account's other access keys without the signers approving each change.
 ---
 
-# Admin access keys
+import { Card, Cards } from 'vocs'
 
-An admin access key manages an account's other access keys without the signers approving each change.
+# Admin Access Keys
 
-It's the only kind of [access key](/docs/accounts/access-keys) that can authorize, change, and revoke keys. A customer's trusted device can add their new phone, or your key-management service can rotate keys. Unlike a limited key, an admin key has no spending limit, expiry, or scopes. Whoever holds it can spend the whole balance.
+Manages an account's other access keys without the signers approving each change.
 
+## Overview
+
+An admin access key is the only kind of [access key](/docs/accounts/access-keys) that can authorize, change, and revoke keys. A customer's trusted device can add their new phone, or your key-management service can rotate keys.
+
+Unlike a limited key, an admin key has no spending limit, expiry, or scopes. Whoever holds it can spend the whole balance.
+
+<span id="how-it-works" />
 <span id="what-an-admin-access-key-can-do" />
 
-## How it works
+## Permissions
 
 An admin key can:
 
@@ -28,7 +35,7 @@ An admin key isn't a signer. It can't change the signers or the threshold, or lo
 
 <span id="when-to-use-one" />
 
-## Use cases
+## Use Cases
 
 Give an admin key only to a party you'd trust with the whole balance. On a configurable account (devnet until [T14](/docs/protocol/upgrades/t14)), an admin key also skips the [signing threshold](/docs/accounts/policies/signing-thresholds). It removes the protection of requiring several signers.
 
@@ -39,13 +46,13 @@ Give an admin key only to a party you'd trust with the whole balance. On a confi
 | A [backend that pays out](/docs/accounts/automations/pay-out-from-a-backend) | Limited key |
 | A [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) | Limited key |
 
-Protect an admin key like a signer. Keep it in a KMS or HSM, or as a [device key](/docs/accounts/authentication/device-keys) that can't be exported. A leaked admin key compromises the account: its holder can authorize a new admin key before you revoke the leaked one.
+Protect an admin key like a signer. Keep it in a KMS or HSM, or as a [device key](/docs/accounts/authentication/device-keys) that can't be exported. A leaked admin key compromises the account. Its holder can authorize a new admin key before you revoke the leaked one.
 
 <span id="authorize-an-admin-key" />
 
 <span id="authorize-one" />
 
-## Authorize an admin access key
+## Authorize an Admin Access Key
 
 Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key). Pass `admin: true` to Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). Viem ignores `limits`, `expiry`, and `scopes` on an admin key. Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
 
@@ -57,3 +64,12 @@ Enough signers to reach the threshold, or an existing admin key, authorize it li
 - Revoking an admin key leaves the keys it authorized in place, so revoke each one separately.
 
 Specification: [Account Keychain admin keys](/docs/protocol/transactions/AccountKeychain#admin-key-authorization).
+
+## Related
+
+<Cards>
+  <Card title="Access Keys" description="Covers how access keys sign for an account within their bounds." to="/docs/accounts/access-keys" />
+  <Card title="Revocation" description="Covers how to end an access key and what stays in place." to="/docs/accounts/access-keys/revocation" />
+  <Card title="Signing Thresholds" description="Covers the signer approvals an admin key skips." to="/docs/accounts/policies/signing-thresholds" />
+  <Card title="Device Keys" description="Covers non-exportable keys on a customer's device." to="/docs/accounts/authentication/device-keys" />
+</Cards>

@@ -645,75 +645,75 @@ export default defineConfig({
     ]
     const accountsSidebar = [
       {
-        text: 'Getting started',
+        text: 'Getting Started',
         items: [
           { text: 'Overview', link: '/docs/accounts' },
-          { text: 'How it works', link: '/docs/accounts/how-it-works' },
+          { text: 'How It Works', link: '/docs/accounts/how-it-works' },
           { text: 'Security', link: '/docs/accounts/security' },
-          { text: 'Use cases', link: '/docs/accounts/use-cases' },
-          { text: 'Create an account', link: '/docs/accounts/create' },
-          { text: 'Add funds', link: '/docs/accounts/fund' },
+          { text: 'Use Cases', link: '/docs/accounts/use-cases' },
+          { text: 'Create an Account', link: '/docs/accounts/create' },
+          { text: 'Add Funds', link: '/docs/accounts/fund' },
         ],
       },
       {
         text: 'Features',
         items: [
           {
-            text: 'Signing methods',
+            text: 'Signing Methods',
             link: '/docs/accounts/authentication',
             collapsed: true,
             items: [
-              { text: 'Private keys', link: '/docs/accounts/authentication/private-keys' },
-              { text: 'Device keys', link: '/docs/accounts/authentication/device-keys' },
+              { text: 'Private Keys', link: '/docs/accounts/authentication/private-keys' },
+              { text: 'Device Keys', link: '/docs/accounts/authentication/device-keys' },
               { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
             ],
           },
           {
-            text: 'Account policies',
+            text: 'Account Policies',
             link: '/docs/accounts/policies',
             collapsed: true,
             items: [
-              { text: 'Signing thresholds', link: '/docs/accounts/policies/signing-thresholds' },
-              { text: 'Receive policies', link: '/docs/accounts/policies/receive-policies' },
+              { text: 'Signing Thresholds', link: '/docs/accounts/policies/signing-thresholds' },
+              { text: 'Receive Policies', link: '/docs/accounts/policies/receive-policies' },
             ],
           },
           {
-            text: 'Access keys',
+            text: 'Access Keys',
             link: '/docs/accounts/access-keys',
             collapsed: true,
             items: [
-              { text: 'Spending limits', link: '/docs/accounts/access-keys/spending-limits' },
+              { text: 'Spending Limits', link: '/docs/accounts/access-keys/spending-limits' },
               { text: 'Expiry', link: '/docs/accounts/access-keys/expiry' },
               { text: 'Scopes', link: '/docs/accounts/access-keys/scopes' },
-              { text: 'Admin access keys', link: '/docs/accounts/access-keys/admin-access-keys' },
+              { text: 'Admin Access Keys', link: '/docs/accounts/access-keys/admin-access-keys' },
               { text: 'Revocation', link: '/docs/accounts/access-keys/revocation' },
             ],
           },
           {
-            text: 'Account configuration',
+            text: 'Account Configuration',
             link: '/docs/accounts/account-configuration',
             collapsed: true,
             items: [
               {
-                text: 'Configuration updates',
+                text: 'Configuration Updates',
                 link: '/docs/accounts/account-configuration/configuration-updates',
               },
               {
-                text: 'Account upgrade',
+                text: 'Account Upgrade',
                 link: '/docs/accounts/account-configuration/account-upgrade',
               },
             ],
           },
           {
-            text: 'Fee management',
+            text: 'Fee Management',
             link: '/docs/accounts/fees',
             collapsed: true,
             items: [
-              { text: 'Fee tokens', link: '/docs/accounts/fees/fee-tokens' },
-              { text: 'Fee sponsorship', link: '/docs/accounts/fees/fee-sponsorship' },
+              { text: 'Fee Tokens', link: '/docs/accounts/fees/fee-tokens' },
+              { text: 'Fee Sponsorship', link: '/docs/accounts/fees/fee-sponsorship' },
             ],
           },
-          { text: 'Virtual addresses', link: '/docs/accounts/virtual-addresses' },
+          { text: 'Virtual Addresses', link: '/docs/accounts/virtual-addresses' },
         ],
       },
       {
@@ -725,10 +725,10 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'Self-custodial wallets with a provider',
+                text: 'Self-Custodial Wallets With a Provider',
                 link: '/docs/accounts/apps/self-custodial-wallets',
               },
-              { text: "Recover a user's account", link: '/docs/accounts/apps/recover-an-account' },
+              { text: "Recover a User's Account", link: '/docs/accounts/apps/recover-an-account' },
             ],
           },
           {
@@ -737,15 +737,15 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'Pay out from a backend',
+                text: 'Pay Out From a Backend',
                 link: '/docs/accounts/automations/pay-out-from-a-backend',
               },
               {
-                text: "Pay from a user's embedded wallet",
+                text: "Pay From a User's Embedded Wallet",
                 link: '/docs/accounts/automations/pay-from-an-embedded-wallet',
               },
               {
-                text: 'Give an agent a wallet',
+                text: 'Give an Agent a Wallet',
                 link: '/docs/accounts/automations/give-an-agent-a-wallet',
               },
             ],
@@ -756,11 +756,11 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'Hold customer funds in an omnibus account',
+                text: 'Hold Customer Funds in an Omnibus Account',
                 link: '/docs/accounts/custodians/omnibus-accounts',
               },
               {
-                text: 'Set up a team multisig',
+                text: 'Set Up a Team Multisig',
                 link: '/docs/accounts/custodians/team-multisig',
               },
             ],
@@ -771,7 +771,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: 'Add Tempo to your wallet',
+                text: 'Add Tempo to Your Wallet',
                 link: '/docs/accounts/wallets/add-tempo-to-your-wallet',
               },
             ],

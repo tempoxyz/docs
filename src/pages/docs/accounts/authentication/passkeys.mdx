@@ -5,6 +5,7 @@ description: Let customers approve payments and configuration updates with Face 
 interactive: true
 ---
 
+import { Card, Cards } from 'vocs'
 import { PasskeyAccountDemo } from '../../../../components/guides/PasskeyAccountDemo'
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
 
@@ -12,12 +13,15 @@ import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-
 
 A passkey lets only the customer approve the account's transactions, with Face ID, a fingerprint, or a security key.
 
+<span id="what-a-passkey-is" />
+
+## Overview
+
 A passkey is the WebAuthn credential behind passwordless sign-in. It's a P-256 key that stays on the customer's device or security key and signs only when the customer approves. Tempo checks each passkey signature onchain. For payments without a prompt, add a [device key](/docs/accounts/authentication/device-keys). On a server, use a [private key](/docs/accounts/authentication/private-keys) instead.
 
 <span id="passkey-authenticators" />
-<span id="what-a-passkey-is" />
 
-## How it works
+## How It Works
 
 Passkeys work with Face ID and Touch ID, Windows Hello, an Android screen lock, and security keys such as YubiKey.
 
@@ -32,15 +36,15 @@ Your servers and wallet providers never hold the passkey. Its security rests on 
 <span id="passkey-signer-weights" />
 <span id="create-a-passkey-signer" />
 
-## Create a passkey
+## Create a Passkey
 
 <PasskeyAccountDemo />
 
-The demo creates a passkey and shows the single-key account it signs for. On mainnet and testnet today, a passkey can be a single-key account's one key, but losing it loses the account.
+The demo creates a passkey and shows the single-key account it signs for. On mainnet and testnet today, a passkey can be a single-key account's one key. Losing it loses the account.
 
 <ConfigurableAccountsT14 />
 
-On the Tempo Accounts devnet, make the passkey the first signer of a configurable account instead, where it approves alone:
+On the Tempo Accounts devnet, make the passkey the first signer of a configurable account instead. It approves alone.
 
 ```ts [passkey.ts]
 import { Account, WebAuthnP256 } from 'viem/tempo'
@@ -61,3 +65,12 @@ const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [
 - Passkeys work only over HTTPS or on `localhost`. A cancelled or timed-out prompt fails with `NotAllowedError`.
 - A passkey on a security key isn't synced, so losing the key loses the signer.
 - On mainnet and testnet, a passkey account is a single-key account and can't add a signer or swap its key. A synced passkey survives a lost phone only through its sync provider, such as iCloud Keychain or Google Password Manager. If the customer loses every synced copy, they lose the account and its funds.
+
+## Related
+
+<Cards>
+  <Card title="Device Keys" description="Covers keys that pay from the customer's device without a prompt." to="/docs/accounts/authentication/device-keys" />
+  <Card title="Private Keys" description="Covers keys in a wallet, a wallet provider, or your KMS or HSM." to="/docs/accounts/authentication/private-keys" />
+  <Card title="Set Up a Self-Custodial Wallet With a Provider" description="Use for adding a recovery signer beside the customer's passkey." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Signing Thresholds" description="Covers signer weights and the threshold a transaction must reach." to="/docs/accounts/policies/signing-thresholds" />
+</Cards>

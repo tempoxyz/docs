@@ -1,30 +1,37 @@
 ---
-title: Spending limits
+title: Spending Limits
 seoTitle: TIP-20 Spending Limits for Access Keys on Tempo | Tempo Docs
 description: Cap how much of each TIP-20 token an access key can spend, once or per period, then read what's left or change the limit without revoking the key.
 interactive: true
 ---
 
+import { Card, Cards } from 'vocs'
+
 import { TidxQuery } from '../../../../components/TidxQuery'
 
-# Spending limits
+# Spending Limits
 
-A spending limit caps how much of one TIP-20 token an access key can spend, such as 500 OUSD a day.
+Caps how much of one TIP-20 token an access key can spend, such as 500 OUSD a day.
 
-Spending limits are one of an [access key](/docs/accounts/access-keys)'s three bounds, with [expiry](/docs/accounts/access-keys/expiry) and [scopes](/docs/accounts/access-keys/scopes). Tempo reverts any transaction that would take the key over its limit. A limit is either one-time or renews each period. To control where the money goes, use scopes.
+## Overview
 
+A spending limit caps how much of one TIP-20 token an [access key](/docs/accounts/access-keys) can spend. It's one of the key's three bounds, with [expiry](/docs/accounts/access-keys/expiry) and [scopes](/docs/accounts/access-keys/scopes). Tempo reverts any transaction that would take the key over its limit.
+
+A limit is either one-time or renews each period. To control where the money goes, use scopes.
+
+<span id="how-it-works" />
 <span id="what-counts" />
 <span id="what-counts-against-the-limit" />
 
-## How it works
+## Counted Outflows
 
 A spending limit covers every TIP-20 outflow in a transaction the key signs:
 
-- **Transfers.** Tokens the key sends count.
-- **Approvals.** Approval increases count, so the key can't let a contract pull more than its limit.
-- **Fees.** Fees the account pays count, unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
-- **Precompile pulls.** Tokens that Tempo's built-in contracts (precompiles) pull from the account count.
-- **Burns.** Since T12, tokens burned from the account with `burnAt` count.
+- **Transfers:** Tokens the key sends count.
+- **Approvals:** Approval increases count, so the key can't let a contract pull more than its limit.
+- **Fees:** Fees the account pays count, unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
+- **Precompile Pulls:** Tokens that Tempo's built-in contracts (precompiles) pull from the account count.
+- **Burns:** Since T12, tokens burned from the account with `burnAt` count.
 
 Assets other than TIP-20 tokens, such as NFTs, don't count. A `transferFrom` that spends an allowance the account already granted doesn't count either. A transaction that would go over the remaining limit reverts entirely with [`SpendingLimitExceeded`](/docs/protocol/transactions/AccountKeychain#error-spendinglimitexceeded).
 
@@ -33,22 +40,23 @@ Assets other than TIP-20 tokens, such as NFTs, don't count. A `transferFrom` tha
 <span id="one-time-and-periodic-limits" />
 <span id="set-a-spending-limit" />
 
-## Set a limit
+## Set a Limit
 
 Pass `limits` when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key) with Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize) or [`accessKey.signAuthorization`](https://viem.sh/tempo/actions/accessKey.signAuthorization). Each entry covers one token, with the amount in base units (most USD stablecoins have 6 decimals). For example, `{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }` allows 500 OUSD a day.
 
-A key without `limits` can spend any amount of any token. Once you pass `limits`, a token not in the list has a limit of zero, including for fees paid in it. `limits: []` lets the key spend no TIP-20 tokens.
+A key without `limits` spends any amount of any token. Once you pass `limits`, a token not in the list has a limit of zero, including for fees paid in it. `limits: []` lets the key spend no TIP-20 tokens.
 
 `period` decides whether the limit renews:
 
-- **One-time: `0` or omitted.** Once the key spends the limit, it can't spend that token again.
-- **Renewing: a number of seconds, such as `86_400` for a day.** The first period starts when the key is authorized, not at midnight or another calendar boundary. The limit resets to its full amount when each period ends. Unspent amounts don't carry over.
+- **One-Time:** Set `period` to `0` or omit it. Once the key spends the limit, it can't spend that token again.
+- **Renewing:** Set `period` to a number of seconds, such as `86_400` for a day. The first period starts when the key is authorized, not at midnight or another calendar boundary. The limit resets to its full amount when each period ends. Unspent amounts don't carry over.
 
 <span id="read-an-access-key" />
 <span id="read-the-remaining-permission" />
 <span id="read-the-remaining-limit" />
+<span id="remaining-limit" />
 
-## Remaining limit
+## Check the Remaining Limit
 
 Read what a key can still spend with Viem's [`accessKey.getRemainingLimit`](https://viem.sh/tempo/actions/accessKey.getRemainingLimit). It returns two values:
 
@@ -73,11 +81,11 @@ LIMIT 10`}
 <span id="change-an-access-key" />
 <span id="change-a-spending-limit" />
 
-## Change a limit
+## Change a Limit
 
 Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's limit without revoking it. Set the new limit with Viem's [`accessKey.updateLimit`](https://viem.sh/tempo/actions/accessKey.updateLimit).
 
-The update sets both the limit and what's left of it to the new value. Later periods renew to the new value. For example, updating a key that already spent 400 of its 500 OUSD today to `parseUnits('600', 6)` lets it spend 600 more today and 600 a day after that, not 100 more today. The period and the current period's end stay the same. On a key with no limits, the update turns limits on.
+The update sets both the limit and what's left of it to the new value. Later periods renew to the new value. For example, a key has spent 400 of its 500 OUSD today. Updating it to `parseUnits('600', 6)` lets it spend 600 more today, not 100. It then spends 600 a day after that. The period and the current period's end stay the same. On a key with no limits, the update turns limits on.
 
 <span id="spending-limit-limits" />
 
@@ -87,3 +95,12 @@ The update sets both the limit and what's left of it to the new value. Later per
 - `updateLimit` reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)), an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)), or an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits.
 
 Specification: [Account Keychain spending limits](/docs/protocol/transactions/AccountKeychain#spending-limit-enforcement).
+
+## Related
+
+<Cards>
+  <Card title="Access Keys" description="Covers how access keys sign for an account within their bounds." to="/docs/accounts/access-keys" />
+  <Card title="Scopes" description="Covers which contracts, functions, and recipients a key can use." to="/docs/accounts/access-keys/scopes" />
+  <Card title="Expiry" description="Covers when a key stops working and how to replace it." to="/docs/accounts/access-keys/expiry" />
+  <Card title="Fee Sponsorship" description="Covers fee payers, whose sponsored fees don't count against a limit." to="/docs/accounts/fees/fee-sponsorship" />
+</Cards>

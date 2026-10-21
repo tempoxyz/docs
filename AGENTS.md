@@ -178,12 +178,25 @@ Prefer headings that name the product, API, command, protocol, or task:
 
 Exceptions are allowed for standards-format pages, especially TIP sections with required names such as `Abstract`, `Motivation`, `Specification`, and `Test Cases`.
 
-Before finishing docs changes, scan changed Markdown files for generic H2s:
+Before finishing docs changes, scan changed Markdown files for generic H2s. Accounts pages follow the Design System template below, so the scan skips them:
 
 ```bash
-git diff --name-only -- '*.md' '*.mdx' \
+git diff --name-only -- '*.md' '*.mdx' | grep -v '^src/pages/docs/accounts' \
   | xargs rg -n '^## +(Overview|Usage|Parameters|Returns?|Examples|Setup|Configuration|Reference|Request|Response|Errors|Best Practices|Next Steps)( +\{#[^}]+\})?$'
 ```
+
+### Design System page template (Accounts)
+
+Accounts pages (`src/pages/docs/accounts.mdx` and `src/pages/docs/accounts/`) follow the [Tempo Design System docs](https://ds.tehq.dev/llms-full.txt) page by page. Other sections move to this template when they are rewritten. On these pages, the template overrides the generic-H2 ban, sentence-case headings, and period labels:
+
+1. **Title:** Title Case `title` frontmatter and `#` heading, matching the sidebar label in `vocs.config.ts`.
+2. **Subhead:** One short sentence after the H1 that defines the page or states its outcome.
+3. **`## Overview`:** Always the first H2. One to three short paragraphs that open by defining the concept or stating what the guide builds.
+4. **Body sections:** Noun labels for concepts (`## Signers`), verb-first labels for tasks (`## Set a Limit`). Guides put their `:::::steps` block under `## Setup`.
+5. **`## Guidelines`:** Optional, and absent from most pages. Put advice in the body, next to the step or fact it concerns. Add Guidelines only when a page has two or more judgment calls that span the page, such as how to weigh signers. Each `###` guideline gives a reason the body doesn't, then an optional `**Do:** …` or `**Don't:** …`. Never restate a body sentence, and never write a Don't that only negates the Do.
+6. **`## Related`:** The last section. Two to five `<Card>`s whose descriptions start with "Covers …" for concepts or "Use for …" for tasks. Getting-started guides (`create`, `fund`) use `## Next Steps` instead.
+
+Headings use Title Case: capitalize every word except a, an, the, and, but, or, nor, for, so, yet, as, at, by, in, of, off, on, per, to, and via, unless first or last. Capitalize a verb particle such as Up in "Set Up". Capitalize prepositions of four or more letters (With, From, Into). Bold-label lists use `- **Label:** Sentence.` with a Title Case label. Title Case alone doesn't change an anchor slug; for any reworded heading, keep the old slug with `<span id="old-slug" />`.
 
 ## Procedural Guides
 
@@ -207,10 +220,41 @@ Each step should be actionable and concrete. Keep long conceptual background out
 
 ## Writing Style
 
+Follows the [Tempo Design System writing style](https://ds.tehq.dev/docs/foundations/content/writing-style), adapted for docs pages.
+
+### Principles
+
+- **Clear before clever.** State exactly what happens, in familiar words.
+- **Short.** Cut every word that does not change the meaning.
+- **Specific.** Name the thing and the action. "Spends up to 500 OUSD a day" carries more than "spends within limits".
+- **Consistent.** Call one thing by one name everywhere. See Protocol Concept Naming below.
+
+### Sentences
+
+- Put one rule or fact in each sentence, so a reader or an agent can quote it alone.
+- Keep sentences under 20 words. Split any sentence over 25 words.
+- Don't chain clauses with colons. A sentence with two colons is always two sentences or a list.
+- Put the important words first: the subject or outcome, then the conditions. "Once the update lands, the lost passkey can't approve anything" leads its paragraph, not ends it.
+- Define before explaining. Open a concept with one sentence that says what it is, then list its parts.
+- State rules as facts that Tempo checks, enforces, or rejects, not as warnings. Prefer "Tempo reverts the transaction" over "the transaction may fail".
+- State what an operation doesn't do, plainly: "It holds no funds." "A configuration update doesn't revoke it."
+- Add a concrete "such as" example to an abstract rule.
+
+### Paragraphs and lists
+
+- The paragraph after the H1 renders as the subhead. Make it one short sentence that states the outcome.
+- Keep paragraphs to two or three sentences.
+- Turn a sentence that lists three or more items with explanations into a bold-label list: `- **Label.** Sentence.` outside Accounts, `- **Label:** Sentence.` on Accounts pages. A short plain list ("A, B, and C") stays in the sentence.
+- Don't stack several lists back to back. Keep a sentence of prose between them.
+- Give the instruction, then the code, then at most one or two sentences on the result. Skip lead-ins such as "The following code…".
+- Don't write sentences whose only job is a link ("X covers Y", "See Z for more"). Link the meaningful words in a sentence that states a fact, and put navigation in Related cards.
+
+### Voice
+
 - Use active voice, present tense, and second person.
 - Lead with the recommended path, then place alternatives under an advanced or reference section.
 - Keep intro paragraphs short. Avoid repeating sidebar or page titles.
-- Use sentence case for headings unless the product or protocol term requires capitalization.
+- Use sentence case for headings unless the product or protocol term requires capitalization. Accounts pages use Title Case (see Design System page template).
 - Use code font for commands, file paths, parameters, status codes, object names, and literal values.
 - Use concrete nouns. Avoid vague labels like "things", "stuff", "various", and "etc." when a specific list is possible.
 - Avoid filler such as "simply", "just", "easy", "obviously", and "seamlessly".

@@ -1,5 +1,5 @@
 ---
-title: "Add funds"
+title: "Add Funds"
 seoTitle: "Add Funds to a Tempo Account | Tempo Docs"
 description: Fund a Tempo account from another Tempo account, Tempo Wallet, a card or bank, or another chain, then check the balance.
 interactive: true
@@ -10,11 +10,13 @@ import * as Demo from '../../../components/guides/Demo.tsx'
 import { DepositToTempoWallet } from '../../../components/guides/steps/wallet/DepositToTempoWallet.tsx'
 import { SignInWithTempo } from '../../../components/guides/steps/wallet/SignInWithTempo.tsx'
 
-# Add funds
+# Add Funds
 
 Anyone can send stablecoins to a Tempo account's address, with nothing to set up first.
 
-Pick a path by where the money starts. Then check the balance to confirm it arrived.
+## Overview
+
+Funding a Tempo account means sending stablecoins to its address. Pick a path by where the money starts. Then check the balance to confirm it arrived.
 
 <span id="choose-a-funding-path" />
 <span id="receive-from-another-tempo-account" />
@@ -27,19 +29,19 @@ Pick a path by where the money starts. Then check the balance to confirm it arri
 
 <span id="ways-to-add-funds" />
 
-## Funding options
+## Funding Options
 
 <Cards>
-  <Card title="From another Tempo account" description="Share the account's address. Any Tempo account or wallet can send stablecoins to it." to="/docs/guide/payments/accept-a-payment" />
+  <Card title="From Another Tempo Account" description="Share the account's address. Any Tempo account or wallet can send stablecoins to it." to="/docs/guide/payments/accept-a-payment" />
   <Card title="With Tempo Wallet" description="The user adds money with Tempo Wallet's built-in onramp. Try it below." to="#add-money-with-tempo-wallet" />
-  <Card title="From a card or bank" description="Embed an onramp such as Stripe, MoonPay, or Mt Pelerin that sends stablecoins to the address." to="/docs/partners/payments-and-ramps" />
-  <Card title="From another chain" description="Tempo Routes moves stablecoins from supported networks to the account." to="/docs/routes" />
+  <Card title="From a Card or Bank" description="Embed an onramp such as Stripe, MoonPay, or Mt Pelerin that sends stablecoins to the address." to="/docs/partners/payments-and-ramps" />
+  <Card title="From Another Chain" description="Tempo Routes moves stablecoins from supported networks to the account." to="/docs/routes" />
   <Card title="Test funds" description="Get test stablecoins on Moderato testnet from the faucet." to="/docs/quickstart/faucet" />
 </Cards>
 
 <span id="add-funds-with-tempo-wallet" />
 
-## Add money with Tempo Wallet
+## Add Money With Tempo Wallet
 
 This demo uses **Tempo Mainnet** and real funds. Select **Connect Tempo Wallet**, then **Add funds**, and choose a funding method. The wallet shows the amount and any fees before you confirm.
 
@@ -55,10 +57,18 @@ To add the same button to your app, request [`wallet_deposit`](/docs/guide/getti
 <span id="accept-only-what-you-want" />
 <span id="give-each-customer-a-deposit-address" />
 
-## Check the balance
+## Check the Balance
 
 Enter the account's address, choose Moderato (`chainId=42431`) or mainnet (`chainId=4217`), and click **Try**.
 
 <OpenApi.Playground operationId="getAddressBalances" query="chainId=42431" anchors={false} />
 
-Card and bank funding can land after the wallet or onramp says it's done. To credit a specific payment, [verify the incoming transfer](/docs/guide/payments/accept-a-payment) rather than the balance.
+Card and bank funding can land after the wallet or onramp says it's done. A balance shows the total, not which payment arrived. To credit a specific payment, [verify the incoming transfer](/docs/guide/payments/accept-a-payment) rather than the balance.
+
+## Next Steps
+
+<Cards>
+  <Card title="Receive Payments" description="Use for sharing an address and verifying incoming transfers." to="/docs/guide/payments/accept-a-payment" />
+  <Card title="Fund an Account" description="Use for adding a funding button to your app with the Accounts SDK." to="/docs/guide/getting-funds" />
+  <Card title="Tempo Routes" description="Use for moving stablecoins from other networks to the account." to="/docs/routes" />
+</Cards>

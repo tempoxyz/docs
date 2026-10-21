@@ -1,22 +1,25 @@
 ---
-title: Device keys
+title: Device Keys
 seoTitle: Pay Without a Prompt Using Device Keys | Tempo Docs
 description: Create a key the customer's phone, computer, or browser can't export, and authorize it once to pay from a Tempo account within a spending limit and expiry.
 interactive: true
 ---
 
+import { Card, Cards } from 'vocs'
 import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
 
-# Device keys
+# Device Keys
 
 A device key lets the customer's phone, computer, or browser pay without asking the customer to approve each payment.
 
-A device key is a P-256 key that the device's own key store creates and never exports. The customer's passkey authorizes it once as an [access key](/docs/accounts/access-keys). Tempo rejects any payment it signs over its spending limit or after it expires. On a server, use a [private key](/docs/accounts/authentication/private-keys) in your KMS or HSM instead.
-
 <span id="what-a-device-key-is" />
 
-## How it works
+## Overview
+
+A device key is a P-256 key that the device's own key store creates and never exports. The customer's passkey authorizes it once as an [access key](/docs/accounts/access-keys). Tempo rejects any payment it signs over its spending limit or after it expires. On a server, use a [private key](/docs/accounts/authentication/private-keys) in your KMS or HSM instead.
+
+## How It Works
 
 Each platform keeps device keys in its own key store:
 
@@ -38,7 +41,7 @@ Your servers and wallet providers never hold the device key. Anyone who unlocks 
 <span id="pay-with-it" />
 <span id="how-a-device-key-starts-paying" />
 
-## Create a device key
+## Create a Device Key
 
 <P256KeyDemo />
 
@@ -50,7 +53,7 @@ On mainnet and testnet today, a device key can be an access key on a single-key 
 
 <ConfigurableAccountsT14 />
 
-This example uses a configurable account with the passkey as its signer, so `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer):
+This example uses a configurable account with the passkey as its signer. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer).
 
 ::::code-group
 
@@ -90,3 +93,13 @@ Pass `keyAuthorization` with the device key's first payment, signed by `deviceKe
 - Each device needs its own key, authorized by the customer's passkey.
 - Clearing site data deletes a browser key. Authorize a new one the same way.
 - If a device is lost, [revoke its key](/docs/accounts/access-keys/revocation#revoke-an-access-key). The account's signers don't change.
+
+## Related
+
+<Cards>
+  <Card title="Access Keys" description="Covers keys that pay alone within limits, expiry, and scopes." to="/docs/accounts/access-keys" />
+  <Card title="Spending Limits" description="Covers how much of one TIP-20 token an access key can spend." to="/docs/accounts/access-keys/spending-limits" />
+  <Card title="Revocation" description="Use for revoking a lost device's key." to="/docs/accounts/access-keys/revocation" />
+  <Card title="Passkeys" description="Covers the customer's passkey, which authorizes each device key." to="/docs/accounts/authentication/passkeys" />
+  <Card title="Private Keys" description="Covers keys in a wallet, a wallet provider, or your KMS or HSM." to="/docs/accounts/authentication/private-keys" />
+</Cards>

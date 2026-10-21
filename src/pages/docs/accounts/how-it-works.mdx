@@ -1,20 +1,23 @@
 ---
-title: How it works
+title: How It Works
 seoTitle: How Tempo Accounts Work and Why They're Non-Custodial | Tempo Docs
 description: Only a Tempo account's own keys can move its stablecoins. Signers approve together, access keys pay alone within limits, and Tempo has no override.
 ---
 
+import { Card, Cards } from 'vocs'
 import { AccountDiagram } from '../../../components/AccountDiagram'
 import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
-# How it works
+# How It Works
 
 A Tempo account holds stablecoins, and only the account's own keys can move them.
 
-An account has two kinds of keys. Tempo checks what each can do on every transaction:
+## Overview
 
-- **Signers** own the account. They approve payments and any change to the account's keys. An existing wallet's account starts with one signer: its existing key.
-- **Access keys** are optional. The signers authorize each one. It pays on its own within the limits you set, such as a daily amount or a single recipient.
+A Tempo account is an address with two kinds of keys. Tempo checks what each key can do on every transaction:
+
+- **Signers:** Own the account. They approve payments and any change to the account's keys. An existing wallet's account starts with one signer, its existing key.
+- **Access Keys:** Pay on their own within the limits you set, such as a daily amount or a single recipient. Access keys are optional, and the signers authorize each one.
 
 No one, including Tempo, can [move an account's funds](/docs/accounts/security) any other way.
 
@@ -37,7 +40,7 @@ The address is the account's public ID. It holds the account's stablecoins and s
 
 A single-key account has one key, like a standard Ethereum account (an EOA). Losing the key loses the account. A [configurable account](/docs/development/configurable-accounts) has signers instead. Its address stays the same when they change, so the customer keeps their address and balance after replacing a lost phone. You can [upgrade a single-key account](/docs/accounts/account-configuration/account-upgrade) to a configurable one at the same address.
 
-Single-key accounts and their access keys work on mainnet and testnet today: in the [wallets](/docs/accounts/wallets) your users already have, your [app's embedded wallets](/docs/accounts/apps), your [backend automations](/docs/accounts/automations), and [custodians](/docs/accounts/custodians).
+Single-key accounts and their access keys work on mainnet and testnet today. They work in the [wallets](/docs/accounts/wallets) your users already have, your [app's embedded wallets](/docs/accounts/apps), your [backend automations](/docs/accounts/automations), and [custodians](/docs/accounts/custodians).
 
 <ConfigurableAccountsT14 />
 
@@ -58,13 +61,23 @@ In the example, the passkey has weight 2, the backup and recovery keys have weig
 
 <span id="access-keys-pay-alone" />
 
-## Access keys
+## Access Keys
 
 <AccountDiagram
   name="access-keys"
   alt="An access key has a key type (passkey, P-256, or secp256k1), spending limits per TIP-20 token that apply once or per period, an expiry, and scopes over contracts, functions, and recipients. An admin access key has no limits and manages other access keys."
 />
 
-A payout server can't ask for the customer's passkey on every payout. Instead, the signers approve an [access key](/docs/accounts/access-keys) once. From then on, it pays alone within its bounds: a spending limit per stablecoin, an expiry, and scopes that limit which contracts and functions it calls and whom it pays. Tempo checks those bounds on every transaction. A leaked payout server key can't spend past its daily limit.
+A payout server can't ask for the customer's passkey on every payout. Instead, the signers approve an [access key](/docs/accounts/access-keys) once. From then on, it pays alone within its bounds. Its bounds are a spending limit per stablecoin, an expiry, and scopes that limit which contracts and functions it calls and whom it pays. Tempo checks those bounds on every transaction. A leaked payout server key can't spend past its daily limit.
 
 An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds and can manage the account's other access keys. Give one only to a party you'd trust with the whole balance. No access key counts toward the threshold, admin or not. Only the signers can change the signers or the threshold.
+
+## Related
+
+<Cards>
+  <Card title="Security" description="Covers who can move an account's funds and what a breach exposes." to="/docs/accounts/security" />
+  <Card title="Signing Methods" description="Covers passkeys, device keys, and private keys, and who holds each." to="/docs/accounts/authentication" />
+  <Card title="Signing Thresholds" description="Covers signer weights and the threshold a transaction must reach." to="/docs/accounts/policies/signing-thresholds" />
+  <Card title="Access Keys" description="Covers the limits, expiry, and scopes Tempo checks for a key that pays alone." to="/docs/accounts/access-keys" />
+  <Card title="Account Upgrade" description="Use for turning a single-key account into a configurable one at the same address." to="/docs/accounts/account-configuration/account-upgrade" />
+</Cards>

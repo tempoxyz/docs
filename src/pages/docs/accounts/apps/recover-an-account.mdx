@@ -1,18 +1,29 @@
 ---
-title: Recover a user's account
+title: Recover a User's Account
 seoTitle: Recover a Tempo Account After a Lost Passkey or Device | Tempo Docs
 description: Replace a user's lost passkey or backup key with the two signers they still have, then revoke the lost phone's device key. The account keeps its address and balance.
 interactive: true
 ---
 
+import { Card, Cards } from 'vocs'
 import { GuideDemo } from '../../../../components/guides/GuideDemo'
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
 
-# Recover a user's account
+# Recover a User's Account
 
-Replace a user's lost passkey at the same address, with the two signers they still have.
+Replaces a user's lost passkey at the same address, with the two signers they still have.
 
-When a user of your consumer app loses the phone that holds their passkey, you replace the passkey instead of moving their funds to a new account. The steps assume the [self-custodial setup](/docs/accounts/apps/self-custodial-wallets): three signers at weight 1, any two approving. They are the user's passkey, a key your wallet provider manages, and a backup key the user keeps. Without the passkey, the provider's key and the backup approve swapping in a new passkey from the user's new phone. The new passkey and the provider then revoke the lost phone's device key. The balance and [Earn](/docs/earn) positions stay at the same address.
+## Overview
+
+Recovery replaces the passkey a user lost with their phone. Their funds don't move to a new account.
+
+The steps assume the [self-custodial setup](/docs/accounts/apps/self-custodial-wallets). It has three signers at weight 1, and any two approve:
+
+- **Passkey:** The user's passkey, lost with the phone.
+- **Provider Key:** A key your wallet provider manages.
+- **Backup Key:** A second key the user keeps.
+
+The provider's key and the backup approve a new passkey from the user's new phone. The new passkey and the provider then revoke the lost phone's device key. The balance and [Earn](/docs/earn) positions stay at the same address.
 
 <span id="account-recovery-limits" />
 <span id="recommended-recovery-setups" />
@@ -23,22 +34,34 @@ When a user of your consumer app loses the phone that holds their passkey, you r
 
 <ConfigurableAccountsT14 />
 
-Replacing a lost signer needs a configurable account. Tempo can't override an account's signers. Recovery works only if the remaining signers reach the threshold. Check that before the user funds the account, whichever signer is lost:
+## Recovery Requirements
+
+Replacing a lost signer needs a configurable account. Tempo can't override an account's signers, so recovery works only if the remaining signers reach the threshold. Run this check for every signer before the user funds the account.
 
 ```ts [check.ts]
 const total = saved.config.owners.reduce((sum, { weight }) => sum + weight, 0)
 const recoverable = saved.config.owners.every(({ weight }) => total - weight >= saved.config.threshold)
 ```
 
-Tempo stores only a hash of the account's configuration, so your app rebuilds the account from the address and configuration it saved after the last update: `saved.address` and `saved.config` below.
+Tempo stores only a hash of the account's configuration. Your app rebuilds the account from the address and configuration it saved after the last update, `saved.address` and `saved.config` below.
 
-The demo runs the same recovery in this browser with different signers: a device key at weight 2 stands in for the passkey, a private key for the provider's key, and a second private key for the backup. The demo treats the device key as lost, and the replacement approves the revoke alone because of its weight of 2.
+## Recovery Demo
+
+The demo runs the same recovery in this browser, with stand-in signers:
+
+- **Passkey:** A device key at weight 2, which the demo treats as lost.
+- **Provider Key:** A private key.
+- **Backup Key:** A second private key.
+
+The replacement device key has weight 2, so it approves the revoke alone.
 
 <GuideDemo guide="recover" />
 
+## Setup
+
 :::::steps
 
-### Create the replacement signer
+### Create the Replacement Signer
 
 The user creates a new passkey on their new phone. It isn't a signer until the next step adds it. Save its `credential.id` and `credential.publicKey` with the user's record, as at signup.
 
@@ -51,11 +74,18 @@ const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
 
 <span id="sign-in-with-the-remaining-signers" />
 
-### Approve with the remaining signers
+### Approve With the Remaining Signers
 
-Rebuild the account from `saved`, attaching the keys that approve: `providerAccount`, the provider's key wrapped as in [Set up a self-custodial wallet](/docs/accounts/apps/self-custodial-wallets#connect-privy-or-turnkey), and the user's backup. Signers without an attached key, such as the lost passkey at `lostPasskey`, stay addresses that can't sign.
+Rebuild the account from `saved`, and attach the two keys that approve:
 
-`openAccount` passes the saved address, because `address: 'infer'` derives a different one once signers change. The update swaps the lost passkey for the new one at the same weight. Viem signs it with both attached keys, whose weights of 1 each reach the threshold of 2.
+- **`providerAccount`:** The provider's key, wrapped as in [Set up a self-custodial wallet](/docs/accounts/apps/self-custodial-wallets#connect-privy-or-turnkey).
+- **`backup`:** The user's backup key.
+
+A signer without an attached key stays an address that can't sign, such as the lost passkey at `lostPasskey`.
+
+`openAccount` passes the saved address. Once signers change, `address: 'infer'` derives a different one.
+
+The update swaps the lost passkey for the new one at the same weight. Viem signs it with both attached keys, and their weights of 1 each reach the threshold of 2.
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -99,11 +129,17 @@ saved.config = config // [!code hl]
 
 ::::
 
-As with every payment, build the update in your backend and check it before asking the provider to sign ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). If the attached keys can't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices), such as the backup on the user's laptop. Once the update lands, the lost passkey can't approve anything.
+As with every payment, build the update in your backend and check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). Once the update lands, the lost passkey can't approve anything.
 
-### Revoke the lost device's keys
+If the attached keys don't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices), such as the backup on the user's laptop.
 
-The lost phone's device key is an [access key](/docs/accounts/access-keys). It pays from the account within its limits without the signers' approval. A configuration update doesn't revoke it, so revoke it now. `lostDeviceKey` is the address your app saved when it authorized the key. Build from the updated `saved.config`: an account built from the old configuration fails with `multisig configuration commitment mismatch`. On the new phone, the new passkey and the provider approve together, as for any payment.
+### Revoke the Lost Device's Keys
+
+The lost phone's device key is an [access key](/docs/accounts/access-keys), so it still pays within its limits. A configuration update doesn't revoke it. Revoke it now.
+
+The new passkey and the provider approve the revoke together, as for any payment. `lostDeviceKey` is the address your app saved when it authorized the key.
+
+Build from the updated `saved.config`. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
 ```ts [recover.ts]
 await client.accessKey.revokeSync({ // [!code hl]
@@ -119,8 +155,17 @@ If you didn't save the lost key's address, [list the keys the account has author
 
 <span id="recover-funds-sent-on-another-chain" />
 
-## Replace a lost backup key
+## Replace a Lost Backup Key
 
-If the user loses their backup instead, the passkey and the provider replace it the same way: attach `passkey` and `providerAccount` to `openAccount`, and swap the lost backup's address for the new backup's. Have the user confirm the new backup works before relying on it, by signing a test message or approving one small payment with it.
+The passkey and the provider replace a lost backup the same way. Attach `passkey` and `providerAccount` to `openAccount`, and swap the lost backup's address for the new backup's. Have the user sign a test message or approve one small payment with the new backup before relying on it.
 
-If the user loses both the passkey and the backup, the provider's key can't approve alone, and the account stays locked unless it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
+The provider's key can't approve alone. If the user loses both the passkey and the backup, the account stays locked unless it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
+
+## Related
+
+<Cards>
+  <Card title="Set Up a Self-Custodial Wallet With a Provider" description="Use for creating the three-signer account this guide recovers." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Revocation" description="Covers revoking access keys, including when signers change." to="/docs/accounts/access-keys/revocation" />
+  <Card title="Device Keys" description="Covers the keys that sign on each of a user's devices." to="/docs/accounts/authentication/device-keys" />
+  <Card title="Signing Thresholds" description="Covers signer weights and approvers on separate devices." to="/docs/accounts/policies/signing-thresholds" />
+</Cards>
