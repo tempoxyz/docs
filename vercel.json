@@ -2,6 +2,793 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/docs/resources/partners.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners.md",
+      "destination": "/developers/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners.md",
+      "destination": "/developers/assets/md/docs/resources/guides.md",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/privy.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/privy.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/privy.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/privy.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#privy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/dynamic.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/dynamic.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/dynamic.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/dynamic.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/turnkey.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/turnkey.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/turnkey.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/turnkey.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/fireblocks.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/fireblocks.md",
+      "destination": "/developers/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/fireblocks.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/fireblocks.md",
+      "destination": "/developers/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/bridge.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/bridge.md",
+      "destination": "/developers/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/bridge.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/bridge.md",
+      "destination": "/developers/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/alchemy.md",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/alchemy.md",
+      "destination": "/developers/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/alchemy.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/alchemy.md",
+      "destination": "/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/quicknode.md",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/quicknode.md",
+      "destination": "/developers/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/quicknode.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/quicknode.md",
+      "destination": "/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/allium.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/allium.md",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/allium.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/allium.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/goldsky.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/goldsky.md",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/goldsky.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/goldsky.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/trm.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/trm.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/trm.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/trm.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#trm",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/chainalysis.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/chainalysis.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/chainalysis.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/chainalysis.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/elliptic.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/elliptic.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/elliptic.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/elliptic.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/blockaid.md",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/blockaid.md",
+      "destination": "/developers/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/resources/partners/blockaid.md",
+      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/resources/partners/blockaid.md",
+      "destination": "/developers/assets/md/docs/resources/guides/payment-screening.md#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners",
+      "destination": "/developers/docs/resources/guides",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/privy",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/privy",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#privy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/dynamic",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/dynamic",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#dynamic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/turnkey",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/turnkey",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#turnkey",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/fireblocks",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/fireblocks",
+      "destination": "/developers/docs/resources/guides/embedded-wallets#fireblocks",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/bridge",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/bridge",
+      "destination": "/developers/docs/resources/guides/funding-and-payouts#bridge",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/alchemy",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/alchemy",
+      "destination": "/developers/docs/partners/rpc-and-nodes#alchemy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/quicknode",
+      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/quicknode",
+      "destination": "/developers/docs/partners/rpc-and-nodes#quicknode",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/allium",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation#allium",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/allium",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation#allium",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/goldsky",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/goldsky",
+      "destination": "/developers/docs/resources/guides/payment-reconciliation#goldsky",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/trm",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#trm",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/trm",
+      "destination": "/developers/docs/resources/guides/payment-screening#trm",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/chainalysis",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/chainalysis",
+      "destination": "/developers/docs/resources/guides/payment-screening#chainalysis",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/elliptic",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/elliptic",
+      "destination": "/developers/docs/resources/guides/payment-screening#elliptic",
+      "permanent": true
+    },
+    {
+      "source": "/docs/resources/partners/blockaid",
+      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/resources/partners/blockaid",
+      "destination": "/developers/docs/resources/guides/payment-screening#blockaid",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/routes/quotes",
+      "destination": "/developers/docs/api/routes/transfers#quoteroutestransfer",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/assets",
+      "destination": "/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/assets",
+      "destination": "/developers/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/documentation/protocol/:path*",
+      "destination": "/developers/docs/protocol/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/stablecoin-exchange/:path*",
+      "destination": "/developers/docs/guide/stablecoin-dex/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/ai-support",
+      "destination": "/developers/docs/guide/using-tempo-with-ai",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/building-with-ai",
+      "destination": "/developers/docs/guide/using-tempo-with-ai",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide",
+      "destination": "/developers/docs/quickstart/integrate-tempo",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/quickstart",
+      "destination": "/developers/docs/quickstart/integrate-tempo",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/blockspace",
+      "destination": "/developers/docs/protocol/blockspace/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip20",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip20-rewards",
+      "destination": "/developers/docs/protocol/upgrades/t7#deprecate-tip-20-rewards",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip20-rewards/:path*",
+      "destination": "/developers/docs/protocol/upgrades/t7#deprecate-tip-20-rewards",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/issuance/distribute-rewards",
+      "destination": "/developers/docs/protocol/upgrades/t7#deprecate-tip-20-rewards",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/tip403",
+      "destination": "/developers/docs/protocol/tip403/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/learn/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/learn/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/using-tempo-with-ai/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/partners",
+      "destination": "/developers/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/sdk/typescript/prool",
+      "destination": "/developers/docs/sdk/typescript/prool/setup",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/cli/reference",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/quickstart/tip20",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/protocol/exchange/pathUSD",
+      "destination": "/developers/docs/protocol/exchange/quote-tokens#pathusd",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/members",
+      "destination": "/developers/docs/api/team",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/invitations",
+      "destination": "/developers/docs/api/team",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/invite-links",
+      "destination": "/developers/docs/api/team",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/usage",
+      "destination": "/developers/docs/api/billing",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/users",
+      "destination": "/developers/docs/api/organizations",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/typed-client",
+      "destination": "/developers/docs/sdk/typescript/api-client",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/tools",
+      "destination": "/developers/docs/sdk",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/wallet",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/wallet/use-with-agents",
+      "destination": "/developers/docs/wallet/recipes#let-an-agent-pay-for-services",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/wallet/reference",
+      "destination": "/developers/docs/cli/wallet#tempo-wallet-cli-command-reference",
+      "permanent": true
+    },
+    {
+      "source": "/developers/wallet",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/wallet/reference",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/wallet/:path*",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/cli/reference",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/cli/wallet",
+      "destination": "/developers/docs/cli/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/cli/:path*",
+      "destination": "/developers/docs/cli/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/developers/sdk/typescript/prool",
+      "destination": "/developers/docs/sdk/typescript/prool/setup",
+      "permanent": true
+    },
+    {
+      "source": "/developers/guide/use-accounts/fee-sponsorship",
+      "destination": "/developers/docs/guide/payments/sponsor-user-fees",
+      "permanent": true
+    },
+    {
+      "source": "/developers/quickstart/tip20",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/protocol/exchange/pathUSD",
+      "destination": "/developers/docs/protocol/exchange/quote-tokens#pathusd",
+      "permanent": true
+    },
+    {
+      "source": "/developers/protocol/zones/overview",
+      "destination": "/developers/docs/protocol/zones",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/assets",
+      "destination": "/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/assets",
+      "destination": "/developers/docs/partners/stablecoins",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/wallets",
+      "destination": "/docs/partners/wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/wallets",
+      "destination": "/developers/docs/partners/wallets",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/smart-contract-libraries",
+      "destination": "/docs/partners/smart-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/smart-contract-libraries",
+      "destination": "/developers/docs/partners/smart-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/exchanges",
+      "destination": "/docs/partners/exchanges",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/exchanges",
+      "destination": "/developers/docs/partners/exchanges",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/bridges",
+      "destination": "/docs/partners/bridges",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/bridges",
+      "destination": "/developers/docs/partners/bridges",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/orchestration",
+      "destination": "/docs/partners/payments-and-ramps",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/orchestration",
+      "destination": "/developers/docs/partners/payments-and-ramps",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/node-infrastructure",
+      "destination": "/docs/partners/rpc-and-nodes",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/node-infrastructure",
+      "destination": "/developers/docs/partners/rpc-and-nodes",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/data-analytics",
+      "destination": "/docs/partners/data-and-oracles",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/data-analytics",
+      "destination": "/developers/docs/partners/data-and-oracles",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/block-explorers",
+      "destination": "/docs/partners/explorers-and-debugging",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/block-explorers",
+      "destination": "/developers/docs/partners/explorers-and-debugging",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/security-compliance",
+      "destination": "/docs/partners/security-and-compliance",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/security-compliance",
+      "destination": "/developers/docs/partners/security-and-compliance",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem/developer-tools",
+      "destination": "/docs/partners/developer-tools",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem/developer-tools",
+      "destination": "/developers/docs/partners/developer-tools",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ecosystem",
+      "destination": "/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/ecosystem",
+      "destination": "/developers/docs/partners",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/machine-payments/use-cases/:path*",
+      "destination": "/developers/docs/guide/machine-payments",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs.md",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/assets/md/index.md",
+      "permanent": true
+    },
+    {
+      "source": "/docs.md",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/index.md",
+      "permanent": true
+    },
+    {
       "source": "/developers/blog/inside-tempo-zones",
       "destination": "/developers/blog/privacy-with-tempo-zones",
       "permanent": true
@@ -34,6 +821,28 @@
     },
     {
       "source": "/developers",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/docs",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs",
       "has": [
         {
           "type": "host",
@@ -106,7 +915,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/ecosystem",
+      "destination": "https://tempo.xyz/developers/docs/partners",
       "permanent": true
     },
     {
@@ -139,7 +948,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -150,7 +959,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -161,7 +970,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -172,7 +981,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -348,7 +1157,18 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/docs/learn/tempo/receive-policies",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -517,6 +1337,31 @@
       "permanent": false
     },
     {
+      "source": "/developers/docs",
+      "destination": "/developers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build",
+      "destination": "/developers/docs/build",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/tip20-tokens",
+      "destination": "/developers/docs/protocol/tip20/overview",
+      "permanent": true
+    },
+    {
+      "source": "/developers/build/tempo-transactions",
+      "destination": "/developers/docs/protocol/transactions",
+      "permanent": true
+    },
+    {
+      "source": "/developers/performance",
+      "destination": "/developers/docs/protocol/blockspace/overview",
+      "permanent": true
+    },
+    {
       "source": "/accounts",
       "destination": "https://accounts.tempo.xyz",
       "permanent": true
@@ -683,27 +1528,27 @@
     },
     {
       "source": "/wallet",
-      "destination": "/docs/wallet",
+      "destination": "/docs/cli/wallet",
       "permanent": true
     },
     {
       "source": "/wallet/:path*",
-      "destination": "/docs/wallet/:path*",
+      "destination": "/docs/cli/wallet",
       "permanent": true
     },
     {
       "source": "/tools",
-      "destination": "/docs/tools",
+      "destination": "/docs/sdk",
       "permanent": true
     },
     {
       "source": "/tools/:path*",
-      "destination": "/docs/tools/:path*",
+      "destination": "/docs/sdk",
       "permanent": true
     },
     {
       "source": "/ecosystem",
-      "destination": "/docs/ecosystem",
+      "destination": "/docs/partners",
       "permanent": true
     },
     {
@@ -712,13 +1557,8 @@
       "permanent": true
     },
     {
-      "source": "/developers/docs/quickstart/developer-tools",
-      "destination": "/developers/docs/ecosystem",
-      "permanent": true
-    },
-    {
       "source": "/developers/docs/developer-tools",
-      "destination": "/developers/docs/ecosystem",
+      "destination": "/developers/docs/partners",
       "permanent": true
     },
     {
@@ -747,6 +1587,21 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/api/routes/chains",
+      "destination": "/developers/docs/api/conventions#chain-identifiers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/api/routes/providers",
+      "destination": "/developers/docs/api/reference",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/use-accounts/embed-passkeys",
+      "destination": "https://accounts.tempo.xyz/docs/adapters/webauthn",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/guide/use-accounts/add-funds",
       "destination": "/developers/docs/guide/getting-funds",
       "permanent": true
@@ -759,6 +1614,266 @@
     {
       "source": "/developers/docs/guide/use-accounts/batch-transactions",
       "destination": "/developers/docs/guide/tempo-transaction#batch-calls",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/sandbox",
+      "destination": "/developers/docs/accounts/create",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/new-device",
+      "destination": "/developers/docs/accounts/authentication/device-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/admin-keys",
+      "destination": "/developers/docs/accounts/access-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/identity-provider",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/relay",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/p256-keys",
+      "destination": "/developers/docs/accounts/authentication/device-keys",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/email-otp",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/privy",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets#build-with-privy",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/login-services",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/relays",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/add-signers",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/multi-factor",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/rotate-keys",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#rotate-an-approvers-key",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/replace-keys",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/change-email",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/revoke-keys",
+      "destination": "/developers/docs/accounts/access-keys#revoke-an-access-key",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/export",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/recover",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/upgrade",
+      "destination": "/developers/docs/accounts/account-configuration/account-upgrade",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/verify-approvals",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/team-accounts",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#give-a-team-a-budget",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/approval-rules",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/integration",
+      "destination": "/developers/docs/accounts/use-cases",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/agents",
+      "destination": "/developers/docs/accounts/automations/give-an-agent-a-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/backend-automation",
+      "destination": "/developers/docs/accounts/automations/pay-out-from-a-backend",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/security-policies",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/wallet-provider",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/enterprise-sso",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/self-custody",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/automate-backend",
+      "destination": "/developers/docs/accounts/automations/pay-out-from-a-backend",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/spending-account",
+      "destination": "/developers/docs/accounts/automations/pay-from-an-embedded-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/agent-wallet",
+      "destination": "/developers/docs/accounts/automations/give-an-agent-a-wallet",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/company-treasury",
+      "destination": "/developers/docs/accounts/custodians/team-multisig",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation",
+      "destination": "/developers/docs/accounts/account-configuration",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation/signer-rotation",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation/signer-recovery",
+      "destination": "/developers/docs/accounts/account-configuration/configuration-updates#remove-a-signer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/key-rotation/account-upgrade",
+      "destination": "/developers/docs/accounts/account-configuration/account-upgrade",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/create/legacy-accounts",
+      "destination": "/developers/docs/accounts/wallets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/authentication/oidc",
+      "destination": "/developers/docs/accounts/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/guides/users/sign-in-with-your-login",
+      "destination": "/developers/docs/accounts/apps",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/policies/escalation-rules",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/policies/private-policies",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/recovery",
+      "destination": "/developers/docs/accounts/account-configuration",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/approvals",
+      "destination": "/developers/docs/accounts/policies/signing-thresholds",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/team-budgets",
+      "destination": "/developers/docs/accounts/custodians/team-multisig#give-a-team-a-budget",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/private-policies",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/advanced/verified-facts",
+      "destination": "/developers/docs/accounts/policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/integrate",
+      "destination": "/developers/docs/accounts/wallets#connect-a-wallet-to-your-app",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/balances",
+      "destination": "/developers/docs/accounts/fund#check-the-balance",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/examples",
+      "destination": "/developers/docs/guide/payments/send-a-payment/examples#payment-client-setup",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/accounts/providers",
+      "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true
     },
     {
@@ -808,7 +1923,12 @@
     },
     {
       "source": "/developers/learn/tempo/receive-policies",
-      "destination": "/developers/docs/guide/payments/configure-receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/learn/tempo/receive-policies",
+      "destination": "/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -853,7 +1973,7 @@
     },
     {
       "source": "/developer-tools",
-      "destination": "/docs/ecosystem",
+      "destination": "/docs/partners",
       "permanent": true
     },
     {
@@ -893,22 +2013,32 @@
     },
     {
       "source": "/learn/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
       "permanent": true
     },
     {
       "source": "/docs/learn/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
       "permanent": true
     },
     {
       "source": "/docs/guide/using-tempo-with-ai/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
       "permanent": true
     },
     {
       "source": "/build/partners",
-      "destination": "/docs/partners",
+      "destination": "/docs/partners/join",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs.md",
+      "destination": "/developers/index.md",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs.md",
+      "destination": "/developers/assets/md/index.md",
       "permanent": true
     }
   ],
@@ -928,6 +2058,18 @@
     {
       "source": "/RSC/R/developers/:path(.*)",
       "destination": "/RSC/R/:path"
+    },
+    {
+      "source": "/developers/blog/:path*",
+      "destination": "/blog/:path*"
+    },
+    {
+      "source": "/developers/images/:path*",
+      "destination": "/images/:path*"
+    },
+    {
+      "source": "/developers/api/og",
+      "destination": "/api/og"
     },
     {
       "source": "/ingest/static/:path(.*)",

@@ -32,16 +32,16 @@ test('renders authored docs metadata and breadcrumbs into JSON-LD', async ({ req
 
   expect(articles).toHaveLength(1)
   expect(articles[0]).toMatchObject({
-    name: 'How to send a stablecoin payment on Tempo',
-    headline: 'How to send a stablecoin payment on Tempo',
+    name: 'Send payments',
+    headline: 'Send payments',
     description:
-      'Send stablecoin payments between accounts on Tempo. Include optional memos for reconciliation and tracking with TypeScript, Rust, or Solidity.',
+      'Send stablecoins, batch payments, choose how to pay fees, and verify delivery to the recipient.',
   })
   expect(breadcrumbs).toHaveLength(1)
   expect(breadcrumbs[0]?.itemListElement).toEqual(
     expect.arrayContaining([
       expect.objectContaining({ name: 'Tempo Docs' }),
-      expect.objectContaining({ name: 'How to send a stablecoin payment on Tempo' }),
+      expect.objectContaining({ name: 'Send payments' }),
     ]),
   )
 })
@@ -52,10 +52,10 @@ test('keeps audited OpenAPI browser and structured-data titles separate', async 
 
   expect(articles).toHaveLength(1)
   expect(articles[0]).toMatchObject({
-    name: 'Using the Tempo API Console',
-    headline: 'Using the Tempo API Console',
+    name: 'Tempo Console',
+    headline: 'Tempo Console',
     description:
-      'Use Tempo API Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.',
+      'Use Tempo Console to create projects and API keys, switch environments, monitor usage, configure billing, and manage organization access in one place.',
   })
 })
 

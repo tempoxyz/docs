@@ -1,0 +1,92 @@
+---
+title: Device keys
+seoTitle: Pay Without a Prompt Using Device Keys | Tempo Docs
+description: Create a key the customer's phone, computer, or browser can't export, and authorize it once to pay from a Tempo account within a spending limit and expiry.
+interactive: true
+---
+
+import { P256KeyDemo } from '../../../../components/guides/P256KeyDemo'
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+
+# Device keys
+
+A device key lets the customer's phone, computer, or browser pay without asking the customer to approve each payment.
+
+A device key is a P-256 key that the device's own key store creates and never exports. The customer's passkey authorizes it once as an [access key](/docs/accounts/access-keys). Tempo rejects any payment it signs over its spending limit or after it expires. On a server, use a [private key](/docs/accounts/authentication/private-keys) in your KMS or HSM instead.
+
+<span id="what-a-device-key-is" />
+
+## How it works
+
+Each platform keeps device keys in its own key store:
+
+<span id="device-key-stores-by-platform" />
+
+| Platform | Key store |
+| --- | --- |
+| iPhone, iPad, and Mac | Secure Enclave |
+| Android | Android Keystore, backed by StrongBox or other secure hardware where available |
+| Windows | TPM, through the Microsoft Platform Crypto Provider |
+| Browsers | Non-extractable WebCrypto key, kept in IndexedDB |
+
+<span id="what-a-device-key-trusts" />
+
+Your servers and wallet providers never hold the device key. Anyone who unlocks the device can pay with it, up to its [spending limit](/docs/accounts/access-keys/spending-limits) and until it [expires](/docs/accounts/access-keys/expiry). Add a device key as an access key to get that cap. A signer has no spending limit.
+
+<span id="create-the-key-on-the-device" />
+<span id="authorize-it-from-a-signer" />
+<span id="pay-with-it" />
+<span id="how-a-device-key-starts-paying" />
+
+## Create a device key
+
+<P256KeyDemo />
+
+The demo makes the device key its own account on the Tempo Accounts devnet to show signing without a prompt. Reload the page and the key is still there.
+
+In your app, add the key to the customer's account as an access key instead. The device creates the key. The customer's passkey authorizes it for up to 500 OUSD a day for 30 days. The first payment carries that authorization.
+
+On mainnet and testnet today, a device key can be an access key on a single-key account whose one key is the customer's passkey.
+
+<ConfigurableAccountsT14 />
+
+This example uses a configurable account with the passkey as its signer, so `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer):
+
+::::code-group
+
+```ts [device-key.ts]
+import { parseUnits } from 'viem'
+import { Account, Expiry, WebCryptoP256 } from 'viem/tempo'
+import { client } from './client'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+// Non-extractable. Save keyPair in IndexedDB so it survives a reload.
+const keyPair = await WebCryptoP256.createKeyPair() // [!code hl]
+const deviceKey = Account.fromWebCryptoP256(keyPair, { access: account }) // [!code hl]
+
+// approved by the customer's passkey
+const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl]
+  accessKey: deviceKey, // [!code hl]
+  account, // [!code hl]
+  expiry: Expiry.days(30), // [!code hl]
+  limits: [{ token: stablecoin, limit: parseUnits('500', 6), period: 86_400 }], // [!code hl]
+}) // [!code hl]
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+Pass `keyAuthorization` with the device key's first payment, signed by `deviceKey`, as in [Access keys](/docs/accounts/access-keys#authorize-an-access-key). Later payments need only `deviceKey`.
+
+<span id="device-key-limits" />
+
+## Limits
+
+- Each device needs its own key, authorized by the customer's passkey.
+- Clearing site data deletes a browser key. Authorize a new one the same way.
+- If a device is lost, [revoke its key](/docs/accounts/access-keys/revocation#revoke-an-access-key). The account's signers don't change.

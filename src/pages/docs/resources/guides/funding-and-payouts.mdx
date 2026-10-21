@@ -1,0 +1,61 @@
+---
+title: "Funding and payout infrastructure"
+seoTitle: "Funding and Payout Infrastructure for Tempo | Tempo Docs"
+description: "Connect bank deposits and payouts to Tempo through supported routes, customer onboarding, Bridge APIs, and payment completion records."
+---
+
+[Guides](/docs/resources/guides) / [Wallets and funding](/docs/resources/guides#choose-wallets-and-funding) / Funding and payouts
+
+# Funding and payout infrastructure
+
+Start with one route: the sender's currency and bank rail, the asset moving on Tempo, and the recipient's delivery method. Confirm the whole route before selecting an API or promising a delivery time.
+
+<span id="define-route" />
+
+## Confirm the payment route
+
+Record customer type, sender and recipient countries, currencies, payment direction, and minimum amounts. Bridge's [route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes) lists supported combinations. Its Tempo guide includes OUSD funding and payout examples; match the exact asset and contract against the [stablecoin registry](/docs/partners/stablecoins).
+
+<span id="select-flow" />
+<span id="bridge" />
+
+## Connect funding and payouts with Bridge
+
+Bridge's [Tempo integration](https://apidocs.bridge.xyz/get-started/guides/move-money/tempo-integration-guide) manages the network connection through its APIs. Choose the component for the movement your application needs:
+
+| Payment task | Bridge component |
+| --- | --- |
+| Receive recurring bank deposits as a supported stablecoin on Tempo | Virtual account with reusable deposit instructions. |
+| Initiate a supported movement between funding and payout endpoints | Transfer. |
+| Convert incoming stablecoin deposits to a configured destination | Liquidation address. |
+| Hold a balance between movements | Custodial wallet. |
+
+Bridge's wallet documentation specifies whole-cent processing. Check its rounding rules before choosing that path for [microtransactions](/docs/resources/guides/microtransactions).
+
+<span id="access-requirements" />
+
+## Prepare customers and test the flow
+
+:::::steps
+
+### Obtain developer and customer access
+
+Follow [Bridge account setup](https://apidocs.bridge.xyz/get-started/introduction/quick-start/get-set-up-with-bridge). Customers need applicable identity or business verification, terms acceptance, and rail endorsements. Production custodial wallets require [fund-flow review and approval](https://apidocs.bridge.xyz/platform/wallets/overview).
+
+### Exercise the payment lifecycle in sandbox
+
+Use the [sandbox](https://apidocs.bridge.xyz/get-started/introduction/quick-start/setting-up-sandbox) for resource creation, webhooks, retries, and reconciliation. It simulates bank and blockchain activity; it does not send real payouts or blockchain testnet transfers. Keep its credentials and resource IDs separate from production.
+
+### Validate the enabled production route
+
+Run controlled production tests under the provider's instructions. Check the actual asset, fees, rounding, recipient amount, and return handling. Resolve an uncertain existing transfer before submitting another.
+
+:::::
+
+<span id="delivery-and-records" />
+
+## Record when the recipient is paid
+
+Link the business payment ID to the customer, provider transfer ID, asset, amount, fees, and transaction references. Follow [Bridge transfer states](https://apidocs.bridge.xyz/platform/orchestration/transfers/transfer-states) and keep submitted, processed, and returned outcomes distinct.
+
+Near-instant Tempo settlement describes the onchain leg. Bank delivery also depends on provider processing, the selected rail, and the recipient bank. For direct token delivery, [verify the delivered transfer](/docs/guide/payments/accept-a-payment); for bank payouts, retain provider completion evidence. Use [payment reconciliation](/docs/resources/guides/payment-reconciliation) to connect both to finance records.

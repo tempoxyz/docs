@@ -1,0 +1,91 @@
+---
+title: HTTP 402 Payment Required
+seoTitle: HTTP 402 Payment Required for Machine Payments | Tempo Docs
+description: Understand how HTTP 402 payment challenges work, choose an MPP payment flow, and handle authorization, retries, and receipts.
+---
+
+[Guides](/docs/resources/guides) / [Machine payment models](/docs/resources/guides#machine-payment-models) / HTTP 402 Payment Required
+
+# HTTP 402 Payment Required
+
+HTTP `402 Payment Required` is a status code that payment protocols use to request payment for a resource. The HTTP standard reserves the code without defining a payment flow. On Tempo, use [Machine Payments Protocol integrations](/docs/guide/machine-payments) to let applications and agents pay for APIs, datasets, or other digital resources inside the request flow.
+
+## What HTTP 402 specifies
+
+The HTTP standard [reserves `402` for future use](https://www.rfc-editor.org/rfc/rfc9110.html#name-402-payment-required). The status code alone does not define a price, accepted asset, payment destination, proof format, or settlement rule. A server and client need a compatible payment protocol to exchange those details.
+
+The [Machine Payments Protocol](https://mpp.dev/) (MPP) supplies a challenge, credential, and receipt flow. Payment methods define the authorization and settlement rules. An endpoint's advertised methods determine what it accepts; support for one method does not mean that every MPP endpoint accepts the same asset or network.
+
+## Follow an MPP payment request
+
+| Stage | Client or server action |
+| --- | --- |
+| Request a resource | The application or agent sends its HTTP request. |
+| Receive a challenge | The server returns `402` with payment terms in `WWW-Authenticate: Payment`. |
+| Authorize payment | The client checks the terms against its budget and permissions, then creates a credential for a supported method. |
+| Retry with a credential | The client supplies payment authorization in `Authorization: Payment` by default, or the credential header selected by the challenge. |
+| Verify and respond | The server verifies the credential according to the payment method and returns the resource with a `Payment-Receipt`. |
+
+The [Payment authentication draft](https://paymentauth.org/draft-httpauth-payment-01.html#name-credentials) lets a challenge select `Payment-Authorization` instead of the default `Authorization` header. Keep payment credentials separate from any application authentication the endpoint requires.
+
+On Tempo, a credential can carry a signed transaction, a transaction reference, or a payment-channel voucher, depending on the intent. A voucher and an onchain transfer are different evidence. Follow the [MPP request flow](/docs/guide/machine-payments) and the selected method's verification rules.
+
+Payment handling also remains separate from application identity and authorization. A valid payment does not automatically authorize access to a particular customer's data.
+
+## Choose a charge or a session
+
+Use [one-time payments](/docs/guide/machine-payments/one-time-payments) when each purchase has a distinct amount and delivery, such as a single dataset. The server verifies payment for that request before returning the resource.
+
+Use [pay-as-you-go sessions](/docs/guide/machine-payments/pay-as-you-go) for repeated usage against a funded channel. The payer signs cumulative offchain vouchers, and the recipient can settle authorized usage onchain. A session can require top-ups and periodic settlement; it is not limited to two onchain transactions over its lifetime.
+
+Use [streamed payments](/docs/guide/machine-payments/streamed-payments) when usage and delivery happen during a stream. The service meters billable units and checks the authorized voucher amount as it delivers them. Renewing a voucher increases authorized usage; adding funds to a channel is a separate operation.
+
+For fixed recurring charges, use the [subscription billing guide](/docs/resources/guides/subscriptions-on-tempo). Access keys constrain spending, while the application schedules charges and manages subscriptions.
+
+## Bound what an agent can purchase
+
+Define the acceptable service, amount, asset, and network before allowing a client to answer payment challenges automatically. Use separate application budgets for a request or task and [access-key controls](/docs/accounts/access-keys) for the account authority delegated to the agent.
+
+An access key can limit token spending, permitted calls, and expiry. Missing bounds remove those checks. A spending limit alone does not restrict every destination or service, and scopes check the calls the key signs directly. Read the [scope limits](/docs/accounts/access-keys/scopes#scope-limits) before allowing a contract.
+
+For sessions, also bound the amount deposited into channels and monitor outstanding channel funds. Authorized usage, channel deposits, settled funds, and the account's available balance are separate quantities.
+
+## Handle payment retries and service delivery
+
+Give each billable operation an application record. Preserve its request identifier, payment evidence, delivered result, and refund or recovery status. If the server receives a retry, determine whether it belongs to an existing operation before treating it as a new purchase.
+
+Do not send another payment solely because a request timed out. Inspect the existing request and payment state first. For direct onchain payments, use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify the network, token, intended recipient, amount, and delivered transfer. A transaction hash or successful call alone is insufficient, including when a receive policy holds the funds.
+
+An MPP receipt acknowledges payment handling. Your application must still track whether it delivered the purchased resource, how the customer can retrieve an existing result, and how failed delivery is resolved.
+
+## Test a payment-gated endpoint
+
+:::::steps
+
+### Configure the server's payment terms
+
+Follow the [MPP server guide](/docs/guide/machine-payments/server) to set the server secret, recipient, supported method, currency, and network. Choose which requests or units are billable.
+
+### Fund a compatible client
+
+Follow the [MPP client guide](/docs/guide/machine-payments/client). Match the client's network and asset to the server's challenge. Testnet faucet tokens cannot pay a mainnet challenge.
+
+### Exercise the complete request flow
+
+Check the unpaid challenge, successful payment, receipt, and delivered resource. Exercise repeated requests, insufficient funds, exceeded budgets, and interrupted responses before enabling unattended purchases.
+
+:::::
+
+## HTTP 402 questions
+
+### Does every browser or agent automatically pay a 402 response?
+
+No. The client needs a compatible payment method, a funded account, and authority to spend. An ordinary HTTP client can receive the response without acting on it.
+
+### Does HTTP 402 require stablecoins?
+
+No. The status code does not select a payment rail. MPP is extensible to different methods; a Tempo payment method uses the documented Tempo account, asset, and settlement flow.
+
+### Is every service unit a separate onchain transaction?
+
+Not with payment sessions. Signed vouchers account for cumulative usage between onchain settlements. Retain usage and voucher records alongside settlement records. See [microtransaction billing](/docs/resources/guides/microtransactions).

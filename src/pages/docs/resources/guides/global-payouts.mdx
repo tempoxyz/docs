@@ -1,0 +1,91 @@
+---
+title: "Plan global payouts"
+seoTitle: "Global Stablecoin Payouts: Integration and Delivery | Tempo Docs"
+description: "Design contractor, merchant, and partner payouts around recipient access, complete costs, verified delivery, and reconciliation."
+---
+
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Plan global payouts
+
+# Plan global payouts
+
+Global stablecoin payouts use onchain transfers to pay contractors, merchants, or partners across countries. Recipients can receive a supported stablecoin directly or local currency through a payout provider. Tempo provides near-instant onchain settlement; funding, conversion, provider checks, and bank delivery have separate timing and completion signals.
+
+Choose the recipient's required outcome, then use [Send payments](/docs/guide/payments/send-a-payment) for direct Tempo transfers or [Routes](/docs/routes) for supported cross-network flows.
+
+## Define recipient access and delivery
+
+A stablecoin payout needs a supported token and network, a verified receiving account, and a practical way for the recipient to use the funds. A local-currency payout also needs the provider's country coverage, beneficiary requirements, conversion quote, limits, and delivery confirmation.
+
+For an illustrative $1,000 contractor payout in Brazil, compare two actual flows: a stablecoin delivered to a wallet and BRL delivered to a supported local account. The first can leave conversion to the contractor; the second includes it in the provider's service. Compare the usable recipient amount and complete delivery time for each.
+
+Do not infer asset support from a wallet's address format or country coverage from a provider's general presence. Verify deposits and withdrawals separately. For Routes, read the [supported route directory](/docs/routes/networks), then quote the exact asset pair, direction, funding method, and amount.
+
+## Compare complete payout costs
+
+Tempo's sub-cent network fees cover standard stablecoin transfers. The complete flow can also include funding, custody, conversion spreads, provider charges, local delivery, liquidity, and operational work.
+
+Use comparable quotes for the same funding method, sender amount, recipient currency, and delivery method. Record quote expiry and whether fees are deducted from the recipient amount or charged separately. An empty separate-fee list does not establish a free route, and a quote does not reserve liquidity. See [Routes quotes](/docs/routes/quotes).
+
+## Choose the integration responsibilities
+
+| Model | Responsibilities to assign |
+| --- | --- |
+| Provider-led | Confirm which funding, custody, conversion, screening, payout, and reporting services the provider actually supplies. |
+| Direct onchain | Operate account access, signing, fees, transfer submission, monitoring, and reconciliation. Arrange any fiat legs separately. |
+| Hybrid | Define the handoff from your onchain account to the provider's conversion and local delivery service. |
+
+For a provider-led evaluation, begin with [payments and ramps](/docs/partners/payments-and-ramps). A listing is a starting point for integration research; verify access and route availability for your account.
+
+## Pilot a recurring payout flow
+
+:::::steps
+
+### Establish the baseline
+
+Pick one recurring corridor and a small recipient group. Record current cost, usable recipient amount, delivery time, exceptions, and reconciliation effort.
+
+### Validate recipient preferences
+
+Confirm whether each recipient wants a stablecoin balance or local currency. Verify destination instructions, supported asset and network, required references, and access to funds.
+
+### Execute and observe
+
+Fund principal and fees, apply approval controls, and submit. Record the existing transaction and provider identifiers before investigating an unresolved request or attempting a retry.
+
+### Reconcile the outcome
+
+Verify every delivered transfer. For fiat payouts, preserve local delivery evidence too. Compare the complete result with the baseline before expanding to more recipients or countries.
+
+:::::
+
+## Keep payout states distinct
+
+A request accepted by an API, a submitted transaction, finalized onchain delivery, and credited bank funds are different states. Model them separately in your payment record. A finalized source transfer does not prove cross-network or bank delivery.
+
+Save the network, transaction hash, and transfer log index for each onchain payout. Use an opaque [payment reference](/docs/guide/payments/transfer-memos) to link that evidence to the offchain obligation. Keep personal data off public ledgers. For Routes, follow [delivery and refund status](/docs/routes/delivery).
+
+Virtual deposit addresses attribute incoming funds to a shared account. They do not automatically reconcile outgoing payouts. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) and [batch payouts](/docs/resources/guides/batch-payments) for the operating model.
+
+## Match the payout flow to its use case
+
+Marketplace payouts need seller eligibility, release rules, and traceable order or payout references. Contractor payouts need an approved compensation record and recipient preferences. Affiliate payouts need accurate payee data and a clear policy for thresholds and failed delivery.
+
+For urgent or humanitarian payouts, verify connectivity, recipient access, and an actual way to use the money. Near-instant onchain settlement alone does not establish access to local currency or goods.
+
+## Global payout questions
+
+### Does the business have to hold stablecoins?
+
+A provider may accept fiat and handle the stablecoin leg. Confirm who owns and controls funds at each stage, the custody model, and the records supplied.
+
+### Do recipients need to manage blockchain mechanics?
+
+A provider or embedded wallet can handle some mechanics in its interface. Confirm the actual recipient experience, supported asset, withdrawal methods, and support process rather than assuming those features.
+
+### How does local currency conversion work?
+
+A supported off-ramp or payout provider supplies conversion and local delivery. Rates, eligibility, limits, fees, and delivery times depend on the specific route.
+
+### Do stablecoins remove country or identity requirements?
+
+No. Record which party handles sender and recipient checks, permitted uses, token policies, and any required reporting for each route.

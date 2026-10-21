@@ -1,0 +1,82 @@
+---
+title: Reconcile payments
+seoTitle: Stablecoin Payment Reconciliation and ERP Integration | Tempo Docs
+description: Match confirmed stablecoin transfers to invoices, prevent duplicate credits, and choose Tempo API, Goldsky pipelines, or Allium reports for reconciliation.
+---
+
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Reconcile payments
+
+<span id="plan-payment-reconciliation" />
+
+# Reconcile payments
+
+Match confirmed transfers to invoices and payables, then post the result to your finance system. Use the Tempo API for application activity, Goldsky to stream records into a database, or Allium for SQL reports. None of these supplies your invoice-to-ledger mapping.
+
+<span id="assign-a-role-to-each-finance-system" />
+<span id="define-the-records-before-moving-funds" />
+<span id="how-does-stablecoin-reconciliation-differ-from-bank-reconciliation" />
+<span id="do-stablecoins-replace-treasury-or-erp-systems" />
+
+## Store the matching records
+
+| Record | Required fields |
+| --- | --- |
+| Invoice or payable | Business ID, legal entity, expected token and amount, authorized recipient. |
+| Payment instructions | Network, token contract, recipient, and payment reference. |
+| Settlement evidence | Network, token contract, transaction hash, transfer log index, delivered amount, and status. |
+| Accounting result | Amount applied, remaining balance, fees, ERP record ID, and exceptions. |
+
+Encode a short, opaque ID in the [32-byte transfer memo](/docs/guide/payments/transfer-memos). Keep customer details and invoice contents offchain. A transaction can contain several transfers, so its hash alone is not a unique payment identifier.
+
+<span id="apply-incoming-payments-to-receivables" />
+<span id="connect-events-to-finance-entries" />
+
+## Verify and apply each transfer once
+
+:::::steps
+
+### Verify the candidate payment
+
+<span id="can-a-successful-transaction-still-leave-an-invoice-unpaid" />
+
+Follow [Receive payments](/docs/guide/payments/accept-a-payment#reconcile-payments-with-memos) to verify the network, token contract, recipient, amount, and successful delivery. A memo match or successful transaction alone is insufficient; a receive policy can hold funds instead of crediting the recipient.
+
+### Save the transfer and invoice update together
+
+Use the network, transaction hash, and transfer log index as the unique event key. Apply the invoice update and save that key atomically so replayed events cannot credit the invoice twice. Route partial payments and unsupported assets to explicit matching rules or review.
+
+### Recover missed activity
+
+Keep an ingestion checkpoint and replay historical records after an interruption. For direct application access, use [account activity](/docs/api/activities), [transfers](/docs/api/transfers), and [API pagination](/docs/api/pagination).
+
+:::::
+
+<span id="goldsky" />
+
+## Stream transfers into PostgreSQL with Goldsky
+
+Choose Goldsky when your application needs transformed chain records delivered to a database or queue. Its [Tempo reconciliation example](https://docs.goldsky.com/solutions/real-time-reconciliation) decodes `TransferWithMemo` events and writes them to PostgreSQL.
+
+Follow the [Turbo quickstart](https://docs.goldsky.com/turbo-pipelines/quickstart) to create a project and install the Turbo CLI extension. Store the PostgreSQL connection string as a Goldsky secret. Select the Tempo dataset and token contract, supply the event ABI, and configure the transformation and destination from the reconciliation example.
+
+Set a historical start that covers the invoices you need to reconcile: the example's `start_at: latest` processes new activity without backfilling earlier payments. Join decoded memos to your invoice records, then apply the delivery and duplicate checks above. Monitor ingestion progress and destination writes.
+
+<span id="allium" />
+
+## Run reconciliation reports with Allium
+
+Choose Allium for SQL investigation and repeatable reports over indexed Tempo records. Check the [Tempo catalog](https://docs.allium.so/historical-data/supported-blockchains/evm/tempo) for dataset access, asset coverage, and freshness before selecting a reporting period.
+
+Query [stablecoin transfers](https://docs.allium.so/historical-data/supported-blockchains/evm/tempo/stablecoins/transfers) by token contract and address; a transaction's `value` is not its stablecoin amount. Preserve precision with the schema's string amount fields, and keep USD valuations separate from token quantities.
+
+To automate a saved query, follow the [Explorer API workflow](https://docs.allium.so/api/explorer/query-workflow): submit the saved query ID, retain its `run_id`, poll that run, and retrieve completed results. Distinguish a failed or incomplete run from zero rows. Report the query's coverage limits alongside totals.
+
+<span id="close-the-loop-on-payables" />
+<span id="make-exceptions-visible" />
+<span id="keep-settlement-evidence-and-accounting-outcomes-separate" />
+<span id="reconciliation-questions" />
+<span id="can-an-existing-erp-or-tms-handle-the-activity" />
+
+## Close invoices and investigate differences
+
+Compare expected payments, verified transfers, and posted ERP records. Track fees separately from principal and distinguish internal transfers from revenue. Keep unmatched references, partial payments, held receipts, and refunds visible. For fiat payouts, retain the provider's completion evidence too; an onchain transfer does not prove bank delivery.

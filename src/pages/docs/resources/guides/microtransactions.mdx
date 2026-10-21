@@ -1,0 +1,90 @@
+---
+title: Microtransactions and metered billing
+seoTitle: Stablecoin Microtransactions and Metered Billing | Tempo Docs
+description: Choose direct charges, payment sessions, or recurring billing for small purchases, then meter usage and reconcile delivery on Tempo.
+---
+
+[Guides](/docs/resources/guides) / [Machine payment models](/docs/resources/guides#machine-payment-models) / Microtransactions and metered billing
+
+# Microtransactions and metered billing
+
+Microtransactions are small payments for individual resources or units of service, such as an API result, article, or minute of usage. On Tempo, collect them as direct charges, payment sessions, or aggregated recurring bills. Define the purchased unit and compare delivery and collection costs before setting the price.
+
+## Choose how to collect small charges
+
+| Billing pattern | Use it for | Records to maintain |
+| --- | --- | --- |
+| Direct payment | A distinct purchase with a defined price and result. | Purchase, verified delivered transfer, and customer entitlement. |
+| Payment session | Repeated requests or streaming usage against a funded channel. | Billable units, cumulative vouchers, channel deposits, and settlements. |
+| Recurring payment | A fixed charge on an application billing schedule. | Subscription, billing period, authorization, charge, and service entitlement. |
+
+Tempo's [stablecoin fee system](/docs/resources/guides/stablecoin-fees) supports sub-cent network fees for standard transfers. Network fees do not include acquiring the asset, custody, currency conversion, delivery of the service, or customer support. Compare the complete costs of individual charges, sessions, and aggregated invoices before setting a price.
+
+## Define the billable unit
+
+For an API, decide whether you charge for a request received, a successful result, compute consumed, or another measurable unit. For content, define the purchased entitlement: a specific article, a playback period, or repeat access to an existing purchase.
+
+Record the price, asset, network, quantity, and delivery rule before requesting payment. Version pricing so an interrupted request can be resolved against the terms the customer accepted. An illustrative per-request price is an application decision, not a Tempo network rate.
+
+For agent purchases, [HTTP 402 and MPP](/docs/resources/guides/402-payment-required) let a service communicate payment requirements inside an HTTP request. The application still decides which usage is billable.
+
+## Collect a direct purchase
+
+Use [one-time MPP payments](/docs/guide/machine-payments/one-time-payments) for payment-gated APIs, or the [receiving guide](/docs/guide/payments/accept-a-payment) for a direct token transfer.
+
+Before fulfilling a direct payment, verify its network, token contract, recipient, amount, and successful delivered transfer. Save the transfer's network, transaction hash, and log index so it credits the purchase once. A matching memo identifies a candidate business record; it does not prove delivery.
+
+When the customer requests the same purchased article or result again, return the existing entitlement according to your product terms. Do not charge a second time because a response was interrupted or a user refreshed a page.
+
+## Meter usage through a payment session
+
+[Pay-as-you-go sessions](/docs/guide/machine-payments/pay-as-you-go) account for usage through signed cumulative vouchers against a funded channel. The service verifies the authorized amount before delivering additional usage and can settle vouchers onchain.
+
+For streaming content, follow the [streamed payments guide](/docs/guide/machine-payments/streamed-payments). Keep these states distinct:
+
+- **Usage delivered:** the units the application has actually supplied.
+- **Usage authorized:** the amount covered by the current valid voucher.
+- **Channel funding:** the tokens deposited into the channel.
+- **Funds settled:** the amount collected onchain.
+
+Request another voucher when more usage needs authorization. Add channel funds when the deposit is insufficient. Closing and settlement follow the channel's rules, including the handling of unused funds. Sessions can need several top-ups or settlements; there is no fixed two-transaction limit for every session.
+
+## Constrain delegated spending
+
+[Access keys](/docs/accounts/access-keys) let a device, backend, or agent sign within defined spending limits, scopes, and expiry. A [spending limit](/docs/accounts/access-keys/spending-limits) caps the TIP-20 spending counted by the keychain; it does not measure API usage or schedule invoices. Transfers that use an existing allowance and assets other than TIP-20 tokens fall outside that limit, so review existing approvals as well as the key's bounds.
+
+Set scopes for the contracts and functions the integration needs. Add recipient restrictions where the supported function allows them. Scopes check direct calls, so permit only contracts you trust. Fees the account pays consume its access-key limit; [fee sponsorship](/docs/guide/payments/sponsor-user-fees) moves that network expense to a separate fee payer.
+
+Access keys work on mainnet and testnet with single-key accounts. Configurable-account access keys remain on the Tempo Accounts devnet until [T14](/docs/protocol/upgrades/t14). Follow the current [account availability guidance](/docs/accounts/access-keys) when choosing the account model.
+
+## Operate a metered billing service
+
+:::::steps
+
+### Record usage and delivery together
+
+Assign a stable identifier to each billable operation. Preserve the accepted price, measured units, delivered result, and associated payment or voucher. Define how failed and repeated requests affect the charge.
+
+### Reconcile collection with consumption
+
+For direct payments, reconcile verified transfers with purchases. For sessions, reconcile usage and vouchers with channel funding and onchain settlements. Track unresolved differences explicitly.
+
+### Exercise billing exceptions
+
+Test insufficient funds, exceeded limits, revoked keys, interrupted streams, duplicate requests, and failed delivery. Verify that a retry does not duplicate usage or payment, and that customers can recover an already purchased result.
+
+:::::
+
+## Microtransaction questions
+
+### How small can a payment be on Tempo?
+
+The usable minimum depends on token precision, network fees, funding costs, and the service being purchased. Sessions can aggregate small usage charges between onchain settlements; they do not make collection costless.
+
+### Do customers need a standalone wallet application?
+
+A stablecoin payment needs an account and a way to authorize spending. A wallet provider can embed that experience in your product. Define funding, key management, recovery, and purchase support as part of the integration.
+
+### Can the same infrastructure support subscriptions?
+
+Yes. Access keys support periodic spending limits, while your application schedules and reconciles charges. A renewed spending limit does not add funds or extend a key's expiry. See [subscription billing](/docs/resources/guides/subscriptions-on-tempo).

@@ -1,0 +1,90 @@
+---
+title: Blockchain payment workflows
+seoTitle: Blockchain Payments and Stablecoin Integration Workflows | Tempo Docs
+description: Map funding, signing, onchain delivery, and reconciliation responsibilities before integrating a stablecoin payment workflow on Tempo.
+---
+
+[Guides](/docs/resources/guides) / [Payment infrastructure](/docs/resources/guides#payment-infrastructure) / Blockchain payment workflows
+
+# Blockchain payment workflows
+
+A blockchain payment uses an onchain asset transfer as part of a payment workflow. The network records the transfer; your application and providers supply funding, signing, customer records, and any local-currency payout. Start with the asset and account your recipient needs, then map the components that deliver it.
+
+## Define the recipient outcome
+
+A supported token in a wallet, a provider account balance, and local currency in a bank account are different results. Specify the network, exact token contract, recipient account, and usable amount before selecting infrastructure.
+
+Stablecoins are tokens designed to track a reference value, often the U.S. dollar. That design can help denominate payments, but does not remove issuer, redemption, custody, or conversion exposure. Verify the exact token representation and supported network; similar tickers do not establish compatibility. Use the [stablecoin registry](/docs/partners/stablecoins) when choosing an asset on Tempo.
+
+## Map the payment lifecycle
+
+| Stage | Integration responsibility |
+| --- | --- |
+| Funding | Make the supported payment asset and network fee funding available. |
+| Authorization | Apply business approvals and the account's signing permissions. |
+| Submission | Save the intended payment and transaction identifier before handling retries. |
+| Onchain delivery | Verify the successful transaction and expected delivered token transfer. |
+| Additional payout | Confirm any provider credit, currency conversion, or bank delivery separately. |
+| Reconciliation | Match the transfer and delivery records to the business operation once. |
+
+A transaction hash identifies a transaction. It does not alone prove that the call succeeded, the recipient received the expected token, or a bank payout completed.
+
+## Implement payment delivery checks
+
+:::::steps
+
+### Validate the payment instruction
+
+Record the network, token contract, recipient, amount in base units, and business reference. Apply your application's approvals and check the available token balance and fee funding. Follow [sending payments](/docs/guide/payments/send-a-payment).
+
+### Submit and preserve the attempt
+
+Store the transaction identifier against the payment record. If submission times out, investigate that attempt before creating another. A repeated application request should not create a duplicate payment.
+
+### Verify the delivered transfer
+
+Follow [receiving payments](/docs/guide/payments/accept-a-payment) to check the successful transaction and the expected transfer's network, contract, recipient, and amount. If a receive policy holds funds, the intended receiver has not received the payment even though the call succeeds.
+
+### Credit the business record once
+
+Use the network, transaction hash, and transfer log index as a unique event key. Save the event and update the invoice or customer ledger atomically. Recover missed events after a service reconnects.
+
+:::::
+
+## Assemble the account and operating model
+
+Choose the wallet or custodian, key management, account recovery, and signing policy for the flow. A platform API credential and an account signing key confer different authority. The [account integration guide](/docs/accounts/use-cases) explains the model.
+
+Use [access keys](/docs/accounts/access-keys) when a device, service, or agent needs bounded signing authority. Apply token spending limits, allowed calls, and expiry. Confirm the account type and network availability before deploying an integration.
+
+Assign operational responsibilities for identity checks, screening, monitoring, and exception handling. [Token and receive controls](/docs/resources/guides/compliance-controls) enforce configured technical policies; they do not perform every surrounding workflow.
+
+## Use Tempo's payment capabilities
+
+- **Stablecoin fees:** pay network fees in eligible USD-denominated TIP-20 tokens under the [fee rules](/docs/resources/guides/stablecoin-fees).
+- **Fee sponsorship:** let an application [pay the network fee](/docs/guide/payments/sponsor-user-fees) while a customer authorizes the payment.
+- **Payment references:** use [32-byte memos](/docs/guide/payments/transfer-memos) to connect transfers to separately stored business records.
+- **Transfer controls:** use [TIP-20 roles and TIP-403 policies](/docs/resources/guides/compliance-controls) for issuer-defined token rules. Configure [account receive policies](/docs/accounts/policies/receive-policies) separately to control incoming payments.
+- **Private account activity:** evaluate [Tempo Zones](/docs/zones) and their current availability. A Zone's operator can read its ledger, and deposits and withdrawals leave public records. See [Zone privacy](/docs/zones/privacy).
+
+These capabilities describe the onchain integration. Funding, conversion, and bank-delivery timing still depend on the providers and route used.
+
+## Compare complete payment routes
+
+Include funding, custody, network fees, conversion, recipient delivery, and exception handling in a route comparison. Bank systems include scheduled payments, wires, and around-the-clock services; treating every bank transfer as slow gives an incomplete comparison.
+
+Use [payment rail comparisons](/docs/resources/guides/payment-rails) for evaluation, [corporate treasury operations](/docs/resources/guides/corporate-treasury) for intercompany funding, or [remittance operations](/docs/resources/guides/remittances) for recipient payouts.
+
+## Blockchain payment questions
+
+### Does a customer need to hold stablecoins directly?
+
+A provider can handle stablecoins between fiat collection and delivery where its product supports the route. A direct onchain integration needs supported token balances and signing. Confirm custody and provider responsibilities for the selected model.
+
+### Is blockchain payment data public?
+
+Public-chain activity is generally visible. Do not put customer details into public payment references. For a Zone, assess the operator's access and the public deposit and withdrawal boundary separately.
+
+### Does successful execution prove payment delivery?
+
+No. Verify the expected delivered transfer. A receive policy can redirect a successful inbound call to a guard-held receipt. Additional provider or bank delivery requires its own evidence.

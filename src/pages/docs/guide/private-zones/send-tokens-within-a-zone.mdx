@@ -2,6 +2,7 @@
 title: Send tokens within a zone
 description: Send OUSD inside Zone A with a signed zone transfer and confirm the updated zone balance.
 interactive: true
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones-send-tokens-within-a-zone_title-f5_v02.png
 ---
 
 import * as Demo from '../../../../components/guides/Demo.tsx'
@@ -11,13 +12,11 @@ export const inZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
 
 # Send tokens within a zone
 
-Send `OUSD` test tokens between private balances in **Zone A**, the example Zone on Tempo Testnet. This deployment supports direct token transfers inside the Zone without moving funds back through the public chain.
+Send `OUSD` test tokens between accounts in **Zone A** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). This deployment supports direct token transfers inside the Zone without moving funds back through the public chain.
 
 <a id="sending-pathusd-within-zone-a" />
 
 ## Sending OUSD within Zone A
-
-By the end of this guide you will have sent `25 OUSD` inside `Zone A` and confirmed the updated balance.
 
 <Demo.Container
   name="Send tokens within Zone A"
@@ -38,14 +37,13 @@ It shows the core zone transfer path; use the demo above when you want to watch 
 
 ```ts
 import { parseUnits, type Address } from 'viem'
-import { Actions } from 'viem/tempo'
 
 const transferAmount = parseUnits('25', 6)
 const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address
 
-await zoneAClient.zone.signAuthorizationToken()
+await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
-const { receipt } = await Actions.token.transferSync(zoneAClient, {
+const { receipt } = await zoneAClient.token.transferSync({
   account: rootClient.account,
   amount: transferAmount,
   feeToken: ousd,

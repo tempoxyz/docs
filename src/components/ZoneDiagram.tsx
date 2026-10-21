@@ -11,6 +11,7 @@ import protocolWithdrawal from '../../public/diagrams/zones/protocol-withdrawal.
 import settlement from '../../public/diagrams/zones/settlement.svg?raw'
 import validation from '../../public/diagrams/zones/validation.svg?raw'
 import withdrawal from '../../public/diagrams/zones/withdrawal.svg?raw'
+import { docsZoneDiagram } from '../styles/surfaces.styles'
 
 const diagrams = {
   overview,
@@ -45,7 +46,7 @@ export function ZoneDiagram({
   )
 
   return (
-    <figure className="docs-zone-diagram">
+    <figure className={`docs-zone-diagram ${docsZoneDiagram().className}`}>
       {/* Only checked-in SVG artwork is rendered; no remote or user-provided markup. */}
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: trusted local SVG source */}
       <div dangerouslySetInnerHTML={{ __html: svg }} />

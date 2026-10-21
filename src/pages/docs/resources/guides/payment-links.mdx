@@ -1,0 +1,66 @@
+---
+title: Create payment links
+seoTitle: Create Stablecoin Payment Links and QR Codes | Tempo Docs
+description: Create stablecoin payment links and QR codes, load trusted payment terms, preserve invoice references, and verify delivery before marking a request paid.
+---
+
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Create payment links
+
+# Create payment links
+
+Create a payment request in your application, then share a URL that loads it. Your checkout presents the network, token, recipient, amount, and reference for customer approval. Verify the delivered transfer before marking the request paid. The URL and checkout are application components; Tempo supplies the payment primitives.
+
+## Store a request before sharing its link
+
+Use an opaque request ID in a URL on a domain you control, such as `https://merchant.example/pay/req_2048`. Load the payment terms from your backend. A QR code can encode the same URL; it does not add payment verification or guarantee that a wallet supports the link.
+
+This illustrative application record is not a Tempo API request:
+
+| Field | Store and validate |
+| --- | --- |
+| Request ID | A unique ID connected to one invoice or purchase. |
+| Network | The intended chain ID: `4217` for Tempo mainnet or `42431` for Moderato testnet. |
+| Token | The contract address on that network and its decimals. |
+| Recipient | An approved receiving account or supported customer deposit address. |
+| Amount | A positive integer amount in base units, stored without floating-point conversion. |
+| Reference | An opaque payment ID with a defined memo encoding. |
+| Terms | Expiry, partial-payment rules, and handling for late or excess funds. |
+| State | Open, submitted, paid, needs review, or closed, with associated attempts. |
+
+Resolve assets through the [token registry](/docs/quickstart/tokenlist). A ticker or EVM address format alone does not identify the correct network or token. Keep customer names, invoice contents, and other personal data out of URLs and public memos.
+
+## Load trusted terms before requesting a signature
+
+:::::steps
+
+### Reload and validate the request
+
+Fetch the stored record when the customer opens the link and again before preparing the payment. Check expiry, current state, accepted asset, amount, and approved recipient. Do not accept an edited URL amount or recipient as authoritative. Return the existing receipt for an already paid request.
+
+### Show the complete payment
+
+Display the network, asset, readable amount, destination, and reference. Convert base units to a decimal string using the token's actual decimals. Show who pays network fees and check that the payment account or [fee sponsor](/docs/guide/payments/sponsor-user-fees) has sufficient funds.
+
+### Prepare the customer-approved transfer
+
+Create a durable attempt record before asking the wallet to submit. Follow the maintained [browser payment walkthrough](/docs/guide/payments/send-a-payment/browser), passing the stored amount and recipient. Include the [encoded memo](/docs/guide/payments/transfer-memos#encode-a-payment-reference) when the flow requires a reference; an ordinary `transfer` does not carry it. Test the actual wallet's behavior.
+
+### Preserve the attempt
+
+Store the submitted transaction hash with the request and network. Show a pending state while inspecting its outcome. A timeout or page refresh must not automatically prompt a second payment.
+
+:::::
+
+## Verify delivery before granting access
+
+For a regular receiving account, use the [invoice verifier](/docs/guide/payments/accept-a-payment/examples#verify-an-invoice) to check the successful receipt and delivered transfer against the expected network, token, recipient, amount, and reference. A wallet success screen or matching memo alone is insufficient. A receive policy can hold funds instead of delivering them.
+
+For customer deposit addresses, follow the [deposit verification rules](/docs/guide/payments/virtual-addresses#what-to-verify-in-virtual-address-deposits). Verify the complete two-hop transfer sequence and delivery to the resolved master account. A transfer to a guard is a held receipt, not a delivered payment.
+
+Save the network, transaction hash, and transfer log index as a unique event key. Record that event and update the request or entitlement atomically. Repeated callbacks and page reloads should return the existing outcome. Recover missed events after an interruption.
+
+Expiry closes the application request; it does not prevent someone from sending tokens to the address. Route late payments, unsupported assets, missing references, and underpayments to explicit matching rules or review. Process [refunds](/docs/resources/guides/refunds) as separate outbound payments.
+
+## Test shared links and checkout recovery
+
+Test altered URLs, an expired request, the wrong network, a wallet that omits the memo, repeated clicks, interrupted submission, and a held receipt. Verify that a QR code loads the same trusted request and that a previously paid invoice cannot grant a second credit.

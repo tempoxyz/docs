@@ -37,6 +37,7 @@ exclude = [
   "^https://tempo\\.xyz/developers/api/search$",
   # MPP service roots expose paid API routes rather than browser landing pages.
   "^https://[a-z0-9-]+\\.mpp\\.paywithlocus\\.com/?$",
+  "^https://api\\.auto\\.exchange/?$",
   # Verified app pages that reject automated link-check requests.
   "^https://dashboard\\.pimlico\\.io/?$",
   "^https://docs\\.elliptic\\.co/?$",

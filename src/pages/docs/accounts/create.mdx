@@ -1,0 +1,112 @@
+---
+title: "Create an account"
+seoTitle: "Create a Tempo Account with a Passkey, Device Key, or Private Key | Tempo Docs"
+description: Create a single-key Tempo account with a passkey on testnet, with no API call or transaction, then try configurable accounts with several signers on the Tempo Accounts devnet.
+interactive: true
+ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
+---
+
+import { AccountSandbox } from '../../../components/guides/AccountSandbox'
+import { SingleKeyAccountDemo } from '../../../components/guides/SingleKeyAccountDemo'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
+
+# Create an account
+
+Creating a Tempo account takes no API call and no transaction.
+
+A single-key Tempo account's address comes from the key that approves its payments. Your app can create one as soon as it has a key. The address can receive stablecoins right away.
+
+<span id="create-a-passkey-account" />
+
+## Create a single-key account
+
+On mainnet and testnet today, an account is a [single-key account](/docs/development/single-key-accounts) (EOA): one key, such as a passkey, approves its payments and authorizes its [access keys](/docs/accounts/access-keys). Create one on Moderato testnet from a passkey, a device key, or a private key:
+
+<span id="try-a-passkey-account" />
+
+<SingleKeyAccountDemo />
+
+In code, this creates a passkey account on Moderato testnet and funds it from the testnet faucet:
+
+```ts [passkey-account.ts]
+import { tempoModerato } from 'viem/chains'
+import { Account, createClient, WebAuthnP256 } from 'viem/tempo'
+
+const credential = await WebAuthnP256.createCredential({ label: 'My Tempo account' }) // [!code hl]
+export const account = Account.fromWebAuthnP256(credential) // [!code hl]
+// Save credential.id and credential.publicKey with your user record.
+
+const client = createClient({ chain: tempoModerato })
+await client.faucet.fundSync({ account: account.address }) // test stablecoins
+```
+
+For a device key, use `Account.fromWebCryptoP256(await WebCryptoP256.createKeyPair())`. For a private key, use `Account.fromSecp256k1(privateKey)`.
+
+For mainnet, use the `tempo` chain from `viem/chains` and fund the address with real stablecoins.
+
+A single-key account can't change its key. Losing the key loses the account. Read [Passkeys](/docs/accounts/authentication/passkeys#passkey-limits) before customers fund one.
+
+## Create a configurable account
+
+<ConfigurableAccountsT14 />
+
+A configurable account's signers can change while its address stays the same. Add a backup key, rotate keys, or require several approvals. Pick a first signer below to create one on the devnet.
+
+<AccountSandbox />
+
+<span id="how-account-creation-works" />
+
+<span id="how-configurable-account-creation-works" />
+
+### Configurable account creation
+
+1. You choose the first signer: a passkey, a device key, or a private key. It approves alone: its weight is 1, and so is the account's [threshold](/docs/accounts/policies/signing-thresholds).
+2. Your app computes the address from that signer. The address can receive stablecoins right away. It stays the same when you change signers or add [access keys](/docs/accounts/access-keys).
+3. The account's first transaction, such as a payment, registers it onchain. That transaction pays a network fee in a stablecoin. Fund the address first, or [sponsor the fee](/docs/accounts/fees/fee-sponsorship).
+
+<span id="create-an-account-in-code" />
+<span id="create-an-account-from-a-signing-key" />
+
+### Create a configurable account in code
+
+```ts [account.ts]
+import { generatePrivateKey } from 'viem/accounts'
+import { Account } from 'viem/tempo'
+
+const privateKey = generatePrivateKey() // Keep this secret: it approves the account's transactions.
+const signer = Account.fromSecp256k1(privateKey) // [!code hl]
+export const account = Account.fromConfig({ address: 'infer', owners: [signer] }) // [!code hl]
+
+// Save account.address and account.config with your user record.
+```
+
+`address: 'infer'` tells [`Account.fromConfig`](https://viem.sh/tempo/accounts/account.fromConfig) to compute the address from the signer. Viem calls a signer an owner. You need the saved `account.config` to [add signers](/docs/accounts/account-configuration/configuration-updates#add-a-signer) later. Its `version` is a bigint, so store `AccountConfig.toRpc(account.config)` and read it back with `AccountConfig.fromRpc` ([Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
+
+For a passkey or device key, use [that signer](/docs/accounts/authentication) instead. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account, [upgrade it in place](/docs/accounts/account-configuration/account-upgrade) to keep its address.
+
+## Connect to the devnet
+
+The Accounts examples connect to the Tempo Accounts devnet, a test network that runs configurable accounts. The demos on these pages run against it with no setup.
+
+To build your own app against the devnet, [contact us](https://tempo.xyz/contact) for an RPC key and set it as the `TEMPO_DEVNET_RPC_KEY` environment variable.
+
+<span id="fund-an-account-on-devnet" />
+
+To fund the address, call the devnet faucet, which sends test stablecoins, including pathUSD:
+
+::::code-group
+
+```ts [fund.ts]
+import { account } from './account'
+import { client } from './client'
+
+await client.faucet.fundSync({ account: account.address }) // [!code hl]
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+On Moderato testnet, the [testnet faucet](/docs/accounts/fund#get-test-funds) sends test funds. In production, [onramps and other chains](/docs/accounts/fund) fund the address.

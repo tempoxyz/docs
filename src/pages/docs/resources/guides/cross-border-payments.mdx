@@ -1,0 +1,118 @@
+---
+title: "Plan cross-border payments"
+seoTitle: "Cross-Border Stablecoin Payments: Costs and Delivery | Tempo Docs"
+description: "Verify funding, asset support, conversion, recipient delivery, complete costs, and payment status for a cross-border route."
+---
+
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Plan cross-border payments
+
+# Plan cross-border payments
+
+A cross-border stablecoin payment uses an onchain transfer to move value between parties in different countries. A complete route may also need bank funding, currency conversion, and local payout. Evaluate the amount the recipient can use and the evidence of delivery for every leg.
+
+Choose the recipient outcome first, then use [direct payments](/docs/guide/payments/send-a-payment) or a supported [Routes integration](/docs/routes) for the onchain path. A wallet transfer and a bank deposit are different delivery outcomes.
+
+## Choose the recipient outcome first
+
+For a **stablecoin payout**, the recipient receives a specified token on a specified network. They need an account or wallet that supports that asset and a way to use it. If they later sell it or withdraw to a bank, that is a separate step with its own price and availability.
+
+For a **local-currency payout**, a provider converts or redeems stablecoins and delivers funds through a bank or another supported local method. The provider must support the exact origin, destination, customer type, currency, and amount. A blockchain's availability does not establish local payout coverage.
+
+For recipients who need **cash or mobile money**, start with that requirement. A wallet balance is not a substitute for a supported cash collection point or a credit to the intended mobile money account. Check the recipient's access, identification requirements, and delivery process.
+
+## Verify a cross-border route before funding it
+
+Record these details for each route. Recheck them when the provider, asset, amount, or destination changes.
+
+| Check             | What to establish                                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Origin and sender | Sending country, individual or business eligibility, funding currency, and permitted payment purpose.                        |
+| Funding method    | The account or wallet that supplies funds, required verification, funding instructions, and when funds become usable.        |
+| Asset and network | Exact source and destination networks and token contracts. A token symbol alone is insufficient.                             |
+| Recipient         | Intended beneficiary, wallet or account details, required references, and eligibility to receive.                            |
+| Conversion        | Whether conversion is needed, the quoted rate, quote expiry, and who bears changes in that rate.                             |
+| Delivery          | Bank, wallet, cash, or mobile money endpoint; supported institution; minimum and maximum amounts; and expected availability. |
+| Cost and amount   | Total sender outlay and expected recipient amount, including deductions and separately charged fees.                         |
+| Exceptions        | Evidence of completion, support contact, return or refund process, and handling of delayed payments.                         |
+
+A country appearing on an exchange's website does not prove that the exchange accepts a particular Tempo asset. Check deposit and withdrawal support separately. A service can accept one asset on one network without supporting the same symbol elsewhere.
+
+For applications using Tempo Routes, the current [network and asset directory](/docs/routes/networks) is the starting point. Its documentation distinguishes network listings from available token pairs, directions, funding modes, and account access. Request a quote using the actual payment inputs before relying on a route.
+
+## Compare the complete cost
+
+A network fee pays for the onchain transaction. It does not include every cost of funding and delivering a cross-border payment.
+
+Build a quote comparison around one of two outcomes:
+
+- **Fixed sender budget:** compare the final amount each option delivers in the recipient's required currency and account.
+- **Fixed recipient amount:** compare the total amount the sender must provide for each option to deliver the same result.
+
+Include funding charges, conversion rates and spreads, network fees, provider charges, payout fees, and any known receiving charges. Record the time of each quote and whether the quoted amount is guaranteed through execution. Do not count the same fee twice if it is already deducted from the recipient amount.
+
+The [Routes quote documentation](/docs/routes/quotes) makes this distinction explicit: routed deductions affect the destination amount, while some fees are charged separately. An empty separate-fee list does not establish that a route is free. A quote also does not reserve liquidity.
+
+Moving the same dollar-denominated token between wallets does not require a currency conversion for that leg. Converting from or into local currency can still create FX costs and exposure. Holding a dollar-pegged asset also leaves issuer, redemption, and custody risks to evaluate.
+
+## Track funding, settlement, and delivery separately
+
+Use a payment record that links the business reference to each provider and network identifier. For a supplier payment, that could include the invoice, approved beneficiary, funding reference, onchain transaction, payout ID, quoted amount, and delivery evidence. A donation can use a campaign reference while keeping donor information in private records.
+
+A successful source transaction is not proof that funds reached a destination chain or bank. Tempo's [delivery documentation](/docs/routes/delivery) separates pending, completed, and refund states. Investigate a delayed payment using its existing identifier before resending it; an unresolved payment can still complete.
+
+Define the evidence that closes the payment before launching the flow. A wallet payout requires verified delivery of the correct token and amount. A bank payout also needs confirmation from the payout provider or receiving institution. An API acknowledgment that a request was accepted is an earlier stage.
+
+[Payment references](/docs/guide/payments/transfer-memos) can connect a payment to an invoice or internal record. Keep personal information, bank details, and sensitive business data off public ledgers. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) for the operating workflow.
+
+## Match the route to the business workflow
+
+**Supplier and contractor payments** need accurate beneficiary details, approval records, and an agreed delivery currency. Ask whether the recipient wants to retain a stablecoin balance or receive a bank deposit, then compare the full route accordingly.
+
+**Treasury transfers** need clear ownership of balances, access to liquidity, and reconciliation between entities. Stablecoin settlement may change where liquidity is held, but it does not eliminate the need to fund payments. Review [prefunding](/docs/resources/guides/prefunding) and [nostro and vostro accounts](/docs/resources/guides/nostro-vostro-accounts) when comparing operating models.
+
+**Remittances and regional payouts** depend on the recipient's ability to use the funds. Country-specific delivery methods and provider access matter as much as the settlement network. The [Latin America guide](/docs/resources/guides/cross-border-payments-latin-america) shows how to evaluate local delivery through Pix and SPEI without assuming that a local rail establishes a complete cross-border route.
+
+## Implement the onchain payment leg
+
+Tempo is a blockchain built for payments. It provides near-instant onchain settlement and sub-cent fees for standard stablecoin transfers. Its [fee system](/docs/protocol/fees) supports eligible USD-denominated TIP-20 tokens with sufficient Fee AMM liquidity. [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) lets an application handle network fees as part of its payment experience.
+
+Funding, conversion, identity checks, and bank payouts require the appropriate products and providers. Review [payments and ramps](/docs/partners/payments-and-ramps) for provider integrations. Confirm current account access and the specific route before selecting a provider.
+
+Start with one recurring payment flow. Compare it with the existing method using total cost, usable recipient amount, time to delivery, exception rate, and reconciliation effort. Expand when the complete flow works for the intended recipients.
+
+## Cross-border payment questions
+
+<details>
+<summary>How long do cross-border stablecoin payments take?</summary>
+
+Separate the onchain transfer from funding, conversion, and local delivery. Tempo provides near-instant onchain settlement. The time until a recipient can use local currency depends on the providers, payment method, eligibility checks, and banking steps in that route.
+
+</details>
+
+<details>
+<summary>Can I send a stablecoin to any wallet or exchange?</summary>
+
+Only send after confirming that the destination accepts the exact token contract on the exact network. A matching token name, dollar peg, or wallet address format does not establish support. Exchange deposits can also require a reference or memo and their own crediting process.
+
+</details>
+
+<details>
+<summary>Does a confirmed blockchain transfer mean a bank payout is complete?</summary>
+
+No. It confirms an onchain step. A bank payout needs separate evidence that the intended beneficiary received the quoted local-currency amount. Keep the blockchain transaction, provider payment ID, and payout reference connected in your records.
+
+</details>
+
+<details>
+<summary>How should I compare the cost with a bank or money transfer service?</summary>
+
+Compare the same sender funding method, amount, recipient currency, and delivery method. Include funding, network, conversion, payout, and recipient charges. Use current quotes and the amount the recipient can actually use, rather than comparing a network fee with a complete transfer price.
+
+</details>
+
+<details>
+<summary>Do stablecoins remove country restrictions or identity checks?</summary>
+
+No. Sender and recipient eligibility, permitted uses, identity requirements, token policies, and provider access still matter. Confirm the actual route with the service handling each leg before sending funds.
+
+</details>

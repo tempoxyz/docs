@@ -1,8 +1,7 @@
-// biome-ignore-all lint/a11y/noSvgWithoutTitle: The loading SVG is decorative and paired with visible chart context.
-
 'use client'
 
 import { scaleLinear } from '../_lib/chart'
+import * as ui from './TpsTrendChartFrame.recipes'
 import useMeasure from './useMeasure'
 
 // Below this container width the chart reserves only a tiny right gutter and
@@ -23,7 +22,7 @@ export const TPS_CHART_DEFAULT_TICKS = [10_000, 15_000, 20_000, 25_000]
 function formatTpsTick(value: number, yTicks: number[]) {
   const tickStep = yTicks.length >= 2 ? Math.abs(yTicks[1] - yTicks[0]) : 1000
   const precision = tickStep >= 1000 ? 0 : tickStep % 100 === 0 ? 1 : 2
-  const compactValue = (value / 1000).toFixed(precision).replace(/\.?0+$/, '')
+  const compactValue = Number((value / 1000).toFixed(precision))
   return `${compactValue}K`
 }
 
@@ -49,12 +48,7 @@ export function TpsChartGrid({
         <g key={t}>
           <line x1={pad.l} x2={width - pad.r} y1={yAt(t)} y2={yAt(t)} stroke="var(--line)" />
           {showLabels ? (
-            <text
-              x={pad.l - 10}
-              y={yAt(t) + 4}
-              textAnchor="end"
-              className="fill-foreground/35 font-mono text-[11px]"
-            >
+            <text x={pad.l - 10} y={yAt(t) + 4} textAnchor="end" {...ui.text()}>
               {formatTpsTick(t, yTicks)}
             </text>
           ) : null}
@@ -74,9 +68,16 @@ export default function TpsTrendChartFrame({
   const { ref, width } = useMeasure<HTMLDivElement>()
 
   return (
-    <div ref={ref} className="relative w-full" style={{ height }} aria-hidden>
+    <div
+      ref={ref}
+      {...ui.tpsTrendChartFrameLayoutAppearance({
+        value0: `${height}px`,
+        className: ui.tpsTrendChartFrameLayout().className,
+      })}
+      aria-hidden="true"
+    >
       {width > 0 ? (
-        <svg width={width} height={height} className="block">
+        <svg width={width} height={height} {...ui.tpsTrendChartFrameIcon()}>
           <title>Benchmark chart frame</title>
           <TpsChartGrid height={height} showLabels={showLabels} width={width} />
         </svg>

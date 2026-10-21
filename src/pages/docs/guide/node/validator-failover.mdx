@@ -2,6 +2,7 @@
 title: Validator failover
 seoTitle: Validator Failover on Bare Metal and Cloud | Tempo Docs
 description: Recover a Tempo validator from disk, transfer cloud consensus storage to a replacement node, or promote a synced follower.
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-node-validator-failover_title-f5_v02.png
 ---
 
 # Validator failover
@@ -31,7 +32,7 @@ Reuse the validator's signing key, latest complete consensus directory, and regi
 
 Keep execution data on [local NVMe storage](/docs/guide/node/system-requirements) and consensus data on a persistent network-attached volume that you can detach and attach to a replacement host. Use `--consensus.datadir` to select the consensus directory on that volume.
 
-Provision and mount the volume before starting the service. Keep the other flags from your existing validator configuration.
+Provision and mount the volume before starting the service. Keep the other flags from your existing validator configuration. The Bash/Zsh command below assumes an encrypted key: replace `<ENCRYPTION_KEY_CMD>` with the command that retrieves its encryption secret. Omit `--consensus.secret` only for an unencrypted key.
 
 ```bash
 tempo node \
@@ -39,6 +40,7 @@ tempo node \
   --datadir <EXECUTION_DATADIR> \
   --consensus.datadir <CONSENSUS_DATADIR> \
   --consensus.signing-key <PRIVATE_KEY_PATH> \
+  --consensus.secret <(<ENCRYPTION_KEY_CMD>) \
   --consensus.listen-address 0.0.0.0:<REGISTERED_INGRESS_PORT>
 ```
 
@@ -69,6 +71,8 @@ Use the same node version and chain configuration as the old validator.
 ```bash
 sudo systemctl stop tempo-follower
 ```
+
+If the follower is not managed by systemd, send `SIGINT` or `SIGTERM` and wait for the process to exit.
 
 **For a fresh replacement:** restore a recent execution backup or download a minimal snapshot into a new local data directory.
 

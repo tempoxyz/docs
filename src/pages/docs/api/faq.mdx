@@ -1,6 +1,7 @@
 ---
 title: Tempo API FAQ
 description: Answers to common Tempo API questions about hosted services, RPC, authentication, webhooks, asset routes, exchange quotes, and API endpoints.
+ogImage: /og/2026-q4/og_2026-q4_docs_api-faq_title-f5_v02.png
 ---
 
 # Tempo API FAQ
@@ -21,11 +22,11 @@ Most read endpoints work without credentials at the public rate limit. Use [MPP 
 
 ## How do I monitor a stablecoin payment?
 
-Read the [transaction and receipt](/docs/api/transactions) to follow execution, then inspect its [transaction activities](/docs/api/activities#list-transaction-activities) to identify the stablecoin movement. Configure [webhooks](/docs/api/webhooks) for signed callbacks instead of polling, and review delivery history when you need to audit an attempt.
+Read the [transaction and receipt](/docs/api/transactions) to follow execution, then inspect its [transaction activities](/docs/api/activities#gettransactionactivities) to identify the stablecoin movement. Configure [webhooks](/docs/api/webhooks) for signed callbacks instead of polling, and review delivery history when you need to audit an attempt.
 
 ## Does the Tempo Routes API execute a transfer?
 
-No. The [Routes API](/docs/api/routes/quotes) compares live quotes across supported chains and providers, but it does not execute a transfer. Execute the chosen transfer separately.
+No. The [Routes API](/docs/api/routes/transfers) quotes a cross-chain transfer and prepares its source transaction, but it does not submit it. Sign and submit the returned transaction to start the transfer.
 
 ## Does the Tempo Exchange API submit a transaction?
 
@@ -33,4 +34,4 @@ No. The [Exchange API](/docs/api/exchange) creates a priced preview on Tempo's n
 
 ## Where do I manage Tempo API projects and keys?
 
-Use [Tempo API Console](/docs/api/console) to create projects, switch between production and sandbox, issue API keys, monitor usage, and configure billing. Console access is currently invite-only.
+Use [Tempo Console](/docs/api/console) to create projects, switch between production and sandbox, issue API keys, monitor usage, and configure billing. Console access is currently invite-only.

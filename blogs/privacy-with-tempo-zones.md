@@ -3,8 +3,9 @@ title: "Privacy with Tempo Zones"
 excerpt: "How Tempo Zones keep transactions private while connecting to public infrastructure on Tempo Mainnet."
 date: 2026-09-23
 category: technical
-authors: "Liam & Varun"
+authors: "Liam Horne, Varun Srinivasan"
 ogImage: /blog/privacy-with-tempo-zones-thumbnail.png
+shareImage: /og/2026-q4/og_2026-q4_devblog_privacy-with-tempo-zones_linework-000_v02.png
 ---
 
 ## Introduction

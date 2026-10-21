@@ -1,0 +1,53 @@
+---
+title: Expiry
+seoTitle: Access Key Expiry on Tempo | Tempo Docs
+description: Make an access key stop working at a set time, so a forgotten or leaked key ends on its own, and authorize its replacement before then.
+---
+
+# Expiry
+
+An expiry makes an access key stop working at a set time, so a forgotten or leaked key ends on its own.
+
+Expiry is one of an [access key](/docs/accounts/access-keys)'s three bounds, with [spending limits](/docs/accounts/access-keys/spending-limits) and [scopes](/docs/accounts/access-keys/scopes). You set it when you authorize the key, and you can't extend it later.
+
+<span id="access-key-expiry" />
+<span id="how-expiry-works" />
+
+## How it works
+
+Tempo checks the expiry against block time (the current block's timestamp), not your server's clock. Once block time reaches the expiry, Tempo rejects every transaction the key signs with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired). The key's remaining limit reads as zero.
+
+## Set an expiry
+
+Pass `expiry`, a Unix timestamp in seconds, when you [authorize the key](/docs/accounts/access-keys#authorize-an-access-key). A key without `expiry` never expires. The `Expiry` helpers in `viem/tempo` return a timestamp relative to now, such as `Expiry.days(30)` or `Expiry.hours(1)`. See Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize).
+
+Use the shortest window the holder needs:
+
+| Holder | Expiry |
+| --- | --- |
+| A one-off task | Hours |
+| A device | 30 days |
+| A backend | 90 days |
+
+<span id="renew-an-expiring-key" />
+
+## Renew a key
+
+Tempo never authorizes the same key address twice for an account. To renew, authorize a new key before the old one expires. Read the old key's `expiry` with `client.accessKey.getMetadata({ account, accessKey })`. Before that time:
+
+1. Generate a new key where the holder signs.
+2. Have the signers, or an admin key, authorize it with a new expiry.
+3. Switch the holder to the new key.
+4. [Revoke](/docs/accounts/access-keys/revocation) the old key if it hasn't expired yet.
+
+Until the old key expires or is revoked, both keys can spend, each up to its own limit. To keep one budget, authorize the new key with a limit of what the old key has left. [Raise it](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) once the old key is revoked. If the holder can pause, revoke the old key first instead.
+
+<span id="expiry-limits" />
+
+## Limits
+
+- An expiry at or before the current block time reverts with [`ExpiryInPast`](/docs/protocol/transactions/AccountKeychain#error-expiryinpast).
+- Admin keys can't have an expiry.
+- Changing an expired key's limit with `updateLimit` reverts with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired).
+
+Specification: [Account Keychain key expiry](/docs/protocol/transactions/AccountKeychain#key-expiry).

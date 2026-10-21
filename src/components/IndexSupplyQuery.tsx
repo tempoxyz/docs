@@ -3,9 +3,11 @@ import * as React from 'react'
 import { isAddress, isHash } from 'viem'
 import { tempo } from 'viem/chains'
 import type * as z from 'zod/mini'
+import { cx as composeStyles } from 'zyzz'
 import LucideExternalLink from '~icons/lucide/external-link'
 import { Container } from './Container'
 import { Button } from './guides/Demo'
+import * as ui from './IndexSupplyQuery.recipes'
 import { type responseSchema, runIndexSupplyQuery } from './lib/IndexSupply'
 import { extractParameterNames, getAllSignatures } from './lib/IndexSupplySignatures'
 import { SignatureSelector } from './SignatureSelector'
@@ -101,7 +103,7 @@ function classifyHash(value: string | number | boolean | null): {
 
 function renderCellValue(cell: string | number | boolean | null): React.ReactNode {
   if (cell === null) {
-    return <span className="text-gray9 italic">null</span>
+    return <span {...ui.renderCellValueText()}>null</span>
   }
 
   const classification = classifyHash(cell)
@@ -125,7 +127,7 @@ function renderCellValue(cell: string | number | boolean | null): React.ReactNod
       href={explorerUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-accent hover:underline"
+      {...ui.renderCellValueLink()}
       onClick={(e) => e.stopPropagation()}
     >
       {displayValue}
@@ -253,9 +255,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
   return (
     <Container
       headerLeft={
-        <h4 className="font-normal text-[14px] text-gray12 leading-none -tracking-[1%]">
-          {props.title || 'IndexSupply SQL Query'}
-        </h4>
+        <h4 {...ui.indexSupplyQueryHeading()}>{props.title || 'IndexSupply SQL Query'}</h4>
       }
       headerRight={
         <Button variant="accent" onClick={handleRunQuery} disabled={isLoading}>
@@ -263,34 +263,33 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
         </Button>
       }
     >
-      <div className="space-y-4">
+      <div {...ui.indexSupplyQueryLayout()}>
         {props.signatures ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-[13px] text-gray11">
+          <div {...ui.indexSupplyQueryLayout2()}>
+            <div {...ui.indexSupplyQueryLayout3()}>
               Signatures
               <a
                 href="https://www.indexsupply.net/docs#signatures"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray9 transition-colors hover:text-gray11"
+                {...ui.indexSupplyQueryLink()}
               >
-                <LucideExternalLink className="size-3" />
+                <LucideExternalLink className={ui.lucideExternalLink().className} />
               </a>
             </div>
-            <div className="flex flex-wrap gap-1">
+            <div {...ui.indexSupplyQueryLayout4()}>
               {selectedSignatureInfos.map((sigInfo) => {
                 const isEvent = sigInfo.type === 'event'
                 return (
-                  <div
-                    key={sigInfo.signature}
-                    className="inline-flex items-center gap-1.5 rounded border border-gray4 bg-gray3 px-2 py-1 font-mono text-[11px]"
-                  >
+                  <div key={sigInfo.signature} {...ui.indexSupplyQueryLayout5()}>
                     <span
-                      className={`size-2 shrink-0 rounded-full ${
-                        isEvent ? 'bg-blue9' : 'bg-purple9'
+                      className={` ${ui.indexSupplyQueryText().className} ${
+                        isEvent
+                          ? ui.indexSupplyQueryText2().className
+                          : ui.functionIndicator().className
                       }`}
                     />
-                    <span className="max-w-[300px] truncate text-gray11">{sigInfo.name}</span>
+                    <span {...ui.indexSupplyQueryText3()}>{sigInfo.name}</span>
                   </div>
                 )
               })}
@@ -305,16 +304,16 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
           />
         )}
 
-        <div className="space-y-2">
-          <label htmlFor="sql-query" className="flex items-center gap-1.5 text-[13px] text-gray11">
+        <div {...ui.indexSupplyQueryLayout2()}>
+          <label htmlFor="sql-query" {...ui.indexSupplyQueryLayout3()}>
             SQL Query
             <a
               href="https://www.indexsupply.net/docs#sql"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray9 transition-colors hover:text-gray11"
+              {...ui.indexSupplyQueryLink()}
             >
-              <LucideExternalLink className="size-3" />
+              <LucideExternalLink className={ui.lucideExternalLink().className} />
             </a>
           </label>
           <SqlEditor
@@ -324,28 +323,28 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
             readOnly={isReadOnly}
             disabled={isLoading || isReadOnly}
             completions={completions}
-            className={`w-full rounded border border-gray4 bg-gray2 font-mono focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
-              isReadOnly ? 'text-[11px] leading-[1.4]' : 'text-[13px] leading-normal'
-            }`}
+            className={
+              composeStyles(
+                ui.sqlEditor(),
+                !!isReadOnly && ui.sqlEditor2(),
+                !isReadOnly && ui.sqlEditor3(),
+              ).className
+            }
             minHeight={isReadOnly ? '200px' : '120px'}
           />
         </div>
 
-        {error && (
-          <div className="rounded bg-destructiveTint px-3 py-2 font-normal text-[14px] text-destructive leading-normal -tracking-[2%]">
-            {error}
-          </div>
-        )}
+        {error && <div {...ui.indexSupplyQueryLayout6()}>{error}</div>}
 
         {result && (
-          <div className="space-y-2">
-            <div className="overflow-auto rounded border border-gray4">
-              <table className="w-full text-[12px]">
-                <thead className="border-gray4 border-b bg-gray2">
+          <div {...ui.indexSupplyQueryLayout2()}>
+            <div {...ui.indexSupplyQueryLayout7()}>
+              <table {...ui.table()}>
+                <thead {...ui.thead()}>
                   <tr>
                     {result.columns.map((col) => (
-                      <th key={col.name} className="px-3 py-2 text-left font-medium text-gray12">
-                        <div className="flex flex-col gap-0.5">
+                      <th key={col.name} {...ui.th()}>
+                        <div {...ui.indexSupplyQueryLayout8()}>
                           <span>{col.name}</span>
                         </div>
                       </th>
@@ -355,7 +354,7 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
                 <tbody>
                   {result.rows.length === 0 ? (
                     <tr>
-                      <td colSpan={result.columns.length} className="py-4 text-center text-gray9">
+                      <td colSpan={result.columns.length} {...ui.td()}>
                         No rows returned
                       </td>
                     </tr>
@@ -363,13 +362,10 @@ export function IndexSupplyQuery(props: IndexSupplyQueryProps) {
                     result.rows.map((row, rowIndex) => (
                       <tr
                         key={`row-${rowIndex}-${row.map((c) => (c === null ? 'null' : String(c))).join('-')}`}
-                        className="border-gray4 border-b last:border-b-0 hover:bg-gray2"
+                        {...ui.tr()}
                       >
                         {row.map((cell, cellIndex) => (
-                          <td
-                            key={`${result.columns[cellIndex]?.name}-${rowIndex}`}
-                            className="px-3 py-2 font-mono text-gray11"
-                          >
+                          <td key={`${result.columns[cellIndex]?.name}-${rowIndex}`} {...ui.td2()}>
                             {renderCellValue(cell)}
                           </td>
                         ))}

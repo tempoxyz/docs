@@ -1,0 +1,90 @@
+---
+title: "T13 Network Upgrade"
+seoTitle: "T13 Network Upgrade | Tempo Docs"
+description: T13 adds an OUSD fee-token fallback, Nitro-backed Zone batch verification, multi-block Tempo imports for Zones, and explicit block system calls.
+---
+
+# T13 Network Upgrade
+
+T13 lets transactions pay fees in OUSD by default, adds Nitro-backed verification and faster recovery for Zones, and narrows block system calls to the ones Tempo uses.
+
+:::info[T13 status]
+T13 is not yet scheduled on testnet or mainnet, and no T13 node release is available. Activation times and the required release appear on this page and in [Node Operator Updates](/docs/guide/node/network-upgrades#t13) once they are set.
+:::
+
+**Integration note:** If your transactions omit `feeToken` and the fee payer has no fee-token preference, T13 can charge fees in OUSD instead of rejecting the transaction for an insufficient pathUSD balance. [See integration guidance](#integration-impact).
+
+## Timeline
+
+| Network | Activation date (UTC) | Unix timestamp |
+|---------|-----------------------|----------------|
+| Testnet | Not yet scheduled | — |
+| Mainnet | Not yet scheduled | — |
+
+## T13 overview
+
+- **Ordered fallback fee tokens:** when no fee token is chosen, the protocol tries pathUSD and then OUSD, so accounts that hold only OUSD can pay fees without setting a preference.
+- **Nitro-backed Zone batch verification:** a native verifier checks AWS Nitro attestations before a Zone portal accepts a batch, with a temporary proofless fallback during rollout.
+- **Multi-block Tempo imports for Zones:** a Zone can catch up on many Tempo blocks at once after an interruption, with global limits on pending deposits and token enablements.
+- **Explicit block system calls:** blocks run only the history and committee system calls and no longer inherit Ethereum's beacon-root and execution-request calls.
+
+## T13 features
+
+### Ordered fallback fee tokens
+
+Before T13, a transaction that reaches the last step of [fee-token selection](/docs/protocol/fees/spec-fee#fee-token-preferences) pays in pathUSD and fails if the fee payer cannot cover the fee in pathUSD.
+
+T13 replaces that last step with an ordered list: pathUSD, then [OUSD](/docs/guide/ousd). The protocol picks the first token whose balance covers the transaction's maximum fee, `ceil(gasLimit * maxFeePerGas / 10^12)` in base units. One token must cover the whole fee; balances are not combined. A transaction with a zero maximum fee uses pathUSD.
+
+Explicit `feeToken` values, account preferences set with `setUserToken`, and inference from TIP-20 transfers and DEX swaps keep their precedence. Only an insufficient balance moves the search to the next token. Once a token is selected, pause, policy, access-key, and Fee AMM liquidity checks apply as before, and a failure there does not try the next token. The validator default fee token remains pathUSD.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1115.md).
+
+### Nitro-backed Zone batch verification
+
+At T13, the Zone verifier at `0x5a56000000000000000000000000000000000000` becomes a native verifier. It accepts a batch only when an AWS Nitro attestation document proves that the approved Zone stateless proof function produced it, and the attestation commits to every settlement input, including the Zone height.
+
+During rollout, a sequencer can also submit a batch with the `NoProof` mode (`verifierConfig = 0x02`) and an empty proof. `NoProof` keeps the sequencer-quorum, continuity, and canonical-portal checks but skips Nitro validation. A later upgrade removes it.
+
+Nitro mode (`0x01`) accepts proofs only from approved enclave measurements. Until those measurements are published, Nitro proofs are rejected and Zones settle through `NoProof`.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1098.md) and [Zone proving and settlement](/docs/protocol/zones/proving).
+
+### Multi-block Tempo imports for Zones
+
+T13 lets one Zone block import a range of consecutive Tempo headers. A header-only block advances the Zone's Tempo checkpoint without other execution, so a Zone can recover from a long outage without historical state proofs. A full block then processes every pending deposit and token enablement against the latest imported Tempo state.
+
+To keep recovery bounded, each Zone portal limits pending work:
+
+| Limit | Value | Effect |
+|-------|-------|--------|
+| Unprocessed deposits | 230 | Withdrawal bounce-backs are rejected at this limit. |
+| Reserve for withdrawal bounce-backs | 20 | Ordinary deposits are rejected once 210 deposits are unprocessed. |
+| Unprocessed token enablements | 8 | `enableToken` reverts while eight enablements are pending. |
+
+A withdrawal batch is rejected before processing if its size exceeds the remaining deposit capacity, because every withdrawal could bounce back.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1096.md) and [Zone execution](/docs/protocol/zones/execution).
+
+### Explicit block system calls
+
+At T13, Tempo blocks run two automatic system calls: the EIP-2935 parent-hash history update before transactions, and the committee update after the last block of each epoch. Blocks no longer schedule the EIP-4788 beacon-root call, EIP-7002 and EIP-7251 request calls, or builder request calls, and the execution-request list is always empty.
+
+This keeps block validity independent of code deployed at Ethereum system-contract addresses. Transactions and receipts are unchanged.
+
+Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1119.md).
+
+### Zone deposit and refund fixes
+
+T13 also changes how Zones credit bridged funds:
+
+- Zone deposits, withdrawal bounce-backs, and refund claims check TIP-403 `Recipient` authorization instead of `MintRecipient`. Receive policies and refund behavior are unchanged.
+- `ZoneInbox.claimRefund(token)` reverts with `NoRefund` when the caller has no pending refund for that token.
+
+## Integration impact
+
+- **Fee payers:** a transaction that omits `feeToken`, has no stored preference, and has too little pathUSD now pays in OUSD when the fee payer holds enough OUSD. To keep a specific token, set `feeToken` on the transaction or call `setUserToken`. A transfer into pathUSD before inclusion can change the token a pending transaction pays with.
+- **Wallets and fee displays:** read the fee token from the receipt's `feeToken` field instead of assuming pathUSD for transactions without a preference. If you estimate the fee token before signing, check pathUSD first, then OUSD, against the maximum fee.
+- **Zone operators:** T13 is a coordinated Tempo and Zone upgrade. Run sequencer, prover, and verifier builds that support T13 before activation, and process any deposit or token-enablement backlog above the new limits under T12 first. `ITempoState.finalizeTempo(bytes)` becomes `finalizeTempo(bytes[])`, and `IZoneInbox.advanceTempoHeaders(bytes[])` is new.
+- **Zone applications:** handle deposit rejections when a Zone's deposit queue is full, and expect `enableToken` to revert while eight enablements are pending. Treat `NoRefund` from `claimRefund` as "nothing to claim".
+- **Node operators and indexers:** install the T13 release once it is published. Tooling that expects beacon-root or execution-request system calls in Tempo blocks should stop expecting them after activation.

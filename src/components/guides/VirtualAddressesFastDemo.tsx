@@ -22,6 +22,7 @@ import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 import { Abis, Actions, tempoActions, withFeePayer } from 'viem/tempo'
 import { Button, ExplorerAccountLink, ExplorerLink, Step, StringFormatter } from './Demo'
 import { alphaUsd, ousd, pathUsd } from './tokens'
+import * as ui from './VirtualAddressesFastDemo.recipes'
 
 const TEST_MNEMONIC = 'test test test test test test test test test test test junk'
 const VIRTUAL_REGISTRY_ADDRESS = '0xfDC0000000000000000000000000000000000000' as const
@@ -391,12 +392,12 @@ export function VirtualAddressesFastDemo() {
   const tokenSymbol = isModerato ? 'OUSD' : 'pathUSD'
 
   return (
-    <div className="space-y-4">
+    <div {...ui.virtualAddressesFastDemoLayout()}>
       <Step
         active={!registration}
         actions={
           <Button
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.virtualAddressesFastDemoButton().className}
             disabled={!isSupported || registerMutation.isPending}
             onClick={() => registerMutation.mutate()}
             type="button"
@@ -410,42 +411,35 @@ export function VirtualAddressesFastDemo() {
         number={1}
         title="Use a docs-managed master with a pre-mined valid salt."
       >
-        <div className="mx-6 border-gray4 border-s-2 ps-5 pb-4">
+        <div {...ui.virtualAddressesFastDemoLayout2()}>
           {!isSupported ? (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesFastDemoLayout3()}>
               Run docs against Tempo testnet or localnet to use this live preview.
             </div>
           ) : registration ? (
-            <div className="mt-2 grid gap-2 text-[13px] text-gray9 -tracking-[1%]">
-              <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                <span className="text-primary">master wallet:</span>
-                <code className="min-w-0 break-all font-mono text-[12px] text-primary">
-                  {registration.masterAddress}
-                </code>
+            <div {...ui.virtualAddressesFastDemoLayout4()}>
+              <div {...ui.virtualAddressesFastDemoLayout5()}>
+                <span {...ui.virtualAddressesFastDemoText()}>master wallet:</span>
+                <code {...ui.code()}>{registration.masterAddress}</code>
               </div>
-              <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                <span className="text-primary">masterId:</span>
-                <code className="font-mono text-primary">{registration.masterId}</code>
+              <div {...ui.virtualAddressesFastDemoLayout5()}>
+                <span {...ui.virtualAddressesFastDemoText()}>masterId:</span>
+                <code {...ui.code2()}>{registration.masterId}</code>
               </div>
-              <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                <span className="text-primary">pre-mined salt:</span>
-                <code className="min-w-0 break-all font-mono text-[12px] text-primary">
-                  {registration.salt}
-                </code>
+              <div {...ui.virtualAddressesFastDemoLayout5()}>
+                <span {...ui.virtualAddressesFastDemoText()}>pre-mined salt:</span>
+                <code {...ui.code()}>{registration.salt}</code>
               </div>
-              <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                <span className="text-primary">virtual address:</span>
+              <div {...ui.virtualAddressesFastDemoLayout5()}>
+                <span {...ui.virtualAddressesFastDemoText()}>virtual address:</span>
                 <div>
-                  <div className="mt-2 flex flex-col gap-2">
-                    <div className="flex flex-col gap-1">
-                      <label
-                        className="text-[11px] text-gray9 -tracking-[1%]"
-                        htmlFor="virtualAddressUserTag"
-                      >
+                  <div {...ui.virtualAddressesFastDemoLayout6()}>
+                    <div {...ui.virtualAddressesFastDemoLayout7()}>
+                      <label {...ui.label()} htmlFor="virtualAddressUserTag">
                         Customize the trailing user tag to derive a different virtual address
                       </label>
                       <input
-                        className="h-[34px] rounded-full border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                        {...ui.virtualAddressesFastDemoInput()}
                         autoCapitalize="none"
                         autoComplete="off"
                         autoCorrect="off"
@@ -463,34 +457,30 @@ export function VirtualAddressesFastDemo() {
                     </div>
                     {normalizedUserTag && customVirtualAddress ? (
                       <>
-                        <div className="flex items-baseline gap-2 text-[11px] text-gray9 -tracking-[1%]">
+                        <div {...ui.virtualAddressesFastDemoLayout8()}>
                           <span>Normalized user tag:</span>
-                          <code className="font-mono text-primary">{normalizedUserTag}</code>
+                          <code {...ui.code2()}>{normalizedUserTag}</code>
                         </div>
-                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                          <span className="min-w-0 break-all font-mono text-[12px] text-primary">
-                            {customVirtualAddress}
-                          </span>
+                        <div {...ui.virtualAddressesFastDemoLayout9()}>
+                          <span {...ui.code()}>{customVirtualAddress}</span>
                           {hasExplorerLink && (
                             <ExplorerAccountLink address={customVirtualAddress} inline />
                           )}
                         </div>
                       </>
                     ) : (
-                      <div className="text-[12px] text-destructive -tracking-[1%]">
+                      <div {...ui.virtualAddressesFastDemoLayout10()}>
                         Enter 1 to 12 hex characters, with or without{' '}
-                        <span className="font-mono">0x</span>.
+                        <span {...ui.virtualAddressesFastDemoText2()}>0x</span>.
                       </div>
                     )}
                   </div>
                 </div>
               </div>
               {registration.txHash ? (
-                <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                  <span className="text-primary">registration tx:</span>
-                  <code className="min-w-0 break-all font-mono text-[12px] text-primary">
-                    {registration.txHash}
-                  </code>
+                <div {...ui.virtualAddressesFastDemoLayout5()}>
+                  <span {...ui.virtualAddressesFastDemoText()}>registration tx:</span>
+                  <code {...ui.code()}>{registration.txHash}</code>
                 </div>
               ) : (
                 <div>
@@ -500,14 +490,14 @@ export function VirtualAddressesFastDemo() {
               )}
             </div>
           ) : registerMutation.isPending ? (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesFastDemoLayout3()}>
               This tab skips live mining and submits a pre-mined salt for a valid virtual address
               and docs-managed wallet so you can get to the forwarding flow immediately.
             </div>
           ) : (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
-              Click <span className="text-primary">Prepare demo master</span> to use a shared
-              docs-managed wallet with a pre-mined salt for a valid virtual address.
+            <div {...ui.virtualAddressesFastDemoLayout3()}>
+              Click <span {...ui.virtualAddressesFastDemoText()}>Prepare demo master</span> to use a
+              shared docs-managed wallet with a pre-mined salt for a valid virtual address.
             </div>
           )}
         </div>
@@ -517,7 +507,7 @@ export function VirtualAddressesFastDemo() {
         active={Boolean(registration) && !sendResult}
         actions={
           <Button
-            className="font-normal text-[14px] -tracking-[2%]"
+            className={ui.virtualAddressesFastDemoButton().className}
             disabled={
               !registration || !isSupported || sendMutation.isPending || !customVirtualAddress
             }
@@ -537,35 +527,29 @@ export function VirtualAddressesFastDemo() {
         number={2}
         title="Send from another address to the virtual address and watch it land in the registered wallet."
       >
-        <div className="mx-6 border-gray4 border-s-2 ps-5 pb-4">
+        <div {...ui.virtualAddressesFastDemoLayout2()}>
           {registration ? (
-            <div className="mt-2 space-y-3 text-[13px] text-gray9 -tracking-[1%]">
-              <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                <span className="text-primary">demo sender:</span>
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="min-w-0 break-all font-mono text-[12px] text-primary">
-                    {demoSender.address}
-                  </span>
+            <div {...ui.virtualAddressesFastDemoLayout11()}>
+              <div {...ui.virtualAddressesFastDemoLayout5()}>
+                <span {...ui.virtualAddressesFastDemoText()}>demo sender:</span>
+                <div {...ui.virtualAddressesFastDemoLayout9()}>
+                  <span {...ui.code()}>{demoSender.address}</span>
                   {hasExplorerLink && <ExplorerAccountLink address={demoSender.address} inline />}
                 </div>
               </div>
-              <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                <span className="text-primary">virtual address:</span>
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="min-w-0 break-all font-mono text-[12px] text-primary">
-                    {customVirtualAddress}
-                  </span>
+              <div {...ui.virtualAddressesFastDemoLayout5()}>
+                <span {...ui.virtualAddressesFastDemoText()}>virtual address:</span>
+                <div {...ui.virtualAddressesFastDemoLayout9()}>
+                  <span {...ui.code()}>{customVirtualAddress}</span>
                   {customVirtualAddress && hasExplorerLink && (
                     <ExplorerAccountLink address={customVirtualAddress} inline />
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                <span className="text-primary">registered wallet:</span>
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="min-w-0 break-all font-mono text-[12px] text-primary">
-                    {registration.masterAddress}
-                  </span>
+              <div {...ui.virtualAddressesFastDemoLayout5()}>
+                <span {...ui.virtualAddressesFastDemoText()}>registered wallet:</span>
+                <div {...ui.virtualAddressesFastDemoLayout9()}>
+                  <span {...ui.code()}>{registration.masterAddress}</span>
                   {hasExplorerLink && (
                     <ExplorerAccountLink address={registration.masterAddress} inline />
                   )}
@@ -574,34 +558,34 @@ export function VirtualAddressesFastDemo() {
 
               {sendResult ? (
                 <>
-                  <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                    <span className="text-primary">transfer tx:</span>
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <span className="min-w-0 break-all font-mono text-[12px] text-primary">
-                        {sendResult.txHash}
-                      </span>
+                  <div {...ui.virtualAddressesFastDemoLayout5()}>
+                    <span {...ui.virtualAddressesFastDemoText()}>transfer tx:</span>
+                    <div {...ui.virtualAddressesFastDemoLayout9()}>
+                      <span {...ui.code()}>{sendResult.txHash}</span>
                       {hasExplorerLink && <ExplorerLink hash={sendResult.txHash} inline />}
                     </div>
                   </div>
-                  <div className="grid gap-2">
-                    <div className="grid grid-cols-[max-content,minmax(0,1fr)] items-start gap-x-4">
-                      <span className="text-primary">master balance:</span>
-                      <code className="min-w-0 break-all font-mono text-primary">
+                  <div {...ui.virtualAddressesFastDemoLayout12()}>
+                    <div {...ui.virtualAddressesFastDemoLayout5()}>
+                      <span {...ui.virtualAddressesFastDemoText()}>master balance:</span>
+                      <code {...ui.code3()}>
                         {sendResult.before.master} → {sendResult.after.master}
                       </code>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-primary">Transfer events in this receipt</span>
+                  <div {...ui.virtualAddressesFastDemoLayout13()}>
+                    <span {...ui.virtualAddressesFastDemoText()}>
+                      Transfer events in this receipt
+                    </span>
                     <div>
-                      Treat the <span className="font-mono text-primary">sender → virtual</span> and{' '}
-                      <span className="font-mono text-primary">virtual → master</span> pair as one
-                      logical deposit to the registered wallet. Other transfer logs in the receipt,
-                      like fees, are separate.
+                      Treat the <span {...ui.code2()}>sender → virtual</span> and{' '}
+                      <span {...ui.code2()}>virtual → master</span> pair as one logical deposit to
+                      the registered wallet. Other transfer logs in the receipt, like fees, are
+                      separate.
                     </div>
                     {sendResult.events.map((event, index) => (
                       <div key={`${event.from}-${event.to}-${index}`}>
-                        <code className="break-all font-mono text-[12px] text-primary">
+                        <code {...ui.code4()}>
                           {StringFormatter.truncate(event.from, { start: 8, end: 6 })} →{' '}
                           {StringFormatter.truncate(event.to, { start: 8, end: 6 })} ({event.amount}{' '}
                           {tokenSymbol})
@@ -619,7 +603,7 @@ export function VirtualAddressesFastDemo() {
               )}
             </div>
           ) : (
-            <div className="mt-2 text-[13px] text-gray9 -tracking-[1%]">
+            <div {...ui.virtualAddressesFastDemoLayout3()}>
               Prepare the demo master first. This step needs a registered master id and derived
               virtual address.
             </div>

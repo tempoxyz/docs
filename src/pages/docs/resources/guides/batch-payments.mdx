@@ -1,0 +1,95 @@
+---
+title: "Plan batch and scheduled payouts"
+seoTitle: "Batch and Scheduled Stablecoin Payments | Tempo Docs"
+description: "Choose atomic batches or independent payments, schedule submission, validate payout runs, and reconcile each delivered transfer."
+---
+
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Plan batch and scheduled payouts
+
+# Plan batch and scheduled payouts
+
+Batch payments group multiple obligations into a payout run. On Tempo, an atomic batch executes several calls in one transaction; independent transactions have separate receipts and outcomes. Your application schedules and submits recurring runs.
+
+Start by choosing which calls must succeed together, then follow [Send payments](/docs/guide/payments/send-a-payment#batch-payment-transactions) for the implementation.
+
+## Choose the payout failure boundary
+
+| Approach | Behavior | Use when |
+| --- | --- | --- |
+| Atomic batch | Multiple calls execute in one transaction. A reverting call reverts the batch. | Related operations must succeed or fail together. |
+| Independent transactions | Each transaction has its own receipt and outcome. | One recipient's failure should not block other payments. |
+| Application scheduling | A service decides when to submit each run. | Payments recur or require a release time or approval event. |
+
+Use [parallel transactions](/docs/guide/payments/send-parallel-transactions) for independent receipts. Tempo [transaction validity windows](/docs/protocol/transactions#scheduled-transactions) constrain when a submitted transaction may be included. They do not submit the transaction, create a recurring job, or guarantee inclusion.
+
+## Validate the complete payout route
+
+Cross-border runs need more than recipient addresses. Record each recipient's chosen asset or local currency, supported delivery method, eligibility, conversion quote, and provider reference. A common onchain settlement layer does not establish local bank coverage.
+
+For each payout, validate required fields, network, token contract, amount, duplicate obligation IDs, and approved destination. Independently verify changes to stored vendor payment instructions. Confirm token policies and account receive policies before release; a successful transaction can still contain a held receipt rather than delivery to the intended recipient.
+
+## Prepare and release a payout run
+
+:::::steps
+
+### Define the run and its obligations
+
+Keep approved invoices, payroll periods, and vendor information in your business system. Assign a separate payment ID to each obligation and decide which payments belong in one atomic transaction.
+
+### Build the transfers
+
+Use a distinct [payment reference](/docs/guide/payments/transfer-memos) for each call. Store the memo encoding with its offchain record. A batch shares one transaction hash, so references and transfer log indexes distinguish the individual payments.
+
+### Fund principal and fees
+
+Check usable balances and expected fees before signing. Use eligible fee tokens with sufficient Fee AMM liquidity, or configure [fee sponsorship](/docs/guide/payments/sponsor-user-fees). If conversion is required, quote it and validate the output rather than assuming parity between stablecoins.
+
+### Approve and submit
+
+Apply your wallet, custodian, or application approval controls. Store the submitted transaction identifier before waiting for a result. Your application schedules and submits the run even when it uses a transaction validity window.
+
+### Confirm each recipient transfer
+
+Inspect the receipt and compare the delivered token, amount, and recipient for every expected payment. Match each transfer to the approved obligation and record it once.
+
+:::::
+
+## Example of an approved supplier run
+
+Consider three approved supplier invoices in the same stablecoin. Keep vendor details in the AP system and give each transfer a short opaque reference. This is an operating pattern for your application, not a Tempo file-upload product.
+
+| Obligation | Pre-submission evidence | Completion evidence |
+| --- | --- | --- |
+| Supplier invoice | Approved amount, token contract, network, verified destination, and payment reference. | Successful delivered transfer matched to the invoice. |
+| Batch | Funded principal and fees, approved call list, chosen failure boundary. | Transaction receipt and every expected transfer. |
+| Fiat payout | Supported provider route, beneficiary, currency, quote, and limits. | Provider confirmation of local delivery as well as the onchain evidence. |
+
+If the calls are atomic, a reverting call reverts the entire batch. For independent transactions, track each result separately. In either case, the system must inspect delivered transfers rather than treating transaction success as sufficient evidence.
+
+If submission times out, inspect the existing transaction before retrying. Keep unresolved payments pending while investigating. Resending an entire run can pay some invoices twice.
+
+## Budget for execution and operations
+
+Standard stablecoin transfers on Tempo have sub-cent network fees, but a batch's actual cost depends on its calls. Use the [fee documentation](/docs/protocol/fees), and include provider charges, conversion, custody, payout costs, and exception handling in the run's economics.
+
+Issuer-defined [TIP-403 policies](/docs/protocol/tip403/overview) and application permissions serve different roles. Token policies can enforce eligibility rules; they do not perform customer onboarding, screening decisions, payroll approval, or reporting for your application.
+
+If a workflow needs private balances, review [Zones](/docs/zones) separately. Zones is in limited preview, and the current runtime disables general TIP-20 transfers. Do not assume that the public-network batch workflow is available inside a Zone.
+
+## Batch payout questions
+
+### Should a payout system use file uploads or an API?
+
+A file-based approval flow can fit infrequent runs. Recurring or large runs often benefit from programmatic validation and submission. The application or provider supplies that interface; Tempo's atomic batch is the onchain execution primitive.
+
+### How are failed payouts handled?
+
+A reverting call reverts an atomic batch. Independent transactions have separate outcomes. Verify the delivered transfers and investigate unresolved submissions before retrying.
+
+### How can bulk payments recur automatically?
+
+Run a scheduler in the application or provider service, then submit and monitor each authorized run. Transaction validity windows bound possible inclusion; they do not create the scheduler.
+
+### How do batches connect to finance systems?
+
+Map each transfer's reference and unique event key to the invoice or payout record. Preserve fees, exceptions, and any provider delivery records alongside the onchain evidence. See [payment reconciliation](/docs/resources/guides/payment-reconciliation).

@@ -64,7 +64,7 @@ Keep the old validator running with its old signing key until its status shows `
 
 ### Generate the replacement identity
 
-[Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) and record its public key. Make the encrypted key and its decryption secret available to the replacement. The commands below assume an encrypted signing key and your existing FIFO setup; omit `--secret` or `--consensus.secret` for an unencrypted key.
+[Generate a new signing key](/docs/guide/node/validator-keys#generating-a-signing-key) and record its public key. Make the encrypted key and its decryption secret available to the replacement. The Bash/Zsh commands below assume an encrypted signing key: replace `<ENCRYPTION_KEY_CMD>` with the command that retrieves its encryption secret. Omit `--secret` or `--consensus.secret` only for an unencrypted key.
 
 ### Submit the rotation
 
@@ -78,7 +78,7 @@ tempo consensus rotate-validator \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --secret <ENCRYPTION_KEY_FIFO> \
+  --secret <(<ENCRYPTION_KEY_CMD>) \
   --wallet-key <OPERATOR_KEY_PATH> \
   --rpc-url https://rpc.tempo.xyz
 ```
@@ -89,7 +89,7 @@ tempo consensus rotate-validator \
   --ingress <NEW_IP:PORT> \
   --egress <NEW_IP> \
   --signing-key <NEW_PRIVATE_KEY_PATH> \
-  --secret <ENCRYPTION_KEY_FIFO> \
+  --secret <(<ENCRYPTION_KEY_CMD>) \
   --wallet-key <OPERATOR_KEY_PATH> \
   --rpc-url https://rpc.testnet.tempo.xyz
 ```
@@ -101,13 +101,13 @@ Wait for the transaction to finalize before starting the replacement in validato
 
 Stop the follower cleanly and wait for it to exit. Reopen the same data directory without `--follow`, using the new signing key and registered ingress port. Preserve any separate `--consensus.datadir` setting.
 
-The example uses mainnet; use `--chain moderato` for testnet. Refill the secret FIFO before starting the node.
+The example uses mainnet; use `--chain moderato` for testnet.
 
 ```bash
 tempo node --datadir <REPLACEMENT_DATADIR> \
   --chain mainnet \
   --consensus.signing-key <NEW_PRIVATE_KEY_PATH> \
-  --consensus.secret <ENCRYPTION_KEY_FIFO> \
+  --consensus.secret <(<ENCRYPTION_KEY_CMD>) \
   --consensus.listen-address 0.0.0.0:<NEW_REGISTERED_INGRESS_PORT> \
   --http --http.port 8545 \
   --http.api eth,net,web3,txpool,trace,consensus \

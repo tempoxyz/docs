@@ -1,5 +1,5 @@
-// biome-ignore lint/correctness/noUnusedImports: the golden renderer uses the classic JSX runtime
-import React from 'react'
+/** @jsxRuntime automatic */
+import type { JSX } from 'react'
 import { layoutTitle } from './og-layout'
 
 export function OgImage({
@@ -12,7 +12,7 @@ export function OgImage({
   section: string
   subsection: string
   backgroundUrl: string
-}) {
+}): JSX.Element {
   const { lines, fontSize } = layoutTitle(title)
   const hasSubsection = !!subsection
 

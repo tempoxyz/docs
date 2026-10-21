@@ -1,0 +1,87 @@
+---
+title: Set up API access
+seoTitle: Routes API Setup | Tempo Docs
+description: Create a Routes API key with the right scopes, configure your backend client, and set idempotency keys for create requests.
+ogImage: /og/2026-q4/og_2026-q4_docs_routes-api-setup_title-f5_v02.png
+---
+
+<span id="routes-api-setup" />
+
+# Set up API access
+
+Configure your backend to call the Routes API. Confirm [beta access](/docs/routes), create a key in [Tempo Console](/docs/api/console), and keep the key out of browser code. Every Routes guide after this page assumes this setup.
+
+## Routes API key scopes
+
+| Scope | Allows |
+| --- | --- |
+| `routes:read` | Quotes, and transfer and deposit status reads |
+| `routes:write` | Creating transfers and deposit addresses, and registering source transactions |
+| `data:read` | Reading the [route directory](/docs/routes/networks) with your key, which applies your organization's access policy |
+
+The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it does not sign blockchain transactions.
+
+## Configure the client
+
+Set `TEMPO_API_KEY` in your environment. TypeScript uses Node.js with built-in `fetch`; Python uses `requests` (`python -m pip install requests`); cURL examples require `curl` and `jq`.
+
+::::code-group
+
+```ts [TypeScript (fetch)]
+const api = 'https://api.tempo.xyz/v1'
+const headers = {
+  'tempo-api-key': process.env.TEMPO_API_KEY!,
+  'Content-Type': 'application/json',
+}
+```
+
+```python [Python (requests)]
+import os
+import requests
+
+api = "https://api.tempo.xyz/v1"
+headers = {
+    "tempo-api-key": os.environ["TEMPO_API_KEY"],
+    "Content-Type": "application/json",
+}
+```
+
+```bash [cURL (API)]
+# Set TEMPO_API_KEY in your terminal's environment before running requests.
+curl --fail-with-body 'https://api.tempo.xyz/v1/routes' \
+  --header "tempo-api-key: $TEMPO_API_KEY"
+```
+
+::::
+
+Each request builder in the flow guides generates cURL and TypeScript for its endpoint with these headers.
+
+<span id="prepare-a-transfer-request" />
+<span id="prepare-a-deposit-address-request" />
+
+## Set idempotency keys
+
+Create requests require an `idempotency-key` header. Assign one key per operation, such as one payment or one customer's deposit address, and store it with that record before sending the request:
+
+::::code-group
+
+```ts [TypeScript (fetch)]
+const requestKey = crypto.randomUUID() // Persist with your payment record.
+```
+
+```python [Python (requests)]
+import uuid
+
+requestKey = str(uuid.uuid4())  # Persist with your payment record.
+```
+
+```bash [cURL (API)]
+# Choose and retain one key per operation, including across retries.
+ROUTE_REQUEST_KEY="my-payment-001"
+```
+
+::::
+
+Reuse the key when you retry the same request with unchanged inputs. Matching requests replay the successful response for 24 hours; a request with changed inputs conflicts. Use a new key for a new operation.
+
+Continue with [Supported routes](/docs/routes/networks) to choose a pair, then [Quotes and fees](/docs/routes/quotes).

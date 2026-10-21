@@ -15,11 +15,24 @@ export type PostSeo = {
   category: CategorySlug
   authors: string
   ogImage?: string // root-relative static asset under public/
+  shareImage?: string // social card only; the blog cards keep ogImage
 }
 
 export function absoluteUrl(base: string, pathname: string): string {
   const normalized = pathname.startsWith('/') ? pathname : `/${pathname}`
   return base ? `${base}${normalized}` : normalized
+}
+
+/**
+ * The production proxy strips /developers before requests reach Waku, so
+ * developersProxyBasePath in vite.config.ts uses / on the server and
+ * /developers/ in browsers on tempo.xyz. Waku Link therefore emits /blog/...
+ * during SSR, pointing crawlers to missing marketing pages.
+ * Blog cards use <a> with this URL until routing and rendered link bases can be
+ * separated. This preserves crawlable URLs at the cost of full-page navigation.
+ */
+export function blogPostHref(slug: string, vercelEnv = import.meta.env.VERCEL_ENV): string {
+  return absoluteUrl(vercelEnv === 'production' ? '/developers' : '', `/blog/${slug}`)
 }
 
 // The renderer only reads `title`, `section`, and `subsection` — keep the
@@ -39,6 +52,10 @@ export function blogPostImageUrl(base: string, post: PostSeo): string {
     : ogImageUrl(base, { title: post.title, section: 'BLOG' })
 }
 
+export function blogPostShareImageUrl(base: string, post: PostSeo): string {
+  return post.shareImage ? absoluteUrl(base, post.shareImage) : blogPostImageUrl(base, post)
+}
+
 // schema.org BlogPosting payload for a post, serialized for a
 // <script type="application/ld+json"> tag. `ogImage` should already be absolute.
 export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): string {
@@ -49,8 +66,9 @@ export function blogPostJsonLd(base: string, post: PostSeo, ogImage: string): st
     url: base || 'https://tempo.xyz',
     logo: { '@type': 'ImageObject', url: absoluteUrl(base, '/icon-dark.png') },
   }
+  // Bylines separate authors with commas; slashes and ampersands are older forms.
   const authors = post.authors
-    .split(/\/|\s+&\s+/)
+    .split(/,|\/|\s+&\s+/)
     .map((name) => name.trim())
     .filter(Boolean)
     .map((name) => ({ '@type': 'Person', name }))

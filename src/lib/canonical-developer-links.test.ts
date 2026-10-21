@@ -11,7 +11,7 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
         publicDevelopersUrl,
       ),
     ).toBe(
-      '<a href="https://tempo.xyz/developers/docs">Docs</a><a href="https://tempo.xyz/developers/docs/api#authentication">API</a>',
+      '<a href="https://tempo.xyz/developers">Docs</a><a href="https://tempo.xyz/developers/docs/api#authentication">API</a>',
     )
   })
 
@@ -39,7 +39,7 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
       ),
     ).toBe(
       [
-        '- [Docs](https://tempo.xyz/developers/docs)',
+        '- [Docs](https://tempo.xyz/developers)',
         '- [API](https://tempo.xyz/developers/docs/api)',
         '- [Authentication](https://tempo.xyz/developers/docs/api#authentication)',
         '<Card title="API" to="https://tempo.xyz/developers/docs/api" />',
@@ -67,13 +67,39 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
     ).toBe('<a href="https://docs.example.com/reference/docs/api">API</a>')
   })
 
+  test('canonicalizes the landing and getting-started routes while preserving anchors and queries', () => {
+    expect(
+      canonicalizeGeneratedDeveloperLinks(
+        '<a href="/">Docs</a> [Start](/get-started?ref=nav#payment) <a href="/developers">Home</a> <a href="/docs#start-here">Legacy</a>',
+        publicDevelopersUrl,
+      ),
+    ).toBe(
+      '<a href="https://tempo.xyz/developers">Docs</a> [Start](https://tempo.xyz/developers/get-started?ref=nav#payment) <a href="https://tempo.xyz/developers">Home</a> <a href="https://tempo.xyz/developers#start-here">Legacy</a>',
+    )
+  })
+
   test('leaves internal route values and unrelated URLs unchanged', () => {
     const content = [
       '{"to":"/docs/api","path":"/docs/api"}',
       '<a href="/docsify">Docsify</a>',
+      '<a href="#section">Section</a><a href="">Current page</a>',
+      '{"to":"/get-started","path":"/"}',
+      '<a href="/get-started-extra">Unrelated route</a>',
+      '{"to":"/get-started/stablecoins","path":"/get-started/stablecoins"}',
       '[External](https://example.com/docs)',
     ].join('\n')
 
     expect(canonicalizeGeneratedDeveloperLinks(content, publicDevelopersUrl)).toBe(content)
+  })
+
+  test('canonicalizes nested getting-started links on both route mounts', () => {
+    expect(
+      canonicalizeGeneratedDeveloperLinks(
+        '<a href="/get-started/stablecoins?ref=nav#token-amounts">Tokens</a> [Tokens](/developers/get-started/stablecoins#token-amounts)',
+        publicDevelopersUrl,
+      ),
+    ).toBe(
+      '<a href="https://tempo.xyz/developers/get-started/stablecoins?ref=nav#token-amounts">Tokens</a> [Tokens](https://tempo.xyz/developers/get-started/stablecoins#token-amounts)',
+    )
   })
 })

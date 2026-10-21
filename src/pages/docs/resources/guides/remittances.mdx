@@ -1,0 +1,117 @@
+---
+title: Remittance payment operations
+seoTitle: Stablecoin Remittance Integration and Operations | Tempo Docs
+description: Map a remittance corridor from sender funding to recipient payout, verify provider responsibilities, and reconcile a stablecoin settlement pilot.
+---
+
+[Guides](/docs/resources/guides) / [Payment workflows](/docs/resources/guides#payment-workflows) / Remittance payment operations
+
+# Remittance payment operations
+
+A stablecoin remittance uses an onchain transfer for part of a cross-border payment to a recipient. Sender funding and final delivery can still use bank accounts, wallets, or cash services. Begin with one corridor and map funding, conversion, settlement, and payout separately before selecting a provider or integrating Tempo.
+
+## Map the complete remittance route
+
+<span id="remittance-corridor" />
+
+A remittance corridor identifies a sending and receiving country, such as the United States to Mexico. Add the funding currency, payout currency, and delivery method when defining an operational route. The [World Bank's country-corridor comparisons](https://remittanceprices.worldbank.org/) show why a global average is insufficient for evaluating one route.
+
+A remittance can use local-currency collection, a stablecoin transfer between providers, and local-currency payout. This is sometimes called a stablecoin sandwich. A recipient can also receive a supported stablecoin directly where the product and recipient support that outcome.
+
+| Stage | Required evidence |
+| --- | --- |
+| Sender funding | Source amount and currency, accepted funding method, and provider confirmation. |
+| Acquisition or conversion | Exact token and network, executable quote, fees, and amount available. |
+| Onchain transfer | Successful delivered transfer of the expected token and amount. |
+| Destination conversion | Provider acceptance, FX terms, and amount available for payout. |
+| Recipient payout | Completion in the promised currency and bank, wallet, or cash-delivery method. |
+
+Tempo's near-instant settlement applies to the onchain leg. Funding, provider checks, conversion, bank processing, and recipient access still determine end-to-end delivery.
+
+## Verify corridor support before accepting funds
+
+Confirm the exact sending and receiving markets, institutions, customer eligibility, funding method, token contract, network, payout currency, and delivery method. A country appearing in a provider's coverage list does not establish that your intended flow is supported.
+
+Document which party supplies custody, wallets, currency conversion, identity checks, screening, information exchange, and local payout. An orchestration API can bundle services, but its responsibilities follow the arrangement you actually have.
+
+Where information-sharing requirements apply, identify who collects and exchanges the required data and what happens when checks remain unresolved. [FATF's virtual-asset guidance](https://www.fatf-gafi.org/en/topics/virtual-assets.html) describes secure originator and beneficiary information exchange under the Travel Rule. Applicable local requirements and the involved institutions determine your implementation. Onchain data or a transfer memo alone is not that implementation.
+
+## Compare net recipient amounts and full costs
+
+Hold the source currency, funding method, transfer amount, recipient currency, and payout method constant. Decide whether the comparison fixes the sender's total budget or the recipient's net amount.
+
+Include collection charges, stablecoin acquisition, network fees, custody or orchestration charges, FX spreads, off-ramp charges, and local payout fees. Record quote expiry and the handling of failed, returned, or delayed payouts. The [World Bank's Remittance Prices Worldwide](https://remittanceprices.worldbank.org/) provides comparison context for relatively small transfers between countries. Check the corridor, transfer amount, and observation date before using its data; a benchmark is not an executable quote for your route.
+
+Sub-cent network fees cover a standard Tempo transfer's onchain expense. They do not establish the cost of the remittance or guarantee savings over an existing provider.
+
+## Choose the local payout rail
+
+### Philippines: distinguish InstaPay, business access, and PESONet
+
+For a proposed PHP payout, identify the provider's actual domestic delivery service:
+
+| Service | What to verify with the payout provider |
+| --- | --- |
+| [InstaPay](https://www.bsp.gov.ph/PaymentAndSettlement/FAQ_Instapay.pdf) | Real-time PHP transfers between participating Philippine accounts, available around the clock. The standard FAQ specifies PHP50,000 per transfer; institutions can impose other account or daily limits. |
+| [InstaPay for Business](https://www.bsp.gov.ph/Media_And_Research/Primers%20Faqs/FAQs-InstaPay-for-Business.pdf) | The BSP's July 29, 2026 FAQ describes transfers up to PHP500,000 for business or corporate accounts through participating institutions. Confirm that the sending account has this access and check institution-specific limits. |
+| [PESONet](https://www.bsp.gov.ph/PaymentAndSettlement/FAQ_PESONet.pdf) | Batch processing with same-banking-day credit subject to the applicable cutoff and clearing cycle. Obtain the provider's actual submission deadline. |
+
+These are local PHP services. They do not establish a supported Tempo-to-Philippines payment route. Verify the provider's accepted stablecoin and network, conversion quote, beneficiary institution, charges, and evidence of recipient credit separately.
+
+## Plan payout liquidity
+
+Document the destination provider balance or liquidity needed before a recipient can be paid, the replenishment path, and how a delayed conversion affects delivery. Faster onchain settlement can shorten one stage without eliminating local payout funding requirements.
+
+Compare individual conversion with bulk funding against the delivery promise and liquidity required. A batch can reduce some operational work while introducing a wait for the batch; use measured route terms to decide.
+
+Keep sender funds accepted, stablecoins available, funds submitted onchain, destination funds received, and recipient payout complete as separate balances or states. A single “complete” status hides where a delayed remittance needs intervention.
+
+## Integrate and pilot the corridor
+
+:::::steps
+
+### Select one measurable route
+
+Choose a corridor with known customer demand and a clear existing delivery or cost baseline. Define the accepted funding method and recipient outcome before implementing.
+
+### Record the quote and instruction
+
+Create a stable remittance identifier. Save the sender and recipient references, source and destination amounts, quote expiry, provider identifiers, and required approvals in your application. Keep personal information offchain.
+
+### Execute and verify each stage
+
+Follow [sending payments](/docs/guide/payments/send-a-payment) for the onchain leg and [receiving payments](/docs/guide/payments/accept-a-payment) for delivery checks. Verify the exact network, contract, recipient, amount, and successful delivered transfer. Treat a receive-policy hold as an exception, not recipient delivery.
+
+### Confirm the recipient payout
+
+Require the destination provider's completion evidence for the promised bank, wallet, or cash payout. Do not mark a fiat remittance delivered solely because the stablecoin leg settled.
+
+### Reconcile and review exceptions
+
+Connect each provider stage and onchain transfer to the remittance identifier. Use the network, transaction hash, and log index to process the transfer once. Test unknown submissions and provider retries without duplicating a payout.
+
+:::::
+
+Measure total sender cost, recipient net amount, delivery by stage, liquidity used, payout failures, support cases, and reconciliation completion. Expand only after the pilot establishes that the complete route meets the promised outcome.
+
+## Define remittance exception handling
+
+Before launch, define what happens after an expired quote, held transfer, failed conversion, rejected recipient account, or uncertain payout. Save the stage and existing attempt before retrying. A second transfer is not a safe default response to a timeout.
+
+Explain the payout status to customers using application evidence. An accepted request, an onchain transfer, and a completed local payout should have distinct meanings in the customer experience.
+
+For refunds or returns, establish the approved destination, conversion treatment, charges, and verification process. A return can require another transfer and a new provider instruction.
+
+## Remittance operation questions
+
+### Must the recipient understand stablecoins?
+
+Not for a supported local-currency payout. The provider can handle the stablecoin leg while the recipient receives the specified bank, wallet, or cash payout. Confirm that capability for the selected route.
+
+### Must the institution hold stablecoins directly?
+
+Not in every provider model. Document custody, signing, asset exposure, fees, and the provider's responsibilities before using a flow that handles stablecoins on your behalf.
+
+### Does onchain settlement prove the remittance is complete?
+
+Only if the promised outcome is the verified onchain receipt itself. Local-currency payout needs separate destination-provider evidence. See [payment rail comparisons](/docs/resources/guides/payment-rails) for the distinction.

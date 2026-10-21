@@ -52,7 +52,7 @@ test('centers the API overview and authored guides while preserving full-width e
   const readableAreaCenter = mainBox.x + (mainBox.width - mainPaddingRight) / 2
   expect(Math.abs(guideCenter - readableAreaCenter)).toBeLessThanOrEqual(1)
 
-  await page.goto('/docs/api/authentication')
+  await page.goto('/docs/api/transactions')
 
   const referenceLayout = page.locator('[data-layout][data-v-sidebar]')
   const operation = referenceLayout.locator('[data-v-openapi-operation]').first()

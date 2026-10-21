@@ -1,12 +1,14 @@
 'use client'
+
 import * as React from 'react'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-import { cx } from '../../../../../cva.config'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Login, Step } from '../../Demo'
+import * as form from '../../form.recipes'
 import { alphaUsd } from '../../tokens'
 import type { DemoStepProps } from '../types'
+import * as ui from './CreateToken.recipes'
 
 export function CreateToken(props: DemoStepProps) {
   const { stepNumber, last = false } = props
@@ -56,8 +58,8 @@ export function CreateToken(props: DemoStepProps) {
       title="Create & deploy a token to testnet."
     >
       {(active || create.isSuccess) && (
-        <div className="ml-6 flex flex-col gap-3 py-4">
-          <div className="border-gray4 border-s-2 ps-5">
+        <div {...ui.createTokenLayout()}>
+          <div {...form.stepRail()}>
             <form
               onSubmit={(event) => {
                 event.preventDefault()
@@ -71,14 +73,14 @@ export function CreateToken(props: DemoStepProps) {
                   feeToken: alphaUsd,
                 })
               }}
-              className="-mt-2.5 flex flex-col gap-2 md:flex-row md:items-end"
+              {...ui.form()}
             >
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="name">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="name">
                   Token name
                 </label>
                 <input
-                  className="h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...ui.createTokenInput()}
                   data-1p-ignore
                   type="text"
                   id="name"
@@ -88,12 +90,12 @@ export function CreateToken(props: DemoStepProps) {
                   placeholder="demoUSD"
                 />
               </div>
-              <div className="flex flex-1 flex-col">
-                <label className="text-[11px] text-gray9 -tracking-[1%]" htmlFor="symbol">
+              <div {...form.secondaryField()}>
+                <label {...form.label()} htmlFor="symbol">
                   Token symbol
                 </label>
                 <input
-                  className="h-[34px] rounded-lg border border-gray4 px-3.25 font-normal text-[14px] text-black -tracking-[2%] placeholder-gray9 dark:text-white"
+                  {...ui.createTokenInput()}
                   data-1p-ignore
                   type="text"
                   id="symbol"
@@ -110,15 +112,11 @@ export function CreateToken(props: DemoStepProps) {
           </div>
 
           {create.data && (
-            <div className="relative">
-              <div
-                className={cx(
-                  'flex flex-col items-center rounded-[10px] bg-gray2 p-4 text-center font-normal text-[13px] text-gray9 leading-snug -tracking-[2%]',
-                )}
-              >
+            <div {...ui.createTokenLayout4()}>
+              <div {...ui.createTokenLayout5()}>
                 <div>
                   Token{' '}
-                  <span className="font-medium text-primary">
+                  <span {...ui.createTokenText()}>
                     {' '}
                     {create.data.name} ({create.data.symbol}){' '}
                   </span>{' '}

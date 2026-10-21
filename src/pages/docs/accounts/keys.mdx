@@ -1,0 +1,76 @@
+---
+title: Account model
+seoTitle: Tempo EVM Account Model, Account Types, and Signature Types | Tempo Docs
+description: Tempo EVM accounts are approved by one key or by weighted owners, can hand limited signing power to access keys, and use five signature formats.
+ogImage: /og/2026-q4/og_2026-q4_docs_accounts-keys_title-f5_v02.png
+---
+
+import { AccountDiagram } from '../../../components/AccountDiagram'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
+
+<span id="keys-and-signing" />
+<span id="keys-and-permissions" />
+
+# Account model
+
+Every Tempo EVM account is either a single-key account or a configurable account, and they differ in who approves transactions.
+
+One key approves a single-key account's transactions, as on Ethereum. Weighted owners approve a configurable account's transactions; the Accounts guides call them signers. A transaction runs once the approving owners' weights reach the account's threshold. Either type can also authorize access keys, which sign alone within limits.
+
+<AccountDiagram
+  name="account-types"
+  alt="Two account types: a single-key account, which can upgrade in place to a configurable account. Both use the Account Keychain for access keys."
+/>
+
+<span id="tempo-evm-account-kinds" />
+<span id="tempo-account-configuration" />
+<span id="account-references" />
+
+## Single-key and configurable accounts
+
+| | [Single-key account](/docs/development/single-key-accounts) | [Configurable account](/docs/development/configurable-accounts) |
+| --- | --- | --- |
+| Approved by | Its one key, the root key | Owners whose weights reach the threshold |
+| Address comes from | One public key: secp256k1, P-256, or WebAuthn (passkey) | The first configuration of owners, weights, threshold, and salt, or the original key if upgraded |
+| Changing keys | A new key means a new address. [Upgrade to a configurable account](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) to change keys and keep the address. | `updateConfig` replaces the owners and threshold. The address stays. |
+| Running contract code (EIP-7702 delegation) | Allowed, but a delegated account can't upgrade | Not allowed |
+
+<ConfigurableAccountsT14 />
+
+Single-key accounts work on mainnet, testnet, and the devnet. The upgrade to a configurable account runs only on the devnet until T14.
+
+<span id="access-key-enforcement" />
+<span id="delegate-only-the-authority-a-task-needs" />
+<span id="grant-access" />
+<span id="revoke-access" />
+<span id="keep-access-and-recovery-explicit" />
+
+## Access keys for both account types
+
+An [access key](/docs/accounts/access-keys) is an extra key that signs for the account on its own, within the limits you set. Those limits are a spending limit per TIP-20 token that can reset each period, an optional expiry, and scopes that restrict which contracts it calls and whom it pays. The [Account Keychain](/docs/development/account-keychain), a contract built into Tempo (a precompile), stores every account's access keys. It enforces those limits on each transaction they sign.
+
+The account itself authorizes and revokes access keys: its root key, or owners whose weights reach the threshold. An [admin access key](/docs/development/account-keychain#admin-access-keys) can too. It has no limits, so store it as carefully as a root or owner key. Access keys, admin or not, never count toward a threshold.
+
+<span id="tempo-transaction-signature-types" />
+
+## Tempo transaction signature types
+
+| Signature | Prefix | Used by |
+| --- | --- | --- |
+| secp256k1 | None (65 bytes) | A root key, owner, access key, or fee payer |
+| P-256 | `0x01` | A root key, owner, or access key |
+| WebAuthn | `0x02` | A root key, owner, or access key |
+| Keychain | `0x04` | An access key, wrapping its own signature with the account's address |
+| Multisig | `0x05` | A configurable account's owners, bundling their signatures with the [account's configuration](/docs/development/configurable-accounts#multisig-signature-format) |
+
+Viem's `Account` helpers encode every [format](/docs/protocol/transactions/spec-tempo-transaction#signature-types).
+
+<span id="separate-login-from-transaction-authority" />
+<span id="choose-a-signer" />
+<span id="logins-as-signers" />
+<span id="sign-transactions" />
+<span id="choose-the-signing-environment" />
+<span id="login-signing-and-api-credentials" />
+<span id="app-session-signing-and-api-credentials" />
+
+Only these keys sign transactions. Your app's login session controls access to your app. A Tempo API key authenticates requests to Tempo's hosted APIs. Neither signs for an account.

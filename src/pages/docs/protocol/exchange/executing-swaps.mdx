@@ -2,13 +2,14 @@
 title: "Executing swaps | Protocol reference"
 seoTitle: "Executing Swaps: Protocol Reference | Docs"
 description: Learn how to execute swaps and quote prices on Tempo's Stablecoin DEX with exact-in and exact-out swap functions and slippage protection.
+ogImage: /og/2026-q4/og_2026-q4_docs_protocol-exchange-executing-swaps_title-f5_v02.png
 ---
 
 # Executing swaps | Protocol reference
 
 ## Swap Functions
 
-The exchange provides two primary swap functions:
+The DEX provides two primary swap functions:
 
 ### Swap Exact Amount In
 
@@ -131,7 +132,7 @@ When you call a swap function:
 5. **Settlement**: Your output tokens are transferred to your wallet
 
 :::warning
-Swaps will revert with an `InsufficientLiquidity` error if there isn't enough liquidity in the orderbook to satisfy your slippage constraints.
+Swaps revert with `InsufficientLiquidity` when the onchain orderbook cannot fill the requested amount. Exact-input swaps revert with `InsufficientOutput` when output is below `amountOutMin`; exact-output swaps revert with `MaxInputExceeded` when the required input exceeds `amountInMax`.
 :::
 
 ## Gas Costs
@@ -143,7 +144,7 @@ Swap gas costs scale with the number of orders and ticks your trade crosses:
 - Per-tick cost (for each price level crossed)
 - Per-flip cost (if any flip orders are triggered)
 
-Larger swaps that cross more orders will cost more gas, but the cost per unit of volume decreases.
+Swaps that cross more orders generally use more gas. Estimate gas for the requested amount and current onchain orderbook; cost per unit of volume is not fixed.
 
 ## Token Balances on the DEX
 

@@ -1,0 +1,92 @@
+---
+title: Revocation
+seoTitle: Revoke Access Keys on Tempo | Tempo Docs
+description: Shut off an access key for good when a device is lost, a backend key leaks, or an account changes hands, then clean up what the key left behind.
+---
+
+import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+
+# Revocation
+
+Revoking an access key shuts it off for good.
+
+Revocation ends an [access key](/docs/accounts/access-keys) on demand, without waiting for its [expiry](/docs/accounts/access-keys/expiry): once the revocation lands, Tempo rejects every transaction the key signs. Revoke a key as soon as its device is lost, its secret leaks, or its holder no longer needs it.
+
+<span id="key-revocation" />
+<span id="what-revocation-stops" />
+<span id="what-revocation-leaves-in-place" />
+<span id="what-stays-in-place" />
+
+## How it works
+
+Revocation doesn't undo what the key did while it was active:
+
+- **Transactions stay final.** A payment racing the revocation goes through only if it lands first. Once the revocation lands, Tempo rejects the rest.
+- **Token approvals stay.** A spender the key approved can still pull tokens up to the allowance. Set each allowance to zero from the account.
+- **Authorized keys stay.** If it was an admin key, the keys it authorized stay authorized. Revoke each one.
+
+<span id="key-revocation-by-situation" />
+<span id="revoke-an-access-key" />
+
+## Revoke a key
+
+Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. In Viem, call [`accessKey.revoke`](https://viem.sh/tempo/actions/accessKey.revoke) with the account and the key's address.
+
+When you authorize a key, save its address next to the device or service that holds it. That record tells you which address to revoke. Show a key as removed only after the revocation confirms.
+
+<span id="revoke-after-a-signer-change" />
+<span id="revoke-when-signers-change" />
+
+<span id="when-signers-change" />
+
+## Signer changes
+
+<ConfigurableAccountsT14 />
+
+Changing a configurable account's signers doesn't touch its access keys. Revoke them yourself after a recovery and before a hand-off.
+
+After you [replace a lost or compromised signer](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer), revoke every key that signer's holder could use. That includes any key an attacker authorized. You won't have those addresses saved, so list every key the account has authorized from its `KeyAuthorized` events. The devnet RPC searches at most 100,000 blocks per request, so read the events in pages:
+
+```ts [find-keys.ts]
+import { Abis, Addresses } from 'viem/tempo'
+import { account } from './access-keys'
+import { client } from './client'
+
+const latestBlock = await client.getBlockNumber()
+const pageSize = 100_000n
+
+const events = []
+// Start from 0, or from the block of the account's first transaction if you saved it
+for (let fromBlock = 0n; fromBlock <= latestBlock; fromBlock += pageSize) {
+  const toBlock = fromBlock + pageSize - 1n
+  const page = await client.getContractEvents({ // [!code hl]
+    abi: Abis.accountKeychain,
+    address: Addresses.accountKeychain,
+    args: { account: account.address },
+    eventName: 'KeyAuthorized', // [!code hl]
+    fromBlock,
+    toBlock: toBlock < latestBlock ? toBlock : latestBlock,
+    strict: true,
+  })
+  events.push(...page)
+}
+
+const keys = await Promise.all(
+  events.map(({ args }) => client.accessKey.getMetadata({ account, accessKey: args.publicKey })),
+)
+// compare with the keys you saved
+const unrevoked = keys.filter((key) => !key.isRevoked) // [!code hl]
+```
+
+Before you [hand an account to a customer](/docs/accounts/apps/self-custodial-wallets), revoke your app's access keys, then swap out your app's signers. Once your signers are gone, your app can't approve anything, including a revocation.
+
+<span id="revocation-limits" />
+
+## Limits
+
+- A limited access key can't revoke any key, including itself.
+- A revoked key's address can never be authorized again for this account. To restore access, authorize a new key.
+- Revoking a key the account hasn't authorized reverts with [`KeyNotFound`](/docs/protocol/transactions/AccountKeychain#error-keynotfound). That includes a key whose authorization hasn't landed yet. If you signed the authorization with a [witness](https://viem.sh/tempo/guides/access-keys/witnesses), a 32-byte value, cancel it with `client.accessKey.burnWitnessSync({ account, witness })`. Tempo then rejects any authorization signed with that witness.
+- An expired key needs no revocation: Tempo already rejects its transactions.
+
+Specification: [Account Keychain key revocation](/docs/protocol/transactions/AccountKeychain#key-revocation).

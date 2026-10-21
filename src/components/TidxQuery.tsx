@@ -1,14 +1,10 @@
 'use client'
 
 import * as React from 'react'
+import { tidxNetworks } from '../lib/tidx-networks'
 import { Container } from './Container'
 import { SqlEditor } from './SqlEditor'
-
-type Network = {
-  name: string
-  chainId: number
-  endpoint: string
-}
+import * as ui from './TidxQuery.recipes'
 
 type Preset = {
   name: string
@@ -28,18 +24,7 @@ type TidxResponse = {
   ok: boolean
 }
 
-const NETWORKS = {
-  mainnet: {
-    name: 'Mainnet',
-    chainId: 4217,
-    endpoint: 'https://indexer.tempo.xyz',
-  },
-  testnet: {
-    name: 'Testnet',
-    chainId: 42431,
-    endpoint: 'https://indexer.testnet.tempo.xyz',
-  },
-} as const satisfies Record<string, Network>
+const NETWORKS = tidxNetworks
 
 const PRESETS: Preset[] = [
   {
@@ -81,18 +66,49 @@ function shorten(value: string) {
 }
 
 function renderValue(value: string | number | boolean | null) {
-  if (value === null) return <span className="text-gray9 italic">null</span>
+  if (value === null) return <span {...ui.renderValueText()}>null</span>
   if (typeof value === 'boolean') return value ? 'true' : 'false'
   if (typeof value === 'string') return shorten(value)
   return String(value)
 }
 
-export function TidxQuery() {
+export type TidxQueryProps = {
+  /** Network the widget opens on. Defaults to the first example's network. */
+  network?: 'mainnet' | 'testnet'
+  /**
+   * Event signature to decode as a table, for example `Transfer(address indexed from, ...)`.
+   * Pass an array to decode several events; the input shows them separated by `;`.
+   */
+  signature?: string | readonly string[]
+  /** Initial query. Adds a "This page" example ahead of the built-in examples. */
+  sql?: string
+}
+
+export function TidxQuery(props: TidxQueryProps = {}) {
+  const { network: initialNetwork, sql: initialSql } = props
+  const initialSignature =
+    typeof props.signature === 'string' ? props.signature : props.signature?.join('; ')
+  const presets = React.useMemo<Preset[]>(() => {
+    if (!initialSql) return PRESETS
+    return [
+      {
+        name: 'This page',
+        description: 'Run the query for this page, or edit it first.',
+        network: initialNetwork ?? 'mainnet',
+        engine: 'clickhouse',
+        ...(initialSignature ? { signature: initialSignature } : {}),
+        sql: initialSql,
+      },
+      ...PRESETS,
+    ]
+  }, [initialNetwork, initialSignature, initialSql])
   const [presetIndex, setPresetIndex] = React.useState(0)
-  const activePreset = PRESETS[presetIndex] ?? PRESETS[0]
-  const [networkKey, setNetworkKey] = React.useState<'mainnet' | 'testnet'>(activePreset.network)
+  const activePreset = presets[presetIndex] ?? presets[0] ?? PRESETS[0]
+  const [networkKey, setNetworkKey] = React.useState<'mainnet' | 'testnet'>(
+    initialNetwork ?? activePreset.network,
+  )
   const [engine, setEngine] = React.useState<'postgres' | 'clickhouse'>(activePreset.engine)
-  const [signature, setSignature] = React.useState(activePreset.signature ?? '')
+  const [signature, setSignature] = React.useState(initialSignature ?? activePreset.signature ?? '')
   const [sql, setSql] = React.useState(activePreset.sql)
   const [result, setResult] = React.useState<TidxResponse | null>(null)
   const [error, setError] = React.useState<string | null>(null)
@@ -101,7 +117,7 @@ export function TidxQuery() {
   const network = NETWORKS[networkKey]
 
   const applyPreset = (nextIndex: number) => {
-    const next = PRESETS[nextIndex] ?? PRESETS[0]
+    const next = presets[nextIndex] ?? presets[0] ?? PRESETS[0]
     setPresetIndex(nextIndex)
     setNetworkKey(next.network)
     setEngine(next.engine)
@@ -127,7 +143,9 @@ export function TidxQuery() {
       url.searchParams.set('chainId', String(network.chainId))
       url.searchParams.set('engine', engine)
       url.searchParams.set('sql', query)
-      if (signature.trim()) url.searchParams.set('signature', signature.trim())
+      for (const item of signature.split(';')) {
+        if (item.trim()) url.searchParams.append('signature', item.trim())
+      }
 
       const response = await fetch(url)
       const json = await response.json()
@@ -151,43 +169,38 @@ export function TidxQuery() {
   return (
     <Container
       headerLeft={
-        <h4 className="font-normal text-[14px] text-gray12 leading-none">
+        <h4 {...ui.tidxQueryHeading()}>
           Public <code>tidx</code> Query
         </h4>
       }
       headerRight={
-        <button
-          type="button"
-          onClick={runQuery}
-          disabled={isLoading}
-          className="rounded-md bg-accent px-3 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <button type="button" onClick={runQuery} disabled={isLoading} {...ui.tidxQueryButton()}>
           {isLoading ? 'Running...' : 'Run query'}
         </button>
       }
     >
-      <div className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-3">
-          <label className="space-y-1 text-sm">
-            <span className="text-gray11">Example</span>
+      <div {...ui.tidxQueryLayout()}>
+        <div {...ui.tidxQueryLayout2()}>
+          <label {...ui.label()}>
+            <span {...ui.tidxQueryText()}>Example</span>
             <select
               value={presetIndex}
               onChange={(event) => applyPreset(Number(event.target.value))}
-              className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 text-gray12"
+              {...ui.select()}
             >
-              {PRESETS.map((preset, index) => (
+              {presets.map((preset, index) => (
                 <option key={preset.name} value={index}>
                   {preset.name}
                 </option>
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm">
-            <span className="text-gray11">Network</span>
+          <label {...ui.label()}>
+            <span {...ui.tidxQueryText()}>Network</span>
             <select
               value={networkKey}
               onChange={(event) => setNetworkKey(event.target.value as 'mainnet' | 'testnet')}
-              className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 text-gray12"
+              {...ui.select()}
             >
               {Object.entries(NETWORKS).map(([key, value]) => (
                 <option key={key} value={key}>
@@ -196,12 +209,12 @@ export function TidxQuery() {
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm">
-            <span className="text-gray11">Engine</span>
+          <label {...ui.label()}>
+            <span {...ui.tidxQueryText()}>Engine</span>
             <select
               value={engine}
               onChange={(event) => setEngine(event.target.value as 'postgres' | 'clickhouse')}
-              className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 text-gray12"
+              {...ui.select()}
             >
               <option value="clickhouse">ClickHouse</option>
               <option value="postgres">PostgreSQL</option>
@@ -209,41 +222,37 @@ export function TidxQuery() {
           </label>
         </div>
 
-        <p className="text-gray11 text-sm">{activePreset.description}</p>
+        <p {...ui.tidxQueryDescription()}>{activePreset.description}</p>
 
-        <label className="block space-y-1 text-sm">
-          <span className="text-gray11">Event signature (optional)</span>
+        <label {...ui.label2()}>
+          <span {...ui.tidxQueryText()}>Event signature (optional)</span>
           <input
             value={signature}
             onChange={(event) => setSignature(event.target.value)}
             placeholder="Transfer(address indexed from, address indexed to, uint256 value)"
-            className="w-full rounded-md border border-gray6 bg-gray1 px-3 py-2 font-mono text-gray12"
+            {...ui.tidxQueryInput()}
           />
         </label>
 
         <SqlEditor value={sql} onChange={setSql} minHeight="180px" />
 
-        {error && (
-          <div className="rounded-md border border-red6 bg-red2 px-3 py-2 text-red11 text-sm">
-            {error}
-          </div>
-        )}
+        {error && <div {...ui.tidxQueryLayout3()}>{error}</div>}
 
         {result && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2 text-gray11 text-xs">
+          <div {...ui.tidxQueryLayout4()}>
+            <div {...ui.tidxQueryLayout5()}>
               <span>Rows: {result.row_count}</span>
               <span>Engine: {result.engine}</span>
               {result.query_time_ms !== undefined && (
                 <span>Query time: {result.query_time_ms.toFixed(1)} ms</span>
               )}
             </div>
-            <div className="overflow-x-auto rounded-md border border-gray6">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-gray2 text-gray11">
+            <div {...ui.tidxQueryLayout6()}>
+              <table {...ui.table()}>
+                <thead {...ui.thead()}>
                   <tr>
                     {result.columns.map((column) => (
-                      <th key={column} className="px-3 py-2 font-medium">
+                      <th key={column} {...ui.th()}>
                         {column}
                       </th>
                     ))}
@@ -251,9 +260,9 @@ export function TidxQuery() {
                 </thead>
                 <tbody>
                   {result.rows.map((row) => (
-                    <tr key={JSON.stringify(row)} className="border-gray5 border-t">
+                    <tr key={JSON.stringify(row)} {...ui.tr()}>
                       {result.columns.map((column, cellIndex) => (
-                        <td key={column} className="px-3 py-2 font-mono">
+                        <td key={column} {...ui.td()}>
                           {renderValue(row[cellIndex] ?? null)}
                         </td>
                       ))}

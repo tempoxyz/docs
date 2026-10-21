@@ -1,0 +1,107 @@
+---
+title: Tempo Accounts
+seoTitle: "Tempo Accounts | Tempo Docs"
+description: Give every customer and business a stablecoin account with its security rules built in. Users hold their keys, backends and agents pay within limits, and Tempo enforces every rule onchain.
+ogImage: /og/2026-q4/og_2026-q4_docs_accounts_shape-000_v02.jpg
+---
+
+import { Card, Cards } from 'vocs'
+import { DocsProductOverview } from '../../components/DocsProductOverview'
+import ConfigurableAccountsT14 from '../../snippets/configurable-accounts-t14.mdx'
+
+<span id="build-your-account-integration" />
+
+<DocsProductOverview image="accounts" alt="A Tempo account: an address that holds stablecoin balances, a passkey and a private key as signers with weight 1 each toward a threshold of 2, and an access key with a daily limit.">
+
+# Tempo Accounts
+
+Give every customer and business a stablecoin account with security rules that Tempo enforces onchain.
+
+[Create an account →](/docs/accounts/create)
+
+</DocsProductOverview>
+
+<span id="account-capabilities" />
+<span id="accounts-capabilities" />
+
+## Why Tempo Accounts
+
+- **Native account abstraction.** Passkey signatures, access keys, batched calls, and [fee sponsorship](/docs/accounts/fees/fee-sponsorship) are built into every [Tempo Transaction](/docs/guide/tempo-transaction), with no wallet contracts, bundlers, or paymasters to run.
+- **Self-custodial.** Signing rules live onchain and Tempo checks every transaction against them, so when the customer holds the [passkey](/docs/accounts/authentication/passkeys) or [private key](/docs/accounts/authentication/private-keys), neither you nor Tempo can move their funds.
+- **Your wallet stack works.** Tempo is [EVM compatible](/docs/quickstart/evm-compatibility), so [wallet providers](/docs/accounts/apps) and [custodians](/docs/accounts/custodians) such as Privy, Turnkey, Dynamic, and Fireblocks work, along with browser wallets like MetaMask.
+
+## What you can build
+
+- **Stablecoin accounts for your users.** Each user gets their own account in your app, approved with a key they hold, such as a [passkey](/docs/accounts/authentication/passkeys) or a key from a provider like Privy or Turnkey, so you never hold their funds.
+- **Automated payments.** Your backend, card program, or AI agent pays with its own revocable [access key](/docs/accounts/access-keys), and Tempo rejects any payment over its limit, to an unlisted payee, or after it expires.
+- **Business accounts.** Hold customer funds in one [omnibus account](/docs/accounts/custodians/omnibus-accounts) with a [deposit address](/docs/accounts/virtual-addresses) per customer and no sweep transactions, or run a treasury from a [custodian](/docs/accounts/custodians) like Fireblocks.
+
+<span id="choose-an-account-model" />
+<span id="choose-who-controls-signing" />
+<span id="tempo-account-building-blocks" />
+<span id="configure-account-controls" />
+<span id="keys-and-permissions" />
+<span id="control-account-access" />
+<span id="control-who-can-use-an-account" />
+<span id="delegate-access-to-applications-and-services" />
+<span id="signing-methods" />
+<span id="signing-thresholds" />
+<span id="access-keys" />
+<span id="key-management" />
+<span id="fee-management" />
+<span id="whats-in-a-tempo-account" />
+
+<span id="how-tempo-accounts-work" />
+
+## Account model
+
+A Tempo account is an address that holds stablecoins, with its rules stored onchain:
+
+- **Address:** holds the account's stablecoins and never changes, even when you [replace its signers](/docs/accounts/account-configuration).
+- **Signers:** approve payments and changes to the account. Each is a [private key, device key, or passkey](/docs/accounts/authentication) with a weight, and a transaction runs once its approvers' weights reach the [threshold](/docs/accounts/policies/signing-thresholds), such as any 2 of 3.
+- **Access keys:** let a customer's phone, your backend, or an AI agent [pay on its own](/docs/accounts/access-keys), within the limits, expiry, and allowed calls you set.
+
+<ConfigurableAccountsT14 />
+
+<span id="tempo-account-use-cases" />
+<span id="what-you-can-build-with-tempo-accounts" />
+<span id="building-on-accounts" />
+<span id="accounts-and-wallets" />
+<span id="fit-accounts-into-your-application" />
+<span id="fund-accounts-and-reconcile-payments" />
+<span id="put-an-account-to-use" />
+<span id="connect-accounts-to-your-payment-system" />
+<span id="what-do-you-want-to-do" />
+<span id="create-an-account" />
+<span id="embedded-wallets" />
+<span id="consumer-self-custody" />
+<span id="automations" />
+<span id="ai-agents" />
+<span id="spending-accounts" />
+<span id="company-treasury" />
+
+## Start building
+
+On mainnet, [create a single-key account](/docs/accounts/create#create-a-single-key-account) or support the [wallets your users already have](/docs/accounts/wallets). To try several signers and recovery, [create a configurable account](/docs/accounts/create#create-a-configurable-account) on the devnet. Then [add funds](/docs/accounts/fund).
+
+<Cards>
+  <Card title="Set up a self-custodial wallet with a provider" description="Your provider's key and the user's passkey approve together, and only the user can recover or leave without you. Devnet until T14." to="/docs/accounts/apps/self-custodial-wallets" />
+  <Card title="Recover a user's account" description="Replace a lost passkey with the signers the user still has, at the same address. Devnet until T14." to="/docs/accounts/apps/recover-an-account" />
+  <Card title="Pay out from a backend" description="Your backend pays approved payees, up to a daily limit, with a key in your KMS." to="/docs/accounts/automations/pay-out-from-a-backend" />
+  <Card title="Pay from a user's embedded wallet" description="A user's Privy or Turnkey wallet authorizes a key once, so your card or subscription backend pays within limits." to="/docs/accounts/automations/pay-from-an-embedded-wallet" />
+  <Card title="Give an agent a wallet" description="An AI agent's own key, with a budget, an expiry, and only the calls it needs." to="/docs/accounts/automations/give-an-agent-a-wallet" />
+  <Card title="Hold customer funds in an omnibus account" description="A deposit address per customer, paying into one account that accepts only the stablecoins you list." to="/docs/accounts/custodians/omnibus-accounts" />
+  <Card title="Set up a team multisig" description="Any two of three approvers sign each payment, so no one moves funds alone. Devnet until T14." to="/docs/accounts/custodians/team-multisig" />
+  <Card title="Add Tempo to your wallet" description="Add the networks, show stablecoin balances, and send Tempo Transactions from your wallet." to="/docs/accounts/wallets/add-tempo-to-your-wallet" />
+</Cards>
+
+## Account features
+
+<Cards>
+  <Card title="Signing methods" description="Approve payments with a passkey, a key on the device, or a private key." to="/docs/accounts/authentication" />
+  <Card title="Account policies" description="Require several approvals, and choose which stablecoins and senders can pay the account." to="/docs/accounts/policies" />
+  <Card title="Access keys" description="Let a backend, a device, or an agent pay on its own, within limits you set." to="/docs/accounts/access-keys" />
+  <Card title="Account configuration" description="Add, remove, and rotate signers while the address stays the same." to="/docs/accounts/account-configuration" />
+  <Card title="Fee management" description="Pay network fees in stablecoins, or pay them for your customers." to="/docs/accounts/fees" />
+  <Card title="Virtual addresses" description="Give each customer a deposit address that pays into one account." to="/docs/accounts/virtual-addresses" />
+</Cards>

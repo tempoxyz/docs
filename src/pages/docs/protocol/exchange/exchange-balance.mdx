@@ -1,20 +1,17 @@
 ---
 title: "Understanding DEX balances on Tempo"
 seoTitle: "Understanding DEX Balances | Tempo Docs"
-description: Hold token balances directly on the Stablecoin DEX to save gas costs on trades, receive maker proceeds automatically, and trade more efficiently.
+description: Read balances recorded by the Stablecoin DEX, use them for trades, and withdraw tokens to your account.
+ogImage: /og/2026-q4/og_2026-q4_docs_protocol-exchange-exchange-balance_title-f5_v02.png
 ---
 
 # Understanding DEX balances on Tempo
 
-The Stablecoin DEX allows you to hold token balances directly using the DEX contract. This eliminates the need for token transfers on every trade, significantly reducing gas costs for active traders and liquidity providers.
+The Stablecoin DEX records a token balance for each trading account. This DEX balance is separate from the tokens held at the account's address. Order fills credit proceeds to the DEX balance; withdraw those tokens when you need them in the account.
 
-## Why DEX Balances?
+<span id="why-dex-balances" />
 
-When you trade or provide liquidity on the DEX, constantly transferring tokens between your wallet and the DEX contract wastes gas. By maintaining a balance via the DEX contract, you can:
-
-- **Save on gas costs** - Avoid ERC-20 transfer costs for each trade
-- **Trade more efficiently** - Execute multiple swaps without transfers between each trade
-- **Receive maker proceeds automatically** - When your limit orders are filled, proceeds are credited to your DEX balance instead of requiring a transfer for each fill
+Use the DEX balance for repeated trades without transferring tokens into the contract for each operation. See [account balances](/docs/guide/payments/accept-a-payment#read-balances) to read holdings outside the DEX.
 
 ## Checking Your Balance
 
@@ -34,7 +31,9 @@ uint128 balance = exchange.balanceOf(msg.sender, USDG_ADDRESS);
 
 ## Using Your DEX Balance
 
-Each transaction that you authorize will use your DEX balance before using funds you approve from your wallet. When you execute a swap or place an order, the DEX contract automatically:
+Each transaction you authorize uses your available DEX balance before pulling any TIP-20 shortfall from your account. The DEX has [implicit approval](/docs/protocol/tip20/spec#implicit-approvals-for-listed-precompiles), so it does not require a separate token allowance. The pull still checks balances, token transfer policies, and access-key spending limits.
+
+When you execute a swap or place an order, the DEX contract automatically:
 
 1. Checks if you have sufficient balance in the DEX
 2. If insufficient, transfers the needed amount from your wallet to your DEX balance
@@ -65,18 +64,18 @@ exchange.withdraw(USDG_ADDRESS, 1000e6);
 ```
 
 :::warning
-The withdraw function will revert if you attempt to withdraw more than your available balance on the exchange.
+The withdraw function will revert if you attempt to withdraw more than your available balance on the DEX.
 :::
 
 ## How Balances Work
 
 ### When Swapping
 
-- **Before swap**: Exchange checks your balance, transfers from wallet if needed
-- **After swap**: Output tokens are transferred directly to your wallet (not kept on exchange)
+- **Before swap**: The DEX checks your balance, transfers from wallet if needed
+- **After swap**: Output tokens are transferred directly to your wallet (not kept on the DEX)
 
 ### When Placing Orders
 
-- **On placement**: Required tokens are debited from your exchange balance (or transferred from wallet if insufficient)
-- **When filled**: Proceeds are credited to your exchange balance
-- **On cancellation**: Unfilled portion is refunded to your exchange balance
+- **On placement**: Required tokens are debited from your DEX balance (or transferred from wallet if insufficient)
+- **When filled**: Proceeds are credited to your DEX balance
+- **On cancellation**: Unfilled portion is refunded to your DEX balance

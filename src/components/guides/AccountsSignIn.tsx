@@ -1,5 +1,6 @@
 'use client'
 import { useConnect, useConnection, useConnectors, useDisconnect } from 'wagmi'
+import * as ui from './AccountsSignIn.recipes'
 import { Button, TempoMarkBoxed } from './Demo'
 
 export function AccountsSignIn() {
@@ -12,7 +13,7 @@ export function AccountsSignIn() {
 
   if (account.address)
     return (
-      <div className="flex items-center gap-2">
+      <div {...ui.accountsSignInLayout()}>
         <Button onClick={() => disconnect.disconnect()} variant="destructive">
           Sign out
         </Button>
@@ -27,9 +28,9 @@ export function AccountsSignIn() {
     )
 
   return (
-    <div className="flex gap-1">
+    <div {...ui.accountsSignInLayout2()}>
       <Button variant="accent" onClick={() => connect.connect({ connector })} type="button">
-        <TempoMarkBoxed className="size-[14px]" />
+        <TempoMarkBoxed className={ui.tempoMarkBoxed().className} />
         Sign in with Tempo
       </Button>
     </div>

@@ -1,0 +1,147 @@
+---
+title: Fee sponsorship
+seoTitle: Sponsor Tempo Account Fees with a Fee Payer | Tempo Docs
+description: Pay your customers' network fees from a fee payer that Tempo hosts or you run. The fee payer signs only for the fee, so it can't move their funds.
+---
+
+# Fee sponsorship
+
+Fee sponsorship lets you pay your customers' network fees, so their accounts don't need any balance for fees.
+
+A fee payer is an account that you run or Tempo hosts. It adds its signature to a customer's Tempo transaction and pays the fee from its own balance. That signature covers only the fee, so the fee payer can't change what the account signed or move its funds.
+
+<span id="sponsor-an-accounts-fees" />
+<span id="sponsor-fees-with-a-fee-payer" />
+<span id="how-fee-sponsorship-works" />
+
+## How it works
+
+1. The account signs its calls.
+2. The fee payer decides whether to sponsor the transaction. It picks the fee token and adds its signature.
+3. Tempo verifies both signatures and charges the fee to the fee payer.
+
+Tempo rejects the transaction if either signature fails or the fee payer can't cover the fee.
+
+<span id="what-a-fee-payer-can-and-cant-do" />
+
+The worst a fee payer can do is refuse or delay sponsorship. The account can then pay its own fee if it holds a fee token.
+
+## Run your own fee payer
+
+Your own fee payer is an account funded with stablecoins. Its key stays on your backend. How you use it depends on where the customer's transaction is signed:
+
+- **Your backend signs.** It signs with a key such as an [access key](/docs/accounts/access-keys) it holds for the account, and passes the fee payer as `feePayer`.
+- **The customer's device signs.** It signs with a key such as a passkey, then sends the transaction to your fee payer server. The server adds the fee payer's signature.
+
+### When your backend signs
+
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). It's the only network that runs configurable accounts until T14, so these examples can sponsor either kind of account. To sponsor single-key accounts on mainnet or testnet, connect `client` to that network instead.
+
+In `sponsored-transfer.ts`, `account` is the paying account with the keys that approve the payment attached. It can be the account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) or an [access key](/docs/accounts/access-keys) your backend holds for it. `recipient` is the payee's address. Fund the fee payer's address from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first, so it can pay fees:
+
+::::code-group
+
+```ts [sponsored-transfer.ts]
+import { parseUnits } from 'viem'
+import { Account } from 'viem/tempo'
+import { client } from './client'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+// Keep the fee payer's private key on your server.
+const feePayer = Account.fromSecp256k1(process.env.FEE_PAYER_KEY as `0x${string}`) // [!code hl]
+
+await client.token.transferSync({
+  account, // needs the stablecoin for the payment, none for the fee
+  amount: parseUnits('25', 6),
+  // The fee payer signs only for the fee, pays it, and picks the token being transferred.
+  feePayer, // [!code hl]
+  feeToken: stablecoin, // [!code hl]
+  to: recipient,
+  token: stablecoin,
+})
+```
+
+```ts [client.ts]
+// [!include ~/snippets/accounts-devnet.ts:client]
+```
+
+::::
+
+Your backend decides what to sponsor. The fee payer pays for every transaction your code passes it to, so authenticate and rate-limit the requests that trigger one.
+
+<span id="request-sponsorship" />
+
+### When the customer's device signs
+
+The customer's keys stay on their device and sign the payment. The fee payer's key stays on your backend and signs only for the fee. Run the fee payer as a server that the customer's device sends its transactions to. Viem's `Relay` with the `Relay.feePayer` plugin is that server. It forwards requests to the devnet through the same `client`. It adds the fee payer's signature to each transaction that `validate` approves:
+
+```ts [fee-payer-server.ts]
+import { Account, Relay } from 'viem/tempo'
+import { client } from './client'
+
+const relay = Relay.create({
+  client, // forwards to the Tempo Accounts devnet
+  plugins: [
+    Relay.feePayer({ // [!code hl]
+      account: Account.fromSecp256k1(process.env.FEE_PAYER_KEY as `0x${string}`), // [!code hl]
+      // pays every fee in a test stablecoin on the devnet // [!code hl]
+      feeToken: '0x20c0000000000000000000000000000000000001', // [!code hl]
+      validate: async (request) => request.from !== undefined && (await isCustomer(request.from)), // [!code hl]
+    }), // [!code hl]
+  ],
+})
+
+export default { fetch: relay.fetch }
+```
+
+The server's URL ships in your app, so anyone can send it transactions. Each transaction it sponsors spends the fee payer's balance.
+
+`validate` is your sponsorship policy. It receives the filled transaction, with the sending account's address as `request.from`. `isCustomer` stands for your own check, such as looking that address up in your user records. Only `true` sponsors the transaction. With `false`, the customer's call fails with `Sponsorship rejected.` and nothing is sent. Without `validate`, the server sponsors every transaction it receives. Add rate limits too, since one customer can send many transactions.
+
+`bun fee-payer-server.ts` serves this file as it is. Other servers can pass their requests to `relay.fetch`. It takes a standard `Request` and returns a `Response`. Set `FEE_PAYER_KEY` and `TEMPO_DEVNET_RPC_KEY` on the server. Fund the fee payer's address from the faucet. [Relay fee payer](https://viem.sh/tempo/relay/plugins/fee-payer) covers the plugin's other options.
+
+On the customer's device, route the client through your server with [`withRelay`](https://viem.sh/tempo/transports/withRelay). Set `feePayer: true` on each transaction you want sponsored. `devnet` is an `http` transport to the devnet with the RPC key, as in `client.ts`. It reads the key from your bundler's environment variables:
+
+```ts [pay.ts]
+import { http, parseUnits } from 'viem'
+import { tempoDevnet } from 'viem/chains'
+import { createClient, withRelay } from 'viem/tempo'
+
+// A test stablecoin on the devnet
+const stablecoin = '0x20c0000000000000000000000000000000000001'
+
+const client = createClient({
+  chain: tempoDevnet,
+  // fee payer requests go to your server, everything else to the devnet
+  transport: withRelay(devnet, http('https://fee-payer.example.com')), // [!code hl]
+})
+
+await client.token.transferSync({
+  account, // needs the stablecoin for the payment, none for the fee
+  amount: parseUnits('25', 6),
+  // ask your fee payer server to sponsor
+  feePayer: true, // [!code hl]
+  to: recipient,
+  token: stablecoin,
+})
+```
+
+`account` is the customer's account with the keys on this device attached: a single-key account, or a configurable account [rebuilt from its saved configuration](/docs/accounts/policies/signing-thresholds#collect-approvals). `recipient` is the payee's address. Leave `feeToken` off, because the server picks it.
+
+<span id="use-tempos-hosted-fee-payer" />
+
+## Hosted fee payer
+
+Tempo also hosts a fee payer server. The [Fee Payer API](/docs/api/fee-payer) takes your server's place in `withRelay`, with a Tempo API key. It runs on mainnet and the Moderato testnet. It doesn't run on the devnet, so it can't sponsor configurable accounts. Try it in the [Sponsor fees](/docs/guide/payments/sponsor-user-fees) demo.
+
+<span id="fee-sponsorship-limits" />
+
+## Limits
+
+- The fee payer pays in the transaction's `feeToken` when your backend sponsors directly, and in its own `feeToken` setting when it runs as a fee payer server.
+- Fund the fee payer with the [supported fee token](/docs/accounts/fees/fee-tokens#supported-fee-tokens) it pays in.
+- A sponsored transaction that's included and then fails still costs the fee payer its fee.
+
+Specification: [fee payer](/docs/protocol/fees/spec-fee#fee-payer).

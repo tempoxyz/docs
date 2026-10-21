@@ -1,0 +1,62 @@
+---
+title: "Choose embedded wallets"
+seoTitle: "Choose Embedded Wallets for Tempo | Tempo Docs"
+description: "Choose a wallet integration for customer payments, backend signing, or custody, with provider-specific Tempo SDK and fee-sponsorship requirements."
+---
+
+[Guides](/docs/resources/guides) / [Wallets and funding](/docs/resources/guides#choose-wallets-and-funding) / Choose embedded wallets
+
+# Choose embedded wallets
+
+Choose a wallet integration by deciding who authorizes payments: the customer, your backend, or a custody operation. Then check the provider's Tempo signing path and the features your payment requires.
+
+<span id="signing-authority" />
+
+## Define payment authority
+
+Customer login, provider signing policies, and onchain permissions serve different purposes. Decide whether every payment requires customer approval or whether a backend can act within delegated limits. Include recovery, key export, and revocation in that decision.
+
+A [Tempo access key](/docs/accounts/access-keys) is optional. If you authorize one, configure its onchain limits and expiry separately from the wallet provider's policies. Start with [embedded-wallet accounts](/docs/accounts/apps) for the account model.
+
+<span id="integration-model" />
+
+## Choose the integration path
+
+<span id="privy" />
+
+### Privy: customer wallets and payments
+
+Use Privy for embedded customer wallets and Tempo transfers, batches, and sponsored payments. Its [Tempo transaction reference](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) documents the SDK-specific fields. The React method supports `sponsor: true`; enable dashboard sponsorship and meet its TEE execution requirement. Server and REST parameter placement differs.
+
+For its transfer API, save the wallet action ID and [track the action](https://docs.privy.io/wallets/actions/status). Use Privy's REST API with `include=steps` when retrieving step-level transaction hashes. Inspect [failed action steps](https://docs.privy.io/wallets/actions/lifecycle) before retrying because an action can have partial onchain effects. For a low-level send, retain the broadcast hash. Privy's older browser example requires SDK, network, and token updates; start from the current reference.
+
+<span id="dynamic" />
+
+### Dynamic: authentication and embedded wallets
+
+Use Dynamic's [Tempo JavaScript package](https://www.dynamic.xyz/docs/javascript/reference/tempo/overview), `@dynamic-labs-sdk/tempo`, and its `/waas` extension for embedded wallets. The old `@dynamic-labs-sdk/evm/tempo` entry point has been removed. Supply your own interface for the headless SDK.
+
+Pass the token's actual decimal precision to `sendTip20Transaction`; its default is `18`. For [fee sponsorship](https://www.dynamic.xyz/docs/javascript/reference/tempo/sign-for-a-fee-sponsor), sign with `awaitingFeePayer: true`, then send the signed transaction to your fee-payer service for signing and broadcast. Check SDK restrictions: embedded Tempo wallets do not support typed-data signing, and business-account wallets cannot send transactions.
+
+<span id="turnkey" />
+
+### Turnkey: policy-controlled signing
+
+Use Turnkey for policy-controlled signing. Its [native Tempo policies](https://docs.turnkey.com/features/policies/examples/tempo) use `tempo.tx` fields for networks, fee tokens, validity windows, and calls. When every batch call must be approved, evaluate the full call list. Allowing a token contract or selector alone does not constrain its encoded recipient or amount.
+
+Start from the [`with-tempo` implementation](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo). Choose between your own Tempo fee payer and Turnkey's [managed sponsorship service](https://docs.turnkey.com/features/transaction-management), which requires an Enterprise plan and dashboard activation.
+
+<span id="fireblocks" />
+
+### Fireblocks: vaults and transaction approvals
+
+Use Fireblocks for a vault-based payment operation. Query [workspace assets](https://developers.fireblocks.com/api-reference/blockchains-&-assets/list-assets), verify the network and token contract, and use the asset's `legacyId` where a transaction requires `assetId`.
+
+Configure transaction policies before funding. Supply a unique `externalTxId` when [creating a transfer](https://developers.fireblocks.com/transactions/create-transactions) to reject duplicate submissions. Confirm native batching or sponsorship support for the selected product separately.
+
+<span id="tempo-requirements" />
+<span id="operational-fit" />
+
+## Test one complete customer payment
+
+Match the wallet, network, [token contract](/docs/partners/stablecoins), and [fee-payment approach](/docs/guide/payments/pay-fees-in-any-stablecoin). Test approval, rejected signing, revoked permissions, and account recovery. Before displaying payment completion, [verify the delivered transfer](/docs/guide/payments/accept-a-payment). Add [bank funding and payouts](/docs/resources/guides/funding-and-payouts) separately when the product needs them.

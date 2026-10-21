@@ -1,0 +1,71 @@
+---
+title: Screen blockchain payments
+seoTitle: Blockchain Payment Screening and Compliance Tools | Tempo Docs
+description: Choose address screening, transaction monitoring, or transaction simulation for Tempo payments, then connect provider results to payment controls.
+---
+
+[Guides](/docs/resources/guides) / [Compliance and security](/docs/resources/guides#compliance-and-security) / Payment screening
+
+# Screen blockchain payments
+
+Use address screening to assess a sender or recipient, transaction monitoring to review activity over time, and simulation to preview a payment before signing. Choose the check for the decision your application needs to make.
+
+<span id="choose-check" />
+
+## Place checks in the payment flow
+
+| Decision | Check | Provider options |
+| --- | --- | --- |
+| Authorize a payment to or from an address | Address risk and counterparty exposure. | [TRM](#trm), [Chainalysis](#chainalysis), [Elliptic](#elliptic). |
+| Review suspicious payment activity | Monitoring alerts and investigation tools. | [TRM](#trm), [Chainalysis](#chainalysis), [Elliptic](#elliptic). |
+| Show a user what a proposed transaction will do | Transaction simulation and security findings before signing. | [Blockaid](#blockaid). |
+| Enforce an approved address or token restriction | Token permissions or account receive policies. | [Tempo controls](/docs/resources/guides/compliance-controls). |
+
+Screening provides risk information. Tempo's onchain controls enforce configured rules; connecting the two is your application's responsibility.
+
+<span id="compare-products" />
+
+## Choose a screening provider
+
+### TRM
+
+[TRM's Tempo coverage](https://www.trmlabs.com/blockchain-coverage/tempo) includes wallet screening, monitoring, tracing, and entity attribution. Use Wallet Screening for address assessments and Transaction Monitoring for ongoing activity. Its [API portal](https://docs.trmlabs.com/api-reference) provides product documentation linked to your account; the public Sanctions API is a different product.
+
+### Chainalysis
+
+[Chainalysis supports](https://www.chainalysis.com/blog/tempo-automatic-token-coverage-march-2026/) Address Screening, KYT monitoring, and Reactor investigations on Tempo, including TIP-20 tokens and transfer memos. For an API integration, [rescreen an address](https://www.chainalysis.com/product/address-screening/) when you need an updated assessment; interface alerts do not refresh an earlier API result.
+
+### Elliptic
+
+[Elliptic's Tempo integration](https://www.elliptic.co/newsroom/elliptic-integrates-with-tempo-the-payments-first-blockchain/) covers address screening, payment monitoring, and cross-chain investigations. Its [analysis API](https://developers.elliptic.co/reference/analysissync) takes a subject, analysis type, and `customer_reference`. Choose the source-of-funds or destination-of-funds direction for your investigation, using [authenticated requests](https://developers.elliptic.co/docs/authentication-1).
+
+<span id="blockaid" />
+
+## Preview a transaction before signing
+
+Blockaid's [`client.evm.transaction.scan`](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts) previews transaction effects and assesses security risk. Its [chain list](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/evm.ts) includes `tempo` and `tempo-testnet` for individual scans. Set `options: ['simulation', 'validation']` for both outputs; the default requests validation only.
+
+Check `validation.result_type` before presenting a result: `Error` is not a benign assessment. Verify support for native Tempo batches or sponsored transaction formats with Blockaid; the separate bulk-scanning chain list does not include Tempo. Simulation does not assess a recipient's sanctions exposure.
+
+<span id="inputs-and-access" />
+<span id="decision-policy" />
+
+## Connect results to a payment decision
+
+:::::steps
+
+### Configure the provider connection
+
+Confirm the product, credentials, Tempo network and asset identifiers, and subject schema for your account.
+
+### Apply a decision policy
+
+Map findings to proceed, review, or decline. Set a maximum result age and explicit handling for unavailable services and errors.
+
+### Record and enforce the decision
+
+Save the assessment, check time, decision, and payment reference together. Keep customer and case details offchain. Apply any onchain permission change through an authorized [token or receive-policy workflow](/docs/resources/guides/compliance-controls).
+
+:::::
+
+A clean assessment does not replace customer checks or establish legal compliance. When accepting funds, separately [verify the delivered transfer](/docs/guide/payments/accept-a-payment) before crediting a customer.

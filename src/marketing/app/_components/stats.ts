@@ -19,7 +19,7 @@ export type Stat = {
 export const stats: Stat[] = [
   {
     category: 'Speed',
-    title: '< 500ms transaction time',
+    title: 'Fast, guaranteed settlement',
     caption: 'Tempo sustained sub-second block times under continuous benchmark load',
     small: { label: 'BLOCK TIME', value: '508ms' },
     main: { label: 'AVG BLOCK TIME', value: '508', unit: 'ms' },
@@ -35,19 +35,19 @@ export const stats: Stat[] = [
   },
   {
     category: 'Performance',
-    title: '20k+ TPS',
+    title: '15k+ TPS',
     caption: "Tempo's highest observed execution rate under peak benchmark load",
-    small: { label: 'PEAK TPS', value: '21,200' },
-    main: { label: 'PEAK PERFORMANCE CAPACITY', value: '1.25', unit: 'Ggas/s' },
+    small: { label: 'AVG EXECUTION', value: '1.45 Ggas/s' },
+    main: { label: 'PEAK PERFORMANCE CAPACITY', value: '1.45', unit: 'Ggas/s' },
     tickerLabel: 'peak execution rate',
   },
   {
     category: 'Reliability',
     title: '99.999 uptime',
-    caption:
-      'Tempo settled ~92% of submitted benchmark load while sustaining high-volume throughput.',
-    small: { label: 'SETTLED TPS', value: '17,311' },
-    main: { label: 'SETTLED TPS', value: '21,200', unit: 'TPS' },
+    caption: 'Tempo sustained high-volume throughput across 10 validators in 5 regions.',
+    // Fallback: multi-region public-mix nightly, Sep 29 2026.
+    small: { label: 'SETTLED TPS', value: '15,600' },
+    main: { label: 'SETTLED TPS', value: '15,600', unit: 'TPS' },
     tickerLabel: 'settled at peak load',
   },
 ]
@@ -58,9 +58,10 @@ export function statValue(stat: Stat): string {
 }
 
 // Latest run from the current nightly benchmark preset.
-const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&scenario_id=public'
+const PERF_API_URL = 'https://perf.tempo.xyz/api/perf/runs?feed=nightly&limit=1&series=multi-region'
 
 type PerfRuns = {
+  series?: string
   runs?: {
     finishedAt?: string
     metrics?: {
@@ -103,6 +104,7 @@ export async function fetchStats(): Promise<PerfData> {
     const res = await fetch(PERF_API_URL)
     if (!res.ok) return fallback
     const data = (await res.json()) as PerfRuns
+    if (data.series !== 'multi-region') return fallback
     const run = data.runs?.[0]
     const m = run?.metrics
     if (!m) return fallback

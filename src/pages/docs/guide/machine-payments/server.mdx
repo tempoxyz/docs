@@ -1,14 +1,27 @@
 ---
-title: "Server quickstart: add MPP payments to your server"
-seoTitle: "Add MPP Payments to Your Server | Docs"
+title: "Accept payments for an API"
+seoTitle: "Accept payments for an API | Tempo Docs"
 description: Add payment gating to any HTTP endpoint on Tempo with mppx middleware for Next.js, Hono, Express, and the Fetch API.
+ogImage: /og/2026-q4/og_2026-q4_docs_guide-machine-payments-server_title-f5_v02.png
 ---
 
 import { Card, Cards } from 'vocs'
 
-# Server quickstart: add MPP payments to your server
+<span id="server-quickstart-add-mpp-payments-to-your-server" />
 
-Plug MPP into any server framework to accept payments for protected resources. Use `mppx` middleware for your framework, or call `mppx/server` directly with the Fetch API.
+# Accept payments for an API
+
+Add payment verification to an API endpoint. Use the `mppx` middleware for your framework, or call `mppx/server` with the Fetch API.
+
+## Set the server secret
+
+`Mppx.create()` requires a server secret to authenticate payment challenges. Generate one before starting the server:
+
+```bash
+export MPP_SECRET_KEY="$(openssl rand -base64 32)"
+```
+
+Store this value in your deployment's secret manager and reuse it across server instances. It is separate from the account's signing key.
 
 ## MPP server framework middleware
 
@@ -78,8 +91,8 @@ You can override `currency` and `recipient` per call if different routes need di
 ```ts
 mppx.charge({
   amount: '0.1',
-  currency: '0x…',
-  recipient: '0x…',
+  currency: '0x...',
+  recipient: '0x...',
 })
 ```
 :::
@@ -115,7 +128,7 @@ export async function handler(request: Request) {
 
 ## MPP payment realm
 
-The `realm` identifies your server in payment challenges and on-chain attribution. By default, mppx auto-detects it from environment variables (`HOSTNAME`, `VERCEL_URL`, etc.), but this can produce incorrect values in containerized environments where `HOSTNAME` is set to an internal identifier (e.g. a Kubernetes pod name).
+The `realm` identifies your server in payment challenges and onchain attribution. `mppx` resolves it from `MPP_REALM` or supported hosting variables such as `VERCEL_URL`, then falls back to the request URL's hostname. Configure it explicitly when a proxy or deployment exposes an internal hostname.
 
 Set `realm` explicitly to your public domain:
 
@@ -133,12 +146,12 @@ You can also set the `MPP_REALM` environment variable instead of passing it in c
 
 ## MPP push and pull modes
 
-Tempo charges support two transaction submission modes, determined by the client:
+Non-zero Tempo charges support two transaction submission modes, determined by the client:
 
 - **`pull` mode (default)**: the client signs the transaction and sends the serialized transaction to the server. The server broadcasts it and verifies on-chain. This enables the server to sponsor gas fees via a `feePayer`.
 - **`push` mode**: the client builds, signs, and broadcasts the transaction itself (for example, via a browser wallet). It sends the transaction hash to the server, which verifies the payment by fetching the receipt.
 
-Your server handles both modes automatically — no configuration required. The server inspects the credential payload type (`transaction` for pull, `hash` for push) and verifies accordingly.
+Your server handles both modes automatically — no configuration required. The server inspects the credential payload type (`transaction` for pull, `hash` for push) and verifies accordingly. A zero-amount charge uses a `proof` credential and does not submit a transaction.
 
 ### MPP fee sponsorship
 
@@ -146,12 +159,12 @@ To sponsor gas fees for pull-mode clients, pass a `feePayer` account to `tempo()
 
 ```ts
 import { Mppx, tempo } from 'mppx/server'
-import { privateKeyToAccount } from 'viem/accounts'
+import { Account } from 'viem/tempo'
 
 const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
-    feePayer: privateKeyToAccount('0x…'),
+    feePayer: Account.fromSecp256k1('0x...'),
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
   })],
 })
@@ -161,26 +174,24 @@ When a pull-mode client submits a signed transaction, the server co-signs with t
 
 ## Test your MPP server
 
-After your server is running, test it with the `mppx` CLI:
+These examples charge mainnet OUSD. Configure the `mppx` CLI with a funded mainnet account before calling the endpoint; testnet faucet tokens cannot pay a mainnet challenge.
 
 ```bash
-# Create an account funded with testnet tokens
-$ npx mppx account create
-
-# Make a paid request
-$ npx mppx <your-server>/resource
+npx mppx https://your-server.example/resource
 ```
 
 :::tip
-Use `npx mppx --inspect` to debug your server's Challenge response without making any payments.
+Use `curl -i https://your-server.example/resource` to inspect the `402` Challenge without paying. Run `npx mppx validate https://your-server.example` for an end-to-end server check.
 :::
+
+To test on Moderato, add `testnet: true` to the server's `tempo({ ... })` configuration. The OUSD address above exists on both networks; `testnet: true` selects chain `42431`. Fund the payer with [testnet OUSD](/docs/quickstart/faucet), and connect the client to the same network. For a browser client, select `tempoModerato` instead of `tempoMainnet` in the [Wagmi example](/docs/guide/machine-payments/client#use-mpp-with-wagmi).
 
 ## Next steps for MPP servers
 
 <Cards>
   <Card
     icon="lucide:user"
-    title="Client quickstart"
+    title="Pay for services"
     description="Handle payment-gated resources automatically"
     to="/docs/guide/machine-payments/client"
   />

@@ -21,9 +21,7 @@
     }
   },
   "css": {
-    "parser": {
-      "tailwindDirectives": true
-    },
+    "parser": {},
     "formatter": {
       "enabled": true
     },
@@ -40,15 +38,6 @@
       },
       "suspicious": {
         "noArrayIndexKey": "off"
-      },
-      "nursery": {
-        "useSortedClasses": {
-          "level": "warn",
-          "options": {
-            "attributes": ["className", "class"],
-            "functions": ["clsx", "cva", "tw", "cn", "twMerge"]
-          }
-        }
       }
     }
   },

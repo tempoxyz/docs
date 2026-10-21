@@ -1,0 +1,58 @@
+---
+title: "How Earn works"
+seoTitle: "How Earn works | Tempo Docs"
+description: "Understand how deposits become vault shares, how shares are valued, how fees share returns, and what is available to withdraw."
+ogImage: /og/2026-q4/og_2026-q4_docs_earn-how-it-works_title-f5_v02.png
+---
+
+import { EarnIllustration } from '../../../components/EarnIllustration'
+
+# How Earn works
+
+When your application deposits stablecoins into a vault, the account receives shares representing its position. Use the shares' current asset value to display an earning balance, and the vault's withdrawal interface to return stablecoins to the account.
+
+<EarnIllustration
+  name="flow"
+  alt="An account deposits stablecoins into a vault and receives vault shares. The vault's engine connects it to one strategy, such as U.S. Treasuries, institutional credit, or collateralized lending."
+  caption="Each vault connects to one strategy through its engine."
+/>
+
+| Component | Role |
+| --- | --- |
+| **Vault** | Accepts deposits and accounts for positions. |
+| **Vault shares** | Units representing an account's position in the vault. Check the selected vault's share token and contract interface. |
+| **Engine** | Connects the vault to a lending market, managed strategy, or liquidity pool. |
+
+A share is not necessarily worth one stablecoin. Its value changes with the underlying strategy's returns, losses, and fees. An account's **position value** is the asset value of all its shares; **earnings** are returns over a period, separate from deposits and withdrawals.
+
+The account that deposits holds the shares: each customer's account, or a company account that your ledger allocates.
+
+The [Earn API](/docs/api/earn) exposes the vault's engine, share token, accepted asset, accounting state, and supported operations.
+
+## Keep value and liquidity separate
+
+A position's value can change with returns, losses, and fees. It is not necessarily the amount that can be withdrawn immediately. Read the vault's supported withdrawal methods and current terms before showing funds as available to withdraw.
+
+A vault's `verified` flag identifies a curated listing, not a guarantee of return or a description of the strategy's risk. [Choose a vault](/docs/earn/vaults) based on its accepted asset, access rules, strategy, and withdrawal behavior.
+
+## Fees and revenue share
+
+A vault can pay a share of its returns to fee recipients, such as your platform. Earn fees apply only to returns above the vault's previous high in value per share, never to deposited principal.
+
+<EarnIllustration
+  name="revenue-share"
+  alt="Illustrative split of $100.00 in returns: 20%, or $20.00, to your business as a fee recipient and 80%, or $80.00, to your customers."
+/>
+
+| Fee | How it is calculated | Example on a 5% return |
+| --- | --- | --- |
+| **Fixed fee** | A percentage of positive returns, paid to one recipient. A vault supports up to four. | A 20% fee leaves customers 4% and pays the recipient 1%. |
+| **Excess-return fee** | A percentage of returns above a target rate for customers, paid to one recipient. | A 4% target with a 100% fee leaves customers 4% and pays the recipient the remaining 1%. |
+
+At 1%, $10 million in balances earns the fee recipient $100,000 a year. Returns vary, so the fee amount does too.
+
+The vault takes fees by issuing new shares for its fee recipients, so the share price and the observed `apy.vault` already reflect them. Fees charged by the underlying venue are reflected in the engine's reported value. See [what customers net](/docs/earn/vaults#what-customers-net) for the costs outside the observed rate.
+
+Fee terms are set per vault; `state.feesActive` reports whether a vault charges Earn fees. [Contact Tempo](https://tempo.xyz/contact) to configure fee recipients for your Earn program.
+
+Continue with [Deposit](/docs/earn/integrate), then [show balances and earnings](/docs/earn/balances). If you operate a yield strategy, see [Connect a strategy](/docs/earn/providers).

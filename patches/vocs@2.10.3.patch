@@ -1,0 +1,1522 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 565de93..258c88b 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -18,4 +18,5 @@ export { Sandbox } from './react/Sandbox/index.js';
+ export { ScrollRestoration } from './react/ScrollRestoration.js';
+ export { Tab, Tabs } from './react/Tabs.js';
+ export { useConfig } from './react/useConfig.js';
+-//# sourceMappingURL=index.d.ts.map
+\ No newline at end of file
++//# sourceMappingURL=index.d.ts.map
++export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
+diff --git a/dist/index.js b/dist/index.js
+index 7043839..688bebd 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -17,4 +17,5 @@ export { Sandbox } from './react/Sandbox/index.js';
+ export { ScrollRestoration } from './react/ScrollRestoration.js';
+ export { Tab, Tabs } from './react/Tabs.js';
+ export { useConfig } from './react/useConfig.js';
+-//# sourceMappingURL=index.js.map
+\ No newline at end of file
++//# sourceMappingURL=index.js.map
++export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
+diff --git a/dist/internal/openapi/openapi.d.ts b/dist/internal/openapi/openapi.d.ts
+index bf62698..09bb5fb 100644
+--- a/dist/internal/openapi/openapi.d.ts
++++ b/dist/internal/openapi/openapi.d.ts
+@@ -65,6 +65,14 @@ export type SidebarExtras = {
+      * @default true
+      */
+     backLink?: boolean | undefined;
++    /** Spread `intro` items at the top level instead of nesting them under "Introduction". */
++    introFlat?: boolean | undefined;
++    /** Hide generated groups by display name or id. */
++    hide?: readonly string[] | undefined;
++    /** Extra items inside a generated group, keyed by group display name. */
++    groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
++    /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
++    sectionExtras?: Record<string, SidebarItem[]> | undefined;
+     /**
+      * Names of `x-tagGroups` sections to flatten: their categories render as
+      * top-level sidebar items (as without tag groups) instead of nesting under
+diff --git a/dist/internal/openapi/query-presets.d.ts b/dist/internal/openapi/query-presets.d.ts
+new file mode 100644
+index 0000000..6198c7f
+--- /dev/null
++++ b/dist/internal/openapi/query-presets.d.ts
+@@ -0,0 +1,4 @@
++import type { IrOperation } from './parser.js';
++export type QueryPreset = { method: string; path: string; query: string };
++export declare function operationWithQuery(operation: IrOperation, query?: string): IrOperation;
++export declare function documentWithQuery(document: Record<string, unknown>, preset?: QueryPreset): Record<string, unknown>;
+diff --git a/dist/internal/openapi/query-presets.js b/dist/internal/openapi/query-presets.js
+new file mode 100644
+index 0000000..39cecdb
+--- /dev/null
++++ b/dist/internal/openapi/query-presets.js
+@@ -0,0 +1,39 @@
++function presetParameters(parameters, query) {
++    const values = new URLSearchParams(query);
++    return parameters.map((parameter) => {
++        if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
++            return parameter;
++        const raw = values.get(parameter.name);
++        const value = parameter.schema?.type === 'array' ? raw.split(',') : raw;
++        const { example: _example, ...rest } = parameter;
++        return {
++            ...rest,
++            // Scalar reads parameter examples and needs optional rows explicitly enabled.
++            examples: { default: { value, 'x-disabled': false } },
++            // Vocs generates snippets from schema examples. Neither changes API defaults.
++            schema: { ...parameter.schema, example: value, examples: [value] },
++        };
++    });
++}
++/** Apply editable query examples to one embed without changing its shared spec. */
++export function operationWithQuery(operation, query) {
++    if (!query)
++        return operation;
++    return { ...operation, parameters: presetParameters(operation.parameters, query) };
++}
++/** Prepare the isolated Scalar document used by this playground instance. */
++export function documentWithQuery(document, preset) {
++    if (!preset?.query)
++        return document;
++    const copy = structuredClone(document);
++    const paths = copy.paths;
++    const path = paths?.[preset.path];
++    const operation = path?.[preset.method.toLowerCase()];
++    if (!operation)
++        return copy;
++    for (const owner of [path, operation]) {
++        if (Array.isArray(owner.parameters))
++            owner.parameters = presetParameters(owner.parameters, preset.query);
++    }
++    return copy;
++}
+diff --git a/dist/internal/openapi/registry.js b/dist/internal/openapi/registry.js
+index 3f67f41..9380eae 100644
+--- a/dist/internal/openapi/registry.js
++++ b/dist/internal/openapi/registry.js
+@@ -48,7 +48,7 @@ export function sidebars(config) {
+         const backLink = entry?.sidebar?.backLink ?? true;
+         result[path] = {
+             backLink,
+-            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed }),
++            items: Sidebar.toSidebar(ir, { collapsed, intro, flatten, tagGroupsCollapsed, introFlat: entry?.sidebar?.introFlat, hide: entry?.sidebar?.hide, groupExtrasByName: entry?.sidebar?.groupExtrasByName, sectionExtras: entry?.sidebar?.sectionExtras }),
+         };
+     }
+     return result;
+diff --git a/dist/internal/openapi/sidebar.d.ts b/dist/internal/openapi/sidebar.d.ts
+index 635da1b..ef423db 100644
+--- a/dist/internal/openapi/sidebar.d.ts
++++ b/dist/internal/openapi/sidebar.d.ts
+@@ -34,6 +34,14 @@ export declare namespace toSidebar {
+         flatten?: readonly string[] | undefined;
+         /** Collapse `x-tagGroups` sections independently. @default collapsed */
+         tagGroupsCollapsed?: boolean | undefined;
++        /** Spread `intro` items at the top level instead of nesting them under `Introduction`. */
++        introFlat?: boolean | undefined;
++        /** Generated groups to omit, by display name or id. */
++        hide?: readonly string[] | undefined;
++        /** Extra items inside a generated group, after its `Overview`, keyed by group display name. */
++        groupExtrasByName?: Record<string, SidebarItem[]> | undefined;
++        /** Extra items at the top of an `x-tagGroups` section, keyed by section name. */
++        sectionExtras?: Record<string, SidebarItem[]> | undefined;
+     };
+ }
+ //# sourceMappingURL=sidebar.d.ts.map
+\ No newline at end of file
+diff --git a/dist/internal/openapi/sidebar.js b/dist/internal/openapi/sidebar.js
+index a1be030..9115c3d 100644
+--- a/dist/internal/openapi/sidebar.js
++++ b/dist/internal/openapi/sidebar.js
+@@ -38,6 +38,10 @@ export function toSidebar(ir, options = {}) {
+     // collapsible group: an "Overview" link to the landing page followed by the
+     // extra items (e.g. authentication/versioning guide pages).
+     const intro = options.intro ?? [];
++    // `introFlat` spreads intro items at the top level instead of nesting them
++    // under a generated "Introduction" group. `hide` drops generated groups.
++    const introItems = options.introFlat ? intro : null;
++    const hidden = new Set(options.hide ?? []);
+     const introduction = intro.length > 0
+         ? {
+             text: 'Introduction',
+@@ -48,6 +52,9 @@ export function toSidebar(ir, options = {}) {
+     // Extra items (e.g. `x-parent` guide pages) injected into a group, keyed by
+     // group id, rendered after the group's "Overview" link.
+     const groupExtras = options.groupExtras ?? new Map();
++    // Extra items keyed by group display name or `x-tagGroups` section name.
++    const groupExtrasByName = options.groupExtrasByName ?? {};
++    const sectionExtras = options.sectionExtras ?? {};
+     // Generated categories inherit `collapsed`. Tag-group sections can override
+     // that default independently. Active groups still auto-expand at render.
+     const groupCollapsed = options.collapsed ?? false;
+@@ -60,6 +67,7 @@ export function toSidebar(ir, options = {}) {
+             // is a non-link header so its label doesn't compete with the operations.
+             { text: 'Overview', link: groupLink(group) },
+             ...(groupExtras.get(group.id) ?? []),
++            ...(groupExtrasByName[group.name] ?? []),
+             ...group.operations.map((operation) => ({
+                 text: operation.summary || `${operation.method} ${operation.path}`,
+                 link: operationLink(operation, group),
+@@ -73,7 +81,7 @@ export function toSidebar(ir, options = {}) {
+     });
+     const tagGroups = ir.tagGroups ?? [];
+     if (tagGroups.length === 0)
+-        return [introduction, ...ir.groups.map(groupItem)];
++        return [...(introItems ?? [introduction]), ...ir.groups.filter((g) => !(hidden.has(g.name) || hidden.has(g.id))).map(groupItem)];
+     // `x-tagGroups` sections render as collapsible headers. Sections named in
+     // `flatten` spread their categories in place instead.
+     const flatten = new Set(options.flatten ?? []);
+@@ -84,14 +92,15 @@ export function toSidebar(ir, options = {}) {
+             const group = groupById.get(id);
+             return group ? [groupItem(group)] : [];
+         });
++        const extras = sectionExtras[tagGroup.name] ?? [];
+         if (flatten.has(tagGroup.name))
+-            return items;
+-        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items }];
++            return items.map((item) => ({ ...item, items: [item.items[0], ...extras, ...item.items.slice(1)] }));
++        return [{ text: tagGroup.name, collapsed: tagGroupsCollapsed, items: [...extras, ...items] }];
+     });
+     return [
+-        introduction,
++        ...(introItems ?? [introduction]),
+         ...sections,
+-        ...ir.groups.filter((group) => !claimed.has(group.id)).map(groupItem),
++        ...ir.groups.filter((group) => !claimed.has(group.id) && !(hidden.has(group.name) || hidden.has(group.id))).map(groupItem),
+     ];
+ }
+ //# sourceMappingURL=sidebar.js.map
+\ No newline at end of file
+diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
+index 808d57f..2b6bf2a 100644
+--- a/dist/react/Head.d.ts
++++ b/dist/react/Head.d.ts
+@@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react").JSX.Element;
+ export declare namespace Head {
+     type Props = {
+         includeJsonLd?: boolean | undefined;
++        includeTitle?: boolean | undefined;
+     };
+ }
+ export declare function resolveTitleTemplate(config: Pick<Config.Config, 'title' | 'titleTemplate'>, path: string, title: string | undefined, frontmatter: Config.Frontmatter | undefined): string | undefined;
+diff --git a/dist/react/Head.js b/dist/react/Head.js
+index 9c74255..b82f9bd 100644
+--- a/dist/react/Head.js
++++ b/dist/react/Head.js
+@@ -6,7 +6,7 @@ import * as JsonLd from './json-ld.js';
+ import * as MdxPageContext from './MdxPageContext.js';
+ import { useConfig } from './useConfig.js';
+ export function Head(props) {
+-    const { includeJsonLd = true } = props;
++    const { includeJsonLd = true, includeTitle = true } = props;
+     const config = useConfig();
+     const { path: pathname } = useRouter();
+     const { frontmatter } = MdxPageContext.use();
+@@ -90,7 +90,7 @@ export function Head(props) {
+                 // biome-ignore lint/security/noDangerouslySetInnerHtml: blocking script to prevent FOUC
+                 dangerouslySetInnerHTML: {
+                     __html: `(function(){try{var e=document.documentElement;var s=function(t){e.setAttribute('data-vocs-theme',t);e.style.colorScheme=t};var t=localStorage.getItem('vocs-theme');if(t==='light'||t==='dark'){s(t)}else if(window.matchMedia('(prefers-color-scheme:dark)').matches){s('dark')}else if(window.matchMedia('(prefers-color-scheme:light)').matches){s('light')}else{s('dark')}}catch(e){}})()`,
+-                } })), _jsx("meta", { name: "color-scheme", content: colorScheme }), !disabled && (_jsxs(_Fragment, { children: [fullTitle && _jsx("title", { children: fullTitle }, "title"), base && _jsx("base", { href: base }), canonical && _jsx("link", { rel: "canonical", href: canonical }), icons && iconUrl && typeof iconUrl === 'string' && (_jsx("link", { rel: "icon", href: iconUrl, type: getIconType(iconUrl) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.light, type: getIconType(iconUrl.light) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.dark, type: getIconType(iconUrl.dark), media: "(prefers-color-scheme: dark)" })), metaTags.map((tag, index) => {
++                } })), _jsx("meta", { name: "color-scheme", content: colorScheme }), !disabled && (_jsxs(_Fragment, { children: [includeTitle && fullTitle && _jsx("title", { children: fullTitle }, "title"), base && _jsx("base", { href: base }), canonical && _jsx("link", { rel: "canonical", href: canonical }), icons && iconUrl && typeof iconUrl === 'string' && (_jsx("link", { rel: "icon", href: iconUrl, type: getIconType(iconUrl) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.light, type: getIconType(iconUrl.light) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.dark, type: getIconType(iconUrl.dark), media: "(prefers-color-scheme: dark)" })), metaTags.map((tag, index) => {
+                         const { charset: charSet, content, 'http-equiv': httpEquiv, media, name, property, } = tag;
+                         return (_jsx("meta", { charSet: charSet, httpEquiv: httpEquiv, name: name, property: property, content: content != null ? String(content) : undefined, media: media }, `${name ?? property ?? httpEquiv ?? charSet}-${index}`));
+                     }), jsonLd && (_jsx("script", { type: "application/ld+json", 
+diff --git a/dist/react/Layout.d.ts b/dist/react/Layout.d.ts
+index 8f4633b..b3389ce 100644
+--- a/dist/react/Layout.d.ts
++++ b/dist/react/Layout.d.ts
+@@ -3,6 +3,7 @@ export declare namespace Layout {
+     type Props = {
+         children: React.ReactNode;
+         includeJsonLd?: boolean | undefined;
++        includeTitle?: boolean | undefined;
+     };
+ }
+ //# sourceMappingURL=Layout.d.ts.map
+\ No newline at end of file
+diff --git a/dist/react/Layout.js b/dist/react/Layout.js
+index dd8f3a8..faea5cb 100644
+--- a/dist/react/Layout.js
++++ b/dist/react/Layout.js
+@@ -2,7 +2,7 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
+ import { Head } from './Head.js';
+ import * as Layout_client from './Layout.client.js';
+ export function Layout(props) {
+-    const { children, includeJsonLd } = props;
+-    return (_jsxs(_Fragment, { children: [_jsx(Head, { includeJsonLd: includeJsonLd }), _jsx(Layout_client.Main, { children: children })] }));
++    const { children, includeJsonLd, includeTitle } = props;
++    return (_jsxs(_Fragment, { children: [_jsx(Head, { includeJsonLd: includeJsonLd, includeTitle: includeTitle }), _jsx(Layout_client.Main, { children: children })] }));
+ }
+ //# sourceMappingURL=Layout.js.map
+\ No newline at end of file
+diff --git a/dist/react/Root.js b/dist/react/Root.js
+index 5f3d063..c58b72a 100644
+--- a/dist/react/Root.js
++++ b/dist/react/Root.js
+@@ -3,13 +3,12 @@ import { config } from 'virtual:vocs/config';
+ import groupIconsStylesUrl from 'virtual:vocs/group-icons.css?url';
+ import userStylesUrl from 'virtual:vocs/user-styles';
+ import stylesUrl from '../styles/index.css?url';
+-import { Head } from './Head.js';
+ import { Root_client } from './Root.client.js';
+ import { ScrollRestoration } from './ScrollRestoration.js';
+ export async function Root({ children }) {
+     const { colorScheme, accentColor } = config;
+     return (_jsxs("html", { "data-vocs": true, ...(colorScheme === 'light' || colorScheme === 'dark'
+             ? { 'data-vocs-theme': colorScheme }
+-            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl }), _jsx(Head, { includeJsonLd: false })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
++            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
+ }
+ //# sourceMappingURL=Root.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/NotFound.js b/dist/react/internal/NotFound.js
+index b189ea5..f78449c 100644
+--- a/dist/react/internal/NotFound.js
++++ b/dist/react/internal/NotFound.js
+@@ -1,8 +1,9 @@
+-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
++import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
++import { config } from 'virtual:vocs/config';
+ import { Link } from 'waku';
+ import LucideFileQuestion from '~icons/lucide/file-question';
+ import LucideHome from '~icons/lucide/home';
+ export function NotFound() {
+-    return (_jsxs("div", { className: "vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center", "data-v-not-found": true, children: [_jsx("div", { className: "vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6", "data-v-not-found-icon": true, children: _jsx(LucideFileQuestion, { className: "vocs:size-10" }) }), _jsx("h1", { className: "vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3", "data-v-not-found-title": true, children: "Page not found" }), _jsx("p", { className: "vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8", "data-v-not-found-description": true, children: "The page you're looking for doesn't exist or has been moved." }), _jsxs(Link, { className: "vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted", "data-v-not-found-link": true, to: "/", children: [_jsx(LucideHome, { className: "vocs:size-4 vocs:text-secondary" }), "Back to home"] })] }));
++    return (_jsxs(_Fragment, { children: [_jsx("title", { children: `Page not found ⋅ ${config.title}` }), _jsx("meta", { name: "robots", content: "noindex, nofollow" }), _jsxs("div", { className: "vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center", "data-v-not-found": true, children: [_jsx("div", { className: "vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6", "data-v-not-found-icon": true, children: _jsx(LucideFileQuestion, { className: "vocs:size-10" }) }), _jsx("h1", { className: "vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3", "data-v-not-found-title": true, children: "Page not found" }), _jsx("p", { className: "vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8", "data-v-not-found-description": true, children: "The page you're looking for doesn't exist or has been moved." }), _jsxs(Link, { className: "vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted", "data-v-not-found-link": true, to: "/", children: [_jsx(LucideHome, { className: "vocs:size-4 vocs:text-secondary" }), "Back to home"] })] })] }));
+ }
+ //# sourceMappingURL=NotFound.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/Sidebar.js b/dist/react/internal/Sidebar.js
+index 47ddd87..32c6107 100644
+--- a/dist/react/internal/Sidebar.js
++++ b/dist/react/internal/Sidebar.js
+@@ -11,110 +11,25 @@ import * as Sidebar_core from '../../internal/sidebar.js';
+ import { Badge } from '../Badge.js';
+ import { Link } from '../Link.js';
+ import { useSidebar } from '../useSidebar.js';
++import { useActiveSidebarAnchor } from '../useActiveSidebarAnchor.js';
+ const maxDepth = 5;
+ /** Active in-page anchor id, for hash-link sidebar items (e.g. OpenAPI). */
+ const ActiveAnchorContext = React.createContext(null);
+-/**
+- * The set of in-page anchor ids that the sidebar links to on the current page.
+- * Used so page-level items only defer their active state to corresponding
+- * sidebar items — not to arbitrary headings or hash links for another page.
+- */
+-const HashIdsContext = React.createContext(new Set());
+-/** Collects the `#fragment` ids of hash-link sidebar items for the current page. */
+-function collectHashIds(items, path, ids = new Set()) {
+-    const pagePath = path.split('#')[0] ?? path;
+-    for (const item of items) {
+-        if (item.link?.includes('#') && !Path.isExternal(item.link)) {
+-            const [itemPath, id] = item.link.split('#');
+-            if (id && (!itemPath || Path.matches(pagePath, itemPath)))
+-                ids.add(id);
+-        }
+-        if (item.items)
+-            collectHashIds(item.items, pagePath, ids);
+-    }
+-    return ids;
+-}
+-/**
+- * Tracks the in-page section currently in view, so hash-link sidebar items
+- * (used by the OpenAPI section) can show active state. Mirrors the Outline's
+- * IntersectionObserver approach.
+- */
+-function useActiveAnchor(hashIds, path) {
+-    const [activeId, setActiveId] = React.useState(null);
+-    React.useEffect(() => {
+-        if (hashIds.size === 0 || typeof window === 'undefined')
+-            return;
+-        // OpenAPI pages render inside `article[data-v-content]` too, so the generic
+-        // markdown selector would also match operation sub-headings (Parameters,
+-        // Responses, schema anchors, …) whose ids have no sidebar entry — hijacking
+-        // the active anchor as you scroll through a section. On those pages observe
+-        // only the group header (`<h1>`) and per-operation titles, which back the
+-        // hash-link sidebar items, so the active item persists across the section.
+-        const isOpenApi = document.querySelector('[data-v-openapi]') !== null;
+-        const selector = isOpenApi
+-            ? '[data-v-openapi-h1][id], [data-v-openapi-operation-title][id]'
+-            : 'article[data-v-content] :is(h2, h3, h4, h5, h6)[id]';
+-        // Reset on every client-side navigation. If the destination hash belongs
+-        // to a nested heading without a sidebar item, keep its nearest preceding
+-        // sidebar anchor active instead of falling back to the page-level item.
+-        // Reading `path` here — rather than only `window.location` — keeps it a
+-        // genuine effect dependency so navigation reliably re-runs this.
+-        const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : '';
+-        const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '');
+-        let initialId = hashIds.has(hash) ? hash : null;
+-        const target = hash ? document.getElementById(hash) : null;
+-        if (!initialId && target) {
+-            for (const element of document.querySelectorAll(selector)) {
+-                const position = element.compareDocumentPosition(target);
+-                if (element === target || position & Node.DOCUMENT_POSITION_PRECEDING)
+-                    break;
+-                if (hashIds.has(element.id))
+-                    initialId = element.id;
+-            }
+-        }
+-        setActiveId(initialId);
+-        const observer = new IntersectionObserver((entries) => {
+-            for (const entry of entries)
+-                if (entry.isIntersecting) {
+-                    setActiveId(entry.target.id);
+-                    break;
+-                }
+-        }, { rootMargin: '0px 0px -80% 0px' });
+-        const observeAll = () => {
+-            observer.disconnect();
+-            for (const element of document.querySelectorAll(selector)) {
+-                // Nested headings without matching sidebar items belong to the current
+-                // section. Observing them would reactivate the page-level item.
+-                if (!hashIds.has(element.id))
+-                    continue;
+-                // Skip changelog release-body headings — they have no sidebar entry and
+-                // would hijack the active section as you scroll through the changelog.
+-                if (element.closest('[data-v-changelog]'))
+-                    continue;
+-                observer.observe(element);
+-            }
+-        };
+-        observeAll();
+-        const content = document.querySelector('article[data-v-content]') ??
+-            document.querySelector('[data-v-openapi]');
+-        const mutation = content ? new MutationObserver(observeAll) : null;
+-        if (content && mutation)
+-            mutation.observe(content, { childList: true, subtree: true });
+-        return () => {
+-            observer.disconnect();
+-            mutation?.disconnect();
+-        };
+-    }, [hashIds, path]);
+-    return activeId;
++/** Flatten links once; the hook filters them to the current page. */
++function collectLinks(items) {
++    return items.flatMap((item) => [
++        ...(item.link ? [item.link] : []),
++        ...(item.items ? collectLinks(item.items) : []),
++    ]);
+ }
+ export function Sidebar(props) {
+     const { className, onNavigate, scrollRef } = props;
+     const sidebar = useSidebar();
+     const condenseSidebar = React.useMemo(() => Sidebar_core.length(sidebar.items, { startDepth: 2 }) > 25, [sidebar.items]);
+-    const { path } = useRouter();
+-    const hashIds = React.useMemo(() => collectHashIds(sidebar.items, path), [sidebar.items, path]);
+-    const activeAnchor = useActiveAnchor(hashIds, path);
+-    return (_jsx(HashIdsContext.Provider, { value: hashIds, children: _jsx(ActiveAnchorContext.Provider, { value: activeAnchor, children: _jsxs("nav", { className: cx("vocs:flex-1 vocs:flex vocs:flex-col vocs:text-sm vocs:font-[450] vocs:[&>*:not(:last-child)[data-collapsed='false']]:mb-4", className), "data-v-sidebar": true, children: [sidebar.backLink && _jsx(BackLink, { onNavigate: onNavigate }), sidebar.items.map((item, i) => (_jsx(Section, { ...item, condensed: condenseSidebar, onNavigate: onNavigate, scrollRef: scrollRef }, `${item.text}-${i}`)))] }) }) }));
++    const links = React.useMemo(() => collectLinks(sidebar.items), [sidebar.items]);
++    const { path, hash } = useRouter();
++    const activeAnchor = useActiveSidebarAnchor(links, path, hash);
++    return (_jsx(ActiveAnchorContext.Provider, { value: activeAnchor, children: _jsxs("nav", { className: cx("vocs:flex-1 vocs:flex vocs:flex-col vocs:text-sm vocs:font-[450] vocs:[&>*:not(:last-child)[data-collapsed='false']]:mb-4", className), "data-v-sidebar": true, children: [sidebar.backLink && _jsx(BackLink, { onNavigate: onNavigate }), sidebar.items.map((item, i) => (_jsx(Section, { ...item, condensed: condenseSidebar, onNavigate: onNavigate, scrollRef: scrollRef }, `${item.text}-${i}`)))] }) }));
+ }
+ function BackLink(props) {
+     const { onNavigate } = props;
+@@ -134,31 +49,19 @@ function Item(props) {
+     const { path } = useRouter();
+     const isExternal = external ?? Path.isExternal(link);
+     const activeAnchor = React.useContext(ActiveAnchorContext);
+-    const hashIds = React.useContext(HashIdsContext);
+     const hashId = link?.includes('#') ? link.split('#')[1] : undefined;
+     const active = React.useMemo(() => {
+-        if (isExternal)
++        if (isExternal || !link || !Path.matches(path, link.split('#')[0] || path))
+             return false;
+-        if (hashId)
++        if (!hashId)
++            return activeAnchor === null;
++        try {
++            return decodeURIComponent(hashId) === activeAnchor;
++        }
++        catch {
+             return hashId === activeAnchor;
+-        if (!Path.matches(path, link))
+-            return false;
+-        // Page-level item (e.g. the OpenAPI "Overview"). When in-page anchor
+-        // tracking is active, only highlight it while viewing the top of the page —
+-        // i.e. when the active section is the page's top heading (whose id matches
+-        // the last path segment) or no section is active yet. Otherwise the matching
+-        // anchor item below it is highlighted instead.
+-        if (activeAnchor == null)
+-            return true;
+-        const topId = (link?.split('#')[0] ?? '').split('/').filter(Boolean).pop();
+-        if (activeAnchor === topId)
+-            return true;
+-        // Only defer to the active anchor when it corresponds to an actual hash-link
+-        // sidebar item (a sibling section on this same page). Otherwise the anchor is
+-        // just an in-page heading on a standalone guide page that lives under a
+-        // section whose sidebar uses hash links elsewhere — keep this item active.
+-        return !hashIds.has(activeAnchor);
+-    }, [path, link, isExternal, hashId, activeAnchor, hashIds]);
++        }
++    }, [path, link, isExternal, hashId, activeAnchor]);
+     const itemRef = React.useRef(null);
+     const prevPath = React.useRef(path);
+     React.useEffect(() => {
+@@ -205,7 +108,7 @@ function Item(props) {
+     if (link && !disabled) {
+         if (isExternal)
+             return (_jsxs("a", { className: Item.className, "data-condensed": condensed && depth > 1, "data-link": true, "data-v-sidebar-item": true, href: link, ref: itemRef, target: "_blank", rel: "noopener noreferrer", onClick: onNavigate, children: [_jsxs("span", { className: "vocs:inline-flex vocs:items-center vocs:gap-1 vocs:min-w-0 vocs:truncate", children: [text, _jsx(LucideArrowUpRight, { className: "vocs:size-3 vocs:shrink-0" })] }), badge && _jsx(ItemBadge, { badge: badge })] }));
+-        return (_jsxs(Link, { className: Item.className, "data-condensed": condensed && depth > 1, "data-link": true, "data-v-sidebar-item": true, to: link, ref: itemRef, onClick: onNavigate, ...(active && { 'data-active': true }), children: [_jsx("span", { className: "vocs:min-w-0 vocs:truncate", children: text }), badge && _jsx(ItemBadge, { badge: badge })] }));
++        return (_jsxs(Link, { className: Item.className, "data-condensed": condensed && depth > 1, "data-link": true, "data-v-sidebar-item": true, to: link, ref: itemRef, onClick: onNavigate, "aria-current": active ? (hashId ? 'location' : 'page') : undefined, ...(active && { 'data-active': true }), children: [_jsx("span", { className: "vocs:min-w-0 vocs:truncate", children: text }), badge && _jsx(ItemBadge, { badge: badge })] }));
+     }
+     return (_jsxs("div", { "aria-disabled": disabled, className: Item.className, "data-condensed": condensed && depth > 1, "data-link": link ? true : undefined, "data-v-sidebar-item": true, ref: itemRef, children: [_jsx("span", { className: "vocs:min-w-0 vocs:truncate", children: text }), badge && _jsx(ItemBadge, { badge: badge })] }));
+ }
+@@ -261,7 +164,7 @@ function Section(props) {
+     if (items)
+         return (_jsxs("section", { "data-collapsed": collapsed, "data-v-sidebar-section": true, children: [(() => {
+                     if (text && link)
+-                        return (_jsxs("div", { className: depth > 0 ? Section.childHeaderClassName : Section.rootHeaderClassName, "data-condensed": condensed && depth > 1, "data-collapsed": collapsed, "data-collapsable": collapsable, "data-v-sidebar-section-header": true, ...(groupLinkIsActive && { 'data-active': true }), children: [_jsx(Link, { className: Section.headerLinkClassName, onClick: onNavigate, to: link, children: _jsxs("span", { className: "vocs:inline-flex vocs:items-center vocs:gap-1", children: [text, groupLinkIsExternal && _jsx(LucideArrowUpRight, { className: "vocs:size-3" })] }) }), badge && _jsx(ItemBadge, { badge: badge }), collapsable && (_jsx("button", { "aria-expanded": !collapsed, "aria-label": `Toggle ${text} section`, className: "vocs:ml-2 vocs:-mr-1 vocs:shrink-0 vocs:rounded-md vocs:p-1 vocs:text-secondary/80 vocs:hover:text-heading", onClick: () => setCollapsed((x) => !x), type: "button", children: _jsx(LucideChevronRight, { className: "vocs:data-collapsed:rotate-90 vocs:transition-transform vocs:duration-200 vocs:ease-in-out", ...(!collapsed ? { 'data-collapsed': false } : {}) }) }))] }));
++                        return (_jsxs("div", { className: depth > 0 ? Section.childHeaderClassName : Section.rootHeaderClassName, "data-condensed": condensed && depth > 1, "data-collapsed": collapsed, "data-collapsable": collapsable, "data-v-sidebar-section-header": true, ...(groupLinkIsActive && { 'data-active': true }), children: [_jsx(Link, { className: Section.headerLinkClassName, onClick: onNavigate, to: link, ...(groupLinkIsActive && { 'aria-current': 'page', 'data-active': true }), children: _jsxs("span", { className: "vocs:inline-flex vocs:items-center vocs:gap-1", children: [text, groupLinkIsExternal && _jsx(LucideArrowUpRight, { className: "vocs:size-3" })] }) }), badge && _jsx(ItemBadge, { badge: badge }), collapsable && (_jsx("button", { "aria-expanded": !collapsed, "aria-label": `Toggle ${text} section`, className: "vocs:ml-2 vocs:-mr-1 vocs:shrink-0 vocs:rounded-md vocs:p-1 vocs:text-secondary/80 vocs:hover:text-heading", onClick: () => setCollapsed((x) => !x), type: "button", children: _jsx(LucideChevronRight, { className: "vocs:data-collapsed:rotate-90 vocs:transition-transform vocs:duration-200 vocs:ease-in-out", ...(!collapsed ? { 'data-collapsed': false } : {}) }) }))] }));
+                     // Non-link item is a header.
+                     if (text)
+                         return (_jsxs("div", { className: depth > 0 ? Section.childHeaderClassName : Section.rootHeaderClassName, "data-condensed": condensed && depth > 1, "data-collapsed": collapsed, "data-collapsable": collapsable, "data-v-sidebar-section-header": true, ...(collapsable
+@@ -284,4 +187,3 @@ function Section(props) {
+     Section.headerLinkClassName = 'vocs:flex-1 vocs:min-w-0 vocs:text-inherit vocs:hover:text-inherit';
+     Section.rootHeaderClassName = 'vocs:h-[2.5em] vocs:px-3 vocs:-mx-3 vocs:rounded-md vocs:flex vocs:items-center vocs:justify-between vocs:text-heading vocs:font-medium vocs:data-[collapsable=true]:cursor-pointer';
+ })(Section || (Section = {}));
+-//# sourceMappingURL=Sidebar.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/OpenApiPage.js b/dist/react/internal/openapi/OpenApiPage.js
+index 06cc466..b74f6a6 100644
+--- a/dist/react/internal/openapi/OpenApiPage.js
++++ b/dist/react/internal/openapi/OpenApiPage.js
+@@ -21,7 +21,7 @@ function OpenApiLayout(props) {
+             ...props.frontmatter,
+             content: { ...props.frontmatter?.content, width: props.width ?? 'full' },
+             outline: props.outline ?? true,
+-        }, children: _jsx(Layout, { includeJsonLd: false, children: props.children }) }));
++        }, children: _jsxs(Layout, { includeJsonLd: false, includeTitle: !props.documentTitle, children: [props.documentTitle ? _jsx("title", { children: props.documentTitle }) : null, props.children] }) }));
+ }
+ /**
+  * Renders a consumer-authored "guide" page (a normal MDX page mounted under an
+@@ -44,7 +44,7 @@ function OpenApiLayout(props) {
+ export function OpenApiGuide(props) {
+     const title = props.title ?? props.frontmatter?.title;
+     const description = props.description ?? props.frontmatter?.description;
+-    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, description, title }, width: "full", children: [title ? _jsx("title", { children: title }) : null, _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] })] }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, width: "default", children: _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] }) }));
+ }
+ /**
+  * Renders an isolated, auto-generated OpenAPI reference section (Vite/RSC site
+@@ -73,10 +73,14 @@ export function OpenApiPage(props) {
+             return (_jsx(OpenApiLayout, { frontmatter: props.frontmatter, children: _jsxs("p", { children: ["No category \u201C", props.group, "\u201D exists in the API mounted at ", props.mount, "."] }) }));
+         const description = props.frontmatter?.description ?? group.description;
+         const title = props.title ?? props.frontmatter?.title ?? `${group.name} · ${ir.info.title}`;
+-        return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, description, title }, outline: false, children: [_jsx("title", { children: title }), _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(ReferenceGroup, { ir: ir, group: group, intro: props.intro, modelSource: props.inlineSchemaModels ? undefined : schemaModelSource(ir.path, group.id) }) })] }));
++        return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, outline: false, children: _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(ReferenceGroup, { ir: ir, group: group, intro: props.intro, modelSource: props.inlineSchemaModels ? undefined : schemaModelSource(ir.path, group.id) }) }) }));
+     }
+     // Overview / landing page.
+     const title = props.title ?? props.frontmatter?.title ?? ir.info.title;
+-    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, title }, width: "full", children: [_jsx("title", { children: title }), _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined })] }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, title }, width: "default", children: _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined }) }));
++}
++function resolveDocumentTitle(frontmatter, fallback) {
++    const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : '';
++    return seoTitle || fallback;
+ }
+ //# sourceMappingURL=OpenApiPage.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/Playground.client.d.ts b/dist/react/internal/openapi/Playground.client.d.ts
+index 1d2726b..c27f2b3 100644
+--- a/dist/react/internal/openapi/Playground.client.d.ts
++++ b/dist/react/internal/openapi/Playground.client.d.ts
+@@ -1,3 +1,4 @@
++import type { QueryPreset } from '../../../internal/openapi/query-presets.js';
+ import * as React from 'react';
+ /**
+  * Mounts the Scalar API client modal once per spec and exposes an `open`
+@@ -11,6 +12,8 @@ export declare namespace PlaygroundProvider {
+         children: React.ReactNode;
+         /** Spec mount path; scopes the persisted auth (e.g. `/api`). */
+         mount?: string | undefined;
++        /** Editable query values scoped to this provider instance. */
++        queryPreset?: QueryPreset | undefined;
+     };
+ }
+ /**
+diff --git a/dist/react/internal/openapi/Playground.client.js b/dist/react/internal/openapi/Playground.client.js
+index 8b2cf49..08c4971 100644
+--- a/dist/react/internal/openapi/Playground.client.js
++++ b/dist/react/internal/openapi/Playground.client.js
+@@ -3,6 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ import * as React from 'react';
+ import { createPortal } from 'react-dom';
+ import LucidePlay from '~icons/lucide/play';
++import { documentWithQuery } from '../../../internal/openapi/query-presets.js';
+ import { useColorScheme } from '../../useColorScheme.js';
+ import * as Auth from './auth.js';
+ const PlaygroundContext = React.createContext(null);
+@@ -13,7 +14,8 @@ const PlaygroundContext = React.createContext(null);
+  * server rendering.
+  */
+ export function PlaygroundProvider(props) {
+-    const { children, mount: specMount = '/' } = props;
++    const { children, mount: specMount = '/', queryPreset } = props;
++    const presetKey = queryPreset ? JSON.stringify(queryPreset) : '';
+     const containerRef = React.useRef(null);
+     // biome-ignore lint/suspicious/noExplicitAny: Scalar's modal type lives in a client-only module.
+     const modalRef = React.useRef(null);
+@@ -39,7 +41,7 @@ export function PlaygroundProvider(props) {
+             storeRef.current = null;
+             initializeRef.current = null;
+         };
+-    }, [specMount]);
++    }, [specMount, presetKey]);
+     // When another playground instance (another page/tab) persists new
+     // credentials, load them into this live store so its "Try" stays in sync
+     // without reopening the modal.
+@@ -84,7 +86,15 @@ export function PlaygroundProvider(props) {
+             });
+             await store.addDocument({
+                 name: 'default',
+-                ...('url' in client ? { url: client.url } : { document: client.content }),
++                ...('url' in client
++                    ? queryPreset
++                        ? { document: documentWithQuery(await fetch(client.url).then((response) => {
++                                if (!response.ok)
++                                    throw new Error(`Failed to load OpenAPI spec: ${response.status}`);
++                                return response.json();
++                            }), queryPreset) }
++                        : { url: client.url }
++                    : { document: documentWithQuery(client.content, queryPreset) }),
+             });
+             if (generation !== generationRef.current)
+                 return null;
+@@ -109,7 +119,7 @@ export function PlaygroundProvider(props) {
+         });
+         initializeRef.current = pending;
+         return pending;
+-    }, [specMount]);
++    }, [specMount, presetKey]);
+     const open = React.useCallback((operation) => {
+         void initialize().then((modal) => modal?.open({
+             method: operation.method.toLowerCase(),
+@@ -170,4 +180,3 @@ export function TestRequestButton(props) {
+     const context = React.useContext(PlaygroundContext);
+     return (_jsxs("button", { type: "button", "data-v-openapi-action": true, "data-v-openapi-test-request": true, disabled: !context || context.loading, onClick: () => context?.open({ method, path, example }), children: [_jsx(LucidePlay, { "data-v-openapi-action-icon": true }), "Try"] }));
+ }
+-//# sourceMappingURL=Playground.client.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/PlaygroundStandalone.d.ts b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
+index fbec302..6fb0a3a 100644
+--- a/dist/react/internal/openapi/PlaygroundStandalone.d.ts
++++ b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
+@@ -50,6 +50,8 @@ export declare namespace Playground {
+          * @default false
+          */
+         hideQueryParams?: boolean | undefined;
++        /** Editable query values for this embed, e.g. `chainId=42431`. */
++        query?: string | undefined;
+     };
+ }
+ //# sourceMappingURL=PlaygroundStandalone.d.ts.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/PlaygroundStandalone.js b/dist/react/internal/openapi/PlaygroundStandalone.js
+index 0ef0a76..f63270c 100644
+--- a/dist/react/internal/openapi/PlaygroundStandalone.js
++++ b/dist/react/internal/openapi/PlaygroundStandalone.js
+@@ -1,5 +1,6 @@
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ import { specs } from 'virtual:vocs/openapi';
++import { operationWithQuery } from '../../../internal/openapi/query-presets.js';
+ import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js';
+ import { CodeSample } from './CodeSample.client.js';
+ import { findOperation } from './find-operation.js';
+@@ -35,7 +36,8 @@ export function Playground(props) {
+     const ir = specs[mount];
+     if (!ir)
+         return _jsxs("p", { children: ["No OpenAPI spec is mounted at ", mount, "."] });
+-    const operation = findOperation(ir, props);
++    const found = findOperation(ir, props);
++    const operation = found && operationWithQuery(found, props.query);
+     if (!operation)
+         return (_jsxs("p", { children: ["No matching operation found in the API mounted at ", mount, ". Pass an ", _jsx("code", { children: "operationId" }), ", or a ", _jsx("code", { children: "method" }), " and ", _jsx("code", { children: "path" }), "."] }));
+     const samples = codeSamples(operation, ir.servers[0]?.url, {
+@@ -44,6 +46,5 @@ export function Playground(props) {
+     if (samples.length === 0)
+         return null;
+     const responses = responseSamples(operation);
+-    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
++    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, queryPreset: props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
+ }
+-//# sourceMappingURL=PlaygroundStandalone.js.map
+\ No newline at end of file
+diff --git a/dist/react/useActiveSidebarAnchor.d.ts b/dist/react/useActiveSidebarAnchor.d.ts
+new file mode 100644
+index 0000000..f462ca3
+--- /dev/null
++++ b/dist/react/useActiveSidebarAnchor.d.ts
+@@ -0,0 +1 @@
++export declare function useActiveSidebarAnchor(links: readonly string[], path: string, hash?: string): string | null;
+diff --git a/dist/react/useActiveSidebarAnchor.js b/dist/react/useActiveSidebarAnchor.js
+new file mode 100644
+index 0000000..ae9a29a
+--- /dev/null
++++ b/dist/react/useActiveSidebarAnchor.js
+@@ -0,0 +1,93 @@
++'use client';
++import { useEffect, useMemo, useState } from 'react';
++function pathname(value) {
++    return value.split(/[?#]/)[0]?.replace(/\/+$/, '') || '/';
++}
++function fragment(value) {
++    try {
++        return decodeURIComponent(value);
++    }
++    catch {
++        return value;
++    }
++}
++/** Tracks only sections linked by the current page's sidebar, including their subsections. */
++export function useActiveSidebarAnchor(links, path, hash) {
++    const currentPath = pathname(path);
++    const anchorKey = JSON.stringify(links.flatMap((link) => {
++        const [target, id] = link.split('#');
++        return id && pathname(target || currentPath) === currentPath ? [fragment(id)] : [];
++    }));
++    const ids = useMemo(() => new Set(JSON.parse(anchorKey)), [anchorKey]);
++    const [active, setActive] = useState({
++        path: currentPath,
++        id: null,
++    });
++    useEffect(() => {
++        const updateActive = (id) => setActive((previous) => previous.path === currentPath && previous.id === id ? previous : { path: currentPath, id });
++        if (!ids.size) {
++            updateActive(null);
++            return;
++        }
++        let anchors = [];
++        let frame = 0;
++        const update = () => {
++            frame = 0;
++            // Match the browser's anchor offset, including a visible mobile outline.
++            const padding = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
++            const outline = document.querySelector('[data-v-outline-mobile]');
++            const outlineBottom = outline?.getClientRects().length
++                ? outline.getBoundingClientRect().bottom
++                : 0;
++            let id = null;
++            for (const { element, margin } of anchors) {
++                const readingEdge = Math.max(padding + margin, outlineBottom) + 2;
++                if (element.getBoundingClientRect().top > readingEdge)
++                    break;
++                id = element.id;
++            }
++            // A short final section may never reach the reading edge.
++            if (window.scrollY > 0 &&
++                window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) {
++                const last = anchors.at(-1)?.element;
++                if (last && last.getBoundingClientRect().top < window.innerHeight)
++                    id = last.id;
++            }
++            updateActive(id);
++        };
++        const schedule = () => {
++            if (!frame)
++                frame = requestAnimationFrame(update);
++        };
++        const collect = () => {
++            anchors = Array.from(document.querySelectorAll('article[data-v-content] [id], [data-v-openapi] [id]'))
++                .filter((element) => ids.has(element.id) && element.getClientRects().length > 0)
++                .map((element) => ({
++                element,
++                margin: Number.parseFloat(getComputedStyle(element).scrollMarginTop) || 0,
++            }));
++            schedule();
++        };
++        collect();
++        // Read positions after scroll rather than intersection-entry order. This
++        // works in both directions and when navigation jumps over several headings.
++        window.addEventListener('scroll', schedule, { passive: true });
++        window.addEventListener('resize', collect);
++        window.addEventListener('hashchange', schedule);
++        // Client navigation can replace the article after this effect runs. Observe
++        // its ancestor so asynchronously rendered reference pages are collected too.
++        const mutation = new MutationObserver(collect);
++        mutation.observe(document.body, { childList: true, subtree: true });
++        const resize = new ResizeObserver(schedule);
++        resize.observe(document.documentElement);
++        return () => {
++            cancelAnimationFrame(frame);
++            window.removeEventListener('scroll', schedule);
++            window.removeEventListener('resize', collect);
++            window.removeEventListener('hashchange', schedule);
++            mutation.disconnect();
++            resize.disconnect();
++        };
++    }, [currentPath, ids, hash]);
++    return active.path === currentPath ? active.id : null;
++}
+diff --git a/src/index.ts b/src/index.ts
+index 5977d9d..23679ca 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -22,3 +22,5 @@ export { Sandbox } from './react/Sandbox/index.js'
+ export { ScrollRestoration } from './react/ScrollRestoration.js'
+ export { Tab, Tabs } from './react/Tabs.js'
+ export { useConfig } from './react/useConfig.js'
++
++export { useActiveSidebarAnchor } from './react/useActiveSidebarAnchor.js'
+diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
+new file mode 100644
+index 0000000..6ee138e
+--- /dev/null
++++ b/src/internal/openapi/query-presets.ts
+@@ -0,0 +1,53 @@
++import type { IrOperation } from './parser.js'
++
++export type QueryPreset = { method: string; path: string; query: string }
++
++type Parameter = {
++  name?: string
++  in?: string
++  schema?: Record<string, unknown>
++}
++
++function presetParameters<T extends Parameter>(parameters: T[], query: string): T[] {
++  const values = new URLSearchParams(query)
++  return parameters.map((parameter) => {
++    if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
++      return parameter
++    const raw = values.get(parameter.name)!
++    const value = parameter.schema?.type === 'array' ? raw.split(',') : raw
++    const { example: _example, ...rest } = parameter
++    return {
++      ...rest,
++      // Scalar reads parameter examples and needs optional rows explicitly enabled.
++      examples: { default: { value, 'x-disabled': false } },
++      // Vocs generates snippets from schema examples. Neither changes API defaults.
++      schema: { ...parameter.schema, example: value, examples: [value] },
++    } as T
++  })
++}
++
++/** Apply editable query examples to one embed without changing its shared spec. */
++export function operationWithQuery(operation: IrOperation, query?: string): IrOperation {
++  if (!query) return operation
++  return { ...operation, parameters: presetParameters(operation.parameters, query) }
++}
++
++/** Prepare the isolated Scalar document used by this playground instance. */
++export function documentWithQuery(
++  document: Record<string, unknown>,
++  preset?: QueryPreset,
++): Record<string, unknown> {
++  if (!preset?.query) return document
++  const copy = structuredClone(document)
++  const paths = copy.paths as Record<string, Record<string, unknown>> | undefined
++  const path = paths?.[preset.path]
++  const operation = path?.[preset.method.toLowerCase()] as
++    | Record<string, unknown>
++    | undefined
++  if (!operation) return copy
++  for (const owner of [path!, operation]) {
++    if (Array.isArray(owner.parameters))
++      owner.parameters = presetParameters(owner.parameters, preset.query)
++  }
++  return copy
++}
+diff --git a/src/react/Head.tsx b/src/react/Head.tsx
+index e7b51ed..004c472 100644
+--- a/src/react/Head.tsx
++++ b/src/react/Head.tsx
+@@ -9,7 +9,7 @@ import * as MdxPageContext from './MdxPageContext.js'
+ import { useConfig } from './useConfig.js'
+ 
+ export function Head(props: Head.Props) {
+-  const { includeJsonLd = true } = props
++  const { includeJsonLd = true, includeTitle = true } = props
+   const config = useConfig()
+   const { path: pathname } = useRouter()
+   const { frontmatter } = MdxPageContext.use()
+@@ -122,7 +122,7 @@ export function Head(props: Head.Props) {
+       {!disabled && (
+         <>
+           {/* Title */}
+-          {fullTitle && <title key="title">{fullTitle}</title>}
++          {includeTitle && fullTitle && <title key="title">{fullTitle}</title>}
+ 
+           {/* Base URL */}
+           {base && <base href={base} />}
+@@ -225,6 +225,7 @@ export function Head(props: Head.Props) {
+ export declare namespace Head {
+   export type Props = {
+     includeJsonLd?: boolean | undefined
++    includeTitle?: boolean | undefined
+   }
+ }
+ 
+diff --git a/src/react/Layout.tsx b/src/react/Layout.tsx
+index ca77c7a..4c8fbb9 100644
+--- a/src/react/Layout.tsx
++++ b/src/react/Layout.tsx
+@@ -2,10 +2,10 @@ import { Head } from './Head.js'
+ import * as Layout_client from './Layout.client.js'
+ 
+ export function Layout(props: Layout.Props) {
+-  const { children, includeJsonLd } = props
++  const { children, includeJsonLd, includeTitle } = props
+   return (
+     <>
+-      <Head includeJsonLd={includeJsonLd} />
++      <Head includeJsonLd={includeJsonLd} includeTitle={includeTitle} />
+       <Layout_client.Main>{children}</Layout_client.Main>
+     </>
+   )
+@@ -15,5 +15,6 @@ export namespace Layout {
+   export type Props = {
+     children: React.ReactNode
+     includeJsonLd?: boolean | undefined
++    includeTitle?: boolean | undefined
+   }
+ }
+diff --git a/src/react/Root.tsx b/src/react/Root.tsx
+index 77180d1..495ce44 100644
+--- a/src/react/Root.tsx
++++ b/src/react/Root.tsx
+@@ -2,7 +2,6 @@ import { config } from 'virtual:vocs/config'
+ import groupIconsStylesUrl from 'virtual:vocs/group-icons.css?url'
+ import userStylesUrl from 'virtual:vocs/user-styles'
+ import stylesUrl from '../styles/index.css?url'
+-import { Head } from './Head.js'
+ import { Root_client } from './Root.client.js'
+ import { ScrollRestoration } from './ScrollRestoration.js'
+ 
+@@ -24,7 +23,6 @@ export async function Root({ children }: { children: React.ReactNode }) {
+         <link rel="stylesheet" href={stylesUrl} />
+         {userStylesUrl && <link rel="stylesheet" href={userStylesUrl} />}
+         {groupIconsStylesUrl && <link rel="stylesheet" href={groupIconsStylesUrl} />}
+-        <Head includeJsonLd={false} />
+       </head>
+       <body data-version="1.0">
+         <Root_client>{children}</Root_client>
+diff --git a/src/react/internal/NotFound.tsx b/src/react/internal/NotFound.tsx
+index ccbf3ac..409c67c 100644
+--- a/src/react/internal/NotFound.tsx
++++ b/src/react/internal/NotFound.tsx
+@@ -1,43 +1,48 @@
++import { config } from 'virtual:vocs/config'
+ import { Link } from 'waku'
+ import LucideFileQuestion from '~icons/lucide/file-question'
+ import LucideHome from '~icons/lucide/home'
+ 
+ export function NotFound() {
+   return (
+-    <div
+-      className="vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center"
+-      data-v-not-found
+-    >
++    <>
++      <title>{`Page not found ⋅ ${config.title}`}</title>
++      <meta name="robots" content="noindex, nofollow" />
+       <div
+-        className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
+-        data-v-not-found-icon
++        className="vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center"
++        data-v-not-found
+       >
+-        <LucideFileQuestion className="vocs:size-10" />
++        <div
++          className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
++          data-v-not-found-icon
++        >
++          <LucideFileQuestion className="vocs:size-10" />
++        </div>
++
++        <h1
++          className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
++          data-v-not-found-title
++        >
++          Page not found
++        </h1>
++
++        <p
++          className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
++          data-v-not-found-description
++        >
++          The page you're looking for doesn't exist or has been moved.
++        </p>
++
++        <Link
++          className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
++          data-v-not-found-link
++          to="/"
++        >
++          <LucideHome className="vocs:size-4 vocs:text-secondary" />
++          Back to home
++        </Link>
+       </div>
+-
+-      <h1
+-        className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
+-        data-v-not-found-title
+-      >
+-        Page not found
+-      </h1>
+-
+-      <p
+-        className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
+-        data-v-not-found-description
+-      >
+-        The page you're looking for doesn't exist or has been moved.
+-      </p>
+-
+-      <Link
+-        className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
+-        data-v-not-found-link
+-        to="/"
+-      >
+-        <LucideHome className="vocs:size-4 vocs:text-secondary" />
+-        Back to home
+-      </Link>
+-    </div>
++    </>
+   )
+ }
+ 
+diff --git a/src/react/internal/Sidebar.tsx b/src/react/internal/Sidebar.tsx
+index 12b1355..28d0973 100644
+--- a/src/react/internal/Sidebar.tsx
++++ b/src/react/internal/Sidebar.tsx
+@@ -11,114 +11,19 @@ import * as Sidebar_core from '../../internal/sidebar.js'
+ import { Badge } from '../Badge.js'
+ import { Link } from '../Link.js'
+ import { useSidebar } from '../useSidebar.js'
++import { useActiveSidebarAnchor } from '../useActiveSidebarAnchor.js'
+ 
+ const maxDepth = 5
+ 
+ /** Active in-page anchor id, for hash-link sidebar items (e.g. OpenAPI). */
+ const ActiveAnchorContext = React.createContext<string | null>(null)
+ 
+-/**
+- * The set of in-page anchor ids that the sidebar links to on the current page.
+- * Used so page-level items only defer their active state to corresponding
+- * sidebar items — not to arbitrary headings or hash links for another page.
+- */
+-const HashIdsContext = React.createContext<ReadonlySet<string>>(new Set())
+-
+-/** Collects the `#fragment` ids of hash-link sidebar items for the current page. */
+-function collectHashIds(
+-  items: Sidebar_core.SidebarItem[],
+-  path: string,
+-  ids = new Set<string>(),
+-): Set<string> {
+-  const pagePath = path.split('#')[0] ?? path
+-  for (const item of items) {
+-    if (item.link?.includes('#') && !Path.isExternal(item.link)) {
+-      const [itemPath, id] = item.link.split('#')
+-      if (id && (!itemPath || Path.matches(pagePath, itemPath))) ids.add(id)
+-    }
+-    if (item.items) collectHashIds(item.items, pagePath, ids)
+-  }
+-  return ids
+-}
+-
+-/**
+- * Tracks the in-page section currently in view, so hash-link sidebar items
+- * (used by the OpenAPI section) can show active state. Mirrors the Outline's
+- * IntersectionObserver approach.
+- */
+-function useActiveAnchor(hashIds: ReadonlySet<string>, path: string): string | null {
+-  const [activeId, setActiveId] = React.useState<string | null>(null)
+-
+-  React.useEffect(() => {
+-    if (hashIds.size === 0 || typeof window === 'undefined') return
+-
+-    // OpenAPI pages render inside `article[data-v-content]` too, so the generic
+-    // markdown selector would also match operation sub-headings (Parameters,
+-    // Responses, schema anchors, …) whose ids have no sidebar entry — hijacking
+-    // the active anchor as you scroll through a section. On those pages observe
+-    // only the group header (`<h1>`) and per-operation titles, which back the
+-    // hash-link sidebar items, so the active item persists across the section.
+-    const isOpenApi = document.querySelector('[data-v-openapi]') !== null
+-    const selector = isOpenApi
+-      ? '[data-v-openapi-h1][id], [data-v-openapi-operation-title][id]'
+-      : 'article[data-v-content] :is(h2, h3, h4, h5, h6)[id]'
+-
+-    // Reset on every client-side navigation. If the destination hash belongs
+-    // to a nested heading without a sidebar item, keep its nearest preceding
+-    // sidebar anchor active instead of falling back to the page-level item.
+-    // Reading `path` here — rather than only `window.location` — keeps it a
+-    // genuine effect dependency so navigation reliably re-runs this.
+-    const hashFromPath = path.includes('#') ? path.slice(path.indexOf('#') + 1) : ''
+-    const hash = hashFromPath || (window.location.hash ? window.location.hash.slice(1) : '')
+-    let initialId = hashIds.has(hash) ? hash : null
+-    const target = hash ? document.getElementById(hash) : null
+-    if (!initialId && target) {
+-      for (const element of document.querySelectorAll(selector)) {
+-        const position = element.compareDocumentPosition(target)
+-        if (element === target || position & Node.DOCUMENT_POSITION_PRECEDING) break
+-        if (hashIds.has(element.id)) initialId = element.id
+-      }
+-    }
+-    setActiveId(initialId)
+-
+-    const observer = new IntersectionObserver(
+-      (entries) => {
+-        for (const entry of entries)
+-          if (entry.isIntersecting) {
+-            setActiveId(entry.target.id)
+-            break
+-          }
+-      },
+-      { rootMargin: '0px 0px -80% 0px' },
+-    )
+-
+-    const observeAll = () => {
+-      observer.disconnect()
+-      for (const element of document.querySelectorAll(selector)) {
+-        // Nested headings without matching sidebar items belong to the current
+-        // section. Observing them would reactivate the page-level item.
+-        if (!hashIds.has(element.id)) continue
+-        // Skip changelog release-body headings — they have no sidebar entry and
+-        // would hijack the active section as you scroll through the changelog.
+-        if (element.closest('[data-v-changelog]')) continue
+-        observer.observe(element)
+-      }
+-    }
+-    observeAll()
+-
+-    const content =
+-      document.querySelector('article[data-v-content]') ??
+-      document.querySelector('[data-v-openapi]')
+-    const mutation = content ? new MutationObserver(observeAll) : null
+-    if (content && mutation) mutation.observe(content, { childList: true, subtree: true })
+-
+-    return () => {
+-      observer.disconnect()
+-      mutation?.disconnect()
+-    }
+-  }, [hashIds, path])
+-
+-  return activeId
++/** Flatten links once; the hook filters them to the current page. */
++function collectLinks(items: Sidebar_core.SidebarItem[]): string[] {
++  return items.flatMap((item) => [
++    ...(item.link ? [item.link] : []),
++    ...(item.items ? collectLinks(item.items) : []),
++  ])
+ }
+ 
+ export function Sidebar(props: Sidebar.Props) {
+@@ -129,33 +34,31 @@ export function Sidebar(props: Sidebar.Props) {
+     () => Sidebar_core.length(sidebar.items, { startDepth: 2 }) > 25,
+     [sidebar.items],
+   )
+-  const { path } = useRouter()
+-  const hashIds = React.useMemo(() => collectHashIds(sidebar.items, path), [sidebar.items, path])
+-  const activeAnchor = useActiveAnchor(hashIds, path)
++  const links = React.useMemo(() => collectLinks(sidebar.items), [sidebar.items])
++  const { path, hash } = useRouter()
++  const activeAnchor = useActiveSidebarAnchor(links, path, hash)
+ 
+   return (
+-    <HashIdsContext.Provider value={hashIds}>
+-      <ActiveAnchorContext.Provider value={activeAnchor}>
+-        <nav
+-          className={cx(
+-            "vocs:flex-1 vocs:flex vocs:flex-col vocs:text-sm vocs:font-[450] vocs:[&>*:not(:last-child)[data-collapsed='false']]:mb-4",
+-            className,
+-          )}
+-          data-v-sidebar
+-        >
+-          {sidebar.backLink && <BackLink onNavigate={onNavigate} />}
+-          {sidebar.items.map((item, i) => (
+-            <Section
+-              key={`${item.text}-${i}`}
+-              {...item}
+-              condensed={condenseSidebar}
+-              onNavigate={onNavigate}
+-              scrollRef={scrollRef}
+-            />
+-          ))}
+-        </nav>
+-      </ActiveAnchorContext.Provider>
+-    </HashIdsContext.Provider>
++    <ActiveAnchorContext.Provider value={activeAnchor}>
++      <nav
++        className={cx(
++          "vocs:flex-1 vocs:flex vocs:flex-col vocs:text-sm vocs:font-[450] vocs:[&>*:not(:last-child)[data-collapsed='false']]:mb-4",
++          className,
++        )}
++        data-v-sidebar
++      >
++        {sidebar.backLink && <BackLink onNavigate={onNavigate} />}
++        {sidebar.items.map((item, i) => (
++          <Section
++            key={`${item.text}-${i}`}
++            {...item}
++            condensed={condenseSidebar}
++            onNavigate={onNavigate}
++            scrollRef={scrollRef}
++          />
++        ))}
++      </nav>
++    </ActiveAnchorContext.Provider>
+   )
+ }
+ 
+@@ -224,26 +127,16 @@ function Item(props: Item.Props) {
+   const { path } = useRouter()
+   const isExternal = external ?? Path.isExternal(link)
+   const activeAnchor = React.useContext(ActiveAnchorContext)
+-  const hashIds = React.useContext(HashIdsContext)
+   const hashId = link?.includes('#') ? link.split('#')[1] : undefined
+   const active = React.useMemo(() => {
+-    if (isExternal) return false
+-    if (hashId) return hashId === activeAnchor
+-    if (!Path.matches(path, link)) return false
+-    // Page-level item (e.g. the OpenAPI "Overview"). When in-page anchor
+-    // tracking is active, only highlight it while viewing the top of the page —
+-    // i.e. when the active section is the page's top heading (whose id matches
+-    // the last path segment) or no section is active yet. Otherwise the matching
+-    // anchor item below it is highlighted instead.
+-    if (activeAnchor == null) return true
+-    const topId = (link?.split('#')[0] ?? '').split('/').filter(Boolean).pop()
+-    if (activeAnchor === topId) return true
+-    // Only defer to the active anchor when it corresponds to an actual hash-link
+-    // sidebar item (a sibling section on this same page). Otherwise the anchor is
+-    // just an in-page heading on a standalone guide page that lives under a
+-    // section whose sidebar uses hash links elsewhere — keep this item active.
+-    return !hashIds.has(activeAnchor)
+-  }, [path, link, isExternal, hashId, activeAnchor, hashIds])
++    if (isExternal || !link || !Path.matches(path, link.split('#')[0] || path)) return false
++    if (!hashId) return activeAnchor === null
++    try {
++      return decodeURIComponent(hashId) === activeAnchor
++    } catch {
++      return hashId === activeAnchor
++    }
++  }, [path, link, isExternal, hashId, activeAnchor])
+ 
+   const itemRef = React.useRef<HTMLElement>(null)
+   const prevPath = React.useRef(path)
+@@ -324,6 +217,7 @@ function Item(props: Item.Props) {
+         to={link}
+         ref={itemRef as never}
+         onClick={onNavigate}
++        aria-current={active ? (hashId ? 'location' : 'page') : undefined}
+         {...(active && { 'data-active': true })}
+       >
+         <span className="vocs:min-w-0 vocs:truncate">{text}</span>
+@@ -421,7 +315,9 @@ function Section(props: Section.Props) {
+                 data-v-sidebar-section-header
+                 {...(groupLinkIsActive && { 'data-active': true })}
+               >
+-                <Link className={Section.headerLinkClassName} onClick={onNavigate} to={link}>
++                <Link className={Section.headerLinkClassName} onClick={onNavigate} to={link}
++                  {...(groupLinkIsActive && { 'aria-current': 'page' as const, 'data-active': true })}
++                >
+                   <span className="vocs:inline-flex vocs:items-center vocs:gap-1">
+                     {text}
+                     {groupLinkIsExternal && <LucideArrowUpRight className="vocs:size-3" />}
+diff --git a/src/react/internal/openapi/OpenApiPage.tsx b/src/react/internal/openapi/OpenApiPage.tsx
+index 939c937..8207ef5 100644
+--- a/src/react/internal/openapi/OpenApiPage.tsx
++++ b/src/react/internal/openapi/OpenApiPage.tsx
+@@ -20,6 +20,7 @@ import { Prose, ReferenceGroup, ReferenceOverview } from './Reference.js'
+  */
+ function OpenApiLayout(props: {
+   children: React.ReactNode
++  documentTitle?: string | undefined
+   frontmatter?: Frontmatter | undefined
+   outline?: boolean | undefined
+   width?: 'default' | 'full'
+@@ -32,7 +33,10 @@ function OpenApiLayout(props: {
+         outline: props.outline ?? true,
+       }}
+     >
+-      <Layout includeJsonLd={false}>{props.children}</Layout>
++      <Layout includeJsonLd={false} includeTitle={!props.documentTitle}>
++        {props.documentTitle ? <title>{props.documentTitle}</title> : null}
++        {props.children}
++      </Layout>
+     </MdxPageContext.Provider>
+   )
+ }
+@@ -60,8 +64,11 @@ export function OpenApiGuide(props: OpenApiGuide.Props) {
+   const description = props.description ?? props.frontmatter?.description
+ 
+   return (
+-    <OpenApiLayout frontmatter={{ ...props.frontmatter, description, title }} width="full">
+-      {title ? <title>{title}</title> : null}
++    <OpenApiLayout
++      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++      frontmatter={{ ...props.frontmatter, description, title }}
++      width="default"
++    >
+       <div data-v-openapi-guide>
+         {props.header && title ? (
+           <header data-v-openapi-header>
+@@ -140,8 +147,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+     const title = props.title ?? props.frontmatter?.title ?? `${group.name} · ${ir.info.title}`
+ 
+     return (
+-      <OpenApiLayout frontmatter={{ ...props.frontmatter, description, title }} outline={false}>
+-        <title>{title}</title>
++      <OpenApiLayout
++        documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++        frontmatter={{ ...props.frontmatter, description, title }}
++        outline={false}
++      >
+         <PlaygroundProvider mount={ir.path}>
+           <ReferenceGroup
+             ir={ir}
+@@ -160,8 +170,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+   const title = props.title ?? props.frontmatter?.title ?? ir.info.title
+ 
+   return (
+-    <OpenApiLayout frontmatter={{ ...props.frontmatter, title }} width="full">
+-      <title>{title}</title>
++    <OpenApiLayout
++      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++      frontmatter={{ ...props.frontmatter, title }}
++      width="default"
++    >
+       <ReferenceOverview
+         ir={ir}
+         intro={props.intro}
+@@ -171,6 +184,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+   )
+ }
+ 
++function resolveDocumentTitle(frontmatter: Frontmatter | undefined, fallback: string | undefined) {
++  const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : ''
++  return seoTitle || fallback
++}
++
+ export declare namespace OpenApiPage {
+   type Props = {
+     /** Mount path identifying which spec to render (e.g. `/api`). */
+diff --git a/src/react/internal/openapi/Playground.client.tsx b/src/react/internal/openapi/Playground.client.tsx
+index ff2d824..921f3a9 100644
+--- a/src/react/internal/openapi/Playground.client.tsx
++++ b/src/react/internal/openapi/Playground.client.tsx
+@@ -3,6 +3,7 @@
+ import * as React from 'react'
+ import { createPortal } from 'react-dom'
+ import LucidePlay from '~icons/lucide/play'
++import { documentWithQuery, type QueryPreset } from '../../../internal/openapi/query-presets.js'
+ import { useColorScheme } from '../../useColorScheme.js'
+ import * as Auth from './auth.js'
+ 
+@@ -17,7 +18,8 @@ const PlaygroundContext = React.createContext<{ open: OpenFn; loading: boolean }
+  * server rendering.
+  */
+ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+-  const { children, mount: specMount = '/' } = props
++  const { children, mount: specMount = '/', queryPreset } = props
++  const presetKey = queryPreset ? JSON.stringify(queryPreset) : ''
+   const containerRef = React.useRef<HTMLDivElement>(null)
+   // biome-ignore lint/suspicious/noExplicitAny: Scalar's modal type lives in a client-only module.
+   const modalRef = React.useRef<any>(null)
+@@ -43,7 +45,7 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+       storeRef.current = null
+       initializeRef.current = null
+     }
+-  }, [specMount])
++  }, [specMount, presetKey])
+ 
+   // When another playground instance (another page/tab) persists new
+   // credentials, load them into this live store so its "Try" stays in sync
+@@ -89,7 +91,14 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+         })
+         await store.addDocument({
+           name: 'default',
+-          ...('url' in client ? { url: client.url } : { document: client.content }),
++          ...('url' in client
++            ? queryPreset
++              ? { document: documentWithQuery(await fetch(client.url).then((response) => {
++                  if (!response.ok) throw new Error(`Failed to load OpenAPI spec: ${response.status}`)
++                  return response.json()
++                }), queryPreset) }
++              : { url: client.url }
++            : { document: documentWithQuery(client.content, queryPreset) }),
+         })
+         if (generation !== generationRef.current) return null
+ 
+@@ -112,7 +121,7 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+       })
+     initializeRef.current = pending
+     return pending
+-  }, [specMount])
++  }, [specMount, presetKey])
+ 
+   const open = React.useCallback<OpenFn>(
+     (operation) => {
+@@ -171,6 +180,8 @@ export declare namespace PlaygroundProvider {
+     children: React.ReactNode
+     /** Spec mount path; scopes the persisted auth (e.g. `/api`). */
+     mount?: string | undefined
++    /** Editable query values scoped to this provider instance. */
++    queryPreset?: QueryPreset | undefined
+   }
+ }
+ 
+diff --git a/src/react/internal/openapi/PlaygroundStandalone.tsx b/src/react/internal/openapi/PlaygroundStandalone.tsx
+index db348a0..f35e4d8 100644
+--- a/src/react/internal/openapi/PlaygroundStandalone.tsx
++++ b/src/react/internal/openapi/PlaygroundStandalone.tsx
+@@ -1,4 +1,5 @@
+ import { specs } from 'virtual:vocs/openapi'
++import { operationWithQuery } from '../../../internal/openapi/query-presets.js'
+ import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js'
+ import { CodeSample } from './CodeSample.client.js'
+ import { findOperation } from './find-operation.js'
+@@ -41,7 +42,8 @@ export function Playground(props: Playground.Props) {
+   const ir = specs[mount]
+   if (!ir) return <p>No OpenAPI spec is mounted at {mount}.</p>
+ 
+-  const operation = findOperation(ir, props)
++  const found = findOperation(ir, props)
++  const operation = found && operationWithQuery(found, props.query)
+   if (!operation)
+     return (
+       <p>
+@@ -58,7 +60,10 @@ export function Playground(props: Playground.Props) {
+ 
+   return (
+     <div data-v-openapi>
+-      <PlaygroundProvider mount={ir.path}>
++      <PlaygroundProvider
++        mount={ir.path}
++        queryPreset={props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined}
++      >
+         <CodeSample
+           samples={samples}
+           responses={responses}
+@@ -107,5 +112,7 @@ export declare namespace Playground {
+      * @default false
+      */
+     hideQueryParams?: boolean | undefined
++    /** Editable query values for this embed, e.g. `chainId=42431`. */
++    query?: string | undefined
+   }
+ }
+diff --git a/src/react/useActiveSidebarAnchor.ts b/src/react/useActiveSidebarAnchor.ts
+new file mode 100644
+index 0000000..33a3e44
+--- /dev/null
++++ b/src/react/useActiveSidebarAnchor.ts
+@@ -0,0 +1,114 @@
++'use client'
++
++import { useEffect, useMemo, useState } from 'react'
++
++function pathname(value: string) {
++  return value.split(/[?#]/)[0]?.replace(/\/+$/, '') || '/'
++}
++
++function fragment(value: string) {
++  try {
++    return decodeURIComponent(value)
++  } catch {
++    return value
++  }
++}
++
++/** Tracks only sections linked by the current page's sidebar, including their subsections. */
++export function useActiveSidebarAnchor(
++  links: readonly string[],
++  path: string,
++  hash?: string,
++): string | null {
++  const currentPath = pathname(path)
++  const anchorKey = JSON.stringify(
++    links.flatMap((link) => {
++      const [target, id] = link.split('#')
++      return id && pathname(target || currentPath) === currentPath ? [fragment(id)] : []
++    }),
++  )
++  const ids = useMemo<Set<string>>(() => new Set(JSON.parse(anchorKey)), [anchorKey])
++  const [active, setActive] = useState<{ path: string; id: string | null }>({
++    path: currentPath,
++    id: null,
++  })
++
++  useEffect(() => {
++    const updateActive = (id: string | null) =>
++      setActive((previous) =>
++        previous.path === currentPath && previous.id === id ? previous : { path: currentPath, id },
++      )
++    if (!ids.size) {
++      updateActive(null)
++      return
++    }
++
++    let anchors: { element: HTMLElement; margin: number }[] = []
++    let frame = 0
++    const update = () => {
++      frame = 0
++      // Match the browser's anchor offset, including a visible mobile outline.
++      const padding =
++        Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
++      const outline = document.querySelector<HTMLElement>('[data-v-outline-mobile]')
++      const outlineBottom = outline?.getClientRects().length
++        ? outline.getBoundingClientRect().bottom
++        : 0
++      let id: string | null = null
++      for (const { element, margin } of anchors) {
++        const readingEdge = Math.max(padding + margin, outlineBottom) + 2
++        if (element.getBoundingClientRect().top > readingEdge) break
++        id = element.id
++      }
++      // A short final section may never reach the reading edge.
++      if (
++        window.scrollY > 0 &&
++        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2
++      ) {
++        const last = anchors.at(-1)?.element
++        if (last && last.getBoundingClientRect().top < window.innerHeight) id = last.id
++      }
++      updateActive(id)
++    }
++    const schedule = () => {
++      if (!frame) frame = requestAnimationFrame(update)
++    }
++    const collect = () => {
++      anchors = Array.from(
++        document.querySelectorAll<HTMLElement>(
++          'article[data-v-content] [id], [data-v-openapi] [id]',
++        ),
++      )
++        .filter((element) => ids.has(element.id) && element.getClientRects().length > 0)
++        .map((element) => ({
++          element,
++          margin: Number.parseFloat(getComputedStyle(element).scrollMarginTop) || 0,
++        }))
++      schedule()
++    }
++    collect()
++
++    // Read positions after scroll rather than intersection-entry order. This
++    // works in both directions and when navigation jumps over several headings.
++    window.addEventListener('scroll', schedule, { passive: true })
++    window.addEventListener('resize', collect)
++    window.addEventListener('hashchange', schedule)
++    // Client navigation can replace the article after this effect runs. Observe
++    // its ancestor so asynchronously rendered reference pages are collected too.
++    const mutation = new MutationObserver(collect)
++    mutation.observe(document.body, { childList: true, subtree: true })
++    const resize = new ResizeObserver(schedule)
++    resize.observe(document.documentElement)
++
++    return () => {
++      cancelAnimationFrame(frame)
++      window.removeEventListener('scroll', schedule)
++      window.removeEventListener('resize', collect)
++      window.removeEventListener('hashchange', schedule)
++      mutation.disconnect()
++      resize.disconnect()
++    }
++  }, [currentPath, ids, hash])
++
++  return active.path === currentPath ? active.id : null
++}
