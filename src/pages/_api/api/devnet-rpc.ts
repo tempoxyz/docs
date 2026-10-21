@@ -1,9 +1,10 @@
-// Same-origin JSON-RPC proxy for the Accounts demos on the multisig-1113 devnet.
+// Same-origin JSON-RPC proxy for the Accounts demos on the t14-checkpoint devnet.
 // Its public endpoint sits behind the shared `previews` API key, which must stay server-side,
 // and HTTPS pages can't call the Tailscale-only HTTP endpoint. Without a key (local dev on the
 // tailnet), it forwards to the Tailscale RPC instead.
-const publicUpstream = process.env.DEVNET_RPC_URL ?? 'https://rpc-multisig-1113.devnet.tempoxyz.dev'
-const tailnetUpstream = 'http://multisig-1113-nodes-rpc-service.tail388b2e.ts.net:8545'
+const publicUpstream =
+  process.env.DEVNET_RPC_URL ?? 'https://rpc-t14-checkpoint.devnet.tempoxyz.dev'
+const tailnetUpstream = 'http://t14-checkpoint-nodes-rpc-service.tail388b2e.ts.net:8545'
 
 const maxRequestBytes = 256 * 1024
 const maxResponseBytes = 4 * 1024 * 1024
@@ -24,6 +25,7 @@ export async function POST(request: Request): Promise<Response> {
     const calls = Array.isArray(parsed) ? parsed : [parsed]
     if (calls.length === 0 || calls.length > maxBatch || !calls.every(isAllowedCall))
       return failure(400, 'Unsupported demo RPC request')
+    if (calls.map(renameSimulation).includes(true)) body = JSON.stringify(parsed)
   } catch {
     return failure(400, 'Invalid JSON-RPC request')
   }
@@ -71,6 +73,20 @@ function isAllowedCall(call: unknown) {
   if (jsonrpc !== '2.0' || typeof method !== 'string') return false
   if (params !== undefined && !Array.isArray(params)) return false
   return allowedMethods.has(method) || allowedPrefixes.some((prefix) => method.startsWith(prefix))
+}
+
+// ox still sends the simulation hint as `multisigSimulation`, and the t14-checkpoint node reads
+// `configurableAccountSimulation`. Without it, the node underestimates a new account's first
+// transaction and it runs out of gas. Remove once ox sends the new name.
+function renameSimulation(call: unknown) {
+  const [request] = (call as { params?: unknown[] }).params ?? []
+  if (!request || typeof request !== 'object' || !('multisigSimulation' in request)) return false
+  const { multisigSimulation, ...rest } = request as Record<string, unknown>
+  ;(call as { params: unknown[] }).params[0] = {
+    ...rest,
+    configurableAccountSimulation: multisigSimulation,
+  }
+  return true
 }
 
 function failure(status: number, message: string) {
