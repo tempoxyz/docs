@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import type { Chain, Client, Transport } from 'viem'
-import { parseUnits } from 'viem'
+import { BaseError, HttpRequestError, LimitExceededRpcError, parseUnits } from 'viem'
 import { mnemonicToAccount } from 'viem/accounts'
 import { Actions } from 'viem/tempo'
 import { useBlockNumber, useClient, useConnection } from 'wagmi'
@@ -98,9 +98,25 @@ export function AddFunds(props: DemoStepProps) {
       active={active}
       completed={Boolean(address && balance && balance.amount > 0n)}
       actions={actions}
-      error={fundAccount.error}
+      error={getFundingError(fundAccount.error)}
       number={stepNumber}
       title="Add testnet funds to your account."
     />
   )
+}
+
+export function getFundingError(error: Error | null) {
+  const limitError =
+    error instanceof BaseError
+      ? error.walk(
+          (cause) =>
+            cause instanceof LimitExceededRpcError ||
+            (cause instanceof HttpRequestError && cause.status === 429),
+        )
+      : undefined
+  if (limitError)
+    return new Error(
+      'Test-fund request limit reached. Wait before requesting more funds. You can continue if you already have enough of the selected tokens.',
+    )
+  return error
 }
