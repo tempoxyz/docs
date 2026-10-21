@@ -726,8 +726,8 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
     await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
   // Each Features and Build group opens to its own overview page and guides.
   for (const [group, href] of [
-    ['Account policies', '/docs/accounts/policies'],
-    ['Access keys', '/docs/accounts/access-keys'],
+    ['Account Policies', '/docs/accounts/policies'],
+    ['Access Keys', '/docs/accounts/access-keys'],
     ['Wallets', '/docs/accounts/wallets'],
   ]) {
     const disclosure = drawer.locator('summary').filter({ hasText: new RegExp(`^${group}$`) })
@@ -736,11 +736,11 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
     await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
   }
   await expect(drawer.getByText('More guides', { exact: true })).toHaveCount(0)
-  const guide = drawer.getByRole('link', { name: 'Create an account', exact: true })
+  const guide = drawer.getByRole('link', { name: 'Create an Account', exact: true })
   await guide.click()
   await expect(page).toHaveURL(/\/docs\/accounts\/create\/?$/)
   await expect(drawer).toBeHidden()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Create an account')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Create an Account')
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
 })
 

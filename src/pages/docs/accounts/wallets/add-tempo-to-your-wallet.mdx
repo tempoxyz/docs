@@ -1,18 +1,24 @@
 ---
-title: Add Tempo to your wallet
+title: Add Tempo to Your Wallet
 seoTitle: Add Tempo Networks, Stablecoin Balances, and Tempo Transactions to a Wallet | Tempo Docs
 description: Add Tempo mainnet and testnet to a wallet, show stablecoin balances without a native gas token, let users pay fees in stablecoins, and send Tempo Transactions.
 ---
 
-# Add Tempo to your wallet
+import { Card, Cards } from 'vocs'
+
+# Add Tempo to Your Wallet
 
 Support Tempo in your wallet, from network settings to Tempo Transactions.
 
-If you build a wallet, such as a browser extension, mobile wallet, or hardware wallet, your users can already sign standard Ethereum transactions on Tempo. Tempo has no native gas token, so [balance checks and fee quotes need changes](/docs/quickstart/wallet-developers). [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
+## Overview
+
+Any wallet, such as a browser extension, mobile wallet, or hardware wallet, already signs standard Ethereum transactions on Tempo. Tempo has no native gas token, so [balance checks and fee quotes need changes](/docs/quickstart/wallet-developers). [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
+
+## Setup
 
 :::::steps
 
-### Add the Tempo networks
+### Add the Tempo Networks
 
 Add mainnet for production and Moderato testnet for development. Both use `USD` as the currency symbol, because fees are denominated in USD.
 
@@ -23,7 +29,7 @@ Add mainnet for production and Moderato testnet for development. Both use `USD` 
 
 In Viem, use the `tempo` and `tempoModerato` chains from `viem/chains`.
 
-### Show stablecoin balances
+### Show Stablecoin Balances
 
 Don't show a native balance. `eth_getBalance` [returns a large placeholder value](/docs/quickstart/evm-compatibility#handling-eth-native-token-balance-checks) so existing balance checks don't block users. The `BALANCE` opcode returns 0. Read each stablecoin's TIP-20 balance instead. Remove any check that blocks a transaction on the native balance.
 
@@ -47,9 +53,9 @@ const balance = await client.token.getBalance({
 
 Pull token names, symbols, and icons from the [tokenlist](/docs/quickstart/tokenlist), at `tokenlist.tempo.xyz/list/4217` for mainnet and `tokenlist.tempo.xyz/list/42431` for testnet.
 
-### Let users pay fees in stablecoins
+### Let Users Pay Fees in Stablecoins
 
-Each transaction pays its fee in a USD stablecoin, its [fee token](/docs/accounts/fees/fee-tokens). Quote fees in the transaction's fee token, and let users choose it in your confirmation screen or account settings. Pass `feeToken` for one transaction, or set the account's default with `setUserTokenSync`:
+Each transaction pays its fee in a USD stablecoin, its [fee token](/docs/accounts/fees/fee-tokens). Quote fees in the transaction's fee token, and let users choose it in your confirmation screen or account settings. Pass `feeToken` for one transaction, or set the account's default with `setUserTokenSync`.
 
 ::::code-group
 
@@ -80,7 +86,7 @@ Without a default, Tempo follows the [fee token precedence](/docs/accounts/fees#
 
 ### Send Tempo Transactions
 
-Replace your EIP-1559 (type 2) envelope with the Tempo Transaction envelope (type `0x76`), using a [Tempo SDK](/docs/guide/tempo-transaction#integration-guides) for TypeScript, Rust, Go, Python, or Foundry. With it, your wallet can:
+Replace your EIP-1559 (type 2) envelope with the Tempo Transaction envelope (type `0x76`). Use a [Tempo SDK](/docs/guide/tempo-transaction#integration-guides) for TypeScript, Rust, Go, Python, or Foundry. With Tempo Transactions, your wallet can:
 
 - [Batch calls](/docs/guide/tempo-transaction#batch-calls) that succeed or fail together, such as an approval and a swap.
 - Accept [sponsored fees](/docs/accounts/fees/fee-sponsorship), so an app pays the fee for your user.
@@ -92,9 +98,22 @@ If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Trans
 :::::
 
 <span id="after-you-add-tempo" />
+<span id="backup-signers-and-listing" />
 
-## Backup signers and listing
+## Add Backup Signers
 
 Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. To let a user add backup signers at the same address, the wallet signs an [account upgrade](/docs/accounts/account-configuration/account-upgrade) as a Tempo Transaction. Until [T14](/docs/protocol/upgrades/t14), upgrades run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
+## List Your Wallet
+
 To list your wallet in [Wallet partners](/docs/partners/wallets), [tell us about your integration](/docs/partners/join).
+
+## Related
+
+<Cards>
+  <Card title="Use Tempo Transactions" description="Use for batched calls, sponsored fees, access keys, and the Tempo SDKs." to="/docs/guide/tempo-transaction" />
+  <Card title="Fee Tokens" description="Covers which stablecoin pays each transaction's fee." to="/docs/accounts/fees/fee-tokens" />
+  <Card title="Integrating Wallet Support for Tempo" description="Covers balance checks and fee quotes without a native gas token." to="/docs/quickstart/wallet-developers" />
+  <Card title="Account Upgrade" description="Use for adding backup signers at the same address. Devnet until T14." to="/docs/accounts/account-configuration/account-upgrade" />
+  <Card title="Partner With Tempo" description="Use for listing your wallet in Wallet partners." to="/docs/partners/join" />
+</Cards>
