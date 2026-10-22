@@ -5,9 +5,9 @@
   "type": "module",
   "packageManager": "pnpm@10.28.1",
   "scripts": {
-    "dev": "node --env-file-if-exists=.env --import=tsx --import=./scripts/native-json-imports.mjs node_modules/vite/bin/vite.js",
+    "dev": "pnpm sync:network-identities && node --env-file-if-exists=.env --import=tsx --import=./scripts/native-json-imports.mjs node_modules/vite/bin/vite.js",
     "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && pnpm run build:site",
-    "build:site": "pnpm run check:styles && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
+    "build:site": "pnpm sync:network-identities && pnpm run check:styles && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe . && pnpm run check:styles",
     "check:anchors": "node --experimental-strip-types scripts/check-internal-anchors.ts",
     "check:markdown": "node scripts/check-markdown-components.mjs && tsx scripts/check-ai-docs.ts",
@@ -26,7 +26,8 @@
     "og:probe": "node --experimental-strip-types scripts/probe-og.ts",
     "og:goldens": "node scripts/og-goldens.mjs",
     "og:goldens:check": "node scripts/og-goldens.mjs --check",
-    "check:styles": "node scripts/check-styles.mjs && oxlint src"
+    "check:styles": "node scripts/check-styles.mjs && oxlint src",
+    "sync:network-identities": "node --experimental-strip-types scripts/sync-network-identities.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",

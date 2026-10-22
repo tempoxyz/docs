@@ -6,6 +6,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_guide-node-network-upgrades_title-f5_v02.pn
 
 import { Tab, Tabs } from 'vocs'
 import { Badge } from '../../../../components/Badge'
+import networkIdentities from '../../../../snippets/network-identities.json'
 
 # Network Upgrades and Releases
 
@@ -15,34 +16,34 @@ For detailed release notes and binaries, see [Node releases](/docs/changelog). R
 
 ## Network identities
 
-Follow/RPC nodes and validators verify consensus finalization certificates, including those that authenticate Tempo snapshots, against the current network identity. Each `tempo` release includes these identities as [built-in trust anchors](https://github.com/tempoxyz/tempo/blob/main/crates/chainspec/src/network_identity.rs). To learn how the identity is produced and rotated, see [Consensus, DKG, and network identity](/docs/guide/node/consensus-and-dkg).
+Follow/RPC nodes and validators verify consensus finalization certificates, including those that authenticate Tempo snapshots, against the current network identity. Each `tempo` release includes these identities as built-in trust anchors from the [mainnet](https://github.com/tempoxyz/tempo/blob/main/mainnet-network-identity.json) and [testnet](https://github.com/tempoxyz/tempo/blob/main/testnet-network-identity.json) identity files. To learn how the identity is produced and rotated, see [Consensus, DKG, and network identity](/docs/guide/node/consensus-and-dkg).
 
 <Tabs>
 <Tab title="Mainnet">
 
-**Network identity, from epoch 2042:**
+**Network identity, from epoch {networkIdentities.mainnet.fromEpoch}:**
 
 ```text
 // [!include ~/snippets/network-identities.txt:mainnet-identity]
 ```
 
-Mainnet nodes on v1.16.0 or earlier that do not already have this identity in their persisted DKG state need the [network identity override](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
+Mainnet nodes without this identity in their binary or persisted DKG state need the [network identity override](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
 
 </Tab>
 <Tab title="Testnet">
 
-**Network identity, from epoch 1747:**
+**Network identity, from epoch {networkIdentities.testnet.fromEpoch}:**
 
 ```text
 // [!include ~/snippets/network-identities.txt:testnet-identity]
 ```
 
-Testnet nodes on v1.15.0 or earlier that do not already have this identity in their persisted DKG state need the [network identity override](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
+Testnet nodes without this identity in their binary or persisted DKG state need the [network identity override](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
 
 </Tab>
 </Tabs>
 
-After an identity rotation, this section and the release table below list the new identity and the first release that includes it. Start new nodes with that release or later. If a node fails to start after a rotation, see [My node fails to start: finalized tip certificate failed verification against the trusted network identity](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
+These values come from the Tempo monorepo’s `main` branch when this documentation is built. They may precede a tagged release. Check release notes for a binary that includes the identity, or use the override with a compatible binary. If a node fails to start after a rotation, see [My node fails to start: finalized tip certificate failed verification against the trusted network identity](/docs/guide/node/validator-troubleshooting#my-node-fails-to-start-finalized-tip-certificate-failed-verification-against-the-trusted-network-identity).
 
 ## Node Operator Updates
 
