@@ -7,6 +7,7 @@ import CheckIcon from '~icons/lucide/check'
 import CopyIcon from '~icons/lucide/copy'
 import DownloadIcon from '~icons/lucide/download'
 import ExternalLinkIcon from '~icons/lucide/external-link'
+import GitHubIcon from '~icons/simple-icons/github'
 import { publicAssetPath } from '../lib/public-asset-path'
 import { CopyButton, type CopyButtonState } from './CopyButton'
 import { CopyIconSwap } from './CopyIconSwap'
@@ -110,6 +111,17 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
               <DownloadIcon aria-hidden="true" width="14" height="14" />
               <span className="docs-page-action-label">Install agent tools</span>
             </Link>
+            {pathname.replace(/\/$/, '') === '/docs/earn' && (
+              <a
+                href="https://github.com/tempoxyz/earn"
+                target="_blank"
+                rel="noreferrer"
+                title="View Earn on GitHub"
+              >
+                <GitHubIcon aria-hidden="true" width="14" height="14" />
+                <span className="docs-page-action-label">GitHub</span>
+              </a>
+            )}
             <span
               role="status"
               className={
