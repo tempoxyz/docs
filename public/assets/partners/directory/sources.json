@@ -289,5 +289,11 @@
   "Hastra": {
     "file": "hastra.ico",
     "source": "https://hastra.io/favicon.ico"
+  },
+  "Moralis": {
+    "file": "moralis.webp",
+    "source": "https://moralis.com/Moralis-Logo-Black.webp",
+    "darkFile": "moralis-dark.webp",
+    "darkSource": "https://moralis.com/Moralis-Logo-White.webp"
   }
 }
