@@ -5,7 +5,7 @@ description: Query blockchain data on Tempo with indexers, analytics platforms, 
 ogImage: /og/2026-q4/og_2026-q4_docs_partners-data-and-oracles_title-image_v02.jpg
 ---
 
-import { partnerLogo, partnerLogoAllium, partnerLogoArtemis, partnerLogoChainlink, partnerLogoCodex, partnerLogoCoingecko, partnerLogoDune, partnerLogoGoldsky, partnerLogoRange, partnerLogoRedstone, partnerLogoSonarx, partnerLogoSqd, partnerLogoZerion } from '../../../components/PartnerLogos.styles'
+import { partnerLogo, partnerLogoAllium, partnerLogoArtemis, partnerLogoChainlink, partnerLogoCodex, partnerLogoCoingecko, partnerLogoDune, partnerLogoGoldsky, partnerLogoMoralis, partnerLogoRange, partnerLogoRedstone, partnerLogoSonarx, partnerLogoSqd, partnerLogoZerion } from '../../../components/PartnerLogos.styles'
 
 <span id="data-and-analytics-providers" />
 
@@ -84,6 +84,18 @@ Dune [retired the Sim API on August 1, 2026](https://dune.com/blog/sunsetting-si
 - **[Turbo Pipelines](https://goldsky.com/chains/tempo):** Stream chain data to databases or message queues. Turbo Pipelines succeeds Goldsky Mirror.
 
 Start indexing Tempo [here](https://goldsky.com/chains/tempo).
+
+## <span className={`partner-logo partner-logo--moralis ${partnerLogo().className + ' ' + partnerLogoMoralis().className}`} aria-hidden="true" />Moralis
+
+[Moralis](https://moralis.com/chains/tempo/) supports Tempo mainnet across its Data API, Streams, Datashare, and Data Feeds:
+
+- **[Data API](https://docs.moralis.com/data-api/supported-chains):** Wallet balances, transaction history, net worth, and profitability; token metadata, transfers, owners, and prices; NFTs by wallet and collection; blocks, transactions, and internal transactions; and labelled entities. DeFi positions and NFT trades, sale prices, and floor prices are not available for Tempo.
+- **[Streams](https://docs.moralis.com/streams/supported-chains):** Webhooks for token and NFT activity, contract events, internal transactions, and transaction data.
+- **[Datashare](https://docs.moralis.com/datashare/supported-chains) and [Data Feeds](https://docs.moralis.com/data-feeds/overview):** Token transfers, NFT transfers, and swaps delivered to your own warehouse or database, with historical backfill and live updates.
+
+Pass `tempo` or `0x1079` as the Data API `chain` value. Streams accepts only the hex chain ID `0x1079`. Tempo has no native gas token, so Moralis returns balances and transfers as TIP-20 tokens.
+
+Create an API key in the [Moralis dashboard](https://admin.moralis.com/register) and see the [Tempo release notes](https://docs.moralis.com/changelog#october-21-2026) for the full feature list.
 
 ## <span className={`partner-logo partner-logo--range ${partnerLogo().className + ' ' + partnerLogoRange().className}`} aria-hidden="true" />Range
 
