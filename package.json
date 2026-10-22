@@ -27,7 +27,7 @@
     "og:goldens": "node scripts/og-goldens.mjs",
     "og:goldens:check": "node scripts/og-goldens.mjs --check",
     "check:styles": "node scripts/check-styles.mjs && oxlint src",
-    "diagrams": "ondine src/diagrams/t13/*.mmd --out-dir public/diagrams/t13"
+    "diagrams": "pnpm dlx ondine@0.0.3 src/diagrams/t13/*.mmd --out-dir public/diagrams/t13"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",
@@ -86,7 +86,6 @@
     "anser": "^2.3.5",
     "github-slugger": "2.0.0",
     "mppx": "0.13.3",
-    "ondine": "0.0.3",
     "oxlint": "1.72.0",
     "remark-stringify": "^11.0.0",
     "tsx": "^4.22.4",
