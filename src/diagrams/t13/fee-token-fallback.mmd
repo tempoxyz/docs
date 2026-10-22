@@ -1,7 +1,0 @@
-flowchart LR
-  chosen(Fee token already chosen?) -- yes --> keep[Pay in that token]
-  chosen -- no --> path(Enough pathUSD?)
-  path -- yes --> pusd[Pay in pathUSD]
-  path -- no --> ousd(Enough OUSD?)
-  ousd -- yes --> ousdpay[Pay in OUSD, new]:::accent
-  ousd -- no --> reject[Reject]:::muted

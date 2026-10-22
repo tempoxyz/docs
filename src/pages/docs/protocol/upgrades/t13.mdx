@@ -4,7 +4,7 @@ seoTitle: "T13 Network Upgrade | Tempo Docs"
 description: T13 ships the Zone prover with Nitro-backed settlement verification, multi-block Tempo imports for Zones, explicit block system calls, and an OUSD fee-token fallback.
 ---
 
-import { OndineDiagram } from '../../../../components/OndineDiagram'
+import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 # T13 Network Upgrade
 
@@ -44,9 +44,9 @@ The [T13 meta-TIP PR (TIP-1146)](https://github.com/tempoxyz/tempo/pull/8289) co
 
 A Zone sequencer executes transactions privately and settles batches on Tempo. Before T13, Tempo accepted a batch when enough sequencers signed it, trusting them to have executed it correctly. With T13, a prover replays each batch and Tempo verifies the result before settlement, so a sequencer cannot settle invented balances or unauthorized transfers.
 
-<OndineDiagram
+<ZoneDiagram
   name="prover"
-  alt="Inside the Zone, the sequencer sends a batch and state witness to the Nitro prover, which replays it and returns a signed attestation. The sequencer submits the batch, attestation, and quorum signatures to the ZonePortal on Tempo, which calls the native verifier and, if valid, records the new state and queues withdrawals. A dashed T13 fallback path submits with quorum signatures only (NoProof)."
+  alt="The Zone sequencer groups blocks into a batch and gathers the state witness. The Nitro prover replays the batch in AWS Nitro and signs an attestation. On Tempo, the Zone portal verifies quorum signatures and the attestation, then records state and queues withdrawals. In T13, NoProof lets quorum signatures settle a batch without a Nitro proof."
   caption="Private transactions and the state witness stay in the Zone. Tempo sees only the batch commitments, the attestation, and signatures."
 />
 
@@ -57,11 +57,6 @@ A Zone sequencer executes transactions privately and settles batches on Tempo. B
 This is a TEE-based prover, not a zero-knowledge proof: security rests on the approved enclave code and AWS Nitro's attestation. It checks execution, including balances and authorized transfers. It does not guarantee uptime, transaction inclusion, or completed withdrawals, and Zone operators still see plaintext data.
 
 **Temporary NoProof fallback.** T13 ships the prover with training wheels. A sequencer can still settle a batch in `NoProof` mode (`verifierConfig = 0x02`, empty proof), which keeps the quorum and continuity checks but skips Nitro verification, so Zones keep settling if proving fails during rollout. Because `NoProof` is allowed even when proving works, any batch settled this way still relies on the sequencer quorum. Nitro proofs also require approved enclave measurements, and the [release measurement registry](https://github.com/tempoxyz/tempo/blob/main/crates/precompiles/src/zone_verifier/pcrs.json) is currently empty, so Zones settle through `NoProof` until measurements are approved.
-
-<OndineDiagram
-  name="prover-rollout"
-  alt="Before T13 the sequencer quorum authorizes settlement. T13 verifies Nitro proofs on Tempo but allows the NoProof fallback. A later upgrade requires proofs and removes NoProof."
-/>
 
 A later upgrade removes `NoProof`; after that, a missing or invalid proof stops settlement. Forced exits are not part of T13.
 
@@ -97,7 +92,7 @@ Before T13, a transaction with no `feeToken`, no stored preference, and no infer
 
 T13 replaces that last step with an ordered list: pathUSD, then [OUSD](/docs/guide/ousd) (`0x20c0000000000000000000006a37da5c996874be`).
 
-<OndineDiagram
+<ZoneDiagram
   name="fee-token-fallback"
   alt="If the transaction already has a fee token from feeToken, a stored preference, or inference, it pays in that token as before. Otherwise it pays in pathUSD if pathUSD covers the max fee, else in OUSD if OUSD covers it, else it is rejected for insufficient funds."
 />

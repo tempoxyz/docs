@@ -65,16 +65,6 @@
       }
     },
     {
-      "includes": ["public/diagrams/t13/*.svg"],
-      "linter": {
-        "rules": {
-          "a11y": {
-            "noRedundantRoles": "off"
-          }
-        }
-      }
-    },
-    {
       "includes": ["vocs.config.ts"],
       "linter": {
         "rules": {

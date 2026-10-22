@@ -26,8 +26,7 @@
     "og:probe": "node --experimental-strip-types scripts/probe-og.ts",
     "og:goldens": "node scripts/og-goldens.mjs",
     "og:goldens:check": "node scripts/og-goldens.mjs --check",
-    "check:styles": "node scripts/check-styles.mjs && oxlint src",
-    "diagrams": "pnpm dlx ondine@0.0.3 src/diagrams/t13/*.mmd --out-dir public/diagrams/t13"
+    "check:styles": "node scripts/check-styles.mjs && oxlint src"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.114",

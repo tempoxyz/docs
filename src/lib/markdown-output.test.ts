@@ -277,16 +277,6 @@ Following text.
     expect(output).not.toContain('AccountDiagram')
   })
 
-  test('replaces an Ondine diagram with its description and caption', async () => {
-    const output = await render(`
-<OndineDiagram name="prover" alt="The prover attests the batch." caption="Tempo verifies it." />
-`)
-
-    expect(output).toContain('The prover attests the batch.')
-    expect(output).toContain('Tempo verifies it.')
-    expect(output).not.toContain('OndineDiagram')
-  })
-
   test('preserves validator topology relationships in plain Markdown', async () => {
     const output = await render(`
 import { ValidatorTopologyDiagram } from './ValidatorTopologyDiagram'
