@@ -1745,4 +1745,18 @@ global({
     // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
     fill: 'var(--foreground-secondary) !custom',
   },
+  '.docs-zone-diagram svg.ondine .ondine-edge-label > rect': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'var(--diagram-box) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    stroke: 'var(--diagram-box-border) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    strokeWidth: '1px !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    rx: '10px !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-shape-rounded > rect': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    rx: '999px !custom',
+  },
 })

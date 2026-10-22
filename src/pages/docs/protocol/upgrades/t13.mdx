@@ -99,7 +99,7 @@ T13 replaces that last step with an ordered list: pathUSD, then [OUSD](/docs/gui
 
 <OndineDiagram
   name="fee-token-fallback"
-  alt="If the transaction sets feeToken, has a stored preference, or an inferred token, it pays in that token as before. Otherwise it pays in pathUSD if pathUSD covers the max fee, else in OUSD if OUSD covers it, else it is rejected for insufficient funds."
+  alt="If the transaction already has a fee token from feeToken, a stored preference, or inference, it pays in that token as before. Otherwise it pays in pathUSD if pathUSD covers the max fee, else in OUSD if OUSD covers it, else it is rejected for insufficient funds."
 />
 
 One token must cover the whole maximum fee, `ceil(gasLimit * maxFeePerGas / 10^12)` in base units; balances are not combined. Only an insufficient balance moves on to OUSD: pause, policy, access-key, and Fee AMM liquidity failures on the selected token do not. Explicit `feeToken` values, `setUserToken` preferences, and inference from TIP-20 transfers and DEX swaps keep their precedence. The validator default fee token remains pathUSD.
