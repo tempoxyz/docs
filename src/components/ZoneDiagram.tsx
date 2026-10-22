@@ -8,7 +8,6 @@ import policy from '../../public/diagrams/zones/policy.svg?raw'
 import privacy from '../../public/diagrams/zones/privacy.svg?raw'
 import protocolDeposit from '../../public/diagrams/zones/protocol-deposit.svg?raw'
 import protocolWithdrawal from '../../public/diagrams/zones/protocol-withdrawal.svg?raw'
-import prover from '../../public/diagrams/zones/prover.svg?raw'
 import settlement from '../../public/diagrams/zones/settlement.svg?raw'
 import validation from '../../public/diagrams/zones/validation.svg?raw'
 import withdrawal from '../../public/diagrams/zones/withdrawal.svg?raw'
@@ -22,7 +21,6 @@ const diagrams = {
   accounts,
   'protocol-deposit': protocolDeposit,
   'protocol-withdrawal': protocolWithdrawal,
-  prover,
   settlement,
   validation,
   deposit,

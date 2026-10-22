@@ -335,6 +335,7 @@ function rewriteNode(
   if (
     node.name === 'ZoneDiagram' ||
     node.name === 'AccountDiagram' ||
+    node.name === 'OndineDiagram' ||
     node.name === 'EarnIllustration'
   ) {
     const alt = requiredStringAttribute(node, 'alt')

@@ -1,0 +1,13 @@
+flowchart TB
+  subgraph zone[Zone: private execution]
+    direction LR
+    seq[Zone sequencer] -- 1. batch + state witness --> prover[Nitro prover]
+    prover -- 2. signed attestation --> seq
+  end
+  subgraph tempo[Tempo: public settlement]
+    direction LR
+    portal[ZonePortal] -- attestation --> verifier[Native verifier]
+    verifier -- valid --> settle[Record state, queue withdrawals]
+  end
+  seq -- 3. batch + attestation + quorum signatures --> portal
+  seq -. T13 fallback: NoProof, quorum signatures only .-> portal

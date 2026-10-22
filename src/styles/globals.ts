@@ -1651,3 +1651,20 @@ global({
     },
   },
 })
+
+/* Ondine diagrams (OndineDiagram) read --ondine-* properties; map them to the
+     diagram palette so they follow the light and dark themes. */
+global({
+  '.docs-zone-diagram svg.ondine': {
+    '--ondine-bg': 'var(--background)',
+    '--ondine-fg': 'var(--foreground)',
+    '--ondine-muted': 'var(--foreground-secondary)',
+    '--ondine-line': 'var(--foreground-secondary)',
+    '--ondine-border': 'var(--diagram-box-border)',
+    '--ondine-surface': 'var(--diagram-box)',
+    '--ondine-surface-alt': 'transparent',
+    '--ondine-font': 'Pilat, ui-sans-serif, system-ui, sans-serif',
+    '--ondine-radius': '10px',
+    '--ondine-stroke': '1.5px',
+  },
+})
