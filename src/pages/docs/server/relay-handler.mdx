@@ -18,6 +18,8 @@ Apply the [Tempo API dependency override](/docs/sdk/typescript/api-client#instal
 pnpm add --save-exact tapimo@0.18.2 viem@2.56.9
 ```
 
+`tapimo@0.18.2` exports `Handler.relay` from `tapimo/server`, not the older `Handler.feePayer`. Configure sponsorship through the relay's [`feePayer` option](#sponsorship). The relay also proxies RPC requests; review its [features](#relay-handler-features) when migrating an older fee payer service.
+
 Create the handler with an optional [Tempo API key](/docs/api/authentication), then expose either its Fetch API or Node.js listener entrypoint:
 
 ```ts

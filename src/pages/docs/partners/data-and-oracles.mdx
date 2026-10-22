@@ -15,9 +15,11 @@ Choose an indexer, analytics platform, or oracle for the data your application n
 
 For Tempo's hosted interfaces, start with the [Tempo API](/docs/api) for payment activity or the [Indexer API](/docs/api/indexer-api) for SQL queries. Use [explorers and debugging tools](/docs/partners/explorers-and-debugging) to inspect individual transactions.
 
+For payment ledgers, use [Reconcile payments](/docs/resources/guides/payment-reconciliation) to connect indexed records to your application. It includes Goldsky and Allium setup paths.
+
 ## <span className={`partner-logo partner-logo--allium ${partnerLogo().className + ' ' + partnerLogoAllium().className}`} aria-hidden="true" />Allium
 
-[Allium](https://www.allium.so) is an enterprise blockchain data platform that delivers real-time, analytics-ready datasets through a unified schema across chains. Developers can fetch wallet, token, and price data in milliseconds without managing infrastructure, decoding raw data, or inferring transactions—making it easy to focus on building Tempo applications.
+[Allium](https://www.allium.so) indexes Tempo chain records and stablecoin transfers for SQL analysis. Use the [Allium reporting workflow](/docs/resources/guides/payment-reconciliation#allium) for saved-query runs, amount precision, and reconciliation reports.
 
 Get access to Tempo data through the [Allium App](https://app.allium.so/join), explore the full API in the [Allium docs](https://docs.allium.so/), and browse real examples of production apps built on Allium [here](https://docs.allium.so/api/developer/overview).
 
@@ -116,6 +118,6 @@ Get started with the [SQD docs](https://docs.sqd.ai/) and deploy indexers via [S
 
 ## <span className={`partner-logo partner-logo--zerion ${partnerLogo().className + ' ' + partnerLogoZerion().className}`} aria-hidden="true" />Zerion
 
-[Zerion](https://zerion.io/api) provides an enterprise-grade wallet data API that delivers portfolio balances, transaction history, DeFi positions, PnL tracking, and real-time webhooks — including Tempo — through a single unified interface. Developers can add comprehensive blockchain data to their applications without running any indexing infrastructure.
+Use [Zerion](https://zerion.io/api) for token balances and transaction history. Its [chain coverage matrix](https://zerion.io/api/chains) lists these products for Tempo, with DeFi and NFT data unavailable. Filter wallet requests with `filter[chain_ids]=tempo`; that API identifier differs from the numeric EVM chain ID.
 
-Get a free API key from the [Zerion dashboard](https://dashboard.zerion.io/) and explore the [API documentation](https://developers.zerion.io/reference/authentication).
+Create an API key in the [Zerion dashboard](https://dashboard.zerion.io/) and follow its [authentication](https://developers.zerion.io/authentication) and [pagination](https://developers.zerion.io/pagination-and-filtering) instructions.

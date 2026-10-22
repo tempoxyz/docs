@@ -58,7 +58,7 @@ test('seven sections expose product tasks and expandable developer chapters', as
   const utilities = page.locator('.docs-section-utilities')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(navigation.getByRole('link')).toHaveText(sectionLabels)
-  await expect(utilities.getByRole('link')).toHaveText(utilityLabels)
+  await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
   for (const section of [
     {
       label: 'Get Started',
@@ -443,7 +443,22 @@ for (const path of ['/', '/blog']) {
       await expect(
         navigation.getByRole('combobox', { name: 'Color theme', includeHidden: true }),
       ).toHaveCount(0)
-      const destinations = [navigation.getByRole('link', { name: 'Blog', exact: true })]
+      const headerBlog = navigation.getByRole('link', { name: 'Blog', exact: true })
+      const destinations = path === '/blog' ? [headerBlog] : []
+      if (path === '/') {
+        await expect(headerBlog).toBeHidden()
+        const utilities = page.locator('.docs-section-utilities')
+        await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
+        const blog = utilities.getByRole('link', { name: 'Blog', exact: true })
+        await expect(blog).toBeVisible()
+        await expect(blog).toHaveAttribute('href', '/blog')
+        const partnersBox = await utilities
+          .getByRole('link', { name: 'Partners', exact: true })
+          .boundingBox()
+        const blogBox = await blog.boundingBox()
+        if (!partnersBox || !blogBox) throw new Error('Utility links have no visible bounds')
+        expect(blogBox.x).toBeGreaterThanOrEqual(partnersBox.x + partnersBox.width)
+      }
       const search = navigation.getByRole('button', { name: 'Search documentation', exact: true })
       const agents = navigation.getByRole('button', { name: 'Agent setup', exact: true })
       await expect(agents).toBeEnabled()
@@ -457,13 +472,16 @@ for (const path of ['/', '/blog']) {
           return box
         }),
       )
-      // Blog sits centered in the bar; Agent setup, then search, at the inline end.
-      const [blogBox, searchBox, agentsBox] = boxes
-      const navBox = await navigation.boundingBox()
-      if (!navBox) throw new Error('Header has no visible bounds')
-      const destinationsCenter = blogBox.x + blogBox.width / 2
-      expect(Math.abs(destinationsCenter - (navBox.x + navBox.width / 2))).toBeLessThanOrEqual(2)
-      expect(agentsBox.x).toBeGreaterThan(blogBox.x + blogBox.width)
+      // Blog pages retain the centered destination; docs use the utility row.
+      const [searchBox, agentsBox] = boxes.slice(-2)
+      if (path === '/blog') {
+        const blogBox = boxes[0]
+        const navBox = await navigation.boundingBox()
+        if (!navBox) throw new Error('Header has no visible bounds')
+        const destinationsCenter = blogBox.x + blogBox.width / 2
+        expect(Math.abs(destinationsCenter - (navBox.x + navBox.width / 2))).toBeLessThanOrEqual(2)
+        expect(agentsBox.x).toBeGreaterThan(blogBox.x + blogBox.width)
+      }
       expect(searchBox.x).toBeGreaterThan(agentsBox.x + agentsBox.width)
       expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(width)
       for (const [index, a] of boxes.entries()) {
@@ -690,7 +708,7 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   for (const [path, destination] of [
     ['/docs/earn', '/docs/earn/how-it-works'],
     ['/docs/routes', '/docs/routes/quotes'],
-    ['/docs/zones', '/docs/guide/private-zones'],
+    ['/docs/zones', '/docs/zones/connect'],
   ]) {
     await page.goto(path)
     await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
@@ -708,8 +726,8 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
     await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
   // Each Features and Build group opens to its own overview page and guides.
   for (const [group, href] of [
-    ['Account policies', '/docs/accounts/policies'],
-    ['Access keys', '/docs/accounts/access-keys'],
+    ['Account Policies', '/docs/accounts/policies'],
+    ['Access Keys', '/docs/accounts/access-keys'],
     ['Wallets', '/docs/accounts/wallets'],
   ]) {
     const disclosure = drawer.locator('summary').filter({ hasText: new RegExp(`^${group}$`) })
@@ -718,20 +736,25 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
     await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
   }
   await expect(drawer.getByText('More guides', { exact: true })).toHaveCount(0)
-  const guide = drawer.getByRole('link', { name: 'Create an account', exact: true })
+  const guide = drawer.getByRole('link', { name: 'Create an Account', exact: true })
   await guide.click()
   await expect(page).toHaveURL(/\/docs\/accounts\/create\/?$/)
   await expect(drawer).toBeHidden()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Create an account')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Create an Account')
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
 })
 
-test('sandbox routes reveal their guides within the Zones sidebar', async ({ page }) => {
+test('sandbox guides stay collapsed under Testnet Sandbox until a sandbox page opens', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/docs/zones')
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
   const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-  await expect(drawer.getByText('Sandbox guides', { exact: true })).toHaveCount(0)
+  const sandbox = drawer.locator('summary').filter({ hasText: /^Testnet Sandbox$/ })
+  await expect(sandbox).toBeVisible()
+  await expect(drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]')).toBeHidden()
+  await sandbox.click()
   await drawer.locator('a[href="/docs/guide/private-zones"]').click()
   await expect(page).toHaveURL(/\/docs\/guide\/private-zones\/?$/)
   await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
@@ -1015,7 +1038,7 @@ for (const mobile of [false, true]) {
       name: 'Zone architecture reference',
       section: 'Zones',
       path: '/docs/protocol/zones/architecture',
-      group: 'Technical reference',
+      group: 'Technical Reference',
       sibling: '/docs/protocol/zones/proving',
       unrelated: '/docs/guide/private-zones/connect-to-a-zone',
     },

@@ -1,32 +1,37 @@
 ---
-title: "Create an account"
+title: "Create an Account"
 seoTitle: "Create a Tempo Account with a Passkey, Device Key, or Private Key | Tempo Docs"
 description: Create a single-key Tempo account with a passkey on testnet, with no API call or transaction, then try configurable accounts with several signers on the Tempo Accounts devnet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
 import { AccountSandbox } from '../../../components/guides/AccountSandbox'
 import { SingleKeyAccountDemo } from '../../../components/guides/SingleKeyAccountDemo'
 import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
-# Create an account
+# Create an Account
 
-Creating a Tempo account takes no API call and no transaction.
+Create a Tempo account from a key, with no API call and no transaction.
+
+## Overview
 
 A single-key Tempo account's address comes from the key that approves its payments. Your app can create one as soon as it has a key. The address can receive stablecoins right away.
 
 <span id="create-a-passkey-account" />
 
-## Create a single-key account
+## Create a Single-Key Account
 
-On mainnet and testnet today, an account is a [single-key account](/docs/development/single-key-accounts) (EOA): one key, such as a passkey, approves its payments and authorizes its [access keys](/docs/accounts/access-keys). Create one on Moderato testnet from a passkey, a device key, or a private key:
+On mainnet and testnet today, an account is a [single-key account](/docs/development/single-key-accounts) (EOA). One key, such as a passkey, approves its payments and authorizes its [access keys](/docs/accounts/access-keys).
+
+Create one on Moderato testnet from a passkey, a device key, or a private key.
 
 <span id="try-a-passkey-account" />
 
 <SingleKeyAccountDemo />
 
-In code, this creates a passkey account on Moderato testnet and funds it from the testnet faucet:
+In code, create a passkey account on Moderato testnet and fund it from the testnet faucet.
 
 ```ts [passkey-account.ts]
 import { tempoModerato } from 'viem/chains'
@@ -46,11 +51,11 @@ For mainnet, use the `tempo` chain from `viem/chains` and fund the address with 
 
 A single-key account can't change its key. Losing the key loses the account. Read [Passkeys](/docs/accounts/authentication/passkeys#passkey-limits) before customers fund one.
 
-## Create a configurable account
+## Create a Configurable Account
 
 <ConfigurableAccountsT14 />
 
-A configurable account's signers can change while its address stays the same. Add a backup key, rotate keys, or require several approvals. Pick a first signer below to create one on the devnet.
+A configurable account's signers can change while its address stays the same. Add a backup key, rotate keys, or require several approvals. Pick a first signer in the sandbox to create one on the devnet.
 
 <AccountSandbox />
 
@@ -58,16 +63,17 @@ A configurable account's signers can change while its address stays the same. Ad
 
 <span id="how-configurable-account-creation-works" />
 
-### Configurable account creation
+### Configurable Account Creation
 
-1. You choose the first signer: a passkey, a device key, or a private key. It approves alone: its weight is 1, and so is the account's [threshold](/docs/accounts/policies/signing-thresholds).
+1. You choose a passkey, a device key, or a private key as the first signer. It approves alone, because its weight is 1 and so is the account's [threshold](/docs/accounts/policies/signing-thresholds).
 2. Your app computes the address from that signer. The address can receive stablecoins right away. It stays the same when you change signers or add [access keys](/docs/accounts/access-keys).
 3. The account's first transaction, such as a payment, registers it onchain. That transaction pays a network fee in a stablecoin. Fund the address first, or [sponsor the fee](/docs/accounts/fees/fee-sponsorship).
 
 <span id="create-an-account-in-code" />
 <span id="create-an-account-from-a-signing-key" />
+<span id="create-a-configurable-account-in-code" />
 
-### Create a configurable account in code
+### Create the Account in Code
 
 ```ts [account.ts]
 import { generatePrivateKey } from 'viem/accounts'
@@ -84,11 +90,11 @@ export const account = Account.fromConfig({ address: 'infer', owners: [signer] }
 
 For a passkey or device key, use [that signer](/docs/accounts/authentication) instead. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account, [upgrade it in place](/docs/accounts/account-configuration/account-upgrade) to keep its address.
 
-## Connect to the devnet
+## Connect to the Devnet
 
 The Accounts examples connect to the Tempo Accounts devnet, a test network that runs configurable accounts. The demos on these pages run against it with no setup.
 
-To build your own app against the devnet, [contact us](https://tempo.xyz/contact) for an RPC key and set it as the `TEMPO_DEVNET_RPC_KEY` environment variable.
+Your own app needs an RPC key to reach the devnet. [Contact us](https://tempo.xyz/contact) for one, and set it as the `TEMPO_DEVNET_RPC_KEY` environment variable.
 
 <span id="fund-an-account-on-devnet" />
 
@@ -110,3 +116,12 @@ await client.faucet.fundSync({ account: account.address }) // [!code hl]
 ::::
 
 On Moderato testnet, the [testnet faucet](/docs/accounts/fund#get-test-funds) sends test funds. In production, [onramps and other chains](/docs/accounts/fund) fund the address.
+
+## Next Steps
+
+<Cards>
+  <Card title="Add Funds" description="Use for funding the account from another account, an onramp, or another chain." to="/docs/accounts/fund" />
+  <Card title="Configuration Updates" description="Use for adding a backup signer or rotating a key." to="/docs/accounts/account-configuration/configuration-updates" />
+  <Card title="Account Upgrade" description="Use for adding signers to a single-key account at the same address." to="/docs/accounts/account-configuration/account-upgrade" />
+  <Card title="Access Keys" description="Covers keys that sign for the account within limits." to="/docs/accounts/access-keys" />
+</Cards>

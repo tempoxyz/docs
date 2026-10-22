@@ -1,22 +1,29 @@
 ---
-title: Set up a team multisig
+title: Set Up a Team Multisig
 seoTitle: Set Up a Team Multisig with Several Approvers on Tempo | Tempo Docs
 description: Create one Tempo account that three approvers control, where any two approve each payment and no single key can move funds.
 ---
 
+import { Card, Cards } from 'vocs'
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
 
-# Set up a team multisig
+# Set Up a Team Multisig
 
 Set up one Tempo account that three approvers share, where any two must approve each payment.
 
-When your team holds stablecoins together, such as a company's funds or a shared budget, no single person or key should move them. Here you create a multisig account on the Tempo Accounts devnet. Its three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself. Neither one stolen key nor your own backend can pay without a second approver.
+## Overview
+
+A team multisig is one account whose payments need approvals from several people. It's for stablecoins your team holds together, such as a company's funds or a shared budget. No single person or key moves them.
+
+Here you create a multisig account on the Tempo Accounts devnet. Its three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself. Neither one stolen key nor your own backend can pay without a second approver.
 
 <span id="treasury-model" />
 
 Each approver's signer has a weight of 1, and the [threshold](/docs/accounts/policies/signing-thresholds) is 2. The same threshold covers configuration updates, so no single approver can add or remove a signer.
 
 <ConfigurableAccountsT14 />
+
+## Setup
 
 `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -25,9 +32,9 @@ Each approver's signer has a weight of 1, and the [threshold](/docs/accounts/pol
 <span id="create-the-treasury-account" />
 <span id="create-the-treasury" />
 
-### Create the multisig
+### Create the Multisig
 
-Keep each approver's key somewhere different, such as a hardware wallet, a separate KMS per team, or the approver's passkey, so one breach can't reach two of them. Here finance and operations sign with [private keys](/docs/accounts/authentication/private-keys), and the controller signs with a passkey on their own device, so your app knows only the controller's address.
+Keep each approver's key somewhere different, so one breach can't reach two of them. Use a hardware wallet, a separate KMS per team, or the approver's passkey. Here finance and operations sign with [private keys](/docs/accounts/authentication/private-keys). The controller signs with a passkey on their own device, so your app knows only the controller's address.
 
 ::::code-group
 
@@ -69,9 +76,9 @@ Tempo stores only a hash of the configuration (signers, weights, threshold, salt
 
 <span id="collect-approvals" />
 
-### Approve a payment
+### Approve a Payment
 
-To pay, rebuild the multisig from its saved record and attach the keys of the approvers signing this payment. The other signers stay as addresses:
+To pay, rebuild the multisig from its saved record and attach the keys of the approvers signing this payment. The other signers stay as addresses.
 
 ```ts [multisig.ts]
 import { isAddressEqual, parseUnits } from 'viem'
@@ -107,16 +114,16 @@ await client.token.transferSync({ // [!code hl]
 
 Viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openMultisig` for every action, not once at startup. A [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer) raises the configuration's version and returns the new `config`. Save it, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.
 
-This example holds two approvers' keys in one process, so that process could pay alone. In production, each approver checks the recipient and amount and signs on their own device. Your app [collects approvals from separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Your own contract can also [verify the multisig's approvals](/docs/accounts/policies/signing-thresholds#verify-approvals).
+This example holds two approvers' keys in one process, so that process could pay alone. In production, have each approver check the recipient and amount and sign on their own device. Your app can [collect approvals from separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Your own contract can also [verify the multisig's approvals](/docs/accounts/policies/signing-thresholds#verify-approvals).
 
 :::::
 
 <span id="offboard-an-approver" />
 <span id="remove-a-departing-approver" />
 
-## Replace an approver
+## Replace an Approver
 
-When an approver leaves, swap their signer for their successor's in one configuration update, at the same weight and threshold. The two remaining approvers approve it, so the multisig stays 2 of 3 throughout:
+When an approver leaves, swap their signer for their successor's in one configuration update, at the same weight and threshold. The two remaining approvers approve it, so the multisig stays 2 of 3 throughout.
 
 ```ts [multisig.ts]
 const successor = env('NEW_CONTROLLER_PASSKEY_ADDRESS') // the successor's passkey, on their device
@@ -136,7 +143,7 @@ saved.config = replaced.config // [!code hl]
 
 The multisig keeps its address and balance. The departing approver's key can no longer approve anything. A [configuration update](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) also removes a signer without a successor, or rotates the key of an approver who stays.
 
-Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). [List the keys the multisig has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change). Revoke every access key the departing approver held or managed with `client.accessKey.revokeSync`, and set to zero any token allowance one of those keys approved. If the key was an [admin access key](/docs/accounts/access-keys/admin-access-keys), revoke the keys it authorized too.
+Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). [List the keys the multisig has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change). Revoke every access key the departing approver held or managed with `client.accessKey.revokeSync`. Set to zero any token allowance one of those keys approved. If the key was an [admin access key](/docs/accounts/access-keys/admin-access-keys), revoke the keys it authorized too.
 
 <span id="treasury-limits" />
 <span id="give-a-team-a-budget" />
@@ -144,8 +151,20 @@ Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). [Lis
 
 <span id="treasury-limits-and-changes" />
 
-## Limits and changes
+## Limits and Changes
 
-A multisig holds 1 to 48 signers, and a transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
+A multisig holds 1 to 48 signers. A transaction carries at most 8 approvals, so set a threshold that eight approvers can reach.
 
-To let a team or a backend pay within a daily limit without two multisig approvals per payment, authorize an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits). A configuration update voids approvals collected for a payment that hasn't been sent, so collect them again. If another update landed first, rebuild the multisig from the latest saved configuration.
+A team or a backend can pay within a daily limit without two approvals per payment. Authorize an [access key](/docs/accounts/access-keys) with a [spending limit](/docs/accounts/access-keys/spending-limits) for it.
+
+A configuration update voids approvals collected for a payment that hasn't been sent, so collect them again. If another update landed first, rebuild the multisig from the latest saved configuration.
+
+## Related
+
+<Cards>
+  <Card title="Signing Thresholds" description="Covers signer weights, thresholds, and collecting approvals from separate devices." to="/docs/accounts/policies/signing-thresholds" />
+  <Card title="Configuration Updates" description="Use for adding, removing, or rotating a signer." to="/docs/accounts/account-configuration/configuration-updates" />
+  <Card title="Spending Limits" description="Covers how much an access key can spend." to="/docs/accounts/access-keys/spending-limits" />
+  <Card title="Revocation" description="Use for revoking access keys after a signer change." to="/docs/accounts/access-keys/revocation" />
+  <Card title="Configurable Accounts" description="Covers configuration hashes and keeping the current configuration." to="/docs/development/configurable-accounts" />
+</Cards>

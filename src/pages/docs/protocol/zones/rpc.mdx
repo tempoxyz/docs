@@ -1,28 +1,35 @@
 ---
-title: "Tempo Zone RPC access control"
+title: RPC Reference
 seoTitle: "Tempo Zone RPC & Authorization Tokens | Docs"
 description: Authenticated JSON-RPC interface for Tempo Zones with per-account scoping, response redaction, and event filtering.
 ogImage: /og/2026-q4/og_2026-q4_docs_protocol-zones-rpc_title-f5_v02.png
 ---
 
-# Tempo Zone RPC access control
+import { Card, Cards } from 'vocs'
 
-This reference describes the account-scoped, redacted Ethereum JSON-RPC interface for reading Zone data and submitting transactions. Every request includes an authorization token proving control of a Tempo account. Responses are scoped to that account; shared data, such as block headers, is redacted. Operator RPC and hosted provider APIs have separate access rules.
+# RPC Reference
 
-## Authorization tokens
+The Zone RPC is an account-scoped, redacted Ethereum JSON-RPC interface.
 
-Authorization tokens are credentials signed by the caller's Tempo account key. They expire after at most 30 days, or a shorter operator-configured limit. Tempo accounts support multiple signature types (secp256k1, P256, WebAuthn), and accounts with access keys via the `AccountKeychain` precompile can use those keys to authenticate.
+## Overview
+
+The Zone RPC reads Zone data and submits transactions. Every request includes an authorization token proving control of a Tempo account. Responses are scoped to that account. Shared data, such as block headers, is redacted. Operator RPC and hosted provider APIs have separate access rules.
+
+## Authorization Tokens
+
+Authorization tokens are credentials signed by the caller's Tempo account key. They expire after at most 30 days, or a shorter operator-configured limit. Tempo accounts support multiple signature types (secp256k1, P256, WebAuthn). Accounts with access keys via the `AccountKeychain` precompile can use those keys to authenticate.
 
 The signed message includes:
+
 - `"TempoZoneRPC"` magic prefix for domain separation
-- Spec version, zone ID, and chain ID for replay protection (zone ID `0` skips the zone-ID check, but the chain ID must still match)
+- Spec version, Zone ID, and chain ID for replay protection. Zone ID `0` skips the Zone ID check, but the chain ID must still match.
 - Issuance and expiry timestamps
 
-Tokens are sent via the `X-Authorization-Token` HTTP header on every request. WebSocket clients supply the token when opening the connection; subscriptions remain scoped to that account.
+Tokens are sent via the `X-Authorization-Token` HTTP header on every request. WebSocket clients supply the token when opening the connection. Subscriptions remain scoped to that account.
 
-## Method access control
+## Method Access Control
 
-The redacted RPC exposes an explicit method allowlist. Authenticating with a sequencer key does not bypass its privacy rules; operator methods belong on the separate operator RPC.
+The redacted RPC exposes an explicit method allowlist. Authenticating with a sequencer key doesn't bypass its privacy rules. Operator methods belong on the separate operator RPC.
 
 Available to any authenticated caller:
 
@@ -59,27 +66,40 @@ Available to any authenticated caller:
 | `eth_newBlockFilter` | Scoped | Returns new block hashes. |
 | `eth_uninstallFilter` | Scoped | Removes a previously created filter. |
 
-**Error vs. silent response**: Methods where the user explicitly provides a mismatched parameter (`eth_sendRawTransaction` with wrong sender, `eth_call` with wrong `from`) return explicit errors, since the user already knows the address they supplied and the error leaks nothing. Methods that query *about* other accounts return silent dummy values (`0x0`, `null`, empty results) instead of errors; an error would reveal "this data exists but you can't see it."
+Scoped methods either return an error or a silent dummy value:
+
+- **Explicit Errors:** Methods where the user explicitly provides a mismatched parameter return explicit errors. Examples are `eth_sendRawTransaction` with wrong sender and `eth_call` with wrong `from`. The user already knows the address they supplied, so the error leaks nothing.
+- **Silent Responses:** Methods that query *about* other accounts return silent dummy values (`0x0`, `null`, empty results) instead of errors. An error would reveal "this data exists but you can't see it."
 
 <span id="restricted-sequencer-only" />
 
-### Restricted and unavailable methods
+### Restricted and Unavailable Methods
 
 `eth_getBlockByNumber` and `eth_getBlockByHash` with `full=true` return `-32005` on the redacted RPC, including for sequencer accounts.
 
-Raw storage and code reads, access-list creation, transaction-count and transaction-by-index block methods, `eth_getProof`, pending-transaction filters, mining methods, and the `debug_*`, `admin_*`, and `txpool_*` namespaces are not exposed here. They return `-32601` (method not found). Operators use a separate RPC endpoint.
+The redacted RPC doesn't expose these methods. They return `-32601` (method not found):
+
+- Raw storage and code reads.
+- Access-list creation.
+- Transaction-count and transaction-by-index block methods.
+- `eth_getProof`.
+- Pending-transaction filters.
+- Mining methods.
+- The `debug_*`, `admin_*`, and `txpool_*` namespaces.
+
+Operators use a separate RPC endpoint.
 
 <span id="disabled" />
 
-### Disabled subscriptions
+### Disabled Subscriptions
 
 `eth_subscribe("newPendingTransactions")`, `eth_subscribe("syncing")`, and transaction-receipt subscriptions return `-32006` (method disabled). The supported subscriptions are `newHeads` and account-scoped `logs`.
 
-## Timing side channels
+## Timing Side Channels
 
-The current implementation does not enforce a fixed minimum response time. Silent `null` or zero responses prevent direct disclosure through result values, but they do not guarantee indistinguishable timings. Log filters must include the caller in an eligible indexed topic before retrieval, which limits the scope of backend queries.
+The current implementation doesn't enforce a fixed minimum response time. Silent `null` or zero responses prevent direct disclosure through result values. They don't guarantee indistinguishable timings. Log filters must include the caller in an eligible indexed topic before retrieval. This limits the scope of backend queries.
 
-## Block responses
+## Block Responses
 
 All block headers returned through the redacted RPC are sanitized:
 
@@ -88,11 +108,15 @@ All block headers returned through the redacted RPC are sanitized:
 - `gasUsed` and block size are zeroed, and `extraData` is empty. Optional blob-gas fields and the withdrawals root are also zeroed when present.
 - Public identifiers such as `number` and `hash` remain available.
 
-Transaction and receipt ordering fields are also redacted. Receipt logs include only visible events, `transactionIndex` is zero, and `cumulativeGasUsed` is replaced with that transaction’s gas usage.
+Transaction and receipt ordering fields are also redacted:
 
-## Event filtering
+- Receipt logs include only visible events.
+- `transactionIndex` is zero.
+- `cumulativeGasUsed` is replaced with that transaction's gas usage.
 
-Log queries are restricted to enabled zone tokens and the receive-policy guard. Filters must include the authenticated address, padded to 32 bytes, in `topics[1]` or `topics[2]` as appropriate for the event. Broad filters without an eligible caller topic return `-32602`. To find both outgoing and incoming transfers, query each indexed position separately.
+## Event Filtering
+
+Log queries are restricted to enabled Zone tokens and the receive-policy guard. Filters must include the authenticated address, padded to 32 bytes. It goes in `topics[1]` or `topics[2]` as appropriate for the event. Broad filters without an eligible caller topic return `-32602`. To find both outgoing and incoming transfers, query each indexed position separately.
 
 Returned events are restricted to those where the authenticated account is a relevant party:
 
@@ -105,9 +129,9 @@ Returned events are restricted to those where the authenticated account is a rel
 | `Burn` | `from == caller` |
 | `TransferBlocked` | Caller is the receiver, originator, or recovery authority in the claim receipt. Log queries require the indexed receiver topic; transaction receipts can also expose the event to the other eligible parties. |
 
-All other event topics (system events, role events, configuration events) are filtered out. Visible `logIndex` values restart at zero for each transaction, hiding the number of preceding private events.
+All other event topics, such as system, role, and configuration events, are filtered out. Visible `logIndex` values restart at zero for each transaction, hiding the number of preceding private events.
 
-## Zone-specific RPC methods
+## Zone-Specific RPC Methods
 
 | Method | Access | Description |
 |--------|--------|-------------|
@@ -115,17 +139,48 @@ All other event topics (system events, role events, configuration events) are fi
 | `zone_getZoneInfo` | Any authenticated | Returns `zoneId`, `zoneTokens`, `sequencers`, `chainId`, `tempoBlockNumber`, `isAccessEnforced`, and `isGatewayOpen` |
 | `zone_getEncryptionKey` | Any authenticated | Returns the portal’s active encryption key from finalized Tempo state |
 
-`zone_getDepositStatus` is not implemented. For settlement progress, compare a deposit’s number from `DepositMade` with `ZonePortal.lastProcessedDepositNumber()` on Tempo.
+`zone_getDepositStatus` isn't implemented. For settlement progress, compare a deposit’s number from `DepositMade` with `ZonePortal.lastProcessedDepositNumber()` on Tempo.
 
-## Error codes
+## Error Codes
 
-Authentication fails at the HTTP transport layer: a missing token returns HTTP `401`, an invalid or expired token returns HTTP `403`, and an internal authentication failure returns HTTP `500`. These responses have no JSON-RPC error body. Authenticated requests can return:
+Authentication fails at the HTTP transport layer. These responses have no JSON-RPC error body:
+
+- A missing token returns HTTP `401`.
+- An invalid or expired token returns HTTP `403`.
+- An internal authentication failure returns HTTP `500`.
+
+Authenticated requests can return:
 
 | Code | Message | Meaning |
 |------|---------|---------|
 | `-32003` | Transaction rejected | Transaction sender does not match authenticated account |
 | `-32004` | Account mismatch | The `from` field does not match the authenticated account |
 | `-32005` | Sequencer only | Full-block request rejected on the redacted RPC |
-| `-32006` | Method disabled | Method is not available on zones |
+| `-32006` | Method disabled | Method is not available on Zones |
 | `-32601` | Method not found | Method is outside the redacted RPC allowlist |
 | `-32602` | Invalid params | Unsupported filter, state override, or other invalid argument |
+
+## Related
+
+<Cards>
+  <Card
+    title="Connect to a Zone"
+    description="Use for authorizing your application's access to a Zone deployment."
+    to="/docs/zones/connect"
+  />
+  <Card
+    title="Balances and Activity"
+    description="Use for reading private balances and activity with the authenticated client."
+    to="/docs/zones/balances"
+  />
+  <Card
+    title="Accounts and Privacy"
+    description="Covers private balances, private allowances, and account-scoped access control."
+    to="/docs/protocol/zones/accounts"
+  />
+  <Card
+    title="Bridging"
+    description="Covers deposits, withdrawals, encrypted deposits, and composable withdrawal callbacks."
+    to="/docs/protocol/zones/bridging"
+  />
+</Cards>

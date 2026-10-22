@@ -1,5 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoWallet, webAuthn } from '@wagmi/core/tempo'
+import { Storage } from 'accounts'
 import * as React from 'react'
 import {
   base,
@@ -68,6 +69,12 @@ export function getConfig(options: getConfig.Options = {}) {
       url: 'https://sponsor.moderato.tempo.xyz',
     },
   })
+  // Both connectors default to the accounts SDK's `tempo` store. Sharing it lets Tempo Wallet read
+  // the passkey account and reconnect with it, so the passkey account keeps its own store.
+  const passkeyStorage =
+    typeof window === 'undefined'
+      ? Storage.memory({ key: 'tempo-docs-passkey' })
+      : Storage.idb({ key: 'tempo-docs-passkey' })
   return createConfig({
     // Demo balance watchers do not need to poll at the chain's subsecond default.
     pollingInterval: { [tempoModerato.id]: 2_000 },
@@ -77,8 +84,11 @@ export function getConfig(options: getConfig.Options = {}) {
     chains: [chain, tempo, ...routesSourceChains],
     connectors:
       import.meta.env.VITE_E2E === 'true'
-        ? [webAuthn(), wallet]
-        : [wallet, webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }) })],
+        ? [webAuthn({ storage: passkeyStorage }), wallet]
+        : [
+            wallet,
+            webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }), storage: passkeyStorage }),
+          ],
     multiInjectedProviderDiscovery,
     storage: createStorage<Record<string, unknown>>({
       // Pages that move real funds keep wallet connections, and the addresses in them, for the

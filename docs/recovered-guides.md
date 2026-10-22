@@ -1,85 +1,70 @@
 # Recovered payment and integration guides
 
-The source conversation is **Build Tempo ecosystem pages** (`01a12d2d-fef6-7bc2-ac99-f64757946bad`). The initial recovery adapts the reviewed educational content from [website PR #158](https://github.com/tempoxyz/tempo.xyz/pull/158) and the three provider-selection guides from [website PR #155](https://github.com/tempoxyz/tempo.xyz/pull/155) into native documentation. The follow-up also adapts the 13 partner profiles from [website PR #150](https://github.com/tempoxyz/tempo.xyz/pull/150) into provider-specific Docs guides. This lets the documentation ship independently of the website ecosystem work.
+This reconciliation accounts for every original guide draft from Docs PR #36 and tempo-web PR #483. It compares the archived body with current content, restores missing useful tasks, and records unsupported material separately. The source conversation is **Build Tempo ecosystem pages** (01a12d2d-fef6-7bc2-ac99-f64757946bad).
 
-## Scope and navigation
+## Archive inventory
 
-- 26 substantive educational and provider-selection pages, plus their index.
-- 13 partner-specific integration guides, plus their index at `/docs/resources/partners`.
-- Three existing implementation guides absorb recovered fee-sponsorship, transfer-memo, and mint/burn operating details.
-- Get Started → Resources → Guides is collapsed by default. Its topic groups are also collapsed. No primary navigation section is added.
-- Get Started → Resources → Partner guides is also collapsed by default, with collapsed provider categories. Existing Partners and educational guide indexes link to it.
-- Every published page remains in the normal search, sitemap, and generated Markdown/AI inventory. The submenu changes visual prominence, not crawler access.
-- No marketing website pages, ecosystem cards, or historical redirects are changed.
+| Source | Original content files | Pinned revision |
+| --- | --- | --- |
+| [Docs PR #36](https://github.com/tempoxyz/docs/pull/36) | 210 MDX files: 208 article/profile bodies and two navigation indexes. | 6fd45c89ead49e05df826a648f500e3a9d82257f |
+| [tempo-web PR #483](https://github.com/tempoxyz/tempo-web/pull/483) | 25 MDX article bodies and four editorial/support notes. | d5456a5f89e6e6b05e7f4028dafec9beffd10d30 |
 
-## Source coverage
+There are **233 article/profile bodies, two indexes, and four notes: 239 source files**. The commonly used 235-page count includes the two indexes. PR titles and prospective glossary plans are not additional written articles.
 
-The previous recovery reviewed 235 historical MDX drafts: 210 from [Docs PR #36](https://github.com/tempoxyz/docs/pull/36) and 25 from [tempo-web PR #483](https://github.com/tempoxyz/tempo-web/pull/483). It consolidated repeated intent and withheld unsupported premises. [The complete ledger](recovered-guide-mapping.csv) retains all 235 decisions plus four supporting notes and adds the applicable documentation destination. An empty destination retains the recorded source decision; it does not imply that a withheld integration is supported.
+The [pinned source inventory](recovered-guide-source-inventory.json) lists every original path and the seven other modified build, analytics, and protocol files excluded from the article count. All 239 archived file hashes were checked against the source hashes in the ledger.
 
-This change uses the reviewed recovery rather than importing the raw archive. It preserves source-specific availability, onchain/fiat delivery boundaries, hypothetical example labels, and explicit regulatory dates. The provider-selection pages use official provider instructions or maintained Docs partner categories, without linking to unpublished ecosystem profiles.
+## Reconciliation decisions
 
-## Documentation destinations
+| Decision | Source files | Meaning |
+| --- | ---: | --- |
+| Restored | 13 | Added missing useful content: two operational tasks, seven provider distinctions, and four settlement/corridor explanations. |
+| Covered | 51 | The useful intent is already explained by the specified current canonical content. |
+| Consolidated | 88 | Retained a narrower useful task in current guides or maintained provider instructions; excluded obsolete code, duplicate positioning, and unsupported claims. |
+| Withheld | 81 | The original premise lacks current support. General references are recorded separately and do not count as recovered coverage. |
+| Navigation | 2 | Replaced archive indexes with the current Guides and Partners indexes. |
+| Support note | 4 | Accounted for editorial templates, rollout plans, and press notes without presenting them as articles. |
+| **Total** | **239** | **Every original path has exactly one decision.** |
 
-| Recovered topic | Destination |
-| --- | --- |
-| 402-payment-required | [/docs/resources/guides/402-payment-required](/docs/resources/guides/402-payment-required) |
-| batch-payments | [/docs/resources/guides/batch-payments](/docs/resources/guides/batch-payments) |
-| blockchain-payments | [/docs/resources/guides/blockchain-payments](/docs/resources/guides/blockchain-payments) |
-| cross-border-payments-latin-america | [/docs/resources/guides/cross-border-payments-latin-america](/docs/resources/guides/cross-border-payments-latin-america) |
-| cross-border-payments | [/docs/resources/guides/cross-border-payments](/docs/resources/guides/cross-border-payments) |
-| fbo-accounts | [/docs/resources/guides/fbo-accounts](/docs/resources/guides/fbo-accounts) |
-| genius-act | [/docs/resources/guides/genius-act](/docs/resources/guides/genius-act) |
-| global-payouts | [/docs/resources/guides/global-payouts](/docs/resources/guides/global-payouts) |
-| how-to-accept-stablecoin-payments | [/docs/resources/guides/how-to-accept-stablecoin-payments](/docs/resources/guides/how-to-accept-stablecoin-payments) |
-| microtransactions | [/docs/resources/guides/microtransactions](/docs/resources/guides/microtransactions) |
-| nostro-vostro-accounts | [/docs/resources/guides/nostro-vostro-accounts](/docs/resources/guides/nostro-vostro-accounts) |
-| payment-rails | [/docs/resources/guides/payment-rails](/docs/resources/guides/payment-rails) |
-| payment-reconciliation | [/docs/resources/guides/payment-reconciliation](/docs/resources/guides/payment-reconciliation) |
-| prefunding | [/docs/resources/guides/prefunding](/docs/resources/guides/prefunding) |
-| stablecoin-payment-infrastructure-enterprise-scale | [/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale](/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale) |
-| stablecoin-payroll-for-global-teams | [/docs/resources/guides/stablecoin-payroll-for-global-teams](/docs/resources/guides/stablecoin-payroll-for-global-teams) |
-| stablecoin-settlement | [/docs/resources/guides/stablecoin-settlement](/docs/resources/guides/stablecoin-settlement) |
-| stablecoins-for-business | [/docs/resources/guides/stablecoins-for-business](/docs/resources/guides/stablecoins-for-business) |
-| compliance-controls | [/docs/resources/guides/compliance-controls](/docs/resources/guides/compliance-controls) |
-| corporate-treasury | [/docs/resources/guides/corporate-treasury](/docs/resources/guides/corporate-treasury) |
-| remittances | [/docs/resources/guides/remittances](/docs/resources/guides/remittances) |
-| stablecoin-fees | [/docs/resources/guides/stablecoin-fees](/docs/resources/guides/stablecoin-fees) |
-| subscriptions-on-tempo | [/docs/resources/guides/subscriptions-on-tempo](/docs/resources/guides/subscriptions-on-tempo) |
-| embedded-wallets | [/docs/resources/guides/embedded-wallets](/docs/resources/guides/embedded-wallets) |
-| funding-and-payouts | [/docs/resources/guides/funding-and-payouts](/docs/resources/guides/funding-and-payouts) |
-| payment-screening | [/docs/resources/guides/payment-screening](/docs/resources/guides/payment-screening) |
-| fee-sponsorship | [/docs/guide/payments/sponsor-user-fees](/docs/guide/payments/sponsor-user-fees) |
-| transfer-memos | [/docs/guide/payments/transfer-memos](/docs/guide/payments/transfer-memos) |
-| mint-and-burn | [/docs/guide/issuance/mint-stablecoins](/docs/guide/issuance/mint-stablecoins) |
+The 152 restored, covered, or consolidated article intents are not 155 new pages. The 81 withheld premises comprise 48 country/regional send templates, 15 unsupported provider flows, 15 dated legal or unsupported vertical/asset/savings claims, two bank-marketing stubs, and one retired protocol comparison.
 
-## Partner profile recovery
+## Content restored in this pass
 
-The partner guides retain the original profiles' capability, prerequisite, operating-consideration, FAQ, and primary-source content, refreshed against current provider instructions. They use native MDX rather than the marketing website's generated components. General provider coverage does not imply support for every SDK, asset, or endpoint.
+- [Create payment links](https://tempo.xyz/developers/docs/resources/guides/payment-links): trusted request records, shareable URLs and QR codes, payment attempts, ordinary and virtual-address delivery checks, and invoice state.
+- [Handle stablecoin refunds](https://tempo.xyz/developers/docs/resources/guides/refunds): verified originals, safe return destinations, partial-amount reservations, concurrent requests, and uncertain submissions.
+- [Compare payment rails](https://tempo.xyz/developers/docs/resources/guides/payment-rails#read-settlement-timing-and-netting-terms): RTGS versus net settlement and T+0/T+1/T+2 business-day notation.
+- [Remittance operations](https://tempo.xyz/developers/docs/resources/guides/remittances): corridor definition and a sourced Philippine local-rail example that does not imply Tempo corridor availability.
+- Existing [wallet](https://tempo.xyz/developers/docs/partners/wallets), [bridge](https://tempo.xyz/developers/docs/partners/bridges), and [data](https://tempo.xyz/developers/docs/partners/data-and-oracles) entries: current BitGo, Crossmint, DFNS, Para, Across, Chainlink CCIP, and Zerion implementation distinctions.
 
-| Original profile | Documentation destination |
-| --- | --- |
-| Privy | `/docs/resources/partners/privy` |
-| Dynamic | `/docs/resources/partners/dynamic` |
-| Turnkey | `/docs/resources/partners/turnkey` |
-| Fireblocks | `/docs/resources/partners/fireblocks` |
-| Bridge | `/docs/resources/partners/bridge` |
-| Alchemy | `/docs/resources/partners/alchemy` |
-| QuickNode | `/docs/resources/partners/quicknode` |
-| Allium | `/docs/resources/partners/allium` |
-| Goldsky | `/docs/resources/partners/goldsky` |
-| TRM | `/docs/resources/partners/trm` |
-| Chainalysis | `/docs/resources/partners/chainalysis` |
-| Elliptic | `/docs/resources/partners/elliptic` |
-| Blockaid | `/docs/resources/partners/blockaid` |
+The pass also removes redundant native DEX approval instructions and demo calls, following the TIP-20 implicit-approval specification. It preserves swap/order operations, slippage controls, balance checks, transfer policies, spending limits, and old heading anchors.
 
-The website draft and its directory cards are unchanged. No unpublished ecosystem route is required to read or use these Docs guides.
+## Reading the ledger
 
-## Verification
+The [complete ledger](recovered-guide-mapping.csv) retains source paths, pinned source URLs, original SHA-256 hashes, current decisions, exact reader destinations, content evidence, excluded claims, and the reconciliation date. Fields beginning with previous_ preserve the older review history; they are not current publication proof.
 
-Validation results are recorded in the pull request. Publication requires a successful deployment and verification at the canonical `/developers` mount. Local output and a preview are not production proof.
+Live destinations identify retained coverage. Reference destinations provide adjacent guidance for withheld premises. Coverage evidence identifies the source documents and current implementation basis. A provider's general documentation, a directory entry, or an HTTP 200 alone does not prove that the archive's complete integration tutorial works.
 
-## Editorial and claim review
+Country templates are withheld where the exact origin, customer eligibility, asset/network, provider, conversion, and local-delivery route is unverified. Dated licensing rules, guaranteed savings, free FX, bank-account equivalence, and unsupported asset listings are not republished. Organic underlying returns can use yield; boosted returns use rewards or Earn.
 
-The October 19, 2026 follow-up review checks the 26 recovered guides, their index, and the implementation content incorporated during recovery against Tempo's writing guidance and current primary sources. It distinguishes token permissions from regulatory authorization, issuer redemption access from minting functions, and onchain delivery from provider or bank completion.
+## Navigation and verification
 
-The corrections clarify access-key allowances and scopes, Fee AMM conversion, payroll eligibility, deposit-insurance conditions, screening coverage, and sandbox limitations. Search titles and opening answers identify each guide's subject and task; relevant FAQs address operating decisions. Existing routes, heading anchors, and the collapsed navigation remain in place. This editorial review does not establish legal approval of a particular customer arrangement.
+The 28 recovered task guides remain under **Get Started → Resources → Guides**, with collapsed topic groups and visible category breadcrumbs. Existing website coverage is reused where it already serves the reader. The former 13 standalone partner overviews remain redirected to task sections. The website ecosystem work stays independent.
+
+Run the source/decision checks:
+
+~~~sh
+python3 scripts/verify-recovered-guides.py
+~~~
+
+After a production build, check destinations and anchors against that output:
+
+~~~sh
+python3 scripts/verify-recovered-guides.py --build-dir .vercel/output/static
+~~~
+
+After deployment succeeds, compare public HTML, anchors, canonical URLs, and Markdown hashes with that same build:
+
+~~~sh
+python3 scripts/verify-recovered-guides.py --live --build-dir .vercel/output/static --output /tmp/recovered-guides-live.json
+~~~
+
+The optional --archive-dir argument verifies the original file hashes against locally materialized pinned source files, using the archive directories named in the inventory. Editorial review establishes the retained meaning; the verifier establishes inventory completeness and destination integrity. Provider-authenticated operations were source-checked, not executed. A merge or preview alone is not production proof.

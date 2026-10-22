@@ -11,7 +11,7 @@ const rpcKey = process.env.TEMPO_DEVNET_RPC_KEY
 
 export const client = createClient({
   chain: tempoDevnet,
-  transport: http('https://rpc-multisig-1113.devnet.tempoxyz.dev', {
+  transport: http('https://rpc-t14-checkpoint.devnet.tempoxyz.dev', {
     fetchOptions: { headers: { Authorization: `Basic ${btoa(`previews:${rpcKey}`)}` } },
   }),
 })

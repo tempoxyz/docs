@@ -52,6 +52,8 @@ For testing on Tempo testnet, use the public fee payer endpoint at `https://spon
 
 ### Configure your client to use the fee payer service
 
+Use `withRelay` from `viem/tempo` for transport-based sponsorship; `withFeePayer` is deprecated. `withRelay` sends every `eth_fillTransaction` request to the relay, including self-paid requests, so your endpoint must support both. Keep `feePayer: true` on transactions you want sponsored. For a self-hosted server, use `Handler.relay` from `tapimo/server` with the [supported server package versions](/docs/server/relay-handler#create-a-relay-handler).
+
 :::code-group
 
 ```ts twoslash [Tempo Wallet]

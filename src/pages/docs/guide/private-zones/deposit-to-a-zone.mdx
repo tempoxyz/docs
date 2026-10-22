@@ -1,13 +1,13 @@
 ---
-title: "Deposit OUSD to a Tempo Zone on testnet"
+title: Deposit OUSD
 seoTitle: "Deposit OUSD to a Tempo Zone on Testnet | Docs"
-description: Deposit OUSD from your public-chain balance into Zone A and confirm the resulting zone balance.
+description: Deposit OUSD from your Tempo balance into Zone A and confirm the resulting Zone balance.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones-deposit-to-a-zone_title-f5_v02.png
 ---
 
 import * as Demo from '../../../../components/guides/Demo.tsx'
-import { Tab, Tabs } from 'vocs'
+import { Card, Cards, Tab, Tabs } from 'vocs'
 import { DepositToZone } from '../../../../components/guides/zones/DepositToZone.tsx'
 
 export const depositZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
@@ -16,20 +16,25 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 <a id="deposit-pathusd-to-a-tempo-zone-on-testnet" />
 
-# Deposit OUSD to a Tempo Zone on testnet
+# Deposit OUSD
 
-Deposit `OUSD` test tokens from public Tempo into **Zone A** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). Submit a public-chain deposit first, then wait for the Zone to credit the net amount after fees.
+Move `OUSD` test tokens from public Tempo into a private balance on Zone A.
+
+## Overview
+
+This guide deposits `OUSD` test tokens from public Tempo into **Zone A**. It uses the [testnet sandbox](/docs/guide/private-zones#testnet-compatibility), which differs from current deployments. You submit a deposit on Tempo, then wait for the Zone to credit the net amount after fees.
 
 <ZoneDiagram
   name="deposit"
   alt="A public account signs a plaintext or encrypted deposit, the Zone A portal locks OUSD, and Zone A later imports the deposit and credits the private balance."
 />
 
-The deposit is accepted through `ZonePortal` on the public chain. You need private zone authorization to read the resulting zone balance, because those reads are only exposed to the authenticated account.
+The portal (`ZonePortal`) on Tempo accepts the deposit. Reading the resulting balance needs an [authorization token](/docs/zones/connect#authorize-access), which scopes Zone RPC reads to your account.
 
 <a id="depositing-pathusd-to-zone-a" />
+<span id="depositing-ousd-to-zone-a" />
 
-## Depositing OUSD to Zone A
+## Deposit OUSD to Zone A
 
 <Demo.Container
   name="Deposit to Zone A"
@@ -40,11 +45,11 @@ The deposit is accepted through `ZonePortal` on the public chain. You need priva
   <DepositToZone />
 </Demo.Container>
 
-## Code examples
+## Code Examples
 
-These snippets assume you already have a signed-in `rootClient` on the public chain and the usual token and zone constants in scope.
+These snippets assume a signed-in `rootClient` on Tempo and the usual token and Zone constants in scope.
 
-On this legacy testnet deployment, use the plaintext flow when revealing the recipient and memo is acceptable, or the encrypted flow to hide those fields from public-chain observers. Current Zone portals require encrypted deposits and a Tempo refund recipient; neither legacy call signature below applies to those portals. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before adapting these SDK calls to another Zone.
+Use the plaintext flow when revealing the recipient and memo is acceptable. Use the encrypted flow to hide those fields from public observers on Tempo.
 
 <Tabs stateKey="zone-deposit-mode">
   <Tab title="Plaintext">
@@ -85,14 +90,19 @@ console.log(receipt.blockNumber)
   </Tab>
 </Tabs>
 
-## What Happens During a Deposit
+<span id="what-happens-during-a-deposit" />
 
-A zone deposit settles in two phases.
+## Deposit Settlement
 
-First, you submit a public Tempo transaction depositing to the `ZonePortal`. The Zone Portal contract locks the token, deducts the deposit fee in the same token, and records the net deposit in its deposit queue. Later, the zone sequencer processes that queue and credits the recipient inside the zone.
+A deposit settles in two phases. The Tempo receipt confirms that the portal accepted the deposit. The Zone balance changes later, when the Zone sequencer [imports the deposit](/docs/protocol/zones/bridging#deposits).
 
-That means your public transaction receipt and your zone balance do not update at the same time. The Tempo transaction confirms that the deposit request was accepted. The zone balance changes only after the zone has processed that deposit, and it reflects the post-fee amount rather than the full amount you passed into `deposit(...)`.
+The Zone mints `amount - depositFee`, not the full amount you passed to `deposit(...)`. The portal deducts the [deposit fee](/docs/protocol/zones/execution#deposit-fees) in the deposited token. To land a specific net amount in the Zone, add the deposit fee first.
 
-:::warning
-  If you need a specific net amount inside the zone, account for the portal deposit fee first. The amount minted on the zone is `amount - depositFee`.
-:::
+## Related
+
+<Cards>
+  <Card title="Deposit Into a Zone" description="Use for depositing into a current Zone deployment." to="/docs/zones/deposit" />
+  <Card title="Send Within a Zone" description="Use for a private transfer between accounts in Zone A." to="/docs/guide/private-zones/send-tokens-within-a-zone" />
+  <Card title="Withdraw OUSD" description="Use for moving OUSD from Zone A back to your public balance." to="/docs/guide/private-zones/withdraw-from-a-zone" />
+  <Card title="Testnet Sandbox" description="Covers the sandbox Zones, router deployment, and compatibility limits." to="/docs/guide/private-zones" />
+</Cards>

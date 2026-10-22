@@ -19,6 +19,8 @@ Jump to [embedded wallets](#embedded), [custody and institutional providers](#cu
 
 For account abstraction providers and programmable wallet frameworks, see [Smart accounts](/docs/partners/smart-accounts).
 
+Choose [wallets by signing and payment requirements](/docs/resources/guides/embedded-wallets) before selecting a provider.
+
 ## Embedded
 
 ### <span className={`partner-logo partner-logo--blockradar ${partnerLogo().className + ' ' + partnerLogoBlockradar().className}`} aria-hidden="true" />Blockradar
@@ -30,7 +32,7 @@ For account abstraction providers and programmable wallet frameworks, see [Smart
 
 ### <span className={`partner-logo partner-logo--crossmint ${partnerLogo().className + ' ' + partnerLogoCrossmint().className}`} aria-hidden="true" />Crossmint Wallets
 
-Create embedded wallets for users or server-side wallets for treasury and agent workflows with [Crossmint Wallets](https://docs.crossmint.com/wallets/overview).
+Create embedded or server-side wallets with [Crossmint Wallets](https://docs.crossmint.com/wallets/overview). Its [product matrix](https://docs.crossmint.com/introduction/supported-chains) lists Tempo wallets as self-serve; checkout, onramp, and tokenization require project access, and offramp is unsupported. Use `tempo` on mainnet and `tempo-testnet` in staging.
 
 [Wallet documentation](https://docs.crossmint.com/wallets/overview) · [Project console](https://crossmint.com/console)
 
@@ -44,9 +46,9 @@ Add authentication and embedded wallets with [Dynamic Embedded Wallets](https://
 
 ### <span className={`partner-logo partner-logo--para ${partnerLogo().className + ' ' + partnerLogoPara().className}`} aria-hidden="true" />Para
 
-[Para](https://getpara.com) is a comprehensive wallet and authentication suite for fintech and crypto applications. It provides flexible login methods, secure MPC-backed wallets, fast authentication, and infrastructure for automating onchain activity. Para [supports Tempo](https://blog.getpara.com/tempo-para/) for wallet creation and payment flows.
+Use [Para](https://getpara.com) for embedded wallets and authentication. Start from its [current React SDK quickstart](https://docs.getpara.com/v3/react/quickstart), then configure the selected Tempo chain and transport with the [custom RPC guide](https://docs.getpara.com/v3/react/guides/web3-operations/evm/configure-rpc).
 
-Get started by signing up through the [Para Dev Portal](https://developer.getpara.com/) and following the quickstart in the [Para docs](https://docs.getpara.com/v2/introduction/welcome).
+The [original Tempo announcement](https://blog.getpara.com/tempo-para/) describes testnet support. Confirm mainnet access and Tempo transaction features separately; generic EVM signing does not establish batching or fee sponsorship.
 
 ### <span className={`partner-logo partner-logo--privy ${partnerLogo().className + ' ' + partnerLogoPrivy().className}`} aria-hidden="true" />Privy
 
@@ -82,9 +84,9 @@ Create hosted stablecoin wallets, read balances, and transfer funds with Bridge 
 
 ### <span className={`partner-logo partner-logo--bitgo ${partnerLogo().className + ' ' + partnerLogoBitgo().className}`} aria-hidden="true" />BitGo
 
-[BitGo](https://www.bitgo.com) provides institutional-grade custody, trading, and wallet infrastructure. BitGo supports Tempo with both custodial and self-custody wallet solutions, enabling enterprises to securely store, manage, and transact with Tempo-based assets under robust security and compliance controls. BitGo is a  qualified custodian in the United States and globally [licensed and regulated](https://www.bitgo.com/company/licenses/).
+Use [BitGo's Tempo guide](https://developers.bitgo.com/docs/tempo) for MPC wallets: custodial cold, or self-custody cold and hot. Its Tempo integration does not use the provider's multisig wallet model.
 
-Get started through the [BitGo platform](https://www.bitgo.com) or explore their [developer docs](https://developers.bitgo.com/).
+For deposit attribution, BitGo encodes `memoId` in an address suffix, but the onchain transfer must carry the corresponding TIP-20 memo. When sending from another wallet, follow its `transferWithMemo` instructions to encode that memo against the underlying EVM address.
 
 ### <span className={`partner-logo partner-logo--coinbase ${partnerLogo().className + ' ' + partnerLogoCoinbase().className}`} aria-hidden="true" />Coinbase
 
@@ -102,9 +104,9 @@ Use [CubeSigner](https://cubist.dev/products/cubesigner-end-user-custody) for wa
 
 ### <span className={`partner-logo partner-logo--dfns ${partnerLogo().className + ' ' + partnerLogoDfns().className}`} aria-hidden="true" />DFNS
 
-[DFNS](https://www.dfns.co) provides programmable key management and wallet-as-a-service infrastructure for Tempo. With DFNS, developers can create and manage wallets, automate signing workflows, and build custom orchestration logic, all backed by distributed MPC key generation and policy-based access controls.
+DFNS lists Tempo mainnet as a [specialty network available upon request](https://docs.dfns.co/networks), with `TempoModerato` as its testnet. Obtain the required access and select the DFNS network identifier for your environment before creating wallets.
 
-Create an account on the [DFNS dashboard](https://app.dfns.io) and explore the [DFNS docs](https://docs.dfns.co/) to integrate wallets into your Tempo application.
+Use the [DFNS quickstart](https://docs.dfns.co/introduction/quickstart) for authentication and wallet operations, then configure provider permissions and [signing policies](https://docs.dfns.co/core-concepts/policies) for the intended activity.
 
 <span id="fireblocks" />
 

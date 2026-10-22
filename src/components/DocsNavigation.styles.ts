@@ -40,7 +40,18 @@ export const docsHeaderNav = style({
   '@media (width < 380px)': {
     paddingInline: tokens.spacing['3_5'],
   },
-  // tempo.xyz layout: logo, centered destinations, actions on the inline end.
+  // Docs destinations sit with the section utilities once that row is visible.
+  '@media (width >= 800px)': {
+    selectors: {
+      '&[data-surface="docs"]': {
+        gridTemplateColumns: 'minmax(0, 1fr) auto',
+      },
+      '&[data-surface="docs"] > .docs-header-destinations': {
+        display: 'none',
+      },
+    },
+  },
+  // Blog pages keep the centered destination and actions on the inline end.
   '@media (width >= 1080px)': {
     gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)',
     gap: tokens.spacing['5'],

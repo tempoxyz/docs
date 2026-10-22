@@ -1,21 +1,24 @@
 ---
-title: Account model
+title: Account Model
 seoTitle: Tempo EVM Account Model, Account Types, and Signature Types | Tempo Docs
 description: Tempo EVM accounts are approved by one key or by weighted owners, can hand limited signing power to access keys, and use five signature formats.
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-keys_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
 import { AccountDiagram } from '../../../components/AccountDiagram'
 import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
 
 <span id="keys-and-signing" />
 <span id="keys-and-permissions" />
 
-# Account model
+# Account Model
 
-Every Tempo EVM account is either a single-key account or a configurable account, and they differ in who approves transactions.
+Every Tempo EVM account is either a single-key account or a configurable account.
 
-One key approves a single-key account's transactions, as on Ethereum. Weighted owners approve a configurable account's transactions; the Accounts guides call them signers. A transaction runs once the approving owners' weights reach the account's threshold. Either type can also authorize access keys, which sign alone within limits.
+## Overview
+
+The two account types differ in who approves transactions. One key approves a single-key account's transactions, as on Ethereum. Weighted owners approve a configurable account's transactions. The Accounts guides call them signers. A transaction runs once the approving owners' weights reach the account's threshold. Either type can also authorize access keys, which sign alone within limits.
 
 <AccountDiagram
   name="account-types"
@@ -26,7 +29,7 @@ One key approves a single-key account's transactions, as on Ethereum. Weighted o
 <span id="tempo-account-configuration" />
 <span id="account-references" />
 
-## Single-key and configurable accounts
+## Single-Key and Configurable Accounts
 
 | | [Single-key account](/docs/development/single-key-accounts) | [Configurable account](/docs/development/configurable-accounts) |
 | --- | --- | --- |
@@ -44,16 +47,21 @@ Single-key accounts work on mainnet, testnet, and the devnet. The upgrade to a c
 <span id="grant-access" />
 <span id="revoke-access" />
 <span id="keep-access-and-recovery-explicit" />
+<span id="access-keys-for-both-account-types" />
 
-## Access keys for both account types
+## Access Keys
 
-An [access key](/docs/accounts/access-keys) is an extra key that signs for the account on its own, within the limits you set. Those limits are a spending limit per TIP-20 token that can reset each period, an optional expiry, and scopes that restrict which contracts it calls and whom it pays. The [Account Keychain](/docs/development/account-keychain), a contract built into Tempo (a precompile), stores every account's access keys. It enforces those limits on each transaction they sign.
+An [access key](/docs/accounts/access-keys) is an extra key that signs for the account on its own, within the limits you set:
 
-The account itself authorizes and revokes access keys: its root key, or owners whose weights reach the threshold. An [admin access key](/docs/development/account-keychain#admin-access-keys) can too. It has no limits, so store it as carefully as a root or owner key. Access keys, admin or not, never count toward a threshold.
+- **Spending Limits:** A limit per TIP-20 token, which can reset each period.
+- **Expiry:** An optional time after which the key stops working.
+- **Scopes:** Restrictions on which contracts it calls and whom it pays.
 
-<span id="tempo-transaction-signature-types" />
+The [Account Keychain](/docs/development/account-keychain), a contract built into Tempo (a precompile), stores every account's access keys. It enforces those limits on each transaction they sign.
 
-## Tempo transaction signature types
+The account itself authorizes and revokes access keys, through its root key or owners whose weights reach the threshold. An [admin access key](/docs/development/account-keychain#admin-access-keys) can too. It has no limits, so store it as carefully as a root or owner key. Access keys, admin or not, never count toward a threshold.
+
+## Tempo Transaction Signature Types
 
 | Signature | Prefix | Used by |
 | --- | --- | --- |
@@ -73,4 +81,15 @@ Viem's `Account` helpers encode every [format](/docs/protocol/transactions/spec-
 <span id="login-signing-and-api-credentials" />
 <span id="app-session-signing-and-api-credentials" />
 
+## Logins and API Keys
+
 Only these keys sign transactions. Your app's login session controls access to your app. A Tempo API key authenticates requests to Tempo's hosted APIs. Neither signs for an account.
+
+## Related
+
+<Cards>
+  <Card title="Access Keys" description="Covers keys that sign for an account within spending limits, expiry, and scopes." to="/docs/accounts/access-keys" />
+  <Card title="Single-Key Accounts" description="Covers the protocol reference for accounts approved by one key." to="/docs/development/single-key-accounts" />
+  <Card title="Configurable Accounts" description="Covers the protocol reference for accounts approved by weighted owners." to="/docs/development/configurable-accounts" />
+  <Card title="Account Keychain" description="Covers the precompile that stores and enforces access keys." to="/docs/development/account-keychain" />
+</Cards>

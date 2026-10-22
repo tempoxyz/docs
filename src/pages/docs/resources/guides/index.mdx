@@ -4,9 +4,11 @@ seoTitle: Payment and Integration Guides | Tempo Docs
 description: Plan stablecoin payment workflows, compare providers and payment rails, and design funding, reconciliation, and operating controls.
 ---
 
+[Tempo Docs](/get-started) / Guides
+
 # Payment and integration guides
 
-Use these guides to plan the payment flow around your Tempo integration, including funding, recipient delivery, reconciliation, and provider responsibilities. Start with the workflow you need, then follow the linked implementation docs for the current APIs and code examples.
+Choose the task your application needs to complete. Each guide explains the workflow, the Tempo controls involved, and the providers that can supply a missing part.
 
 For a first test payment, use the [quickstart](/get-started/quickstart). For provider listings, use [Partners](/docs/partners).
 
@@ -22,6 +24,8 @@ For a first test payment, use the [quickstart](/get-started/quickstart). For pro
 ## Payment workflows
 
 - [Accept stablecoin payments](/docs/resources/guides/how-to-accept-stablecoin-payments)
+- [Create payment links](/docs/resources/guides/payment-links)
+- [Handle refunds](/docs/resources/guides/refunds)
 - [Reconcile payments](/docs/resources/guides/payment-reconciliation)
 - [Plan batch payments](/docs/resources/guides/batch-payments)
 - [Global payouts](/docs/resources/guides/global-payouts)
@@ -44,14 +48,16 @@ For a first test payment, use the [quickstart](/get-started/quickstart). For pro
 - [HTTP 402 payment flows](/docs/resources/guides/402-payment-required)
 - [Microtransactions and sessions](/docs/resources/guides/microtransactions)
 
-## Provider selection and controls
+## Choose wallets and funding
 
-- [Choose embedded wallets](/docs/resources/guides/embedded-wallets)
-- [Choose funding and payouts](/docs/resources/guides/funding-and-payouts)
-- [Choose screening tools](/docs/resources/guides/payment-screening)
-- [Design payment controls](/docs/resources/guides/compliance-controls)
+- [Add embedded wallets](/docs/resources/guides/embedded-wallets): compare Privy, Dynamic, Turnkey, and Fireblocks by signing and payment requirements.
+- [Fund accounts and pay out](/docs/resources/guides/funding-and-payouts): choose the funding rail and follow Bridge's setup path.
+- [Connect an RPC provider](/docs/partners/rpc-and-nodes): choose hosted network access and verify its chain ID.
 
-For provider-specific capabilities and access requirements, use the [partner integration guides](/docs/resources/partners).
+## Compliance and security
+
+- [Screen blockchain payments](/docs/resources/guides/payment-screening): choose address checks, monitoring, or transaction simulation and see which providers support each.
+- [Configure token and receive controls](/docs/resources/guides/compliance-controls): enforce address and token restrictions, handle held funds, and keep case records.
 
 ## Implement native payment features
 
@@ -60,5 +66,3 @@ Use the maintained implementation guide for each feature:
 - [Sponsor user fees](/docs/guide/payments/sponsor-user-fees): define who pays the network fee and how sponsorship is authorized.
 - [Payment references](/docs/guide/payments/transfer-memos): attach an opaque reference and match a confirmed transfer to your ledger.
 - [Mint and burn TIP-20 tokens](/docs/guide/issuance/mint-stablecoins): manage token supply and distinguish token events from issuer funding and redemption.
-
-These guides describe operating and integration decisions. Availability depends on the asset, provider, customer, network, and destination. Onchain settlement and bank delivery are separate stages.

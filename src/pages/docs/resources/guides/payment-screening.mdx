@@ -1,81 +1,71 @@
 ---
-title: "Payment screening tools"
-seoTitle: "Choose Payment Screening Tools for Tempo | Tempo Docs"
-description: "Compare address screening, transaction monitoring, and security simulation for your Tempo payment workflow."
+title: Screen blockchain payments
+seoTitle: Blockchain Payment Screening and Compliance Tools | Tempo Docs
+description: Choose address screening, transaction monitoring, or transaction simulation for Tempo payments, then connect provider results to payment controls.
 ---
 
-# Payment screening tools
+[Guides](/docs/resources/guides) / [Compliance and security](/docs/resources/guides#compliance-and-security) / Payment screening
 
-Choose a screening tool by identifying the decision it must support: assessing an address before payment, monitoring activity afterward, or checking a proposed transaction before signing. These are different jobs, and one provider’s support for Tempo does not establish every product’s scope.
+# Screen blockchain payments
+
+Use address screening to assess a sender or recipient, transaction monitoring to review activity over time, and simulation to preview a payment before signing. Choose the check for the decision your application needs to make.
 
 <span id="choose-check" />
 
-## Place the check in your payment flow
+## Place checks in the payment flow
 
-Use address screening when you need risk information about a sender or recipient. Use transaction monitoring when activity over time should produce alerts or cases. Use transaction simulation and validation when a wallet needs to understand the proposed action and its security risks before signing.
+| Decision | Check | Provider options |
+| --- | --- | --- |
+| Authorize a payment to or from an address | Address risk and counterparty exposure. | [TRM](#trm), [Chainalysis](#chainalysis), [Elliptic](#elliptic). |
+| Review suspicious payment activity | Monitoring alerts and investigation tools. | [TRM](#trm), [Chainalysis](#chainalysis), [Elliptic](#elliptic). |
+| Show a user what a proposed transaction will do | Transaction simulation and security findings before signing. | [Blockaid](#blockaid). |
+| Enforce an approved address or token restriction | Token permissions or account receive policies. | [Tempo controls](/docs/resources/guides/compliance-controls). |
 
-Map each check to a decision your application or operations team can take. A provider result should lead to a defined outcome, such as continuing, waiting for review, or declining the payment under your own policy.
+Screening provides risk information. Tempo's onchain controls enforce configured rules; connecting the two is your application's responsibility.
 
 <span id="compare-products" />
 
-## Compare screening products
+## Choose a screening provider
 
-Start with the products that match that decision. Confirm their Tempo coverage, API availability, and the information returned before comparing commercial terms.
+### TRM
 
-- **TRM.** Documents Tempo wallet screening, transaction monitoring, tracing, and entity attribution. Confirm access to the required product. [Explore TRM](https://www.trmlabs.com/blockchain-coverage/tempo).
-- **Chainalysis.** Documents Tempo support in Address Screening, KYT, and Reactor for screening, monitoring, and investigation workflows. [Explore Chainalysis](https://www.chainalysis.com/blog/tempo-automatic-token-coverage-march-2026/).
-- **Elliptic.** Documents Tempo address screening, stablecoin transaction monitoring, and cross-chain investigation capabilities. [Explore Elliptic](https://www.elliptic.co/newsroom/elliptic-integrates-with-tempo-the-payments-first-blockchain/).
-- **Blockaid.** Evaluate transaction simulation and validation before signing. Confirm Tempo support for the particular scanning endpoint before including it in your integration; a general EVM scanning API does not establish that support. [Review Blockaid's request types](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts).
+[TRM's Tempo coverage](https://www.trmlabs.com/blockchain-coverage/tempo) includes wallet screening, monitoring, tracing, and entity attribution. Use Wallet Screening for address assessments and Transaction Monitoring for ongoing activity. Its [API portal](https://docs.trmlabs.com/api-reference) provides product documentation linked to your account; the public Sanctions API is a different product.
+
+### Chainalysis
+
+[Chainalysis supports](https://www.chainalysis.com/blog/tempo-automatic-token-coverage-march-2026/) Address Screening, KYT monitoring, and Reactor investigations on Tempo, including TIP-20 tokens and transfer memos. For an API integration, [rescreen an address](https://www.chainalysis.com/product/address-screening/) when you need an updated assessment; interface alerts do not refresh an earlier API result.
+
+### Elliptic
+
+[Elliptic's Tempo integration](https://www.elliptic.co/newsroom/elliptic-integrates-with-tempo-the-payments-first-blockchain/) covers address screening, payment monitoring, and cross-chain investigations. Its [analysis API](https://developers.elliptic.co/reference/analysissync) takes a subject, analysis type, and `customer_reference`. Choose the source-of-funds or destination-of-funds direction for your investigation, using [authenticated requests](https://developers.elliptic.co/docs/authentication-1).
+
+<span id="blockaid" />
+
+## Preview a transaction before signing
+
+Blockaid's [`client.evm.transaction.scan`](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts) previews transaction effects and assesses security risk. Its [chain list](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/evm.ts) includes `tempo` and `tempo-testnet` for individual scans. Set `options: ['simulation', 'validation']` for both outputs; the default requests validation only.
+
+Check `validation.result_type` before presenting a result: `Error` is not a benign assessment. Verify support for native Tempo batches or sponsored transaction formats with Blockaid; the separate bulk-scanning chain list does not include Tempo. Simulation does not assess a recipient's sanctions exposure.
 
 <span id="inputs-and-access" />
-
-## Confirm screening inputs, access, and refresh behavior
-
-Prepare the subject you need assessed: an address, transaction, or proposed wallet action. Establish how the selected API identifies networks and assets. Avoid copying request fields from a different provider or assuming a public sanctions endpoint is equivalent to a commercial screening product.
-
-Confirm product access before planning an integration. TRM’s detailed API documentation follows account entitlements. Elliptic documents API-key authentication. Chainalysis offers both interface and API screening, but its API needs another request to refresh the result; automatic interface alerts do not establish identical API behavior.
-
-- **Screening behavior.** Review Chainalysis’s explanation of configurable thresholds, exposure, and API rescreening. [Read the product FAQ](https://www.chainalysis.com/product/address-screening/).
-- **Transaction scan inputs.** Review Blockaid’s official request and response types for simulation and validation. [Review the official request types](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts).
-
 <span id="decision-policy" />
 
-## Define screening decisions before enabling payments
+## Connect results to a payment decision
 
-Choose the categories and thresholds relevant to your payment policy, who reviews ambiguous findings, and when an address should be checked again. Define explicit behavior for unavailable services, unsupported subjects, stale responses, and scan errors. An error is not a clean result.
+:::::steps
 
-Evaluate representative cases with the provider’s supported fixtures or test process. Keep the result, check time, policy decision, and payment reference together so a reviewer can understand what happened. Screening supplies risk information; your organization remains responsible for its payment decisions and broader controls.
+### Configure the provider connection
 
-## Payment screening questions
+Confirm the product, credentials, Tempo network and asset identifiers, and subject schema for your account.
 
-### Is transaction simulation the same as wallet screening?
+### Apply a decision policy
 
-No. Simulation examines a proposed transaction and its expected effects. Wallet screening assesses address risk. Select the checks your payment flow requires.
+Map findings to proceed, review, or decline. Set a maximum result age and explicit handling for unavailable services and errors.
 
-### Does a passed screen guarantee a compliant payment?
+### Record and enforce the decision
 
-No. A screening result is risk information for your decision process. It does not replace customer checks, your policies, or other applicable obligations.
+Save the assessment, check time, decision, and payment reference together. Keep customer and case details offchain. Apply any onchain permission change through an authorized [token or receive-policy workflow](/docs/resources/guides/compliance-controls).
 
-### Will a one-time API screen keep an address monitored?
+:::::
 
-Do not assume that. Confirm the selected product’s refresh and alert behavior. Chainalysis, for example, documents another API call to refresh Address Screening results.
-
-## Screening provider documentation
-
-Source review: October 19, 2026. Confirm product access and endpoint coverage for your account before integration.
-
-- [Tempo: security and compliance tools](/docs/partners/security-and-compliance)
-- [TRM: Tempo coverage](https://www.trmlabs.com/blockchain-coverage/tempo)
-- [TRM: API documentation access](https://docs.trmlabs.com/api-reference)
-- [Chainalysis: Tempo product coverage](https://www.chainalysis.com/blog/tempo-automatic-token-coverage-march-2026/)
-- [Chainalysis: Address Screening](https://www.chainalysis.com/product/address-screening/)
-- [Elliptic: Tempo integration](https://www.elliptic.co/newsroom/elliptic-integrates-with-tempo-the-payments-first-blockchain/)
-- [Elliptic: API authentication](https://developers.elliptic.co/docs/authentication-1)
-- [Blockaid: transaction scan request and response types](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts)
-- [Blockaid: endpoint-specific network coverage](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/evm.ts)
-
-## Related payment workflow guides
-
-- [Accepting stablecoin payments](/docs/resources/guides/how-to-accept-stablecoin-payments): Place screening within the wider acceptance workflow.
-- [Payment reconciliation](/docs/resources/guides/payment-reconciliation): Connect payment references to operational records.
-- [Partner integrations](/docs/partners): Browse the tools around your payment risk workflow.
+A clean assessment does not replace customer checks or establish legal compliance. When accepting funds, separately [verify the delivered transfer](/docs/guide/payments/accept-a-payment) before crediting a customer.

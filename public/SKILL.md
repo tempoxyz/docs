@@ -28,7 +28,9 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 
 Accounts covers account setup and its guides; Tempo EVM covers payments and the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.
 
-For a provider's documented capabilities and access requirements, use the [partner integration guides](https://tempo.xyz/developers/docs/resources/partners.md) under Get Started resources. Follow their links to the provider's current implementation instructions and verify support for the particular network, asset, SDK, and operation.
+Choose providers through the task guides for [wallets](https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md), [funding and payouts](https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts.md), [payment screening](https://tempo.xyz/developers/docs/resources/guides/payment-screening.md), and [reconciliation](https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md). Use [node providers](https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md) for hosted RPC access.
+
+For application checkout and returns, use [payment links](https://tempo.xyz/developers/docs/resources/guides/payment-links.md) and [refunds](https://tempo.xyz/developers/docs/resources/guides/refunds.md). These workflows connect trusted request records and amount reservations to the maintained payment primitives.
 
 Within Tempo EVM, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
 

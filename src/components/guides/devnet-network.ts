@@ -2,12 +2,12 @@ import type { Address } from 'viem'
 import { developersApiPath } from '../../marketing/app/_lib/developersPaths'
 
 /**
- * Where the Accounts demos reach the multisig-1113 devnet. Kept apart from
+ * Where the Accounts demos reach the t14-checkpoint devnet. Kept apart from
  * `account-sandbox-devnet.ts` so small demos can import these values without bundling the adapter.
  */
 
 /** The demo devnet's Tailscale RPC, for Node scripts on the tailnet. */
-export const devnetTailnetRpcUrl = 'http://multisig-1113-nodes-rpc-service.tail388b2e.ts.net:8545'
+export const devnetTailnetRpcUrl = 'http://t14-checkpoint-nodes-rpc-service.tail388b2e.ts.net:8545'
 
 /**
  * Pages reach the devnet through the docs site's same-origin proxy (`/api/devnet-rpc`), which holds

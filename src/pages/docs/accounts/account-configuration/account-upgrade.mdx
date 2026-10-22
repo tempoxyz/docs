@@ -1,18 +1,21 @@
 ---
-title: Account upgrade
+title: Account Upgrade
 seoTitle: Upgrade a Single-Key Tempo Account to Configurable Signers | Tempo Docs
 description: Add backup signers to a single-key (EOA) Tempo account at the same address, so a lost key no longer means a lost account or lost balances.
 interactive: true
 ---
 
+import { Card, Cards } from 'vocs'
 import { UpgradeAccountDemo } from '../../../../components/guides/UpgradeAccountDemo'
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
 
-# Account upgrade
+# Account Upgrade
 
-An account upgrade adds backup signers to a single-key account without changing its address.
+Adds backup signers to a single-key account without changing its address.
 
-A single-key account works like a standard Ethereum account (an EOA). One key controls it, so losing that key loses the account. An account upgrade turns it into a configurable account with several signers and a threshold, at the same address. The upgrade is permanent.
+## Overview
+
+An account upgrade turns a single-key account into a configurable account at the same address. A configurable account has several signers and a threshold. A single-key account works like a standard Ethereum account (an EOA). One key controls it, so losing that key loses the account. The upgrade is permanent.
 
 <ConfigurableAccountsT14 />
 
@@ -27,30 +30,32 @@ Until T14, the upgrade transaction does nothing on mainnet or testnet. It succee
 
 <span id="what-changes" />
 
-## Upgrade effects
+## Upgrade Effects
 
-The upgrade gives the account a list of signers, each with a weight, and a threshold: the total weight an approval needs. From then on, signers whose weights reach the threshold approve for the account. The original key approves only if you list it, at its weight. The address, balances, token approvals, nonce, contract storage, and access keys with their limits stay the same.
+The upgrade gives the account a list of signers, each with a weight. It also sets a threshold, the total weight an approval needs. From then on, signers whose weights reach the threshold approve for the account. The original key approves only if you list it, at its weight. The address, balances, token approvals, nonce, contract storage, and access keys with their limits stay the same.
 
 Contracts that verify signatures themselves, such as Permit2, may still accept the original key. The original key also still controls the address on other EVM chains.
 
 <span id="choose-signers-and-threshold" />
 
-## Choose signers
+## Choose Signers
 
-List the original key and at least one backup signer, such as a passkey on the user's device or a key your recovery provider holds.
+List the original key and at least one backup signer. A backup can be a passkey on the user's device or a key your recovery provider holds.
 
 | Setup | Threshold | Result |
 | --- | --- | --- |
 | Original key and one backup, each at weight 1 | 1 | Either key pays alone and replaces the other if it's lost. |
 | Three signers at weight 1 | 2 | Every payment needs two approvals. |
 
-In any setup, the signers left after losing any one must still reach the threshold ([Plan for recovery](/docs/accounts/account-configuration#plan-for-recovery)).
+In any setup, the signers left after losing any one must still reach the threshold ([Plan for Recovery](/docs/accounts/account-configuration#plan-for-recovery)).
 
 [Revoke](/docs/accounts/access-keys/revocation) any access key you don't want before you upgrade.
 
-## Send the upgrade
+## Send the Upgrade
 
-The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. Call it with `writeContractSync`, and stop unless the client is on the devnet. Set `feeToken` to the stablecoin that pays the fee. Without it, Viem sends a standard Ethereum transaction and the upgrade reverts with `PrimitiveRootRequired`. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. Call it with `writeContractSync`, and stop unless the client is on the devnet. Set `feeToken` to the stablecoin that pays the fee. Without it, Viem sends a standard Ethereum transaction, and the upgrade reverts with `PrimitiveRootRequired`.
+
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -103,9 +108,9 @@ await client.writeContractSync({ // [!code hl]
 
 The upgraded configuration uses `version: 1n` and a salt Tempo derives from the address. `account.config` lists the signers sorted by address, as Tempo requires.
 
-After the upgrade, the record your app saves is the account's only readable list of signers. [Keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration) shows how to save it. Each time your app acts for the account, rebuild it from that record with `Account.fromConfig` and attach the keys that approve, such as `original`. The other signers stay as addresses.
+After the upgrade, the record your app [saves](/docs/development/configurable-accounts#keep-the-current-configuration) is the account's only readable list of signers. Each time your app acts for the account, rebuild it from that record with `Account.fromConfig`. Attach the keys that approve, such as `original`. The other signers stay as addresses.
 
-Viem signs with the attached keys until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. To collect approvals from separate devices, see [Signing thresholds](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
+Viem signs with the attached keys until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 [Adding](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [removing](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) signers later raises the version. Save the `config` that `updateConfigSync` returns and rebuild the account from it. Otherwise the next transaction fails with `multisig configuration commitment mismatch`.
 
@@ -119,4 +124,11 @@ Viem signs with the attached keys until their weights reach the threshold. If th
 - Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
 - Upgraded accounts don't use the [recovery factory](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain) for funds sent to their address on another chain.
 
-Reference: [Single-key accounts](/docs/development/single-key-accounts#upgrade-to-a-configurable-account).
+## Related
+
+<Cards>
+  <Card title="Account Configuration" description="Covers signers, weights, thresholds, and recovery planning." to="/docs/accounts/account-configuration" />
+  <Card title="Configuration Updates" description="Use for adding, removing, or replacing signers after the upgrade." to="/docs/accounts/account-configuration/configuration-updates" />
+  <Card title="Signing Thresholds" description="Covers how signer weights approve a transaction." to="/docs/accounts/policies/signing-thresholds" />
+  <Card title="Single-Key Accounts" description="Covers the protocol reference for the upgrade to a configurable account." to="/docs/development/single-key-accounts#upgrade-to-a-configurable-account" />
+</Cards>

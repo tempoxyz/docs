@@ -45,7 +45,7 @@ Show the destination amount and fees as described in [Quotes and fees](/docs/rou
 
 Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stored for this customer's address.
 
-<OpenApi.Playground operationId="createRoutesDepositAddress" anchors={false} />
+<OpenApi.Playground operationId="createRoutesDepositAddressV2" anchors={false} />
 
 Save the returned `id` and `address` with your customer record. A newly created address includes quote terms; an existing address may not. Obtain a fresh quote before showing funding instructions when terms are absent or stale.
 

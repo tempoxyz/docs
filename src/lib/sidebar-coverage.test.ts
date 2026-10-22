@@ -81,13 +81,15 @@ describe('resource guide navigation', () => {
     const resources = sidebar.at(-1)
     expect(resources?.text).toBe('Resources')
     expect(resources?.items?.[0]).toMatchObject({ text: 'Guides', collapsed: true })
-    const partnerGuides = resources?.items?.find(({ text }) => text === 'Partner guides')
-    expect(partnerGuides).toMatchObject({ collapsed: true })
-    expect(
-      partnerGuides?.items?.filter(({ items }) => items).every(({ collapsed }) => collapsed),
-    ).toBe(true)
+    const guides = resources?.items?.[0]
+    expect(resources?.items?.find(({ text }) => text === 'Partner guides')).toBeUndefined()
+    expect(guides?.items?.filter(({ items }) => items).every(({ collapsed }) => collapsed)).toBe(
+      true,
+    )
+    const compliance = guides?.items?.find(({ text }) => text === 'Compliance and security')
+    expect(links(compliance)).toContain('/docs/resources/guides/payment-screening')
+    expect(links(compliance)).toContain('/docs/resources/guides/compliance-controls')
     expect(links(resources)).toContain('/docs/resources/guides')
-    expect(links(partnerGuides)).toContain('/docs/resources/partners')
     expect(sidebar[0].items?.some(({ text }) => text === 'Guides')).toBe(false)
   })
 
