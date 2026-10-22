@@ -65,8 +65,6 @@ This is a TEE-based prover, not a zero-knowledge proof: security rests on the ap
 
 A later upgrade removes `NoProof`; after that, a missing or invalid proof stops settlement. Forced exits are not part of T13.
 
-**Prover upgrades.** A new prover build changes its enclave measurements (PCRs), the fingerprints of the approved code. A Tempo hardfork approves new measurements, and at activation the verifier and sequencers switch to the matching prover. Each attestation binds its own Zone and batch, so Zones can share a prover version without their proofs being interchangeable.
-
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1098.md) and [Zone proving and settlement](/docs/protocol/zones/proving).
 
 ### Multi-block Tempo imports for Zones
