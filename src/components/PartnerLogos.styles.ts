@@ -151,6 +151,9 @@ global({
   ':root[data-vocs-theme="dark"] .partner-logo--ondo': {
     filter: 'brightness(0) invert(1)',
   },
+  ':root[data-vocs-theme="dark"] .partner-logo--moralis': {
+    backgroundImage: 'url("/assets/partners/directory/moralis-dark.webp")',
+  },
 })
 
 export const partnerLogo = style({
@@ -543,4 +546,9 @@ export const partnerLogoHastra = style({
 export const partnerLogoDwellir = style({
   width: '84px',
   backgroundImage: 'url("/assets/partners/directory/dwellir.svg")',
+})
+
+export const partnerLogoMoralis = style({
+  width: '84px',
+  backgroundImage: 'url("/assets/partners/directory/moralis.webp")',
 })
