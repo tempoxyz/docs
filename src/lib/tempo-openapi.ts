@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { aliasRoutesDepositAddressV2 } from './routes-openapi'
 
 const canonicalSpecUrl = 'https://api.tempo.xyz/openapi.json'
 // The verified Moderato deployment also used by the interactive Earn deposit demo.
@@ -131,6 +132,7 @@ export function prepareTempoOpenApi(
       }
     }
   }
+  aliasRoutesDepositAddressV2(spec)
   return spec
 }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { annotateRoutesAvailability } from './routes-openapi'
+import { aliasRoutesDepositAddressV2, annotateRoutesAvailability } from './routes-openapi'
 
 describe('Routes reference availability', () => {
   it('labels 501-only operations and preserves future successful operations', () => {
@@ -23,5 +23,30 @@ describe('Routes reference availability', () => {
       'Original description.',
     )
     expect(spec.paths['/v1/routes/transfers/zone'].post.summary).toBe('Create transfer into zone')
+  })
+})
+
+describe('aliasRoutesDepositAddressV2', () => {
+  it('renames the v1 create operation only when the spec has no v2 operation', () => {
+    const legacy = {
+      paths: {
+        '/v1/routes/deposit-addresses': { post: { operationId: 'createRoutesDepositAddress' } },
+      },
+    }
+    aliasRoutesDepositAddressV2(legacy)
+    expect(legacy.paths['/v1/routes/deposit-addresses'].post.operationId).toBe(
+      'createRoutesDepositAddressV2',
+    )
+
+    const current = {
+      paths: {
+        '/v1/routes/deposit-addresses': { post: { operationId: 'createRoutesDepositAddress' } },
+        '/v2/routes/deposit-addresses': { post: { operationId: 'createRoutesDepositAddressV2' } },
+      },
+    }
+    aliasRoutesDepositAddressV2(current)
+    expect(current.paths['/v1/routes/deposit-addresses'].post.operationId).toBe(
+      'createRoutesDepositAddress',
+    )
   })
 })

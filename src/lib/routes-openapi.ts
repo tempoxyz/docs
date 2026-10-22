@@ -15,3 +15,16 @@ export function annotateRoutesAvailability(spec: Record<string, unknown>) {
   }
   return spec
 }
+
+/**
+ * Names the v1 create operation `createRoutesDepositAddressV2` when the spec has no v2 operation.
+ * Transitional: remove once the deployed API publishes `/v2/routes/deposit-addresses`.
+ */
+export function aliasRoutesDepositAddressV2(spec: Record<string, unknown>) {
+  const paths = spec.paths as Record<string, Record<string, Record<string, unknown>>> | undefined
+  if (paths?.['/v2/routes/deposit-addresses']?.post) return spec
+  const operation = paths?.['/v1/routes/deposit-addresses']?.post
+  if (operation?.operationId === 'createRoutesDepositAddress')
+    operation.operationId = 'createRoutesDepositAddressV2'
+  return spec
+}

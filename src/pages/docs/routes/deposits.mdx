@@ -9,7 +9,7 @@ import { OpenApi } from 'vocs'
 
 # Accept deposits
 
-Give customers a reusable address to fund from an external wallet. Each address accepts a specific network and token and routes funds to your chosen Tempo recipient.
+Give customers a reusable address to fund from an external wallet. Each address routes funds to your chosen Tempo recipient, either from one source network and token or from every supported source in its chain family.
 
 For payments already on Tempo, use [Receive payments](/docs/guide/payments/accept-a-payment). [Virtual addresses](/docs/guide/payments/virtual-addresses) attribute those payments to a shared Tempo balance; they are different from Routes deposit addresses.
 
@@ -21,7 +21,7 @@ Before the first step, have:
 
 - A backend key with `routes:read` and `routes:write` from [Set up API access](/docs/routes/api-setup). Keep the key on the backend; show customers only the returned funding instructions.
 - A route with deposit-address support from [Supported routes](/docs/routes/networks).
-- A Tempo recipient, and a refund address on the source network.
+- A Tempo recipient, and a refund address for each source chain family.
 
 Each step below has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test) and choose **Deposit address**. The [cURL example](/docs/routes/examples/deposits) runs every step from a terminal.
 
@@ -45,15 +45,15 @@ Show the destination amount and fees as described in [Quotes and fees](/docs/rou
 
 Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stored for this customer's address.
 
-<OpenApi.Playground operationId="createRoutesDepositAddress" anchors={false} />
+<OpenApi.Playground operationId="createRoutesDepositAddressV2" anchors={false} />
 
-Save the returned `id` and `address` with your customer record. A newly created address includes quote terms; an existing address may not. Obtain a fresh quote before showing funding instructions when terms are absent or stale.
+Set `sourceChain` and `sourceToken` together to accept one source, or omit both to accept every supported source. Save the returned `id` and each `addresses[].address` with your customer record. The response carries no quote terms, so quote the deposit again before showing funding instructions when terms are stale.
 
 <span id="show-the-funding-instructions" />
 
 ### Show funding instructions
 
-Display the returned network, token, and deposit address together. Check that its status is `active` before inviting deposits. Do not present it as an address for arbitrary assets or networks.
+Display each returned address with the networks and tokens in its `sources`. Check that its status is `active` before inviting deposits. Do not present it as an address for arbitrary assets or networks.
 
 <span id="track-each-deposit" />
 
