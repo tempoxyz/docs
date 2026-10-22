@@ -1,12 +1,12 @@
 flowchart TB
   subgraph zone[Zone: private execution]
     direction LR
-    seq[Zone sequencer] -- 1. batch + state witness --> prover[Nitro prover]
+    seq[Zone sequencer]:::zone -- 1. batch + state witness --> prover[Nitro prover]:::zone
     prover -- 2. signed attestation --> seq
   end
   subgraph tempo[Tempo: public settlement]
     direction LR
-    portal[ZonePortal] -- attestation --> verifier[Native verifier]
+    portal[ZonePortal]:::portal -- attestation --> verifier[Native verifier]
     verifier -- valid --> settle[Record state, queue withdrawals]
   end
   seq -- 3. batch + attestation + quorum signatures --> portal

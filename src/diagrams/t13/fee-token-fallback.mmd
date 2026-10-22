@@ -3,5 +3,5 @@ flowchart LR
   chosen -- no --> path{pathUSD covers the max fee?}
   path -- yes --> pusd[Pay in pathUSD]
   path -- no --> ousd{OUSD covers the max fee?}
-  ousd -- yes --> ousdpay[Pay in OUSD, new in T13]
-  ousd -- no --> reject[Reject: insufficient funds]
+  ousd -- yes --> ousdpay[Pay in OUSD, new in T13]:::accent
+  ousd -- no --> reject[Reject: insufficient funds]:::muted

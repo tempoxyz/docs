@@ -1653,18 +1653,96 @@ global({
 })
 
 /* Ondine diagrams (OndineDiagram) read --ondine-* properties; map them to the
-     diagram palette so they follow the light and dark themes. */
+     diagram palette so they match the tempo.xyz Zone diagrams in both themes. */
 global({
+  '.docs-zone-diagram .ondine-canvas': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    padding: '32px 24px !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    borderRadius: '12px !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    backgroundColor: 'var(--diagram-bg) !custom',
+  },
   '.docs-zone-diagram svg.ondine': {
-    '--ondine-bg': 'var(--background)',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    display: 'block !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    marginInline: 'auto !custom',
+    '--ondine-bg': 'var(--diagram-bg)',
     '--ondine-fg': 'var(--foreground)',
     '--ondine-muted': 'var(--foreground-secondary)',
-    '--ondine-line': 'var(--foreground-secondary)',
-    '--ondine-border': 'var(--diagram-box-border)',
+    '--ondine-line': 'color-mix(in srgb, var(--foreground) 62%, transparent)',
+    '--ondine-border': 'color-mix(in srgb, var(--foreground) 32%, transparent)',
     '--ondine-surface': 'var(--diagram-box)',
-    '--ondine-surface-alt': 'transparent',
     '--ondine-font': 'Pilat, ui-sans-serif, system-ui, sans-serif',
-    '--ondine-radius': '10px',
+    '--ondine-radius': '8px',
     '--ondine-stroke': '1.5px',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-label': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fontWeight: '500 !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-edge-label, .docs-zone-diagram svg.ondine .ondine-edges text':
+    {
+      // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+      fill: 'var(--foreground-secondary) !custom',
+    },
+  '.docs-zone-diagram svg.ondine .ondine-hatch-bg': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'color-mix(in srgb, var(--diagram-accent) 7%, var(--diagram-bg)) !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-hatch-line': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    stroke: 'var(--diagram-accent) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    strokeOpacity: '0.1 !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    strokeWidth: '3px !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-cluster[data-id="zone"] > rect': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fillOpacity: '1 !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    stroke: 'color-mix(in srgb, var(--diagram-accent) 45%, transparent) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    rx: '16px !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-cluster[data-id="zone"] > text': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'var(--diagram-accent) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fontWeight: '600 !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-cluster[data-id="tempo"] > rect': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'var(--diagram-box) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fillOpacity: '1 !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    rx: '16px !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-node.zone > :is(rect, path, polygon)': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'color-mix(in srgb, var(--diagram-accent) 9%, var(--diagram-box)) !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-node.portal > :is(rect, path, polygon)': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'color-mix(in srgb, #f0a030 15%, var(--diagram-box)) !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-node.accent > :is(rect, path, polygon)': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'color-mix(in srgb, var(--diagram-accent) 12%, var(--diagram-box)) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    stroke: 'var(--diagram-accent) !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-node.accent > text': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'var(--diagram-accent) !custom',
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fontWeight: '600 !custom',
+  },
+  '.docs-zone-diagram svg.ondine .ondine-node.muted > text': {
+    // design-exception: Ondine diagram palette mapped onto the tempo.xyz Zone diagram style.
+    fill: 'var(--foreground-secondary) !custom',
   },
 })
