@@ -44,14 +44,14 @@ const errorGuides: Record<string, string> = {
   unauthorized: 'The API key was rejected. Check your project API key.',
   api_key_malformed: 'That does not look like a Tempo API key. Check your project API key.',
   api_key_forbidden:
-    'This key cannot make this request. Quotes and reads need routes:read; creating and registering need routes:write.',
+    'This key cannot make this request. Use a production key with routes:read and data:read. To create routes, request access in Tempo Console.',
   api_key_ip_forbidden:
     'This key only accepts requests from approved IP addresses, and this browser is not one of them.',
   billing_required: 'Billing for this organization needs attention in the API console.',
   billing_past_due: 'Billing for this organization needs attention in the API console.',
   routes_suspended: 'Routes is suspended for this organization. Contact Tempo.',
   routes_not_allowed:
-    'Your organization’s access policy does not allow this route or funding method. Choose another route.',
+    'Your access policy does not allow this route. Choose another, or request it in Tempo Console.',
   quote_not_available:
     'No quote is available for this route right now. Try another amount, or try again later.',
   deposit_address_not_available:

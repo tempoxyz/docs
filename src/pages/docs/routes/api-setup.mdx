@@ -1,7 +1,7 @@
 ---
 title: Set up API access
 seoTitle: Routes API Setup | Tempo Docs
-description: Create a Routes API key with the right scopes, configure your backend client, and set idempotency keys for create requests.
+description: Create a Routes API key, request access in Tempo Console, and set idempotency keys for create requests.
 ogImage: /og/2026-q4/og_2026-q4_docs_routes-api-setup_title-f5_v02.png
 ---
 
@@ -9,17 +9,66 @@ ogImage: /og/2026-q4/og_2026-q4_docs_routes-api-setup_title-f5_v02.png
 
 # Set up API access
 
-Configure your backend to call the Routes API. Confirm [beta access](/docs/routes), create a key in [Tempo Console](/docs/api/console), and keep the key out of browser code. Every Routes guide after this page assumes this setup.
+Create a key, request Routes access, and keep the key on your backend. Later guides assume this setup.
 
 ## Routes API key scopes
 
-| Scope | Allows |
-| --- | --- |
-| `routes:read` | Quotes, and transfer and deposit status reads |
-| `routes:write` | Creating transfers and deposit addresses, and registering source transactions |
-| `data:read` | Reading the [route directory](/docs/routes/networks) with your key, which applies your organization's access policy |
+| Scope | Allows | How a key gets it |
+| --- | --- | --- |
+| `routes:read` | Quotes, and transfer and deposit status reads | On by default. |
+| `routes:write` | Creating transfers and deposit addresses, and registering source transactions | Tempo adds it when it [approves access](#request-routes-access). |
+| `data:read` | Reading the [route directory](/docs/routes/networks) with your key, which applies your organization's access policy | On by default. |
 
-The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it does not sign blockchain transactions.
+Use a production key. Sandbox keys can't create live routes.
+
+The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it doesn't sign blockchain transactions.
+
+## Request Routes access
+
+Any organization member can request access. Tempo reviews the request and adds `routes:write` to the keys you choose.
+
+:::::steps
+
+### Create a production key
+
+[Create an API key](/docs/api/console/api-keys#create-an-api-key) in the project that calls Routes. Creating keys needs the admin or owner role. The key starts with `routes:read` and `data:read`.
+
+### Open the request form
+
+In [Tempo Console](https://console.tempo.xyz/?to=/:org/routes), open **Routes**, choose the project, and select **Request access**. Exit sandbox first.
+
+### Send the request
+
+Choose the keys and routes you need, estimate monthly volume, and say whether you need [1:1 delivery](/docs/routes/quotes#offer-11-delivery). Leave routes empty if you're unsure. Select **Send request**.
+
+### Check the status
+
+The **Routes access** card shows the status:
+
+| Status | Card shows | Next |
+| --- | --- | --- |
+| Pending | **Request sent** | Wait, or select **Cancel request**. |
+| Declined | Tempo's reason | Address it and request again. |
+| Approved | **Ready**, or no card | Start building. |
+
+:::::
+
+Approval sets the routes your keys can use and any 1:1 terms. To add routes later, select **Request a route** under **Routes** › **Available routes**. The [access request endpoints](/docs/api/routes-access-requests) use Console sign-in, not API keys.
+
+<span id="routes-access-errors" />
+
+## Resolve Routes access errors
+
+These `403` codes mean the key or organization lacks access:
+
+| Code | Cause | Fix |
+| --- | --- | --- |
+| `api_key_forbidden` | Missing scope, or a sandbox key. | Use a production key with the scope named in the message. |
+| `routes_not_allowed` | The route isn't in your policy. | Select **Request a route** in Console. |
+| `routes_subsidy_not_enabled` | No approved 1:1 terms. | Request 1:1 delivery, or omit `subsidize`. |
+| `routes_subsidy_not_allowed` | The route can't be subsidized. | Omit `subsidize`. |
+| `billing_required`, `billing_past_due` | 1:1 delivery your organization pays for needs active billing. | [Add a payment method](/docs/api/console/usage-and-billing#add-a-payment-method). |
+| `routes_suspended` | New routes are paused for your organization. | [Contact Tempo](https://tempo.xyz/contact). |
 
 ## Configure the client
 
