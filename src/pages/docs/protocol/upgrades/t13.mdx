@@ -40,7 +40,7 @@ T13 is scheduled for **October 29, 2026 at 15:00 UTC on Moderato testnet** and *
 
 ### Zone prover
 
-A Zone sequencer executes transactions privately and settles batches on Tempo. Before T13, Tempo accepted a batch when enough sequencers signed it, trusting them to have executed it correctly. With T13, a prover replays each batch and Tempo verifies its attestation before settlement, which checks balances and authorized transfers.
+A Zone sequencer executes transactions privately and settles batches on Tempo. Before T13, Tempo accepted a batch when enough sequencers signed it, trusting them to have executed it correctly. With T13, a prover replays each batch, checking balances and authorized transfers, and Tempo verifies its attestation before settlement.
 
 <ZoneDiagram
   name="prover"
