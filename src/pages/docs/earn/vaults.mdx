@@ -19,17 +19,17 @@ Choose a vault that accepts the stablecoin your customers hold and supports the 
 
 ## Find a vault
 
-Start with the [verified vault directory](/docs/api/earn#getverifiedearnvaults), then evaluate each vault in the order below: where its returns come from, what customers net, how they exit, and who can deposit. The directory's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
+Use the vault address and network provided for your integration. Evaluate where its returns come from, what customers net, how they exit, and who can deposit. A vault's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
 
 <span id="inspect-the-selected-vault" />
 
 ### Inspect a vault
 
-The demo loads verified vaults from Moderato testnet and selects the deposit demo’s pathUSD vault when available. Choose another vault or network to inspect its current configuration. All values come from live Tempo API responses.
+The demo starts with Sentora pathUSD on Tempo mainnet. Switch to Moderato testnet to inspect the pathUSD test vault. Each network lists only its approved demo vault, with live configuration from Tempo API.
 
 <EarnVaultDemo />
 
-Save the selected vault's `id` (its contract address) and network together. The directory uses public read access; the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) includes request fields, code samples, and authenticated access.
+Read your vault's configuration through the [Earn API reference](/docs/api/earn). Save its `id` (contract address) and network together.
 
 <span id="where-yield-comes-from" />
 
@@ -43,7 +43,7 @@ Each vault earns from one strategy. Strategies fall into three categories:
   <EarnStrategyCard strategy="lending" title="Collateralized lending" description="Onchain lending pools. Rates move with borrow demand." />
 </EarnStrategyCards>
 
-An engine is the contract that connects an Earn vault to its underlying strategy. The vault directory reports each vault's engine and accepted asset; available strategies vary by network.
+An engine is the contract that connects an Earn vault to its underlying strategy. The vault configuration reports its engine and accepted asset; available strategies vary by network.
 
 | Source | How it connects to Earn |
 | --- | --- |

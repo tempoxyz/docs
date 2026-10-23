@@ -4,6 +4,15 @@ import { earnDemoVault } from './earn-deposit-demo'
 
 export type EarnNetwork = 'mainnet' | 'testnet'
 
+// Fetch only these reviewed demo vaults, never the public directory.
+export const sentoraPathUsdVault = '0xb20ba39ccf522d69b7a21e3f369be5de73a2c694'
+
+export function earnVaultForNetwork(network: EarnNetwork) {
+  return network === 'mainnet'
+    ? { id: sentoraPathUsdVault, label: 'Sentora pathUSD (Earn)' }
+    : { id: earnDemoVault, label: 'pathUSD test vault' }
+}
+
 const address = z.string().regex(/^0x[0-9a-fA-F]{40}$/)
 const decimalAmount = z.string().regex(/^\d+(\.\d+)?$/)
 const vaultSchema = z.object({
@@ -34,72 +43,19 @@ const vaultSchema = z.object({
 
 export type EarnVault = z.infer<typeof vaultSchema>
 
-const vaultPageSchema = z.object({
-  data: z.array(vaultSchema),
-  nextCursor: z.string().nullable(),
-})
-
-export function parseEarnVaultPage(value: unknown): {
-  data: EarnVault[]
-  nextCursor: string | null
-} {
-  const result = vaultPageSchema.safeParse(value)
-  if (!result.success)
-    throw new Error(
-      'The Earn API returned an unexpected vault response. Try loading the vaults again.',
-    )
-  return { ...result.data, data: result.data.data.filter((vault) => vault.verified) }
-}
-
-export type EarnVaultDirectory = {
-  vaults: EarnVault[]
-  selectedId: string
-  nextCursor: string | null
-  loaded: boolean
-}
-
-export function updateEarnVaultDirectory(
-  previous: EarnVaultDirectory,
-  page: { data: EarnVault[]; nextCursor: string | null },
-  network: EarnNetwork,
-  more = false,
-): EarnVaultDirectory {
-  const items = (more ? [...previous.vaults, ...page.data] : page.data).filter(
-    (vault) => vault.verified,
-  )
-  const vaults = [...new Map(items.map((vault) => [vault.id.toLowerCase(), vault])).values()]
-  const selected =
-    vaults.find((vault) => vault.id.toLowerCase() === previous.selectedId.toLowerCase()) ??
-    (network === 'testnet'
-      ? vaults.find((vault) => vault.id.toLowerCase() === earnDemoVault)
-      : undefined) ??
-    vaults[0]
-  return { vaults, selectedId: selected?.id ?? '', nextCursor: page.nextCursor, loaded: true }
-}
-
-export function parseEarnVaultDetail(value: unknown, expectedId: string): EarnVault | null {
+export function parseEarnVaultDetail(value: unknown, network: EarnNetwork = 'mainnet'): EarnVault {
+  const approved = earnVaultForNetwork(network)
   const result = vaultSchema.safeParse(value)
-  if (!result.success || result.data.id.toLowerCase() !== expectedId.toLowerCase())
-    throw new Error(
-      'The Earn API returned an unexpected vault response. Try loading the vaults again.',
-    )
-  return result.data.verified ? result.data : null
+  if (!result.success || result.data.id.toLowerCase() !== approved.id || !result.data.verified)
+    throw new Error('The approved vault is currently unavailable on this network. Try again later.')
+  return { ...result.data, ...approved }
 }
 
-export function earnVaultDetailRequestUrl(network: EarnNetwork, vaultId: string): string {
-  address.parse(vaultId)
-  const url = new URL(earnVaultRequestUrl(network))
-  url.pathname = `/v1/earn/vaults/${vaultId}`
-  url.searchParams.delete('limit')
-  return url.toString()
-}
-
-export function earnVaultRequestUrl(network: EarnNetwork, cursor?: string): string {
-  const url = new URL('https://api.tempo.xyz/v1/earn/vaults/verified')
+export function earnVaultRequestUrl(network: EarnNetwork = 'mainnet'): string {
+  const { id } = earnVaultForNetwork(network)
+  const url = new URL(`https://api.tempo.xyz/v1/earn/vaults/${id}`)
   url.searchParams.set('chainId', network)
-  url.searchParams.set('include', 'access,capabilities,apy,tvl')
-  url.searchParams.set('limit', '10')
-  if (cursor) url.searchParams.set('cursor', cursor)
+  url.searchParams.set('include', 'access,capabilities')
   return url.toString()
 }
 

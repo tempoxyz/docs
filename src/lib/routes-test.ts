@@ -144,14 +144,21 @@ function address(value: string, format: string, label: string) {
   if (format === 'base58' && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) {
     throw new Error(`${label} must be a source-network Base58 address.`)
   }
+  // Routes takes classic Stellar accounts for senders and refunds, never muxed (M…) addresses.
+  if (format === 'strkey' && !/^G[A-Z2-7]{55}$/.test(trimmed)) {
+    throw new Error(`${label} must be a classic Stellar account address (G…).`)
+  }
   return trimmed
 }
 
-/** Funding methods the demo can run: wallet transfers need an EVM source to sign here. */
+/** Funding methods the demo can run: wallet transfers need a source network it can sign on. */
 export function demoMethods(route: TestRoute): TestMethod[] {
   const methods: TestMethod[] = []
-  // The demo signs transfers on EVM networks and Tron; Solana funds through deposit addresses.
-  if (route.capabilities.transfer?.modes.length && /^(eip155|tron):/.test(route.sourceChain.id))
+  // The demo signs transfers on EVM networks, Tron, and Stellar; Solana funds through deposit addresses.
+  if (
+    route.capabilities.transfer?.modes.length &&
+    /^(eip155|tron|stellar):/.test(route.sourceChain.id)
+  )
     methods.push('transfer')
   if (route.capabilities.depositAddress) methods.push('depositAddress')
   return methods

@@ -41,6 +41,28 @@ describe('agent instructions', () => {
     expect(markdown).toContain('A run of it delivered 1 USDC.e.')
     expect(markdown).not.toMatch(/0x[\da-f]{64}/)
   })
+  it('signs the prepared Stellar envelope instead of calls', () => {
+    const stellarSender = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR'
+    const markdown = agentInstructions({
+      ...run,
+      route: {
+        ...route,
+        sourceChain: {
+          id: 'stellar:pubnet',
+          name: 'Stellar',
+          addressFormat: 'strkey',
+          kind: 'stellar',
+        },
+      },
+      createBody: { amount: '10000000', sender: stellarSender, recipient, mode: 'exactSource' },
+      addresses: { sender: stellarSender, recipient },
+    })
+    expect(markdown).toContain('Sign `action.xdr` unchanged as `<SENDER>`')
+    expect(markdown).toContain('https://horizon.stellar.org/transactions')
+    expect(markdown).toContain('source-transactions')
+    expect(markdown).not.toContain('action.calls')
+    expect(markdown).not.toContain(stellarSender)
+  })
   it('funds a deposit address instead of signing calls', () => {
     const markdown = agentInstructions({
       ...run,

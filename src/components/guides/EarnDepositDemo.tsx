@@ -466,8 +466,8 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
           </button>
           {!(mode === 'deposit' ? available : redeemAvailable) && pending === null && (
             <p {...ui.earnDepositDemoText2()}>
-              {mode === 'deposit' ? 'Deposits' : 'Withdrawals'} stay disabled until the live
-              directory and deployed contract match.{' '}
+              {mode === 'deposit' ? 'Deposits' : 'Withdrawals'} stay disabled until the live vault
+              configuration and deployed contract match.{' '}
               <a href="https://tempo.xyz/contact" {...ui.earnDepositDemoLink2()}>
                 Contact Tempo
               </a>{' '}

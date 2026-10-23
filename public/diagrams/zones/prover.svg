@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+  <title>Zone prover: prepare, prove, settle</title>
+  <desc>Inside the private Zone, the sequencer sends a batch and state witness to the Nitro prover, which replays it in AWS Nitro and returns a signed attestation. The sequencer submits the batch, quorum signatures and attestation to the Zone portal on Tempo. The portal checks the signatures, the native verifier checks the attestation, and the portal records state and queues withdrawals. In T13, a NoProof batch skips the verifier and settles on quorum signatures alone.</desc>
+  <defs>
+    <pattern id="t13-prover-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" style="fill: color-mix(in srgb, var(--diagram-accent, #168f24) 6%, var(--diagram-box, #ffffff))"/>
+      <path d="M0 0V8" stroke="var(--diagram-accent, #168f24)" stroke-opacity="0.12" stroke-width="3"/>
+    </pattern>
+    <marker id="t13-prover-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M1 1L7 4L1 7" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- Private Zone execution -->
+  <rect x="24" y="24" width="912" height="196" rx="16" fill="url(#t13-prover-hatch)" stroke="var(--diagram-accent, #168f24)" stroke-opacity="0.5" stroke-width="1.5"/>
+  <text x="48" y="58" font-size="15" font-weight="600" letter-spacing="1" fill="var(--diagram-accent, #168f24)">ZONE &#183; PRIVATE</text>
+  <rect x="108" y="88" width="240" height="96" rx="10" fill="var(--diagram-box, #ffffff)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5" style="fill: color-mix(in srgb, var(--diagram-accent, #168f24) 8%, var(--diagram-box, #ffffff))"/>
+  <text x="228" y="130" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">Zone sequencer</text>
+  <text x="228" y="158" font-size="15" text-anchor="middle" fill="var(--foreground-secondary, #666)">Orders and executes</text>
+  <rect x="612" y="88" width="240" height="96" rx="10" fill="var(--diagram-box, #ffffff)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5" style="fill: color-mix(in srgb, var(--diagram-accent, #168f24) 8%, var(--diagram-box, #ffffff))"/>
+  <text x="732" y="130" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">Nitro prover</text>
+  <text x="732" y="158" font-size="15" text-anchor="middle" fill="var(--foreground-secondary, #666)">Replays in AWS Nitro</text>
+  <g stroke="currentColor" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#t13-prover-arrow)">
+    <path d="M356 118H602"/>
+    <path d="M604 158H358"/>
+  </g>
+  <text x="480" y="108" font-size="15" text-anchor="middle" fill="var(--foreground-secondary, #666)">1 &#183; Batch + state witness</text>
+  <text x="480" y="182" font-size="15" text-anchor="middle" fill="var(--foreground-secondary, #666)">2 &#183; Signed attestation</text>
+
+  <!-- Public settlement region (drawn first so arrows sit on top) -->
+  <rect x="24" y="300" width="912" height="236" rx="16" fill="var(--diagram-box, #ffffff)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="48" y="334" font-size="15" font-weight="600" letter-spacing="1" fill="var(--foreground-secondary, #666)">TEMPO &#183; PUBLIC</text>
+
+  <!-- Public submission crosses into Tempo -->
+  <path d="M228 192V362" stroke="currentColor" stroke-width="1.75" marker-end="url(#t13-prover-arrow)"/>
+  <text x="244" y="254" font-size="15" fill="var(--foreground-secondary, #666)">3 &#183; Batch + quorum signatures</text>
+  <text x="244" y="276" font-size="15" fill="var(--foreground-secondary, #666)">+ attestation, or NoProof</text>
+
+  <!-- Legend -->
+  <g font-size="14" fill="var(--foreground-secondary, #666)">
+    <path d="M652 248H684" stroke="currentColor" stroke-width="1.6" stroke-dasharray="6 5"/>
+    <text x="694" y="253">Private data</text>
+    <path d="M800 248H832" stroke="currentColor" stroke-width="1.6"/>
+    <text x="842" y="253">Public</text>
+    <path d="M652 276H684" stroke="#d98e04" stroke-width="1.6" stroke-dasharray="3 4"/>
+    <text x="694" y="281">T13 NoProof fallback</text>
+  </g>
+
+  <!-- Public settlement on Tempo -->
+  <rect x="108" y="372" width="240" height="96" rx="10" fill="var(--diagram-box, #ffffff)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5" style="fill: color-mix(in srgb, #f0a030 14%, var(--diagram-box, #ffffff))"/>
+  <text x="228" y="414" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">Zone portal</text>
+  <text x="228" y="442" font-size="15" text-anchor="middle" fill="var(--foreground-secondary, #666)">Checks signatures</text>
+  <rect x="396" y="372" width="240" height="96" rx="10" fill="var(--diagram-box, #ffffff)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="516" y="414" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">Native verifier</text>
+  <text x="516" y="442" font-size="15" text-anchor="middle" fill="var(--foreground-secondary, #666)">Checks attestation</text>
+  <rect x="684" y="372" width="228" height="96" rx="10" fill="var(--diagram-box, #ffffff)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+  <text x="798" y="414" font-size="20" font-weight="600" text-anchor="middle" fill="currentColor">Settle</text>
+  <text x="798" y="442" font-size="15" text-anchor="middle" fill="var(--foreground-secondary, #666)">Record state, queue exits</text>
+  <g stroke="currentColor" stroke-width="1.6" marker-end="url(#t13-prover-arrow)">
+    <path d="M352 420H390"/>
+    <path d="M640 420H678"/>
+  </g>
+  <path d="M228 472V492Q228 508 244 508H782Q798 508 798 492V478" stroke="#d98e04" stroke-width="1.75" stroke-dasharray="3 4" marker-end="url(#t13-prover-arrow)"/>
+  <text x="516" y="500" font-size="14" text-anchor="middle" fill="#d98e04" font-weight="500">NoProof skips the verifier (T13 only)</text>
+</svg>

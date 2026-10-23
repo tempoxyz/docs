@@ -470,6 +470,125 @@ async function mockSolanaWallet(page: Page) {
   })
 }
 
+// A 1 USDC payment built and signed with @stellar/stellar-sdk, as Routes prepares it.
+const stellarSender = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR'
+const stellarUnsigned =
+  'AAAAAgAAAACKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXAAAJxAAAAAAB1vNFgAAAAEAAAAAAAAAAAAAAABw29iAAAAAAQAAAAVxXzEyMwAAAAAAAAEAAAAAAAAAAQAAAACBOXcOqH0XX1ajVGbDTH7My42KkbTuN6Jd9g9bj8mzlAAAAAFVU0RDAAAAADuZETgO/piLoKiQDrHP5E82b32+lGvtB3JA9/Yk3xXFAAAAAACYloAAAAAAAAAAAA=='
+const stellarSigned =
+  'AAAAAgAAAACKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXAAAJxAAAAAAB1vNFgAAAAEAAAAAAAAAAAAAAABw29iAAAAAAQAAAAVxXzEyMwAAAAAAAAEAAAAAAAAAAQAAAACBOXcOqH0XX1ajVGbDTH7My42KkbTuN6Jd9g9bj8mzlAAAAAFVU0RDAAAAADuZETgO/piLoKiQDrHP5E82b32+lGvtB3JA9/Yk3xXFAAAAAACYloAAAAAAAAAAAbQPb1wAAABAaTrtGwYVTE+mI5LshncTmJv5Xdgp6PT+KHuxrSAm1CsJnsPYZBQhy2fzC3yWqEQy+TVUTArm5w5l2owSR3BqCQ=='
+const stellarHash = 'daa3f6e13cd2e76bca765cb6a4ad21ac0e674953b57599a02c49feea8cb89339'
+/**
+ * Hana Wallet's injected Stellar provider, and the Horizon node the demo submits through. Horizon
+ * holds the payment once it is submitted; with `lostAnswer`, the submission's answer never arrives
+ * and the payment lands only after the demo's first check.
+ */
+async function mockStellarWallet(page: Page, { lostAnswer = false } = {}) {
+  await page.addInitScript(
+    ({ account, signedTransaction }) => {
+      const signed: { xdr: string; accountToSign: string; networkPassphrase: string }[] = []
+      const stellar = {
+        getPublicKey: async () => account,
+        async signTransaction(request: (typeof signed)[number]) {
+          signed.push(request)
+          return signedTransaction
+        },
+      }
+      Object.assign(window, { hanaWallet: { stellar }, __stellarSigned: signed })
+    },
+    { account: stellarSender, signedTransaction: stellarSigned },
+  )
+  const submitted: string[] = []
+  let misses = 0
+  await page.route('https://horizon.stellar.org/**', (route) => {
+    const request = route.request()
+    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors })
+    if (request.method() === 'POST') {
+      submitted.push(new URLSearchParams(request.postData() ?? '').get('tx') ?? '')
+      if (lostAnswer) {
+        misses = 1
+        return route.abort('failed')
+      }
+    } else if (submitted.length === 0 || misses > 0) {
+      misses = Math.max(0, misses - 1)
+      return route.fulfill({
+        status: 404,
+        headers: cors,
+        contentType: 'application/json',
+        body: '{}',
+      })
+    }
+    return route.fulfill({
+      headers: cors,
+      contentType: 'application/json',
+      body: JSON.stringify({ hash: stellarHash, successful: true }),
+    })
+  })
+  return submitted
+}
+
+/** Create a Stellar USDC to Tempo OUSD transfer whose action is the prepared envelope. */
+async function createStellarTransfer(page: Page) {
+  const stellarToTempo = {
+    id: 'stellar-usdc-tempo-ousd',
+    sourceChain: {
+      id: 'stellar:pubnet',
+      name: 'Stellar',
+      addressFormat: 'strkey',
+      kind: 'stellar',
+    },
+    sourceToken: {
+      tokenKey:
+        'stellar:pubnet/asset:USDC-GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN',
+      symbol: 'USDC',
+      decimals: 7,
+    },
+    destinationChain: chains.tempo,
+    destinationToken: {
+      tokenKey: 'eip155:4217/erc20:0x20c0000000000000000000006a37da5c996874be',
+      symbol: 'OUSD',
+      decimals: 6,
+    },
+    capabilities: { depositAddress: true, transfer: { modes: ['exactSource'] } },
+    subsidies: { depositAddress: true, transfer: false },
+  }
+  const api = await mockRoutesApi(page, {
+    'GET /v1/routes': [{ body: { data: [baseToTempo, stellarToTempo], nextCursor: null } }],
+    'GET /v1/routes/transfers/quote': [{ body: transferQuote }],
+    'POST /v1/routes/transfers': [
+      {
+        status: 201,
+        body: {
+          ...createdTransfer,
+          action: {
+            type: 'stellar:xdr',
+            networkPassphrase: 'Public Global Stellar Network ; September 2015',
+            xdr: stellarUnsigned,
+          },
+        },
+      },
+    ],
+    'POST /v1/routes/transfers/rtx_1/source-transactions': [
+      { body: { id: 'rtx_1', status: 'processing' } },
+    ],
+    'GET /v1/routes/transfers/rtx_1': [
+      { body: { id: 'rtx_1', status: 'completed', destinationAmount: usd('0.9991') } },
+    ],
+  })
+  await openDemo(page)
+  await chooseRoute(page, ['Stellar', 'USDC'], ['Tempo', 'OUSD'])
+  await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
+  await page.getByLabel('Amount (USDC)').fill('1')
+  await lifecycle(page).getByRole('button', { name: '(Connect)' }).first().click()
+  await expect(page.getByLabel('Sender on Stellar')).toHaveValue(stellarSender)
+  await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+  await button(page, 'Get quote').click()
+  await button(page, 'Create').click()
+  return api
+}
+/** What the injected Stellar wallet was asked to sign. */
+const signedByStellarWallet = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __stellarSigned: unknown[] }).__stellarSigned)
+
 async function openDemo(page: Page) {
   await page.goto(demo)
   // The anonymous directory load proves the demo has hydrated before the key is added.
@@ -1159,6 +1278,53 @@ test.describe('Routes demo wallets', () => {
     // Tron transaction IDs register without a 0x prefix.
     expect(api.to('POST', '/v1/routes/transfers/rtx_1/source-transactions')[0].body).toEqual({
       transactionHashes: ['1'.repeat(64), '2'.repeat(64)],
+    })
+  })
+
+  test('signs the prepared Stellar envelope with an injected wallet and submits it once', async ({
+    page,
+  }) => {
+    const submitted = await mockStellarWallet(page)
+    const api = await createStellarTransfer(page)
+    await expect(lifecycle(page)).toContainText(
+      'Hana Wallet signs one transaction from the sender.',
+    )
+    await button(page, 'Sign and send').click()
+    await expect(lifecycle(page)).toContainText('Delivered 0.9991 OUSD.', { timeout: 20_000 })
+
+    expect(await signedByStellarWallet(page)).toEqual([
+      {
+        xdr: stellarUnsigned,
+        accountToSign: stellarSender,
+        networkPassphrase: 'Public Global Stellar Network ; September 2015',
+      },
+    ])
+    expect(submitted).toEqual([stellarSigned])
+    // Stellar hashes register without a 0x prefix.
+    expect(api.to('POST', '/v1/routes/transfers/rtx_1/source-transactions')[0].body).toEqual({
+      transactionHashes: [stellarHash],
+    })
+    await expect(
+      lifecycle(page).locator(`a[href="https://stellar.expert/explorer/public/tx/${stellarHash}"]`),
+    ).toHaveCount(1)
+  })
+
+  test('registers a Stellar payment that landed after its answer was lost, without signing again', async ({
+    page,
+  }) => {
+    const submitted = await mockStellarWallet(page, { lostAnswer: true })
+    const api = await createStellarTransfer(page)
+    await button(page, 'Sign and send').click()
+    await expect(lifecycle(page)).toContainText(
+      'Horizon could not be reached. Sign and send again; the payment can land only once.',
+    )
+    await button(page, 'Sign and send').click()
+    await expect(lifecycle(page)).toContainText('Delivered 0.9991 OUSD.', { timeout: 20_000 })
+
+    expect(await signedByStellarWallet(page)).toHaveLength(1)
+    expect(submitted).toHaveLength(1)
+    expect(api.to('POST', '/v1/routes/transfers/rtx_1/source-transactions')[0].body).toEqual({
+      transactionHashes: [stellarHash],
     })
   })
 
