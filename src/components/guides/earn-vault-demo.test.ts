@@ -10,7 +10,6 @@ import {
 const vault = {
   id: sentoraPathUsdVault,
   verified: true,
-  label: 'Sentora pathUSD (Earn)',
   assetToken: {
     address: '0x20c0000000000000000000000000000000000000',
     symbol: 'pathUSD',
@@ -32,9 +31,11 @@ describe('Approved vault inspector', () => {
   })
 
   it('accepts only the approved verified vault, including checksummed addresses', () => {
-    expect(parseEarnVaultDetail(vault)).toEqual(vault)
+    // The API sends no label, so the reviewed display label is added.
+    const shown = { ...vault, ...earnVaultForNetwork('mainnet') }
+    expect(parseEarnVaultDetail(vault)).toEqual(shown)
     const checksummed = { ...vault, id: `0x${sentoraPathUsdVault.slice(2).toUpperCase()}` }
-    expect(parseEarnVaultDetail(checksummed)).toEqual(vault)
+    expect(parseEarnVaultDetail(checksummed)).toEqual(shown)
   })
 
   it.each([
