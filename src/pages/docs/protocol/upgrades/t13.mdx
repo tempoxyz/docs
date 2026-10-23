@@ -108,10 +108,10 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-11
 
 ## Integration impact
 
-- **Integrations that assume pathUSD for gas:** the fallback applies only when no fee token is chosen. If you set `feeToken` to pathUSD, users without pathUSD still fail after T13: set it to OUSD or the token the user holds, or omit it. If your wallet or frontend blocks a transaction when pathUSD is zero, check pathUSD, then OUSD, against the maximum fee. Until T13 activates on your network, set `feeToken` to OUSD explicitly or keep pathUSD in the fee payer's account.
+- **Apps that send standard Ethereum transactions:** these transactions have no `feeToken` field, so fees fall back to pathUSD and fail for users who hold only OUSD. After T13, they pay in OUSD with no change on your side.
+- **Integrations that pin pathUSD for gas:** the fallback applies only when no fee token is chosen. If you set `feeToken` to pathUSD, accept only pathUSD as a fee token, or block a transaction when the pathUSD balance is zero, users who hold only OUSD still fail after T13. Accept OUSD as a fee token (or the token the user holds), or omit `feeToken` and let the fallback choose. When estimating, check pathUSD, then OUSD, against the maximum fee.
 - **Fee payers and sponsors:** a transaction without `feeToken` or a stored preference, and with too little pathUSD, now pays in OUSD when the fee payer holds enough. A sponsor holding only OUSD works. To pin a token, set `feeToken` or call `setUserToken`; a pathUSD transfer before inclusion can change which token a pending transaction pays with.
 - **Wallets and fee displays:** read the fee token from the receipt's `feeToken` field instead of assuming pathUSD.
-- **Zone portal integrations:** explorers, indexers, and deposit frontends that read Zone portals on Tempo need the T13 portal ABI. See [Breaking changes](#breaking-changes).
 - **Zone applications:** handle deposit rejections when a Zone's deposit queue is full, and expect `enableToken` to revert while eight enablements are pending. Treat `NoRefund` from `claimRefund` as "nothing to claim".
 - **Node operators and indexers:** install the T13 release before your network activates. Stop expecting beacon-root or execution-request system calls in Tempo blocks after activation.
 
