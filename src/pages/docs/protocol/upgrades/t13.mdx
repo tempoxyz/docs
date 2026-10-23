@@ -111,14 +111,26 @@ Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-11
 - **Integrations that assume pathUSD for gas:** the fallback applies only when no fee token is chosen. If you set `feeToken` to pathUSD, users without pathUSD still fail after T13: set it to OUSD or the token the user holds, or omit it. If your wallet or frontend blocks a transaction when pathUSD is zero, check pathUSD, then OUSD, against the maximum fee. Until T13 activates on your network, set `feeToken` to OUSD explicitly or keep pathUSD in the fee payer's account.
 - **Fee payers and sponsors:** a transaction without `feeToken` or a stored preference, and with too little pathUSD, now pays in OUSD when the fee payer holds enough. A sponsor holding only OUSD works. To pin a token, set `feeToken` or call `setUserToken`; a pathUSD transfer before inclusion can change which token a pending transaction pays with.
 - **Wallets and fee displays:** read the fee token from the receipt's `feeToken` field instead of assuming pathUSD.
-- **Zone operators:** T13 is a coordinated Tempo and Zone upgrade. Run compatible sequencer and prover builds with a T13-compatible Tempo node before activation, and monitor `NoProof` fallback.
+- **Zone portal integrations:** explorers, indexers, and deposit frontends that read Zone portals on Tempo need the T13 portal ABI. See [Breaking changes](#breaking-changes).
 - **Zone applications:** handle deposit rejections when a Zone's deposit queue is full, and expect `enableToken` to revert while eight enablements are pending. Treat `NoRefund` from `claimRefund` as "nothing to claim".
 - **Node operators and indexers:** install the T13 release before your network activates. Stop expecting beacon-root or execution-request system calls in Tempo blocks after activation.
 
 ### Breaking changes
 
-**Zone interfaces and pending-work limits**
+**Zone portal ABI on Tempo**
 
-`ITempoState.finalizeTempo(bytes)` becomes `finalizeTempo(bytes[])`, and `IZoneInbox.advanceTempoHeaders(bytes[])` is new. Update Zone tooling that calls or decodes these functions.
+Each Zone's portal is a public contract on Tempo. At activation, its interface changes:
 
-Zone portals enforce the new deposit and token-enablement limits at activation. Clear any backlog above them under T12 first.
+- `ZonePortal.submitBatch` and `IVerifier.verify` take a new `TokenEnablementTransition` argument.
+- `ZonePortal.BatchSubmitted` adds a `lastProcessedEnabledTokenCount` field, which changes the event's signature and topic.
+- `MAX_DEPOSITS_PER_TEMPO_BLOCK()` is replaced by `MAX_UNPROCESSED_DEPOSITS()`. `MAX_UNPROCESSED_TOKEN_ENABLEMENTS()` and `lastProcessedEnabledTokenCount()` are new.
+
+Block explorers, indexers, and monitoring that decode settlement transactions or `BatchSubmitted` logs need the T13 ABI for blocks after activation. Deposit frontends that read `MAX_DEPOSITS_PER_TEMPO_BLOCK()` should read `MAX_UNPROCESSED_DEPOSITS()` instead.
+
+**Deposits and token enablements can revert**
+
+Deposits now revert once a Zone has 210 unprocessed deposits, and `enableToken` reverts while eight enablements are pending. Callers should handle these reverts and retry after the Zone catches up.
+
+**Zone-internal interfaces**
+
+The Zone's own system contracts also change: `ITempoState.finalizeTempo` takes `bytes[]`, `IZoneInbox.advanceTempoHeaders(bytes[])` is new, and `ZoneInbox.TempoAdvanced` adds `lastProcessedEnabledTokenCount`. Only the Zone operator's sequencer, prover, and nodes call these, and they switch together at activation. Integrators need no changes.
