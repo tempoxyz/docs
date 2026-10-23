@@ -173,7 +173,9 @@ const failures: Record<string, string> = {
 
 type HorizonTransaction = { successful?: boolean }
 /** The included transaction, or `undefined` when Horizon has no record of it or did not answer. */
-async function lookup(hash: string): Promise<HorizonTransaction | undefined> {
+export async function findStellarTransaction(
+  hash: string,
+): Promise<HorizonTransaction | undefined> {
   const response = await fetch(`${horizon}/transactions/${hash}`).catch(() => undefined)
   if (!response?.ok) return undefined
   return (await response.json().catch(() => undefined)) as HorizonTransaction | undefined
@@ -214,7 +216,7 @@ export async function sendStellarTransaction(options: {
       : undefined
   if (codes?.transaction === 'tx_failed') throw new StellarFailedError(codes)
   // An earlier submission that already landed is rejected as a reused sequence number.
-  if (await lookup(hash)) return hash
+  if (await findStellarTransaction(hash)) return hash
   const code = codes?.transaction
   throw new StellarNotLandedError(
     code
@@ -229,7 +231,7 @@ export async function waitForStellarTransaction(
   { attempts = 40, intervalMs = 3_000 } = {},
 ) {
   for (let attempt = 1; attempt <= attempts; attempt++) {
-    const transaction = await lookup(hash)
+    const transaction = await findStellarTransaction(hash)
     if (transaction) {
       if (transaction.successful === false) throw new StellarFailedError()
       return transaction

@@ -70,10 +70,12 @@ import {
 } from '../lib/solana-wallets'
 import {
   connectStellarAccount,
+  findStellarTransaction,
   StellarFailedError,
   StellarNotLandedError,
   sendStellarTransaction,
   stellarMainnet,
+  stellarTransactionHash,
   useStellarWallets,
   waitForStellarTransaction,
 } from '../lib/stellar-wallets'
@@ -858,13 +860,21 @@ function RouteLifecycle({
       try {
         // A saved hash is one Horizon took: wait for it rather than prompting the wallet again.
         if (!hash) {
-          assertUnexpired(expiresAt)
-          hash = await sendStellarTransaction({
-            wallet: stellarWallet,
-            sender,
-            xdr: stellarXdr,
-            onHash: (submitted) => setHashes([submitted]),
-          })
+          // Every attempt submits the same envelope, so one that already landed is found by its
+          // hash and registered without a new signature, even after its quote expired.
+          const prepared = stellarTransactionHash(stellarXdr)
+          if (await findStellarTransaction(prepared)) {
+            hash = prepared
+            setHashes([hash])
+          } else {
+            assertUnexpired(expiresAt)
+            hash = await sendStellarTransaction({
+              wallet: stellarWallet,
+              sender,
+              xdr: stellarXdr,
+              onHash: (submitted) => setHashes([submitted]),
+            })
+          }
         }
         await waitForStellarTransaction(hash)
       } catch (e) {
