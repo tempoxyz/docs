@@ -18,7 +18,7 @@ Read status with a key that has `routes:read`:
 
 | Flow | Read | Request builder |
 | --- | --- | --- |
-| Deposit address | `GET /v1/routes/deposits?depositAddress=…`, then `GET /v1/routes/deposits/{id}` for each deposit | [Track deposits](/docs/routes/deposits#track-deposits) |
+| Deposit address | `GET /v1/routes/deposits?depositAddressId=…`, then `GET /v1/routes/deposits/{id}` for each deposit | [Track deposits](/docs/routes/deposits#track-deposits) |
 | Transfer | `GET /v1/routes/transfers/{id}`, after you register the source transaction hashes | [Confirm the transfer](/docs/routes/transfers#confirm-the-transfer) |
 
 A deposit address being `active` says it can receive deposits; it does not describe a particular deposit's progress.
