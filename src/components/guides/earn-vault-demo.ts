@@ -18,7 +18,6 @@ const decimalAmount = z.string().regex(/^\d+(\.\d+)?$/)
 const vaultSchema = z.object({
   id: address,
   verified: z.boolean(),
-  label: z.string(),
   assetToken: z.object({
     address,
     symbol: z.string(),
@@ -41,7 +40,8 @@ const vaultSchema = z.object({
   tvl: z.object({ formatted: decimalAmount, currency: z.string() }).nullable().optional(),
 })
 
-export type EarnVault = z.infer<typeof vaultSchema>
+// The API omits curated vault labels, so the display label is the reviewed one.
+export type EarnVault = z.infer<typeof vaultSchema> & ReturnType<typeof earnVaultForNetwork>
 
 export function parseEarnVaultDetail(value: unknown, network: EarnNetwork = 'mainnet'): EarnVault {
   const approved = earnVaultForNetwork(network)

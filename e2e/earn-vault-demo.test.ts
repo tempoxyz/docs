@@ -4,7 +4,6 @@ import { earnVaultForNetwork, sentoraPathUsdVault } from '../src/components/guid
 const vault = {
   id: sentoraPathUsdVault,
   verified: true,
-  label: 'Sentora pathUSD (Earn)',
   assetToken: {
     address: '0x20c0000000000000000000000000000000000000',
     symbol: 'pathUSD',
