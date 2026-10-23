@@ -1,7 +1,7 @@
 ---
 title: Set up API access
 seoTitle: Routes API Setup | Tempo Docs
-description: Create a Routes API key with the right scopes, configure your backend client, and set idempotency keys for create requests.
+description: Create a Routes API key, request transfer access in Tempo Console, and set idempotency keys for create requests.
 ogImage: /og/2026-q4/og_2026-q4_docs_routes-api-setup_title-f5_v02.png
 ---
 
@@ -9,17 +9,78 @@ ogImage: /og/2026-q4/og_2026-q4_docs_routes-api-setup_title-f5_v02.png
 
 # Set up API access
 
-Configure your backend to call the Routes API. Confirm [beta access](/docs/routes), create a key in [Tempo Console](/docs/api/console), and keep the key out of browser code. Every Routes guide after this page assumes this setup.
+Create a Routes API key, request transfer access, and keep the key on your backend. Every Routes guide after this page assumes this setup.
 
 ## Routes API key scopes
 
-| Scope | Allows |
-| --- | --- |
-| `routes:read` | Quotes, and transfer and deposit status reads |
-| `routes:write` | Creating transfers and deposit addresses, and registering source transactions |
-| `data:read` | Reading the [route directory](/docs/routes/networks) with your key, which applies your organization's access policy |
+| Scope | Allows | How a key gets it |
+| --- | --- | --- |
+| `routes:read` | Quotes, and transfer and deposit status reads | Selected by default on a new key. |
+| `routes:write` | Creating transfers and deposit addresses, and registering source transactions | Tempo adds it when it approves your [access request](#request-routes-access). |
+| `data:read` | Reading the [route directory](/docs/routes/networks) with your key, which applies your organization's access policy | Selected by default on a new key. |
 
-The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it does not sign blockchain transactions.
+Routes runs on mainnet, so use a production key. Sandbox keys can't create live routes.
+
+The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it doesn't sign blockchain transactions.
+
+## Request Routes access
+
+Tempo reviews each request and adds `routes:write` to the keys you choose. Any member of your organization can send one from Tempo Console. Each project has at most one pending request.
+
+:::::steps
+
+### Create a production key
+
+[Create an API key](/docs/api/console/api-keys#create-an-api-key) in the project that will call Routes. Creating a key needs the admin or owner role. The new-key form shows `routes:write` as **Requires Tempo approval**, so the key starts with `routes:read` and `data:read`.
+
+You can request access before the project has a key. Tempo can grant access to keys you create later.
+
+### Open the request form
+
+In [Tempo Console](https://console.tempo.xyz/?to=/:org/routes), select **Routes** and choose the project. On the **Routes access** card, select **Request access**. The card shows **Exit sandbox** instead when you're in sandbox.
+
+### Describe what you need
+
+The **Request Routes access** form asks for:
+
+- **Keys.** The production keys that should create transfers. Keys with `routes:read` start selected.
+- **Routes.** The source and destination pairs your application needs. Leave the list empty if you're not sure, and Tempo follows up.
+- **Expected monthly volume.** An estimate, such as `$50k across 2,000 transfers`.
+- **1:1 delivery.** Whether recipients receive the full amount sent. See [Offer 1:1 delivery](/docs/routes/quotes#offer-11-delivery).
+- **Notes.** Your use case, launch date, or questions.
+
+Select **Send request**.
+
+### Check the request status
+
+The **Create transfers** row on the **Routes access** card shows where the request stands:
+
+| Status | Card shows | What to do |
+| --- | --- | --- |
+| Pending | **Request sent** with the date | Wait for review. Select **Cancel request** to withdraw it; a sent request can't be edited. |
+| Declined | **Your last request was declined**, with Tempo's reason when given | Address the reason, then send a new request. |
+| Approved | **Ready.** The card hides once the project has keys with `routes:read` and `routes:write`. | Start building. |
+
+:::::
+
+Approval saves your organization's route policy, which sets the routes your keys can use and any 1:1 delivery terms. Tempo then adds `routes:write` to the keys you chose. Read the [route directory](/docs/routes/networks) with your key to see the routes your policy allows.
+
+To add routes later, open **Routes** › **Available routes** and select **Request a route**. It opens the same form. The [Routes access requests endpoints](/docs/api/routes-access-requests) behind this form authenticate with your Console session, not an API key.
+
+<span id="routes-access-errors" />
+
+## Resolve Routes access errors
+
+The Routes API returns HTTP `403` with one of these codes when a key or organization lacks access:
+
+| Code | Cause | Fix |
+| --- | --- | --- |
+| `api_key_forbidden` | The key lacks a scope named in the message, or it's a sandbox key. | Use a production key with that scope. For `routes:write`, [request access](#request-routes-access). |
+| `routes_not_allowed` | Your organization's policy doesn't include this route or funding method. | Select **Request a route** in Tempo Console. |
+| `routes_subsidy_not_enabled` | The request sent `subsidize: true` without approved 1:1 terms. | Ask for 1:1 delivery in your access request, or quote without `subsidize`. |
+| `routes_subsidy_not_allowed` | This route isn't eligible for the requested subsidy. | Quote without `subsidize`. |
+| `billing_required`, `billing_past_due` | 1:1 delivery that your organization pays for needs active billing. | [Add a payment method](/docs/api/console/usage-and-billing#add-a-payment-method) in Billing. |
+| `routes_suspended` | New routes are paused for your organization and environment. | [Contact Tempo](https://tempo.xyz/contact). |
 
 ## Configure the client
 

@@ -31,6 +31,8 @@ Select the project that will use the credential. Give the key a name that identi
 
 Expand **View scopes** and keep only the permissions the integration needs. Available self-service scopes are selected by default. A key with no scopes has no access to scoped APIs.
 
+Some scopes, such as `routes:write`, show **Requires Tempo approval** and can't be selected. Tempo adds them to existing keys after you [request Routes access](/docs/routes/api-setup#request-routes-access).
+
 ### Create and store the key
 
 Select **Create key**, then immediately copy the revealed token into your secret manager. The plaintext value is shown only once.
