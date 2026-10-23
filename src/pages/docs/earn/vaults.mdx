@@ -2,10 +2,12 @@
 title: "Vaults"
 seoTitle: "Earn vaults | Tempo Docs"
 description: "Select an Earn vault by asset, strategy, access rules, and supported deposit and withdrawal operations."
+interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_earn-vaults_title-f5_v02.png
 ---
 
 import { EarnStrategyCard, EarnStrategyCards } from '../../../components/EarnIllustration'
+import { EarnVaultDemo } from '../../../components/guides/EarnVaultDemo'
 
 <span id="choose-a-vault" />
 
@@ -22,6 +24,10 @@ Use the vault address and network provided for your integration. Evaluate where 
 <span id="inspect-the-selected-vault" />
 
 ### Inspect a vault
+
+The demo shows only the Sentora pathUSD vault on Tempo mainnet. Its configuration comes from live Tempo API responses.
+
+<EarnVaultDemo />
 
 Read your vault's configuration through the [Earn API reference](/docs/api/earn). Save its `id` (contract address) and network together.
 

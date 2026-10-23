@@ -415,6 +415,12 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(loadOpenApi).not.toHaveBeenCalled()
   })
 
+  test('describes the Sentora-only vault inspector', async () => {
+    const output = await render('<EarnVaultDemo />')
+    expect(output).toContain('only the Sentora pathUSD vault on Tempo mainnet')
+    expect(output).toContain('[Earn API reference](/docs/api/earn)')
+  })
+
   test('describes the interactive Tempo MCP explorer', async () => {
     const output = await render('<TempoMcpExplorer />')
     expect(output).toContain('Use the interactive web page to try the Tempo MCP server.')
