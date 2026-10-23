@@ -40,7 +40,7 @@ T13 is scheduled for **October 29, 2026 at 15:00 UTC on Moderato testnet** and *
 
 ### Zone prover
 
-A Zone sequencer executes transactions privately and settles batches on Tempo. Before T13, Tempo accepted a batch when enough sequencers signed it, trusting them to have executed it correctly. With T13, a prover replays each batch and Tempo verifies the result before settlement, so a sequencer cannot settle invented balances or unauthorized transfers.
+A Zone sequencer executes transactions privately and settles batches on Tempo. Before T13, Tempo accepted a batch when enough sequencers signed it, trusting them to have executed it correctly. With T13, a prover replays each batch and Tempo verifies its attestation before settlement, which checks balances and authorized transfers.
 
 <ZoneDiagram
   name="prover"
@@ -52,9 +52,9 @@ A Zone sequencer executes transactions privately and settles batches on Tempo. B
 2. **Prove.** The prover replays the batch inside an AWS Nitro Enclave running approved code, then signs an attestation bound to the Zone, the batch, and its resulting commitments.
 3. **Settle.** The sequencer submits the batch, attestation, and quorum signatures to the Zone's portal. The portal checks the signatures and continuity, and the native verifier at `0x5a56000000000000000000000000000000000000` checks the AWS certificate chain, approved enclave measurements, and batch digest. Only then does the portal record the new state and queue withdrawals.
 
-The prover runs in a trusted execution environment: security rests on the approved enclave code and AWS Nitro's attestation. It checks execution, including balances and authorized transfers.
+The prover runs in a trusted execution environment: security rests on the approved enclave code and AWS Nitro's attestation.
 
-**Temporary NoProof fallback.** During rollout, a sequencer can also settle a batch in `NoProof` mode, which keeps the signature and continuity checks but skips attestation verification. A later upgrade removes this mode.
+**Temporary NoProof fallback.** During rollout, a sequencer can also settle a batch in `NoProof` mode, which keeps the signature and continuity checks but skips attestation verification. Batches settled this way rely on sequencer signatures, as before T13. A later upgrade removes this mode.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1098.md) and [Zone proving and settlement](/docs/protocol/zones/proving).
 
