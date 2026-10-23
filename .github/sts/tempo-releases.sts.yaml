@@ -1,0 +1,9 @@
+# Allow only Tempo's node-release documentation workflow, on a node tag or main
+# (manual backfills), to push a docs branch and open a pull request.
+subject_pattern: repo:tempoxyz@211589300/tempo@994992847:ref:refs/(tags/v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?|heads/main)
+claim_pattern:
+  workflow_ref: tempoxyz/tempo/\.github/workflows/update-release-docs\.yml@refs/(tags/v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?|heads/main)
+  event_name: (release|workflow_dispatch)
+permissions:
+  contents: write
+  pull_requests: write
