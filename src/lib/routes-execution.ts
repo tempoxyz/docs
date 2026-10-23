@@ -44,7 +44,7 @@ const errorGuides: Record<string, string> = {
   unauthorized: 'The API key was rejected. Check your project API key.',
   api_key_malformed: 'That does not look like a Tempo API key. Check your project API key.',
   api_key_forbidden:
-    'This key cannot make this request. Use a production key with routes:read for quotes and reads. Creating a route also needs routes:write, which Tempo adds when you request Routes access in Tempo Console.',
+    'This key cannot make this request. Use a production key with routes:read and data:read for quotes and reads. Creating a route also needs routes:write, which Tempo adds when you request Routes access in Tempo Console.',
   api_key_ip_forbidden:
     'This key only accepts requests from approved IP addresses, and this browser is not one of them.',
   billing_required: 'Billing for this organization needs attention in the API console.',
