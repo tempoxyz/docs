@@ -1407,7 +1407,7 @@ function RouteLifecycle({
               href={
                 isTransfer
                   ? '/docs/api/routes/transfers#getroutestransfer'
-                  : '/docs/api/routes/deposit-addresses#getroutesdepositaddress'
+                  : '/docs/api/routes/deposit-addresses#getroutesdepositaddressv2'
               }
             />
           )}

@@ -1,7 +1,7 @@
 ---
 title: Accept deposits
 seoTitle: Accept Deposits | Tempo Docs
-description: Create a route-specific deposit address and track each incoming deposit through delivery to Tempo.
+description: Create reusable deposit addresses for one source or every supported source, and track each incoming deposit through delivery to Tempo.
 ogImage: /og/2026-q4/og_2026-q4_docs_routes-deposits_title-f5_v02.png
 ---
 
@@ -9,9 +9,20 @@ import { OpenApi } from 'vocs'
 
 # Accept deposits
 
-Give customers a reusable address to fund from an external wallet. Each address accepts a specific network and token and routes funds to your chosen Tempo recipient.
+Give customers reusable addresses to fund from an external wallet. Routes delivers each deposit to your chosen Tempo recipient.
 
 For payments already on Tempo, use [Receive payments](/docs/guide/payments/accept-a-payment). [Virtual addresses](/docs/guide/payments/virtual-addresses) attribute those payments to a shared Tempo balance; they are different from Routes deposit addresses.
+
+## Choose a deposit address type
+
+One create request returns a deposit address object with one reusable address per chain family. The request's source fields decide what those addresses accept:
+
+| Type | Create with | Accepts | Use when |
+| --- | --- | --- | --- |
+| Single-source | `sourceChain` and `sourceToken` | One network and token, such as USDC on Base | Your application shows the customer one asset. |
+| Universal | Neither field | The supported sources in each chain family you give a refund address for | The customer pays from whichever network they hold funds on. |
+
+A single-source object has an `rda_…` ID. A universal object has a `uda_…` ID and covers the EVM, Solana, and Tron families. Stellar routes support single-source addresses only.
 
 <span id="set-up-routes-api-access" />
 
@@ -20,8 +31,9 @@ For payments already on Tempo, use [Receive payments](/docs/guide/payments/accep
 Before the first step, have:
 
 - A backend key with `routes:read` and `routes:write` from [Set up API access](/docs/routes/api-setup). Keep the key on the backend; show customers only the returned funding instructions.
-- A route with deposit-address support from [Supported routes](/docs/routes/networks).
-- A Tempo recipient, and a refund address on the source network.
+- A route from [Supported routes](/docs/routes/networks) with `capabilities.depositAddress`, or `capabilities.universalDepositAddress` for a universal address.
+- A Tempo recipient.
+- A refund address for each chain family the customer might send from, such as `evm` for Base or `solana` for Solana.
 
 Each step below has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test) and choose **Deposit address**. The [cURL example](/docs/routes/examples/deposits) runs every step from a terminal.
 
@@ -35,6 +47,8 @@ Each step below has a request builder that generates cURL and TypeScript. To see
 
 <OpenApi.Playground operationId="quoteRoutesDepositAddress" anchors={false} />
 
+A quote prices one source. For a universal address, quote each source you show the customer, such as the one they choose.
+
 Include the `recipient` and `refundAddress` you create the address with. Some routes, including those from Ethereum, Polygon, BNB Smart Chain, and Tron, return `quote_not_available` without them.
 
 Show the destination amount and fees as described in [Quotes and fees](/docs/routes/quotes), and refresh expired terms. A quote prices the supplied amount; it does not establish receipt of funds.
@@ -47,28 +61,40 @@ Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stor
 
 <OpenApi.Playground operationId="createRoutesDepositAddressV2" anchors={false} />
 
-Save the returned `id` and `address` with your customer record. A newly created address includes quote terms; an existing address may not. Obtain a fresh quote before showing funding instructions when terms are absent or stale.
+Set `refundAddresses` to one refund account per chain family. A universal address provisions only the families listed there. A single-source address needs the family of its `sourceChain`.
+
+Set `amount` to a typical deposit in base units. Creation fails with `amount_too_low` when it's below the route minimum.
+
+Save the returned `id` with your customer record. The response has no quote terms, so [quote the deposit](#quote-the-deposit) before showing funding instructions.
+
+A retry with the same idempotency key and body returns the original response. Reusing a key for the other address type returns `idempotency_conflict`.
 
 <span id="show-the-funding-instructions" />
 
 ### Show funding instructions
 
-Display the returned network, token, and deposit address together. Check that its status is `active` before inviting deposits. Do not present it as an address for arbitrary assets or networks.
+Each entry in `addresses` holds one reusable `address` and the `sources` it accepts. Show each address with its accepted networks and tokens. Check that its `status` is `active` before inviting deposits.
+
+Show only the listed sources. Routes doesn't credit or automatically refund funds sent from a network or token missing from `sources`.
 
 <span id="track-each-deposit" />
 
 ### Track deposits
 
-Set `depositAddress` to the returned source-chain address, not its `rda_…` object ID.
+Set `depositAddressId` to the returned `id`. A `uda_…` ID matches deposits on every address in the object.
 
 <OpenApi.Playground operationId="listRoutesDeposits" anchors={false} />
 
-The response lists deposits in `data`. Follow `nextCursor` for subsequent pages. Read each deposit with `GET /v1/routes/deposits/{id}`.
+The response lists deposits in `data`. Follow `nextCursor` for subsequent pages. Read each deposit with `GET /v1/routes/deposits/{id}`. Each deposit's `depositAddressId` names the `rda_…` address in `addresses` that received it.
 
 :::::
 
 ## Reconcile delivery and refunds
 
-Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits, so reconcile each deposit's delivered amount and destination transaction references separately. An active address can receive funds; only a completed deposit confirms delivery to Tempo.
+Save the customer, the deposit address `id`, and individual deposit IDs together. The same address can receive multiple deposits, so reconcile each deposit's delivered amount and destination transaction references separately. An active address can receive funds; only a completed deposit confirms delivery to Tempo.
+
+If a deposit the customer sent doesn't appear, ask Routes to check every address in the object again:
+
+<OpenApi.Playground operationId="reconcileRoutesDepositAddressV2" anchors={false} />
 
 Continue with [Track delivery](/docs/routes/delivery) before crediting a balance or treating a refund as complete. See the [Deposit addresses API reference](/docs/api/routes/deposit-addresses) for the full lifecycle.

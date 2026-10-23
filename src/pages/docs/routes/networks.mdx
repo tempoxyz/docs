@@ -30,7 +30,7 @@ Send the request below to read the directory your application builds its choices
 
 Requests without a key use the [public rate limit](/docs/api/rate-limits). To read the routes your organization can use, send a key with `data:read`; see [Set up API access](/docs/routes/api-setup).
 
-Use the returned source and destination chain/token pairs, funding methods, and amount modes to build the choices in your application. Pass `nextCursor` as `cursor` to read subsequent pages. Match tokens by network and contract address, not by symbol alone.
+Use the returned source and destination chain/token pairs, funding methods, and amount modes to build the choices in your application. `capabilities.universalDepositAddress` marks routes that a [universal deposit address](/docs/routes/deposits#choose-a-deposit-address-type) accepts. Pass `nextCursor` as `cursor` to read subsequent pages. Match tokens by network and contract address, not by symbol alone.
 
 <span id="check-the-selected-payment" />
 
