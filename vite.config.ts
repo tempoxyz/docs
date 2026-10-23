@@ -6,6 +6,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
+import { vocsSkipLinkPlugin } from './scripts/vocs-skip-link-plugin'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
 import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
@@ -45,6 +46,7 @@ export default defineConfig(({ mode }) => {
       blogPostsPlugin(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),
+      vocsSkipLinkPlugin(),
       vocsWithZyzz(),
       Icons({ compiler: 'jsx', jsx: 'react' }),
       react(),

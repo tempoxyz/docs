@@ -151,6 +151,7 @@ export function PayWithFeeToken(props: DemoStepProps & { feeToken?: Address }) {
                 <div {...ui.payWithFeeTokenLayout5()}>
                   <span {...ui.payWithFeeTokenText()}>Fee Token</span>
                   <TokenSelector
+                    aria-label="Fee token"
                     tokens={[alphaUsd, betaUsd, thetaUsd, ousd]}
                     value={feeToken}
                     onChange={setFeeToken}

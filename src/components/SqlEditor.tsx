@@ -328,22 +328,25 @@ export function SqlEditor(props: SqlEditorProps) {
     }
   }, [])
 
+  // Keep the example readable in server HTML and while Monaco loads. The
+  // preview is text only; mounting the editor does not execute the query.
+  const preview = (
+    <pre
+      {...ui.sqlEditorLayoutAppearance({
+        value0: editorHeight,
+        value1: minHeight,
+        className: ui.sqlEditorLayout2().className,
+      })}
+    >
+      <code>{value}</code>
+    </pre>
+  )
+
   return (
     <div className={`${className} ${isFocused ? ui.sqlEditorLayout().className : ''}`}>
-      <React.Suspense
-        fallback={
-          <div
-            {...ui.sqlEditorLayoutAppearance({
-              value0: editorHeight,
-              value1: minHeight,
-              className: ui.sqlEditorLayout2().className,
-            })}
-          >
-            Loading editor...
-          </div>
-        }
-      >
+      <React.Suspense fallback={preview}>
         <Editor
+          loading={preview}
           height={editorHeight}
           defaultLanguage="sql"
           value={value}
@@ -352,6 +355,7 @@ export function SqlEditor(props: SqlEditorProps) {
           beforeMount={handleEditorWillMount}
           onMount={handleEditorDidMount}
           options={{
+            ariaLabel: 'SQL query',
             readOnly: readOnly || disabled,
             minimap: { enabled: false },
             lineNumbers: 'on',
