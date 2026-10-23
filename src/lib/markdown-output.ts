@@ -81,8 +81,6 @@ const interactiveDescriptions: Record<string, string> = {
     'In the interactive web page, create a testnet passkey account, get test pathUSD from the faucet, choose a deposit amount (1 pathUSD by default), approve it for the verified vault, and confirm a deposit. Inspect the resulting shares and receipt, then withdraw the test position. Every transaction requires your confirmation and uses Moderato testnet.',
   EarnWithdrawDemo:
     'In the interactive web page, restore the passkey test account from the deposit demo and redeem its full position in the verified Moderato pathUSD vault. Confirm the withdrawal and inspect the receipt. If the account has no shares, make a test deposit first.',
-  EarnVaultDemo:
-    'In the interactive web page, inspect the automatically loaded verified Earn vault directory, starting with the testnet demo vault when available, or select another network and vault to inspect its asset, access rules, deposit status, withdrawal capabilities, and available liquidity. The demo makes read-only requests to Tempo API and starts on Moderato testnet. See the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) for the request and response fields.',
   SingleKeyAccountDemo:
     'In the interactive web page, create a single-key account on Moderato testnet from a passkey, a non-extractable P-256 device key, or a secp256k1 private key, kept in the tab. The address comes from the key with no transaction. Then get test stablecoins from the faucet and pay 1 test stablecoin with the key. Each payment is a real testnet transaction.',
   PasskeyAccountDemo:
