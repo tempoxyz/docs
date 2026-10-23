@@ -22,7 +22,7 @@ Set `TEMPO_API_KEY` to a key with `routes:read` and `routes:write` from [Set up 
 | `DESTINATION_TOKEN` | Token the recipient receives on Tempo. |
 | `ROUTE_RECIPIENT` | Recipient account on Tempo. |
 | `ROUTE_REFUND_ADDRESS` | Account on the source network that receives refunds. |
-| `EVM_REFUND_ADDRESS`, `SOLANA_REFUND_ADDRESS`, `TRON_REFUND_ADDRESS` | For a universal address, the refund account in each chain family you accept. |
+| `EVM_REFUND_ADDRESS`, `SOLANA_REFUND_ADDRESS`, `TRON_REFUND_ADDRESS` | Universal only. Refund account per family; leave one empty to skip it. |
 | `ROUTE_AMOUNT` | Source amount in base units to use for the quote. |
 
 <span id="create-and-monitor-a-deposit-address" />
@@ -50,7 +50,7 @@ Review the terms as described in [Quotes and fees](/docs/routes/quotes).
 
 ### Create a deposit address
 
-Set `ROUTE_REQUEST_KEY` to the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) for this address. Build the request body for a single-source or universal address:
+Set `ROUTE_REQUEST_KEY` to the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) for this address. Build the body for either address type:
 
 ::::code-group
 
@@ -69,7 +69,6 @@ jq -n \
 ```
 
 ```bash [Universal]
-# Families left empty get no address.
 jq -n \
   --arg destinationToken "$DESTINATION_TOKEN" \
   --arg recipient "$ROUTE_RECIPIENT" \
@@ -85,7 +84,7 @@ jq -n \
 
 ::::
 
-Send the request and keep the response:
+Create the address:
 
 ```bash
 curl --fail-with-body 'https://api.tempo.xyz/v2/routes/deposit-addresses' \
@@ -104,7 +103,7 @@ Save `ROUTE_DEPOSIT_ADDRESS_ID` with your customer record.
 
 ### Show funding instructions
 
-List each address with the sources it accepts, and confirm each status is `active`:
+Print each address with its status and sources:
 
 ```bash
 jq -r '.addresses[]
@@ -112,13 +111,13 @@ jq -r '.addresses[]
   deposit-address.json
 ```
 
-Show the customer each address with its listed sources only.
+Show each `active` address with its listed sources.
 
 <span id="track-each-deposit" />
 
 ### Track deposits
 
-Pass the deposit address ID. It matches deposits on every address in the response:
+Filter by the deposit address ID, which covers every address in it:
 
 ```bash
 curl --get 'https://api.tempo.xyz/v1/routes/deposits' \

@@ -15,14 +15,14 @@ For payments already on Tempo, use [Receive payments](/docs/guide/payments/accep
 
 ## Choose a deposit address type
 
-One create request returns a deposit address object with one reusable address per chain family. The request's source fields decide what those addresses accept:
+Each deposit address object holds one reusable address per chain family. The source fields decide what it accepts:
 
 | Type | Create with | Accepts | Use when |
 | --- | --- | --- | --- |
-| Single-source | `sourceChain` and `sourceToken` | One network and token, such as USDC on Base | Your application shows the customer one asset. |
-| Universal | Neither field | The supported sources in each chain family you give a refund address for | The customer pays from whichever network they hold funds on. |
+| Single-source | `sourceChain` and `sourceToken` | One network and token, such as USDC on Base | You show one asset. |
+| Universal | Neither field | Supported sources in each family you give a refund address | The customer picks the network. |
 
-A single-source object has an `rda_…` ID. A universal object has a `uda_…` ID and covers the EVM, Solana, and Tron families. Stellar routes support single-source addresses only.
+Single-source IDs start with `rda_` and universal IDs with `uda_`. Universal addresses cover EVM, Solana, and Tron; Stellar is single-source only.
 
 <span id="set-up-routes-api-access" />
 
@@ -32,8 +32,7 @@ Before the first step, have:
 
 - A backend key with `routes:read` and `routes:write` from [Set up API access](/docs/routes/api-setup). Keep the key on the backend; show customers only the returned funding instructions.
 - A route from [Supported routes](/docs/routes/networks) with `capabilities.depositAddress`, or `capabilities.universalDepositAddress` for a universal address.
-- A Tempo recipient.
-- A refund address for each chain family the customer might send from, such as `evm` for Base or `solana` for Solana.
+- A Tempo recipient, and a refund address for each chain family you accept, such as `evm` or `solana`.
 
 Each step below has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test) and choose **Deposit address**. The [cURL example](/docs/routes/examples/deposits) runs every step from a terminal.
 
@@ -47,7 +46,7 @@ Each step below has a request builder that generates cURL and TypeScript. To see
 
 <OpenApi.Playground operationId="quoteRoutesDepositAddress" anchors={false} />
 
-A quote prices one source. For a universal address, quote each source you show the customer, such as the one they choose.
+A quote prices one source. For a universal address, quote the source the customer picks.
 
 Include the `recipient` and `refundAddress` you create the address with. Some routes, including those from Ethereum, Polygon, BNB Smart Chain, and Tron, return `quote_not_available` without them.
 
@@ -61,31 +60,25 @@ Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stor
 
 <OpenApi.Playground operationId="createRoutesDepositAddressV2" anchors={false} />
 
-Set `refundAddresses` to one refund account per chain family. A universal address provisions only the families listed there. A single-source address needs the family of its `sourceChain`.
+Set `refundAddresses` per chain family; a universal address only gets addresses for those families. Set `amount` to a typical deposit in base units. Below the route minimum, creation returns `amount_too_low`.
 
-Set `amount` to a typical deposit in base units. Creation fails with `amount_too_low` when it's below the route minimum.
-
-Save the returned `id` with your customer record. The response has no quote terms, so [quote the deposit](#quote-the-deposit) before showing funding instructions.
-
-A retry with the same idempotency key and body returns the original response. Reusing a key for the other address type returns `idempotency_conflict`.
+Save the returned `id`. The response has no quote terms, so [quote](#quote-the-deposit) before showing instructions. Retrying with the same idempotency key and body returns the original response.
 
 <span id="show-the-funding-instructions" />
 
 ### Show funding instructions
 
-Each entry in `addresses` holds one reusable `address` and the `sources` it accepts. Show each address with its accepted networks and tokens. Check that its `status` is `active` before inviting deposits.
-
-Show only the listed sources. Routes doesn't credit or automatically refund funds sent from a network or token missing from `sources`.
+Show each entry in `addresses` with its `sources`, once its `status` is `active`. Routes doesn't credit or automatically refund funds from an unlisted network or token.
 
 <span id="track-each-deposit" />
 
 ### Track deposits
 
-Set `depositAddressId` to the returned `id`. A `uda_…` ID matches deposits on every address in the object.
+Set `depositAddressId` to the returned `id`. It matches deposits on every address in the object.
 
 <OpenApi.Playground operationId="listRoutesDeposits" anchors={false} />
 
-The response lists deposits in `data`. Follow `nextCursor` for subsequent pages. Read each deposit with `GET /v1/routes/deposits/{id}`. Each deposit's `depositAddressId` names the `rda_…` address in `addresses` that received it.
+The response lists deposits in `data`. Follow `nextCursor` for subsequent pages. Read each deposit with `GET /v1/routes/deposits/{id}`. Each deposit's `depositAddressId` is the `rda_…` address that received it.
 
 :::::
 
@@ -93,7 +86,7 @@ The response lists deposits in `data`. Follow `nextCursor` for subsequent pages.
 
 Save the customer, the deposit address `id`, and individual deposit IDs together. The same address can receive multiple deposits, so reconcile each deposit's delivered amount and destination transaction references separately. An active address can receive funds; only a completed deposit confirms delivery to Tempo.
 
-If a deposit the customer sent doesn't appear, ask Routes to check every address in the object again:
+If a sent deposit doesn't appear, reconcile the object:
 
 <OpenApi.Playground operationId="reconcileRoutesDepositAddressV2" anchors={false} />
 
