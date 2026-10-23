@@ -82,6 +82,21 @@ describe('route test requests', () => {
     ).toThrow('1:1')
     expect(() => routeTestRequest(route, { ...input, subsidize: true })).toThrow('1:1')
   })
+  it('requires Stellar account addresses on Stellar sources', () => {
+    const stellar = { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' }
+    const fromStellar = { ...route, sourceChain: stellar }
+    const account = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR'
+    expect(routeTestRequest(fromStellar, { ...input, sender: account })).toMatchObject({
+      sender: account,
+    })
+    expect(() => routeTestRequest(fromStellar, input)).toThrow(
+      'sender must be a classic Stellar account address (G…).',
+    )
+    const muxed = 'MCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYAAAAAAAAAAAACE3C'
+    expect(() => routeTestRequest(fromStellar, { ...input, sender: muxed })).toThrow(
+      'sender must be a classic Stellar account address (G…).',
+    )
+  })
   it('cascades network and asset choices and fills single options', () => {
     const tempo = { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' }
     const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
@@ -133,10 +148,12 @@ describe('route test requests', () => {
       covered: 0n,
     })
   })
-  it('offers wallet transfers for EVM and Tron sources, and deposits everywhere', () => {
+  it('offers wallet transfers for EVM, Tron, and Stellar sources, and deposits everywhere', () => {
     expect(demoMethods(route)).toEqual(['transfer', 'depositAddress'])
     const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
     expect(demoMethods({ ...route, sourceChain: tron })).toEqual(['transfer', 'depositAddress'])
+    const stellar = { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' }
+    expect(demoMethods({ ...route, sourceChain: stellar })).toEqual(['transfer', 'depositAddress'])
     // Routes has no signed action for Solana sources, so they fund through deposit addresses.
     const solana = {
       id: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',

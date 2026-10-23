@@ -296,8 +296,20 @@ export const tronActionSchema = z.object({
     .min(1)
     .max(10),
 })
-/** The action a created transfer returns: calls to sign on an EVM network or on Tron. */
-export const sourceActionSchema = z.discriminatedUnion('type', [evmActionSchema, tronActionSchema])
+export const stellarActionSchema = z.object({
+  type: z.literal('stellar:xdr'),
+  networkPassphrase: z.literal('Public Global Stellar Network ; September 2015'),
+  xdr: z
+    .string()
+    .max(65_536)
+    .regex(/^[A-Za-z0-9+/]+={0,2}$/),
+})
+/** The action a created transfer returns: calls to sign on an EVM network or Tron, or a Stellar envelope. */
+export const sourceActionSchema = z.discriminatedUnion('type', [
+  evmActionSchema,
+  tronActionSchema,
+  stellarActionSchema,
+])
 export function assertUnexpired(expiresAt: unknown) {
   if (
     typeof expiresAt !== 'string' ||
