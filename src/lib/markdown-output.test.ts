@@ -415,9 +415,9 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(loadOpenApi).not.toHaveBeenCalled()
   })
 
-  test('describes the Sentora-only vault inspector', async () => {
+  test('describes the approved mainnet and testnet vault inspector', async () => {
     const output = await render('<EarnVaultDemo />')
-    expect(output).toContain('only the Sentora pathUSD vault on Tempo mainnet')
+    expect(output).toContain('defaults to Sentora pathUSD on Tempo mainnet')
     expect(output).toContain('[Earn API reference](/docs/api/earn)')
   })
 

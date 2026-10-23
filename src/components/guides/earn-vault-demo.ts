@@ -1,8 +1,17 @@
 import { formatUnits } from 'viem'
 import { z } from 'zod'
+import { earnDemoVault } from './earn-deposit-demo'
 
-// Only this explicitly approved mainnet vault is displayed in the docs.
+export type EarnNetwork = 'mainnet' | 'testnet'
+
+// Fetch only these reviewed demo vaults, never the public directory.
 export const sentoraPathUsdVault = '0xb20ba39ccf522d69b7a21e3f369be5de73a2c694'
+
+export function earnVaultForNetwork(network: EarnNetwork) {
+  return network === 'mainnet'
+    ? { id: sentoraPathUsdVault, label: 'Sentora pathUSD (Earn)' }
+    : { id: earnDemoVault, label: 'pathUSD test vault' }
+}
 
 const address = z.string().regex(/^0x[0-9a-fA-F]{40}$/)
 const decimalAmount = z.string().regex(/^\d+(\.\d+)?$/)
@@ -34,20 +43,18 @@ const vaultSchema = z.object({
 
 export type EarnVault = z.infer<typeof vaultSchema>
 
-export function parseEarnVaultDetail(value: unknown): EarnVault {
+export function parseEarnVaultDetail(value: unknown, network: EarnNetwork = 'mainnet'): EarnVault {
+  const approved = earnVaultForNetwork(network)
   const result = vaultSchema.safeParse(value)
-  if (
-    !result.success ||
-    result.data.id.toLowerCase() !== sentoraPathUsdVault ||
-    !result.data.verified
-  )
-    throw new Error('The Sentora pathUSD vault is currently unavailable. Try again later.')
-  return result.data
+  if (!result.success || result.data.id.toLowerCase() !== approved.id || !result.data.verified)
+    throw new Error('The approved vault is currently unavailable on this network. Try again later.')
+  return { ...result.data, ...approved }
 }
 
-export function earnVaultRequestUrl(): string {
-  const url = new URL(`https://api.tempo.xyz/v1/earn/vaults/${sentoraPathUsdVault}`)
-  url.searchParams.set('chainId', 'mainnet')
+export function earnVaultRequestUrl(network: EarnNetwork = 'mainnet'): string {
+  const { id } = earnVaultForNetwork(network)
+  const url = new URL(`https://api.tempo.xyz/v1/earn/vaults/${id}`)
+  url.searchParams.set('chainId', network)
   url.searchParams.set('include', 'access,capabilities')
   return url.toString()
 }

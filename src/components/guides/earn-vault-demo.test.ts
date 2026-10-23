@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  earnVaultForNetwork,
   earnVaultRequestUrl,
   formatVaultLiquidity,
   parseEarnVaultDetail,
@@ -19,7 +20,7 @@ const vault = {
   instantLiquidity: '1000000',
 }
 
-describe('Sentora-only vault inspector', () => {
+describe('Approved vault inspector', () => {
   it('requests the approved mainnet vault directly without enumerating a directory', () => {
     const url = new URL(earnVaultRequestUrl())
     expect(url.origin).toBe('https://api.tempo.xyz')
@@ -33,7 +34,7 @@ describe('Sentora-only vault inspector', () => {
   it('accepts only the approved verified vault, including checksummed addresses', () => {
     expect(parseEarnVaultDetail(vault)).toEqual(vault)
     const checksummed = { ...vault, id: `0x${sentoraPathUsdVault.slice(2).toUpperCase()}` }
-    expect(parseEarnVaultDetail(checksummed)).toEqual(checksummed)
+    expect(parseEarnVaultDetail(checksummed)).toEqual(vault)
   })
 
   it.each([
@@ -45,9 +46,26 @@ describe('Sentora-only vault inspector', () => {
     { ...vault, state: { depositsPaused: 'false' } },
     { ...vault, assetToken: { ...vault.assetToken, decimals: 256 } },
   ])('fails closed for an unexpected response', (value) => {
-    expect(() => parseEarnVaultDetail(value)).toThrow(
-      'Sentora pathUSD vault is currently unavailable',
+    expect(() => parseEarnVaultDetail(value)).toThrow('approved vault is currently unavailable')
+  })
+
+  it('uses only the reviewed testnet demo and a safe display label', () => {
+    const approved = earnVaultForNetwork('testnet')
+    const url = new URL(earnVaultRequestUrl('testnet'))
+    expect(url.pathname).toBe(`/v1/earn/vaults/${approved.id}`)
+    expect(url.searchParams.get('chainId')).toBe('testnet')
+    expect(
+      parseEarnVaultDetail({ ...vault, id: approved.id, label: 'Unreviewed label' }, 'testnet'),
+    ).toEqual({ ...vault, ...approved })
+  })
+
+  it('rejects a vault from the wrong network', () => {
+    expect(() => parseEarnVaultDetail(vault, 'testnet')).toThrow(
+      'approved vault is currently unavailable',
     )
+    expect(() =>
+      parseEarnVaultDetail({ ...vault, id: earnVaultForNetwork('testnet').id }, 'mainnet'),
+    ).toThrow('approved vault is currently unavailable')
   })
 
   it('distinguishes missing liquidity from zero and preserves integer precision', () => {

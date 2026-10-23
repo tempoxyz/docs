@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { sentoraPathUsdVault } from '../src/components/guides/earn-vault-demo'
+import { earnVaultForNetwork, sentoraPathUsdVault } from '../src/components/guides/earn-vault-demo'
 
 const vault = {
   id: sentoraPathUsdVault,
@@ -15,26 +15,53 @@ const vault = {
 }
 
 for (const width of [1296, 390]) {
-  test(`shows only Sentora and never reads the directory at ${width}px`, async ({ page }) => {
+  test(`defaults to Sentora and preserves approved network and vault dropdowns at ${width}px`, async ({
+    page,
+  }) => {
     await page.setViewportSize({ width, height: 1000 })
     const requests: string[] = []
     await page.route('https://api.tempo.xyz/v1/earn/**', async (route) => {
       requests.push(route.request().url())
-      await route.fulfill({ json: vault })
+      const network =
+        new URL(route.request().url()).searchParams.get('chainId') === 'testnet'
+          ? 'testnet'
+          : 'mainnet'
+      await route.fulfill({ json: { ...vault, ...earnVaultForNetwork(network) } })
     })
     await page.goto('/docs/earn/vaults')
     const demo = page.getByTestId('earn-vault-demo')
+    await expect(demo.getByLabel('Network', { exact: true })).toBeEnabled({ timeout: 30_000 })
     await expect(demo.getByTestId('earn-vault-details')).toBeVisible()
     await expect(demo).toContainText('Sentora pathUSD (Earn)')
     await expect(demo).toContainText(sentoraPathUsdVault)
-    await expect(demo.locator('select')).toHaveCount(0)
+    const network = demo.getByLabel('Network', { exact: true })
+    const dropdown = demo.getByLabel('Vault', { exact: true })
+    await expect(network).toHaveValue('mainnet')
+    await expect(network.locator('option')).toHaveText(['Moderato testnet', 'Tempo mainnet'])
+    await expect(dropdown).toHaveValue(sentoraPathUsdVault)
+    await expect(dropdown.locator('option')).toHaveText([
+      'Choose a vault',
+      'Sentora pathUSD (Earn)',
+    ])
+    await dropdown.selectOption('')
+    await expect(demo.getByTestId('earn-vault-details')).toHaveCount(0)
+    await dropdown.selectOption(sentoraPathUsdVault)
     await demo.getByRole('button', { name: 'Refresh vault', exact: true }).click()
     await expect(demo.getByTestId('earn-vault-details')).toBeVisible()
-    expect(requests.length).toBeGreaterThanOrEqual(2)
+    await network.selectOption('testnet')
+    const testnet = earnVaultForNetwork('testnet')
+    await expect(dropdown).toHaveValue(testnet.id)
+    await expect(dropdown.locator('option')).toHaveText(['Choose a vault', 'pathUSD test vault'])
+    await expect(demo.getByTestId('earn-vault-details')).toContainText(testnet.id)
+    await expect(demo).not.toContainText(sentoraPathUsdVault)
+    await network.selectOption('mainnet')
+    await expect(dropdown).toHaveValue(sentoraPathUsdVault)
+    await expect(demo.getByTestId('earn-vault-details')).toContainText(sentoraPathUsdVault)
+    expect(requests.length).toBeGreaterThanOrEqual(4)
     for (const request of requests) {
       const url = new URL(request)
-      expect(url.pathname).toBe(`/v1/earn/vaults/${sentoraPathUsdVault}`)
-      expect(url.searchParams.get('chainId')).toBe('mainnet')
+      const network = url.searchParams.get('chainId') === 'testnet' ? 'testnet' : 'mainnet'
+      expect(url.pathname).toBe(`/v1/earn/vaults/${earnVaultForNetwork(network).id}`)
       expect(url.searchParams.has('cursor')).toBe(false)
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
@@ -52,9 +79,8 @@ test('hides unexpected vault data and retries only the approved vault', async ({
   })
   await page.goto('/docs/earn/vaults')
   const demo = page.getByTestId('earn-vault-demo')
-  await expect(demo.getByRole('alert')).toContainText(
-    'Sentora pathUSD vault is currently unavailable',
-  )
+  await expect(demo.getByLabel('Network', { exact: true })).toBeEnabled({ timeout: 30_000 })
+  await expect(demo.getByRole('alert')).toContainText('approved vault is currently unavailable')
   await expect(demo.getByTestId('earn-vault-details')).toHaveCount(0)
   await expect(demo).not.toContainText('Private vault')
   valid = true
