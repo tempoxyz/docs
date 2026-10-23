@@ -31,7 +31,7 @@ Select the project that will use the credential. Give the key a name that identi
 
 Expand **View scopes** and keep only the permissions the integration needs. Available self-service scopes are selected by default. A key with no scopes has no access to scoped APIs.
 
-Some scopes, such as `routes:write`, show **Requires Tempo approval** and can't be selected. Tempo adds them to existing keys after you [request Routes access](/docs/routes/api-setup#request-routes-access).
+`routes:write` shows **Requires Tempo approval**. Tempo adds it after you [request Routes access](/docs/routes/api-setup#request-routes-access).
 
 ### Create and store the key
 
@@ -126,7 +126,7 @@ Return to [**API Keys**](https://console.tempo.xyz/?to=/:org/api-keys), open the
 | --- | --- |
 | The key cannot be found in the console | Confirm that the selected environment and project filter match the key. |
 | The API rejects the credential | Check that the full token was copied, has not been revoked, and is sent in a supported header. |
-| A scoped endpoint denies access | Open the key's project and confirm that the key was created with the required scope. Create a replacement to change self-service scopes. For `routes:write`, [request Routes access](/docs/routes/api-setup#request-routes-access) and Tempo adds it to the key. |
+| A scoped endpoint denies access | Open the key's project and confirm that the key was created with the required scope. Create a replacement to change scopes. For `routes:write`, [request Routes access](/docs/routes/api-setup#request-routes-access). |
 | A sandbox key returns `403 api_key_forbidden` | Select `chainId=testnet`, or use a production key for mainnet. An omitted `chainId` targets mainnet. |
 | The plaintext token was lost | Create a replacement key. Existing tokens cannot be revealed again. |
 
