@@ -172,17 +172,16 @@ const failures: Record<string, string> = {
 }
 
 type HorizonTransaction = { successful?: boolean }
-/** The included transaction, `null` when Horizon has no record of it, or `undefined` without an answer. */
-async function lookup(hash: string): Promise<HorizonTransaction | null | undefined> {
+/** The included transaction, or `undefined` when Horizon has no record of it or did not answer. */
+async function lookup(hash: string): Promise<HorizonTransaction | undefined> {
   const response = await fetch(`${horizon}/transactions/${hash}`).catch(() => undefined)
-  if (response?.status === 404) return null
   if (!response?.ok) return undefined
   return (await response.json().catch(() => undefined)) as HorizonTransaction | undefined
 }
 
 /**
  * Sign Routes' prepared envelope in the wallet, then submit it to Horizon. `onHash` receives the
- * hash before submission, so a lost answer is resolved by waiting, never by sending again.
+ * hash before submission. A payment that has not landed may be submitted again: it can apply once.
  */
 export async function sendStellarTransaction(options: {
   wallet: StellarWallet
@@ -203,17 +202,24 @@ export async function sendStellarTransaction(options: {
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ tx: signed }),
   }).catch(() => undefined)
-  // Without a verdict (no answer, or a timeout), the payment may still land: wait for it by hash.
-  if (response?.status !== 400) return hash
-  const codes = (
-    (await response.json().catch(() => ({}))) as { extras?: { result_codes?: ResultCodes } }
-  ).extras?.result_codes
+  // Horizon answers 504 when the payment is queued but not yet in a ledger: wait for it by hash.
+  if (response?.ok || response?.status === 504) return hash
+  const codes =
+    response?.status === 400
+      ? (
+          (await response.json().catch(() => ({}))) as {
+            extras?: { result_codes?: ResultCodes }
+          }
+        ).extras?.result_codes
+      : undefined
   if (codes?.transaction === 'tx_failed') throw new StellarFailedError(codes)
-  // An earlier submission that already landed is rejected as a reused sequence.
-  if ((await lookup(hash)) !== null) return hash
-  const code = codes?.transaction ?? 'unknown'
-  throw new StellarRejectedError(
-    `${rejections[code] ?? `Stellar rejected the payment (${code}).`} Nothing was sent.`,
+  // An earlier submission that already landed is rejected as a reused sequence number.
+  if (await lookup(hash)) return hash
+  const code = codes?.transaction
+  throw new StellarNotLandedError(
+    code
+      ? `${rejections[code] ?? `Stellar rejected the payment (${code}).`} Nothing was sent.`
+      : `${response ? `Horizon did not take the payment (HTTP ${response.status}).` : 'Horizon could not be reached.'} Sign and send again; the payment can land only once.`,
   )
 }
 
@@ -230,11 +236,13 @@ export async function waitForStellarTransaction(
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs))
   }
-  throw new Error('The Stellar payment has not landed yet. Check it in a Stellar explorer.')
+  throw new StellarNotLandedError(
+    'The Stellar payment has not landed yet. Sign and send again; the payment can land only once.',
+  )
 }
 
-/** Horizon refused the payment before any ledger, so the same envelope may be submitted again. */
-export class StellarRejectedError extends Error {}
+/** The payment is not in a ledger, so submitting the same envelope again is safe. */
+export class StellarNotLandedError extends Error {}
 
 /** The payment landed in a ledger and failed, using its sequence number. */
 export class StellarFailedError extends Error {

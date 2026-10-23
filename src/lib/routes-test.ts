@@ -117,8 +117,9 @@ function address(value: string, format: string, label: string) {
   if (format === 'base58' && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) {
     throw new Error(`${label} must be a source-network Base58 address.`)
   }
-  if (format === 'strkey' && !/^(G[A-Z2-7]{55}|M[A-Z2-7]{68})$/.test(trimmed)) {
-    throw new Error(`${label} must be a Stellar account address (G… or M…).`)
+  // Routes takes classic Stellar accounts for senders and refunds, never muxed (M…) addresses.
+  if (format === 'strkey' && !/^G[A-Z2-7]{55}$/.test(trimmed)) {
+    throw new Error(`${label} must be a classic Stellar account address (G…).`)
   }
   return trimmed
 }

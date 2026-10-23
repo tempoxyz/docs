@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   injectedStellarWallets,
   StellarFailedError,
-  StellarRejectedError,
+  StellarNotLandedError,
   type StellarWallet,
   sendStellarTransaction,
   signsUnchanged,
@@ -48,10 +48,12 @@ function wallet({ account = sender, returns = signed } = {}) {
 }
 
 /** Horizon answers: one reply for the submission, then one per transaction lookup. */
-function horizon(submission: Response, ...lookups: Response[]) {
-  const fetcher = vi.fn(async (_url: string, init?: RequestInit) =>
-    init?.method === 'POST' ? submission : (lookups.shift() ?? new Response('', { status: 404 })),
-  )
+function horizon(submission: Response | Error, ...lookups: Response[]) {
+  const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
+    if (init?.method !== 'POST') return lookups.shift() ?? new Response('', { status: 404 })
+    if (submission instanceof Error) throw submission
+    return submission
+  })
   vi.stubGlobal('fetch', fetcher)
   return fetcher
 }
@@ -133,7 +135,7 @@ describe('Stellar signing', () => {
   it('explains a payment Horizon rejected before any ledger', async () => {
     horizon(rejected('tx_insufficient_balance'))
     const failure = sendStellarTransaction({ wallet: wallet().hana, sender, xdr: unsigned })
-    await expect(failure).rejects.toBeInstanceOf(StellarRejectedError)
+    await expect(failure).rejects.toBeInstanceOf(StellarNotLandedError)
     await expect(failure).rejects.toThrow('Add XLM, then try again. Nothing was sent.')
   })
   it('treats a rejected resubmission of a landed payment as sent', async () => {
@@ -156,6 +158,22 @@ describe('Stellar signing', () => {
       sendStellarTransaction({ wallet: wallet().hana, sender, xdr: unsigned }),
     ).resolves.toBe(hash)
   })
+  it('lets a payment Horizon did not take be submitted again', async () => {
+    horizon(new Response('Too Many Requests', { status: 429 }))
+    const limited = sendStellarTransaction({ wallet: wallet().hana, sender, xdr: unsigned })
+    await expect(limited).rejects.toBeInstanceOf(StellarNotLandedError)
+    await expect(limited).rejects.toThrow('Horizon did not take the payment (HTTP 429).')
+    horizon(new TypeError('Failed to fetch'))
+    await expect(
+      sendStellarTransaction({ wallet: wallet().hana, sender, xdr: unsigned }),
+    ).rejects.toThrow('Horizon could not be reached. Sign and send again')
+  })
+  it('treats an unavailable Horizon as sent when it already holds the payment', async () => {
+    horizon(new Response('', { status: 503 }), Response.json({ hash, successful: true }))
+    await expect(
+      sendStellarTransaction({ wallet: wallet().hana, sender, xdr: unsigned }),
+    ).resolves.toBe(hash)
+  })
 })
 
 describe('Stellar inclusion', () => {
@@ -171,6 +189,12 @@ describe('Stellar inclusion', () => {
     })
     expect(fetcher).toHaveBeenCalledTimes(3)
     expect(fetcher.mock.calls[0][0]).toBe(`https://horizon.stellar.org/transactions/${hash}`)
+  })
+  it('lets a payment that never landed be submitted again', async () => {
+    horizon(Response.json({}))
+    await expect(
+      waitForStellarTransaction(hash, { attempts: 2, intervalMs: 0 }),
+    ).rejects.toBeInstanceOf(StellarNotLandedError)
   })
   it('throws when the payment landed but failed', async () => {
     horizon(Response.json({}), Response.json({ hash, successful: false }))

@@ -71,7 +71,7 @@ import {
 import {
   connectStellarAccount,
   StellarFailedError,
-  StellarRejectedError,
+  StellarNotLandedError,
   sendStellarTransaction,
   stellarMainnet,
   useStellarWallets,
@@ -855,27 +855,22 @@ function RouteLifecycle({
     task(async () => {
       if (!stellarWallet) throw new Error('Install a Stellar wallet, such as Hana Wallet, to sign.')
       let hash = hashes[0]
-      // A saved hash was already submitted: wait for it instead of sending again.
-      if (!hash) {
-        assertUnexpired(expiresAt)
-        try {
+      try {
+        // A saved hash is one Horizon took: wait for it rather than prompting the wallet again.
+        if (!hash) {
+          assertUnexpired(expiresAt)
           hash = await sendStellarTransaction({
             wallet: stellarWallet,
             sender,
             xdr: stellarXdr,
             onHash: (submitted) => setHashes([submitted]),
           })
-        } catch (e) {
-          if (e instanceof StellarFailedError) setReverted(true)
-          // Horizon refused it before any ledger, so Sign and send can submit the envelope again.
-          if (e instanceof StellarRejectedError) setHashes([])
-          throw e
         }
-      }
-      try {
         await waitForStellarTransaction(hash)
       } catch (e) {
         if (e instanceof StellarFailedError) setReverted(true)
+        // A payment not in a ledger can be submitted again, since its sequence number applies once.
+        if (e instanceof StellarNotLandedError) setHashes([])
         throw e
       }
       setConfirmedCalls(1)

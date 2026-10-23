@@ -90,7 +90,11 @@ describe('route test requests', () => {
       sender: account,
     })
     expect(() => routeTestRequest(fromStellar, input)).toThrow(
-      'sender must be a Stellar account address (G… or M…).',
+      'sender must be a classic Stellar account address (G…).',
+    )
+    const muxed = 'MCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYAAAAAAAAAAAACE3C'
+    expect(() => routeTestRequest(fromStellar, { ...input, sender: muxed })).toThrow(
+      'sender must be a classic Stellar account address (G…).',
     )
   })
   it('cascades network and asset choices and fills single options', () => {
