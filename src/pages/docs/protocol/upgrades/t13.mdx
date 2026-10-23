@@ -46,7 +46,7 @@ A Zone sequencer executes transactions privately and settles batches on Tempo. B
 
 <ZoneDiagram
   name="prover"
-  alt="The Zone sequencer groups blocks into a batch and gathers the state witness. The Nitro prover replays the batch in AWS Nitro and signs an attestation. On Tempo, the Zone portal verifies quorum signatures and the attestation, then records state and queues withdrawals. In T13, NoProof lets quorum signatures settle a batch without a Nitro proof."
+  alt="Inside the private Zone, the sequencer sends a batch and state witness to the Nitro prover, which replays it in AWS Nitro and returns a signed attestation. The sequencer submits the batch, quorum signatures and attestation to the Zone portal on Tempo. The portal checks the signatures, the native verifier checks the attestation, and the batch settles: state is recorded and withdrawals are queued. In T13, a NoProof batch skips the verifier and settles on quorum signatures alone."
   caption="Private transactions and the state witness stay in the Zone. Tempo sees only the batch commitments, the attestation, and signatures."
 />
 
