@@ -87,15 +87,16 @@ Start indexing Tempo [here](https://goldsky.com/chains/tempo).
 
 ## <span className={`partner-logo partner-logo--moralis ${partnerLogo().className + ' ' + partnerLogoMoralis().className}`} aria-hidden="true" />Moralis
 
-[Moralis](https://moralis.com/chains/tempo/) supports Tempo mainnet across its Data API, Streams, Datashare, and Data Feeds:
+[Moralis](https://moralis.com) supports Tempo mainnet across its Data API, Streams, Datashare, and Data Feeds:
 
-- **[Data API](https://docs.moralis.com/data-api/supported-chains):** Wallet balances, transaction history, net worth, and profitability; token metadata, transfers, owners, and prices; NFTs by wallet and collection; blocks, transactions, and internal transactions; and labelled entities. DeFi positions and NFT trades, sale prices, and floor prices are not available for Tempo.
-- **[Streams](https://docs.moralis.com/streams/supported-chains):** Webhooks for token and NFT activity, contract events, internal transactions, and transaction data.
-- **[Datashare](https://docs.moralis.com/datashare/supported-chains) and [Data Feeds](https://docs.moralis.com/data-feeds/overview):** Token transfers, NFT transfers, and swaps delivered to your own warehouse or database, with historical backfill and live updates.
+- **[Data API](https://docs.moralis.com/data-api/supported-chains):** Wallet balances, transaction history, net worth, and profitability; token metadata, transfers, owners, and prices; NFTs by wallet and collection; blocks, transactions, and internal transactions; and labelled entities. DeFi positions and NFT trades, sale prices, and floor prices are currently not available for Tempo.
+- **[Streams](https://docs.moralis.com/streams/supported-chains):** Realtime webhooks for wallet, token and NFT activity, contract events, internal transactions, and transaction data, confirmed after 30 blocks.
+- **[Data Feeds](https://docs.moralis.com/data-feeds/overview):** Index Tempo into your own infrastructure with no indexing layer to build or run. Backfill from genesis, tail the chain head in realtime, or both, with automatic reorg correction. Covers raw blocks, transactions and event logs, plus decoded token transfers with balances, NFT transfers, swaps, prices, and metadata. Ready-made templates handle wallet transactions, balances, holders, swaps, OHLCV, and NFTs. Data lands in ClickHouse, Postgres, or MySQL, streams through Kafka, RabbitMQ, or SQS, or can be read over REST or Arrow Flight.
+- **[Datashare](https://docs.moralis.com/datashare/supported-chains):** Bulk historical exports of Tempo token transfers, NFT transfers, and swaps.
 
-Pass `tempo` or `0x1079` as the Data API `chain` value. Streams accepts only the hex chain ID `0x1079`. Tempo has no native gas token, so Moralis returns balances and transfers as TIP-20 tokens.
+Pass `tempo` or `0x1079` as the Data API `chain` value (or in `chains` on multi-chain endpoints). Streams accepts only the hex chain ID `0x1079`.
 
-Create an API key in the [Moralis dashboard](https://admin.moralis.com/register) and see the [Tempo release notes](https://docs.moralis.com/changelog#october-21-2026) for the full feature list.
+Create an API key in the [Moralis dashboard](https://admin.moralis.com) and see the [Tempo release notes](https://docs.moralis.com/changelog#tempo-is-now-supported) for the full feature list.
 
 ## <span className={`partner-logo partner-logo--range ${partnerLogo().className + ' ' + partnerLogoRange().className}`} aria-hidden="true" />Range
 
