@@ -94,6 +94,31 @@ export function subsidizedDelivery(data: Record<string, unknown>, decimals: numb
   }
 }
 
+type Amount = Quantity & { currency?: string }
+const usdUnits = (value: unknown, decimals: number) =>
+  (value as Amount | undefined)?.currency === 'USD' ? inDecimals(value, decimals) : undefined
+/**
+ * What a quote costs the sender, in destination base units, so the summary adds up. Both amounts
+ * must be USD-denominated (stablecoins); otherwise no cost is claimed. `total` is what is sent
+ * (or, for a subsidized quote, the guaranteed amount) minus what the route delivers. `priceImpact`
+ * is the part of it that the listed fees do not explain, and is left out when the fees are not all
+ * USD-denominated or when they already cover the whole difference.
+ */
+export function quoteCosts(data: Record<string, unknown>, decimals: number) {
+  const sent =
+    data.subsidize === true
+      ? subsidizedDelivery(data, decimals)?.guaranteed
+      : usdUnits(data.sourceAmount, decimals)
+  const routed = usdUnits(data.destinationAmount, decimals)
+  if (sent === undefined || routed === undefined || routed > sent) return undefined
+  const total = sent - routed
+  const fees = Array.isArray(data.fees) ? (data.fees as { amount?: Amount }[]) : []
+  const listed = fees.map((fee) => usdUnits(fee.amount, decimals))
+  if (listed.some((fee) => fee === undefined)) return { total }
+  const impact = total - listed.reduce<bigint>((sum, fee) => sum + (fee ?? 0n), 0n)
+  return { total, priceImpact: impact > 0n ? impact : undefined }
+}
+
 export function toBaseUnits(amount: string, decimals: number): string {
   if (!/^\d+(\.\d+)?$/.test(amount)) throw new Error('Enter a positive decimal amount.')
   const [whole, fraction = ''] = amount.split('.')
