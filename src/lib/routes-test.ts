@@ -4,6 +4,8 @@ const chain = z.object({
   id: z.string().min(1),
   name: z.string(),
   addressFormat: z.string(),
+  /** The chain family, such as `evm` or `solana`, that keys a deposit address's refund address. */
+  kind: z.string().min(1),
 })
 const token = z.object({
   tokenKey: z.string().min(1),
@@ -209,19 +211,11 @@ function pricing(route: TestRoute, input: RouteInput) {
 }
 
 /**
- * Quote parameters. Transfer quotes need the sender and recipient; deposit-address quotes price
- * the route alone, so their recipient and refund address are only asked for at creation.
- */
-/**
- * Quotes use the creation inputs. The API lists a deposit quote's recipient and refund address as
- * optional, but several deposit routes (Ethereum, Polygon, BNB, Tron) only quote with them.
+ * Quote parameters, which use the creation inputs. The API lists a deposit quote's recipient and
+ * refund address as optional, but several deposit routes (Ethereum, Polygon, BNB, Tron) only quote
+ * with them.
  */
 export function routeQuoteRequest(route: TestRoute, input: RouteInput) {
-  return routeTestRequest(route, input)
-}
-
-/** The creation request body. */
-export function routeTestRequest(route: TestRoute, input: RouteInput) {
   const common = {
     ...pricing(route, input),
     recipient: address(input.recipient, route.destinationChain.addressFormat, 'recipient'),
@@ -237,4 +231,12 @@ export function routeTestRequest(route: TestRoute, input: RouteInput) {
         ...common,
         refundAddress: address(input.refundAddress, route.sourceChain.addressFormat, 'refund'),
       }
+}
+
+/** The creation request body. A v2 deposit address takes one refund address per chain family. */
+export function routeTestRequest(route: TestRoute, input: RouteInput) {
+  const request = routeQuoteRequest(route, input)
+  if (!('refundAddress' in request)) return request
+  const { refundAddress, ...rest } = request
+  return { ...rest, refundAddresses: { [route.sourceChain.kind]: refundAddress } }
 }

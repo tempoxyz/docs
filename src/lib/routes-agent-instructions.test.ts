@@ -6,8 +6,8 @@ const sender = `0x${'1'.repeat(40)}`
 const recipient = `0x${'2'.repeat(40)}`
 const route: TestRoute = {
   id: 'route',
-  sourceChain: { id: 'eip155:8453', name: 'Base', addressFormat: 'hex' },
-  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' },
+  sourceChain: { id: 'eip155:8453', name: 'Base', addressFormat: 'hex', kind: 'evm' },
+  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex', kind: 'evm' },
   sourceToken: { tokenKey: 'eip155:8453/erc20:0xusdc', symbol: 'USDC', decimals: 6 },
   destinationToken: { tokenKey: 'eip155:4217/erc20:0xusdce', symbol: 'USDC.e', decimals: 6 },
   capabilities: { transfer: { modes: ['exactSource'] }, depositAddress: true },
@@ -46,12 +46,16 @@ describe('agent instructions', () => {
       ...run,
       method: 'depositAddress',
       quoteQuery: { amount: '1000000' },
-      createBody: { amount: '1000000', recipient, refundAddress: sender },
+      createBody: { amount: '1000000', recipient, refundAddresses: { evm: sender } },
       addresses: { recipient, refundAddress: sender },
     })
+    expect(markdown).not.toContain(sender)
     expect(markdown).toContain('/v1/routes/deposit-addresses/quote?amount=1000000')
-    expect(markdown).toContain('"refundAddress":"<REFUND_ADDRESS>"')
+    expect(markdown).toContain('-X POST "https://api.tempo.xyz/v2/routes/deposit-addresses"')
+    expect(markdown).toContain('"refundAddresses":{"evm":"<REFUND_ADDRESS>"}')
+    expect(markdown).toContain('`addresses[0].address`')
     expect(markdown).toContain('## 3. Fund the deposit address')
+    expect(markdown).toContain('/v1/routes/deposits?depositAddressId=<DEPOSIT_ADDRESS_ID>')
     expect(markdown).toContain('/v1/routes/deposits/<DEPOSIT_ID>')
     expect(markdown).not.toContain('source-transactions')
   })

@@ -16,8 +16,8 @@ import {
 
 const route: TestRoute = {
   id: 'test-route',
-  sourceChain: { id: 'eip155:1', name: 'Ethereum', addressFormat: 'hex' },
-  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' },
+  sourceChain: { id: 'eip155:1', name: 'Ethereum', addressFormat: 'hex', kind: 'evm' },
+  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex', kind: 'evm' },
   sourceToken: { tokenKey: 'eip155:1/erc20:source', symbol: 'USDC', decimals: 6 },
   destinationToken: { tokenKey: 'eip155:4217/erc20:destination', symbol: 'USDY', decimals: 18 },
   capabilities: { depositAddress: true, transfer: { modes: ['exactSource'] } },
@@ -58,11 +58,13 @@ describe('route test requests', () => {
     }).data[0]
     expect(() => routeTestRequest(depositOnly, input)).toThrow('advertise')
     const request = routeTestRequest(depositOnly, { ...input, method: 'depositAddress' })
+    // A v2 deposit address keys its refund address by the source chain's family.
     expect(request).toMatchObject({
       amount: '1234567',
-      refundAddress: input.refundAddress,
+      refundAddresses: { evm: input.refundAddress },
       subsidize: false,
     })
+    expect(request).not.toHaveProperty('refundAddress')
     expect(request).not.toHaveProperty('sender')
     expect(request).not.toHaveProperty('mode')
     expect(request).not.toHaveProperty('destinationChain')
@@ -84,9 +86,9 @@ describe('route test requests', () => {
     expect(() => routeTestRequest(route, { ...input, subsidize: true })).toThrow('1:1')
   })
   it('cascades network and asset choices and fills single options', () => {
-    const tempo = { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' }
-    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
-    const base = { id: 'eip155:8453', name: 'Base', addressFormat: 'hex' }
+    const tempo = { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex', kind: 'evm' }
+    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check', kind: 'tron' }
+    const base = { id: 'eip155:8453', name: 'Base', addressFormat: 'hex', kind: 'evm' }
     const usdt0 = { tokenKey: 'tempo/usdt0', symbol: 'USDT0', decimals: 6 }
     const toTron = {
       ...route,
@@ -174,13 +176,14 @@ describe('route test requests', () => {
   })
   it('offers wallet transfers for EVM and Tron sources, and deposits everywhere', () => {
     expect(demoMethods(route)).toEqual(['transfer', 'depositAddress'])
-    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
+    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check', kind: 'tron' }
     expect(demoMethods({ ...route, sourceChain: tron })).toEqual(['transfer', 'depositAddress'])
     // Routes has no signed action for Solana sources, so they fund through deposit addresses.
     const solana = {
       id: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
       name: 'Solana',
       addressFormat: 'base58',
+      kind: 'solana',
     }
     expect(demoMethods({ ...route, sourceChain: solana })).toEqual(['depositAddress'])
     expect(
@@ -205,7 +208,12 @@ describe('route test requests', () => {
     // Several deposit routes only quote with both addresses, so the quote needs them too.
     expect(() => routeQuoteRequest(route, { ...deposit, recipient: '' })).toThrow('recipient')
     expect(() => routeQuoteRequest(route, { ...deposit, refundAddress: '' })).toThrow('refund')
-    expect(routeQuoteRequest(route, deposit)).toEqual(routeTestRequest(route, deposit))
+    // The v1 quote takes one refund address; the v2 creation keys it by chain family.
+    const { refundAddress, ...rest } = routeQuoteRequest(route, deposit) as Record<string, unknown>
+    expect(routeTestRequest(route, deposit)).toEqual({
+      ...rest,
+      refundAddresses: { evm: refundAddress },
+    })
     // Transfer quotes need the same sender and recipient as creation.
     expect(() => routeQuoteRequest(route, { ...input, sender: '' })).toThrow('sender')
     expect(routeQuoteRequest(route, input)).toEqual(routeTestRequest(route, input))

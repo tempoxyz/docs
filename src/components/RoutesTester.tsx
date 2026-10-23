@@ -499,6 +499,12 @@ function RouteLifecycle({
   const balance = isTransfer ? sourceBalance.data : undefined
   const shortfall = balance !== undefined && requiredSource > 0n && balance < requiredSource
   const id = typeof created?.data.id === 'string' ? created.data.id : ''
+  // A single-source deposit address has one address, in the source chain's family.
+  const depositEntry = (
+    created?.data.addresses as { address?: unknown; status?: unknown }[] | undefined
+  )?.[0]
+  const depositAddressValue = String(depositEntry?.address ?? '')
+  const depositActive = depositEntry?.status === 'active'
   const parsedAction = sourceActionSchema.safeParse(created?.data.action)
   // Tron sources get Tron calls; every other transfer source gets EVM calls.
   const action =
@@ -538,9 +544,9 @@ function RouteLifecycle({
       </p>
     ) : null
   // What the canvas shows: where the route is, the amounts at each end, and the addresses.
-  // A created transfer carries its final terms. A created deposit address has only its address,
-  // so its amounts stay those of the quote.
-  const terms = (created?.data.sourceAmount ? created : quote)?.data
+  // A created transfer carries its final terms. A created deposit address carries none, so its
+  // amounts stay those of the quote.
+  const terms = (isTransfer && created ? created : quote)?.data
   const subsidizedTerms = terms?.subsidize === true
   const { decimals: destinationDecimals, symbol: destinationSymbol } = route.destinationToken
   const guaranteed =
@@ -716,7 +722,7 @@ function RouteLifecycle({
         startedAt: Date.now(),
         request: {
           method: 'POST',
-          path: `/${isTransfer ? 'transfers' : 'deposit-addresses'}`,
+          path: isTransfer ? '/transfers' : '/v2/deposit-addresses',
           body,
           idempotencyKey: crypto.randomUUID(),
         },
@@ -745,6 +751,12 @@ function RouteLifecycle({
       }
       if (typeof result.data.id !== 'string')
         throw new Error('Creation returned no ID. Retry to recover the response.')
+      if (
+        !isTransfer &&
+        typeof (result.data.addresses as { address?: unknown }[] | undefined)?.[0]?.address !==
+          'string'
+      )
+        throw new Error('Creation returned no deposit address. Retry to recover the response.')
       setCreated(result)
     })
   const signWithTempo = () =>
@@ -884,7 +896,7 @@ function RouteLifecycle({
       }
     })
   const fund = async () => {
-    const to = String(created?.data.address ?? '')
+    const to = depositAddressValue
     const token = route.sourceToken.tokenKey.split(':').at(-1) ?? ''
     const amount = requiredSource
     const onHash = (hash: string) => {
@@ -959,7 +971,8 @@ function RouteLifecycle({
     const result = await call({
       method: 'GET',
       path: '/deposits',
-      query: { depositAddress: created?.data.address, limit: 50 },
+      // The deposit address ID matches deposits on every address it holds.
+      query: { depositAddressId: id, limit: 50 },
     })
     const rows = Array.isArray(result.data.data)
       ? (result.data.data as Record<string, unknown>[])
@@ -989,11 +1002,7 @@ function RouteLifecycle({
   const pollTimeout = () =>
     setPollError('Stopped checking after 30 minutes. Check again to resume.')
   const watchingDeposit =
-    step === 3 &&
-    !isTransfer &&
-    created?.data.status === 'active' &&
-    !(deposits && deposits.length > 1) &&
-    !pollError
+    step === 3 && !isTransfer && depositActive && !(deposits && deposits.length > 1) && !pollError
   const tracking = step === 4 && !finalStatuses.has(String(current?.status ?? '')) && !pollError
   usePolling(watchingDeposit, poll(readDeposits), pollTimeout)
   usePolling(tracking, poll(readStatus), pollTimeout)
@@ -1506,7 +1515,7 @@ function RouteLifecycle({
               href={
                 isTransfer
                   ? '/docs/api/routes/transfers#getroutestransfer'
-                  : '/docs/api/routes/deposit-addresses#getroutesdepositaddress'
+                  : '/docs/api/routes/deposit-addresses#getroutesdepositaddressv2'
               }
             />
           )}
@@ -1550,7 +1559,7 @@ function RouteLifecycle({
               step === 3 ? (
                 <Demo.Button
                   type="button"
-                  disabled={busy || created?.data.status !== 'active'}
+                  disabled={busy || !depositActive}
                   onClick={() => void findDeposit()}
                 >
                   {busy ? 'Checking…' : 'Check now'}
@@ -1565,10 +1574,10 @@ function RouteLifecycle({
                   automatically as {route.destinationToken.symbol} on {route.destinationChain.name}.
                 </p>
                 <div {...depositAddress()}>
-                  <span {...depositAddressText()}>{String(created.data.address ?? '')}</span>
-                  <CopyButton text={String(created.data.address ?? '')} />
+                  <span {...depositAddressText()}>{depositAddressValue}</span>
+                  <CopyButton text={depositAddressValue} />
                 </div>
-                {created.data.status !== 'active' ? (
+                {!depositActive ? (
                   <p role="alert" {...errorText()}>
                     This address is not active. Do not fund it.
                   </p>

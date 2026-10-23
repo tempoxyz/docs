@@ -1,4 +1,4 @@
-import { routesApi } from './routes-execution'
+import { routesApi, routesApiV2 } from './routes-execution'
 import type { TestMethod, TestMode, TestRoute } from './routes-test'
 
 /** What a completed demo run did, to describe for an agent that repeats it for another user. */
@@ -24,10 +24,18 @@ const placeholders = {
   refundAddress: '<REFUND_ADDRESS>',
 } as const
 
-/** Replace the reader's addresses with placeholders, so nothing user-specific carries over. */
-function generalize(values: Record<string, unknown>, addresses: AgentRun['addresses']) {
+/**
+ * Replace the reader's addresses with placeholders, so nothing user-specific carries over. Nested
+ * objects, such as a deposit address's `refundAddresses`, are generalized too.
+ */
+function generalize(
+  values: Record<string, unknown>,
+  addresses: AgentRun['addresses'],
+): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(values).map(([key, value]) => {
+      if (value && typeof value === 'object' && !Array.isArray(value))
+        return [key, generalize(value as Record<string, unknown>, addresses)]
       const match = (Object.keys(placeholders) as (keyof typeof placeholders)[]).find(
         (name) => addresses[name] && value === addresses[name],
       )
@@ -93,14 +101,14 @@ export function agentInstructions(run: AgentRun): string {
     `## 2. Create the ${transfer ? 'transfer' : 'deposit address'}`,
     '',
     '```bash',
-    `curl -s -X POST "${routesApi}/${kind}" \\`,
+    `curl -s -X POST "${transfer ? routesApi : routesApiV2}/${kind}" \\`,
     '  -H "tempo-api-key: $TEMPO_API_KEY" \\',
     '  -H "content-type: application/json" \\',
     '  -H "idempotency-key: <NEW_UUID>" \\',
     `  -d '${JSON.stringify(createBody)}'`,
     '```',
     '',
-    `Save \`id\`${transfer ? ' and `action`' : ' and `address`'}. If the request fails or times out, retry it with the same idempotency key and body, so it cannot create a duplicate.`,
+    `${transfer ? 'Save `id` and `action`.' : 'Save `id` as `<DEPOSIT_ADDRESS_ID>`, and `addresses[0].address`. The response carries no terms, so the quote’s terms are the ones to show.'} If the request fails or times out, retry it with the same idempotency key and body, so it cannot create a duplicate.`,
     '',
     ...(transfer
       ? [
@@ -125,11 +133,12 @@ export function agentInstructions(run: AgentRun): string {
       : [
           '## 3. Fund the deposit address',
           '',
-          `- Send exactly ${run.amount} ${run.amountToken.symbol} on ${route.sourceChain.name} to \`address\`, from any wallet the user controls.`,
+          '- Check that `addresses[0].status` is `active`. Do not fund an address that is not.',
+          `- Send exactly ${run.amount} ${run.amountToken.symbol} on ${route.sourceChain.name} to \`addresses[0].address\`, from any wallet the user controls.`,
           '- Find the deposit every 6 seconds until one appears, and save its `id`:',
           '',
           '```bash',
-          `curl -s "${routesApi}/deposits?depositAddress=<ADDRESS>" -H "tempo-api-key: $TEMPO_API_KEY"`,
+          `curl -s "${routesApi}/deposits?depositAddressId=<DEPOSIT_ADDRESS_ID>" -H "tempo-api-key: $TEMPO_API_KEY"`,
           '```',
         ]),
     '',
