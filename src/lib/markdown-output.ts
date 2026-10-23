@@ -106,7 +106,11 @@ const interactiveDescriptions: Record<string, string> = {
     'get a quote (without a key, routes that support subsidies preview 1:1 delivery from a quote-only demo organization), ' +
     'add an API key to create the transfer or deposit address, ' +
     'sign with Tempo Wallet (Tempo sources) or a browser wallet, and track delivery. ' +
-    'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory.',
+    'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory. ' +
+    'Example 1:1 terms use the demo organization; your pricing and eligibility apply with your key. ' +
+    'Cover route fees for your users by enabling billing in Tempo Console (https://console.tempo.xyz/?to=/:org/billing). ' +
+    'Your organization pays these fees unless you have a separate pricing agreement with Tempo. ' +
+    'Contact Tempo for pricing requests (https://tempo.xyz/contact). Billing, coverage policy, and route eligibility are separate requirements.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   GuideDemo:
     "In the interactive web page, a demo runs the steps that follow on the Tempo Accounts devnet with the reader's own signers: a passkey on their device, or keys the page generates. Each step that changes the account sends a devnet transaction and shows its hash, next to what changed in the app and on the account. It runs only where the page can reach Tempo Accounts devnet.",

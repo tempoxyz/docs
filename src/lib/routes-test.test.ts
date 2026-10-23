@@ -114,7 +114,7 @@ describe('route test requests', () => {
     expect(fromEthereum.options.destinationChains.map((o) => o.label)).toEqual(['Tempo', 'Base'])
     expect(fromEthereum.route).toBeUndefined()
   })
-  it('reads the 1:1 amount a subsidy guarantees and what Tempo covers', () => {
+  it('reads the 1:1 amount a subsidy guarantees and the route fees covered', () => {
     const deposit = {
       subsidize: true,
       sourceAmount: { baseUnits: '1000000', decimals: 6, formatted: '1' },

@@ -15,7 +15,9 @@ import { RoutesTester } from '../../../components/RoutesTester'
 
 Run a route end to end in your browser. Choose a source and destination, and the demo quotes it; add an API key to create the transfer or deposit address, fund it from your wallet, and track delivery. The log beside the steps shows each Routes API request and response.
 
-Without a key, routes that support subsidies quote 1:1 delivery from a quote-only demo organization. The preview shows the terms an approved organization receives; it cannot create a route.
+Without a key, routes that support subsidies quote 1:1 delivery from a quote-only demo organization. This is an example of 1:1 delivery. Your organization's pricing and eligibility apply when you add your API key; the preview cannot create a route.
+
+Cover route fees for your users by enabling [billing in Tempo Console](https://console.tempo.xyz/?to=/:org/billing). Your organization pays these fees unless you have a separate pricing agreement with Tempo. [Contact Tempo for pricing requests](https://tempo.xyz/contact). See [fee coverage requirements](/docs/routes/quotes#offer-11-delivery) before creating a route.
 
 :::warning
 This demo moves real funds on live networks. Start with a small amount. Creating a route requires a project key with `routes:read`, `routes:write`, and `data:read` from [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys); the key stays in this tab's memory.
@@ -34,7 +36,7 @@ To open a specific route, choose **Try** beside it in [Supported routes](/docs/r
 | From Tron | Choose a Tron wallet, such as TronLink, then sign the calls one at a time. Each call needs TRX for energy. |
 | From Solana, or when you choose Deposit address | Send the source asset to the generated deposit address with your wallet, or from any wallet. The demo detects the deposit and tracks it. |
 
-Routes that support subsidies offer 1:1 delivery, where the recipient receives the amount sent and the quote shows the amount Tempo covers. When you add your key, the demo quotes again with your organization's pricing. Without subsidy approval, it quotes the route without 1:1 delivery and says why; see [Offer 1:1 delivery](/docs/routes/quotes#offer-11-delivery).
+Routes that support subsidies offer 1:1 delivery, where the recipient receives the amount sent and the quote shows the route fees covered. When you add your key, the demo quotes again with your organization's pricing. Without eligible fee coverage, it quotes the route without 1:1 delivery and says why; see [Offer 1:1 delivery](/docs/routes/quotes#offer-11-delivery).
 
 Retrying a creation reuses the same request and idempotency key, so it cannot create a duplicate. If a wallet may have sent a transaction, check its history before trying again.
 

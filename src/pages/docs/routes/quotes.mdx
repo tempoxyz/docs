@@ -43,9 +43,13 @@ A quote does not create or reserve a transfer. Review the terms returned when yo
 
 ## Offer 1:1 delivery
 
-Where your organization is approved for subsidies, send `subsidize: true` on the quote and the create request. Tempo then guarantees normalized 1:1 delivery: the recipient receives the amount sent, and `destinationAmountRequired` shows that guaranteed amount. Transfers support this for `exactSource` only.
+Cover route fees for your users by enabling [billing in Tempo Console](https://console.tempo.xyz/?to=/:org/billing). Your organization pays these fees unless you have a separate pricing agreement with Tempo. [Contact Tempo for pricing requests](https://tempo.xyz/contact).
 
-The route directory's `subsidies` field shows which funding methods accept a subsidy on each route. Without approval, the API rejects the request with a `routes_subsidy_*` error code. [Try a route](/docs/routes/test) with your key to see whether a subsidy applies.
+Billing activation and route coverage are separate requirements. Your organization needs active production billing for customer-paid coverage, an enabled coverage policy, and eligibility for the selected route. If billing is unavailable, contact Tempo to enable it; see [billing setup](/docs/api/console/usage-and-billing#add-a-payment-method).
+
+Where your organization is eligible for fee coverage, send `subsidize: true` on the quote and the create request. Tempo then guarantees normalized 1:1 delivery: the recipient receives the amount sent, and `destinationAmountRequired` shows that guaranteed amount. Transfers support this for `exactSource` only.
+
+The route directory's `subsidies` field shows fee coverage support for each funding method under the caller's route policy; it does not identify who pays or guarantee access. Requests that do not meet coverage requirements fail with a `routes_subsidy_*` error code; missing billing returns `billing_required`. [Try a route](/docs/routes/test) with your key to see whether a subsidy applies.
 
 ## Refresh expired quotes
 

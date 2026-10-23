@@ -21,6 +21,12 @@ Configure your backend to call the Routes API. Confirm [beta access](/docs/route
 
 The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it does not sign blockchain transactions.
 
+## Enable billing for route fee coverage
+
+Cover route fees for your users by enabling [billing in Tempo Console](https://console.tempo.xyz/?to=/:org/billing). Your organization pays these fees unless you have a separate pricing agreement with Tempo. [Contact Tempo for pricing requests](https://tempo.xyz/contact).
+
+Ask an organization owner to select production in Console, add a payment method, and confirm **Active** billing; follow [billing setup](/docs/api/console/usage-and-billing#add-a-payment-method). If billing is not enabled for the organization, contact Tempo to enable it. Billing does not grant route access or enable coverage policy: check the [1:1 delivery requirements](/docs/routes/quotes#offer-11-delivery) separately.
+
 ## Configure the client
 
 Set `TEMPO_API_KEY` in your environment. TypeScript uses Node.js with built-in `fetch`; Python uses `requests` (`python -m pip install requests`); cURL examples require `curl` and `jq`.
