@@ -11,7 +11,7 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 T13 ships the prover for [Tempo Zones](/docs/zones), adds multi-block Tempo imports for Zones, makes block system calls explicit, and lets transactions pay fees in OUSD when the fee payer has no pathUSD.
 
 :::info[T13 status]
-T13 is scheduled for **October 29, 2026 at 15:00 UTC on Moderato testnet** and **November 3, 2026 at 15:00 UTC on mainnet**, as set by the [merged scheduling PR](https://github.com/tempoxyz/tempo/pull/8480). The required node release is not yet published. See [Node Operator Updates](/docs/guide/node/network-upgrades#t13) before upgrading.
+T13 is scheduled for **October 29, 2026 at 15:00 UTC on Moderato testnet** and **November 3, 2026 at 15:00 UTC on mainnet**. The required node release is not yet published. See [Node Operator Updates](/docs/guide/node/network-upgrades#t13) before upgrading.
 :::
 
 **Integration note:** If your integration sets `feeToken` to pathUSD or requires a pathUSD balance for gas, users who hold only OUSD still fail after T13. [See integration guidance](#integration-impact).
@@ -31,8 +31,6 @@ T13 is scheduled for **October 29, 2026 at 15:00 UTC on Moderato testnet** and *
 - **Multi-block Tempo imports for Zones:** bounds the work in each Zone batch so the prover can replay it, and lets Zones catch up after downtime.
 - **Explicit block system calls:** Tempo blocks run only the system calls Tempo uses, instead of inheriting Ethereum's, so future Ethereum changes cannot alter block validity.
 - **OUSD fee-token fallback:** a transaction with no fee token selected pays in OUSD when the fee payer has too little pathUSD, instead of failing.
-
-The [T13 meta-TIP PR (TIP-1146)](https://github.com/tempoxyz/tempo/pull/8289) collects these TIPs and additional fixes; it is still under review.
 
 <span id="features" />
 
@@ -54,11 +52,9 @@ A Zone sequencer executes transactions privately and settles batches on Tempo. B
 2. **Prove.** The prover replays the batch inside an AWS Nitro Enclave running approved code, then signs an attestation bound to the Zone, the batch, and its resulting commitments.
 3. **Settle.** The sequencer submits the batch, attestation, and quorum signatures to the Zone's portal. The portal checks the signatures and continuity, and the native verifier at `0x5a56000000000000000000000000000000000000` checks the AWS certificate chain, approved enclave measurements, and batch digest. Only then does the portal record the new state and queue withdrawals.
 
-This is a TEE-based prover, not a zero-knowledge proof: security rests on the approved enclave code and AWS Nitro's attestation. It checks execution, including balances and authorized transfers. It does not guarantee uptime, transaction inclusion, or completed withdrawals, and Zone operators still see plaintext data.
+The prover runs in a trusted execution environment: security rests on the approved enclave code and AWS Nitro's attestation. It checks execution, including balances and authorized transfers.
 
-**Temporary NoProof fallback.** T13 ships the prover with training wheels. A sequencer can still settle a batch in `NoProof` mode (`verifierConfig = 0x02`, empty proof), which keeps the quorum and continuity checks but skips Nitro verification, so Zones keep settling if proving fails during rollout. Because `NoProof` is allowed even when proving works, any batch settled this way still relies on the sequencer quorum. Nitro proofs also require approved enclave measurements, and the [release measurement registry](https://github.com/tempoxyz/tempo/blob/main/crates/precompiles/src/zone_verifier/pcrs.json) is currently empty, so Zones settle through `NoProof` until measurements are approved.
-
-A later upgrade removes `NoProof`; after that, a missing or invalid proof stops settlement. Forced exits are not part of T13.
+**Temporary NoProof fallback.** During rollout, a sequencer can also settle a batch in `NoProof` mode, which keeps the signature and continuity checks but skips attestation verification. A later upgrade removes this mode.
 
 Read the [specification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1098.md) and [Zone proving and settlement](/docs/protocol/zones/proving).
 
