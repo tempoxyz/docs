@@ -4,6 +4,7 @@ import {
   demoMethods,
   directorySchema,
   linkedRoute,
+  quoteCosts,
   routeChoices,
   routeDemoHref,
   routeQuoteRequest,
@@ -131,6 +132,44 @@ describe('route test requests', () => {
     expect(subsidizedDelivery({ sourceAmount: { baseUnits: '5', decimals: 18 } }, 6)).toEqual({
       guaranteed: 0n,
       covered: 0n,
+    })
+  })
+  it('splits a quote into listed fees and the price impact no fee explains', () => {
+    const usd = (baseUnits: string) => ({ baseUnits, decimals: 6, currency: 'USD' })
+    const quote = {
+      sourceAmount: usd('5000000'),
+      destinationAmount: usd('4972951'),
+      fees: [{ amount: usd('21590') }],
+    }
+    // Sent 5, delivered 4.972951: 0.027049 in all, of which 0.02159 is the fee.
+    expect(quoteCosts(quote, 6)).toEqual({ total: 27_049n, priceImpact: 5_459n })
+    // The same gap, expressed in the destination token's precision.
+    expect(quoteCosts({ ...quote, sourceAmount: { ...usd('5'), decimals: 0 } }, 6)).toEqual({
+      total: 5_000_000n - 4_972_951n,
+      priceImpact: 5_459n,
+    })
+    // A subsidized quote counts from the guaranteed amount, which is what Tempo covers.
+    expect(
+      quoteCosts({ ...quote, subsidize: true, destinationAmountRequired: usd('5000000') }, 6),
+    ).toEqual({ total: 27_049n, priceImpact: 5_459n })
+  })
+  it('never reports negative price impact or costs it cannot verify', () => {
+    const usd = (baseUnits: string, currency = 'USD') => ({ baseUnits, decimals: 6, currency })
+    const base = { sourceAmount: usd('1000000'), destinationAmount: usd('990000') }
+    // Fees that exceed the gap leave no impact to show.
+    expect(quoteCosts({ ...base, fees: [{ amount: usd('20000') }] }, 6)).toEqual({
+      total: 10_000n,
+      priceImpact: undefined,
+    })
+    // No fees: the whole gap is price impact.
+    expect(quoteCosts({ ...base, fees: [] }, 6)).toEqual({ total: 10_000n, priceImpact: 10_000n })
+    // Receiving more than was sent is not a cost.
+    expect(quoteCosts({ ...base, destinationAmount: usd('1010000') }, 6)).toBeUndefined()
+    // Non-USD amounts cannot be compared, and a non-USD fee leaves the impact unknown.
+    expect(quoteCosts({ ...base, destinationAmount: usd('990000', 'EUR') }, 6)).toBeUndefined()
+    expect(quoteCosts({ ...base, sourceAmount: { baseUnits: '1000000' } }, 6)).toBeUndefined()
+    expect(quoteCosts({ ...base, fees: [{ amount: usd('1', 'ETH') }] }, 6)).toEqual({
+      total: 10_000n,
     })
   })
   it('offers wallet transfers for EVM and Tron sources, and deposits everywhere', () => {

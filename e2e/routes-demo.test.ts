@@ -561,7 +561,7 @@ test.describe('Routes demo', () => {
 
     // Transfer fees are charged on top of the routed amount, here in ETH.
     await expect(lifecycle(page)).toContainText(
-      'You send1 USDCRecipient gets0.9991 USDC.eFee0.0001006 ETH',
+      'You send1 USDCRecipient gets0.9991 USDC.eProvider fee0.0001006 ETHTotal cost0.0009 USDC.e',
     )
     const [quote] = api.to('GET', '/v1/routes/transfers/quote')
     expect(Object.fromEntries(quote.query)).toMatchObject({
@@ -697,7 +697,7 @@ test.describe('Routes demo', () => {
 
     // Tempo covers the gap between the routed amount (0.9591) and 1:1 delivery.
     await expect(lifecycle(page)).toContainText(
-      'Recipient gets1 USDC.eCovered by Tempo0.0409 USDC.eFeesNone',
+      'Recipient gets1 USDC.eCovered by Tempo0.0409 USDC.ePrice impact0.0409 USDC.e',
     )
     await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
     const quoteQuery = Object.fromEntries(
