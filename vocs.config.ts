@@ -36,14 +36,15 @@ const changelog = Changelog.from({
   async fetch(options = {}) {
     const limit = options.limit ?? 50
     // The repository also publishes package-only tags. Over-fetch, then retain
-    // the requested number of network releases for the public changelog.
+    // the requested number of network releases for the public changelog. Node releases
+    // are tagged vX.Y.Z until v1.16.x and tempo/vX.Y.Z from v1.17.0.
     const releases = await tempoChangelog.fetch({
       ...options,
       limit: Math.min(limit * 5, 100),
     })
 
     return releases
-      .filter((release) => /^v\d+\.\d+\.\d+(?:[-+].*)?$/.test(release.version))
+      .filter((release) => /^(?:tempo\/)?v\d+\.\d+\.\d+(?:[-+].*)?$/.test(release.version))
       .slice(0, limit)
       .map((release) => {
         // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain

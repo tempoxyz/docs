@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="320" viewBox="0 88 960 320" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
+<title>Fee-token fallback in T13</title>
+<desc>If the transaction already has a fee token from feeToken, a stored preference, or inference, it pays in that token. Otherwise it pays in pathUSD if the balance covers the maximum fee, else in OUSD. If neither covers it, the transaction is rejected.</desc>
+<text x="32" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">1 · ALREADY CHOSEN</text>
+<rect x="32" y="148" width="260" height="212" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(162 197)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<rect x="-22" y="-25" width="44" height="50" rx="4"/>
+<path d="M-11 -12h23 M-11 0h23 M-11 12h14"/>
+</g>
+<text x="162" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">Chosen token</text>
+<text x="162" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">feeToken, preference,</text>
+<text x="162" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">or inferred token</text>
+<path d="M308 254 L334 254 M326.00 250.00 L334 254 L326.00 258.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="321" y="240" font-size="13" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">none</text>
+<text x="350" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">2 · FALLBACK</text>
+<rect x="350" y="148" width="260" height="212" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
+<g transform="translate(480 197)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="0" cy="0" r="22"/>
+<path d="M0 -14v28 M7 -8h-9a5 5 0 000 10h4a5 5 0 010 10h-9"/>
+</g>
+<text x="480" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">pathUSD</text>
+<text x="480" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">If the balance covers</text>
+<text x="480" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">the maximum fee</text>
+<path d="M626 254 L652 254 M644.00 250.00 L652 254 L644.00 258.00" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="639" y="240" font-size="13" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">too little</text>
+<text x="668" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--diagram-accent, #168f24)">3 · NEW IN T13</text>
+<rect x="668" y="148" width="260" height="212" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-accent, #168f24)" stroke-width="1.5"/>
+<g transform="translate(798 197)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="0" cy="0" r="22"/>
+<path d="M0 -14v28 M7 -8h-9a5 5 0 000 10h4a5 5 0 010 10h-9"/>
+</g>
+<text x="798" y="254" font-size="22" font-weight="600" text-anchor="middle" fill="currentColor">OUSD</text>
+<text x="798" y="296" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">If pathUSD cannot</text>
+<text x="798" y="322" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">cover the maximum fee</text>
+<text x="480" y="396" font-size="16" font-weight="400" text-anchor="middle" fill="var(--foreground-secondary, #666)">If neither covers the maximum fee, the transaction is rejected for insufficient funds.</text>
+</svg>
