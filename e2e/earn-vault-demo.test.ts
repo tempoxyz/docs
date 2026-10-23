@@ -39,19 +39,13 @@ for (const width of [1296, 390]) {
     await expect(network).toHaveValue('mainnet')
     await expect(network.locator('option')).toHaveText(['Moderato testnet', 'Tempo mainnet'])
     await expect(dropdown).toHaveValue(sentoraPathUsdVault)
-    await expect(dropdown.locator('option')).toHaveText([
-      'Choose a vault',
-      'Sentora pathUSD (Earn)',
-    ])
-    await dropdown.selectOption('')
-    await expect(demo.getByTestId('earn-vault-details')).toHaveCount(0)
-    await dropdown.selectOption(sentoraPathUsdVault)
+    await expect(dropdown.locator('option')).toHaveText(['Sentora pathUSD (Earn)'])
     await demo.getByRole('button', { name: 'Refresh vault', exact: true }).click()
     await expect(demo.getByTestId('earn-vault-details')).toBeVisible()
     await network.selectOption('testnet')
     const testnet = earnVaultForNetwork('testnet')
     await expect(dropdown).toHaveValue(testnet.id)
-    await expect(dropdown.locator('option')).toHaveText(['Choose a vault', 'pathUSD test vault'])
+    await expect(dropdown.locator('option')).toHaveText(['pathUSD test vault'])
     await expect(demo.getByTestId('earn-vault-details')).toContainText(testnet.id)
     await expect(demo).not.toContainText(sentoraPathUsdVault)
     await network.selectOption('mainnet')

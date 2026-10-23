@@ -17,14 +17,12 @@ export function EarnVaultDemo() {
   const inputId = React.useId()
   const ready = useHydrated()
   const [network, setNetwork] = React.useState<EarnNetwork>('mainnet')
-  const [selectedId, setSelectedId] = React.useState(earnVaultForNetwork('mainnet').id)
   const [vault, setVault] = React.useState<EarnVault | null>(null)
   const [pending, setPending] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [copied, copy] = useCopyToClipboard()
   const request = React.useRef<AbortController | null>(null)
   const approved = earnVaultForNetwork(network)
-  const selected = vault && selectedId === approved.id ? vault : null
   const inputClass = ui.earnVaultDemoStateState().className
 
   function changeNetwork(value: EarnNetwork) {
@@ -32,7 +30,6 @@ export function EarnVaultDemo() {
     request.current?.abort()
     request.current = null
     setVault(null)
-    setSelectedId(earnVaultForNetwork(value).id)
     setPending(true)
     setError(null)
     setNetwork(value)
@@ -149,7 +146,7 @@ export function EarnVaultDemo() {
             number={2}
             title="Choose a vault to inspect"
             active={Boolean(vault)}
-            completed={Boolean(selected)}
+            completed={Boolean(vault)}
           >
             <div {...ui.earnVaultDemoLayout4()}>
               <label htmlFor={`${inputId}-vault`} {...ui.label()}>
@@ -157,42 +154,39 @@ export function EarnVaultDemo() {
               </label>
               <select
                 id={`${inputId}-vault`}
-                value={vault ? selectedId : ''}
                 disabled={!vault || pending}
-                onChange={(event) => setSelectedId(event.target.value)}
                 className={`${inputClass} ${ui.select().className}`}
               >
-                <option value="">Choose a vault</option>
-                {vault && <option value={approved.id}>{approved.label}</option>}
+                <option value={approved.id}>{approved.label}</option>
               </select>
-              {selected ? (
+              {vault ? (
                 <div data-testid="earn-vault-details" {...ui.earnVaultDemoLayout5()}>
                   <dl {...ui.dl()}>
                     <Field label="Accepted asset">
-                      {selected.assetToken.symbol}
-                      <span {...ui.earnVaultDemoText3()}>{selected.assetToken.address}</span>
+                      {vault.assetToken.symbol}
+                      <span {...ui.earnVaultDemoText3()}>{vault.assetToken.address}</span>
                     </Field>
                     <Field label="Share-token access">
-                      {selected.access?.status === 'open'
+                      {vault.access?.status === 'open'
                         ? 'Open'
-                        : selected.access?.status === 'allowlisted'
+                        : vault.access?.status === 'allowlisted'
                           ? 'Allowlisted'
                           : 'Not reported'}
                     </Field>
                     <Field label="Deposits">
-                      {selected.state.depositsPaused
+                      {vault.state.depositsPaused
                         ? 'Paused'
-                        : supported(selected.capabilities?.deposit)}
+                        : supported(vault.capabilities?.deposit)}
                     </Field>
-                    <Field label="Vault-wide liquidity">{formatVaultLiquidity(selected)}</Field>
+                    <Field label="Vault-wide liquidity">{formatVaultLiquidity(vault)}</Field>
                     <Field label="Immediate redemption">
-                      {supported(selected.capabilities?.redeem)}
+                      {supported(vault.capabilities?.redeem)}
                     </Field>
                     <Field label="Queued redemption">
-                      {supported(selected.capabilities?.asyncRedeem)}
+                      {supported(vault.capabilities?.asyncRedeem)}
                     </Field>
                     <Field label="Vault address">
-                      <span {...ui.earnVaultDemoText4()}>{selected.id}</span>
+                      <span {...ui.earnVaultDemoText4()}>{vault.id}</span>
                     </Field>
                     <Field label="Network">
                       {network === 'mainnet' ? 'Tempo mainnet' : 'Moderato testnet'}
@@ -202,8 +196,7 @@ export function EarnVaultDemo() {
                     <Button
                       type="button"
                       onClick={async () => {
-                        if (!(await copy(selected.id)))
-                          setError('Could not copy the vault address.')
+                        if (!(await copy(vault.id))) setError('Could not copy the vault address.')
                       }}
                     >
                       {copied ? 'Copied' : 'Copy vault address'}
@@ -212,11 +205,7 @@ export function EarnVaultDemo() {
                 </div>
               ) : (
                 <p {...ui.earnVaultDemoDescription2()}>
-                  {pending
-                    ? 'Loading vault…'
-                    : vault
-                      ? 'Choose a vault to inspect.'
-                      : 'Refresh to retry loading this vault.'}
+                  {pending ? 'Loading vault…' : 'Refresh to retry loading this vault.'}
                 </p>
               )}
             </div>
