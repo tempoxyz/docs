@@ -77,7 +77,8 @@ jq -n \
   --arg tron "$TRON_REFUND_ADDRESS" \
   --arg amount "$ROUTE_AMOUNT" \
   '{destinationToken: $destinationToken, recipient: $recipient,
-    refundAddresses: ({evm: $evm, solana: $solana, tron: $tron} | with_entries(select(.value != ""))),
+    refundAddresses: ({evm: $evm, solana: $solana, tron: $tron}
+      | with_entries(select(.value != ""))),
     amount: $amount}' \
   > deposit-address-request.json
 ```
@@ -106,8 +107,8 @@ Save `ROUTE_DEPOSIT_ADDRESS_ID` with your customer record.
 Print each address with its status and sources:
 
 ```bash
-jq -r '.addresses[]
-  | "\(.status)\t\(.address)\t\([.sources[] | "\(.token.symbol) on \(.chain.name)"] | join(", "))"' \
+jq -r '.addresses[] | [.status, .address,
+  ([.sources[] | "\(.token.symbol) on \(.chain.name)"] | join(", "))] | @tsv' \
   deposit-address.json
 ```
 
