@@ -1391,6 +1391,28 @@ global({
   },
 })
 
+// Long URLs, signatures and identifiers must wrap inside the article. Keep
+// fenced code's whitespace and its own horizontal scrolling unchanged.
+global({
+  '@layer utilities': {
+    'article[data-v-content] :is(p, li, h1, h2, h3, h4, h5, h6)[data-v]': {
+      overflowWrap: 'anywhere',
+    },
+    'article[data-v-content] :is(p, li, h1, h2, h3, h4, h5, h6)[data-v] code[data-v]': {
+      whiteSpace: 'normal',
+      overflowWrap: 'anywhere',
+    },
+    'article[data-v-content] [role="tablist"]': {
+      minWidth: 0,
+      overflowX: 'auto',
+      overflowY: 'hidden',
+    },
+    'article[data-v-content] [role="tab"]': {
+      flexShrink: 0,
+    },
+  },
+})
+
 /* Formal specifications link back to their index above the page title. */
 
 // Vocs owns the Mermaid wrapper markup.
