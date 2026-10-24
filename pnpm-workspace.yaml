@@ -30,6 +30,9 @@ onlyBuiltDependencies:
   - vue-demi
 
 overrides:
+  "zod@>=4.0.0 <4.6.6": "4.6.7"
+  "fast-uri@>=3.0.0 <3.1.9": "3.1.9"
+  "body-parser@>=2.0.0 <2.4.0": "2.4.0"
   vocs: https://pkg.pr.new/vocs@1c023ba
   # Configurable account hash domains matching the t14-checkpoint devnet (wevm/ox#519).
   'viem@2.57.5>ox': https://pkg.pr.new/ox@bf010ee
@@ -38,7 +41,7 @@ overrides:
   'baseline-browser-mapping@<2.11.0': 2.11.0
   'browserslist@<4.28.7': 4.28.7
   dompurify: '>=3.4.0'
-  'fast-uri@>=3.0.0 <3.1.6': 3.1.6
+  'fast-uri@>=3.0.0 <3.1.6': 3.1.9
   'fflate@>=0.4.5 <0.4.9': 0.4.9
   'js-yaml@>=4.0.0 <4.3.2': 4.3.2
   'nanoid@>=3.0.0 <3.3.18': 3.3.18
