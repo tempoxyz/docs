@@ -4,10 +4,21 @@ import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
 import { describe, expect, test, vi } from 'vitest'
 import type { Ir } from '../../node_modules/vocs/dist/internal/openapi/parser.js'
+import networkIdentities from '../snippets/network-identities.json'
 import { docsLinkCards } from './docs-link-cards'
 import { plainMarkdownComponents } from './markdown-output'
 
 describe('plainMarkdownComponents', () => {
+  test('exports generated network identity epochs as text', async () => {
+    for (const network of ['mainnet', 'testnet'] as const) {
+      const output = await render(
+        `**Network identity, from epoch {networkIdentities.${network}.fromEpoch}:**`,
+      )
+      expect(output.trim()).toBe(
+        `**Network identity, from epoch ${networkIdentities[network].fromEpoch}:**`,
+      )
+    }
+  })
   test('keeps the linked specification badge with its own page in full exports', async () => {
     const output = await render(`
 <span id="old-title" />

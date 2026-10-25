@@ -11,6 +11,7 @@ import {
 import { operationWithQuery } from '../../node_modules/vocs/dist/internal/openapi/query-presets.js'
 import { groupPath } from '../../node_modules/vocs/dist/internal/openapi/route.js'
 import { codeSamples } from '../../node_modules/vocs/dist/internal/openapi/sample.js'
+import networkIdentities from '../snippets/network-identities.json'
 import { tempoAgentSetupCommands } from './ai-install-commands'
 import { docsLinkCards } from './docs-link-cards'
 import { loadTempoOpenApi } from './tempo-openapi'
@@ -242,6 +243,11 @@ function rewriteNode(
   context: MarkdownContext,
 ): MarkdownNode[] {
   if (node.type === 'mdxjsEsm') return []
+  if (node.type === 'mdxTextExpression') {
+    const network = node.value?.match(/^networkIdentities\.(mainnet|testnet)\.fromEpoch$/)?.[1]
+    if (network === 'mainnet' || network === 'testnet')
+      return [text(String(networkIdentities[network].fromEpoch))]
+  }
   if (node.type === 'html' && node.value?.trim() === '<!-- changelog unavailable -->')
     return [
       paragraph([
