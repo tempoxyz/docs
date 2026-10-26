@@ -67,7 +67,7 @@
     "unplugin-icons": "^23.0.1",
     "viem": "2.57.5",
     "viem-zones-sandbox": "npm:viem@2.54.6",
-    "vocs": "https://pkg.pr.new/vocs@1c023ba",
+    "vocs": "2.11.0",
     "wagmi": "3.7.7",
     "waku": "1.0.0-rc.3",
     "webauthx": "~0.1.2",
