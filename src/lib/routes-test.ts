@@ -41,8 +41,15 @@ export type RoutePick = {
 type Option = { value: string; label: string }
 const unique = (options: Option[]) => [...new Map(options.map((o) => [o.value, o])).values()]
 const only = (options: Option[]) => (options.length === 1 ? options[0].value : '')
+const isTempo = (chainId: string) => /^eip155:(4217|42431)$/.test(chainId)
+/** On Tempo, OUSD is the default destination asset when the route offers it. */
+const preferred = (chainId: string, options: Option[]) =>
+  (isTempo(chainId) && options.find((o) => o.label === 'OUSD')?.value) || ''
 
-/** Cascade source network → asset → destination network → asset, filling single-option steps. */
+/**
+ * Cascade source network → asset → destination network → asset, filling single-option steps and
+ * defaulting a Tempo destination to OUSD until the reader picks another asset.
+ */
 export function routeChoices(routes: TestRoute[], pick: RoutePick) {
   const sourceChains = unique(
     routes.map((r) => ({ value: r.sourceChain.id, label: r.sourceChain.name })),
@@ -62,7 +69,10 @@ export function routeChoices(routes: TestRoute[], pick: RoutePick) {
   const destinationTokens = unique(
     toChain.map((r) => ({ value: r.destinationToken.tokenKey, label: r.destinationToken.symbol })),
   )
-  const destinationToken = pick.destinationToken || only(destinationTokens)
+  const destinationToken =
+    pick.destinationToken ||
+    only(destinationTokens) ||
+    preferred(destinationChain, destinationTokens)
   return {
     options: { sourceChains, sourceTokens, destinationChains, destinationTokens },
     pick: { sourceChain, sourceToken, destinationChain, destinationToken },
