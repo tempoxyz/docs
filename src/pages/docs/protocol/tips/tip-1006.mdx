@@ -5,7 +5,7 @@ description: The burnAt function for TIP-20 tokens, enabling authorized administ
 authors: Dan Robinson
 status: In Review
 related: N/A
-protocolVersion: TBD
+protocolVersion: T12
 ogImage: /og/2026-q4/og_2026-q4_docs_protocol-tips-tip-1006_title-f5_v02.png
 ---
 
@@ -13,13 +13,15 @@ ogImage: /og/2026-q4/og_2026-q4_docs_protocol-tips-tip-1006_title-f5_v02.png
 
 ## Abstract
 
-This specification introduces a `burnAt` function to TIP-20 tokens, allowing holders of a new `BURN_AT_ROLE` to burn tokens from any address without transfer policy restrictions. This complements the existing `burnBlocked` function which is limited to burning from addresses blocked by the transfer policy.
+[TIP-20](/docs/protocol/tip20/spec) is Tempo's token standard for stablecoins. Each TIP-20 token checks a [TIP-403](/docs/protocol/tip403/spec) transfer policy, a shared registry rule that decides which addresses may send and receive it. An address is blocked when it fails that policy's sender check.
+
+This specification introduces a `burnAt` function to TIP-20 tokens. Holders of a new `BURN_AT_ROLE` can burn tokens from any address without transfer policy restrictions. This complements the existing `burnBlocked` function, which can burn only from addresses that the transfer policy blocks.
 
 ## Motivation
 
 The existing TIP-20 burn mechanisms have the following limitations:
 
-1. `burn()` - Only burns from the caller's own balance, requires `ISSUER_ROLE`
+1. `burn()` - Only burns from the caller's own balance, requires `ISSUER_ROLE`, the role that controls minting and burning
 2. `burnBlocked()` - Can burn from other addresses, but only if the target address is blocked by the transfer policy
 
 There are legitimate use cases where token administrators may want a privileged caller to have the ability to burn tokens from any address regardless of their policy status, such as allowing a bridge contract to burn tokens that are being bridged out without requiring approval (as in the `crosschainBurn` function proposed in [ERC 7802](https://github.com/ethereum/ERCs/blob/master/ERCS/erc-7802.md)).
@@ -38,12 +40,13 @@ A new role constant is added to TIP-20:
 bytes32 public constant BURN_AT_ROLE = keccak256("BURN_AT_ROLE");
 ```
 
-This role is administered by the `DEFAULT_ADMIN_ROLE` (same as other TIP-20 roles).
+This role is administered by the `DEFAULT_ADMIN_ROLE`, which grants and revokes TIP-20 roles (same as other TIP-20 roles).
 
 ### New Event
 
 ```solidity
 /// @notice Emitted when tokens are burned from any account.
+/// @param burner The caller that holds BURN_AT_ROLE.
 /// @param from The address from which tokens were burned.
 /// @param amount The amount of tokens burned.
 event BurnAt(address indexed burner, address indexed from, uint256 indexed amount);
@@ -53,7 +56,7 @@ event BurnAt(address indexed burner, address indexed from, uint256 indexed amoun
 
 ```solidity
 /// @notice Burns tokens from any account.
-/// @dev Requires BURN_AT_ROLE. Cannot burn from protected precompile addresses.
+/// @dev Requires BURN_AT_ROLE. Cannot burn from protected addresses.
 /// @param from The address to burn tokens from.
 /// @param amount The amount of tokens to burn.
 function burnAt(address from, uint256 amount) external;
@@ -62,22 +65,24 @@ function burnAt(address from, uint256 amount) external;
 #### Behavior
 
 1. **Access Control**: Reverts with `Unauthorized` if caller does not have `BURN_AT_ROLE`
-2. **Protected Addresses**: Reverts with `ProtectedAddress` if `from` is:
+2. **Protected Addresses**: Reverts with `ProtectedAddress` if `from` is a protocol custody address, whose balance backs other users' funds:
    - `TIP_FEE_MANAGER_ADDRESS` (0xfeEC000000000000000000000000000000000000)
    - `STABLECOIN_DEX_ADDRESS` (0xDEc0000000000000000000000000000000000000)
    - The token contract itself
    - `TIP20ChannelReserve` (0x4D50500000000000000000000000000000000000)
-   - `ReceivePolicyGuard` (0xB10C000000000000000000000000000000000000)
-   - Any address with the Zone prefix
+   - `ReceivePolicyGuard` (0xB10C000000000000000000000000000000000000), which holds transfers that a recipient's receive policy rejected
+   - Any [Zone](/docs/protocol/zones) portal, meaning an address with the 12-byte Zone Portal prefix `0x5ad000000000000000000000` ([T10](/docs/protocol/upgrades/t10))
 3. **Balance Check**: Reverts with `InsufficientBalance` if `from` has insufficient balance
 4. **No Policy Check**: Unlike `burnBlocked`, this function does NOT check transfer policy authorization
 5. **State Changes**:
    - Decrements `balanceOf[from]` by `amount`
    - Decrements `_totalSupply` by `amount`
-   - Does not update the retired token-reward accounting
+   - Does not update TIP-20 reward accounting, which the [T8](/docs/protocol/upgrades/t8) upgrade shut down
 6. **Events**: Emits `Transfer(from, address(0), amount)` and `BurnAt(msg.sender, from, amount)`
 
-The token must be unpaused. A zero amount is valid. When `from == tx.origin`, the burn also consumes the active access key's spending limit. These rules correspond to the T12 implementation; consult the [T12 activation schedule](/docs/protocol/upgrades/t12) before using `burnAt`.
+The token must be unpaused. A zero amount is valid. When `from == tx.origin`, the burn also consumes the spending limit of the [access key](/docs/protocol/transactions/AccountKeychain) that signed the transaction. Access keys are secondary signing keys with per-token spending limits.
+
+These rules match the implementation that activated in [T12](/docs/protocol/upgrades/t12), a Tempo network upgrade. `burnAt` is available only on networks running T12 or later.
 
 #### Interface Addition
 
@@ -97,17 +102,13 @@ function burnAt(address from, uint256 amount) external;
 ## Invariants
 
 1. **Role Required**: `burnAt` must always revert if caller lacks `BURN_AT_ROLE`
-2. **Protected Addresses**: `burnAt` must never succeed when `from` is a protected precompile address
+2. **Protected Addresses**: `burnAt` must never succeed when `from` is one of the protected addresses listed in Behavior
 3. **Supply Conservation**: After `burnAt(from, amount)`:
    - `totalSupply` decreases by exactly `amount`
    - `balanceOf[from]` decreases by exactly `amount`
 4. **Balance Constraint**: `burnAt` must revert if `amount > balanceOf[from]`
-5. **Reward Accounting**: If `from` is opted into rewards:
-   - Pending rewards must be accrued to the reward recipient's `rewardBalance` before the balance changes
-   - `from`'s `rewardPerToken` snapshot must be synced to `globalRewardPerToken`
-   - `optedInSupply` must decrease by `amount`
-   - Any previously accrued `rewardBalance` remains claimable
-6. **Policy Independence**: `burnAt` must succeed regardless of transfer policy status of `from`
+5. **No Reward Accounting**: `burnAt` must not checkpoint TIP-20 reward accumulators, which stopped updating after T8. Rewards settled before T8 remain claimable
+6. **Policy Independence**: The transfer policy status of `from` must never cause `burnAt` to revert
 
 ### Test Cases
 

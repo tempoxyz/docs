@@ -18,7 +18,9 @@ Send `OUSD` test tokens between accounts in Zone A without leaving the Zone.
 
 ## Overview
 
-A Zone transfer moves `OUSD` test tokens between accounts in **Zone A**. It uses the [testnet sandbox](/docs/guide/private-zones#testnet-compatibility), which differs from current deployments. The sandbox supports direct token transfers inside the Zone, so funds don't pass through Tempo.
+A Zone is a private stablecoin ledger connected to Tempo, the public chain. A Zone transfer moves `OUSD` test tokens between two accounts inside one Zone, here **Zone A**.
+
+This guide uses the [testnet sandbox](/docs/guide/private-zones), an earlier deployment with two example Zones (Zone A and Zone B) on Tempo Moderato testnet. The sandbox allows direct [TIP-20](/docs/protocol/tip20/overview) transfers inside a Zone. [Current deployments](/docs/guide/private-zones#testnet-compatibility) disable direct transfers. The transfer never passes through Tempo.
 
 <a id="sending-pathusd-within-zone-a" />
 <span id="sending-ousd-within-zone-a" />
@@ -36,15 +38,19 @@ A Zone transfer moves `OUSD` test tokens between accounts in **Zone A**. It uses
 
 ## Code Example
 
-This snippet assumes a signed-in `rootClient` on Tempo and a derived `zoneAClient`. It uses the sandbox's TIP-20 token interface.
+The snippet needs two Viem clients that share one account:
 
-This code covers the core Zone transfer call. Use the demo to watch the Zone balance update.
+- **`rootClient`:** Your signed-in client on Tempo. Its `account` signs the transfer.
+- **`zoneAClient`:** A Zone A client for the same account, built as in [Connect to the Sandbox](/docs/guide/private-zones/connect-to-a-zone#create-a-viem-client).
+
+The snippet first signs an [authorization token](/docs/zones/connect#authorize-access) for Zone ID `6` (Zone A), which the Zone RPC requires on every request. It then sends 25 `OUSD` and pays the network fee in `OUSD`. `transferSync` waits for the Zone receipt.
 
 ```ts
 import { parseUnits, type Address } from 'viem'
 
-const transferAmount = parseUnits('25', 6)
-const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address
+const ousd = '0x20c0000000000000000000006a37da5c996874be' as Address // OUSD test token
+const transferAmount = parseUnits('25', 6) // 25 OUSD in base units
+const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address // any address
 
 await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
@@ -59,7 +65,7 @@ const { receipt } = await zoneAClient.token.transferSync({
 
 ## Transfer Settlement
 
-The transfer stays inside Zone A. It doesn't create a deposit or withdrawal on Tempo, so it leaves no public bridge record. Each account reads its updated balance through its own authenticated Zone RPC connection.
+The transfer stays inside Zone A. Deposits and withdrawals move funds between Tempo and a Zone through the Zone's portal, and their amounts are public on Tempo. This transfer creates neither, so Tempo shows no record of it. Each account reads its updated balance through the Zone RPC with its own authorization token.
 
 ## Related
 

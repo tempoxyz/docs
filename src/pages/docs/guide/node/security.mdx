@@ -13,20 +13,20 @@ This page covers security best practices for Tempo node operators. Following the
 
 ## Key management
 
-Your signing key is the most sensitive asset on your validator. Anyone with access to it can impersonate your node in consensus.
+Your signing key is the ed25519 key that identifies your validator in consensus, the protocol validators use to propose and vote on blocks. It's the most sensitive asset on your validator. Anyone with access to it can impersonate your node in consensus.
 
 - **Restrict file permissions** — set `chmod 600` on key files so only the node process user can read them.
 - **Never share your private key** — the Tempo team will never ask for it.
-- **Use different keys for testnet and mainnet** — do not reuse signing keys or operator keys across networks; a testnet compromise should never put your mainnet validator at risk.
-- **Rotate keys periodically** — use [key rotation](/docs/guide/node/validator-lifecycle#rotate-validator-identity) to swap to a new ed25519 key without leaving the committee.
-- **Separate the operator address** — the Ethereum address that controls on-chain operations (IP updates, rotation, ownership transfer) should be a dedicated address, not a general-purpose hot wallet.
+- **Use different keys for testnet and mainnet** — do not reuse signing keys or the keys that control your validator operator address across networks; a testnet compromise should never put your mainnet validator at risk.
+- **Rotate keys periodically** — use [key rotation](/docs/guide/node/validator-lifecycle#rotate-validator-identity) to swap to a new ed25519 key without leaving the committee, the set of validators that run consensus in an epoch.
+- **Separate the operator address** — the validator operator address is the Ethereum address that authorizes your validator's onchain configuration changes, such as IP updates, rotation, and ownership transfer. Use a dedicated address, not a general-purpose hot wallet.
 
-See [Managing validator keys](/docs/guide/node/validator-keys) for the full key hierarchy and generation instructions.
+[Managing validator keys](/docs/guide/node/validator-keys) lists every validator key and address, including the fee recipient and signing share, and shows how to generate the signing key.
 
 ## Network configuration
 
 :::info
-Deploy validators using the [validator network topology](/docs/guide/node/validator-topology). Isolate the validator, allow direct consensus traffic only with other validators, and route execution P2P through internal follower RPC nodes.
+Deploy validators using the [validator network topology](/docs/guide/node/validator-topology). Isolate the validator, allow direct consensus traffic only with other validators, and route execution P2P through internal follower RPC nodes. A follower RPC node is a non-validating Tempo node you run to sync blocks and accept transactions for the validator.
 :::
 
 Tempo's networking protections complement the firewall and isolation rules in the validator topology. The node:
@@ -38,7 +38,7 @@ Tempo's networking protections complement the firewall and isolation rules in th
 ### Recommendations
 
 - **Expose only the required ports** — see [Ports](/docs/guide/node/system-requirements#ports) for which ports need public access vs. internal-only.
-- **Keep ingress addresses unique** — the on-chain contract enforces uniqueness, but verify your registered `IP:port` is correct after infrastructure changes.
+- **Keep ingress addresses unique** — your ingress address is the inbound `IP:port` registered onchain for consensus peers. The validator registry enforces uniqueness, but verify your registered `IP:port` is correct after infrastructure changes.
 - **Use a dedicated machine** — avoid running other internet-facing services on the same host as your validator.
 
 ## Release verification
@@ -47,15 +47,15 @@ Always verify release artifacts before running them. Tempo signs all binaries an
 
 ## Time synchronization
 
-An unsynchronized clock can cause your node to reject valid blocks or produce blocks that other validators reject. Use `chrony` or `ntpd` — not `systemd-timesyncd`. See [Time Synchronization](/docs/guide/node/system-requirements#time-synchronization) for setup instructions.
+An unsynchronized clock can cause your node to reject valid blocks or produce blocks that other validators reject. Use `chrony` or `ntpd`. `systemd-timesyncd`, the default on many minimal VMs, isn't precise enough. See [Time Synchronization](/docs/guide/node/system-requirements#time-synchronization) for setup instructions.
 
 ## Data integrity
 
-- **Never delete the data directory and re-sync with the same signing key** — this risks double-signing and will require [rotating to a new identity](/docs/guide/node/validator-lifecycle#resetting-your-validators-data). Deleting the `consensus` subdirectory also removes certificates required at startup; coordinate snapshot recovery with the Tempo team. [Signing-share recovery](/docs/guide/node/validator-keys#signing-share-recovery) does not replace those certificates.
+- **Never delete the data directory and re-sync with the same signing key** — the node loses its record of past votes, so it risks double-signing: casting conflicting votes. Recovering requires [rotating to a new identity](/docs/guide/node/validator-lifecycle#resetting-your-validators-data). Deleting the `<datadir>/consensus` subdirectory also removes consensus certificates the node needs at startup. Coordinate recovery from a snapshot with the Tempo team. [Signing-share recovery](/docs/guide/node/validator-keys#signing-share-recovery), which restores the node's share of the committee's signing key, doesn't replace those certificates.
 - **Back up your signing key** — if the key file is lost and no backup exists, you will need to rotate to a new key and coordinate with the Tempo team.
 
 ## Staying up to date
 
 - Subscribe to [Tempo GitHub releases](https://github.com/tempoxyz/tempo/releases) for security patches and upgrade announcements.
-- Review the [Upgrade Cadence](/docs/guide/node/upgrade-cadence) to understand notification timelines.
-- Apply <span className={required().className}>Required</span> upgrades before the activation block — failing to do so will fork your node off the network.
+- Review the [Upgrade Cadence](/docs/guide/node/upgrade-cadence) for how far ahead Tempo announces testnet and mainnet upgrades.
+- Apply <span className={required().className}>Required</span> upgrades before the activation block, the block where the new protocol rules take effect. Required upgrades are consensus-breaking, so a node that misses one forks off the network.
