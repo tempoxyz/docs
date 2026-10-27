@@ -12,9 +12,9 @@ Create a payment request in your application, then share a URL that loads it. Yo
 
 ## Store a request before sharing its link
 
-Use an opaque request ID in a URL on a domain you control, such as `https://merchant.example/pay/req_2048`. Load the payment terms from your backend. A QR code can encode the same URL; it does not add payment verification or guarantee that a wallet supports the link.
+Use an opaque request ID in a URL on a domain you control, such as `https://merchant.example/pay/req_2048`. Load the payment terms from your backend. A QR code can encode the same URL.
 
-This illustrative application record is not a Tempo API request:
+An example application record (not a Tempo API request):
 
 | Field | Store and validate |
 | --- | --- |
@@ -27,7 +27,7 @@ This illustrative application record is not a Tempo API request:
 | Terms | Expiry, partial-payment rules, and handling for late or excess funds. |
 | State | Open, submitted, paid, needs review, or closed, with associated attempts. |
 
-Resolve assets through the [token registry](/docs/quickstart/tokenlist). A ticker or EVM address format alone does not identify the correct network or token. Keep customer names, invoice contents, and other personal data out of URLs and public memos.
+Resolve assets through the [token registry](/docs/quickstart/tokenlist). Keep customer names, invoice contents, and other personal data out of URLs and public memos.
 
 ## Load trusted terms before requesting a signature
 
@@ -43,7 +43,7 @@ Display the network, asset, readable amount, destination, and reference. Convert
 
 ### Prepare the customer-approved transfer
 
-Create a durable attempt record before asking the wallet to submit. Follow the maintained [browser payment walkthrough](/docs/guide/payments/send-a-payment/browser), passing the stored amount and recipient. Include the [encoded memo](/docs/guide/payments/transfer-memos#encode-a-payment-reference) when the flow requires a reference; an ordinary `transfer` does not carry it. Test the actual wallet's behavior.
+Create a durable attempt record before asking the wallet to submit. Follow the maintained [browser payment walkthrough](/docs/guide/payments/send-a-payment/browser), passing the stored amount and recipient. Include the [encoded memo](/docs/guide/payments/transfer-memos#encode-a-payment-reference) when the flow requires a reference; an ordinary `transfer` doesn't carry it.
 
 ### Preserve the attempt
 
@@ -53,13 +53,13 @@ Store the submitted transaction hash with the request and network. Show a pendin
 
 ## Verify delivery before granting access
 
-For a regular receiving account, use the [invoice verifier](/docs/guide/payments/accept-a-payment/examples#verify-an-invoice) to check the successful receipt and delivered transfer against the expected network, token, recipient, amount, and reference. A wallet success screen or matching memo alone is insufficient. A receive policy can hold funds instead of delivering them.
+For a regular receiving account, use the [invoice verifier](/docs/guide/payments/accept-a-payment/examples#verify-an-invoice) to check the successful receipt and delivered transfer against the expected network, token, recipient, amount, and reference. Don't mark a request paid from a wallet success screen or a matching memo. A receive policy can hold funds instead of delivering them.
 
 For customer deposit addresses, follow the [deposit verification rules](/docs/guide/payments/virtual-addresses#what-to-verify-in-virtual-address-deposits). Verify the complete two-hop transfer sequence and delivery to the resolved master account. A transfer to a guard is a held receipt, not a delivered payment.
 
 Save the network, transaction hash, and transfer log index as a unique event key. Record that event and update the request or entitlement atomically. Repeated callbacks and page reloads should return the existing outcome. Recover missed events after an interruption.
 
-Expiry closes the application request; it does not prevent someone from sending tokens to the address. Route late payments, unsupported assets, missing references, and underpayments to explicit matching rules or review. Process [refunds](/docs/resources/guides/refunds) as separate outbound payments.
+Expiry closes the application request, but anyone can still send tokens to the address. Route late payments, unsupported assets, missing references, and underpayments to explicit matching rules or review. Process [refunds](/docs/resources/guides/refunds) as separate outbound payments.
 
 ## Test shared links and checkout recovery
 

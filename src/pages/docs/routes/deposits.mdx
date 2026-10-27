@@ -37,7 +37,7 @@ Each step below has a request builder that generates cURL and TypeScript. To see
 
 Include the `recipient` and `refundAddress` you create the address with. Some routes, including those from Ethereum, Polygon, BNB Smart Chain, and Tron, return `quote_not_available` without them.
 
-Show the destination amount and fees as described in [Quotes and fees](/docs/routes/quotes), and refresh expired terms. A quote prices the supplied amount; it does not establish receipt of funds.
+Show the destination amount and fees as described in [Quotes and fees](/docs/routes/quotes), and refresh expired terms.
 
 <span id="create-a-reusable-address" />
 
@@ -47,13 +47,13 @@ Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stor
 
 <OpenApi.Playground operationId="createRoutesDepositAddressV2" anchors={false} />
 
-Save the returned `id` and `address` with your customer record. A newly created address includes quote terms; an existing address may not. Obtain a fresh quote before showing funding instructions when terms are absent or stale.
+Save the returned `id` and `address` with your customer record. A newly created address includes quote terms; an existing address may not. Get a fresh quote when terms are missing or stale.
 
 <span id="show-the-funding-instructions" />
 
 ### Show funding instructions
 
-Display the returned network, token, and deposit address together. Check that its status is `active` before inviting deposits. Do not present it as an address for arbitrary assets or networks.
+Display the returned network, token, and deposit address together. Check that its status is `active` before inviting deposits. The address accepts only that network and token.
 
 <span id="track-each-deposit" />
 
@@ -69,6 +69,6 @@ The response lists deposits in `data`. Follow `nextCursor` for subsequent pages.
 
 ## Reconcile delivery and refunds
 
-Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits, so reconcile each deposit's delivered amount and destination transaction references separately. An active address can receive funds; only a completed deposit confirms delivery to Tempo.
+Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits, so reconcile each deposit's delivered amount and destination transaction references on its own. Only a `completed` deposit has reached Tempo.
 
 Continue with [Track delivery](/docs/routes/delivery) before crediting a balance or treating a refund as complete. See the [Deposit addresses API reference](/docs/api/routes/deposit-addresses) for the full lifecycle.

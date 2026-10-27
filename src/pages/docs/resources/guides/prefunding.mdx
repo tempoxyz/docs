@@ -16,13 +16,13 @@ The practical goal is to fund reliable delivery without keeping more capital in 
 
 Timing mismatches create liquidity needs. Customer payments may arrive on one schedule while recipients expect payouts on another. Providers also need to account for uncertain demand, funding limits, holidays, and unavailable replenishment routes.
 
-In cross-border operations, separate currencies and accounts can fragment liquidity. The [BIS report on cross-border liquidity bridges](https://www.bis.org/publications/liquidity-bridges-across-central-banks-cross-border-payments) examines this broader challenge. A balance available in one place may not be available where the next obligation must settle.
+In cross-border operations, separate currencies and accounts can fragment liquidity. A balance available in one place may not be available where the next obligation must settle.
 
 ## A practical way to size a buffer
 
-Start with the period between reliable replenishments. Estimate the net outflows expected during that period, then add a buffer for forecast error, delayed funding, and exceptional demand. Treat contractual minimum balances separately so they do not disappear into an average.
+Start with the period between reliable replenishments. Estimate the net outflows expected during that period, then add a buffer for forecast error, delayed funding, and exceptional demand. Treat contractual minimum balances separately so they don't disappear into an average.
 
-For example, a provider expecting $100,000 of net payouts before its next replenishment might reserve another $40,000 for uncertainty. That produces an illustrative $140,000 funding target. It is a planning example, not a recommended reserve or a claim about any provider's requirements.
+For example, a provider expecting $100,000 of net payouts before its next replenishment might reserve another $40,000 for uncertainty. That gives a $140,000 funding target.
 
 Track these inputs for each funding pool:
 
@@ -34,15 +34,15 @@ Track these inputs for each funding pool:
 
 ## Estimating the capital cost
 
-An illustrative annual opportunity cost is average funded balance multiplied by an assumed annual funding rate. A $1 million average balance at an assumed 5% annual rate represents $50,000 per year before any interest earned, FX effects, account charges, or operational costs.
+Annual opportunity cost is the average funded balance multiplied by an assumed annual funding rate. A $1 million average balance at an assumed 5% annual rate represents $50,000 per year before any interest earned, FX effects, account charges, or operational costs.
 
-Use the average balance held over time, not total annual payment volume. For a fuller comparison, add the cost of replenishment, conversion, failed payouts, and operating the alternative. Faster settlement is useful when it improves this complete cost and service picture.
+Use the average balance held over time, not total annual payment volume. For a fuller comparison, add the cost of replenishment, conversion, failed payouts, and operating the alternative.
 
 ## Where stablecoin settlement can help
 
 Tempo can move supported stablecoins with near-instant onchain settlement around the clock. If a receiving provider can use those funds promptly, shorter replenishment times may support a smaller prefunded balance.
 
-This is a hypothesis to measure for each flow. A local off-ramp may still require fiat liquidity or process payouts only during supported hours. A wallet transfer does not prove the final bank payment arrived. Moving a buffer from a bank account into stablecoins also changes its custody and issuer exposure.
+Measure this for each flow. A local off-ramp may still require fiat liquidity or process payouts only during supported hours. Moving a buffer from a bank account into stablecoins also changes its custody and issuer exposure.
 
 Compare a pilot against the existing flow using average committed capital, replenishment time, failed-payment rate, and time to recipient receipt. The [cross-border payments guide](/docs/resources/guides/cross-border-payments) explains the prerequisites; [nostro and vostro accounts](/docs/resources/guides/nostro-vostro-accounts) explains one common account arrangement.
 
@@ -51,7 +51,7 @@ Compare a pilot against the existing flow using average committed capital, reple
 <details>
 <summary>Why can a fast payout still require prefunding?</summary>
 
-The receiving provider may pay from funds already on hand and replenish them later. Fast recipient delivery does not by itself show that the underlying funding flow is equally fast.
+The receiving provider may pay from funds already on hand and replenish them later. Delivery can be fast while the funding flow behind it is slow.
 
 </details>
 

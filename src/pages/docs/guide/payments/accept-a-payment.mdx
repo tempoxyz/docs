@@ -47,7 +47,7 @@ For payments held by a receive policy, see [Handle blocked receipts](/docs/accou
 
 <span id="check-receiver-token-balance" />
 
-For balance snapshots and display formatting, see [Read balances](#read-balances). A balance change alone does not identify which customer or invoice to credit.
+For balance snapshots and display formatting, see [Read balances](#read-balances). Credit customers from transfer events, not balance changes.
 
 <span id="watch-for-changes" />
 <span id="listen-for-tip-20-transfer-events" />
@@ -161,7 +161,7 @@ Check the network, token, recipient, and amount against the invoice. Confirm the
 
 ### Record the payment once
 
-Store the network, transaction hash, and transfer log index as a unique event key. Save that event and mark the invoice paid in one database transaction. An API response or matching memo alone must not fulfill an invoice.
+Store the network, transaction hash, and transfer log index as a unique event key. Save that event and mark the invoice paid in one database transaction.
 
 :::::
 

@@ -17,7 +17,7 @@ Withdraw through the Zone's outbox, then track delivery to a Tempo recipient.
 
 A withdrawal moves funds from a Zone back to a recipient on Tempo. You prepare it, submit it through the Zone's outbox (`ZoneOutbox`), then track delivery. The source transaction, the accepted batch, and the recipient's token receipt are separate events.
 
-This page uses the deployment details and authenticated connection from [Connect to a Zone](/docs/zones/connect).
+You need the deployment details and authenticated connection from [Connect to a Zone](/docs/zones/connect).
 
 <span id="submit-and-track-a-withdrawal" />
 
@@ -29,7 +29,7 @@ This page uses the deployment details and authenticated connection from [Connect
 
 ### Prepare the Withdrawal
 
-Confirm the token, amount, Tempo recipient, and fallback recipient with the operator's tooling. Also confirm the deployment's restrictions. If you use a callback, verify the permitted target and callback interface before you request authorization.
+Choose the token, amount, Tempo recipient, and fallback recipient within the deployment's restrictions. A callback must use a permitted target and callback interface. Check them with the operator's tooling before you request authorization.
 
 <span id="include-withdrawal-fees" />
 
@@ -42,14 +42,14 @@ Read `calculateWithdrawalFee(gasLimit)` from the deployed outbox. Reserve enough
 
 ### Submit the Withdrawal
 
-Use the operator's supported interface to submit the withdrawal through the outbox. Save the source transaction. Also save the identifiers you need to follow the withdrawal across the Zone and Tempo.
+Submit the withdrawal through the outbox with the operator's interface. Save the source transaction and the identifiers that follow the withdrawal across the Zone and Tempo.
 
 <span id="track-settlement-on-tempo" />
 <span id="track-delivery" />
 
 ### Confirm Delivery
 
-The sequencer includes the withdrawal in a batch. The portal accepts the batch, and Tempo processes the withdrawal. Keep it pending until the destination delivery is confirmed.
+The sequencer includes the withdrawal in a batch. The portal accepts the batch, and Tempo processes the withdrawal. Show it as pending until the recipient receives the funds.
 
 :::::
 
@@ -57,7 +57,7 @@ The sequencer includes the withdrawal in a batch. The portal accepts the batch, 
 
 ## Track the Withdrawal
 
-Read Tempo outcomes with the hosted [Zone withdrawal status API](/docs/api/zones). Its `zoneStatus: completed` is a checkpoint signal. Check the delivery outcome and any refund separately.
+Read Tempo outcomes with the hosted [Zone withdrawal status API](/docs/api/zones). `zoneStatus: completed` marks the Zone checkpoint, not delivery. Delivery and any refund have their own outcomes.
 
 Use the `senderTag` emitted for this withdrawal. Tags can differ for withdrawals within the same transaction. The API returns indexed outcomes in `data`.
 
@@ -65,7 +65,7 @@ In the playground, select **Try**. Enter the emitted sender tag and the Zone’s
 
 <OpenApi.Playground operationId="listZoneWithdrawals" anchors={false} />
 
-An empty `data` array means no outcome is indexed yet. Keep the withdrawal pending while you track both delivery and any refund. The Zone checkpoint alone doesn't confirm that funds arrived.
+An empty `data` array means no outcome is indexed yet. Keep the withdrawal pending until delivery or a refund completes.
 
 <span id="handle-failed-delivery" />
 <span id="handle-refunds" />

@@ -19,7 +19,7 @@ Before the first step, have:
 
 - A backend key with `routes:read` and `routes:write` from [Set up API access](/docs/routes/api-setup).
 - A route with transfer support from [Supported routes](/docs/routes/networks). This guide fixes the source amount with `exactSource`, so check that the route lists that mode.
-- A signer for the sender account on the source network, such as a connected wallet or your own signing service. The Routes API key does not authorize that account.
+- A signer for the sender account on the source network, such as a connected wallet or your own signing service. The API key doesn't sign transactions.
 
 Each step below has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test). The [cURL example](/docs/routes/examples/transfers) runs every step from a terminal.
 
@@ -35,8 +35,6 @@ Each step below has a request builder that generates cURL and TypeScript. To see
 
 <OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
 
-A quote prices the request; it does not reserve or create a transfer.
-
 <span id="review-fees" />
 
 Show the source amount, destination amount, minimum destination amount, and fees as described in [Quotes and fees](/docs/routes/quotes). Refresh the quote when `quote.expiresAt` passes.
@@ -47,7 +45,7 @@ Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stor
 
 <OpenApi.Playground operationId="createRoutesTransfer" anchors={false} />
 
-Save the returned transfer `id` and retain its unsigned `action`. Review the returned terms before requesting a signature. Transfer reads do not return the executable action.
+Save the returned transfer `id` and its unsigned `action`; transfer reads don't return the action. Review the returned terms before requesting a signature.
 
 <span id="sign-and-submit-the-source-calls" />
 

@@ -12,9 +12,9 @@ HTTP `402 Payment Required` is a status code that payment protocols use to reque
 
 ## What HTTP 402 specifies
 
-The HTTP standard [reserves `402` for future use](https://www.rfc-editor.org/rfc/rfc9110.html#name-402-payment-required). The status code alone does not define a price, accepted asset, payment destination, proof format, or settlement rule. A server and client need a compatible payment protocol to exchange those details.
+The HTTP standard [reserves `402` for future use](https://www.rfc-editor.org/rfc/rfc9110.html#name-402-payment-required). It doesn't define a price, accepted asset, payment destination, proof format, or settlement rule. A payment protocol supplies those details.
 
-The [Machine Payments Protocol](https://mpp.dev/) (MPP) supplies a challenge, credential, and receipt flow. Payment methods define the authorization and settlement rules. An endpoint's advertised methods determine what it accepts; support for one method does not mean that every MPP endpoint accepts the same asset or network.
+The [Machine Payments Protocol](https://mpp.dev/) (MPP) supplies a challenge, credential, and receipt flow. Payment methods define the authorization and settlement rules. Each endpoint advertises the methods, assets, and networks it accepts.
 
 ## Follow an MPP payment request
 
@@ -30,13 +30,13 @@ The [Payment authentication draft](https://paymentauth.org/draft-httpauth-paymen
 
 On Tempo, a credential can carry a signed transaction, a transaction reference, or a payment-channel voucher, depending on the intent. A voucher and an onchain transfer are different evidence. Follow the [MPP request flow](/docs/guide/machine-payments) and the selected method's verification rules.
 
-Payment handling also remains separate from application identity and authorization. A valid payment does not automatically authorize access to a particular customer's data.
+A valid payment doesn't authorize access to a particular customer's data.
 
 ## Choose a charge or a session
 
 Use [one-time payments](/docs/guide/machine-payments/one-time-payments) when each purchase has a distinct amount and delivery, such as a single dataset. The server verifies payment for that request before returning the resource.
 
-Use [pay-as-you-go sessions](/docs/guide/machine-payments/pay-as-you-go) for repeated usage against a funded channel. The payer signs cumulative offchain vouchers, and the recipient can settle authorized usage onchain. A session can require top-ups and periodic settlement; it is not limited to two onchain transactions over its lifetime.
+Use [pay-as-you-go sessions](/docs/guide/machine-payments/pay-as-you-go) for repeated usage against a funded channel. The payer signs cumulative offchain vouchers, and the recipient can settle authorized usage onchain. A session can require top-ups and periodic settlement.
 
 Use [streamed payments](/docs/guide/machine-payments/streamed-payments) when usage and delivery happen during a stream. The service meters billable units and checks the authorized voucher amount as it delivers them. Renewing a voucher increases authorized usage; adding funds to a channel is a separate operation.
 
@@ -46,17 +46,17 @@ For fixed recurring charges, use the [subscription billing guide](/docs/resource
 
 Define the acceptable service, amount, asset, and network before allowing a client to answer payment challenges automatically. Use separate application budgets for a request or task and [access-key controls](/docs/accounts/access-keys) for the account authority delegated to the agent.
 
-An access key can limit token spending, permitted calls, and expiry. Missing bounds remove those checks. A spending limit alone does not restrict every destination or service, and scopes check the calls the key signs directly. Read the [scope limits](/docs/accounts/access-keys/scopes#scope-limits) before allowing a contract.
+An access key can limit token spending, permitted calls, and expiry. A key without bounds has none of those checks. A spending limit doesn't restrict destinations or services, and scopes check only the calls the key signs directly. Read the [scope limits](/docs/accounts/access-keys/scopes#scope-limits) before allowing a contract.
 
-For sessions, also bound the amount deposited into channels and monitor outstanding channel funds. Authorized usage, channel deposits, settled funds, and the account's available balance are separate quantities.
+For sessions, bound the amount deposited into channels and monitor outstanding channel funds. Authorized usage, channel deposits, settled funds, and the account's available balance are separate quantities.
 
 ## Handle payment retries and service delivery
 
 Give each billable operation an application record. Preserve its request identifier, payment evidence, delivered result, and refund or recovery status. If the server receives a retry, determine whether it belongs to an existing operation before treating it as a new purchase.
 
-Do not send another payment solely because a request timed out. Inspect the existing request and payment state first. For direct onchain payments, use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify the network, token, intended recipient, amount, and delivered transfer. A transaction hash or successful call alone is insufficient, including when a receive policy holds the funds.
+Don't send another payment because a request timed out. Inspect the existing request and payment state first. For direct onchain payments, use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify the network, token, intended recipient, amount, and delivered transfer. A successful transaction can still leave the funds held by a receive policy.
 
-An MPP receipt acknowledges payment handling. Your application must still track whether it delivered the purchased resource, how the customer can retrieve an existing result, and how failed delivery is resolved.
+An MPP receipt covers payment, not delivery. Track whether your application delivered the purchased resource, how the customer can retrieve an existing result, and how failed delivery is resolved.
 
 ## Test a payment-gated endpoint
 
@@ -84,7 +84,7 @@ No. The client needs a compatible payment method, a funded account, and authorit
 
 ### Does HTTP 402 require stablecoins?
 
-No. The status code does not select a payment rail. MPP is extensible to different methods; a Tempo payment method uses the documented Tempo account, asset, and settlement flow.
+No. The status code does not select a payment rail. MPP supports multiple payment methods, and the Tempo method is one of them.
 
 ### Is every service unit a separate onchain transaction?
 

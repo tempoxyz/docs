@@ -222,8 +222,6 @@ feeManager.setValidatorToken(0x20c0000000000000000000000000000000000000);
 
 ## Fee lifecycle
 
-This section describes the complete flow of how fees are collected, converted, and distributed from user to validator.
-
 ### Fee flow steps
 
 When a user submits a transaction on Tempo, fees are paid in their chosen stablecoin (determined by the [fee token preferences](#fee-token-preferences) hierarchy). If the validator prefers a different stablecoin, the Fee AMM automatically converts the user's payment to the validator's preferred token.

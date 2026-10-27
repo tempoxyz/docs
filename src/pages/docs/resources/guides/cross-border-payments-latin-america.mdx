@@ -14,13 +14,13 @@ Companies paying suppliers, contractors, sellers, or subsidiaries across Latin A
 
 ## Map country-specific payment requirements
 
-A flow that works in Brazil can require a different provider, currency workflow, beneficiary record, and reconciliation process in Mexico, Colombia, Argentina, or Peru. Check these differences before treating regional coverage as one product capability.
+A flow that works in Brazil can require a different provider, currency workflow, beneficiary record, and reconciliation process in Mexico, Colombia, Argentina, or Peru.
 
 | Requirement | Operating implication |
 | --- | --- |
 | Funding and settlement timing | Bank funding, onchain delivery, conversion, and local payout have separate clocks. |
-| Local currency | A USD-denominated stablecoin keeps that leg in dollars; it does not remove exposure for a recipient spending in another currency. |
-| Domestic rail | A local payment system does not establish the cross-border provider's asset support or access. |
+| Local currency | A USD-denominated stablecoin keeps that leg in dollars; a recipient spending in another currency still carries FX exposure. |
+| Domestic rail | The payout provider must support both the stablecoin and the domestic rail. |
 | Payment visibility | Link the invoice or payroll obligation to each network and provider identifier. |
 | Recipient access | Verify the wallet, bank, account type, limits, and required beneficiary details. |
 
@@ -32,30 +32,30 @@ Stablecoin settlement can connect approved wallets and providers between these e
 
 **Marketplace settlements** need seller eligibility, release rules, accurate beneficiary details, and an order or payout reference. The platform can share onchain infrastructure across markets while maintaining country-specific provider configurations.
 
-**Treasury transfers** need clear entity ownership, custody controls, funding limits, and reconciliation. Model the balances needed with each provider rather than assuming that faster settlement eliminates prefunding.
+**Treasury transfers** need clear entity ownership, custody controls, funding limits, and reconciliation. Model the balances each provider needs; faster settlement doesn't eliminate prefunding.
 
-**Remittance and supplier payments** require an agreed delivery currency and endpoint. Preserve the recipient's requested local amount, conversion quote, and final delivery evidence. Settlement between providers does not prove completion of their customer payment.
+**Remittance and supplier payments** require an agreed delivery currency and endpoint. Preserve the recipient's requested local amount, conversion quote, and final delivery evidence. Settlement between providers is a separate step from delivery to the recipient.
 
 ## Verify local delivery country by country
 
-Regional coverage is a starting point for research. Before funding a payment, verify one complete route: the sender's country and funding currency, the stablecoin and network, the recipient's eligibility, any conversion, and the final delivery method.
+Before funding a payment, verify one complete route: the sender's country and funding currency, the stablecoin and network, the recipient's eligibility, any conversion, and the final delivery method.
 
 | Route detail   | Evidence to request                                                                                       |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
 | Sender access  | The provider accepts this individual or business, origin country, funding method, and payment purpose.    |
-| Asset support  | Deposit instructions name the exact network and token contract; withdrawal support is checked separately. |
+| Asset support  | Deposit instructions name the network and token contract; withdrawal support is checked separately. |
 | Local delivery | The required bank account, wallet, or other endpoint is supported for this recipient and amount.          |
 | Conversion     | A current quote states the local-currency amount, applicable fees, expiry, and conversion timing.         |
 | Completion     | A payment reference and delivery status can be matched to the beneficiary, invoice, and amount.           |
 | Exceptions     | The provider explains delayed delivery, rejected beneficiary details, returns, and refunds.               |
 
-Use the same worksheet for Brazil, Mexico, Colombia, Argentina, Peru, and other markets. A provider's presence in a country or its support for a dollar-denominated stablecoin does not establish that it accepts that asset on Tempo. When using Tempo Routes, consult its current [network and asset directory](/docs/routes/networks) and quote the actual payment inputs.
+Use the same worksheet for Brazil, Mexico, Colombia, Argentina, Peru, and other markets. Check that the provider accepts the asset on Tempo specifically. For Tempo Routes, use the [network and asset directory](/docs/routes/networks) and quote the actual payment inputs.
 
 ### Brazil: separate Pix delivery from the cross-border route
 
-Use [Banco Central do Brasil's Pix information](https://www.bcb.gov.br/en/financialstability/pix_en) to understand the domestic system. A provider offering Pix does not establish that it can accept your stablecoin, convert it to BRL, and deliver the complete payment.
+Use [Banco Central do Brasil's Pix information](https://www.bcb.gov.br/en/financialstability/pix_en) to understand the domestic system. A Pix payout also needs a provider that accepts your stablecoin, converts it to BRL, and delivers the payment.
 
-For a proposed Brazil payout, request the provider's current asset and network instructions, eligible recipient details, BRL quote, payout limits, and evidence of the final Pix delivery. Keep the onchain transaction and the provider's local payout reference together. Do not treat completion of the first as completion of the second.
+For a proposed Brazil payout, request the provider's current asset and network instructions, eligible recipient details, BRL quote, payout limits, and evidence of the final Pix delivery. Keep the onchain transaction and the provider's local payout reference together.
 
 ### Mexico: distinguish a SPEI payment from beneficiary credit
 
@@ -63,23 +63,21 @@ For a proposed Brazil payout, request the provider's current asset and network i
 
 Banco de México's [payment-status guidance](https://www.banxico.org.mx/servicios/mi-spei_-transferencias-ban.html) distinguishes settlement in SPEI from credit to the beneficiary. Its electronic payment receipt, the CEP, is generated from the receiving institution's confirmation of that credit. Ask which payout identifiers and delivery evidence your provider supplies, then connect those records to the original payment.
 
-These examples show how to verify local delivery. They do not assert that every Tempo asset, wallet, or payment provider supports Pix or SPEI.
-
 ### Compare the amount recipients can use
 
-For a contractor expecting local currency, compare quotes for the same local-currency delivery. For a contractor choosing to retain a dollar-denominated balance, explain the supported asset, custody model, and later withdrawal options separately. A dollar peg does not make a token equivalent to a dollar bank deposit or remove future FX costs.
+For a contractor expecting local currency, compare quotes for the same local-currency delivery. For a contractor choosing to retain a dollar-denominated balance, explain the supported asset, custody model, and withdrawal options. A dollar-pegged token isn't a dollar bank deposit, and converting it later still costs FX.
 
-A treasury team should also model where liquidity must be available before the payout. [Prefunding](/docs/resources/guides/prefunding) can move between providers or accounts when the settlement architecture changes; it does not disappear merely because one leg uses stablecoins.
+A treasury team should also model where liquidity must be available before the payout. [Prefunding](/docs/resources/guides/prefunding) can move between providers or accounts when the settlement architecture changes; a stablecoin leg doesn't remove it.
 
 ## Implement the settlement and reporting path
 
-Use [Send payments](/docs/guide/payments/send-a-payment) for direct supported stablecoin transfers. Choose [atomic batches or independent transactions](/docs/resources/guides/batch-payments) according to the required failure boundary. Your application schedules and submits recurring runs; validity windows alone do not create a scheduler.
+Use [Send payments](/docs/guide/payments/send-a-payment) for direct supported stablecoin transfers. Choose [atomic batches or independent transactions](/docs/resources/guides/batch-payments) according to the required failure boundary. Your application schedules and submits recurring runs.
 
 Attach an opaque [payment reference](/docs/guide/payments/transfer-memos) and keep sensitive payroll, supplier, and bank data offchain. Save the network, transaction hash, and transfer log index, then connect them to the local payout reference. Recover missed events and process each transfer once.
 
 Use the [fee documentation](/docs/protocol/fees) to choose eligible fee tokens and estimate actual execution. Include funding, FX, provider charges, and local delivery in the complete cost comparison.
 
-If private balances are required, review the [Zones preview capabilities](/docs/zones) and [privacy model](/docs/zones/privacy). The operator can read its ledger, deposit and withdrawal amounts remain public, and the current runtime disables general TIP-20 transfers. Confirm the deployment before designing a private payment flow.
+For private balances, see the [Zones preview](/docs/zones) and its [privacy model](/docs/zones/privacy). A Zone's operator can read its ledger, deposit and withdrawal amounts are public, and the current runtime disables general TIP-20 transfers.
 
 ## Latin America payment questions
 
@@ -93,7 +91,7 @@ Businesses usually use a mix of banks, money transmitters, fintech providers, lo
 <details>
 <summary>What should companies evaluate before using stablecoin payment rails?</summary>
 
-Companies should evaluate compliance, custody, privacy, reconciliation, local payout coverage, FX conversion, off-ramp availability, and issuer risk. The right infrastructure should fit into existing finance operations rather than create a separate crypto-native workflow.
+Companies should evaluate compliance, custody, privacy, reconciliation, local payout coverage, FX conversion, off-ramp availability, and issuer risk.
 
 </details>
 
@@ -107,13 +105,13 @@ The main challenges are currency fragmentation, settlement delays, FX costs, loc
 <details>
 <summary>Does Pix or SPEI availability prove a Tempo payout route is supported?</summary>
 
-No. A domestic payment system and a complete cross-border route are different capabilities. Confirm the provider, sender and recipient eligibility, exact asset and network, conversion quote, and final delivery method before funding a payment.
+No. Before funding a payment, confirm the provider, sender and recipient eligibility, asset and network, conversion quote, and final delivery method.
 
 </details>
 
 <details>
 <summary>Does a confirmed onchain transfer prove the recipient received local currency?</summary>
 
-No. Verify local delivery separately using the payout provider or receiving institution. Link the onchain transaction to the payout identifier, beneficiary, currency, amount, and delivery evidence in your payment records.
+No. Verify local delivery with the payout provider or receiving institution. Link the onchain transaction to the payout identifier, beneficiary, currency, amount, and delivery evidence in your payment records.
 
 </details>

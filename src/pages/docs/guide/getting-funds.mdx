@@ -114,13 +114,13 @@ export function AddFundsButton() {
 }
 ```
 
-Omit `intent` to let the user choose a funding method. To prefer Apple Pay where available, add `intent: 'applePay'` to the parameter object. `intent: 'crypto'` prefers funding with crypto. These are preferences, not guarantees that a method is available to every user.
+Omit `intent` to let the user choose a funding method. To prefer Apple Pay where available, add `intent: 'applePay'` to the parameter object. `intent: 'crypto'` prefers funding with crypto. These are preferences; method availability varies by user.
 
 You can also prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol or contract address. The user reviews and confirms the funding request in the wallet.
 
 ### Confirm funds have arrived
 
-A resolved `wallet_deposit` request does not prove the account was funded. Fiat funding can complete asynchronously, and the response's `receipts` field may be absent. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
+Fiat funding can complete asynchronously, and the response's `receipts` field may be absent. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
 
 :::::
 
