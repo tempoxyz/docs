@@ -72,7 +72,8 @@ test('a hash belonging to another page does not steal the current guide highligh
   // A fragment from another task must never deactivate Receive payments.
   const guide = '/docs/guide/payments/accept-a-payment'
   await page.goto(`${guide}#batch-payment-transactions`)
-  const active = page.locator('[data-v-gutter-left] nav[data-v-sidebar] a[data-active]')
+  // The guide is a section header with child pages; Vocs marks its link with aria-current.
+  const active = page.locator('[data-v-gutter-left] nav[data-v-sidebar] a[aria-current]')
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', guide)
   await expect(active).toHaveAttribute('aria-current', 'page')
@@ -89,7 +90,8 @@ test('payment sections keep the current task selected while scrolling', async ({
   const batch = `${guide}#batch-payment-transactions`
   await page.goto(batch)
   const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
-  const active = sidebar.locator('a[data-active]')
+  // The guide is a section header with child pages; Vocs marks its link with aria-current.
+  const active = sidebar.locator('a[aria-current]')
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', guide)
   await expect(active).toHaveAttribute('aria-current', 'page')

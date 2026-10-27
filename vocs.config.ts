@@ -380,10 +380,10 @@ export default defineConfig({
       sidebar: {
         backLink: false,
         collapsed: true,
-        introFlat: true,
+        introduction: false,
         hide: ['MCP'],
         // Each guide sits inside the endpoint group it explains.
-        groupExtrasByName: {
+        groupItems: {
           'JSON-RPC': [{ text: 'Guide', link: '/docs/api/json-rpc' }],
           Indexer: [{ text: 'Guide', link: '/docs/api/indexer-api' }],
           'API keys': [{ text: 'Guide', link: '/docs/api/console/api-keys' }],
@@ -392,7 +392,7 @@ export default defineConfig({
           Team: [{ text: 'Guide', link: '/docs/api/console/team' }],
           'Billing and usage': [{ text: 'Guide', link: '/docs/api/console/usage-and-billing' }],
         },
-        sectionExtras: {
+        tagGroupItems: {
           Accounts: [
             { text: 'Transactions and transfers', link: '/docs/api/transactions-and-transfers' },
           ],

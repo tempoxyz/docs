@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { selectTab } from './helpers'
 
 test.describe('documentation without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
@@ -59,6 +60,6 @@ test('names the faucet fee-token control when its wallet tab is opened', async (
   await page.goto('/docs/quickstart/faucet')
   const tab = page.getByRole('tab', { name: 'Fund your wallet', exact: true })
   await expect(tab).toBeVisible({ timeout: 90000 })
-  await tab.click()
+  await selectTab(tab)
   await expect(page.getByRole('combobox', { name: 'Fee token', exact: true })).toHaveCount(1)
 })

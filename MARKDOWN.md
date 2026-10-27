@@ -1,11 +1,8 @@
 # Maintaining generated Markdown
 
-This site tests Pierre Highlights with the commit-pinned preview
-`https://pkg.pr.new/vocs@1c023ba` from [Vocs #670](https://github.com/wevm/vocs/pull/670).
-`codeHighlight.engine` is set to `highlights` for MDX code blocks, client-side
-samples, and Twoslash hover popups. Set it to `shiki` to compare the engines.
-To test a new upstream commit, update the commit pin and lockfile, then rerun
-the audit, tests, and build. Use a release version when leaving the preview channel.
+This site uses Vocs 2.12.0 from npm with `codeHighlight.engine` set to
+`highlights` for MDX code blocks, client-side samples, and Twoslash hover
+popups. Set it to `shiki` to compare the engines.
 
 ## Generation and enforcement
 
@@ -102,8 +99,7 @@ in development and the CLI audit. Do not rewrite generated Markdown afterward.
 `public/SKILL.md` is the published static asset. The root `SKILL.md` links to it,
 so repository tooling and the website use the same source.
 
-The Vocs patch is rebased onto the preview, preserving Tempo's UI, OpenAPI, and
-other site-specific changes. The preview already includes shared component
-loading and server OpenAPI config serialization, so those patch hunks are no longer necessary. A dependency override
-keeps transitive Vocs copies on the same preview; replace it along with the root
-pin when upgrading to the release, and rebase the patch again.
+`patches/vocs@2.12.0.patch` carries Tempo's UI, OpenAPI, and other
+site-specific changes on top of the release. A dependency override keeps
+transitive Vocs copies on the same version; update it with the root pin and
+rebase the patch on every Vocs upgrade.

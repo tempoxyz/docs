@@ -1,3 +1,4 @@
+import { selectTab } from './helpers'
 import { expect, type Locator, type Page, test } from './live'
 
 async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
@@ -44,7 +45,7 @@ test('virtual addresses guide signs in and starts master registration', async ({
 
   try {
     const realRegistrationTab = await openVirtualAddressesGuide(page)
-    await realRegistrationTab.click()
+    await selectTab(realRegistrationTab)
 
     const passkeySignUpButton = page.getByRole('button', { name: 'Sign up' }).first()
     await expect(passkeySignUpButton).toBeVisible({ timeout: 90000 })

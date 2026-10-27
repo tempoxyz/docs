@@ -6,14 +6,12 @@ ignoredBuiltDependencies:
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
-  # Vocs #670 tests this newly published tokenizer.
-  - '@pierre/highlights@0.2.0'
   - accounts
   - mppx
   - incur
   - ox
   - viem
-  - vocs
+  - vocs@2.12.0
   - vite
   - tapimo
   - es-module-lexer
@@ -30,7 +28,8 @@ onlyBuiltDependencies:
   - vue-demi
 
 overrides:
-  vocs: https://pkg.pr.new/vocs@1c023ba
+  # Keep tapimo's transitive vocs (^2.8.5) on the same patched release as the root.
+  vocs: 2.12.0
   # Configurable account hash domains matching the t14-checkpoint devnet (wevm/ox#519).
   'viem@2.57.5>ox': https://pkg.pr.new/ox@bf010ee
   # accounts 0.18.5 was published with unresolved catalog dependencies.
@@ -51,7 +50,7 @@ overrides:
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2': patches/@braintree__sanitize-url@7.1.2.patch
   dayjs@1.11.20: patches/dayjs@1.11.20.patch
-  vocs@2.10.3: patches/vocs@2.10.3.patch
+  vocs@2.12.0: patches/vocs@2.12.0.patch
   waku@1.0.0-rc.3: patches/waku@1.0.0-rc.3.patch
 
 strictDepBuilds: true

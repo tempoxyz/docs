@@ -1,5 +1,14 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 
+// Vocs renders tabs on the server, so they are visible before hydration attaches their
+// click handlers. Retry until the tab is selected; an early click is a no-op.
+export async function selectTab(tab: Locator) {
+  await expect(async () => {
+    await tab.click()
+    await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 1000 })
+  }).toPass({ timeout: 30_000 })
+}
+
 export function getDemoStep(page: Page, title: string | RegExp): Locator {
   return page.locator('[data-active][data-completed]').filter({ hasText: title }).first()
 }
