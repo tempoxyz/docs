@@ -18,9 +18,11 @@ Set `TEMPO_API_KEY` to a key with `routes:read` and `routes:write` from [Set up 
 | Variable | Value |
 | --- | --- |
 | `SOURCE_CHAIN`, `SOURCE_TOKEN` | Accepted source network and token. |
+| `SOURCE_FAMILY` | Chain family of `SOURCE_CHAIN`: `evm`, `solana`, `tron`, or `stellar`. |
 | `DESTINATION_TOKEN` | Token the recipient receives on Tempo. |
 | `ROUTE_RECIPIENT` | Recipient account on Tempo. |
 | `ROUTE_REFUND_ADDRESS` | Account on the source network that receives refunds. |
+| `EVM_REFUND_ADDRESS`, `SOLANA_REFUND_ADDRESS`, `TRON_REFUND_ADDRESS` | Universal only. Refund account per family; leave one empty to skip it. |
 | `ROUTE_AMOUNT` | Source amount in base units to use for the quote. |
 
 <span id="create-and-monitor-a-deposit-address" />
@@ -48,43 +50,80 @@ Review the terms as described in [Quotes and fees](/docs/routes/quotes).
 
 ### Create a deposit address
 
-Set `ROUTE_REQUEST_KEY` to the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) for this address.
+Set `ROUTE_REQUEST_KEY` to the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) for this address. Build the body for either address type:
 
-```bash
+::::code-group
+
+```bash [Single source]
 jq -n \
   --arg sourceChain "$SOURCE_CHAIN" \
   --arg sourceToken "$SOURCE_TOKEN" \
   --arg destinationToken "$DESTINATION_TOKEN" \
   --arg recipient "$ROUTE_RECIPIENT" \
+  --arg family "$SOURCE_FAMILY" \
   --arg refundAddress "$ROUTE_REFUND_ADDRESS" \
   --arg amount "$ROUTE_AMOUNT" \
-  '$ARGS.named' > deposit-address-request.json
+  '{sourceChain: $sourceChain, sourceToken: $sourceToken, destinationToken: $destinationToken,
+    recipient: $recipient, refundAddresses: {($family): $refundAddress}, amount: $amount}' \
+  > deposit-address-request.json
+```
 
-curl --fail-with-body 'https://api.tempo.xyz/v1/routes/deposit-addresses' \
+```bash [Universal]
+jq -n \
+  --arg destinationToken "$DESTINATION_TOKEN" \
+  --arg recipient "$ROUTE_RECIPIENT" \
+  --arg evm "$EVM_REFUND_ADDRESS" \
+  --arg solana "$SOLANA_REFUND_ADDRESS" \
+  --arg tron "$TRON_REFUND_ADDRESS" \
+  --arg amount "$ROUTE_AMOUNT" \
+  '{destinationToken: $destinationToken, recipient: $recipient,
+    refundAddresses: ({evm: $evm, solana: $solana, tron: $tron}
+      | with_entries(select(.value != ""))),
+    amount: $amount}' \
+  > deposit-address-request.json
+```
+
+::::
+
+Create the address:
+
+```bash
+curl --fail-with-body 'https://api.tempo.xyz/v2/routes/deposit-addresses' \
   --header "tempo-api-key: ${TEMPO_API_KEY}" \
   --header "idempotency-key: ${ROUTE_REQUEST_KEY}" \
   --header 'Content-Type: application/json' \
-  --data @deposit-address-request.json
+  --data @deposit-address-request.json \
+  > deposit-address.json
+
+ROUTE_DEPOSIT_ADDRESS_ID="$(jq -r '.id' deposit-address.json)"
 ```
 
-Save the returned address and `id` with your customer record.
+Save `ROUTE_DEPOSIT_ADDRESS_ID` with your customer record.
 
 <span id="show-the-funding-instructions" />
 
 ### Show funding instructions
 
-Confirm the address status is `active`, then show the source network, token, and address together.
+Print each address with its status and sources:
+
+```bash
+jq -r '.addresses[] | [.status, .address,
+  ([.sources[] | "\(.token.symbol) on \(.chain.name)"] | join(", "))] | @tsv' \
+  deposit-address.json
+```
+
+Show each `active` address with its listed sources.
 
 <span id="track-each-deposit" />
 
 ### Track deposits
 
-Set `ROUTE_DEPOSIT_ADDRESS` to the returned source-chain address, not the `rda_…` object ID:
+Filter by the deposit address ID, which covers every address in it:
 
 ```bash
 curl --get 'https://api.tempo.xyz/v1/routes/deposits' \
   --header "tempo-api-key: ${TEMPO_API_KEY}" \
-  --data-urlencode "depositAddress=${ROUTE_DEPOSIT_ADDRESS}"
+  --data-urlencode "depositAddressId=${ROUTE_DEPOSIT_ADDRESS_ID}"
 ```
 
 Read `GET /v1/routes/deposits/{id}` for each deposit, and reconcile each one separately.
