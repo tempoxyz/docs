@@ -129,6 +129,7 @@ const apiTagGroups = [
       'Team',
       'Billing',
       'Verified Token Requests',
+      'Routes Access Requests',
       'Organization',
       'Authentication',
     ],
@@ -164,6 +165,10 @@ const apiTags: Record<string, { displayName?: string; pagePath?: string }> = {
   'Fee payer': { pagePath: 'fee-payer-usage' },
   Billing: { displayName: 'Billing and usage', pagePath: 'billing' },
   'Verified Token Requests': { displayName: 'Token requests', pagePath: 'verified-token-requests' },
+  'Routes Access Requests': {
+    displayName: 'Routes access requests',
+    pagePath: 'routes-access-requests',
+  },
   Team: { pagePath: 'team' },
   Organization: { pagePath: 'organizations' },
   Authentication: { displayName: 'Sign-in', pagePath: 'console/authentication' },
