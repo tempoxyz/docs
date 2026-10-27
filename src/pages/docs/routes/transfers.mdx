@@ -55,7 +55,7 @@ Save the returned transfer `id` (`rtr_…`) and keep its `action`, the unsigned 
 
 ### Sign and submit
 
-Use the source account's signer to submit the calls in `action` in order. Calls can include token approvals, and each call can be its own transaction. `action.type` names the call format, such as `evm:calls`; the [transfers API reference](/docs/api/routes/transfers) describes the EVM and Tron formats.
+Use the source account's signer to submit the calls in `action` in order. Calls can include token approvals, and each call can be its own transaction. `action.type` names the call format, such as `evm:calls`. Handle it using the [EVM or Tron action format](/docs/api/routes/transfers).
 
 For an `evm:calls` action, pass each call's `to`, `data`, and `value` to your source-chain wallet client. Wait for successful execution before the next call, and retain all hashes as `transactionHashes`. If submission stops partway through, inspect the transactions already sent before resuming.
 
