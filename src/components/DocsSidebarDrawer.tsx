@@ -3,7 +3,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useActiveSidebarAnchor, useConfig } from 'vocs'
-import { useRouter } from 'waku'
 import { resolveSidebarItems, SidebarNodes, usePathname } from './DocsHeader'
 import * as ui from './DocsSidebarDrawer.recipes'
 
@@ -24,11 +23,10 @@ function collectSidebarLinks(nodes: ReturnType<typeof resolveSidebarItems>): str
  */
 export default function DocsSidebarDrawer() {
   const pathname = usePathname()
-  const { hash } = useRouter()
   const config = useConfig()
   const items = resolveSidebarItems(config?.sidebar, pathname)
   const links = useMemo(() => collectSidebarLinks(items), [items])
-  const activeAnchor = useActiveSidebarAnchor(links, pathname, hash)
+  const activeAnchor = useActiveSidebarAnchor(links)
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement | null>(null)

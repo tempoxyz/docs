@@ -35,7 +35,7 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Keep the API reference to API pages: endpoints, authentication, conventions, and API guides. Client libraries live under Get Started › Tempo SDK; the Tempo API client for TypeScript (`tapimo`) is at `/docs/sdk/typescript/api-client`.
 - A single-tag section renders its operations directly under the section header, so give that tag the section's name as its `x-displayName`.
 - When renaming or merging a tag, set `x-pagePath` to keep the existing URL; the display name otherwise changes the page path.
-- The `introFlat`, `hide`, `groupExtrasByName`, and `sectionExtras` sidebar options are local additions to vocs. Ship them through `patches/vocs@2.11.0.patch`, including their types, or upstream.
+- `sidebar` uses Vocs's OpenAPI options: `introduction: false` puts the `intro` items at the top level, `hide` drops tags or sections from the sidebar while keeping their pages, `groupItems` adds links inside a tag group after its Overview (keyed by tag or display name), and `tagGroupItems` adds links at the top of an `x-tagGroups` section.
 
 ### Moving, renaming, or removing pages
 

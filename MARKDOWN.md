@@ -1,6 +1,6 @@
 # Maintaining generated Markdown
 
-This site uses Vocs 2.11.0 from npm with `codeHighlight.engine` set to
+This site uses Vocs 2.12.0 from npm with `codeHighlight.engine` set to
 `highlights` for MDX code blocks, client-side samples, and Twoslash hover
 popups. Set it to `shiki` to compare the engines.
 
@@ -99,7 +99,7 @@ in development and the CLI audit. Do not rewrite generated Markdown afterward.
 `public/SKILL.md` is the published static asset. The root `SKILL.md` links to it,
 so repository tooling and the website use the same source.
 
-`patches/vocs@2.11.0.patch` carries Tempo's UI, OpenAPI, and other
+`patches/vocs@2.12.0.patch` carries Tempo's UI, OpenAPI, and other
 site-specific changes on top of the release. A dependency override keeps
 transitive Vocs copies on the same version; update it with the root pin and
 rebase the patch on every Vocs upgrade.
