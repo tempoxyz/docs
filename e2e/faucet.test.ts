@@ -1,4 +1,4 @@
-import { expectDemoSuccess, getDemoStep } from './helpers'
+import { expectDemoSuccess, getDemoStep, selectTab } from './helpers'
 import { expect, test } from './live'
 
 test('fund an address via faucet', async ({ page }) => {
@@ -9,7 +9,7 @@ test('fund an address via faucet', async ({ page }) => {
   // Switch to "Fund an address" tab
   const tab = page.getByRole('tab', { name: 'Fund an address' })
   await expect(tab).toBeVisible({ timeout: 90000 })
-  await tab.click()
+  await selectTab(tab)
 
   // Enter an address
   const addressInput = page.getByPlaceholder('0x...')
@@ -47,7 +47,7 @@ test('fund a connected passkey wallet via faucet', async ({ page }) => {
 
     const tab = page.getByRole('tab', { name: 'Fund your wallet' })
     await expect(tab).toBeVisible({ timeout: 90000 })
-    await tab.click()
+    await selectTab(tab)
 
     const connectStep = getDemoStep(page, 'Connect your wallet.')
     const connectButton = connectStep.getByRole('button').first()

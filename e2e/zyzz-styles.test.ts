@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { selectTab } from './helpers'
 
 test.setTimeout(45_000)
 
@@ -107,7 +108,7 @@ test('component recipes preserve badges and keyboard-accessible docs buttons', a
   await expect(badge).toHaveCSS('border-radius', '8px')
 
   await page.goto('/docs/guide/using-tempo-with-ai')
-  await page.getByRole('tab', { name: 'Cursor', exact: true }).click()
+  await selectTab(page.getByRole('tab', { name: 'Cursor', exact: true }))
   const install = page.getByRole('link', { name: 'Install in Cursor', exact: true })
   await expect(install).toHaveCSS('min-height', '40px')
   // The page layout recipe must override the button's default margin.
