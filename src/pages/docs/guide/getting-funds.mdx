@@ -120,7 +120,7 @@ You can also prefill `amount` as a human-readable string, such as `'50'`, and `t
 
 ### Confirm funds have arrived
 
-Fiat funding can complete asynchronously, and the response's `receipts` field may be absent. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
+A resolved `wallet_deposit` request doesn't mean the account is funded. Fiat funding can complete asynchronously, and the response's `receipts` field may be absent. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
 
 :::::
 

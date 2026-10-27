@@ -18,9 +18,9 @@ Zone settlement queues accepted withdrawals for processing on Tempo. The statele
 
 ## Implementation Status
 
-The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. Its approved enclave measurements are unset, so it rejects Nitro proofs.
+The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. In the current Tempo source, its approved enclave measurements are unset, so it rejects Nitro proofs.
 
-During rollout, T13 also accepts the `NoProof` mode. This mode keeps the quorum and continuity checks but skips attestation. A later upgrade removes it. Before relying on execution-proof enforcement, check the network's active hardfork and verifier.
+During rollout, T13 also accepts the `NoProof` mode. This mode keeps the quorum and continuity checks but skips attestation. A later upgrade removes it. Before relying on execution-proof enforcement, check the network's active hardfork, verifier, and approved enclave measurements.
 
 The sequencer implementation can be configured to wait for a Nitro-attested batch before submitting it. This node-side requirement is separate from onchain enforcement. Forced exits remain unfinished. Withdrawal settlement depends on the operator continuing to process and submit batches.
 

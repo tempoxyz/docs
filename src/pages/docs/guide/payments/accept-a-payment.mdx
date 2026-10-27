@@ -161,7 +161,7 @@ Check the network, token, recipient, and amount against the invoice. Confirm the
 
 ### Record the payment once
 
-Store the network, transaction hash, and transfer log index as a unique event key. Save that event and mark the invoice paid in one database transaction.
+Store the network, transaction hash, and transfer log index as a unique event key. Save that event and mark the invoice paid in one database transaction. Never fulfill an invoice from an API response or a matching memo.
 
 :::::
 
