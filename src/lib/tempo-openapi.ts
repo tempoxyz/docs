@@ -134,11 +134,30 @@ export function prepareTempoOpenApi(
   return spec
 }
 
-export async function loadTempoOpenApi(source = canonicalSpecUrl) {
-  const remote = /^https?:\/\//.test(source)
+type FetchRetryOptions = { attempts?: number; retryDelayMs?: number; timeoutMs?: number }
+
+// The build fetches the live spec, so one slow connection (such as a connect
+// ETIMEDOUT on Vercel) would otherwise fail the whole deployment.
+async function fetchWithRetry(
+  url: string,
+  { attempts = 4, retryDelayMs = 1_000, timeoutMs = 30_000 }: FetchRetryOptions = {},
+) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
+      if ((response.status < 500 && response.status !== 429) || attempt >= attempts) return response
+    } catch (error) {
+      if (attempt >= attempts) throw error
+    }
+    await new Promise((resolve) => setTimeout(resolve, retryDelayMs * 2 ** (attempt - 1)))
+  }
+}
+
+export async function loadTempoOpenApi(source = canonicalSpecUrl, retry: FetchRetryOptions = {}) {
+  const remote = /^https?:/ //.test(source)
   let spec: Record<string, unknown>
   if (remote) {
-    const response = await fetch(source)
+    const response = await fetchWithRetry(source, retry)
     if (!response.ok) throw new Error(`Failed to fetch Tempo OpenAPI: ${response.status}`)
     const body: unknown = await response.json()
     if (!isObject(body)) throw new TypeError('Tempo OpenAPI must be a JSON object.')

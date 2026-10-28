@@ -365,3 +365,36 @@ it.each([null, [], 'invalid'])('rejects non-object OpenAPI responses: %j', async
     fetcher.mockRestore()
   }
 })
+
+it('retries the OpenAPI fetch after a network failure or server error', async () => {
+  const fetcher = vi
+    .spyOn(globalThis, 'fetch')
+    .mockRejectedValueOnce(new TypeError('fetch failed'))
+    .mockResolvedValueOnce(new Response('unavailable', { status: 503 }))
+    .mockResolvedValueOnce(Response.json({ openapi: '3.1.0' }))
+  try {
+    await expect(
+      loadTempoOpenApi('https://example.test/openapi.json', { retryDelayMs: 0 }),
+    ).resolves.toMatchObject({ openapi: '3.1.0' })
+    expect(fetcher).toHaveBeenCalledTimes(3)
+  } finally {
+    fetcher.mockRestore()
+  }
+})
+
+it('stops retrying the OpenAPI fetch after the last attempt or a client error', async () => {
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('fetch failed'))
+  try {
+    await expect(
+      loadTempoOpenApi('https://example.test/openapi.json', { attempts: 2, retryDelayMs: 0 }),
+    ).rejects.toThrow('fetch failed')
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    fetcher.mockReset().mockResolvedValue(new Response('missing', { status: 404 }))
+    await expect(
+      loadTempoOpenApi('https://example.test/openapi.json', { retryDelayMs: 0 }),
+    ).rejects.toThrow('404')
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  } finally {
+    fetcher.mockRestore()
+  }
+})
