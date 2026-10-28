@@ -32,19 +32,7 @@ Pay transaction fees on behalf of your users. A fee payer service signs the fee 
 
 ### Set up the fee payer service
 
-<Tabs stateKey="fee-payer-service">
-  <Tab title="Hosted">
-
 See the [Fee Payer API guide](/docs/api/fee-payer) to set up authenticated production (and sandbox) sponsorship.
-
-  </Tab>
-
-  <Tab title="Self-hosted">
-
-Use the [Relay & Fee Payer Handler](/docs/server/relay-handler) to run a fee payer service with your own sponsorship policy.
-
-  </Tab>
-</Tabs>
 
 :::info
 For testing on Tempo testnet, use the public fee payer endpoint at `https://sponsor.moderato.tempo.xyz` without an API key.
@@ -52,7 +40,7 @@ For testing on Tempo testnet, use the public fee payer endpoint at `https://spon
 
 ### Configure your client to use the fee payer service
 
-Use `withRelay` from `viem/tempo` for transport-based sponsorship; `withFeePayer` is deprecated. `withRelay` sends every `eth_fillTransaction` request to the relay, including self-paid requests, so your endpoint must support both. Keep `feePayer: true` on transactions you want sponsored. For a self-hosted server, use `Handler.relay` from `tapimo/server` with the [supported server package versions](/docs/server/relay-handler#create-a-relay-handler).
+Use `withRelay` from `viem/tempo` for transport-based sponsorship; `withFeePayer` is deprecated. `withRelay` sends every `eth_fillTransaction` request to the relay, including self-paid requests, so your endpoint must support both. Keep `feePayer: true` on transactions you want sponsored.
 
 :::code-group
 

@@ -62,7 +62,7 @@
     "shiki": "^4.3.0",
     "sonner": "^2.0.7",
     "sql-formatter": "^15.8.2",
-    "tapimo": "0.18.2",
+    "tapimo": "0.21.0",
     "unified": "^11.0.5",
     "unplugin-icons": "^23.0.1",
     "viem": "2.57.5",
