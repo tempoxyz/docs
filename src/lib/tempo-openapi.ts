@@ -154,7 +154,7 @@ async function fetchWithRetry(
 }
 
 export async function loadTempoOpenApi(source = canonicalSpecUrl, retry: FetchRetryOptions = {}) {
-  const remote = /^https?:/ //.test(source)
+  const remote = /^https?:\/\//.test(source)
   let spec: Record<string, unknown>
   if (remote) {
     const response = await fetchWithRetry(source, retry)
