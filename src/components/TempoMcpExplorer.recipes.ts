@@ -2,6 +2,7 @@ import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
 import { vars as tokens } from '../styles/theme'
 export const resultViewLayout = style({
+  minWidth: 0,
   selectors: {
     ':where(& > :not(:last-child))': {
       '--tempo-style-space-y-reverse': '0',
@@ -126,6 +127,7 @@ export const form = style({
 })
 export const tempoMcpExplorerLayout = style({
   display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
   gap: tokens.spacing['4'],
   '@media (width >= 48rem)': {
     gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) auto',
@@ -268,6 +270,7 @@ export const label2 = style({
 })
 export const tempoMcpExplorerLayout3 = style({
   display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
   gap: tokens.spacing['3'],
   '@media (width >= 48rem)': {
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
@@ -287,6 +290,7 @@ export const tempoMcpExplorerInput = style({
 })
 export const tempoMcpExplorerLayout4 = style({
   display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
   gap: tokens.spacing['5'],
   '@media (width >= 64rem)': {
     gridTemplateColumns: 'minmax(0,0.85fr) minmax(0,1.15fr)',
