@@ -1,5 +1,7 @@
-import { readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { describe, expect, it, vi } from 'vitest'
 import { loadTempoOpenApi, prepareTempoOpenApi } from './tempo-openapi'
@@ -371,12 +373,13 @@ it('retries the OpenAPI fetch after a network failure or server error', async ()
     .spyOn(globalThis, 'fetch')
     .mockRejectedValueOnce(new TypeError('fetch failed'))
     .mockResolvedValueOnce(new Response('unavailable', { status: 503 }))
+    .mockResolvedValueOnce(new Response('{"openapi":', { status: 200 }))
     .mockResolvedValueOnce(Response.json({ openapi: '3.1.0' }))
   try {
     await expect(
       loadTempoOpenApi('https://example.test/openapi.json', { retryDelayMs: 0 }),
     ).resolves.toMatchObject({ openapi: '3.1.0' })
-    expect(fetcher).toHaveBeenCalledTimes(3)
+    expect(fetcher).toHaveBeenCalledTimes(4)
   } finally {
     fetcher.mockRestore()
   }
@@ -396,5 +399,19 @@ it('stops retrying the OpenAPI fetch after the last attempt or a client error', 
     expect(fetcher).toHaveBeenCalledTimes(1)
   } finally {
     fetcher.mockRestore()
+  }
+})
+
+it('reads a local OpenAPI file without fetching it', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'tempo-openapi-'))
+  const file = path.join(dir, 'openapi.json')
+  writeFileSync(file, JSON.stringify({ openapi: '3.1.0' }))
+  const fetcher = vi.spyOn(globalThis, 'fetch')
+  try {
+    await expect(loadTempoOpenApi(file)).resolves.toMatchObject({ openapi: '3.1.0' })
+    expect(fetcher).not.toHaveBeenCalled()
+  } finally {
+    fetcher.mockRestore()
+    rmSync(dir, { recursive: true, force: true })
   }
 })
