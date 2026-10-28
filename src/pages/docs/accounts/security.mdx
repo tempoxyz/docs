@@ -29,7 +29,7 @@ An account's rules are protocol rules. Every validator checks them on every tran
 
 A transaction that breaks any rule never lands. No validator or operator, including Tempo, can skip these checks.
 
-A distributed set of validators runs Tempo, not a single sequencer. Each validator checks every block against the protocol's rules before agreeing to it. A block is [final](/docs/protocol/blockspace/consensus) once enough validators agree, and a final block can't be reverted. A confirmed transaction can't be changed or undone. These guarantees hold while fewer than a third of validators misbehave.
+A distributed set of validators runs Tempo, not a single sequencer. Each validator checks every block against the protocol's rules before agreeing to it. A block is [final](/docs/protocol/blockspace/consensus) once enough validators agree. A final block and its transactions can't be reverted or changed. These guarantees hold while fewer than a third of validators misbehave.
 
 <span id="who-can-move-the-funds" />
 
@@ -61,7 +61,7 @@ Tempo checks what a key signs, not whether the right person holds the key. Your 
 - **How Your Backend Pays:** Authorize an [access key](/docs/accounts/access-keys) for each backend that pays. Don't give your backend the account's key. A breached backend then spends at most the key's remaining limit. You recover by revoking one key, not by changing the account's signers or moving its funds.
 - **Which Signers Your App Holds:** A breach gives an attacker every signer your app or wallet provider holds. Their combined weight counts toward the threshold ([what a threshold protects against](/docs/accounts/policies/signing-thresholds#what-a-threshold-protects)). On a configurable account, keep that weight below the threshold. Count parties, not keys, when you add it up.
 - **Each Account's Configuration:** Tempo stores only a hash of a configurable account's signers, weights, threshold, and version. Without the full configuration, the signers can't approve ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)).
-- **What Gets Signed:** A wallet provider's policy engine can't read a raw hash. It can't tell a key authorization from a payment. Check the key, limits, scopes, and expiry in your backend before the provider signs ([who can move the funds](/docs/accounts/apps#who-can-move-the-funds)).
+- **What Gets Signed:** A wallet provider's policy engine sees only a raw hash, so it can't tell a key authorization from a payment. Check the key, limits, scopes, and expiry in your backend before the provider signs ([who can move the funds](/docs/accounts/apps#who-can-move-the-funds)).
 
 <span id="if-a-key-or-service-is-compromised" />
 
@@ -82,7 +82,7 @@ On a configurable account, a configuration update leaves the account's access ke
 
 ## Post-Quantum Accounts
 
-A [configurable Tempo account](/docs/development/configurable-accounts) changes the keys behind its address. Switching to quantum-safe signatures doesn't mean moving funds.
+A [configurable Tempo account](/docs/development/configurable-accounts) changes the keys behind its address, so it can switch to quantum-safe signatures without moving funds once Tempo supports a quantum-safe key type.
 
 A large enough quantum computer could forge the signatures that protect crypto accounts today. That includes the secp256k1 keys in Ethereum wallets and the P-256 keys behind passkeys.
 

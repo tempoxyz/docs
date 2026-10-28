@@ -19,7 +19,7 @@ Choose a vault that accepts the stablecoin your customers hold and supports the 
 
 ## Find a vault
 
-Use the vault address and network provided for your integration. Evaluate where its returns come from, what customers net, how they exit, and who can deposit. A vault's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
+Use the vault address and network provided for your integration. Evaluate where its returns come from, what customers net, how they exit, and who can deposit. A vault's `verified` flag marks a curated listing, not a risk rating or a guaranteed return.
 
 <span id="inspect-the-selected-vault" />
 
@@ -53,7 +53,7 @@ An engine is the contract that connects an Earn vault to its underlying strategy
 
 ## What changes a position's value
 
-A share's value moves with its strategy's returns, losses, and fees. A verified listing does not remove these risks.
+A share's value moves with its strategy's returns, losses, and fees, including for verified vaults.
 
 | Strategy | What moves value |
 | --- | --- |
@@ -93,6 +93,6 @@ Check withdrawal support before the first deposit:
 
 ## Who can deposit
 
-A vault accepts one stablecoin, and its share token is open or allowlisted to approved holders. Before enabling a deposit, check the accepted asset, the account's eligibility, `state.depositsPaused`, and the operations listed in `capabilities`. Use the deployed vault's supported operations through [Viem's Earn actions](/docs/earn/integrate). The Earn read API does not submit deposits or withdrawals.
+A vault accepts one stablecoin, and its share token is open or allowlisted to approved holders. Before enabling a deposit, check the accepted asset, the account's eligibility, `state.depositsPaused`, and the operations listed in `capabilities`. Submit deposits and withdrawals with [Viem's Earn actions](/docs/earn/integrate); the Earn API only reads.
 
 Continue with [Deposit](/docs/earn/integrate).

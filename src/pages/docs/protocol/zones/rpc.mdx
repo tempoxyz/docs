@@ -97,7 +97,7 @@ Operators use a separate RPC endpoint.
 
 ## Timing Side Channels
 
-The current implementation doesn't enforce a fixed minimum response time. Silent `null` or zero responses prevent direct disclosure through result values. They don't guarantee indistinguishable timings. Log filters must include the caller in an eligible indexed topic before retrieval. This limits the scope of backend queries.
+The Zone RPC doesn't enforce a fixed minimum response time. Silent `null` or zero responses prevent direct disclosure through result values. They don't guarantee indistinguishable timings. Log filters must include the caller in an eligible indexed topic before retrieval. This limits the scope of backend queries.
 
 ## Block Responses
 

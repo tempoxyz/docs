@@ -36,13 +36,13 @@ For its transfer API, save the wallet action ID and [track the action](https://d
 
 Use Dynamic's [Tempo JavaScript package](https://www.dynamic.xyz/docs/javascript/reference/tempo/overview), `@dynamic-labs-sdk/tempo`, and its `/waas` extension for embedded wallets. The old `@dynamic-labs-sdk/evm/tempo` entry point has been removed. Supply your own interface for the headless SDK.
 
-Pass the token's actual decimal precision to `sendTip20Transaction`; its default is `18`. For [fee sponsorship](https://www.dynamic.xyz/docs/javascript/reference/tempo/sign-for-a-fee-sponsor), sign with `awaitingFeePayer: true`, then send the signed transaction to your fee-payer service for signing and broadcast. Check SDK restrictions: embedded Tempo wallets do not support typed-data signing, and business-account wallets cannot send transactions.
+Pass the token's actual decimal precision to `sendTip20Transaction`; its default is `18`. For [fee sponsorship](https://www.dynamic.xyz/docs/javascript/reference/tempo/sign-for-a-fee-sponsor), sign with `awaitingFeePayer: true`, then send the signed transaction to your fee-payer service for signing and broadcast. Embedded Tempo wallets don't support typed-data signing, and business-account wallets can't send transactions.
 
 <span id="turnkey" />
 
 ### Turnkey: policy-controlled signing
 
-Use Turnkey for policy-controlled signing. Its [native Tempo policies](https://docs.turnkey.com/features/policies/examples/tempo) use `tempo.tx` fields for networks, fee tokens, validity windows, and calls. When every batch call must be approved, evaluate the full call list. Allowing a token contract or selector alone does not constrain its encoded recipient or amount.
+Use Turnkey for policy-controlled signing. Its [native Tempo policies](https://docs.turnkey.com/features/policies/examples/tempo) use `tempo.tx` fields for networks, fee tokens, validity windows, and calls. When every batch call must be approved, evaluate the full call list. Allowing a token contract or selector doesn't constrain the encoded recipient or amount.
 
 Start from the [`with-tempo` implementation](https://github.com/tkhq/sdk/tree/main/examples/chain-integrations/with-tempo). Choose between your own Tempo fee payer and Turnkey's [managed sponsorship service](https://docs.turnkey.com/features/transaction-management), which requires an Enterprise plan and dashboard activation.
 
@@ -52,7 +52,7 @@ Start from the [`with-tempo` implementation](https://github.com/tkhq/sdk/tree/ma
 
 Use Fireblocks for a vault-based payment operation. Query [workspace assets](https://developers.fireblocks.com/api-reference/blockchains-&-assets/list-assets), verify the network and token contract, and use the asset's `legacyId` where a transaction requires `assetId`.
 
-Configure transaction policies before funding. Supply a unique `externalTxId` when [creating a transfer](https://developers.fireblocks.com/transactions/create-transactions) to reject duplicate submissions. Confirm native batching or sponsorship support for the selected product separately.
+Configure transaction policies before funding. Supply a unique `externalTxId` when [creating a transfer](https://developers.fireblocks.com/transactions/create-transactions) to reject duplicate submissions.
 
 <span id="tempo-requirements" />
 <span id="operational-fit" />

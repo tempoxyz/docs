@@ -17,7 +17,7 @@ Deposit stablecoins through the Zone's portal on Tempo, then confirm the private
 
 A deposit sends stablecoins to the Zone's portal (`ZonePortal`) on Tempo and credits a private account in the Zone. You prepare it, submit it on Tempo, then track the credit.
 
-This page uses the deployment details and authenticated connection from [Connect to a Zone](/docs/zones/connect). Get the operator's supported encryption and contract tooling.
+You need the deployment details and authenticated connection from [Connect to a Zone](/docs/zones/connect), and the operator's encryption and contract tooling.
 
 <span id="submit-an-encrypted-deposit" />
 
@@ -29,20 +29,20 @@ This page uses the deployment details and authenticated connection from [Connect
 
 ### Prepare the Deposit
 
-Confirm that the deployment accepts the token. Confirm that the depositor and recipient satisfy its access rules. Choose the private recipient and memo, and a public refund recipient.
+The deployment must accept the token, and the depositor and recipient must satisfy its access rules. Choose the private recipient and memo, and a public refund recipient.
 
 <span id="check-the-deposit-fees" />
 
 #### Calculate Deposit Fees
 
-Use the deployed portal's `calculateDepositFee` and `calculateBouncebackFee` helpers. They return the amount the private account can receive and the required failure coverage. Deposit fees come out of the amount sent. Show the expected net credit before authorization. The [deposit fee rules](/docs/protocol/zones/execution#deposit-fees) define the exact calculation.
+Use the deployed portal's `calculateDepositFee` and `calculateBouncebackFee` helpers. They return the amount the private account can receive and the required failure coverage. Deposit fees come out of the amount sent. Show the expected net credit before authorization. The [deposit fee rules](/docs/protocol/zones/execution#deposit-fees) define the calculation.
 
 <span id="encrypt-and-authorize-the-deposit" />
 <span id="send-funds" />
 
 ### Submit the Deposit
 
-Use the operator's supported tooling to encrypt the private recipient and memo. The tooling encrypts them with the Zone's published encryption key. Approve token spending where required. Then submit the encrypted deposit to the portal on Tempo.
+Encrypt the private recipient and memo with the operator's tooling, which uses the Zone's published encryption key. Approve token spending where required, then submit the encrypted deposit to the portal on Tempo.
 
 The token, amount, depositor, and refund recipient stay public, as the [privacy model](/docs/zones/privacy) describes.
 
@@ -67,7 +67,7 @@ A `pending` deposit hasn't completed. For a failed deposit, inspect `refund.stat
 
 ## Handle Deposit Failures
 
-Follow the deployment's [deposit lifecycle](/docs/protocol/zones/bridging#deposits-tempo--zone) for policy failures and refunds. Confirm the eventual credit or refund before you retry a deposit.
+The [deposit lifecycle](/docs/protocol/zones/bridging#deposits-tempo--zone) covers policy failures and refunds.
 
 If funds start on another network, [route them to Tempo](/docs/routes) first. Then deposit through the portal.
 

@@ -23,7 +23,7 @@ Discovery is advisory. The runtime `402 Payment Required` challenge from the tar
 | Services MCP | [`https://mpp.dev/mcp/services`](https://mpp.dev/mcp/services) | Let an MCP-capable agent rank services, inspect offers, get usage recipes, and fetch advisory OpenAPI summaries. |
 | Protocol reference | [`https://mpp.dev/advanced/discovery`](https://mpp.dev/advanced/discovery) | Learn how service providers publish discovery metadata. |
 
-Use this page as the agent-facing setup and recipe guide. Use `mpp.dev` for the live catalog, protocol reference, and service-provider discovery docs.
+Use `mpp.dev` for the live catalog, protocol reference, and service-provider discovery docs.
 
 The services MCP server is read-only. It does not register services, execute payments, sign transactions, or proxy paid API calls.
 
@@ -251,7 +251,7 @@ tool call you would make before constructing the HTTP request.
 
 Use the web directory when a human is exploring the catalog. Use the public API when you are building your own service browser, CLI, or analytics job. Use the MCP server when an agent needs tool-callable discovery inside its planning loop.
 
-For execution, call services directly with [`tempo request`](/docs/cli/request), the [Pay for services](/docs/guide/machine-payments/client), or another MPP-capable client. Discovery narrows the choice; the service's runtime `402` challenge confirms the exact payment terms.
+For execution, call services directly with [`tempo request`](/docs/cli/request), the [Pay for services](/docs/guide/machine-payments/client), or another MPP-capable client.
 
 ## Next steps for MPP service discovery
 

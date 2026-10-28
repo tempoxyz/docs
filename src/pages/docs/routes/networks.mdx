@@ -12,7 +12,7 @@ import { SupportedRoutesTable } from '../../../components/SupportedRoutesTable'
 
 # Supported routes
 
-Read the route directory before offering a network or asset in your application. A network being supported does not mean every token, direction, or funding method is available.
+Read the route directory before offering a network or asset in your application. Each route lists its own tokens, direction, and funding methods.
 
 ## Available routes
 
@@ -24,7 +24,7 @@ Every route in the live directory, with its funding methods and whether fee cove
 
 ## Read the route directory
 
-Send the request below to read the directory your application builds its choices from. Filter by source or destination network and token to narrow the results. This request lists supported routes; it does not create a transfer or request a signature.
+Send the request below to read the directory your application builds its choices from. Filter by source or destination network and token to narrow the results.
 
 <OpenApi.Playground operationId="listRoutes" anchors={false} />
 

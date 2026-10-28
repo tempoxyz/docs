@@ -13,7 +13,7 @@ import { EarnWithdrawDemo } from '../../../components/guides/EarnDepositDemo'
 
 # Withdraw
 
-Redeem vault shares to return stablecoins to the account. Use the immediate redemption flow below only when the vault supports it. Check queued withdrawal requirements separately.
+Redeem vault shares to return stablecoins to the account. The flow below is immediate redemption; use it only when the vault supports it.
 
 ## Try a withdrawal
 
@@ -25,7 +25,7 @@ Redeem the shares from your [test deposit](/docs/earn/integrate#try-a-deposit). 
 
 ## Check available funds
 
-A vault uses available cash or liquidity from its underlying venue for redemptions. An immediate redemption can fail when liquidity is unavailable. Vaults with async redemption support use a separate request-and-claim flow; a failed immediate redemption does not automatically enter that queue.
+A vault uses available cash or liquidity from its underlying venue for redemptions. An immediate redemption can fail when liquidity is unavailable. Vaults with async redemption use a separate request-and-claim flow; a failed immediate redemption doesn't enter that queue.
 
 Keep three amounts distinct in your app:
 
@@ -35,13 +35,13 @@ Keep three amounts distinct in your app:
 | **Available to withdraw** | The amount available through the vault's supported withdrawal path and a current quote. |
 | **Pending withdrawal** | An exit requested but not yet delivered to the destination account. |
 
-Read `capabilities.redeem` and `capabilities.asyncRedeem` to distinguish immediate and queued redemption support. The vault's `instantLiquidity` reports liquidity across the vault, not a user-specific withdrawal quote; `null` means a reliable value is unavailable. Recheck the withdrawal path when the user submits a request.
+Read `capabilities.redeem` and `capabilities.asyncRedeem` to distinguish immediate and queued redemption support. The vault's `instantLiquidity` reports liquidity across the vault, not a user-specific withdrawal quote; `null` means a reliable value is unavailable.
 
 Read the selected vault before enabling withdrawal. The API example starts with the same testnet vault. Keep `chainId` set to `testnet` and include `capabilities`, or change both the vault and network for your integration.
 
 <OpenApi.Playground operationId="getEarnVault" anchors={false} />
 
-Inspect `capabilities.redeem`, `capabilities.asyncRedeem`, and `instantLiquidity`. This reads vault-wide support; get a quote for the account’s share amount before signing. A quoted value does not reserve liquidity.
+This reads vault-wide support. Get a quote for the account’s share amount before signing; a quote doesn't reserve liquidity.
 
 <span id="request-and-confirm-a-withdrawal" />
 
@@ -122,7 +122,7 @@ const submitWithdrawal = async () => {
 
 ::::
 
-For queued withdrawals, [contact Tempo](https://tempo.xyz/contact) for the selected vault’s request-and-claim integration. The examples on this page cover immediate redemption. Save the request identifier and keep pending funds separate from available stablecoins. The Earn read API does not submit either withdrawal path.
+For queued withdrawals, [contact Tempo](https://tempo.xyz/contact) for the selected vault’s request-and-claim integration. Save the request identifier and keep pending funds separate from available stablecoins.
 
 <span id="confirm-destination-receipt" />
 
@@ -136,4 +136,4 @@ Track the transaction and any later settlement. Keep the withdrawal pending unti
 
 Once the withdrawn stablecoins reach the account, you can [send a payment](/docs/guide/payments/send-a-payment).
 
-For private balances, use a vault that supports [Zone routing](/docs/zones) and check its route configuration. Public and private positions have different accounting and tracking requirements; see the [integration guide](/docs/earn/integrate#track-private-earn-activity).
+For private balances, use a vault that supports [Zone routing](/docs/zones). Private positions are tracked differently; see [private Earn activity](/docs/earn/integrate#track-private-earn-activity).

@@ -8,13 +8,13 @@ description: Verify the original payment, reserve refundable amounts, approve a 
 
 # Handle stablecoin refunds
 
-A merchant refund for a direct stablecoin payment is a new outbound transfer. Verify the original delivered payment, approve the return destination and amount, then track the new transfer through delivery. A refund does not edit or reverse the original transaction.
+A merchant refund for a direct stablecoin payment is a new outbound transfer. Verify the original delivered payment, approve the return destination and amount, then track the new transfer through delivery. A refund doesn't edit or reverse the original transaction.
 
 Keep merchant refunds separate from provider returns. For a Routes payment being returned by the provider, follow its [delivery and refund states](/docs/routes/delivery#track-refunds) before initiating another movement.
 
 ## Identify the payment and refundable amount
 
-Start with the verified receipt stored during [payment acceptance](/docs/guide/payments/accept-a-payment#reconcile-payments-with-memos). Identify the original transfer by network, token contract, transaction hash, and transfer log index. A transaction can contain several payments, so its hash alone cannot identify the refund entitlement.
+Start with the verified receipt stored during [payment acceptance](/docs/guide/payments/accept-a-payment#reconcile-payments-with-memos). Identify the original transfer by network, token contract, transaction hash, and transfer log index. A transaction can contain several payments, so its hash doesn't identify a single payment.
 
 Keep these records in your application, rather than in public transaction metadata:
 
@@ -26,13 +26,13 @@ Keep these records in your application, rather than in public transaction metada
 | Submission | Network, transaction identifier, attempt state, and payment reference. |
 | Completion | Verified delivered amount and transfer event, with any exception. |
 
-Use integer base units. Decide how fees and any conversion affect the commercial refund terms; do not silently subtract them from the approved amount. This guide assumes the refund uses the original token. A different asset or local-currency refund needs a separately agreed conversion and delivery route.
+Use integer base units. Decide how fees and any conversion affect the commercial refund terms; don't silently subtract them from the approved amount. Refund in the original token; a different asset or local-currency refund needs a separately agreed conversion and delivery route.
 
 ## Approve the destination independently
 
-Do not automatically return funds to the original transaction sender. An exchange, shared wallet, payment contract, or provider may have sent on the customer's behalf. That address may not credit a returned payment to the customer.
+Don't automatically return funds to the original transaction sender. An exchange, shared wallet, payment contract, or provider may have sent on the customer's behalf. That address may not credit a returned payment to the customer.
 
-Use your authenticated customer or provider process to verify the refund destination, supported network and token, and any required deposit reference. Independently verify destination changes before release. An address appearing in a memo or refund request does not establish ownership or authorization.
+Use your authenticated customer or provider process to verify the refund destination, supported network and token, and any required deposit reference. Independently verify destination changes before release.
 
 ## Reserve, submit, and verify the refund
 
@@ -48,7 +48,7 @@ Check signing permissions, payment funds, fee funding, and the approved destinat
 
 ### Keep uncertain submissions pending
 
-Persist the attempt and transaction identifier. If submission times out, inspect that attempt before rebuilding or resending. Keep its amount reserved while the outcome is unknown. A local error does not prove that no payment was delivered.
+Persist the attempt and transaction identifier. If submission times out, inspect that attempt before rebuilding or resending. Keep its amount reserved while the outcome is unknown. A local error can still hide a delivered payment.
 
 ### Confirm the delivered refund
 
@@ -58,6 +58,6 @@ Verify the successful receipt and expected token, recipient, and amount in the d
 
 ## Resolve exceptions without paying twice
 
-Release a reservation for another attempt only after establishing that the earlier attempt cannot deliver the refund. Preserve failed, held, and unknown outcomes with their evidence. A guard-held receipt needs its authorized recovery process; sending another refund can create a second obligation or loss.
+Release a reservation for another attempt only once the earlier attempt can no longer deliver the refund. Preserve failed, held, and unknown outcomes with their evidence. A guard-held receipt needs its authorized recovery process; sending another refund can create a second obligation or loss.
 
 Test two simultaneous partial refunds, duplicate jobs, an interrupted submission, an unsupported destination, and a held receipt. Confirm that replaying events cannot increase the refunded total. Link the completed refund and its fees to the original invoice in [payment reconciliation](/docs/resources/guides/payment-reconciliation).

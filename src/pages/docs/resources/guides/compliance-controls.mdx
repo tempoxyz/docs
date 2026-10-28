@@ -22,7 +22,7 @@ For address risk checks and transaction monitoring, start with [Screen blockchai
 | Burn eligible balances | Dedicated TIP-20 burn authorities and guard receipt rules. | Establish authority for the action and preserve the approval and case evidence. |
 | Connect a transfer to a case | A supported 32-byte transfer memo. | Store personal and case information offchain and control access to it. |
 
-These controls do not perform identity checks or sanctions screening by themselves. An allowlisted address proves membership in a policy, not that the address-to-customer mapping is current or that every obligation has been met.
+These controls enforce decisions; identity checks and sanctions screening happen in your application or provider. An allowlist records policy membership only, so keep the address-to-customer mapping current offchain.
 
 ## Separate issuer roles
 
@@ -33,7 +33,7 @@ These controls do not perform identity checks or sanctions screening by themselv
 - `BURN_BLOCKED_ROLE` permits burning eligible, unprotected balances from addresses that fail the TIP-403 sender check.
 - `BURN_AT_ROLE` permits burning an unprotected balance without TIP-403 authorization, subject to the specification's checks.
 
-Own-balance burning, burning a blocked balance, and `burnAt` are different operations. Burning reduces supply; it does not transfer recovered funds to another account or establish legal authority for the action. Guard-held funds have [separate receipt-level burn rules](/docs/protocol/tip403/receive-policies#burns).
+Own-balance burning, burning a blocked balance, and `burnAt` are different operations. Burning reduces supply; it doesn't move funds to another account. Guard-held funds have [separate receipt-level burn rules](/docs/protocol/tip403/receive-policies#burns).
 
 Pausing affects token movement, while administrative functions and protocol operations have their own rules. Read the [pause controls](/docs/protocol/tip20/spec#pause-controls) before relying on a pause as an emergency response.
 
@@ -51,9 +51,9 @@ Start with [managing an issued stablecoin](/docs/guide/issuance/manage-stablecoi
 
 A [receive policy](/docs/accounts/policies/receive-policies) controls which senders and TIP-20 tokens an account accepts. It is an inbound control, not a general outbound transaction policy.
 
-Token-level checks run first and revert on failure. If those checks pass but the receiver's policy blocks delivery, the call succeeds while funds are held in `ReceivePolicyGuard`. The token's `Transfer` event names the guard as the recipient, so transaction success alone must not credit the intended receiver.
+Token-level checks run first and revert on failure. If those checks pass but the receiver's policy blocks delivery, the call succeeds while funds are held in `ReceivePolicyGuard`. The token's `Transfer` event names the guard as the recipient, so don't credit the intended receiver on transaction success.
 
-Integrations must distinguish these outcomes:
+Handle each outcome separately:
 
 | Outcome | Payment handling |
 | --- | --- |
@@ -61,15 +61,15 @@ Integrations must distinguish these outcomes:
 | Receive policy holds the inbound | Index the blocked receipt and route it through the authorized recovery process. |
 | Expected transfer reaches the receiver | Verify the token, recipient, amount, and successful transaction before crediting it. |
 
-Each blocked inbound creates a receipt. The receipt captures the recovery authority in effect for that inbound; changing the account's authority affects future receipts. Claims consume a full receipt, and the allowed destination and current policy checks depend on the claim path. Follow the [receive-policy specification](/docs/protocol/tip403/receive-policies) rather than treating held funds as an ordinary account balance.
+Each blocked inbound creates a receipt. The receipt captures the recovery authority in effect for that inbound; changing the account's authority affects future receipts. Claims consume a full receipt, and the allowed destination and current policy checks depend on the claim path. Held funds aren't part of the account balance; the [receive-policy specification](/docs/protocol/tip403/receive-policies) defines the claim rules.
 
 ## Keep compliance records offchain
 
 [Transfer memos](/docs/guide/payments/transfer-memos) carry a 32-byte reference through supported TIP-20 methods. Use an opaque identifier to connect a payment to internal records. Do not put names, identity documents, account details, or other personal data in a public memo.
 
-A memo is not a complete information-sharing message. [FATF's virtual-asset standards](https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Regulation-virtual-assets-interpretive-note.html) call for covered providers to obtain, retain, and transmit originator and beneficiary information; that information need not be attached to the onchain transfer. Determine the applicable local requirements and each service's responsibilities, then preserve the information and exchange evidence in the appropriate offchain systems.
+A memo isn't an information-sharing message. [FATF's virtual-asset standards](https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Regulation-virtual-assets-interpretive-note.html) call for covered providers to obtain, retain, and transmit originator and beneficiary information, which doesn't need to travel with the onchain transfer. Keep that information and the exchange evidence in offchain systems.
 
-A matching reference is also not proof of payment. Use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify delivery before updating a customer or case ledger.
+Before updating a customer or case ledger, verify delivery with the [receiving guide](/docs/guide/payments/accept-a-payment), not only the matching reference.
 
 ## Test control changes before operating them
 
@@ -81,7 +81,7 @@ List each token, policy, role holder, receive account, recovery authority, and o
 
 ### Exercise permitted and blocked paths
 
-Test allowed transfers, issuer-policy rejections, receiver holds, authorized claims, and the pause behavior your application depends on. Confirm that a successful held transfer cannot credit a customer as delivered.
+Test allowed transfers, issuer-policy rejections, receiver holds, authorized claims, and the pause behavior your application depends on. Check that a held transfer never credits a customer.
 
 ### Preserve action and decision evidence
 
@@ -101,4 +101,4 @@ It can configure a receive-policy token filter. A blocked inbound is held by the
 
 ### Does an onchain control establish legal compliance?
 
-No. Technical authority, the institution's decisions, applicable requirements, and evidence of the surrounding workflow are distinct. Document the responsibilities for the specific entity, asset, and service.
+No. Onchain controls enforce the institution's decisions. Compliance also depends on the applicable requirements and the institution's own workflow.

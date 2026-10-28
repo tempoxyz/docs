@@ -10,15 +10,15 @@ description: "Connect approved payroll and contractor obligations to verified st
 
 Stablecoin payroll connects approved compensation to a token transfer or provider-mediated local payout. Keep calculation, deductions, and approval in your payroll system, and enable the payment method only where the worker and compensation are eligible. Start with [Send payments](/docs/guide/payments/send-a-payment) and use [batch payouts](/docs/resources/guides/batch-payments) for an approved run.
 
-A production workflow needs worker onboarding, payment preferences, treasury funding, destination validation, error handling, reconciliation, and support. The network does not supply those business processes automatically.
+A production workflow needs worker onboarding, payment preferences, treasury funding, destination validation, error handling, reconciliation, and support.
 
 ## Separate payroll approval from payment execution
 
 The payroll system determines the worker, amount, pay period, classification, and approval status. Your application or provider funds and executes the approved payment. A worker can receive a supported stablecoin directly, or a payout provider can convert it to a supported local payment method.
 
-Define which route is available for each worker before offering it. Check permitted payment forms and currencies, any required consent, worker classification, supported assets, and local delivery requirements. An employee's preference for stablecoins does not by itself establish that the method meets applicable wage-payment rules.
+Define which route is available for each worker before offering it. Check permitted payment forms and currencies, any required consent, worker classification, supported assets, and local delivery requirements.
 
-Keep withholding, reporting, and payroll records in the applicable process. For example, the [IRS digital-asset guidance](https://www.irs.gov/individuals/international-taxpayers/frequently-asked-questions-on-digital-asset-transactions) treats digital assets paid as employee remuneration as wages for U.S. federal employment tax purposes. Contractor payments have a separate treatment. Tax treatment does not establish whether the wage-payment method is permitted.
+Keep withholding, reporting, and payroll records in the applicable process. For example, the [IRS digital-asset guidance](https://www.irs.gov/individuals/international-taxpayers/frequently-asked-questions-on-digital-asset-transactions) treats digital assets paid as employee remuneration as wages for U.S. federal employment tax purposes. Contractor payments have a separate treatment.
 
 ## Capture worker payment preferences
 
@@ -30,7 +30,7 @@ Keep withholding, reporting, and payroll records in the applicable process. For 
 | Delivery expectation | Required delivery date, provider estimate, and evidence of usable funds. |
 | Support | Exception owner, communication process, and verified procedure for changing payment instructions. |
 
-A dollar-denominated balance may fit a worker's preference, but it still involves issuer, custody, and conversion risks. Explain the actual withdrawal or spending options supplied by the product. Do not imply that a supported wallet guarantees local-currency access.
+A dollar-denominated balance may fit a worker's preference, but it still involves issuer, custody, and conversion risks. Explain the withdrawal and spending options the product supports.
 
 ## Fund and schedule an authorized payroll run
 
@@ -38,9 +38,9 @@ Set the balances needed for principal, network fees, provider charges, and any c
 
 Choose an atomic batch when the calls must succeed together. Choose [independent transactions](/docs/guide/payments/send-parallel-transactions) when a failure in one worker's transaction must not revert another worker's payment. A reverting call reverts an atomic batch. Each approach still requires verifying the delivered transfers; a receive-policy hold can occur without reverting the call.
 
-Your application or provider schedules and submits recurring runs. [Transaction validity windows](/docs/protocol/transactions#scheduled-transactions) constrain when a transaction can be included; they do not create a recurring job or guarantee execution.
+Your application or provider schedules and submits recurring runs. [Transaction validity windows](/docs/protocol/transactions#scheduled-transactions) constrain when a transaction can be included; they don't create a recurring job or guarantee execution.
 
-If you sponsor fees, monitor the sponsor's eligible fee-token balance and the applicable liquidity requirements. [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) changes who pays network fees and does not remove the need to fund them.
+If you sponsor fees, monitor the sponsor's eligible fee-token balance and the applicable liquidity requirements. [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) changes who pays network fees; the sponsor still has to fund them.
 
 ## Reconcile each worker payment
 
@@ -48,7 +48,7 @@ Attach an opaque [32-byte payment reference](/docs/guide/payments/transfer-memos
 
 A batch shares a transaction hash, so use each transfer's log index to distinguish outcomes. Store the network, transaction hash, and transfer log index as a unique event key. Verify the recipient, token, amount, and successful delivered transfer before marking the obligation paid.
 
-For local-currency delivery, retain the provider payout ID and delivery evidence as well. Near-instant onchain settlement does not prove that a worker received a bank deposit. See [global payouts](/docs/resources/guides/global-payouts) for route evaluation and [payment reconciliation](/docs/resources/guides/payment-reconciliation) for finance records.
+For local-currency delivery, retain the provider payout ID and delivery evidence as well. See [global payouts](/docs/resources/guides/global-payouts) for route evaluation and [payment reconciliation](/docs/resources/guides/payment-reconciliation) for finance records.
 
 ## Handle unresolved and incorrect payouts
 
@@ -60,7 +60,7 @@ Record support ownership and the evidence needed to resolve each exception. Veri
 
 Compare the complete source amount, usable recipient amount, delivery time, prefunded balances, and support burden with the existing process. Stablecoin payroll succeeds when the worker can receive and use the promised funds and finance can reconcile the obligation once.
 
-If you need private balances, review the [Zones privacy model](/docs/zones/privacy) and current [preview capabilities](/docs/zones) separately. The current permissioned runtime disables general TIP-20 transfers; do not assume public-network payroll transfers are available inside a Zone.
+If you need private balances, review the [Zones privacy model](/docs/zones/privacy) and current [preview capabilities](/docs/zones). The current permissioned runtime disables general TIP-20 transfers, so public-network payroll transfers don't work inside a Zone.
 
 ## Stablecoin payroll questions
 
@@ -70,7 +70,7 @@ No. A provider can convert the stablecoin leg into a supported local payment met
 
 ### Does the payment rail determine compensation treatment?
 
-No. Keep worker classification, wage rules, tax reporting, and recordkeeping in the applicable payroll process. Confirm the operating requirements for the jurisdictions involved before enabling the option.
+No. Keep worker classification, wage rules, tax reporting, and recordkeeping in the applicable payroll process.
 
 ### What infrastructure is required?
 
@@ -78,4 +78,4 @@ Worker onboarding, preferences, approved obligations, funding, signing controls,
 
 ### How do references support payroll reconciliation?
 
-An opaque memo maps the transfer to an offchain payroll record. Combine it with verified delivery and a unique event key; a matching reference alone does not prove payment.
+An opaque memo maps the transfer to an offchain payroll record. Combine it with verified delivery and a unique event key before marking the obligation paid.
