@@ -14,11 +14,15 @@ A Zone executes transactions against its private state with Tempo's gas accounti
 
 ## Overview
 
-A Zone runs a fixed set of system contracts. Transactions pay gas in an enabled TIP-20 token. [Deposits and withdrawals](/docs/protocol/zones/bridging) also incur separate processing fees.
+A Zone is a private ledger of stablecoin balances connected to a `ZonePortal` contract on Tempo. The portal holds the backing tokens. The portal admin, the account that controls a portal's [configuration](/docs/protocol/zones/architecture), sets Zone fees and enabled tokens.
+
+Inside the Zone, fixed system contracts handle token movement. `ZoneInbox` mints tokens for [deposits](/docs/protocol/zones/bridging) from Tempo. `ZoneOutbox` burns tokens for withdrawals back to Tempo. Zone transactions pay gas in an enabled [TIP-20 token](/docs/protocol/tip20/spec), Tempo's stablecoin standard. Deposits and withdrawals pay separate processing fees.
 
 ## Fee Tokens
 
-Zones reuse Tempo fee units and gas accounting. A transaction can select an enabled, initialized TIP-20 token through `feeToken`. If it omits this field, the Zone uses its creation-time default token. The Zone fee manager (`ZoneFeeManager`) accepts the selected token directly without Fee AMM conversion. It doesn't require USD currency. Token pause and compliance policies still apply.
+Zones use the same fee units and gas accounting as [Tempo transaction fees](/docs/protocol/fees/spec-fee). A transaction selects its fee token through `feeToken`. The token must be enabled by the portal admin and initialized, meaning a Zone block has processed its enablement. If `feeToken` is omitted, the Zone uses the default token set when the Zone was created.
+
+On Tempo, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the user's fee token into the validator's preferred stablecoin. The Zone fee manager (`ZoneFeeManager`) skips that conversion and collects the selected token directly. So a Zone fee token doesn't need to be USD-denominated, as Tempo fee tokens must be. The token's pause state and [TIP-403](/docs/protocol/tip403/spec) transfer policy still apply.
 
 ## Deposit Fees
 
@@ -28,7 +32,9 @@ Deposits charge a fixed processing fee in the deposited token:
 fee = FIXED_DEPOSIT_GAS × zoneGasRate
 ```
 
-`FIXED_DEPOSIT_GAS` is fixed at 100,000 gas. The portal admin configures `zoneGasRate` through `ZonePortal.setZoneGasRate()`. The fee is deducted from the deposit amount and paid to the admin on Tempo. Deposits must also cover the configured failed-deposit bounce-back fee. To read both amounts, call `calculateDepositFee()` and `calculateBouncebackFee()` on the portal.
+`FIXED_DEPOSIT_GAS` is fixed at 100,000 gas. `zoneGasRate` is the price per unit of gas, in the deposited token. The portal admin sets it through `ZonePortal.setZoneGasRate()`. The portal deducts the fee from the deposit amount and pays it to the admin on Tempo.
+
+Deposits must also cover the bounce-back fee. The Zone deducts it when a [failed deposit](/docs/protocol/zones/bridging#encrypted-deposits) is refunded to Tempo. To read both amounts, call `calculateDepositFee()` and `calculateBouncebackFee()` on the portal.
 
 ## Withdrawal Fees
 
@@ -38,11 +44,15 @@ Withdrawals charge a processing fee in the withdrawn token:
 fee = (WITHDRAWAL_BASE_GAS + gasLimit) × tempoGasRate
 ```
 
-`WITHDRAWAL_BASE_GAS` is 50,000 gas. The user specifies `gasLimit` for callback execution. It's `0` for a plain withdrawal, with a maximum of 10,000,000. The sequencer configures `tempoGasRate` through `ZoneOutbox.setTempoGasRate()`. The portal admin's `maxTempoGasRate` bounds it. Use `calculateWithdrawalFee(gasLimit)` to read the fee. It's charged in addition to the requested withdrawal amount. It's separate from the Zone transaction gas fee.
+`WITHDRAWAL_BASE_GAS` is 50,000 gas. `gasLimit` is the gas the user reserves for a [withdrawal callback](/docs/protocol/zones/bridging), a contract call on Tempo that runs with the withdrawal. It's `0` for a plain withdrawal, with a maximum of 10,000,000.
+
+The sequencer, which orders Zone blocks and submits them to the portal, sets `tempoGasRate` through `ZoneOutbox.setTempoGasRate()`. It can't exceed the `maxTempoGasRate` that the portal admin sets. Call `calculateWithdrawalFee(gasLimit)` to read the fee. The withdrawal fee is charged on top of the requested withdrawal amount. It's separate from the Zone transaction gas fee.
 
 ## Fixed Gas Costs
 
-These TIP-20 selectors have a fixed precompile charge of 100,000 gas, separate from transaction intrinsic gas. Fixed charges prevent gas-based information leaks tied to storage state. On a standard EVM chain, gas varies when a transfer writes to a previously empty storage slot. That reveals whether the recipient has received tokens before. During the current permissioned phase, public transfer calls still revert with `Unauthorized()`.
+On a Zone, each public TIP-20 transfer and approval function in the table charges a fixed 100,000 gas. This charge is separate from transaction intrinsic gas. Fixed charges prevent gas-based information leaks tied to storage state. On a standard EVM chain, gas varies when a transfer writes to a previously empty storage slot. That reveals whether the recipient has received tokens before.
+
+The current permissioned runtime moves tokens only through deposits and withdrawals. In it, public transfer calls revert with `Unauthorized()`.
 
 | Function | Gas Cost |
 |----------|----------|
@@ -53,11 +63,11 @@ These TIP-20 selectors have a fixed precompile charge of 100,000 gas, separate f
 | `approve(spender, amount)` | 100,000 |
 | `permit(...)` | 100,000 |
 
-Inbox/outbox token movement and fee collection use internal system paths rather than the public transfer selectors.
+`ZoneInbox` minting, `ZoneOutbox` burning, and fee collection don't call these public functions, so they don't pay these charges.
 
 ## Contract Creation Disabled
 
-Contract creation is restricted to protocol-allowlisted deployers. The allowlist is currently empty, so users can't submit deployment transactions or execute `CREATE` or `CREATE2`. Each Zone runs a fixed set of system contracts and predeploys.
+Contract creation is restricted to deployers on a protocol allowlist. The allowlist is currently empty, so users can't submit deployment transactions or execute `CREATE` or `CREATE2`. Each Zone runs only its fixed [system contracts and predeploys](/docs/protocol/zones/architecture#zone-predeploys).
 
 ## Token Management
 
@@ -65,6 +75,8 @@ Contract creation is restricted to protocol-allowlisted deployers. The allowlist
   name="policy"
   alt="Issuer TIP-403 policy is anchored by the finalized Tempo checkpoint imported into TempoState. Zone execution reads and applies that checkpoint's policy to token operations."
 />
+
+Each token on a Zone follows its issuer's [TIP-403](/docs/protocol/tip403/spec) policy from Tempo, the registry rule that decides who may send and receive it. The `TempoState` precompile stores the finalized Tempo checkpoint the Zone has imported. Zone execution applies the policy as of that checkpoint.
 
 The portal admin manages which TIP-20 tokens are available on a Zone:
 
@@ -74,9 +86,9 @@ The portal admin manages which TIP-20 tokens are available on a Zone:
 | `pauseDeposits(token)` | Stops new deposits for the token. Withdrawal processing remains available unless the portal is paused. |
 | `resumeDeposits(token)` | Restarts deposits for a previously paused token. |
 
-Under T13, `enableToken` also requires a submitted batch to initialize the processed enabled-token cursor. At most eight token enablements can remain unprocessed. Earlier runtimes use different admission limits.
+From [T13](/docs/protocol/upgrades/t13), the network upgrade scheduled for October 29 on testnet, a token enablement takes effect when a Zone block processes it. The sequencer then submits that progress to the portal in a batch. `enableToken` reverts while eight enablements are pending, meaning no Zone block has processed them yet. Before T13, other admission limits apply.
 
-Once enabled, a token can't be disabled. Withdrawal availability still depends on the portal pause state, access controls, and the token’s compliance policy. Tokens on a Zone use the same address as their Tempo counterpart. `ZoneInbox` mints on deposit, `ZoneOutbox` burns on withdrawal. No mechanism exists to create new tokens on a Zone.
+Once enabled, a token can't be disabled. Withdrawals still depend on whether the [portal is paused](/docs/protocol/zones/architecture#portal-access-and-pausing), its access controls, and the token's TIP-403 policy. A token on a Zone uses the same address as the TIP-20 token it represents on Tempo. `ZoneInbox` mints it on deposit, and `ZoneOutbox` burns it on withdrawal. No mechanism exists to create new tokens on a Zone.
 
 ## Related
 

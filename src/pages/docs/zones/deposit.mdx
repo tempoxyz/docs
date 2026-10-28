@@ -15,9 +15,9 @@ Deposit stablecoins through the Zone's portal on Tempo, then confirm the private
 
 ## Overview
 
-A deposit sends stablecoins to the Zone's portal (`ZonePortal`) on Tempo and credits a private account in the Zone. You prepare it, submit it on Tempo, then track the credit.
+A deposit moves stablecoins from Tempo into a [Zone](/docs/zones), a private stablecoin ledger connected to Tempo. You send them to the Zone's portal (`ZonePortal`), a contract on Tempo that locks the backing assets. After Tempo finality, the Zone mints the same amount, less fees, to a private account. Only that account and the operator can read its balance.
 
-You need the deployment details and authenticated connection from [Connect to a Zone](/docs/zones/connect), and the operator's encryption and contract tooling.
+This page uses an authenticated Zone RPC connection and the deployment details from [Connect to a Zone](/docs/zones/connect): the Zone ID, chain ID, portal address, and enabled assets. The Zone's operator, who runs the deployment, also supplies the tooling that encrypts deposits and calls the portal.
 
 <span id="submit-an-encrypted-deposit" />
 
@@ -29,20 +29,20 @@ You need the deployment details and authenticated connection from [Connect to a 
 
 ### Prepare the Deposit
 
-The deployment must accept the token, and the depositor and recipient must satisfy its access rules. Choose the private recipient and memo, and a public refund recipient.
+Confirm that the deployment accepts the token. Confirm that its access rules, which the operator sets, permit the depositor and recipient. Choose the private recipient and memo. Also choose a public refund recipient (`tempoRefundRecipient`), a Tempo address that gets the funds back if the Zone can't credit the deposit.
 
 <span id="check-the-deposit-fees" />
 
 #### Calculate Deposit Fees
 
-Use the deployed portal's `calculateDepositFee` and `calculateBouncebackFee` helpers. They return the amount the private account can receive and the required failure coverage. Deposit fees come out of the amount sent. Show the expected net credit before authorization. The [deposit fee rules](/docs/protocol/zones/execution#deposit-fees) define the calculation.
+Call the deployed portal's `calculateDepositFee()` and `calculateBouncebackFee()`. The deposit fee is a fixed processing fee that comes out of the amount sent. The bounce-back fee is deducted only if a failed deposit is refunded to Tempo, and the deposit must be large enough to cover it. Show the expected net credit before the depositor signs. The [deposit fee rules](/docs/protocol/zones/execution#deposit-fees) define the exact calculation.
 
 <span id="encrypt-and-authorize-the-deposit" />
 <span id="send-funds" />
 
 ### Submit the Deposit
 
-Encrypt the private recipient and memo with the operator's tooling, which uses the Zone's published encryption key. Approve token spending where required, then submit the encrypted deposit to the portal on Tempo.
+Use the operator's supported tooling to encrypt the private recipient and memo with the operator's published encryption key. Approve the portal to spend the token if your tooling requires an approval. Then call `ZonePortal.depositEncrypted` on Tempo with the token, amount, encrypted payload, and refund recipient. The portal appends each deposit to a queue that the Zone processes in order. Save the queue hash the call returns, which identifies this deposit in [Track the Deposit](#track-the-deposit).
 
 The token, amount, depositor, and refund recipient stay public, as the [privacy model](/docs/zones/privacy) describes.
 
@@ -51,23 +51,23 @@ The token, amount, depositor, and refund recipient stay public, as the [privacy 
 
 ### Confirm the Credit
 
-After the Tempo transaction finalizes, [check the Zone credit](/docs/zones/balances) with the recipient's authenticated connection. Save the public deposit reference and private credit record together.
+After the Tempo transaction finalizes, [check the Zone credit](/docs/zones/balances) with the recipient's authenticated connection. Store the queue hash with the private balance change it produced, so you can match each public deposit to its credit.
 
 :::::
 
 ## Track the Deposit
 
-Read the deposit outcome with the [Zone status API](/docs/api/zones). Use the queue hash that `ZonePortal.depositEncrypted` returns, not its transaction hash.
+Read the deposit outcome with the hosted [Zone status API](/docs/api/zones). Look it up by the queue hash that `ZonePortal.depositEncrypted` returns, not by its transaction hash.
 
-In the playground, select **Try**. Enter the deposit queue hash and the Zone’s numeric `chainId`. Use an API key with `data:read` and access to that Zone. The request tool includes language examples and the response.
+The API needs a Tempo API key with `data:read` and access to that Zone, created in [Tempo Console](/docs/api/authentication#api-keys). In the playground, select **Try**. Enter the queue hash and the Zone's numeric `chainId` from the operator. The request tool includes language examples and the response.
 
 <OpenApi.Playground operationId="getZoneDeposit" anchors={false} />
 
-A `pending` deposit hasn't completed. For a failed deposit, inspect `refund.status` and confirm the refund before you retry. Keep using authenticated [balance and activity reads](/docs/zones/balances) for the private account's ledger.
+The response `status` is `pending`, `completed` (the Zone credited the recipient), or `failed`. For a `failed` deposit, `refund` names the refund recipient, and `refund.status` is `pending` while the refund's delivery is unverified. Confirm the refund before you retry. Read the private account's ledger with authenticated [balance and activity reads](/docs/zones/balances).
 
 ## Handle Deposit Failures
 
-The [deposit lifecycle](/docs/protocol/zones/bridging#deposits-tempo--zone) covers policy failures and refunds.
+A deposit fails in the Zone when decryption fails or the Zone can't mint to the recipient, such as when a token policy blocks it. The inbox (`ZoneInbox`) then queues a refund to the refund recipient on Tempo, less the bounce-back fee. If that Tempo transfer also fails, the portal records a refund that the refund recipient claims with `claimRefund(token)`. The [encrypted deposit rules](/docs/protocol/zones/bridging#encrypted-deposits) cover each case. Confirm the eventual credit or refund before you retry a deposit.
 
 If funds start on another network, [route them to Tempo](/docs/routes) first. Then deposit through the portal.
 
@@ -78,6 +78,6 @@ If funds start on another network, [route them to Tempo](/docs/routes) first. Th
 <Cards>
   <Card title="Balances and Activity" description="Use for confirming the private credit with an authenticated read." to="/docs/zones/balances" />
   <Card title="Bridging" description="Covers encrypted deposits, the deposit lifecycle, and refunds." to="/docs/protocol/zones/bridging" />
-  <Card title="Deposit OUSD" description="Use for trying a deposit with test funds in the testnet sandbox." to="/docs/guide/private-zones/deposit-to-a-zone" />
+  <Card title="Deposit OUSD" description="Use for trying a deposit with OUSD test funds in the testnet sandbox." to="/docs/guide/private-zones/deposit-to-a-zone" />
   <Card title="Withdraw From a Zone" description="Use for returning funds to Tempo and tracking delivery." to="/docs/zones/withdraw" />
 </Cards>

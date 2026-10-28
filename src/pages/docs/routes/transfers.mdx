@@ -9,19 +9,21 @@ import { OpenApi } from 'vocs'
 
 # Make a transfer
 
-Move stablecoins when your application can authorize the source transaction through a wallet or its own signer. Routes prepares the source calls; your application signs them and tracks delivery.
+Move stablecoins between networks when your application can sign the source transaction through a wallet or its own signer.
+
+[Tempo Routes](/docs/routes) moves stablecoins between Tempo and supported networks. A route connects a source network and token to a destination network and token. For a transfer, Routes prepares the source-chain calls that send the funds; your application signs them and tracks delivery.
 
 <span id="set-up-routes-api-access" />
 
 ## Prepare a transfer route
 
-Before the first step, have:
+Before you start, have:
 
-- A backend key with `routes:read` and `routes:write` from [Set up API access](/docs/routes/api-setup).
-- A route with transfer support from [Supported routes](/docs/routes/networks). This guide fixes the source amount with `exactSource`, so check that the route lists that mode.
+- A Tempo API key on your backend, created in [Set up API access](/docs/routes/api-setup). `routes:read` covers quotes and status reads; `routes:write` covers creating transfers and registering source transactions.
+- A route with transfer support from [Supported routes](/docs/routes/networks). This guide sets the quote's `mode` to `exactSource`, which fixes the amount sent; `exactDestination` fixes the amount received instead ([Quotes and fees](/docs/routes/quotes#choose-which-amount-to-fix)). Check that the route lists `exactSource`.
 - A signer for the sender account on the source network, such as a connected wallet or your own signing service. The API key doesn't sign transactions.
 
-Each step below has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test). The [cURL example](/docs/routes/examples/transfers) runs every step from a terminal.
+Each step in the transfer flow has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test). The [cURL example](/docs/routes/examples/transfers) runs every step from a terminal.
 
 <span id="submit-and-track-a-transfer" />
 
@@ -37,33 +39,33 @@ Each step below has a request builder that generates cURL and TypeScript. To see
 
 <span id="review-fees" />
 
-Show the source amount, destination amount, minimum destination amount, and fees as described in [Quotes and fees](/docs/routes/quotes). Refresh the quote when `quote.expiresAt` passes.
+Show the source amount, destination amount, minimum destination amount, and fees as described in [Quotes and fees](/docs/routes/quotes). The minimum destination amount is what a transfer created now guarantees the recipient. Request a new quote when the response's `quote.expiresAt` time passes.
 
 ### Create the transfer
 
-Send the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) you stored for this payment.
+Send an [idempotency key](/docs/routes/api-setup#set-idempotency-keys) in the `idempotency-key` header. Create one key for this payment and store it with the payment record before the request, so a retry returns the same transfer instead of creating another.
 
 <OpenApi.Playground operationId="createRoutesTransfer" anchors={false} />
 
-Save the returned transfer `id` and its unsigned `action`; transfer reads don't return the action. Review the returned terms before requesting a signature.
+Save the returned transfer `id` (`rtr_…`) and keep its `action`, the unsigned source-chain calls the sender signs. Review the returned terms before requesting a signature. Only this create response includes `action`; later transfer reads don't return it.
 
 <span id="sign-and-submit-the-source-calls" />
 
 ### Sign and submit
 
-Use the source account's signer to submit the returned calls in order. Calls can include approvals and may require separate transactions. Handle the returned `action.type` using the [EVM or Tron action format](/docs/api/routes/transfers).
+Use the source account's signer to submit the calls in `action` in order. Calls can include token approvals, and each call can be its own transaction. `action.type` names the call format, such as `evm:calls`. Handle it using the [EVM or Tron action format](/docs/api/routes/transfers).
 
 For an `evm:calls` action, pass each call's `to`, `data`, and `value` to your source-chain wallet client. Wait for successful execution before the next call, and retain all hashes as `transactionHashes`. If submission stops partway through, inspect the transactions already sent before resuming.
 
-On Tempo, [Tempo Wallet](/docs/accounts/wallets#connect-tempo-wallet) submits every call as one atomic transaction, so the sender signs once. [Try a route](/docs/routes/test) to compare both paths.
+When the source network is Tempo, [Tempo Wallet](/docs/accounts/wallets#connect-tempo-wallet) instead submits every call as one atomic transaction, so the sender signs once. [Try a route](/docs/routes/test) to compare one-call-at-a-time and atomic submission.
 
 ### Register the source transactions
 
-Enter the transfer `id` from creation and the actual `transactionHashes` produced by your signer. Use `transactionHash` instead when there is only one source transaction.
+Send the transfer `id` from creation, and the hashes your signer produced in the request body's `transactionHashes` array (up to 10). For a single source transaction, send the `transactionHash` string field instead.
 
 <OpenApi.Playground operationId="registerRoutesTransferSourceTransaction" anchors={false} />
 
-The API verifies and associates the hashes with the transfer.
+The API verifies the transactions onchain and links them to the transfer. Until you register them, the transfer stays in `awaiting-source`.
 
 <span id="track-destination-delivery" />
 
@@ -71,7 +73,7 @@ The API verifies and associates the hashes with the transfer.
 
 <OpenApi.Playground operationId="getRoutesTransfer" anchors={false} />
 
-Keep the payment pending until `status` is `completed`. Reconcile the delivered amount and destination transaction references.
+Keep the payment pending until `status` is `completed`. Other statuses are `awaiting-source`, `processing`, `action-required`, `expired`, `refunding`, and `refunded`. Once completed, reconcile `destinationAmount` and the destination transactions in `destinationTransactionHashes`.
 
 :::::
 

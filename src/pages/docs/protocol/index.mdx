@@ -18,19 +18,19 @@ Read the specifications for Tempo's tokens, accounts, transactions, fees, blocks
 <Cards>
   <Card
     title="TIP-20 Tokens"
-    description="Token interfaces, memos, roles, metadata, and policy checks."
+    description="Tempo's stablecoin token standard: interfaces, memos, roles, metadata, and policy checks."
     to="/docs/protocol/tip20/spec"
     icon="lucide:coins"
   />
   <Card
     title="Transfer policies"
-    description="TIP-403 policy registry, authorization checks, and receive policies."
+    description="TIP-403 policy registry that decides who can send and receive a token, plus receive policies."
     to="/docs/protocol/tip403/spec"
     icon="lucide:shield-check"
   />
   <Card
     title="Account Keychain"
-    description="Signing keys, permissions, expiry, and spending limits."
+    description="Access keys: secondary signing keys for an account, with expiry, scopes, and spending limits."
     to="/docs/protocol/transactions/AccountKeychain"
     icon="lucide:key-round"
   />
@@ -48,7 +48,7 @@ Read the specifications for Tempo's tokens, accounts, transactions, fees, blocks
   />
   <Card
     title="Fee AMM"
-    description="Fee-token conversion, liquidity accounting, and rebalancing."
+    description="Converts each user's fee token into the validator's preferred stablecoin, with liquidity accounting and rebalancing."
     to="/docs/protocol/fees/spec-fee-amm"
     icon="lucide:repeat"
   />
@@ -61,13 +61,13 @@ Read the specifications for Tempo's tokens, accounts, transactions, fees, blocks
 <Cards>
   <Card
     title="Block structure"
-    description="Header fields, transaction ordering, and system transactions."
+    description="Header fields, transaction ordering, and protocol-inserted system transactions."
     to="/docs/protocol/blockspace/overview"
     icon="lucide:blocks"
   />
   <Card
     title="Payment lanes"
-    description="Payment classification and block gas constraints."
+    description="Payment classification, and a separate block gas limit for non-payment transactions."
     to="/docs/protocol/blockspace/payment-lane-specification"
     icon="lucide:layout-dashboard"
   />
@@ -81,7 +81,9 @@ Read the specifications for Tempo's tokens, accounts, transactions, fees, blocks
 
 ## How protocol changes happen
 
-Tempo Improvement Proposals (TIPs) describe protocol changes. A TIP takes effect when a network upgrade activates it. The [network upgrade timeline](/docs/protocol/upgrades) lists testnet and mainnet activation, and the [upgrade process](/docs/guide/node/upgrade-cadence) covers operator guidance.
+Tempo Improvement Proposals (TIPs) describe protocol changes. Approved TIPs ship in named network upgrades (hardforks), numbered T0, T1, T2, and onward. Each upgrade activates on Moderato, Tempo's testnet, before mainnet.
+
+A proposal doesn't establish that a feature is active. Check the [network upgrade timeline](/docs/protocol/upgrades) for testnet and mainnet activation, or read the [upgrade process](/docs/guide/node/upgrade-cadence) for operator guidance.
 
 <span id="specifications-and-source" />
 
@@ -91,7 +93,7 @@ TIPs are grouped by the network upgrade that includes them, newest first.
 
 **Network status as of October 20, 2026:** mainnet and Moderato testnet are on [T12](/docs/protocol/upgrades/t12). [T13](/docs/protocol/upgrades/t13) is scheduled for October 29 on testnet and November 3 on mainnet, both at 15:00 UTC.
 
-Status fields in the [canonical TIP sources](https://github.com/tempoxyz/tempo/tree/main/tips) can lag activation, so network status here comes from the [network upgrade records](/docs/guide/node/network-upgrades). Meta TIPs collect additional fixes included in an upgrade.
+This index reconciles the [canonical TIP sources](https://github.com/tempoxyz/tempo/tree/main/tips) with the [network upgrade records](/docs/guide/node/network-upgrades). Proposal status fields can lag activation, so the upgrade records determine the network status shown here. A meta TIP bundles small fixes that ship in one upgrade, such as [TIP-1036](/docs/protocol/tips/tip-1036) for T2.
 
 {/* Reviewed 2026-10-15 against tempoxyz/tempo e4acf9caee and docs upgrade records. Update this grouping and network status when an upgrade ships. Exclude withdrawn/cancelled proposals even when protocolVersion names an upgrade. */}
 
@@ -154,7 +156,7 @@ Status fields in the [canonical TIP sources](https://github.com/tempoxyz/tempo/t
 - [TIP-1067: Dynamic Base Fee](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1067.md)
 - [TIP-1075: Deprecate TIP-20 Rewards](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1075.md) — initial deprecation; shutdown completes in T8.
 
-TIP-1066 has no standalone TIP file, so its link opens the T7 upgrade reference.
+The T7 upgrade record references TIP-1066, but the canonical TIP sources have no file for it. Its link opens the T7 upgrade reference instead.
 
 ### T6
 
@@ -218,7 +220,7 @@ TIP-1066 has no standalone TIP file, so its link opens the T7 upgrade reference.
 
 ### Proposals outside activated upgrades
 
-These proposals aren't part of any upgrade. A draft's target upgrade isn't an activation.
+These proposals aren't part of any activated upgrade. A target upgrade in a draft isn't a confirmed activation. `Draft` means the proposal isn't in formal review yet, and `Backlog` means it's deferred. `Withdrawn` and `Cancelled` proposals won't ship. The [TIP process](/docs/protocol/tips/tip-0000) defines each status.
 
 | Proposal | Status | Target upgrade |
 | --- | --- | --- |
@@ -235,6 +237,6 @@ These proposals aren't part of any upgrade. A draft's target upgrade isn't an ac
 | [TIP-1122: Backward compatible SWAPN, DUPN, EXCHANGE](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1122.md) | Draft | Not assigned |
 | [TIP-1124: Increase Calldata Floor Cost](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1124.md) | Draft | Not assigned |
 
-[TIP-0000: TIP Process](https://github.com/tempoxyz/tempo/blob/main/tips/tip-0000.md) defines the proposal lifecycle and is not a network upgrade. Browse [all proposals](https://tips.sh/) for ongoing work.
+[TIP-0000: TIP Process](https://github.com/tempoxyz/tempo/blob/main/tips/tip-0000.md) defines the proposal lifecycle and isn't part of a network upgrade. Browse [all proposals](https://tips.sh/) for ongoing work.
 
-For Zone behavior and interfaces, see the [Zones protocol reference](/docs/protocol/zones).
+A Zone is a private ledger of stablecoin balances connected to a `ZonePortal` contract on Tempo. The [Zones protocol reference](/docs/protocol/zones) specifies their behavior and interfaces.

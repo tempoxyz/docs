@@ -13,7 +13,9 @@ import { EarnDepositDemo } from '../../../components/guides/EarnDepositDemo'
 
 # Deposit
 
-Deposit from a funded Tempo account into a [vault](/docs/earn/vaults) that accepts its stablecoin. Approve and submit the deposit with your account’s signer, then read the resulting shares and asset value.
+Deposit stablecoins from a funded Tempo account into an Earn vault, then read the resulting position.
+
+A [vault](/docs/earn/how-it-works) is a contract that accepts one stablecoin and issues vault shares, units that represent the account's position. A share isn't necessarily worth one stablecoin, so the position's asset value is read separately from its share count.
 
 <span id="select-a-vault" />
 <span id="connect-deposits" />
@@ -23,25 +25,36 @@ Deposit from a funded Tempo account into a [vault](/docs/earn/vaults) that accep
 
 ## Try a deposit
 
-Create a passkey test account, get faucet funds, and deposit into a verified pathUSD vault on Moderato testnet. The vault and network are selected for you, and the amount starts at 1 pathUSD. The demo checks the live deployment before enabling deposits. You can withdraw the test position afterward.
+Create a passkey test account, get faucet funds, and deposit into a pathUSD test vault on [Moderato](/docs/quickstart/connection-details), Tempo's testnet. [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) is a Tempo stablecoin, and the vault is verified, meaning it's in Tempo's curated Earn registry. The amount starts at 1 pathUSD. The demo checks that the vault supports deposits and redemptions before enabling them. You can withdraw the test position afterward.
 
 <EarnDepositDemo />
 
 ## Deposit into a vault
 
-Use the [testnet setup](/docs/earn/example) for your tool: CLI variables and `minimum_output`, a Viem `client`, or Wagmi imports and a connected React component. Every version deposits 1 pathUSD into the same vault. Keep the signer and vault on the same network.
+Each tab deposits 1 pathUSD (`1000000` base units) into the Moderato test vault. The tabs use values defined in the [Earn testnet example](/docs/earn/example), which sets up each tool:
+
+- **CLI (Cast).** Shell variables for the keystore (`KEYSTORE`), RPC URL (`TEMPO_RPC_URL`), `VAULT`, `ASSET_TOKEN`, `ASSET_AMOUNT`, and `ACCOUNT`, funded from the faucet.
+- **Viem.** A `client` created with `createClient` from `viem/tempo` on `tempoModerato`, with a funded account, plus `vault`, `assetToken`, and `assetAmount`.
+- **Wagmi.** A React component connected to a funded Moderato account (`address`), with the same constants and hook imports from `wagmi` and `wagmi/tempo`.
+
+Keep the signer and vault on the same network.
 
 :::::steps
 
 ### Check the asset and access requirements
 
-Save the vault address and network together. Match the account's token to the accepted asset and check the account's eligibility. Read `capabilities` and `state.depositsPaused` before enabling the deposit action.
+Read the vault with the [Earn API](/docs/api/earn) `GET /v1/earn/vaults/{vaultId}` endpoint, adding `include=access,capabilities`. Save the vault address and network together. Before enabling the deposit action, check these fields:
+
+- **`assetToken`.** Matches the stablecoin the account holds.
+- **`access.status`.** `open` accepts any holder; `allowlisted` accepts only approved holders.
+- **`capabilities.deposit`.** Is `true`.
+- **`state.depositsPaused`.** Is `false`.
 
 <span id="prepare-the-deposit" />
 
 ### Approve funds
 
-Approve the deposit amount so you can simulate the vault call. Show the asset, amount, and vault before asking the account to sign.
+The vault pulls the stablecoin from the account, so the deposit simulation that follows needs an approval for the amount. Show the asset, amount, and vault before asking the account to sign. Cast pays the network fee in the vault's asset, pathUSD here, with `--tempo.fee-token`.
 
 ::::code-group
 
@@ -70,7 +83,7 @@ const approve = () => approval.mutateAsync({
 
 ::::
 
-After approval confirms, simulate with a positive minimum to obtain the expected shares. The signed deposit below accepts at most 0.5% less than this quote. `Actions`, `Abis`, and `EarnShares` come from `viem/tempo`.
+`shareAmountMin` is the fewest shares the vault may mint before it rejects the deposit, which protects the account if the share price moves before the deposit lands. After approval confirms, simulate the deposit with `shareAmountMin` set to 1, which only reads the quoted share amount. Then set `shareAmountMin` 0.5% below the quote: `EarnShares.minimumOutput(quotedShares, 50)` subtracts 50 basis points, and the Cast tab defines a `minimum_output` helper that does the same in integer math. `Actions`, `Abis`, and `EarnShares` come from `viem/tempo`.
 
 ::::code-group
 
@@ -84,6 +97,16 @@ const shareAmountMin = EarnShares.minimumOutput(quotedShares, 50)
 ```
 
 ```bash [CLI (Cast)]
+minimum_output() {
+  python3 - "$1" <<'PYTHON'
+import sys
+amount = int(sys.argv[1])
+if amount <= 0:
+    raise ValueError("The quote must be positive")
+print(max(1, amount * 9950 // 10000))
+PYTHON
+}
+
 QUOTED_SHARES=$(cast call "$VAULT" \
   'deposit(uint256,address,uint256)(uint256)' \
   "$ASSET_AMOUNT" "$ACCOUNT" 1 --from "$ACCOUNT" \
@@ -113,7 +136,7 @@ A deposit is a contract call; a direct transfer to the vault address doesn't cre
 
 ### Make a deposit
 
-Viem and Wagmi batch the required approval and deposit in one transaction. Cast uses the approval confirmed above. The account receives shares; the positive minimum output bounds execution.
+Viem's `depositSync` and Wagmi's `Actions.earn.deposit.calls` send an approval and the deposit together as one atomic transaction, so in those tabs the earlier approval only enables the simulation. Cast sends the deposit alone and uses the earlier approval. The account receives shares, and the vault rejects the deposit if it would mint fewer than `shareAmountMin`. In Wagmi, `forceAtomic: true` requires the wallet to run both calls in one transaction.
 
 ::::code-group
 
@@ -146,15 +169,15 @@ const submitDeposit = async () => {
 
 ::::
 
-Confirm the receipt succeeded and save its transaction hash, deposited amount, and shares received for reconciliation.
+Confirm the receipt succeeded. Save its transaction hash, the deposited amount, and the shares received, so you can match them against your own ledger later.
 
 ### Confirm your position
 
-The API example starts with the same vault and `testnet` network. Replace `address` with your test account’s address; use a matching vault and network for other deposits. Use **Try** to read the position or switch the request’s code language to copy an example.
+Read the position with the Earn API `GET /v1/earn/vaults/{vaultId}/positions/{address}` endpoint. The request builder starts with the Moderato test vault as `vaultId` and `chainId` set to `testnet`. Set the `address` path parameter to your test account’s address; use a matching vault and network for other deposits. Use **Try** to read the position, or switch the request’s code language to copy an example.
 
 <OpenApi.Playground operationId="getEarnVaultPosition" anchors={false} />
 
-Read `shareBalance` for the shares held and `value` for their current asset value. Do not treat the share count as the same amount of stablecoins.
+In the response, read `shareBalance` for the shares held and `value` for their current value in the vault's stablecoin. Don't treat the share count as the same amount of stablecoins.
 
 :::::
 
@@ -166,14 +189,14 @@ Follow [Balances and earnings](/docs/earn/balances) to show position value, earn
 
 ## Track private Earn activity
 
-For a [Zone](/docs/zones) integration, check `capabilities.privateRouting` and the vault's configured Zone routes. Zone-routed positions use Zone withdrawals rather than the direct account approval flow.
+A [Zone](/docs/zones) is a private stablecoin ledger connected to Tempo. A vault supports Zone positions when `capabilities.privateRouting` is `true`; request `include=zones` to read its Zone routes. Funds in a Zone reach a vault on Tempo through a [Zone withdrawal](/docs/zones/withdraw), so Zone-routed positions start from a withdrawal, not from the approval and deposit steps on this page. Tempo runs the Earn operation, then deposits the result back into the Zone.
 
-Use `GET /v1/earn/transactions/{senderTag}` to track private Earn execution and return delivery. Show returned funds as available once delivery completes. See the [Earn transaction reference](/docs/api/earn#getearntransaction) for the status fields.
+Each Zone withdrawal emits a `senderTag`, a 32-byte tag shared by withdrawals from one sender in one Zone transaction. Pass it to [`GET /v1/earn/transactions/{senderTag}`](/docs/api/earn#getearntransaction). The response reports the Earn execution on Tempo in `l1Execution` and the return deposit into the Zone in `zoneDeposit`. Show returned funds as available once `zoneDeposit.status` is `completed`.
 
-Account position listing supports private Zones; earnings data is currently unavailable for those positions.
+The Earn API's account position listing includes Zone positions, but it returns no earnings data for them.
 
 <span id="earn-api-operations" />
 
 ## Read Earn data
 
-The [Earn API](/docs/api/earn) covers vault discovery, positions, share prices, and earnings. Keep `chainId` consistent across discovery, transactions, and reads.
+The [Earn API](/docs/api/earn) covers vault discovery, positions, share prices, and earnings. Keep the network consistent across discovery, transactions, and reads. The API's `chainId` parameter takes `mainnet`, `testnet`, or a numeric chain ID.

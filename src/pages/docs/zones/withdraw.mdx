@@ -15,9 +15,11 @@ Withdraw through the Zone's outbox, then track delivery to a Tempo recipient.
 
 ## Overview
 
-A withdrawal moves funds from a Zone back to a recipient on Tempo. You prepare it, submit it through the Zone's outbox (`ZoneOutbox`), then track delivery. The source transaction, the accepted batch, and the recipient's token receipt are separate events.
+A withdrawal moves funds from a [Zone](/docs/zones), a private stablecoin ledger, back to a recipient on Tempo. You submit it to the Zone's outbox (`ZoneOutbox`), a contract that burns the Zone-side tokens and queues the withdrawal. The sequencer, which orders Zone blocks, groups queued withdrawals into a batch. The Zone's portal (`ZonePortal`), which holds the backing assets on Tempo, accepts the batch and releases the tokens.
 
-You need the deployment details and authenticated connection from [Connect to a Zone](/docs/zones/connect).
+So the source transaction, the accepted batch, and the recipient's token receipt are three separate events. Track each one.
+
+This page uses an authenticated Zone RPC connection and the deployment details from [Connect to a Zone](/docs/zones/connect): the Zone ID, chain ID, and outbox and portal addresses.
 
 <span id="submit-and-track-a-withdrawal" />
 
@@ -29,27 +31,29 @@ You need the deployment details and authenticated connection from [Connect to a 
 
 ### Prepare the Withdrawal
 
-Choose the token, amount, Tempo recipient, and fallback recipient within the deployment's restrictions. A callback must use a permitted target and callback interface. Check them with the operator's tooling before you request authorization.
+Confirm the token, amount, Tempo recipient, and fallback recipient with the operator's tooling. The fallback recipient (`zoneFallbackRecipient`) is a Zone account that gets the funds back if delivery on Tempo fails. Confirm that the deployment's funding rules permit the token, the recipient, and any callback.
+
+A callback is a contract call on Tempo that runs with the withdrawal, such as a swap. If you use one, confirm the target and its callback interface before you sign. A portal can restrict callbacks to registered targets, which is called gateway enforcement. Then the portal admin must grant the target the `CallbackGateway` role.
 
 <span id="include-withdrawal-fees" />
 
 #### Calculate Withdrawal Fees
 
-Read `calculateWithdrawalFee(gasLimit)` from the deployed outbox. Reserve enough balance for this fee and Zone transaction gas, on top of the amount withdrawn. The [withdrawal fee rules](/docs/protocol/zones/execution#withdrawal-fees) define the calculation.
+Read `calculateWithdrawalFee(gasLimit)` from the deployed outbox. `gasLimit` is the gas you reserve for a callback, and `0` for a plain withdrawal. Reserve this fee and the Zone transaction fee on top of the amount withdrawn. The [withdrawal fee rules](/docs/protocol/zones/execution#withdrawal-fees) define the calculation.
 
 <span id="submit-through-the-zone-outbox" />
 <span id="request-a-withdrawal" />
 
 ### Submit the Withdrawal
 
-Submit the withdrawal through the outbox with the operator's interface. Save the source transaction and the identifiers that follow the withdrawal across the Zone and Tempo.
+Submit the withdrawal to the outbox with the SDK or contract interface the operator supports for your deployment. Interfaces differ between deployments. Save the source transaction hash and the withdrawal's `senderTag`. Tempo shows the `senderTag` instead of the sender's address, which keeps the sender private. You use it to look up the withdrawal in [Track the Withdrawal](#track-the-withdrawal). Its [derivation](/docs/protocol/zones/bridging#verifiable-withdrawals) uses the sender, the transaction hash, and a per-withdrawal `fallbackNonce`.
 
 <span id="track-settlement-on-tempo" />
 <span id="track-delivery" />
 
 ### Confirm Delivery
 
-The sequencer includes the withdrawal in a batch. The portal accepts the batch, and Tempo processes the withdrawal. Show it as pending until the recipient receives the funds.
+The sequencer includes the withdrawal in a batch. The portal accepts the batch, then processes the withdrawal and transfers the tokens on Tempo. Keep it pending until the recipient's delivery is confirmed, as [Track the Withdrawal](#track-the-withdrawal) describes.
 
 :::::
 
@@ -57,28 +61,31 @@ The sequencer includes the withdrawal in a batch. The portal accepts the batch, 
 
 ## Track the Withdrawal
 
-Read Tempo outcomes with the hosted [Zone withdrawal status API](/docs/api/zones). `zoneStatus: completed` marks the Zone checkpoint, not delivery. Delivery and any refund have their own outcomes.
+Read Tempo outcomes with the hosted [Zone withdrawal status API](/docs/api/zones), part of the Tempo API. It looks up withdrawals by `senderTag` and returns each processed withdrawal in `data`. Use the tag of this withdrawal, since withdrawals in one transaction can have different tags.
 
-Use the `senderTag` emitted for this withdrawal. Tags can differ for withdrawals within the same transaction. The API returns indexed outcomes in `data`.
+Each outcome has two status fields:
 
-In the playground, select **Try**. Enter the emitted sender tag and the Zone’s numeric `chainId`. Use an API key with `data:read` and access to that Zone. The request tool includes language examples and the response.
+- **`status`:** `completed` or `failed`, for delivery on Tempo. `transactionHash` is the Tempo transaction that processed the withdrawal.
+- **`zoneStatus`:** `completed` once the Zone has proven it imported the Tempo block that processed the withdrawal. It says nothing about delivery or a refund.
+
+The API needs a Tempo API key with `data:read` and access to that Zone, created in [Tempo Console](/docs/api/authentication#api-keys). In the playground, select **Try**. Enter the `senderTag` and the Zone's numeric `chainId` from the operator. The request tool includes language examples and the response.
 
 <OpenApi.Playground operationId="listZoneWithdrawals" anchors={false} />
 
-An empty `data` array means no outcome is indexed yet. Keep the withdrawal pending until delivery or a refund completes.
+An empty `data` array means no outcome is indexed yet. Keep the withdrawal pending until `status` is `completed`, or until a `failed` withdrawal's funds return to the fallback recipient, as [Handle Withdrawal Failures](#handle-withdrawal-failures) describes.
 
 <span id="handle-failed-delivery" />
 <span id="handle-refunds" />
 
 ## Handle Withdrawal Failures
 
-A failed token transfer or callback can return funds through a deposit back into the source Zone. That return also needs processing. If minting is blocked, it can leave a pending refund.
+A withdrawal fails when its token transfer or callback reverts on Tempo, such as from a token pause or a TIP-403 policy. The portal then bounces back the funds, which means it deposits them into the source Zone again, to the fallback recipient. The withdrawal fee isn't refunded.
 
-Track the refund to the recipient with [withdrawal failure and bounce-back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back).
+The bounce-back is a deposit, so the sequencer processes it like any other. If a policy or pause blocks minting in the Zone, the inbox (`ZoneInbox`) records a pending refund instead. The fallback recipient claims it with `ZoneInbox.claimRefund(token)` once minting is permitted. [Withdrawal failure and bounce-back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) covers each case.
 
 ## Call a Contract on Tempo
 
-Withdrawals can invoke contracts on Tempo, subject to the deployment's access rules. The public operation and any later Zone credit have separate settlement stages. Use the [composable withdrawal specification](/docs/protocol/zones/bridging#composable-withdrawals) when you integrate callbacks.
+A withdrawal with a callback calls a contract on Tempo through `ZoneMessenger`, subject to the deployment's access rules. The token transfer and the call succeed or revert together. If the call deposits into a Zone, that Zone credit settles separately, after the Tempo call. The [composable withdrawal specification](/docs/protocol/zones/bridging#composable-withdrawals) defines the callback interface and limits.
 
 <span id="try-a-sandbox-withdrawal" />
 
@@ -86,7 +93,7 @@ Withdrawals can invoke contracts on Tempo, subject to the deployment's access ru
 
 <Cards>
   <Card title="Bridging" description="Covers withdrawals, composable callbacks, and bounce-back refunds." to="/docs/protocol/zones/bridging" />
-  <Card title="Withdraw OUSD" description="Use for trying a withdrawal with test funds in the testnet sandbox." to="/docs/guide/private-zones/withdraw-from-a-zone" />
+  <Card title="Withdraw OUSD" description="Use for trying a withdrawal with OUSD test funds in the testnet sandbox." to="/docs/guide/private-zones/withdraw-from-a-zone" />
   <Card title="Balances and Activity" description="Use for reading the private balance before and after a withdrawal." to="/docs/zones/balances" />
   <Card title="Deposit Into a Zone" description="Use for funding a private account through the portal on Tempo." to="/docs/zones/deposit" />
 </Cards>

@@ -13,32 +13,41 @@ import { RoutesTester } from '../../../components/RoutesTester'
 
 # Try a route
 
-Run a route end to end in your browser. Choose a source and destination, and the demo quotes it; add an API key to create the transfer or deposit address, fund it from your wallet, and track delivery. The log beside the steps shows each Routes API request and response.
+Run a route end to end in your browser and watch each Routes API call.
 
-Without a key, routes that support subsidies quote 1:1 delivery from a quote-only demo organization. The preview shows the terms an approved organization receives; it cannot create a route.
+A route moves stablecoins from a source network and token to a destination network and token. The [Routes API](/docs/routes) quotes it, prepares the funding, and tracks delivery. It funds a route in one of two ways:
+
+- **Transfer:** Your wallet signs the source-chain calls that Routes prepares.
+- **Deposit address:** Routes generates an address, and the sender pays into it from any wallet.
+
+Choose a source and destination, and the demo quotes the route. Add a Routes API key to create the transfer or deposit address, fund it from your wallet, and track delivery. The log beside the steps shows each Routes API request and response.
+
+Some routes support subsidies. For an organization Tempo approves, a subsidy guarantees 1:1 delivery, where the recipient receives the amount sent. Without a key, the demo quotes from a demo organization that can quote but not create routes. Its quotes show the subsidized terms an approved organization receives.
 
 :::warning
-This demo moves real funds on live networks. Start with a small amount. Creating a route requires a project key with `routes:read`, `routes:write`, and `data:read` from [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys); the key stays in this tab's memory.
+This demo moves real funds on live networks. Start with a small amount. Creating a route requires a Routes API key from [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys). Give it the `routes:read` (quotes and status), `routes:write` (create), and `data:read` (route directory) [scopes](/docs/routes/api-setup#routes-api-key-scopes). The key stays in this tab's memory.
 :::
 
 <RoutesTester />
 
-To open a specific route, choose **Try** beside it in [Supported routes](/docs/routes/networks#available-routes).
+To open a specific route, find it in the [supported routes](/docs/routes/networks#available-routes) table and choose **Try** beside it.
 
 ## How each route is funded
 
 | Route | How you fund it |
 | --- | --- |
-| From Tempo | Sign in with Tempo Wallet and approve every call in one transaction. |
+| From Tempo | Sign in with Tempo Wallet and approve every source call in one transaction. |
 | From another EVM network | Choose a browser wallet, then sign the calls one at a time. |
-| From Tron | Choose a Tron wallet, such as TronLink, then sign the calls one at a time. Each call needs TRX for energy. |
+| From Tron | Choose a Tron wallet, such as TronLink, then sign the calls one at a time. Each call needs TRX to pay for energy, Tron's resource for contract calls. |
 | From Stellar | Choose a Stellar wallet, such as Hana Wallet or OneKey, then sign one payment. The sender needs XLM for the network fee. |
-| From Solana, or when you choose Deposit address | Send the source asset to the generated deposit address with your wallet, or from any wallet. The demo detects the deposit and tracks it. |
+| From Solana, or when you choose **Deposit address** in the demo | Routes generates a deposit address when you create the route. Send the source asset to it with your wallet, or from any wallet. The demo detects the deposit and tracks it. |
 
-Routes that support subsidies offer 1:1 delivery, where the recipient receives the amount sent and the quote shows the amount Tempo covers. When you add your key, the demo quotes again with your organization's pricing. Without subsidy approval, it quotes the route without 1:1 delivery and says why; see [Offer 1:1 delivery](/docs/routes/quotes#offer-11-delivery).
+With a subsidy, the quote shows the amount Tempo covers to deliver 1:1. When you add your key, the demo quotes again with your organization's pricing. If your organization isn't [approved for subsidies](/docs/routes/quotes#offer-11-delivery), the demo quotes the route without 1:1 delivery and says why. The recipient then receives the amount sent minus the route's fees and deductions.
 
-Retrying a creation reuses the same request and idempotency key, so it cannot create a duplicate. If a wallet may have sent a transaction, check its history before trying again.
+Each create request carries an [idempotency key](/docs/routes/api-setup#set-idempotency-keys). Retrying a creation resends the same request and key, so it returns the original route instead of a duplicate. If a wallet may have sent a transaction, check its history before trying again.
 
 ## Build the same flow
 
-The demo follows the steps in this section. Start with [Set up API access](/docs/routes/api-setup), then follow [Accept deposits](/docs/routes/deposits) or [Make a transfer](/docs/routes/transfers). Receiving USDY is a token conversion; [Earn vault deposits](/docs/earn) use a separate flow.
+The demo makes the same API calls as the Routes guides. Start with [Set up API access](/docs/routes/api-setup) to create a key and configure your backend. Then follow [Accept deposits](/docs/routes/deposits) for a deposit address, or [Make a transfer](/docs/routes/transfers) for a transfer.
+
+A route that delivers [USDY](/docs/partners/rwas), Ondo's tokenized U.S. Treasury token, converts the source token into USDY. It doesn't deposit into an [Earn](/docs/earn) vault, which uses a separate flow.
