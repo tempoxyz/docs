@@ -15,9 +15,9 @@ Authenticate your application's access to one Zone deployment.
 
 ## Overview
 
-Connecting gives your application authenticated access to one Zone deployment. You get the deployment details from the operator, sign an authorization token, and check the chain ID. A Zone runs its own network and chain ID. It isn't a privacy setting on a Tempo account.
+To connect, get the deployment details from the operator, sign an authorization token, and check the chain ID. A Zone is its own network with its own chain ID, not a privacy setting on a Tempo account.
 
-This page assumes you have a [Tempo account signer](/docs/accounts/keys). The Viem and Wagmi examples import `zoneChain` and `zoneConfig` from [Client Setup](/docs/zones/examples).
+You need a [Tempo account signer](/docs/accounts/keys). The Viem and Wagmi examples import `zoneChain` and `zoneConfig` from [Client Setup](/docs/zones/examples).
 
 <span id="configure-the-zone-connection" />
 
@@ -32,19 +32,19 @@ This page assumes you have a [Tempo account signer](/docs/accounts/keys). The Vi
 
 ### Get the Deployment Details
 
-Get the configuration from the operator, or [contact Tempo](https://tempo.xyz/contact). Ask for the Zone RPC endpoint, chain ID, Zone ID, portal address, and enabled assets. Also ask for the supported SDK or contract interfaces and the endpoint access credentials.
+Get the configuration from the operator, or [contact Tempo](https://tempo.xyz/contact). Ask for the Zone RPC endpoint, chain ID, Zone ID, portal address, enabled assets, supported SDK or contract interfaces, and endpoint access credentials.
 
-Confirm three controls separately with the operator or your wallet provider:
+Ask the operator or your wallet provider about three controls:
 
-| Control | Confirm before integrating |
+| Control | What to ask |
 | --- | --- |
 | **Signing authority** | Which account keys or provider interface sign deposits and withdrawals. |
 | **Read access** | Which credentials let your application read balances and activity, and which accounts they expose. |
 | **Funding rules** | Which assets, depositors, withdrawal recipients, refunds, and callbacks the deployment permits. |
 
-A Zone RPC connection alone doesn't establish all three. If you use a hosted provider, confirm its authentication and data-scoping rules. These steps use the account-scoped, redacted Zone RPC. Operator RPC is a separate interface.
+These steps use the account-scoped, redacted Zone RPC. Operator RPC is a separate interface.
 
-Confirm which operations the deployment enables before you move an existing application into a Zone. The current permissioned runtime moves tokens only through deposits and withdrawals. It disables general TIP-20 transfer calls and user contract deployment, as the [execution rules](/docs/protocol/zones/execution) describe.
+The current permissioned runtime moves tokens only through deposits and withdrawals. It disables general TIP-20 transfer calls and user contract deployment, as the [execution rules](/docs/protocol/zones/execution) describe.
 
 <span id="authenticate-the-account" />
 
@@ -52,9 +52,9 @@ Confirm which operations the deployment enables before you move an existing appl
 
 ### Authorize Access
 
-An authorization token is a signed credential that proves control of the account. Sign it with the account key. Send it in the `X-Authorization-Token` header on every Zone RPC request. The token authenticates RPC requests. It doesn't replace transaction signatures or the credentials required to reach the endpoint.
+An authorization token is a signed credential that proves control of the account. Sign it with the account key and send it in the `X-Authorization-Token` header on every Zone RPC request. It authenticates RPC requests only. Transactions still need their own signatures, and the endpoint still needs its access credentials.
 
-With Viem, sign with your account and the Zone chain from [Client Setup](/docs/zones/examples). Set `ZONE_ID` to the operator-provided Zone ID. This code signs locally. It doesn't submit a transaction.
+With Viem, sign with your account and the Zone chain from [Client Setup](/docs/zones/examples). Set `ZONE_ID` to the operator-provided Zone ID. The code signs locally and submits no transaction.
 
 ```ts [Viem]
 import { createClient } from 'viem/tempo'
@@ -66,7 +66,7 @@ const { token } = await client.zone.signAuthorizationToken({
 })
 ```
 
-Use the returned `token` as `ZONE_AUTH_TOKEN`. Keep it private and renew it before expiry. Other signers must follow the [authorization token format](/docs/protocol/zones/rpc#authorization-tokens). Confirm the operator's maximum token lifetime.
+Use the returned `token` as `ZONE_AUTH_TOKEN`. Keep it private and renew it before expiry. Other signers must follow the [authorization token format](/docs/protocol/zones/rpc#authorization-tokens). The operator sets the maximum token lifetime.
 
 <span id="confirm-the-network" />
 
@@ -114,7 +114,7 @@ cast chain-id --rpc-url "$ZONE_RPC_URL" \
 
 ::::
 
-Reuse `zone` in the TypeScript and Python [balance examples](/docs/zones/balances). For raw RPC responses, check for an `error` before you use `result`. A successful HTTP request can contain a JSON-RPC error.
+Reuse `zone` in the TypeScript and Python [balance examples](/docs/zones/balances). A successful HTTP request can still contain a JSON-RPC error, so check raw responses for `error` before you use `result`.
 
 Compare the returned chain ID with the operator-provided configuration. Keep separate clients for public Tempo and the Zone's private ledger. Use the correct chain ID when you prepare signatures and calls.
 

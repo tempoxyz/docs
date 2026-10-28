@@ -10,13 +10,13 @@ description: Design recurring stablecoin billing with periodic spending limits, 
 
 Use a scoped access key with a periodic spending limit to authorize recurring stablecoin charges. Your application schedules each charge, verifies payment, and manages the subscription. The key constrains spending; it is not a billing scheduler.
 
-Access keys work on mainnet and testnet with single-key accounts. Until [T14](/docs/protocol/upgrades/t14), access keys for configurable accounts run only on the Tempo Accounts devnet. Follow the current [access-key guide](/docs/accounts/access-keys) when choosing the account and network for your integration.
+Access keys work on mainnet and testnet with single-key accounts. Until [T14](/docs/protocol/upgrades/t14), access keys for configurable accounts run only on the Tempo Accounts devnet. Follow the [access-key guide](/docs/accounts/access-keys) when choosing the account and network for your integration.
 
 ## Define the subscription and authorization
 
 Record the customer account, asset contract, charge amount, billing schedule, service entitlement, cancellation terms, and key expiry. Keep those application terms distinct from the onchain bounds.
 
-An [access key](/docs/accounts/access-keys) signs from the customer's account and spends its balance. The key does not hold funds itself. The account's authorized signers approve the key, then the service can use it within its permitted spending, scopes, and expiry without a new signer approval for every payment.
+An [access key](/docs/accounts/access-keys) signs from the customer's account and spends its balance. The key holds no funds. The account's authorized signers approve the key, then the service can use it within its permitted spending, scopes, and expiry without a new signer approval for every payment.
 
 For a billing service, set all three bounds:
 
@@ -24,23 +24,23 @@ For a billing service, set all three bounds:
 - **Scopes:** the contracts, functions, and supported recipient restrictions the charge needs.
 - **Expiry:** when the delegated key stops working.
 
-Omitting a bound removes that check. A key without scopes can call any contract; a spending budget alone does not restrict the payment destination.
+Omitting a bound removes that check. A key without scopes can call any contract; a spending limit doesn't restrict the payment destination.
 
 ## Align fixed periods with the billing model
 
-[Periodic spending limits](/docs/accounts/access-keys/spending-limits) use a duration in seconds. The first period starts when the key is authorized, not at midnight or a calendar boundary. At the period boundary, the limit resets to its full amount; unused amounts do not carry over.
+[Periodic spending limits](/docs/accounts/access-keys/spending-limits) use a duration in seconds. The first period starts when the key is authorized, not at midnight or a calendar boundary. At the period boundary, the limit resets to its full amount; unused amounts don't carry over.
 
-For example, an application can request authorization for up to 50 units of its chosen stablecoin every seven days until a specified expiry. The service schedules charges according to its terms and checks the remaining allowance before each charge. This is an illustrative customer budget, not a Tempo price.
+For example, an application can request authorization for up to 50 units of its chosen stablecoin every seven days until a specified expiry. The service schedules charges according to its terms and checks the remaining allowance before each charge.
 
 Fixed durations are different from calendar months. If the product bills on a monthly anniversary, define how that schedule maps to the authorized fixed-duration budget rather than calling a fixed number of days “one month.”
 
 A spending limit also covers fees paid by the account, approval increases, and other counted TIP-20 outflows. A charge equal to the whole limit can fail if the same limited balance must cover its network fee. Use a separately funded [fee payer](/docs/guide/payments/sponsor-user-fees) where appropriate, or make the fee allowance explicit. Read [what counts against a spending limit](/docs/accounts/access-keys/spending-limits#what-counts).
 
-A `transferFrom` that uses an allowance the account already granted does not count against the key's spending limit. Review existing token allowances separately; a periodic key limit does not cap every possible debit from the account.
+A `transferFrom` that uses an allowance the account already granted doesn't count against the key's spending limit, so a periodic key limit doesn't cap every debit from the account. Review existing token allowances.
 
 ## Scope the key to the billing operation
 
-Use the exact token contract and function selectors required by the charge. A scope for `transfer(address,uint256)` does not also allow `transferWithMemo(address,uint256,bytes32)`; a payment-reference flow needs the appropriate additional scope.
+Scope the token contract and function selectors the charge requires. A scope for `transfer(address,uint256)` doesn't allow `transferWithMemo(address,uint256,bytes32)`; a payment-reference flow needs the appropriate additional scope.
 
 Where supported, restrict the recipient to the billing account. The [scope guide](/docs/accounts/access-keys/scopes) describes the functions that support recipient restrictions. Scopes check direct calls signed by the key. A permitted contract can make its own downstream calls, so review that contract and any existing token approvals before allowing it.
 
@@ -56,7 +56,7 @@ Use a stable subscription and period identifier. Save the asset, amount, due tim
 
 ### Check authorization and funding
 
-Confirm the key is active, unexpired, correctly scoped, and within its remaining limit. Check the customer's payment balance and the selected fee payer's balance. A renewed spending limit does not add funds.
+Confirm the key is active, unexpired, correctly scoped, and within its remaining limit. Check the customer's payment balance and the selected fee payer's balance. A renewed spending limit doesn't add funds.
 
 ### Submit and preserve the attempt
 
@@ -76,11 +76,11 @@ Use states such as **due**, **submitted**, **paid**, and **needs attention** in 
 
 ## Handle cancellation, expiry, and changes
 
-Stop new billing when the subscription is canceled. Keep customer cancellation, service entitlement, and onchain signing permissions as explicit records. If cancellation includes key revocation, submit it and verify the result; an application status alone does not revoke a key.
+Stop new billing when the subscription is canceled. Keep customer cancellation, service entitlement, and onchain signing permissions as explicit records. If cancellation includes key revocation, submit it and verify the result; changing an application status doesn't revoke a key.
 
-[Revoking a key](/docs/accounts/access-keys/revocation) ends its authority permanently. Prior payments remain final, and existing token approvals remain until changed separately. An expiry also ends future signing authority; a new billing period does not extend it.
+[Revoking a key](/docs/accounts/access-keys/revocation) ends its authority permanently. Prior payments remain final, and existing token approvals remain until changed separately. An expiry also ends future signing authority; a new billing period doesn't extend it.
 
-If a customer changes a spending limit, read back the resulting authorization. Updating a limit resets the remaining amount to the new value; it does not merely add the difference to what was left. The period and its current end remain unchanged. Follow the [limit update rules](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) when implementing plan changes.
+If a customer changes a spending limit, read back the resulting authorization. Updating a limit resets the remaining amount to the new value; it doesn't add the difference to what was left. The period and its current end remain unchanged. Follow the [limit update rules](/docs/accounts/access-keys/spending-limits#change-a-spending-limit) when implementing plan changes.
 
 Keep personal details and subscription terms offchain. Use an opaque [payment reference](/docs/guide/payments/transfer-memos) to connect the transfer to the billing record.
 

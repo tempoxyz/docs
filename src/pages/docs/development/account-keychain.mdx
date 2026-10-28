@@ -63,7 +63,7 @@ An account authorizes a key in one of two ways: a `key_authorization` field on a
 | `key_authorization` on a transaction | The account signs the authorization, and the new key can sign the transaction that carries it. The key stays authorized even if the calls revert. |
 | `authorizeKey` call | The account calls the precompile. The authorization rolls back if the transaction reverts. |
 
-Viem's `client.accessKey.signAuthorization` and `authorize` both use the `key_authorization` path. An optional `witness`, an application-defined `bytes32`, binds the authorization to an offchain challenge, such as a sign-in nonce; burn it with `client.accessKey.burnWitness` to cancel the authorization before it lands.
+Viem's `client.accessKey.signAuthorization` and `authorize` both use the `key_authorization` path. An optional `witness`, an application-defined `bytes32`, binds the authorization to an offchain challenge, such as a sign-in nonce. To cancel an authorization that hasn't landed yet, the account burns its witness with `client.accessKey.burnWitness`. Tempo then rejects any authorization signed with that witness.
 
 ## `0x04` keychain signature
 

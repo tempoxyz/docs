@@ -87,7 +87,7 @@ The sandbox runs the legacy Zone A and Zone B interfaces in `viem/tempo`. Its co
 - **Deposits:** The sandbox accepts plaintext and encrypted deposits. Current portals accept only encrypted deposits with a Tempo refund recipient.
 - **Transfers:** The sandbox allows direct TIP-20 transfers inside a Zone. The current permissioned runtime disables `transfer`, `transferFrom`, and their memo variants.
 - **Routed Withdrawals:** The sandbox router takes a plaintext destination recipient in its callback payload. Current routers require an encrypted deposit payload and a Tempo refund recipient.
-- **Callback Interface:** The sandbox router uses an older callback signature. The latest protocol source defines a different one.
+- **Callback Interface:** The sandbox router uses an older callback signature than current routers.
 - **SDK Version:** The sandbox examples use `viem@2.54.6`, which matches the deployed portal and outbox (`ZoneOutbox`) interfaces. New deployments use the current SDK.
 - **Chain IDs:** The chain IDs `4217000006` and `4217000007` belong to the sandbox. Other deployments have their own.
 

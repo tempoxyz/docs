@@ -7,7 +7,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_routes-quotes_title-f5_v02.png
 
 # Quotes and fees
 
-Quote the exact payment before requesting a signature or showing deposit instructions. The route directory identifies possible paths; the quote gives terms for the selected amount and recipient. This page explains how to read those terms. Both flow guides apply them.
+Quote the payment before requesting a signature or showing deposit instructions. The route directory lists possible paths; the quote gives terms for the selected amount and recipient.
 
 <span id="get-a-quote" />
 
@@ -35,11 +35,11 @@ For a deposit address, quote the source chain, source token, destination token, 
 
 ## Show the payment terms
 
-Present the source asset and amount, destination asset and amount, minimum destination amount where returned, and fees. Keep the network visible for both assets; a token symbol alone does not identify the route.
+Show the source asset and amount, destination asset and amount, minimum destination amount where returned, and fees. Show the network next to each asset, since the same symbol exists on several networks.
 
-`destinationAmount` includes route deductions. The `fees` array lists separately charged fees, so an empty array does not establish a fee-free route.
+`destinationAmount` already includes route deductions. The `fees` array lists only separately charged fees, so an empty array can still come with deductions.
 
-A quote does not create or reserve a transfer. Review the terms returned when you create the transfer as well, before asking the source account's signer to sign its action.
+A quote doesn't create or reserve a transfer. Check the terms returned when you create the transfer before asking the signer to sign.
 
 ## Offer 1:1 delivery
 
@@ -49,6 +49,6 @@ The route directory's `subsidies` field shows which funding methods accept a sub
 
 ## Refresh expired quotes
 
-Read `quote.expiresAt` when it is returned. If the quote expires before submission, obtain fresh terms rather than signing an expired action or showing stale deposit instructions. Show changed terms to the user before continuing.
+Read `quote.expiresAt` when it is returned. If the quote expires before submission, request a new one and show any changed terms to the user.
 
 Continue with [Accept deposits](/docs/routes/deposits) or [Make a transfer](/docs/routes/transfers).

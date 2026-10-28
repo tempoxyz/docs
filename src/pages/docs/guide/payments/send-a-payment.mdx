@@ -216,7 +216,7 @@ print(receipt["transactionHash"].hex())
 
 <OpenApi.Playground operationId="getReceipt" query="chainId=42431" anchors={false} />
 
-Check the transaction status, then match the token contract, recipient, and amount in the receipt's `Transfer` events. A successful transaction alone is not proof that the intended recipient received funds; a [receive policy](/docs/accounts/policies/receive-policies#blocked-receipts) can redirect funds to `ReceivePolicyGuard` instead of the recipient.
+Check the transaction status, then match the token contract, recipient, and amount in the receipt's `Transfer` events. Even when the transaction succeeds, a [receive policy](/docs/accounts/policies/receive-policies#blocked-receipts) can redirect funds to `ReceivePolicyGuard` instead of the recipient.
 
 If submission times out, check the submitted transaction hash before rebuilding or sending another payment.
 

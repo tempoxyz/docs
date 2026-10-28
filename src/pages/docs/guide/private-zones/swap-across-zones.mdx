@@ -112,7 +112,7 @@ The swap is asynchronous because the trade temporarily leaves the Zone.
 
 The source token exits through the outbox (`ZoneOutbox`) and transfers to `SwapAndDepositRouter` on Tempo. The router optionally swaps it on the Stablecoin DEX. It then deposits the output token through the destination portal. That routed deposit pays the normal [deposit fee](/docs/protocol/zones/execution#deposit-fees), so the destination Zone receives the post-fee output.
 
-A successful source receipt doesn't prove the swap completed. Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to tell destination credit apart from a callback failure and bounce-back.
+The swap completes when the destination Zone credits the recipient. Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to tell destination credit apart from a callback failure and bounce-back.
 
 :::warning
 If the routed withdrawal fails on Tempo, the amount [bounces back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) to the withdrawal's `fallbackRecipient` inside the source Zone. Failures include a failed swap or transfer, a reverting router callback, or a target deposit that can't complete. The sequencer still collects the fee, so a failed routed swap still costs the sender fees.

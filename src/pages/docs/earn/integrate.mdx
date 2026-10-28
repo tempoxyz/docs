@@ -83,7 +83,7 @@ const approve = () => approval.mutateAsync({
 
 ::::
 
-After approval confirms, simulate the deposit with a minimum of 1 share; the result is the quoted share amount. Then set `shareAmountMin` 0.5% below the quote: `EarnShares.minimumOutput(quotedShares, 50)` subtracts 50 basis points, and the Cast tab defines a `minimum_output` helper that does the same in integer math. `Actions`, `Abis`, and `EarnShares` come from `viem/tempo`.
+`shareAmountMin` is the fewest shares the vault may mint before it rejects the deposit, which protects the account if the share price moves before the deposit lands. After approval confirms, simulate the deposit with `shareAmountMin` set to 1, which only reads the quoted share amount. Then set `shareAmountMin` 0.5% below the quote: `EarnShares.minimumOutput(quotedShares, 50)` subtracts 50 basis points, and the Cast tab defines a `minimum_output` helper that does the same in integer math. `Actions`, `Abis`, and `EarnShares` come from `viem/tempo`.
 
 ::::code-group
 
@@ -130,7 +130,7 @@ const shareAmountMin = quote.data
 
 Refresh the simulation if the customer waits before signing. In Wagmi, call `quote.refetch()` to refresh and keep the deposit button disabled until a positive quote is available.
 
-A deposit is a contract interaction. Transferring stablecoins directly to the vault address doesn't create a position. The Earn API only reads data; it doesn't submit deposits or withdrawals.
+A deposit is a contract call; a direct transfer to the vault address doesn't create a position. The Earn API only reads data and doesn't submit deposits or withdrawals.
 
 <span id="submit-and-verify-the-position" />
 
@@ -189,7 +189,7 @@ Follow [Balances and earnings](/docs/earn/balances) to show position value, earn
 
 ## Track private Earn activity
 
-A [Zone](/docs/zones) is a private stablecoin ledger connected to Tempo. A vault supports Zone positions when `capabilities.privateRouting` is `true`; request `include=zones` to read its Zone routes. Zone-routed positions start from a [Zone withdrawal](/docs/zones/withdraw), not from the approval and deposit steps on this page.
+A [Zone](/docs/zones) is a private stablecoin ledger connected to Tempo. A vault supports Zone positions when `capabilities.privateRouting` is `true`; request `include=zones` to read its Zone routes. Funds in a Zone reach a vault on Tempo through a [Zone withdrawal](/docs/zones/withdraw), so Zone-routed positions start from a withdrawal, not from the approval and deposit steps on this page. Tempo runs the Earn operation, then deposits the result back into the Zone.
 
 Each Zone withdrawal emits a `senderTag`, a 32-byte tag shared by withdrawals from one sender in one Zone transaction. Pass it to [`GET /v1/earn/transactions/{senderTag}`](/docs/api/earn#getearntransaction). The response reports the Earn execution on Tempo in `l1Execution` and the return deposit into the Zone in `zoneDeposit`. Show returned funds as available once `zoneDeposit.status` is `completed`.
 

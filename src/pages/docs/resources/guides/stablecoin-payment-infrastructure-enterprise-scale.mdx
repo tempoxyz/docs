@@ -10,24 +10,24 @@ description: "Evaluate settlement, accounts, liquidity, policy controls, fees, a
 
 Enterprise stablecoin payment infrastructure combines settlement, accounts and signing, liquidity, controls, funding and payouts, and finance records. Assign each responsibility before selecting providers. Use the [payments implementation guides](/docs/guide/payments) for transaction submission and verification.
 
-At production volume, payment costs, delivery evidence, exceptions, and finance integration become product requirements. A network capability is useful only when the application and its providers can operate the complete flow.
+At production volume, payment costs, delivery evidence, exceptions, and finance integration become product requirements.
 
 ## Assign responsibility across the payment stack
 
 | Layer | Decisions to make |
 | --- | --- |
-| Settlement | Exact network and asset, finality signal, capacity, fees, and observed delivery evidence. |
+| Settlement | Network and asset, finality signal, capacity, fees, and observed delivery evidence. |
 | Accounts and signing | Who controls funds, approves payments, manages keys, and recovers access. |
 | Issuance and liquidity | Issuer terms, redemption access, supported assets, conversion, and required balances. |
 | Risk controls | Onboarding, screening decisions, token policies, account permissions, monitoring, and reporting. |
 | Fiat access | Funding and local delivery providers, coverage, limits, timing, and exceptions. |
 | Reporting | Business references, event ingestion, ledger mapping, reconciliation, and support records. |
 
-A provider may supply several layers, but verify the exact service and contractual model. A fiat interface alone does not establish who owns funds or which operating obligations remain with your business.
+A provider may supply several layers. Its contract, not its fiat interface, determines who owns funds and which obligations remain with your business.
 
 ## Distinguish a gateway from the settlement network
 
-A gateway connects checkout to payment processing. The settlement network records the onchain transfer. Establish which responsibilities the service supplies and which remain in your application.
+A gateway connects checkout to payment processing. The settlement network records the onchain transfer. Identify which responsibilities the service supplies and which remain in your application.
 
 | Responsibility | Evidence to request |
 | --- | --- |
@@ -37,15 +37,15 @@ A gateway connects checkout to payment processing. The settlement network record
 | Exceptions | Underpayments, held transfers, refunds, delayed delivery, and failed bank payouts. |
 | Finance integration | Stable identifiers, export or API fields, and ownership of the ERP mapping. |
 
-For example, a correctly referenced transfer can arrive while the order system is unavailable. The integration must recover the event and fulfill once. Near-instant settlement does not supply that recovery process. Follow the [receiving guide](/docs/guide/payments/accept-a-payment) for verification and event identifiers, then use the [acceptance planning guide](/docs/resources/guides/how-to-accept-stablecoin-payments) for the wider workflow.
+For example, a correctly referenced transfer can arrive while the order system is unavailable. The integration must recover the event and fulfill once. Follow the [receiving guide](/docs/guide/payments/accept-a-payment) for verification and event identifiers, then use the [acceptance planning guide](/docs/resources/guides/how-to-accept-stablecoin-payments) for the wider workflow.
 
 ## Evaluate settlement reliability
 
 Compare the documented finality signal with the stage the application actually observes. A request acknowledgment, included transaction, finalized block, and provider bank credit are different events.
 
-Tempo's [consensus documentation](/docs/protocol/blockspace/consensus) specifies no re-orgs after a block is finalized and explains the conditions required for network progress. Near-instant onchain settlement is not an unconditional timing guarantee for every funding or payout route.
+Tempo's [consensus documentation](/docs/protocol/blockspace/consensus) specifies no re-orgs after a block is finalized and explains the conditions required for network progress.
 
-Test representative payments and failure cases, including an unavailable provider, rejected recipient, expired quote, delayed response, and missed event stream. [Payment lanes](/docs/protocol/blockspace/overview) reserve blockspace for payment activity; they do not guarantee a downstream provider's delivery time.
+Test representative payments and failure cases, including an unavailable provider, rejected recipient, expired quote, delayed response, and missed event stream. [Payment lanes](/docs/protocol/blockspace/overview) reserve blockspace for payment activity; they don't control a downstream provider's delivery time.
 
 ## Forecast actual payment costs
 
@@ -57,7 +57,7 @@ Use [fee-token configuration](/docs/guide/payments/pay-fees-in-any-stablecoin) a
 
 ## Separate policy primitives from business controls
 
-[TIP-20 Tokens](/docs/protocol/tip20/overview) and the [TIP-403 Policy Registry](/docs/protocol/tip403/overview) supply token-level controls. Account [receive policies](/docs/accounts/policies/receive-policies) can hold receipts instead of delivering them. These primitives do not establish that onboarding, screening, payment approval, or reporting has occurred.
+[TIP-20 Tokens](/docs/protocol/tip20/overview) and the [TIP-403 Policy Registry](/docs/protocol/tip403/overview) supply token-level controls. Account [receive policies](/docs/accounts/policies/receive-policies) can hold receipts instead of delivering them. Onboarding, screening, payment approval, and reporting happen outside them.
 
 Identify the application, issuer, custodian, and payment provider responsible for each control. Keep authentication, signing permissions, and business approval distinct. Verify the delivered transfers even after transaction success.
 
@@ -93,11 +93,11 @@ Compare usable recipient funds, total cost, delivery time, prefunded balances, e
 
 ### Does a payment gateway replace the settlement network?
 
-No. A gateway can connect checkout, payment instructions, and provider services. The network records the onchain transfer. Establish which component verifies delivery, manages accounts, funds fees, resolves exceptions, and supplies finance records.
+No. A gateway can connect checkout, payment instructions, and provider services. The network records the onchain transfer. Identify which component verifies delivery, manages accounts, funds fees, resolves exceptions, and supplies finance records.
 
 ### What proves a stablecoin payment reached the recipient?
 
-Verify the successful transaction and expected delivered transfer, including the network, token contract, recipient, and amount. Transaction success alone is insufficient because a receive policy can hold funds. A local-currency bank payout needs separate provider completion evidence.
+Verify the successful transaction and expected delivered transfer, including the network, token contract, recipient, and amount. Check the transfer, not only transaction success, because a receive policy can hold funds. A local-currency bank payout needs separate provider completion evidence.
 
 ### What should a provider cost comparison include?
 

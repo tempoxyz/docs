@@ -27,21 +27,21 @@ The [ECB's explanation of correspondent banking](https://www.ecb.europa.eu/pub/p
 
 In a simplified example, Bank A instructs Bank B to use its dollar balance to pay a beneficiary. Bank B debits the account and arranges the receiving leg. Additional institutions, currency conversion, and local payment systems may be involved.
 
-An instruction sent successfully is different from a beneficiary receiving funds. Operations teams should retain the instruction identifier, account entry, fees, any FX trade, and final delivery confirmation. See the broader [payment rails comparison](/docs/resources/guides/payment-rails) for how messaging, clearing, and settlement differ.
+A sent instruction isn't a delivered payment. Retain the instruction identifier, account entry, fees, any FX trade, and final delivery confirmation. See the broader [payment rails comparison](/docs/resources/guides/payment-rails) for how messaging, clearing, and settlement differ.
 
 ## Why prefunding matters
 
 Holding a nostro account and prefunding it are different decisions. The account is the arrangement; [prefunding](/docs/resources/guides/prefunding) is putting liquidity in place before payments need it. Available credit, incoming payments, and the service agreement can also affect funding needs.
 
-For an illustrative payout program, a team might track three figures separately: the account balance, the amount already committed to pending payouts, and the amount immediately available for new instructions. A large balance can still conceal a shortage if most of it is reserved.
+A payout program tracks three figures separately: the account balance, the amount already committed to pending payouts, and the amount immediately available for new instructions. A large balance can still conceal a shortage if most of it is reserved.
 
-Replenishment cutoffs, holidays, currency exposure, and access to credit determine how much buffer a particular program needs. A count of destination countries alone does not determine the number or size of accounts required.
+Replenishment cutoffs, holidays, currency exposure, and access to credit determine how much buffer a particular program needs.
 
 ## What stablecoin settlement changes
 
 Stablecoin transfers can provide another way to move value between participating providers. Tempo supports near-instant onchain settlement around the clock, so an operator can evaluate whether faster replenishment reduces balances held ahead of demand.
 
-That benefit depends on the complete flow. A provider paying recipients in local currency still needs conversion liquidity, a supported payout method, and confirmation from the receiving provider. The bank account may remain part of that flow. A stablecoin balance also carries different issuer, custody, and redemption considerations from a bank deposit.
+That benefit depends on the complete flow. A provider paying recipients in local currency still needs conversion liquidity, a supported payout method, and confirmation from the receiving provider. The bank account may remain part of that flow. A stablecoin balance also carries different issuer, custody, and redemption risks than a bank deposit.
 
 Use the [cross-border payments guide](/docs/resources/guides/cross-border-payments) to assess the full payment and the [reconciliation guide](/docs/resources/guides/payment-reconciliation) to connect its records.
 

@@ -21,7 +21,7 @@ Before you start, have:
 
 - A Tempo API key on your backend, created in [Set up API access](/docs/routes/api-setup). `routes:read` covers quotes and status reads; `routes:write` covers creating transfers and registering source transactions.
 - A route with transfer support from [Supported routes](/docs/routes/networks). This guide sets the quote's `mode` to `exactSource`, which fixes the amount sent; `exactDestination` fixes the amount received instead ([Quotes and fees](/docs/routes/quotes#choose-which-amount-to-fix)). Check that the route lists `exactSource`.
-- A signer for the sender account on the source network, such as a connected wallet or your own signing service. The Routes API key does not authorize that account.
+- A signer for the sender account on the source network, such as a connected wallet or your own signing service. The API key doesn't sign transactions.
 
 Each step in the transfer flow has a request builder that generates cURL and TypeScript. To see the flow first, [try a route](/docs/routes/test). The [cURL example](/docs/routes/examples/transfers) runs every step from a terminal.
 
@@ -36,8 +36,6 @@ Each step in the transfer flow has a request builder that generates cURL and Typ
 <span id="quote-the-transfer" />
 
 <OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
-
-A quote prices the request; it does not reserve or create a transfer.
 
 <span id="review-fees" />
 

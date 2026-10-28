@@ -20,7 +20,7 @@ Send `OUSD` test tokens between accounts in Zone A without leaving the Zone.
 
 A Zone is a private stablecoin ledger connected to Tempo, the public chain. A Zone transfer moves `OUSD` test tokens between two accounts inside one Zone, here **Zone A**.
 
-This guide uses the [testnet sandbox](/docs/guide/private-zones), an earlier deployment with two example Zones (Zone A and Zone B) on Tempo Moderato testnet. The sandbox allows direct [TIP-20](/docs/protocol/tip20/overview) transfers inside a Zone. [Current deployments](/docs/guide/private-zones#testnet-compatibility) disable direct transfers. The transfer never passes through Tempo.
+This guide uses the [testnet sandbox](/docs/guide/private-zones), an earlier deployment with two example Zones (Zone A and Zone B) on Tempo Moderato testnet. The sandbox allows direct [TIP-20](/docs/protocol/tip20/overview) transfers inside a Zone, so the transfer never passes through Tempo. [Current deployments](/docs/guide/private-zones#testnet-compatibility) disable direct transfers and move tokens only through deposits and withdrawals, so this guide works only in the sandbox.
 
 <a id="sending-pathusd-within-zone-a" />
 <span id="sending-ousd-within-zone-a" />
