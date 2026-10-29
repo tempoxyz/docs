@@ -86,7 +86,7 @@ The portal admin manages which TIP-20 tokens are available on a Zone:
 | `pauseDeposits(token)` | Stops new deposits for the token. Withdrawal processing remains available unless the portal is paused. |
 | `resumeDeposits(token)` | Restarts deposits for a previously paused token. |
 
-From [T13](/docs/protocol/upgrades/t13), the network upgrade scheduled for October 29 on testnet, a token enablement takes effect when a Zone block processes it. The sequencer then submits that progress to the portal in a batch. `enableToken` reverts while eight enablements are pending, meaning no Zone block has processed them yet. Before T13, other admission limits apply.
+From [T13](/docs/protocol/upgrades/t13), the network upgrade active on testnet since October 29, a token enablement takes effect when a Zone block processes it. The sequencer then submits that progress to the portal in a batch. `enableToken` reverts while eight enablements are pending, meaning no Zone block has processed them yet. Before T13, other admission limits apply.
 
 Once enabled, a token can't be disabled. Withdrawals still depend on whether the [portal is paused](/docs/protocol/zones/architecture#portal-access-and-pausing), its access controls, and the token's TIP-403 policy. A token on a Zone uses the same address as the TIP-20 token it represents on Tempo. `ZoneInbox` mints it on deposit, and `ZoneOutbox` burns it on withdrawal. No mechanism exists to create new tokens on a Zone.
 

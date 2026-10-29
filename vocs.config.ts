@@ -1022,7 +1022,7 @@ export default defineConfig({
               },
               {
                 text: 'T13',
-                badge: { text: 'Upcoming', variant: 'note' as const },
+                badge: { text: 'Testnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t13',
               },
               {
