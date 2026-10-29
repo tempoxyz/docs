@@ -18,7 +18,7 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 ## Documentation IA and agent exports
 
 - `src/lib/docs-sections.ts` owns the section labels, landing routes, and route ownership; `vocs.config.ts` owns the sidebar within each section.
-- Primary sections: Get Started (`/get-started`), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), and Machine Payments (`/docs/agents`). Get Started also owns the SDK, CLI, wallet CLI, and server handler pages (`/docs/sdk`, `/docs/cli`, `/docs/wallet`, `/docs/server`) as its Tempo CLI and Tempo SDK sections.
+- Primary sections: Get Started (`/get-started`), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), and Machine Payments (`/docs/agents`). Get Started also owns the SDK, CLI, and wallet CLI pages (`/docs/sdk`, `/docs/cli`, `/docs/wallet`) as its Tempo CLI and Tempo SDK sections.
 - Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
 - API reference (`/docs/api`) is its own top-nav link, matching Console's "API Docs" link. Partners (`/docs/partners`) contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
 - Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.

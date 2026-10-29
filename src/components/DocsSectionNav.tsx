@@ -3,7 +3,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useRouter } from 'waku'
 import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
-import BracesIcon from '~icons/lucide/braces'
 import ChevronDownIcon from '~icons/lucide/chevron-down'
 import CodeIcon from '~icons/lucide/code-xml'
 import CompassIcon from '~icons/lucide/compass'
@@ -156,7 +155,6 @@ export function DocsApiDropdown({
           { label: 'Overview', href: '/docs/sdk', icon: CompassIcon },
           { label: 'SDKs', href: '/docs/sdk', icon: CodeIcon },
           { label: 'CLI', href: '/docs/cli', icon: TerminalIcon },
-          { label: 'Server handlers', href: '/docs/server', icon: BracesIcon },
         ].map((item) => (
           <Link
             key={item.href}
