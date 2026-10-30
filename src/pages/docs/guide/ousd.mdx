@@ -61,9 +61,7 @@ Swap USDC.e or pathUSD to OUSD on the [Stablecoin DEX](/docs/guide/stablecoin-de
 
 Set OUSD as your fee token to choose it ahead of pathUSD. Call `setUserToken` on the FeeManager once to set the account's preference. Alternatively, set `fee_token` on an individual [Tempo transaction](/docs/protocol/transactions/spec-tempo-transaction).
 
-The [T13 network upgrade](/docs/protocol/upgrades/t13#timeline) adds OUSD to the protocol fallback. It activated on testnet on October 29, 2026. Mainnet activation is scheduled for November 3, 2026.
-
-After activation, the [protocol fallback](/docs/protocol/fees/spec-fee#ordered-fallback-from-t13) tries pathUSD, then OUSD. This applies only when no explicit fee token, stored preference, or transfer/swap inference determines the fee token. OUSD is tried when the fee payer's pathUSD balance cannot cover the maximum fee. OUSD must cover the entire maximum fee; balances are not combined.
+The [protocol fallback](/docs/protocol/fees/spec-fee#ordered-fallback-from-t13) tries pathUSD, then OUSD. This applies only when no explicit fee token, stored preference, or transfer/swap inference determines the fee token. OUSD is tried when the fee payer's pathUSD balance cannot cover the maximum fee. OUSD must cover the entire maximum fee; balances are not combined.
 
 Integrations that explicitly select pathUSD still need updating for users who hold only OUSD. Select OUSD, or remove the pathUSD override to let the [fee token order](/docs/protocol/fees/spec-fee#fee-token-preferences) apply.
 
