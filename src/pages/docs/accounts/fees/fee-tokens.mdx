@@ -20,7 +20,7 @@ Set the account's default fee token once. Override it on any transaction that sh
 
 ## Supported Fee Tokens
 
-Before a transaction runs, Tempo checks its fee token:
+After selecting a fee token, Tempo checks it before running the transaction:
 
 - It's a [TIP-20 token](/docs/protocol/tip20/overview), Tempo's token standard, whose currency is USD.
 - The account paying the fee holds enough of it to cover the maximum fee. The maximum fee is the gas limit times the gas price.
@@ -32,7 +32,9 @@ If any check fails, the transaction is invalid and isn't included. Tempo doesn't
 
 ## Set a Default Fee Token
 
-The default covers every transaction the account pays the fee for. That includes ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token order](/docs/accounts/fees#fee-token-precedence). That order can fall back to pathUSD, a stablecoin the account might not hold.
+The default covers every transaction the account pays the fee for. That includes ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token order](/docs/accounts/fees#fee-token-precedence).
+
+Its final fallback uses pathUSD, then OUSD after [T13 activates on that network](/docs/protocol/upgrades/t13#timeline). OUSD is tried only when pathUSD cannot cover the maximum fee. This fallback does not override an explicit token, a stored preference, or a token inferred from the transaction.
 
 In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet until T14. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). The examples pay fees in its faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
 
@@ -58,7 +60,7 @@ const { receipt } = await client.fee.setUserTokenSync({ // [!code hl]
 
 ::::
 
-[`fee.setUserToken`](https://viem.sh/tempo/actions/fee.setUserToken) calls `setUserToken` on the FeeManager, Tempo's built-in fee contract. Pass `feeToken` as well. Before the default exists, this transaction's own fee can fall back to pathUSD.
+[`fee.setUserToken`](https://viem.sh/tempo/actions/fee.setUserToken) calls `setUserToken` on the FeeManager, Tempo's built-in fee contract. Pass `feeToken` as well. This selects the token for the transaction's own fee instead of relying on the protocol fallback.
 
 Read the current default with `client.fee.getUserToken({ account: account.address })`. It returns `null` until one is set.
 

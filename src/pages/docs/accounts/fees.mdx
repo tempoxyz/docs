@@ -42,7 +42,7 @@ Before the transaction runs, Tempo deducts its maximum fee from the fee payer's 
 
 When the validator producing the block wants a different stablecoin, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the fee to it. The Fee AMM is a set of built-in exchange pools.
 
-If the fee token fails any of [Tempo's fee token checks](/docs/accounts/fees/fee-tokens#supported-fee-tokens), the transaction is invalid. Tempo never includes it, so it costs nothing. A transaction that's included and then fails still pays its fee.
+Insufficient balance, unavailable conversion liquidity, or other failed [fee token checks](/docs/accounts/fees/fee-tokens#supported-fee-tokens) make the transaction invalid. Tempo never includes it, so it costs nothing. A transaction that's included and then fails still pays its fee.
 
 <span id="set-an-accounts-default-fee-token" />
 <span id="fee-token-precedence" />
@@ -56,9 +56,13 @@ Tempo uses the first of these that applies:
 2. The fee payer's default fee token.
 3. The token being transferred. This applies when every call is a `transfer` or `transferWithMemo` on the same USD token. The account must also pay its own fee.
 4. The input token of a single Stablecoin DEX swap.
-5. pathUSD, the first stablecoin deployed on Tempo.
+5. The protocol fallback uses the pathUSD stablecoin. After the [T13 network upgrade](/docs/protocol/upgrades/t13#timeline), it also tries the OUSD stablecoin.
 
-Tempo checks only that first token. If the fee payer can't pay in it, the transaction is invalid, even when a later token would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD. If the fee payer can't pay in pathUSD, the transaction is invalid. [Set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each account that pays fees.
+If one of the first four rules selects a token, Tempo uses only that token. If its fee checks fail, the transaction is invalid. An explicit pathUSD choice does not fall back to OUSD.
+
+Without a token selected by those rules, Tempo uses the [protocol fallback](/docs/protocol/fees/spec-fee#ordered-fallback-from-t13). Before T13, it uses only pathUSD. After T13, it tries OUSD when the fee payer's pathUSD balance cannot cover the maximum fee. One token must cover the entire maximum fee; balances are not combined. Only an insufficient balance advances the fallback, not policy, pause, access-key, or Fee AMM liquidity failures.
+
+[Set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) to choose which stablecoin an account pays fees in.
 
 ## Related
 

@@ -46,7 +46,7 @@ OUSD is also listed in the [Tempo token list](/docs/quickstart/tokenlist).
 | Token | Role on Tempo | Use it when |
 | ----- | ------------- | ----------- |
 | **OUSD** | Recommended stablecoin | Holding balances, accepting payments, settling, and paying fees |
-| **pathUSD** | Root quote token on the Stablecoin DEX and the protocol's fallback fee token | Routing between stablecoins. Most users never need to hold it directly. |
+| **pathUSD** | Root quote token on the Stablecoin DEX and the protocol's first fallback fee token | Routing between stablecoins. Most users never need to hold it directly. |
 | **USDC.e** | USDC bridged from other chains through Stargate | Bringing USDC to Tempo from another chain, before swapping to OUSD |
 
 pathUSD and USDC.e remain fully supported. Existing integrations that use them keep working without changes.
@@ -59,7 +59,13 @@ Swap USDC.e or pathUSD to OUSD on the [Stablecoin DEX](/docs/guide/stablecoin-de
 
 ### Fees
 
-Set OUSD as your fee token so your transactions do not fall back to pathUSD. You can set a preference for every transaction an account pays for by calling `setUserToken` on the FeeManager, or set `fee_token` on an individual [Tempo transaction](/docs/protocol/transactions/spec-tempo-transaction). See [fee token preferences](/docs/protocol/fees/spec-fee#fee-token-preferences).
+Set OUSD as your fee token to choose it ahead of pathUSD. Call `setUserToken` on the FeeManager once to set the account's preference. Alternatively, set `fee_token` on an individual [Tempo transaction](/docs/protocol/transactions/spec-tempo-transaction).
+
+The [T13 network upgrade](/docs/protocol/upgrades/t13#timeline) adds OUSD to the protocol fallback. It activated on testnet on October 29, 2026. Mainnet activation is scheduled for November 3, 2026.
+
+After activation, the [protocol fallback](/docs/protocol/fees/spec-fee#ordered-fallback-from-t13) tries pathUSD, then OUSD. This applies only when no explicit fee token, stored preference, or transfer/swap inference determines the fee token. OUSD is tried when the fee payer's pathUSD balance cannot cover the maximum fee. OUSD must cover the entire maximum fee; balances are not combined.
+
+Integrations that explicitly select pathUSD still need updating for users who hold only OUSD. Select OUSD, or remove the pathUSD override to let the [fee token order](/docs/protocol/fees/spec-fee#fee-token-preferences) apply.
 
 ### Accepting payments
 
