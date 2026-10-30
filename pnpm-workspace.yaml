@@ -34,13 +34,15 @@ overrides:
   'viem@2.57.5>ox': https://pkg.pr.new/ox@bf010ee
   # accounts 0.18.5 was published with unresolved catalog dependencies.
   'tapimo>accounts': 0.18.4
+  # tapimo 0.18.2 pins better-auth 1.7.2; 1.7.7+ fixes GHSA-965c-763c-88jm.
+  'tapimo>better-auth': 1.7.14
   'baseline-browser-mapping@<2.11.0': 2.11.0
   'browserslist@<4.28.7': 4.28.7
   dompurify: '>=3.4.17'
   'fast-uri@>=3.0.0 <3.1.9': 3.1.9
   'fflate@>=0.4.5 <0.4.9': 0.4.9
-  # mermaid 11 still requests katex ^0.16; only 0.18.2+ fixes its trust-check advisory.
-  'mermaid>katex': 0.18.11
+  # mermaid 11 still requests katex ^0.16; only 0.18.2+ fixes its trust-check advisory (0.18.11 is deprecated).
+  'mermaid>katex': 0.18.10
   # wata 0.4 (via accounts) still requests @hono/node-server 1; it only uses getRequestListener, which 2.x keeps.
   'wata>@hono/node-server': 2.1.5
   'js-yaml@>=4.0.0 <4.3.2': 4.3.2
