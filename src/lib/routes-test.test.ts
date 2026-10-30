@@ -4,6 +4,7 @@ import {
   demoMethods,
   directorySchema,
   linkedRoute,
+  quoteCosts,
   routeChoices,
   routeDemoHref,
   routeQuoteRequest,
@@ -15,8 +16,8 @@ import {
 
 const route: TestRoute = {
   id: 'test-route',
-  sourceChain: { id: 'eip155:1', name: 'Ethereum', addressFormat: 'hex' },
-  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' },
+  sourceChain: { id: 'eip155:1', name: 'Ethereum', addressFormat: 'hex', kind: 'evm' },
+  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex', kind: 'evm' },
   sourceToken: { tokenKey: 'eip155:1/erc20:source', symbol: 'USDC', decimals: 6 },
   destinationToken: { tokenKey: 'eip155:4217/erc20:destination', symbol: 'USDY', decimals: 18 },
   capabilities: { depositAddress: true, transfer: { modes: ['exactSource'] } },
@@ -57,11 +58,13 @@ describe('route test requests', () => {
     }).data[0]
     expect(() => routeTestRequest(depositOnly, input)).toThrow('advertise')
     const request = routeTestRequest(depositOnly, { ...input, method: 'depositAddress' })
+    // A v2 deposit address keys its refund address by the source chain's family.
     expect(request).toMatchObject({
       amount: '1234567',
-      refundAddress: input.refundAddress,
+      refundAddresses: { evm: input.refundAddress },
       subsidize: false,
     })
+    expect(request).not.toHaveProperty('refundAddress')
     expect(request).not.toHaveProperty('sender')
     expect(request).not.toHaveProperty('mode')
     expect(request).not.toHaveProperty('destinationChain')
@@ -83,7 +86,12 @@ describe('route test requests', () => {
     expect(() => routeTestRequest(route, { ...input, subsidize: true })).toThrow('1:1')
   })
   it('requires Stellar account addresses on Stellar sources', () => {
-    const stellar = { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' }
+    const stellar = {
+      id: 'stellar:pubnet',
+      name: 'Stellar',
+      addressFormat: 'strkey',
+      kind: 'stellar',
+    }
     const fromStellar = { ...route, sourceChain: stellar }
     const account = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR'
     expect(routeTestRequest(fromStellar, { ...input, sender: account })).toMatchObject({
@@ -98,9 +106,9 @@ describe('route test requests', () => {
     )
   })
   it('cascades network and asset choices and fills single options', () => {
-    const tempo = { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' }
-    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
-    const base = { id: 'eip155:8453', name: 'Base', addressFormat: 'hex' }
+    const tempo = { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex', kind: 'evm' }
+    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check', kind: 'tron' }
+    const base = { id: 'eip155:8453', name: 'Base', addressFormat: 'hex', kind: 'evm' }
     const usdt0 = { tokenKey: 'tempo/usdt0', symbol: 'USDT0', decimals: 6 }
     const toTron = {
       ...route,
@@ -174,17 +182,61 @@ describe('route test requests', () => {
       covered: 0n,
     })
   })
+  it('splits a quote into listed fees and the price impact no fee explains', () => {
+    const usd = (baseUnits: string) => ({ baseUnits, decimals: 6, currency: 'USD' })
+    const quote = {
+      sourceAmount: usd('5000000'),
+      destinationAmount: usd('4972951'),
+      fees: [{ amount: usd('21590') }],
+    }
+    // Sent 5, delivered 4.972951: 0.027049 in all, of which 0.02159 is the fee.
+    expect(quoteCosts(quote, 6)).toEqual({ total: 27_049n, priceImpact: 5_459n })
+    // The same gap, expressed in the destination token's precision.
+    expect(quoteCosts({ ...quote, sourceAmount: { ...usd('5'), decimals: 0 } }, 6)).toEqual({
+      total: 5_000_000n - 4_972_951n,
+      priceImpact: 5_459n,
+    })
+    // A subsidized quote counts from the guaranteed amount, which is what Tempo covers.
+    expect(
+      quoteCosts({ ...quote, subsidize: true, destinationAmountRequired: usd('5000000') }, 6),
+    ).toEqual({ total: 27_049n, priceImpact: 5_459n })
+  })
+  it('never reports negative price impact or costs it cannot verify', () => {
+    const usd = (baseUnits: string, currency = 'USD') => ({ baseUnits, decimals: 6, currency })
+    const base = { sourceAmount: usd('1000000'), destinationAmount: usd('990000') }
+    // Fees that exceed the gap leave no impact to show.
+    expect(quoteCosts({ ...base, fees: [{ amount: usd('20000') }] }, 6)).toEqual({
+      total: 10_000n,
+      priceImpact: undefined,
+    })
+    // No fees: the whole gap is price impact.
+    expect(quoteCosts({ ...base, fees: [] }, 6)).toEqual({ total: 10_000n, priceImpact: 10_000n })
+    // Receiving more than was sent is not a cost.
+    expect(quoteCosts({ ...base, destinationAmount: usd('1010000') }, 6)).toBeUndefined()
+    // Non-USD amounts cannot be compared, and a non-USD fee leaves the impact unknown.
+    expect(quoteCosts({ ...base, destinationAmount: usd('990000', 'EUR') }, 6)).toBeUndefined()
+    expect(quoteCosts({ ...base, sourceAmount: { baseUnits: '1000000' } }, 6)).toBeUndefined()
+    expect(quoteCosts({ ...base, fees: [{ amount: usd('1', 'ETH') }] }, 6)).toEqual({
+      total: 10_000n,
+    })
+  })
   it('offers wallet transfers for EVM, Tron, and Stellar sources, and deposits everywhere', () => {
     expect(demoMethods(route)).toEqual(['transfer', 'depositAddress'])
-    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
+    const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check', kind: 'tron' }
     expect(demoMethods({ ...route, sourceChain: tron })).toEqual(['transfer', 'depositAddress'])
-    const stellar = { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' }
+    const stellar = {
+      id: 'stellar:pubnet',
+      name: 'Stellar',
+      addressFormat: 'strkey',
+      kind: 'stellar',
+    }
     expect(demoMethods({ ...route, sourceChain: stellar })).toEqual(['transfer', 'depositAddress'])
     // Routes has no signed action for Solana sources, so they fund through deposit addresses.
     const solana = {
       id: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
       name: 'Solana',
       addressFormat: 'base58',
+      kind: 'solana',
     }
     expect(demoMethods({ ...route, sourceChain: solana })).toEqual(['depositAddress'])
     expect(
@@ -209,7 +261,12 @@ describe('route test requests', () => {
     // Several deposit routes only quote with both addresses, so the quote needs them too.
     expect(() => routeQuoteRequest(route, { ...deposit, recipient: '' })).toThrow('recipient')
     expect(() => routeQuoteRequest(route, { ...deposit, refundAddress: '' })).toThrow('refund')
-    expect(routeQuoteRequest(route, deposit)).toEqual(routeTestRequest(route, deposit))
+    // The v1 quote takes one refund address; the v2 creation keys it by chain family.
+    const { refundAddress, ...rest } = routeQuoteRequest(route, deposit) as Record<string, unknown>
+    expect(routeTestRequest(route, deposit)).toEqual({
+      ...rest,
+      refundAddresses: { evm: refundAddress },
+    })
     // Transfer quotes need the same sender and recipient as creation.
     expect(() => routeQuoteRequest(route, { ...input, sender: '' })).toThrow('sender')
     expect(routeQuoteRequest(route, input)).toEqual(routeTestRequest(route, input))

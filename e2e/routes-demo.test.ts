@@ -24,13 +24,14 @@ const usd = (formatted: string) => ({
 const future = () => new Date(Date.now() + 10 * 60_000).toISOString()
 
 const chains = {
-  base: { id: 'eip155:8453', name: 'Base', addressFormat: 'hex' },
-  tempo: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' },
-  tron: { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' },
+  base: { id: 'eip155:8453', name: 'Base', addressFormat: 'hex', kind: 'evm' },
+  tempo: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex', kind: 'evm' },
+  tron: { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check', kind: 'tron' },
   solana: {
     id: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
     name: 'Solana',
     addressFormat: 'base58',
+    kind: 'solana',
   },
 }
 const usdce = {
@@ -131,11 +132,20 @@ const subsidizedDepositQuote = {
   fees: [],
   subsidize: true,
 }
+// A v2 deposit address holds one address per chain family and carries no quote terms.
+const familyAddress = {
+  id: 'rda_1',
+  family: 'evm',
+  address: depositAddress,
+  refundAddress: sender,
+  sources: [],
+  status: 'active',
+}
 const createdDepositAddress = {
   subsidize: true,
   id: 'rda_1',
-  address: depositAddress,
   status: 'active',
+  addresses: [familyAddress],
 }
 const deposit = { id: 'rdp_1', status: 'detected', sourceAmount: usd('1') }
 const apiError = (status: number, code: string, message: string, requestId: string) => ({
@@ -155,7 +165,7 @@ type Recorded = {
 /** Replies are consumed in order; the last one repeats. Unscripted calls fail loudly. */
 async function mockRoutesApi(page: Page, replies: Record<string, Reply[]>) {
   const requests: Recorded[] = []
-  await page.route('https://api.tempo.xyz/v1/**', async (route) => {
+  await page.route(/^https:\/\/api\.tempo\.xyz\/v[12]\//, async (route) => {
     const request = route.request()
     if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors })
     const url = new URL(request.url())
@@ -520,7 +530,12 @@ async function mockStellarWallet(page: Page, { lostAnswer = false } = {}) {
 async function createStellarTransfer(page: Page) {
   const stellarToTempo = {
     id: 'stellar-usdc-tempo-ousd',
-    sourceChain: { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' },
+    sourceChain: {
+      id: 'stellar:pubnet',
+      name: 'Stellar',
+      addressFormat: 'strkey',
+      kind: 'stellar',
+    },
     sourceToken: {
       tokenKey:
         'stellar:pubnet/asset:USDC-GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN',
@@ -675,7 +690,7 @@ test.describe('Routes demo', () => {
 
     // Transfer fees are charged on top of the routed amount, here in ETH.
     await expect(lifecycle(page)).toContainText(
-      'You send1 USDCRecipient gets0.9991 USDC.eFee0.0001006 ETH',
+      'You send1 USDCRecipient gets0.9991 USDC.eProvider fee0.0001006 ETHTotal cost0.0009 USDC.e',
     )
     const [quote] = api.to('GET', '/v1/routes/transfers/quote')
     expect(Object.fromEntries(quote.query)).toMatchObject({
@@ -786,7 +801,7 @@ test.describe('Routes demo', () => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
       'GET /v1/routes/deposit-addresses/quote': [{ body: subsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
+      'POST /v2/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
       'GET /v1/routes/deposits': [
         { body: { data: [], nextCursor: null } },
         { body: { data: [deposit], nextCursor: null } },
@@ -811,7 +826,7 @@ test.describe('Routes demo', () => {
 
     // Tempo covers the gap between the routed amount (0.9591) and 1:1 delivery.
     await expect(lifecycle(page)).toContainText(
-      'Recipient gets1 USDC.eCovered by Tempo0.0409 USDC.eFeesNone',
+      'Recipient gets1 USDC.eCovered by Tempo0.0409 USDC.ePrice impact0.0409 USDC.e',
     )
     await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
     const quoteQuery = Object.fromEntries(
@@ -835,13 +850,17 @@ test.describe('Routes demo', () => {
     // The address response has no amounts, so the summary and canvas keep the quote's.
     await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
     await expect(page.getByRole('group', { name: 'From' })).toContainText('1 USDC')
-    expect(api.to('POST', '/v1/routes/deposit-addresses')[0].body).toMatchObject({
+    expect(api.to('POST', '/v2/routes/deposit-addresses')[0].body).toMatchObject({
       recipient: tempoRecipient,
-      refundAddress: sender,
+      refundAddresses: { evm: sender },
       subsidize: true,
     })
+    expect(api.to('POST', '/v2/routes/deposit-addresses')[0].body).not.toHaveProperty(
+      'refundAddress',
+    )
     await expect(lifecycle(page)).toContainText('Delivered 1 USDC.e.', { timeout: 20_000 })
-    expect(api.to('GET', '/v1/routes/deposits')[0].query.get('depositAddress')).toBe(depositAddress)
+    // Deposits are found by the deposit address ID, which covers every address it holds.
+    expect(api.to('GET', '/v1/routes/deposits')[0].query.get('depositAddressId')).toBe('rda_1')
   })
 
   test('quotes without the subsidy when it is refused, and recovers from upstream errors', async ({
@@ -987,7 +1006,7 @@ test.describe('Routes demo', () => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
       'GET /v1/routes/deposit-addresses/quote': [{ body: subsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
+      'POST /v2/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
       'GET /v1/routes/deposits': [
         apiError(500, 'internal_error', 'Something went wrong.', 'req_poll'),
         { body: { data: [deposit], nextCursor: null } },
@@ -1013,8 +1032,15 @@ test.describe('Routes demo', () => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
       'GET /v1/routes/deposit-addresses/quote': [{ body: subsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [
-        { status: 201, body: { ...createdDepositAddress, status: 'inactive' } },
+      'POST /v2/routes/deposit-addresses': [
+        {
+          status: 201,
+          body: {
+            ...createdDepositAddress,
+            status: 'action-required',
+            addresses: [{ ...familyAddress, status: 'action-required' }],
+          },
+        },
       ],
     })
     await openDemo(page)
@@ -1180,7 +1206,7 @@ test.describe('Routes demo wallets', () => {
     await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
       'GET /v1/routes/deposit-addresses/quote': [{ body: subsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
+      'POST /v2/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
       'GET /v1/routes/deposits': [{ body: { data: [], nextCursor: null } }],
     })
     await openDemo(page)
@@ -1305,11 +1331,17 @@ test.describe('Routes demo wallets', () => {
   test('funds a Solana deposit address with a Wallet Standard wallet', async ({ page }) => {
     const solanaDeposit = 'So11111111111111111111111111111111111111112'
     await mockSolanaWallet(page)
-    await mockRoutesApi(page, {
+    const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
       'GET /v1/routes/deposit-addresses/quote': [{ body: subsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [
-        { status: 201, body: { ...createdDepositAddress, address: solanaDeposit } },
+      'POST /v2/routes/deposit-addresses': [
+        {
+          status: 201,
+          body: {
+            ...createdDepositAddress,
+            addresses: [{ ...familyAddress, family: 'solana', address: solanaDeposit }],
+          },
+        },
       ],
       'GET /v1/routes/deposits': [{ body: { data: [], nextCursor: null } }],
     })
@@ -1342,6 +1374,10 @@ test.describe('Routes demo wallets', () => {
     expect(accounts).toContain('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL')
     expect(accounts).toContain('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
     expect(accounts).toContain(solanaDeposit)
+    // The refund address is keyed by the source chain's family.
+    expect(api.to('POST', '/v2/routes/deposit-addresses')[0].body).toMatchObject({
+      refundAddresses: { solana: solanaAccount },
+    })
   })
 })
 
@@ -1464,7 +1500,7 @@ test.describe('Routes demo without a key', () => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [plainDirectory],
       'GET /v1/routes/deposit-addresses/quote': [keyMissing, { body: unsubsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
+      'POST /v2/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
       'GET /v1/routes/deposits': [{ body: { data: [], nextCursor: null } }],
     })
     const proxied = await mockQuoteProxy(page, [{ body: unsubsidizedDepositQuote }])
@@ -1504,10 +1540,13 @@ test.describe('Routes demo without a key', () => {
     await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
     await button(page, 'Create').click()
     await expect(lifecycle(page)).toContainText(depositAddress)
-    const [created] = api.to('POST', '/v1/routes/deposit-addresses')
+    const [created] = api.to('POST', '/v2/routes/deposit-addresses')
     expect(created.headers['tempo-api-key']).toBe(key)
     // The addresses entered for the quote carry through to creation.
-    expect(created.body).toMatchObject({ recipient: tempoRecipient, refundAddress: sender })
+    expect(created.body).toMatchObject({
+      recipient: tempoRecipient,
+      refundAddresses: { evm: sender },
+    })
 
     // The key that created the address stays for the rest of the test.
     await page.getByRole('button', { name: /API key/ }).click()
