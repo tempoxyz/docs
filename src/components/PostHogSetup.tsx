@@ -13,10 +13,14 @@ function PostHogInitializer({ site }: { site: string }) {
     const init = async () => {
       // Bundle the extensions posthog-js would otherwise fetch from /ingest/static
       // at runtime, so disable_external_dependency_loading blocks every remote script.
+      // A failed extension chunk costs only that extension, never core analytics.
+      const optional = (load: Promise<unknown>) => load.catch(() => undefined)
       const [{ default: posthog }] = await Promise.all([
         import('posthog-js'),
-        import('posthog-js/dist/dead-clicks-autocapture'),
-        import('posthog-js/dist/exception-autocapture'),
+        optional(import('posthog-js/dist/dead-clicks-autocapture')),
+        optional(import('posthog-js/dist/exception-autocapture')),
+        optional(import('posthog-js/dist/web-vitals')),
+        optional(import('posthog-js/dist/surveys')),
       ])
 
       posthog.init(posthogKey, {
