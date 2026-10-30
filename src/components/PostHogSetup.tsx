@@ -11,13 +11,21 @@ function PostHogInitializer({ site }: { site: string }) {
     if (!posthogKey || !posthogHost) return
 
     const init = async () => {
-      const { default: posthog } = await import('posthog-js')
+      // Bundle the extensions posthog-js would otherwise fetch from /ingest/static
+      // at runtime, so disable_external_dependency_loading blocks every remote script.
+      const [{ default: posthog }] = await Promise.all([
+        import('posthog-js'),
+        import('posthog-js/dist/dead-clicks-autocapture'),
+        import('posthog-js/dist/exception-autocapture'),
+      ])
 
       posthog.init(posthogKey, {
         api_host: '/ingest',
         ui_host: posthogHost,
         defaults: '2025-11-30',
         capture_exceptions: true,
+        // Never inject posthog scripts at runtime (lazy-loaded chunks have no SRI).
+        disable_external_dependency_loading: true,
         debug: import.meta.env.MODE === 'development',
         ...POSTHOG_REPLAY_PRIVACY_CONFIG,
       })
