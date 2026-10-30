@@ -167,6 +167,10 @@ The `seen` field is a Unix timestamp in milliseconds.
 }
 ```
 
+<span id="consensus_getidentitytransitionproof" />
+
+Tempo nodes no longer serve `consensus_getIdentityTransitionProof`. Validator operators read identity transitions with `cargo xtask get-identity-transitions` from the Tempo repository.
+
 ## Tempo admin `admin_` namespace
 
 Requires the `admin` API to be enabled on a self-hosted node (`--http.api admin`).
