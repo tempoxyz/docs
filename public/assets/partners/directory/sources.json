@@ -295,5 +295,9 @@
     "source": "https://moralis.com/Moralis-Logo-Black.webp",
     "darkFile": "moralis-dark.webp",
     "darkSource": "https://moralis.com/Moralis-Logo-White.webp"
+  },
+  "Envio": {
+    "file": "envio.svg",
+    "source": "Supplied by Envio (envio-logo-primary.svg)"
   }
 }
