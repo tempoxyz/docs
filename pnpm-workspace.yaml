@@ -36,20 +36,24 @@ overrides:
   'tapimo>accounts': 0.18.4
   'baseline-browser-mapping@<2.11.0': 2.11.0
   'browserslist@<4.28.7': 4.28.7
-  dompurify: '>=3.4.0'
-  'fast-uri@>=3.0.0 <3.1.6': 3.1.6
+  dompurify: '>=3.4.17'
+  'fast-uri@>=3.0.0 <3.1.9': 3.1.9
   'fflate@>=0.4.5 <0.4.9': 0.4.9
+  # mermaid 11 still requests katex ^0.16; only 0.18.2+ fixes its trust-check advisory.
+  'mermaid>katex': 0.18.11
+  # wata 0.4 (via accounts) still requests @hono/node-server 1; it only uses getRequestListener, which 2.x keeps.
+  'wata>@hono/node-server': 2.1.5
   'js-yaml@>=4.0.0 <4.3.2': 4.3.2
   'nanoid@>=3.0.0 <3.3.18': 3.3.18
   protobufjs: '>=7.5.5'
-  # remark-mdx-frontmatter 5 still requests toml 3; toml 4 fixes its parser advisories.
-  'remark-mdx-frontmatter@5>toml': 4.2.0
+  # remark-mdx-frontmatter 5 still requests toml 3; toml 5.0.1 fixes its parser advisories.
+  'remark-mdx-frontmatter@5>toml': 5.0.1
   tar: '>=7.5.21'
   'undici@>=8.0.0 <8.10.2': 8.10.2
 
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2': patches/@braintree__sanitize-url@7.1.2.patch
-  dayjs@1.11.20: patches/dayjs@1.11.20.patch
+  dayjs@1.11.23: patches/dayjs@1.11.23.patch
   vocs@2.12.0: patches/vocs@2.12.0.patch
   waku@1.0.0-rc.3: patches/waku@1.0.0-rc.3.patch
 
