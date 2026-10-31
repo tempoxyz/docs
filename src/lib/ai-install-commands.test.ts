@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { tempoPluginInstallCommands } from './ai-install-commands'
+import { tempoAgentSetupCommands, tempoPluginInstallCommands } from './ai-install-commands'
 
 describe('tempoPluginInstallCommands', () => {
   it('uses the canonical Codex marketplace and plugin selectors', () => {
@@ -24,5 +24,12 @@ describe('tempoPluginInstallCommands', () => {
     ]) {
       expect(existsSync(legacyPath), legacyPath).toBe(false)
     }
+  })
+})
+
+describe('tempoAgentSetupCommands', () => {
+  it('uses Amp CLI syntax for remote MCP servers', () => {
+    // `amp mcp add <name> <url>` auto-detects the transport; `--transport` is rejected.
+    expect(tempoAgentSetupCommands.amp).toBe('amp mcp add tempo https://mcp.tempo.xyz')
   })
 })
