@@ -129,6 +129,32 @@ describe('route test requests', () => {
     expect(fromEthereum.options.destinationChains.map((o) => o.label)).toEqual(['Tempo', 'Base'])
     expect(fromEthereum.route).toBeUndefined()
   })
+  it('defaults a Tempo destination to OUSD until the reader picks another asset', () => {
+    const ousd = {
+      ...route,
+      id: 'to-ousd',
+      destinationToken: { tokenKey: 'tempo/ousd', symbol: 'OUSD', decimals: 6 },
+    }
+    const pick = {
+      sourceChain: 'eip155:1',
+      sourceToken: route.sourceToken.tokenKey,
+      destinationChain: 'eip155:4217',
+      destinationToken: '',
+    }
+    expect(routeChoices([route, ousd], pick).route?.id).toBe('to-ousd')
+    expect(
+      routeChoices([route, ousd], { ...pick, destinationToken: route.destinationToken.tokenKey })
+        .route?.id,
+    ).toBe('test-route')
+    const elsewhere = {
+      ...ousd,
+      destinationChain: { id: 'eip155:8453', name: 'Base', addressFormat: 'hex' },
+    }
+    const base = { ...route, id: 'to-base-usdy', destinationChain: elsewhere.destinationChain }
+    expect(
+      routeChoices([base, elsewhere], { ...pick, destinationChain: 'eip155:8453' }).route,
+    ).toBeUndefined()
+  })
   it('reads the 1:1 amount a subsidy guarantees and what Tempo covers', () => {
     const deposit = {
       subsidize: true,

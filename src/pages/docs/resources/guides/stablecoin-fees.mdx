@@ -10,13 +10,13 @@ description: Choose a Tempo fee token, check conversion liquidity, separate spon
 
 Tempo network fees are paid in eligible USD-denominated TIP-20 tokens. Set an explicit fee token for the account or transaction, maintain its balance, and monitor any required fee-conversion liquidity.
 
-For implementation, start with [choosing a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin). This guide explains the operating decisions around that configuration.
+For implementation, start with [choosing a fee token](/docs/guide/payments/pay-fees-in-any-stablecoin).
 
 ## Check fee-token eligibility
 
 A fee token must be a USD-denominated TIP-20 token and satisfy the [fee system's requirements](/docs/protocol/fees). When the payer and validator use different tokens, the required conversion route needs sufficient Fee AMM liquidity.
 
-A token name, custom issuance, or DEX pair does not establish fee eligibility. Check the exact contract, currency denomination, balance, applicable permissions, and conversion liquidity. Technical eligibility also does not establish a redemption service or fiat payout route.
+A token name, custom issuance, or DEX pair doesn't make a token eligible. Check the contract's currency denomination, balance, permissions, and conversion liquidity.
 
 ## Choose a fee token deliberately
 
@@ -24,13 +24,13 @@ The [fee-token preference rules](/docs/protocol/fees/spec-fee#fee-token-preferen
 
 For an application, prefer an explicit transaction-level or persistent account setting. It makes the fee asset you need to fund and reconcile clear. Same-token selection for a payment is conditional on the transaction's calls and the applicable selection rules.
 
-Once a preference selects a token, a failed eligibility, balance, or liquidity check does not cause the protocol to try every later preference. Do not rely on holding another stablecoin to rescue an invalid explicit selection.
+Once a preference selects a token, a failed eligibility, balance, or liquidity check doesn't make the protocol try every later preference. Holding another stablecoin doesn't rescue an invalid explicit selection.
 
 Follow [the fee-token guide](/docs/guide/payments/pay-fees-in-any-stablecoin) to configure and inspect the selected asset. For a sponsored transaction, the fee payer chooses the fee token.
 
 ## Understand fee conversion
 
-The [Fee AMM](/docs/protocol/fees/fee-amm) converts network fees when the payer's token differs from the validator's preferred token. It does not convert the payment principal. User-facing stablecoin trades use the separate [Stablecoin DEX](/docs/protocol/exchange).
+The [Fee AMM](/docs/protocol/fees/fee-amm) converts network fees when the payer's token differs from the validator's preferred token. It doesn't convert the payment principal. User-facing stablecoin trades use the separate [Stablecoin DEX](/docs/protocol/exchange).
 
 Fee pools are directional. The protocol checks the direct pool and, when that pool lacks sufficient liquidity, tries the documented two-hop route through the selected token's quote token. Both hops must have sufficient liquidity.
 
@@ -46,11 +46,11 @@ Before execution, the protocol checks fee funding and conversion liquidity and c
 | Included transaction whose application call reverts | The application operation failed, but the transaction still incurs fees. Record the failed payment separately from its network expense. |
 | Successful payment | Verify the intended transfer and record the actual fee separately from the amount delivered. |
 
-Tempo uses a bounded dynamic base fee. The actual network expense depends on gas used, applicable gas price, and fee-token conversion. Do not budget every operation as one fixed transfer fee; authorization, contract calls, and other operations can have different costs.
+Tempo uses a bounded dynamic base fee. The actual network expense depends on gas used, applicable gas price, and fee-token conversion. Don't budget every operation as one fixed transfer fee; authorization, contract calls, and other operations can have different costs.
 
 ## Configure fee sponsorship separately
 
-[Fee sponsorship](/docs/guide/payments/sponsor-user-fees) allows a distinct account to pay the network fee while the sender authorizes the application calls. Sponsorship does not fund the payment principal or make the transaction costless.
+[Fee sponsorship](/docs/guide/payments/sponsor-user-fees) allows a distinct account to pay the network fee while the sender authorizes the application calls. Sponsorship doesn't fund the payment principal or make the transaction costless.
 
 Set an application policy for which transactions to sponsor, then monitor the sponsor's balance and expense. Preserve the sender, sponsor, fee token, actual fee, and related business operation in your records.
 
@@ -66,7 +66,7 @@ For the complete payment cost, also include asset acquisition, custody, service-
 
 ### Can every stablecoin pay fees?
 
-No. Check USD-denominated TIP-20 eligibility and the required conversion liquidity. A similar ticker or support on another network does not establish support on Tempo.
+No. Check USD-denominated TIP-20 eligibility and the required conversion liquidity.
 
 ### Does the Fee AMM exchange the amount being paid?
 

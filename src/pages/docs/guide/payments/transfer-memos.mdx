@@ -124,7 +124,7 @@ console.log(logs)
 
 A memo match identifies a candidate payment. [Verify the token, recipient, amount, and receipt](/docs/guide/payments/accept-a-payment#reconcile-payments-with-memos) before crediting it. Store the transaction hash and log index so replaying events cannot credit the same transfer twice.
 
-Keep the reference, expected payment, verified transfer, and any exception in your application ledger. Define how you handle missing references, partial payments, duplicate references, and unsupported tokens. A memo supplies a matching key; it does not automatically post an invoice, complete an accounting entry, or authorize a refund.
+Keep the reference, expected payment, verified transfer, and any exception in your application ledger. Define how you handle missing references, partial payments, duplicate references, and unsupported tokens.
 
 <span id="transfer-memo-recipes" />
 <span id="exchange-deposit-reconciliation" />

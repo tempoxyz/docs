@@ -42,8 +42,8 @@
     "@wagmi/core": "3.6.5",
     "abitype": "^1.2.4",
     "accounts": "0.19.1",
-    "hono": "^4.13.5",
-    "mermaid": "^11.14.0",
+    "hono": "^4.13.14",
+    "mermaid": "^11.17.2",
     "minisearch": "7.2.0",
     "monaco-editor": "^0.55.1",
     "ox": "0.14.54",
@@ -67,7 +67,7 @@
     "unplugin-icons": "^23.0.1",
     "viem": "2.57.5",
     "viem-zones-sandbox": "npm:viem@2.54.6",
-    "vocs": "https://pkg.pr.new/vocs@1c023ba",
+    "vocs": "2.12.0",
     "wagmi": "3.7.7",
     "waku": "1.0.0-rc.3",
     "webauthx": "~0.1.2",
@@ -89,9 +89,9 @@
     "remark-stringify": "^11.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "vite": "^8.1.0",
+    "vite": "~8.1.6",
     "vite-plugin-mkcert": "^2.1.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.12"
   },
   "devEngines": {
     "runtime": {
@@ -99,10 +99,5 @@
       "version": "24.22.1",
       "onFail": "download"
     }
-  },
-  "overrides": {
-    "body-parser@>=2.0.0 <2.4.0": "2.4.0",
-    "fast-uri@>=3.0.0 <3.1.9": "3.1.9",
-    "zod@>=4.0.0 <4.6.6": "4.6.7"
   }
 }

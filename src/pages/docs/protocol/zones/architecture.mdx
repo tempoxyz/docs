@@ -44,7 +44,7 @@ The sequencer groups Zone blocks into batches and submits their commitments to t
 
 Accepting the batch makes its withdrawals available for processing on Tempo. Bridge activity and settlement commitments are public. The private ledger isn't published.
 
-Sequencer certificates authenticate batch commitments but don't independently prove correct execution. Enforcement depends on the deployed verifier and its configuration. The reviewed implementations and deployment checks are in the [proving implementation status](/docs/protocol/zones/proving#implementation-status).
+Sequencer certificates authenticate batch commitments but don't independently prove correct execution. Enforcement depends on the deployed verifier and its configuration, as the [proving implementation status](/docs/protocol/zones/proving#implementation-status) describes.
 
 ## Contract Architecture
 
@@ -116,7 +116,7 @@ Zones make explicit tradeoffs between trust and performance:
 | Sequencer for inclusion and ordering | Transactions (including withdrawals) can be excluded or reordered. |
 | Sequencer for privacy | The sequencer can see all transactions on the Zone. |
 | Sequencer for data | Reconstructing the state of the Zone without the sequencer is impossible. |
-| Settlement quorum and deployed verifier for correctness | A signature quorum alone does not establish correct execution. Enforcement depends on the active verifier, approved enclave measurements, and attestation verification. |
+| Settlement quorum and deployed verifier for correctness | A signature quorum doesn't prove correct execution. Enforcement depends on the active verifier, approved enclave measurements, and attestation verification. |
 
 Failed withdrawal deliveries [bounce back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) to the private `zoneFallbackRecipient`. If Zone minting is also blocked, the inbox records a pending refund for later claiming. Token restrictions can delay recovery. They don't make a failed delivery block the withdrawal queue.
 

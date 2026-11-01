@@ -12,7 +12,7 @@ A payment rail is the infrastructure used to move or settle value between accoun
 
 ## Separate the legs of a payment
 
-A business can use several rails for one payment. An ACH credit can fund an account, a stablecoin transfer can move value between providers, and a local bank payment can deliver the recipient's currency. The performance of one leg does not describe the whole payment.
+A business can use several rails for one payment. An ACH credit can fund an account, a stablecoin transfer can move value between providers, and a local bank payment can deliver the recipient's currency.
 
 Record the source account and currency, the asset used between providers, and the recipient account and currency. Specify which organization confirms each stage. A message, network settlement, provider balance credit, and recipient bank deposit are different events.
 
@@ -36,7 +36,7 @@ These are system capabilities. Your bank or provider sets the access conditions,
 
 Real-time gross settlement (RTGS) processes payments individually as they arrive, rather than settling only the difference between amounts owed. For example, the [Federal Reserve describes Fedwire](https://www.frbservices.org/wp-content/uploads/funds.pdf) as processing each payment order individually and, when accepted, settling to the receiving participant's Federal Reserve account in central bank money.
 
-In [deferred net settlement](https://www.bis.org/publications/innovations-payments), obligations are combined and the net positions settle at scheduled times. A batch can contain many payment instructions while the settlement system moves a smaller set of net amounts. Check the actual service's funding requirements and completion rules; an application's batch of blockchain calls is a different concept.
+In [deferred net settlement](https://www.bis.org/publications/innovations-payments), obligations are combined and the net positions settle at scheduled times. A batch can contain many payment instructions while the settlement system moves a smaller set of net amounts. An application's batch of blockchain calls is a different concept.
 
 <span id="t-plus-settlement" />
 
@@ -44,17 +44,17 @@ In [deferred net settlement](https://www.bis.org/publications/innovations-paymen
 
 `T` identifies the transaction or trade date. `T+1` means one business day later; `T+2` means two. A Friday `T+2` settlement normally falls on Tuesday if Monday is a business day. Check the relevant calendar and cutoff before promising a recipient date.
 
-The [SEC's explanation of the U.S. securities transition to T+1](https://www.sec.gov/newsroom/press-releases/2024-62) illustrates this convention. Securities settlement cycles are not bank-payout guarantees. `T+0` means same-day settlement, which can still involve a processing window; it does not establish immediate recipient access.
+`T+0` means same-day settlement, which can still involve a processing window before the recipient has access.
 
 ## Match the rail to the payment workflow
 
 ACH can fit predictable domestic credits or authorized recurring debits. Sending a credit and collecting a debit require different application and authorization flows. Same Day ACH uses banking-day settlement windows; it is different from an instant payment service.
 
-A wire can fit a time-sensitive bank payment when the banks, deadlines, and beneficiary requirements fit. Interbank settlement still needs to be distinguished from credit to the intended customer's account.
+A wire can fit a time-sensitive bank payment when the banks, deadlines, and beneficiary requirements fit. Interbank settlement and credit to the customer's account are separate events.
 
-For an out-of-hours domestic payment, evaluate available instant bank services alongside stablecoins. Confirm whether both accounts can use the service for the payment. Avoid assuming every bank payment stops on weekends.
+For an out-of-hours domestic payment, evaluate available instant bank services alongside stablecoins. Both accounts must support the service.
 
-A stablecoin route can fit a recipient that accepts the exact token, or a provider that converts and delivers it. Receiving a dollar-denominated token and receiving local currency in a bank account are different outcomes.
+A stablecoin route can fit a recipient that accepts the token, or a provider that converts and delivers it. Receiving a dollar-denominated token and receiving local currency in a bank account are different outcomes.
 
 ## Compare the same amount and recipient outcome
 
@@ -69,19 +69,19 @@ Hold the funding method, source currency, recipient currency, and delivery metho
 | Exceptions | Failed-payment, return, investigation, support, and recovery costs. |
 | Liquidity | Required balances, replenishment time, and withdrawal access. |
 
-For example, if a supplier expects a local-currency bank deposit, compare a bank deposit for every route. A network fee alone cannot establish the lower-cost way to deliver that result. Use the [cross-border payment guide](/docs/resources/guides/cross-border-payments) to document the route.
+For example, if a supplier expects a local-currency bank deposit, compare a bank deposit for every route. The network fee is only one part of that cost. Use the [cross-border payment guide](/docs/resources/guides/cross-border-payments) to document the route.
 
 ## Compare services at the same layer
 
 A payment service may bundle funding, recipient lookup, currency conversion, account records, support, and delivery. A blockchain network supplies a different part of the flow.
 
-Before replacing a service, list the features your application needs: bank or wallet delivery, signing and recovery, identity checks, invoices, recurring collections, accounting records, refunds, and error handling. Establish which component supplies each feature in the proposed route.
+Before replacing a service, list the features your application needs: bank or wallet delivery, signing and recovery, identity checks, invoices, recurring collections, accounting records, refunds, and error handling. Then identify which component of the proposed route supplies each one.
 
-Do not assume a settlement network provides the complete customer product. Similarly, confirm a payment provider's current account and country support rather than relying on its brand or a general coverage statement.
+A settlement network doesn't provide the complete customer product. Check a payment provider's current account and country support.
 
 ## Define returns and refunds separately from settlement
 
-Settlement finality describes when a system considers a transfer settled. It does not describe every provider policy, customer right, or remedy that may apply to the underlying purchase.
+Settlement finality describes when a system considers a transfer settled. Provider policies and customer rights for the underlying purchase are separate.
 
 For onchain payments, define the successful delivery event and the network's completion rule. Then specify how to handle a mistaken beneficiary, held receipt, refund, or disputed purchase. A refund can require a new payment and separate business approval.
 
@@ -89,9 +89,9 @@ For bank payments, follow the applicable return and investigation process. A sin
 
 ## Add a Tempo settlement leg
 
-Tempo supports near-instant onchain settlement, [stablecoin network fees](/docs/resources/guides/stablecoin-fees), [fee sponsorship](/docs/guide/payments/sponsor-user-fees), and [payment references](/docs/guide/payments/transfer-memos). These capabilities support the onchain integration; they do not establish bank payout coverage.
+Tempo supports near-instant onchain settlement, [stablecoin network fees](/docs/resources/guides/stablecoin-fees), [fee sponsorship](/docs/guide/payments/sponsor-user-fees), and [payment references](/docs/guide/payments/transfer-memos). Bank funding and payout come from separate providers.
 
-Start with [sending payments](/docs/guide/payments/send-a-payment) and [verifying received payments](/docs/guide/payments/accept-a-payment). Confirm any funding and delivery providers before offering the route to customers.
+Start with [sending payments](/docs/guide/payments/send-a-payment) and [verifying received payments](/docs/guide/payments/accept-a-payment).
 
 ## Payment rail questions
 

@@ -100,7 +100,7 @@ The token leaves `Zone A`, briefly lands on Tempo, and arrives in `Zone B` as th
 
 The target deposit pays the normal [deposit fee](/docs/protocol/zones/execution#deposit-fees). `Zone B` receives the routed `OUSD` minus that fee.
 
-A successful source receipt doesn't prove the transfer completed. Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to confirm destination credit.
+The transfer completes when the destination Zone credits the recipient. Follow the [routed-result checks](/docs/guide/private-zones#check-the-full-routed-result) to confirm destination credit.
 
 :::warning
   If the routed withdrawal fails on Tempo, the amount [bounces back](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) to the withdrawal's `fallbackRecipient` inside `Zone A`. Failures include a reverting callback or a target deposit that can't complete. The sequencer still collects the fee.

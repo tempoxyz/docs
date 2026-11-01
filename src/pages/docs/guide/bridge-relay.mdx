@@ -26,7 +26,7 @@ Query the Relay chains API to see which tokens currently support bridging on Tem
 curl -s "https://api.relay.link/chains" | jq '.chains[] | select(.id == 4217) | .erc20Currencies[] | select(.supportsBridging == true) | {symbol, name, address, decimals}'
 ```
 
-The list of supported tokens changes over time as Relay adds new routes. Always check the API for the latest availability.
+The list changes as Relay adds routes.
 
 ## How Relay works
 
@@ -106,7 +106,7 @@ Poll the status endpoint with the `requestId` from the quote response:
 curl "https://api.relay.link/intents/status/v3?requestId=<REQUEST_ID>"
 ```
 
-The transfer can pass through `waiting`, `depositing`, `pending`, or `submitted` before `success`; `delayed` means it is still processing. Stop polling on `failure` or `refund` and show the returned outcome. A refund is not a successful destination payment. See [Relay's status reference](https://docs.relay.link/references/api/get-intents-status-v3).
+The transfer can pass through `waiting`, `depositing`, `pending`, or `submitted` before `success`; `delayed` means it is still processing. Stop polling on `failure` or `refund` and show the returned outcome. See [Relay's status reference](https://docs.relay.link/references/api/get-intents-status-v3).
 
 Once complete, view the destination transaction on Tempo:
 

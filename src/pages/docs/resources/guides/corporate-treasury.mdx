@@ -12,18 +12,18 @@ Stablecoin treasury operations connect intercompany funding and supplier payment
 
 ## Define the treasury operating model
 
-Stablecoin balances add another asset and account type to cash positioning. Keep them distinct from bank cash, provider balances, and investment positions. A consolidated view needs records from each system; a blockchain balance alone does not show all usable liquidity.
+Stablecoin balances add another asset and account type to cash positioning. Keep them distinct from bank cash, provider balances, and investment positions. A consolidated view needs records from each system.
 
 | Decision | Record before the pilot |
 | --- | --- |
 | Account ownership | Legal entity, network, token contract, account address, and wallet or custodian. |
 | Payment authority | Who proposes, approves, and submits a payment; amount and destination limits. |
-| Asset selection | Issuer, exact token representation, redemption access, and provider support. |
+| Asset selection | Issuer, token contract, redemption access, and provider support. |
 | Liquidity | Operating balance, fee funding, replenishment, withdrawal access, and payout dependencies. |
 | Reconciliation | Business reference, delivered transfer, internal ledger entry, and exception status. |
 | Recovery | How to stop new submissions and investigate unknown or failed payments. |
 
-Tempo's [account model](/docs/accounts/how-it-works) explains signers and delegated access keys; the [custodian and treasury setups](/docs/accounts/custodians) help you choose who holds them. Record legal entity ownership separately. A platform API credential or wallet login does not replace the payment authority required by your operating model.
+Tempo's [account model](/docs/accounts/how-it-works) explains signers and delegated access keys; the [custodian and treasury setups](/docs/accounts/custodians) help you choose who holds them. Record legal entity ownership in your own records.
 
 ## Pilot an intercompany funding flow
 
@@ -33,7 +33,7 @@ For example, a parent company can fund a subsidiary's approved account with a su
 
 ### Establish the source and destination
 
-Record both entities, accounts, network, token contract, business purpose, and amount. Confirm that the receiver and any conversion provider accept the exact asset. Use the [stablecoin registry](/docs/partners/stablecoins) as an integration starting point.
+Record both entities, accounts, network, token contract, business purpose, and amount. Choose the token from the [stablecoin registry](/docs/partners/stablecoins) and check that the receiver and any conversion provider accept it.
 
 ### Apply approvals and signing bounds
 
@@ -57,21 +57,21 @@ Match the treasury instruction, approval, delivered transfer, and any provider r
 
 Use an opaque [payment reference](/docs/guide/payments/transfer-memos) to connect a transfer to an instruction, invoice, or intercompany record. Store detailed accounting, entity, and counterparty data offchain.
 
-Preserve the network, transaction hash, and transfer log index as a unique event key. One transaction can contain several transfers, so a hash alone is not always a unique accounting item. An application integration or provider connector performs the mapping and posting; settlement does not automatically create a general-ledger entry.
+Preserve the network, transaction hash, and transfer log index as a unique event key. One transaction can contain several transfers. Your integration or a provider connector maps transfers to the general ledger and posts the entries.
 
 Reconcile onchain transfer records, wallet or custody statements, provider conversion records, and bank delivery where applicable. Read historical activity after reconnecting so a missed callback does not leave a payment unrecorded. See [payment reconciliation](/docs/resources/guides/payment-reconciliation).
 
 ## Keep usable liquidity visible
 
-Monitor the balances needed for payments and network fees, pending instructions, provider holds, conversion capacity, and the time needed to reach bank accounts. A confirmed token balance does not establish immediate redemption or local-currency access.
+Monitor the balances needed for payments and network fees, pending instructions, provider holds, conversion capacity, and the time needed to reach bank accounts.
 
-Tempo provides near-instant onchain settlement. Funding, redemption, conversion, and bank processing determine when funds are usable elsewhere. Test replenishment and out-of-hours operation for the actual provider route instead of assuming the onchain timing applies end to end.
+Tempo provides near-instant onchain settlement. Funding, redemption, conversion, and bank processing determine when funds are usable elsewhere. Test replenishment and out-of-hours operation on your provider route.
 
-Keep payment liquidity separate from investment allocation. If the organization uses earning products, track the position, withdrawal terms, and available withdrawal amount separately. A treasury settlement pilot can establish whether delivery and reconciliation improve without including an investment strategy.
+Keep payment liquidity separate from investment allocation. If the organization uses earning products, track the position, withdrawal terms, and available withdrawal amount separately.
 
 ## Measure the treasury pilot
 
-Compare the same source and recipient outcome against the existing route. Record the full cost, delivery time for each stage, liquidity required, reconciliation completion, and unresolved exceptions. Avoid using the network fee as the cost of the complete treasury payment.
+Compare the same source and recipient outcome against the existing route. Record the full cost, delivery time for each stage, liquidity required, reconciliation completion, and unresolved exceptions. The network fee is only one part of that cost.
 
 Test insufficient funds, rejected destinations, receive-policy holds, expired or revoked keys, unknown submissions, and failed provider delivery. Verify that an interrupted job can resume without sending the instruction twice.
 
@@ -83,8 +83,8 @@ Not for every model. A provider can supply agreed custody and settlement service
 
 ### Will an existing bank account support the flow?
 
-Confirm the bank and provider terms for the entity, currency, payment direction, and funding or payout method. A bank relationship alone does not establish support for a particular route.
+It depends on the bank and provider terms for the entity, currency, payment direction, and funding or payout method.
 
 ### Does an intercompany transfer need separate controls?
 
-Yes. Preserve the entity purpose, authority, accounting treatment, destination validation, and applicable requirements for the selected flow. Shared corporate ownership does not replace those operating records.
+Yes. Preserve the entity purpose, authority, accounting treatment, destination validation, and applicable requirements for the selected flow.

@@ -18,11 +18,9 @@ Zone settlement queues accepted withdrawals for processing on Tempo. The statele
 
 ## Implementation Status
 
-This page follows Zones source at [`ac49071f`](https://github.com/tempoxyz/zones/tree/ac49071f) and Tempo source at [`3c4db7f843`](https://github.com/tempoxyz/tempo/tree/3c4db7f843). Source support doesn't establish which runtime a deployed Zone uses.
+The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. In the current Tempo source, its approved enclave measurements are unset, so it rejects Nitro proofs.
 
-The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. At the reviewed commit, its approved enclave measurements are unset, so it rejects Nitro proofs.
-
-During rollout, T13 also accepts the `NoProof` mode. This mode keeps the quorum and continuity checks but skips attestation. A later upgrade removes it. Check the network's active hardfork, verifier implementation, and approved measurements before relying on execution-proof enforcement.
+During rollout, T13 also accepts the `NoProof` mode. This mode keeps the quorum and continuity checks but skips attestation. A later upgrade removes it. Before relying on execution-proof enforcement, check the network's active hardfork, verifier, and approved enclave measurements.
 
 The sequencer implementation can be configured to wait for a Nitro-attested batch before submitting it. This node-side requirement is separate from onchain enforcement. Forced exits remain unfinished. Withdrawal settlement depends on the operator continuing to process and submit batches.
 
@@ -138,7 +136,7 @@ Both modes can carry the Nitro attestation. The SPF validates ancestry during re
 The Zone accesses its finalized Tempo checkpoint through the `TempoState` precompile (`0x1c00...0000`). During execution:
 
 1. `ZoneInbox` calls `TempoState.finalizeTempo(headers)` when advancing the checkpoint.
-2. Zone system execution reads Tempo state at that exact checkpoint.
+2. Zone system execution reads Tempo state at that checkpoint.
 3. SPF replay requires witnessed account and storage proofs for those reads.
 
 The Zone imports finalized Tempo headers in order. Policy updates become visible after the corresponding checkpoint is imported. They don't arrive as unrestricted reads of the latest Tempo state.

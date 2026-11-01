@@ -14,7 +14,7 @@ Start with one route: the sender's currency and bank rail, the asset moving on T
 
 ## Confirm the payment route
 
-Record customer type, sender and recipient countries, currencies, payment direction, and minimum amounts. Bridge's [route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes) lists supported combinations. Its Tempo guide includes OUSD funding and payout examples; match the exact asset and contract against the [stablecoin registry](/docs/partners/stablecoins).
+Record customer type, sender and recipient countries, currencies, payment direction, and minimum amounts. Bridge's [route explorer](https://apidocs.bridge.xyz/get-started/introduction/what-we-support/payment-routes) lists supported combinations. Its Tempo guide includes OUSD funding and payout examples; match the token contract against the [stablecoin registry](/docs/partners/stablecoins).
 
 <span id="select-flow" />
 <span id="bridge" />
@@ -58,4 +58,4 @@ Run controlled production tests under the provider's instructions. Check the act
 
 Link the business payment ID to the customer, provider transfer ID, asset, amount, fees, and transaction references. Follow [Bridge transfer states](https://apidocs.bridge.xyz/platform/orchestration/transfers/transfer-states) and keep submitted, processed, and returned outcomes distinct.
 
-Near-instant Tempo settlement describes the onchain leg. Bank delivery also depends on provider processing, the selected rail, and the recipient bank. For direct token delivery, [verify the delivered transfer](/docs/guide/payments/accept-a-payment); for bank payouts, retain provider completion evidence. Use [payment reconciliation](/docs/resources/guides/payment-reconciliation) to connect both to finance records.
+Tempo settles the onchain leg near-instantly. Bank delivery depends on provider processing, the selected rail, and the recipient bank. For direct token delivery, [verify the delivered transfer](/docs/guide/payments/accept-a-payment); for bank payouts, retain provider completion evidence. Use [payment reconciliation](/docs/resources/guides/payment-reconciliation) to connect both to finance records.

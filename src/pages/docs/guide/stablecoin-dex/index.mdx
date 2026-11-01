@@ -23,13 +23,15 @@ Try the [swap walkthrough](/docs/guide/stablecoin-dex/executing-swaps) with a te
 
 ## Swap stablecoins
 
-Choose the input and output tokens, request a quote, and set the minimum output your application accepts. This example swaps one AlphaUSD for BetaUSD on Moderato, using the [Network example setup](/docs/network/examples). The pair needs available liquidity.
+Choose the input and output tokens, request a quote, and set the minimum output your application accepts. This example swaps one AlphaUSD for BetaUSD, two test stablecoins on Moderato testnet. The pair needs available liquidity.
+
+The example reuses the clients and values from [Network examples](/docs/network/examples). Viem imports `client`, `alphaUsd`, and `betaUsd` from `network.config.ts`. The CLI uses the `DEX`, `TOKEN` (AlphaUSD), `BETA_TOKEN`, and `RPC_URL` shell variables. Python imports from `network_config.py`.
 
 :::::steps
 
 ### Get a quote
 
-The quote is an integer amount of the output token in base units.
+Ask the DEX how much BetaUSD one AlphaUSD buys. The amounts are integers in base units, and these stablecoins have six decimals, so `1000000` is one AlphaUSD. `quoteSwapExactAmountIn` takes the input token, output token, and input amount.
 
 ::::code-group
 
@@ -59,11 +61,13 @@ quote = dex.functions.quoteSwapExactAmountIn(
 
 <span id="approve-the-input-token" />
 
-The Stablecoin DEX can pull TIP-20 input tokens through the protocol's implicit-approval path. A separate token approval is not required. The pull still enforces balance, transfer-policy, and access-key spending-limit checks.
+The DEX needs no separate `approve` before the swap. [Implicit approval](/docs/protocol/tip20/spec#implicit-approvals-for-listed-precompiles) lets listed protocol contracts, including the DEX, pull [TIP-20 tokens](/docs/protocol/tip20/overview), Tempo's stablecoin standard, from the caller. The pull still checks the balance, the token's [transfer policy](/docs/protocol/tip403/overview), and any [access key](/docs/development/account-keychain) spending limit.
 
 ### Submit the swap
 
-This example accepts at most 0.5% less output than the quote. A quote does not reserve liquidity; the transaction enforces `minAmountOut` and reverts if the limit cannot be met.
+Set `minAmountOut` to the lowest output you accept. It's `min_amount_out` in Python and the fourth argument in the CLI. This example accepts at most 0.5% less than the quote. A quote doesn't reserve liquidity, so the DEX reverts the swap if it can't meet `minAmountOut`.
+
+The CLI pays the network fee in AlphaUSD with `--tempo.fee-token`, and `--interactive` prompts for the signing key. The Python script continues from the quote step.
 
 ::::code-group
 
@@ -98,16 +102,16 @@ print(receipt["transactionHash"].hex())
 
 :::::
 
-For direct HTTP submission, [sign locally and broadcast through JSON-RPC](/docs/network/transactions#sign-and-submit). [Quote tokens](/docs/protocol/exchange/quote-tokens) explains how supported trading pairs connect.
+For direct HTTP submission, [sign locally and broadcast through JSON-RPC](/docs/network/transactions#sign-and-submit). Each stablecoin on the DEX pairs against one [quote token](/docs/protocol/exchange/quote-tokens), another stablecoin it chooses. That gives one path between any two stablecoins.
 
 ## Provide liquidity
 
-Place a limit order to trade at a chosen price, or use a flip order to place a reverse order after a fill. The [liquidity guide](/docs/guide/stablecoin-dex/providing-liquidity) covers order funding, placement, querying, and cancellation with a working demo.
+Place a limit order, a buy or sell order that waits on the orderbook until someone trades at your price. A flip order is a limit order that switches between buying and selling each time it fills, so it keeps providing liquidity. The [liquidity guide](/docs/guide/stablecoin-dex/providing-liquidity) covers order funding, placement, querying, and cancellation with a working demo.
 
-Fee AMM reserves serve a different purpose: converting transaction fees into a validator's preferred token. Use [Provide fee liquidity](/docs/guide/stablecoin-dex/managing-fee-liquidity) for that workflow.
+The [Fee AMM](/docs/protocol/fees/fee-amm) is a separate protocol pool, not part of the DEX. It converts the stablecoin a user pays network fees in into the token the validator prefers. Use [Provide fee liquidity](/docs/guide/stablecoin-dex/managing-fee-liquidity) to supply it.
 
 <span id="understand-trading-pairs-and-balances" />
 
 ## Account and exchange balances
 
-Balances recorded by the DEX contract are distinct from an account's TIP-20 balance. Read [DEX balances](/docs/protocol/exchange/exchange-balance) before showing available funds or reconciling orders. The [DEX specification](/docs/protocol/exchange/spec) defines order, swap, and settlement behavior.
+The DEX records its own balance for each account and token, separate from the tokens at the account's address. Order fills credit proceeds to this DEX balance. Swaps and orders spend it before pulling any shortfall from the account. Read [DEX balances](/docs/protocol/exchange/exchange-balance) before showing available funds or reconciling orders. The [DEX specification](/docs/protocol/exchange/spec) defines order, swap, and settlement behavior.

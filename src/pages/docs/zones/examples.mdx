@@ -13,7 +13,7 @@ Configure the Zone chain and authenticated Wagmi client that the Build examples 
 
 ## Overview
 
-The `zone.config.ts` file defines the Zone chain and an authenticated Wagmi config. The Build examples import it. This page uses the chain ID, Zone RPC URL, and authorization token from [Connect to a Zone](/docs/zones/connect).
+`zone.config.ts` defines the Zone chain and an authenticated Wagmi config that the Build examples import. It needs the chain ID, Zone RPC URL, and authorization token from [Connect to a Zone](/docs/zones/connect).
 
 These examples run on your backend. Have browser applications call your account-scoped backend. Don't give them shared operator credentials.
 
@@ -23,7 +23,7 @@ Install `@wagmi/core` and `viem` with `pnpm add @wagmi/core viem`. Set `ZONE_CHA
 
 `ZONE_PARENT_CHAIN_ID` is the chain ID of the Tempo network that hosts the portal. It's `4217` for mainnet or `42431` for Moderato.
 
-Save this file as `zone.config.ts` in an ESM project. It configures reads against the operator-provided Zone. It adds no wallet connector or signing account.
+Save this file as `zone.config.ts` in an ESM project. It configures reads against the Zone, with no wallet connector or signing account.
 
 ```ts [zone.config.ts]
 import { createConfig, http } from '@wagmi/core'

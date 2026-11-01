@@ -22,6 +22,6 @@ One transaction can produce zero, one, or many transfers. For example, a payment
 | Transaction | [`/v1/transactions`](/docs/api/transactions) | Inspect submitted transactions, execution status, and fees. |
 | Token transfer | [`/v1/transfers`](/docs/api/transfers) | Identify the sender, recipient, token, and amount for reconciliation. |
 
-A payment is your application's business record. Associate it with the relevant transaction hashes and transfer events. A successful transaction alone does not establish that the intended recipient received the payment; follow [Receive a payment](/docs/guide/payments/accept-a-payment) to verify delivery.
+A payment is your application's business record. Associate it with the relevant transaction hashes and transfer events. A successful transaction doesn't prove the recipient was paid; verify delivery with [Receive a payment](/docs/guide/payments/accept-a-payment).
 
 A [Routes transfer](/docs/routes/transfers) tracks a cross-network workflow and has its own ID and delivery status. It can involve transactions on more than one network.

@@ -33,7 +33,7 @@ Screening provides risk information. Tempo's onchain controls enforce configured
 
 ### Chainalysis
 
-[Chainalysis supports](https://www.chainalysis.com/blog/tempo-automatic-token-coverage-march-2026/) Address Screening, KYT monitoring, and Reactor investigations on Tempo, including TIP-20 tokens and transfer memos. For an API integration, [rescreen an address](https://www.chainalysis.com/product/address-screening/) when you need an updated assessment; interface alerts do not refresh an earlier API result.
+[Chainalysis supports](https://www.chainalysis.com/blog/tempo-automatic-token-coverage-march-2026/) Address Screening, KYT monitoring, and Reactor investigations on Tempo, including TIP-20 tokens and transfer memos. For an API integration, [rescreen an address](https://www.chainalysis.com/product/address-screening/) when you need an updated assessment; interface alerts don't refresh an earlier API result.
 
 ### Elliptic
 
@@ -45,7 +45,7 @@ Screening provides risk information. Tempo's onchain controls enforce configured
 
 Blockaid's [`client.evm.transaction.scan`](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/transaction.ts) previews transaction effects and assesses security risk. Its [chain list](https://github.com/blockaid-official/blockaid-client-node/blob/main/src/resources/evm/evm.ts) includes `tempo` and `tempo-testnet` for individual scans. Set `options: ['simulation', 'validation']` for both outputs; the default requests validation only.
 
-Check `validation.result_type` before presenting a result: `Error` is not a benign assessment. Verify support for native Tempo batches or sponsored transaction formats with Blockaid; the separate bulk-scanning chain list does not include Tempo. Simulation does not assess a recipient's sanctions exposure.
+Check `validation.result_type` before presenting a result: `Error` is not a benign assessment. The bulk-scanning chain list doesn't include Tempo, and support for native Tempo batches and sponsored transactions needs confirming with Blockaid. Simulation doesn't assess a recipient's sanctions exposure.
 
 <span id="inputs-and-access" />
 <span id="decision-policy" />
@@ -68,4 +68,4 @@ Save the assessment, check time, decision, and payment reference together. Keep 
 
 :::::
 
-A clean assessment does not replace customer checks or establish legal compliance. When accepting funds, separately [verify the delivered transfer](/docs/guide/payments/accept-a-payment) before crediting a customer.
+A clean assessment doesn't replace customer checks. When accepting funds, [verify the delivered transfer](/docs/guide/payments/accept-a-payment) before crediting a customer.

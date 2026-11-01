@@ -15,27 +15,29 @@ import { EarnVaultDemo } from '../../../components/guides/EarnVaultDemo'
 
 Choose a vault that accepts the stablecoin your customers hold and supports the access and withdrawal requirements of your product.
 
+An Earn [vault](/docs/earn/how-it-works) is a contract that accepts one stablecoin and issues vault shares, units that represent each account's position. The vault earns from one underlying strategy.
+
 <span id="available-vaults" />
 
 ## Find a vault
 
-Use the vault address and network provided for your integration. Evaluate where its returns come from, what customers net, how they exit, and who can deposit. A vault's `verified` flag identifies a curated listing; it does not describe the strategy's risk or guarantee a return.
+Use the vault address and network agreed for your integration; [contact Tempo](https://tempo.xyz/contact) to discuss which vaults fit. Evaluate where its returns come from, what customers net, how they exit, and who can deposit. A vault's `verified` flag is `true` when the vault is in Tempo's curated Earn registry. It doesn't describe the strategy's risk or guarantee a return.
 
 <span id="inspect-the-selected-vault" />
 
 ### Inspect a vault
 
-The demo starts with Sentora pathUSD on Tempo mainnet. Switch to Moderato testnet to inspect the pathUSD test vault. Each network lists only its approved demo vault, with live configuration from Tempo API.
+The demo starts with the Sentora pathUSD vault on Tempo mainnet. Switch to [Moderato](/docs/quickstart/connection-details), Tempo's testnet, to inspect the pathUSD test vault. Each network lists only its approved demo vault, with live configuration from the [Earn API](/docs/api/earn).
 
 <EarnVaultDemo />
 
-Read your vault's configuration through the [Earn API reference](/docs/api/earn). Save its `id` (contract address) and network together.
+Read your vault's configuration with the Earn API `GET /v1/earn/vaults/{vaultId}` endpoint. Add `include=access,apy,capabilities` to return the access, rate, and operation fields this page uses. Save the vault's `id`, its lowercase contract address, together with its network; the same address on another network is a different contract.
 
 <span id="where-yield-comes-from" />
 
 ## How vaults generate returns
 
-Each vault earns from one strategy. Strategies fall into three categories:
+Each vault earns from one strategy. Strategies fall into three categories by the assets they hold:
 
 <EarnStrategyCards>
   <EarnStrategyCard strategy="treasuries" title="U.S. Treasuries" description="Tokenized U.S. Treasury bonds and sovereign debt products." />
@@ -43,7 +45,7 @@ Each vault earns from one strategy. Strategies fall into three categories:
   <EarnStrategyCard strategy="lending" title="Collateralized lending" description="Onchain lending pools. Rates move with borrow demand." />
 </EarnStrategyCards>
 
-An engine is the contract that connects an Earn vault to its underlying strategy. The vault configuration reports its engine and accepted asset; available strategies vary by network.
+An engine is the contract that connects an Earn vault to its underlying strategy. The vault configuration reports its `engine` and accepted asset (`assetToken`); available strategies vary by network. Engines connect to their source in one of three ways:
 
 | Source | How it connects to Earn |
 | --- | --- |
@@ -53,7 +55,7 @@ An engine is the contract that connects an Earn vault to its underlying strategy
 
 ## What changes a position's value
 
-A share's value moves with its strategy's returns, losses, and fees. A verified listing does not remove these risks.
+A vault share's value moves with its strategy's returns, losses, and fees. A `verified` vault carries these risks too.
 
 | Strategy | What moves value |
 | --- | --- |
@@ -63,15 +65,15 @@ A share's value moves with its strategy's returns, losses, and fees. A verified 
 
 ## What customers net
 
-The observed `apy.vault` already reflects [Earn fees](/docs/earn/how-it-works#fees-and-revenue-share) and the underlying venue's fees. Show the remaining costs before the account deposits:
+The vault's `apy` object reports observed rates, measured over a past window. Its `apy.vault` rate already reflects [Earn fees](/docs/earn/how-it-works#fees-and-revenue-share), the share of returns a vault pays to fee recipients such as your platform, and the underlying venue's fees. Show the remaining costs before the account deposits:
 
 | Cost | Where it appears |
 | --- | --- |
-| **Earn fees** | Already in the share price and `apy.vault`. `state.feesActive` reports whether the vault charges them. |
+| **Earn fees** | Already in the share price and `apy.vault`. The vault's `state.feesActive` field reports whether it charges them. |
 | **Underlying venue fees** | Already in the engine's reported value. |
-| **Provider deposit, management, and withdrawal fees** | Read them from the provider before presenting a rate. |
+| **Provider deposit, management, and withdrawal fees** | Read them from the strategy provider's terms before presenting a rate. |
 | **Network fees** | Each deposit and withdrawal transaction. |
-| **Moving funds from another network** | Each [Routes quote](/docs/routes/quotes), in and out. |
+| **Moving funds from another network** | Each [Routes](/docs/routes) quote, in and out. Routes moves stablecoins between Tempo and other networks. |
 | **Rewards** | Reported separately in the `apy` object, under temporary terms. |
 
 An observed APY describes a measurement window; it is not a promised return.
@@ -80,19 +82,19 @@ An observed APY describes a measurement window; it is not a promised return.
 
 ## How customers exit
 
-Check withdrawal support before the first deposit:
+Check withdrawal support in the vault's `capabilities` object before the first deposit:
 
 | Path | Vault support | Settlement | When liquidity is short |
 | --- | --- | --- | --- |
 | **Immediate redemption** | `capabilities.redeem` | In the redemption transaction | Fails; it does not enter a queue. |
 | **Queued withdrawal** | `capabilities.asyncRedeem` | A request, then a later claim | Waits in the queue. |
 
-`instantLiquidity` describes vault-wide liquidity, not a user-specific quote; `null` means a reliable value is unavailable. [Withdraw](/docs/earn/withdraw) covers the exit flow.
+The vault's `instantLiquidity` field is the amount, in asset base units, that the strategy would release right now across the whole vault. It isn't a quote for one account, and `null` means the engine can't report a reliable value. [Withdraw](/docs/earn/withdraw) covers the exit flow.
 
 <span id="eligibility-and-risk" />
 
 ## Who can deposit
 
-A vault accepts one stablecoin, and its share token is open or allowlisted to approved holders. Before enabling a deposit, check the accepted asset, the account's eligibility, `state.depositsPaused`, and the operations listed in `capabilities`. Use the deployed vault's supported operations through [Viem's Earn actions](/docs/earn/integrate). The Earn read API does not submit deposits or withdrawals.
+A vault accepts one stablecoin, and `access.status` reports whether its share token is `open` or `allowlisted` to approved holders. Before enabling a deposit, check the accepted asset, the access status, `state.depositsPaused`, and the operations listed in `capabilities`. The Earn API only reads data; submit deposits and withdrawals with [Viem's Earn actions](/docs/earn/integrate#deposit-into-a-vault) or a direct contract call.
 
 Continue with [Deposit](/docs/earn/integrate).

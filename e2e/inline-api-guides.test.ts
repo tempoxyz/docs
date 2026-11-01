@@ -120,7 +120,8 @@ for (const guide of guides) {
     await expect(
       article.getByRole('heading', { level: 1, name: guide.title, exact: true }),
     ).toBeVisible()
-    const active = page.locator('[data-v-gutter-left] nav[data-v-sidebar] a[data-active]')
+    // A guide with child pages is a section header; Vocs marks its link with aria-current.
+    const active = page.locator('[data-v-gutter-left] nav[data-v-sidebar] a[aria-current]')
     await expect(active).toHaveCount(1)
     await expect(active).toHaveAttribute('href', guide.page)
     await expect(active).toHaveAttribute('aria-current', 'page')

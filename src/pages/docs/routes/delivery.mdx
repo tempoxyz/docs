@@ -7,7 +7,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_routes-delivery_title-f5_v02.png
 
 # Track delivery
 
-A successful source-chain transaction starts a route; it does not establish that the destination received funds. Keep the Routes object ID with your payment record and follow its status through delivery or refund.
+A successful source-chain transaction starts a route. The route completes when the destination receives funds or the refund lands. Keep the Routes object ID with your payment record and follow its status.
 
 <span id="read-the-transfer-or-deposit" />
 <span id="check-status" />
@@ -21,7 +21,7 @@ Read status with a key that has `routes:read`:
 | Deposit address | `GET /v1/routes/deposits?depositAddress=…`, then `GET /v1/routes/deposits/{id}` for each deposit | [Track deposits](/docs/routes/deposits#track-deposits) |
 | Transfer | `GET /v1/routes/transfers/{id}`, after you register the source transaction hashes | [Confirm the transfer](/docs/routes/transfers#confirm-the-transfer) |
 
-A deposit address being `active` says it can receive deposits; it does not describe a particular deposit's progress.
+An `active` deposit address can receive deposits. Each deposit has its own status.
 
 <span id="keep-delivery-and-refund-states-distinct" />
 
@@ -44,14 +44,14 @@ Use the full [transfer](/docs/api/routes/transfers) or [deposit](/docs/api/route
 
 ## Track refunds
 
-Keep `refunding` separate from `refunded`. Reconcile the returned refund amount and transaction references before updating the customer's balance. A refund and a successful delivery are different outcomes for the original payment.
+Keep `refunding` separate from `refunded`. Reconcile the returned refund amount and transaction references before updating the customer's balance.
 
 <span id="retry-a-create-request-safely" />
 <span id="retry-a-create-request" />
 
 ## Retry without duplicates
 
-A missing create response does not prove that creation failed. Retry with the same [idempotency key](/docs/routes/api-setup#set-idempotency-keys) and unchanged inputs to receive the original result before creating a replacement.
+If a create request gets no response, the object may still exist. Retry with the same [idempotency key](/docs/routes/api-setup#set-idempotency-keys) and unchanged inputs to receive the original result before creating a replacement.
 
 ## Use funds after delivery
 

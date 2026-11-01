@@ -26,7 +26,7 @@ Match confirmed transfers to invoices and payables, then post the result to your
 | Settlement evidence | Network, token contract, transaction hash, transfer log index, delivered amount, and status. |
 | Accounting result | Amount applied, remaining balance, fees, ERP record ID, and exceptions. |
 
-Encode a short, opaque ID in the [32-byte transfer memo](/docs/guide/payments/transfer-memos). Keep customer details and invoice contents offchain. A transaction can contain several transfers, so its hash alone is not a unique payment identifier.
+Encode a short, opaque ID in the [32-byte transfer memo](/docs/guide/payments/transfer-memos). Keep customer details and invoice contents offchain. A transaction can contain several transfers, so its hash doesn't identify a single payment.
 
 <span id="apply-incoming-payments-to-receivables" />
 <span id="connect-events-to-finance-entries" />
@@ -39,7 +39,7 @@ Encode a short, opaque ID in the [32-byte transfer memo](/docs/guide/payments/tr
 
 <span id="can-a-successful-transaction-still-leave-an-invoice-unpaid" />
 
-Follow [Receive payments](/docs/guide/payments/accept-a-payment#reconcile-payments-with-memos) to verify the network, token contract, recipient, amount, and successful delivery. A memo match or successful transaction alone is insufficient; a receive policy can hold funds instead of crediting the recipient.
+Follow [Receive payments](/docs/guide/payments/accept-a-payment#reconcile-payments-with-memos) to verify the network, token contract, recipient, amount, and successful delivery. A matching memo or successful transaction isn't enough, because a receive policy can hold funds instead of crediting the recipient.
 
 ### Save the transfer and invoice update together
 
@@ -79,4 +79,4 @@ To automate a saved query, follow the [Explorer API workflow](https://docs.alliu
 
 ## Close invoices and investigate differences
 
-Compare expected payments, verified transfers, and posted ERP records. Track fees separately from principal and distinguish internal transfers from revenue. Keep unmatched references, partial payments, held receipts, and refunds visible. For fiat payouts, retain the provider's completion evidence too; an onchain transfer does not prove bank delivery.
+Compare expected payments, verified transfers, and posted ERP records. Track fees separately from principal and distinguish internal transfers from revenue. Keep unmatched references, partial payments, held receipts, and refunds visible. For fiat payouts, also retain the provider's evidence of bank delivery.

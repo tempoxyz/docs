@@ -942,7 +942,7 @@ The active fork's gas schedule determines nonce and access-key storage costs. Th
 - Key authorization charges for its signature, the key record, two storage slots per token limit, call-scope storage, and applicable witness/admin events. Scope selectors and recipients add work and storage.
 - T7 storage-credit rules change storage accounting. A complete estimate must also include calldata, the access list, extra batch targets, EIP-7702 authorizations, and the calls themselves.
 
-Use `eth_estimateGas` with the complete transaction on the target network. Implementers can use the [canonical intrinsic-gas calculation](https://github.com/tempoxyz/tempo/blob/main/crates/revm/src/handler.rs) together with the [fork-dependent gas parameters](https://github.com/tempoxyz/tempo/blob/main/crates/revm/src/gas_params.rs); a fixed per-key formula omits state and fork-dependent charges.
+Use `eth_estimateGas` with the complete transaction on the target network. Implementers can use the [canonical intrinsic-gas calculation](https://github.com/tempoxyz/tempo/blob/main/crates/evm/src/handler.rs) together with the [fork-dependent gas parameters](https://github.com/tempoxyz/tempo/blob/main/crates/hardfork/src/gas_params.rs); a fixed per-key formula omits state and fork-dependent charges.
 
 ## Security Considerations
 

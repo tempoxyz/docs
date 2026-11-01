@@ -10,7 +10,7 @@ import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 # TIP-403 receive policies
 
-Receive policies let a receiver control which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it. This page summarizes the protocol behavior from the [specification](https://tips.sh/1028).
+Receive policies let a receiver control which [TIP-20](/docs/protocol/tip20/overview) tokens it accepts and which senders may send those tokens to it. [TIP-1028](https://tips.sh/1028) specifies them.
 
 When a receive policy blocks an inbound TIP-20 transfer or mint, the call still succeeds. Delivery is redirected to `ReceivePolicyGuard`, and the guard records a receipt for that blocked transfer or mint. The token's [TIP-403](/docs/protocol/tip403/spec) policy checks still run first and still revert on failure.
 

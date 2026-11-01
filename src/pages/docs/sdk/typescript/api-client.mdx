@@ -11,17 +11,10 @@ Use the Tempo API Typed Client for endpoint autocomplete and full end-to-end typ
 
 ## Install Tempo API package
 
-Install [`tapimo`](https://www.npmjs.com/package/tapimo) with pnpm. Release `0.18.2` needs the following dependency override because `accounts@0.18.5` was published with unresolved workspace dependencies.
-
-Merge this entry into `pnpm-workspace.yaml` before installing:
-
-```yaml [pnpm-workspace.yaml]
-overrides:
-  'tapimo>accounts': 0.18.4
-```
+Install [`tapimo`](https://www.npmjs.com/package/tapimo), the typed client. Its only dependency is [Hono](https://hono.dev).
 
 ```bash
-pnpm add --save-exact tapimo@0.18.2
+pnpm add tapimo
 ```
 
 ## Create typed Tempo API client

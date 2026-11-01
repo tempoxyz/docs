@@ -10,13 +10,13 @@ description: "Choose a bounded business payment pilot and evaluate funding, cust
 
 Businesses can use stablecoins for treasury transfers, supplier payments, payroll, and platform payouts. Start with one supported payment flow and a measurable operating problem. Use the [payment guides](/docs/guide/payments) for a direct integration and [payments and ramps](/docs/partners/payments-and-ramps) for provider research.
 
-A business can hold stablecoins directly or use a provider that converts between fiat and stablecoins. The right model depends on the recipient's needs, available funding and payout services, and your operating responsibilities. Network capabilities alone do not determine a provider's eligibility, legal coverage, or bank delivery time.
+A business can hold stablecoins directly or use a provider that converts between fiat and stablecoins. The right model depends on the recipient's needs, available funding and payout services, and your operating responsibilities.
 
 ## Match stablecoins to a business flow
 
 ### Treasury management
 
-Global treasury teams manage cash across dozens of accounts, currencies, and banking relationships. Stablecoins support transfers of dollar-denominated value on networks that operate 24/7. Funding bank accounts, converting assets, and redeeming into fiat remain separate steps. Plan the balances required for each entity and provider rather than assuming stablecoins eliminate prefunding. Learn more in our [corporate treasury guide](/docs/resources/guides/corporate-treasury).
+Global treasury teams manage cash across dozens of accounts, currencies, and banking relationships. Stablecoins support transfers of dollar-denominated value on networks that operate 24/7. Funding bank accounts, converting assets, and redeeming into fiat remain separate steps. Plan the balances required for each entity and provider; stablecoins don't eliminate prefunding. Learn more in our [corporate treasury guide](/docs/resources/guides/corporate-treasury).
 
 ### Vendor and supplier payments
 
@@ -54,11 +54,11 @@ The receiving provider converts or redeems as needed and uses a supported bank o
 
 :::::
 
-Confirm the actual account and contractual model before adopting this flow: who owns the funds at each stage, when conversion happens, and what records the provider supplies. A fiat interface alone does not determine custody, accounting treatment, or legal responsibilities. If a provider uses an [FBO account](/docs/resources/guides/fbo-accounts), understand how the pooled bank balance maps to your business's ledger balance.
+Before adopting this flow, confirm who owns the funds at each stage, when conversion happens, and what records the provider supplies. If a provider uses an [FBO account](/docs/resources/guides/fbo-accounts), understand how the pooled bank balance maps to your business's ledger balance.
 
 ## Measure the complete payment cost
 
-Compare the amount your business spends with the amount the recipient receives. Include funding charges, conversion spreads, network fees, provider charges, payout fees, and the staff time required to resolve exceptions. A low network fee does not establish the total price of the payment.
+Compare the amount your business spends with the amount the recipient receives. Include funding charges, conversion spreads, network fees, provider charges, payout fees, and the staff time required to resolve exceptions.
 
 For a pilot, use comparable payments through the existing and proposed flows. Record:
 
@@ -67,7 +67,7 @@ For a pilot, use comparable payments through the existing and proposed flows. Re
 - Balances held with each provider and the time they remain unavailable elsewhere.
 - Failed, returned, or manually reviewed payments and the work needed to resolve them.
 
-Use those results to estimate savings and integration payback. Keep assumptions explicit; there is no universal savings percentage or payment volume at which stablecoins become the better option. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) for the records to preserve.
+Use those results to estimate savings and integration payback. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) for the records to preserve.
 
 ## Assess a specific payment corridor
 
@@ -75,7 +75,7 @@ Before selecting a provider or integration approach, finance teams should evalua
 
 ### Identify high-friction corridors
 
-Identify your highest-cost or highest-friction payment corridors. Compare proposed routes against the specific funding currency, recipient country, payout method, and transaction size your business needs. Broad regional coverage is not evidence that a particular route is available.
+Identify your highest-cost or highest-friction payment corridors. Compare proposed routes against the specific funding currency, recipient country, payout method, and transaction size your business needs.
 
 ### Map the operating problem
 
@@ -91,13 +91,13 @@ Decide which responsibilities your team will operate and which a provider will h
 
 Payment and orchestration providers can connect funding, conversion, stablecoin transfers, and local payouts through an API. Confirm the supported assets, markets, custody model, controls, and approval requirements for the specific service. Explore [payment and ramp providers](/docs/partners/payments-and-ramps) as a starting point.
 
-This model can fit a team that wants a provider to operate the agreed funding, settlement, and payout services. Verify onboarding and route support before estimating implementation time.
+This model can fit a team that wants a provider to operate the agreed funding, settlement, and payout services.
 
 ### Build: direct integration
 
 Building directly on stablecoin infrastructure gives you more control over payment logic and integration choices. Compare its operating and engineering costs with the provider model, and decide who operates accounts, key management, funding, payouts, and compliance processes.
 
-This model can fit a team with the engineering and operating capacity to manage those responsibilities. Payment volume alone does not determine the right integration model.
+This model can fit a team with the engineering and operating capacity to manage those responsibilities.
 
 ### Hybrid
 
@@ -107,7 +107,7 @@ A hybrid model can combine your own accounts and payment logic with providers fo
 
 ### Counterparty risk
 
-Evaluate the issuer's reserve composition, attestation frequency, regulatory status, and redemption terms. Understand the distinction between issuer requirements and the obligations of a business using stablecoins. Our [GENIUS Act overview](/docs/resources/guides/genius-act) explains the U.S. framework and its scope. Direct issuance or redemption also requires the issuer's acceptance of your entity and the relevant funding or payout method. Protocol [minting functions](/docs/guide/issuance/mint-stablecoins) do not establish that commercial access.
+Evaluate the issuer's reserve composition, attestation frequency, regulatory status, and redemption terms. Our [GENIUS Act overview](/docs/resources/guides/genius-act) explains the U.S. framework and its scope. Direct issuance or redemption also requires the issuer's acceptance of your entity and the relevant funding or payout method. The protocol's [minting functions](/docs/guide/issuance/mint-stablecoins) don't grant that access.
 
 ### Operational risk
 
@@ -119,11 +119,11 @@ Document the permitted activities, customer eligibility, reporting, and other op
 
 ## Implement the Tempo payment leg
 
-Use [Send payments](/docs/guide/payments/send-a-payment) and [Receive payments](/docs/guide/payments/accept-a-payment) for supported stablecoin transfers. Check the [OUSD guide](/docs/guide/ousd) and [stablecoin registry](/docs/partners/stablecoins) for asset choices rather than relying on a symbol alone.
+Use [Send payments](/docs/guide/payments/send-a-payment) and [Receive payments](/docs/guide/payments/accept-a-payment) for supported stablecoin transfers. Check the [OUSD guide](/docs/guide/ousd) and [stablecoin registry](/docs/partners/stablecoins) for asset choices.
 
-Tempo supplies near-instant onchain settlement and fees in eligible stablecoins, subject to fee-token and Fee AMM liquidity requirements. [Token policies](/docs/protocol/tip403/overview), [fee sponsorship](/docs/guide/payments/sponsor-user-fees), and [payment references](/docs/guide/payments/transfer-memos) are primitives for the application to integrate. They do not supply the full funding, approval, screening, payout, or accounting process.
+Tempo supplies near-instant onchain settlement and fees in eligible stablecoins, subject to fee-token and Fee AMM liquidity requirements. [Token policies](/docs/protocol/tip403/overview), [fee sponsorship](/docs/guide/payments/sponsor-user-fees), and [payment references](/docs/guide/payments/transfer-memos) are primitives for the application to integrate. The funding, approval, screening, payout, and accounting processes around them come from your application and providers.
 
-For private balances, review [Zones](/docs/zones) separately. It is in limited preview, the operator can read the ledger, deposit and withdrawal amounts remain public, and the current runtime disables general TIP-20 transfers. Confirm the deployment before selecting it for a payment flow.
+For private balances, see [Zones](/docs/zones). It's in limited preview, the operator can read the ledger, deposit and withdrawal amounts remain public, and the current runtime disables general TIP-20 transfers.
 
 ## Start with a bounded pilot
 
@@ -136,7 +136,7 @@ Pick one payment flow with measurable friction and a supported recipient experie
 <details>
 <summary>Do we need to hold crypto on our balance sheet?</summary>
 
-A provider may offer fiat funding and fiat delivery while using stablecoins between those endpoints. Confirm who owns and controls funds at each stage, the contractual model, and the records supplied. A fiat interface alone does not determine the accounting treatment.
+A provider may offer fiat funding and fiat delivery while using stablecoins between those endpoints. Confirm who owns and controls funds at each stage, the contractual model, and the records supplied.
 
 </details>
 
@@ -150,27 +150,27 @@ Support varies by bank, product, asset, and customer. Ask your banking and payme
 <details>
 <summary>How does using stablecoins affect our accounting?</summary>
 
-Map the assets held, entity ownership, conversion events, fees, and payment obligations to your accounting process. Preserve provider records and onchain evidence. Dollar denomination does not by itself eliminate accounting or foreign currency considerations.
+Map the assets held, entity ownership, conversion events, fees, and payment obligations to your accounting process. Preserve provider records and onchain evidence. Dollar denomination doesn't remove accounting or foreign currency considerations.
 
 </details>
 
 <details>
 <summary>What's the minimum volume to justify stablecoin adoption?</summary>
 
-There is no universal threshold. Compare complete payment costs, implementation effort, operating work, and working capital needs for a specific flow. A pilot with representative payments can establish whether the proposed model improves on your current process.
+There is no universal threshold. Compare complete payment costs, implementation effort, operating work, and working capital needs for a specific flow. A pilot with representative payments shows whether the proposed model improves on your current process.
 
 </details>
 
 <details>
 <summary>How do I pitch stablecoins to my CFO?</summary>
 
-Present one measurable payment problem, the proposed operating model, and the results of a comparable pilot. Include source and recipient amounts, complete costs, delivery times, prefunded balances, and exception rates. Avoid assuming a network fee saving equals the saving on the complete payment.
+Present one measurable payment problem, the proposed operating model, and the results of a comparable pilot. Include source and recipient amounts, complete costs, delivery times, prefunded balances, and exception rates. A network fee saving isn't the saving on the complete payment.
 
 </details>
 
 <details>
 <summary>Is this just for cross-border payments?</summary>
 
-No. Businesses can also evaluate stablecoins for treasury transfers, domestic B2B payments, and platform payouts. The funding, recipient experience, and operating requirements still need to be assessed for each flow.
+No. Businesses can also evaluate stablecoins for treasury transfers, domestic B2B payments, and platform payouts.
 
 </details>

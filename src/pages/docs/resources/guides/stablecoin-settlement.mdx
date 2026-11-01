@@ -10,7 +10,7 @@ description: "Compare stablecoin assets, finality signals, delivered transfers, 
 
 Stablecoin settlement records a token transfer on a blockchain under that network's finality rules. A complete business payment can also require funding, conversion, provider credit, or bank delivery. Use the [receiving guide](/docs/guide/payments/accept-a-payment) to verify the onchain transfer, then evaluate the other legs before marking the payment complete.
 
-Start with the payment you need to complete. A supplier retaining a stablecoin balance, a contractor requesting a bank deposit, and a transfer between treasury accounts have different requirements. Evaluate the network within that complete workflow.
+Start with the payment you need to complete. A supplier retaining a stablecoin balance, a contractor requesting a bank deposit, and a transfer between treasury accounts have different requirements.
 
 ## Define what settlement must prove
 
@@ -26,31 +26,31 @@ Define the completion signal for every leg:
 | Provider credit or payout | The provider has credited the intended customer or delivered the requested bank or other payout.       |
 | Business reconciliation   | The payment is matched to its obligation and recorded once.                                            |
 
-A single transaction hash cannot establish all five. For cross-network flows, a finalized source transaction also does not prove destination delivery. Follow the route's [delivery and refund status](/docs/routes/delivery) until the intended outcome is confirmed.
+For cross-network flows, follow the route's [delivery and refund status](/docs/routes/delivery) until the destination receives the funds.
 
 ## Compare networks using the same payment
 
-When comparing Tempo with Ethereum, Base, Solana, Tron, or another network, keep the payment requirements constant. Published fees and block times can describe different transaction types and different stages of confirmation. They are not a substitute for a complete-flow evaluation.
+When comparing Tempo with Ethereum, Base, Solana, Tron, or another network, keep the payment requirements constant. Published fees and block times can describe different transaction types and different stages of confirmation.
 
 | Criterion               | Evidence to collect                                                                                                           |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Exact asset             | Issuer, token contract, network, redemption terms, and whether a bridge or conversion is involved.                            |
-| Recipient access        | Current wallet, custodian, exchange, or payout support for that exact asset and network.                                      |
+| Asset                   | Issuer, token contract, network, redemption terms, and whether a bridge or conversion is involved.                            |
+| Recipient access        | Current wallet, custodian, exchange, or payout support for that asset and network.                                            |
 | Settlement signal       | The documented finality condition and how the application observes it, including failure or delayed-network behavior.         |
 | Total operating cost    | Representative transfer and contract-call fees, fee funding, provider charges, conversion, and any payout costs.              |
 | Integration             | Wallet signing, RPC and API support, contract compatibility, event handling, and the features your application actually uses. |
 | Liquidity               | A current quote for the required amount and direction, available funding, and exit or redemption conditions.                  |
 | Controls and operations | Approvals, token policies, reconciliation, privacy, monitoring, support, and recovery ownership.                              |
 
-Test a representative payment and the exceptions that matter to your business. Include a rejected recipient, insufficient funds, an expired quote, and a delayed response. Record observed results and the assumptions behind them rather than publishing a permanent ranking from a point-in-time fee.
+Test a representative payment and the exceptions that matter to your business. Include a rejected recipient, insufficient funds, an expired quote, and a delayed response. Record observed results and their assumptions; fees change over time.
 
 ## Check finality and successful delivery together
 
 Each network defines its own confirmation and finality stages. Compare the stage your application will rely on. A fast acknowledgment, an included transaction, a finalized block, and a bridged withdrawal can be different events.
 
-[Tempo's consensus documentation](/docs/protocol/blockspace/consensus) specifies no re-orgs after a block is finalized. It also describes the network conditions required to keep making progress. Near-instant onchain settlement should not be interpreted as an unconditional delivery-time guarantee for every payment flow.
+[Tempo's consensus documentation](/docs/protocol/blockspace/consensus) specifies no re-orgs after a block is finalized. It also describes the network conditions required to keep making progress.
 
-Finality alone does not establish that the correct payment succeeded. The [Tempo receiving guide](/docs/guide/payments/accept-a-payment) instructs applications to check the network, token contract, recipient, and amount in successful transfer events. It also distinguishes a delivered receipt from funds held by a receive policy. Match that evidence to the invoice before marking it paid.
+Finality doesn't tell you the correct payment succeeded. Check the network, token contract, recipient, and amount in successful transfer events, as the [Tempo receiving guide](/docs/guide/payments/accept-a-payment) describes. A receive policy can hold funds instead of delivering them. Match that evidence to the invoice before marking it paid.
 
 ## Model fees for the operations you will run
 
@@ -58,33 +58,33 @@ Budget for the actual transaction types in the application. A simple token trans
 
 Tempo's [fee system](/docs/protocol/fees) charges fees in eligible stablecoins and uses a bounded dynamic base fee. No separate gas token is required. Standard stablecoin transfers have sub-cent fees; the actual fee varies with the operation and base fee.
 
-[Fee sponsorship](/docs/guide/payments/sponsor-user-fees) can make the application responsible for network fees. Decide which account pays, which operations qualify, and how the application handles a depleted sponsor balance or an unavailable fee token. This is an operating requirement even when the recipient sees no network-fee prompt.
+[Fee sponsorship](/docs/guide/payments/sponsor-user-fees) can make the application responsible for network fees. Decide which account pays, which operations qualify, and how the application handles a depleted sponsor balance or an unavailable fee token.
 
 ## Confirm liquidity and the asset at both ends
 
 A stablecoin symbol can appear on more than one network. Verify the contract and supported deposit route, not just the name. A wallet's ability to display an address is different from a custodian or exchange accepting that asset for credit.
 
-Review issuer and reserve information, redemption access, custody, and any bridge dependency. [Minting and burning](/docs/guide/issuance/mint-stablecoins) help explain the issuer-side lifecycle; a secondary-market transfer does not automatically give every holder direct redemption access.
+Review issuer and reserve information, redemption access, custody, and any bridge dependency. [Minting and burning](/docs/guide/issuance/mint-stablecoins) cover the issuer-side lifecycle. A holder who received tokens on the secondary market may not have direct redemption access.
 
-If conversion is required, quote the amount and direction you need. Do not assume that two dollar-pegged tokens always exchange at par or that support for both guarantees sufficient liquidity. For Routes integrations, use the current [network and asset documentation](/docs/routes/networks) to establish candidate paths, then request the actual route quote.
+If conversion is required, quote the amount and direction you need. Two dollar-pegged tokens don't always exchange at par, and support for both doesn't mean the pair has enough liquidity. For Routes integrations, use the current [network and asset documentation](/docs/routes/networks) to find candidate paths, then request the actual route quote.
 
 If the recipient needs local currency, add the provider's eligibility, FX, beneficiary details, and bank delivery to the evaluation. [Cross-border payments](/docs/resources/guides/cross-border-payments) covers that complete route.
 
 ## Assign control and reconciliation responsibilities
 
-The settlement layer does not decide who may approve a company payment, manage wallet recovery, or resolve a customer dispute. Assign those responsibilities to the application, custodian, issuer, and payment providers involved.
+The settlement layer doesn't decide who may approve a company payment, manage wallet recovery, or resolve a customer dispute. Assign those responsibilities to the application, custodian, issuer, and payment providers involved.
 
-Tempo's [TIP-403 Policy Registry](/docs/protocol/tip403/overview) lets TIP-20 tokens share access-control policies. These primitives can support an issuer's control framework; they do not establish that an application has completed identity checks, screening, or other obligations.
+Tempo's [TIP-403 Policy Registry](/docs/protocol/tip403/overview) lets TIP-20 tokens share access-control policies. Identity checks, screening, and other obligations stay with the application and its providers.
 
 [Payment references](/docs/guide/payments/transfer-memos) connect transfers with business references. Keep the full invoice, customer details, and sensitive records offchain. Use a reference that your internal systems can resolve, and define who can access those records.
 
-Record the network, transaction hash, and transfer log index as a unique event key. Connect it to the provider payment ID and invoice, and update the ledger once. A matching memo or a changed balance alone is insufficient evidence to fulfill an order. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) for the broader workflow.
+Record the network, transaction hash, and transfer log index as a unique event key. Connect it to the provider payment ID and invoice, and update the ledger once. Don't fulfill an order on a matching memo or a changed balance. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) for the broader workflow.
 
 ## Move from evaluation to a payment pilot
 
 Choose one flow with known counterparties and a clear recipient outcome. Document the expected amount, cost, completion evidence, and exception owner before executing it.
 
-Measure time to usable funds, complete cost, failed or delayed payments, and reconciliation effort. Retain the bank and provider relationships the flow still needs. A settlement network earns its place by improving that complete operation.
+Measure time to usable funds, complete cost, failed or delayed payments, and reconciliation effort. Retain the bank and provider relationships the flow still needs.
 
 ## Stablecoin settlement questions
 
@@ -105,7 +105,7 @@ Evaluate the supported assets, settlement signal, fee behavior, custody, permiss
 <details>
 <summary>How is settlement finality different from confirmation?</summary>
 
-A confirmation may mean that a system has accepted or observed a transaction. Finality is the network-specific point at which the recorded transaction is considered settled. Your application must also verify successful delivery of the intended asset and amount; an acknowledgment or transaction hash alone is insufficient.
+A confirmation may mean that a system has accepted or observed a transaction. Finality is the network-specific point at which the recorded transaction is considered settled. Your application must also verify successful delivery of the intended asset and amount.
 
 </details>
 
@@ -119,6 +119,6 @@ Stablecoins can provide another settlement path for supported flows. Funding, FX
 <details>
 <summary>How should I compare Tempo with another blockchain for payments?</summary>
 
-Compare the same token or explicitly priced conversion, recipient endpoint, transaction type, and operating assumptions. Evaluate actual integration support, finality signals, total fees, liquidity, controls, and delivery evidence. A shared token symbol or an advertised block time is not a complete comparison.
+Compare the same token or explicitly priced conversion, recipient endpoint, transaction type, and operating assumptions. Evaluate actual integration support, finality signals, total fees, liquidity, controls, and delivery evidence.
 
 </details>

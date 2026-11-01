@@ -208,6 +208,6 @@ Wagmi's batched action requires a wallet that supports `wallet_sendCalls`, such 
 
 Replace the generated test account with your application's [signer](/docs/accounts/keys), and select a vault on the same network. Check its accepted asset, eligibility, capabilities, fees, and withdrawal behavior before enabling writes.
 
-Keep the customer's confirmation between the displayed quote and submission. Refresh a stale quote and apply a positive minimum output. A successful quote does not reserve liquidity, and queued withdrawals need the vault's supported request-and-claim flow.
+Ask the customer to confirm the displayed quote before submission. Refresh a stale quote and apply a positive minimum output. A quote doesn't reserve liquidity, and queued withdrawals use the vault's request-and-claim flow.
 
 For hosted API reads with generated request code, use [Balances and earnings](/docs/earn/balances). The Earn API does not sign deposits or withdrawals.

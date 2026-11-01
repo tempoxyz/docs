@@ -27,7 +27,7 @@ curl --fail --silent --show-error '<TEMPO_HTTP_URL>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
 ```
 
-Expect `result: "0x1079"` for mainnet (`4217`) or `result: "0xa5bf"` for Moderato (`42431`). Stop if the network differs. A matching chain ID does not establish support for every method or provider product.
+Expect `result: "0x1079"` for mainnet (`4217`) or `result: "0xa5bf"` for Moderato (`42431`). Method support still varies by provider.
 
 <span id="alchemy" />
 
@@ -35,7 +35,7 @@ Expect `result: "0x1079"` for mainnet (`4217`) or `result: "0xa5bf"` for Moderat
 
 [Alchemy](https://www.alchemy.com/rpc/tempo) provides HTTP and WebSocket RPC endpoints for Tempo mainnet and Moderato. Create an app in the [dashboard](https://dashboard.alchemy.com/?utm_source=chain_partner&utm_medium=referral&utm_campaign=tempo), select the network, and follow its [Tempo quickstart](https://www.alchemy.com/docs/reference/tempo-api-quickstart).
 
-Check chain support separately for Alchemy's indexed APIs, webhooks, and Gas Manager. Its generic native-balance example is not a spendable Tempo stablecoin balance; use [TIP-20 balance reads](/docs/guide/payments/accept-a-payment#read-balances).
+Alchemy's indexed APIs, webhooks, and Gas Manager have their own chain support lists. Its native-balance example doesn't return a spendable stablecoin balance; use [TIP-20 balance reads](/docs/guide/payments/accept-a-payment#read-balances).
 
 <span id="blockdaemon" />
 
@@ -73,21 +73,21 @@ Create an API key in the [Dwellir dashboard](https://dashboard.dwellir.com) and 
 
 ## <span className={`partner-logo partner-logo--luganodes ${partnerLogo().className + ' ' + partnerLogoLuganodes().className}`} aria-hidden="true" />Luganodes
 
-[Luganodes](https://www.luganodes.com/) provides non-custodial node operations on bare metal and cloud infrastructure, backed by SOC 2 Type II certification. Contact Luganodes to discuss your Tempo deployment requirements.
+[Luganodes](https://www.luganodes.com/) runs non-custodial nodes on bare metal and cloud infrastructure, with SOC 2 Type II certification. Contact Luganodes for Tempo deployments.
 
 <span id="quicknode" />
 
 ## <span className={`partner-logo partner-logo--quicknode ${partnerLogo().className + ' ' + partnerLogoQuicknode().className}`} aria-hidden="true" />QuickNode
 
-[QuickNode](https://www.quicknode.com/chains/tempo) provides HTTP and WebSocket Tempo RPC endpoints. Follow the [Tempo quickstart](https://www.quicknode.com/docs/tempo/quickstart), then verify the historical, Debug, or Trace methods you need against its [API overview](https://www.quicknode.com/docs/tempo/api-overview). Use HTTP POST for responses that exceed [WebSocket size limits](https://www.quicknode.com/docs/tempo/endpoints).
+[QuickNode](https://www.quicknode.com/chains/tempo) provides HTTP and WebSocket Tempo RPC endpoints. Follow the [Tempo quickstart](https://www.quicknode.com/docs/tempo/quickstart), then check the historical, Debug, or Trace methods you need in its [API overview](https://www.quicknode.com/docs/tempo/api-overview). Use HTTP POST for responses that exceed [WebSocket size limits](https://www.quicknode.com/docs/tempo/endpoints).
 
-The API overview lists testnet chain ID `42429`, which differs from current Moderato (`42431`). Confirm a Moderato endpoint with QuickNode and run the network check above before using it for testnet.
+The API overview lists testnet chain ID `42429`, not current Moderato (`42431`). Run the [network check](#verify-the-endpoints-network) before using a QuickNode testnet endpoint.
 
 ## <span className={`partner-logo partner-logo--senseinode ${partnerLogo().className + ' ' + partnerLogoSenseinode().className}`} aria-hidden="true" />SenseiNode
 
 [SenseiNode](https://www.senseinode.com/) operates RPC and validator infrastructure with SOC 2 Type II and ISO 27001:2022 certifications. Its team configures and operates deployments for your workload.
 
-Contact [info@senseinode.com](mailto:info@senseinode.com) to discuss Tempo RPC requirements and availability.
+Contact [info@senseinode.com](mailto:info@senseinode.com) for Tempo RPC.
 
 ## <span className={`partner-logo partner-logo--validation-cloud ${partnerLogo().className + ' ' + partnerLogoValidationCloud().className}`} aria-hidden="true" />Validation Cloud
 

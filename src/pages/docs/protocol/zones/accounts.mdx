@@ -55,7 +55,7 @@ Public views like `totalSupply()`, `name()`, `symbol()`, and `decimals()` remain
 
 ## Execution Rules
 
-The current implementation rejects public TIP-20 transfer calls with `Unauthorized()`. Token movement uses the inbox and outbox. Approval and permit calls remain available.
+Zones reject public TIP-20 transfer calls with `Unauthorized()`. Token movement uses the inbox and outbox. Approval and permit calls remain available.
 
 Zones also charge [fixed gas costs](/docs/protocol/zones/execution#fixed-gas-costs) for selected TIP-20 operations. These prevent gas-based side channels.
 

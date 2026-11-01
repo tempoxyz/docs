@@ -21,7 +21,7 @@ Use the [OUSD integration guide](/docs/guide/ousd) for its contract address, tok
 
 ## <span className={`partner-logo partner-logo--allunity ${partnerLogo().className + ' ' + partnerLogoAllunity().className}`} aria-hidden="true" />AllUnity
 
-[AllUnity](https://allunity.com) issues stablecoins including EURAU, SEKAU, and CHFAU on Tempo. Follow the issuer's integration requirements for access to its assets and services.
+[AllUnity](https://allunity.com) issues stablecoins including EURAU, SEKAU, and CHFAU on Tempo.
 
 | Asset | Currency |
 | --- | --- |
@@ -47,13 +47,13 @@ pathUSD is the root quote token for Tempo's [stablecoin exchange](/docs/guide/st
 
 ## Browse mainnet assets
 
-Find contract addresses and token metadata in the [Tempo mainnet token registry](https://tokenlist.tempo.xyz/list/4217). The registry also includes other assets; a listing does not mean an asset can pay transaction fees.
+Find contract addresses and token metadata in the [Tempo mainnet token registry](https://tokenlist.tempo.xyz/list/4217). The registry also lists assets that can't pay transaction fees.
 
-Identify an asset by its network and contract address, rather than its symbol alone. Use the [token list API](/docs/quickstart/tokenlist) for addresses, decimals, and icons in your application.
+Identify an asset by its network and contract address, not its symbol. Use the [token list API](/docs/quickstart/tokenlist) for addresses, decimals, and icons in your application.
 
 ## Develop on testnet
 
-Use [Moderato testnet](/docs/quickstart/connection-details) and the [faucet](/docs/quickstart/faucet) for test payments. Load testnet metadata separately with the token list API's testnet chain ID, `42431`; mainnet uses `4217`. Testnet tokens are separate from mainnet assets.
+Use [Moderato testnet](/docs/quickstart/connection-details) and the [faucet](/docs/quickstart/faucet) for test payments. Load testnet metadata with the token list API's testnet chain ID, `42431`; mainnet uses `4217`.
 
 ## Integrate a stablecoin
 

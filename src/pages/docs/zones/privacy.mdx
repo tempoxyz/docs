@@ -15,7 +15,7 @@ A Zone keeps balances and account activity in a private ledger that its operator
 
 ## Overview
 
-The Zone visibility model defines who can read each kind of Zone data. Four parties matter:
+Four parties see different Zone data:
 
 - **Account Holder:** Reads its own balances and activity through the Zone RPC.
 - **Operator:** Runs the deployment and can read the whole private ledger.
@@ -35,7 +35,7 @@ The Zone visibility model defines who can read each kind of Zone data. Four part
 
 ## Public Deposits and Withdrawals
 
-Amounts and timing at the public boundary stay observable. Don't describe a Zone to customers as hiding deposits and withdrawals. Don't describe its private ledger as unreadable to its operator.
+Deposit and withdrawal amounts and timing stay public on Tempo. A Zone doesn't hide them, and its operator can read the private ledger.
 
 <span id="keep-application-access-scoped" />
 
@@ -45,7 +45,7 @@ The Zone RPC authenticates each caller with an [authorization token](/docs/zones
 
 Enforce customer access in your backend, caches, logs, and user interface. A public Tempo explorer doesn't show private Zone activity.
 
-Read access is separate from transaction-signing authority. It's also separate from the portal's funding rules.
+Read access is separate from transaction-signing authority and from the portal's funding rules.
 
 <span id="check-settlement-assumptions" />
 
@@ -59,7 +59,7 @@ Review [proving and settlement](/docs/protocol/zones/proving) with the operator 
 
 <Cards>
   <Card title="Connect to a Zone" description="Use for getting deployment details and signing the authorization token." to="/docs/zones/connect" />
-  <Card title="Accounts and Privacy" description="Covers the account privacy rules and exact read restrictions." to="/docs/protocol/zones/accounts" />
+  <Card title="Accounts and Privacy" description="Covers the account privacy rules and read restrictions." to="/docs/protocol/zones/accounts" />
   <Card title="RPC Reference" description="Covers per-account scoping and response redaction." to="/docs/protocol/zones/rpc" />
   <Card title="Proving and Settlement" description="Covers settlement certificates and the current onchain verification limits." to="/docs/protocol/zones/proving" />
 </Cards>
