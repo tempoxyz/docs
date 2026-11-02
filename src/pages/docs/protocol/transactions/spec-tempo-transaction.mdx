@@ -614,7 +614,8 @@ When a TempoTransaction is received, the protocol:
    - The Root Key or an active admin access key MUST sign:
      - The `key_authorization` digest: `keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))`
    - If an admin access key signs the authorization, the `account` field must be present and must equal the account being modified
-   - Access Key (being authorized) CAN sign the same tx which it is authorized in.
+   - If an admin access key signs the authorization, the transaction MUST be signed by that same admin access key with the same signature type; the Access Key being authorized cannot sign it
+   - If the Root Key signs the authorization, the Access Key (being authorized) CAN sign the same tx which it is authorized in.
    - This enables "authorize and use" in a single transaction
 
 3. **Sets transaction context**
