@@ -88,6 +88,8 @@ Crossed books are permitted; the implementation does not enforce that best bid â
 - Orders must specify ticks within the configured bounds (Â±2000)
 - Tick spacing is 10: `tick % 10 == 0` for orders and flip orders
 - Withdrawals require sufficient internal balance
+- Placing an order or flip order reverts with `Paused` if either pair token is paused, even when the caller's internal balance funds the whole escrow
+- Swaps revert with `Paused` if any token on the route is paused, including intermediate tokens that move only between books
 
 ### Interface
 
