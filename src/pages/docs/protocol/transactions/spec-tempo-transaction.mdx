@@ -405,7 +405,7 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
   - Fee payer defaults to sender address (self-paid transaction)
 
 **Token Preference:**
-- When `fee_token` is `Some(address)`, this overrides any account/validator-level preferences
+- When `fee_token` is `Some(address)`, this overrides the fee payer's account-level preference; it doesn't change the validator's token preference, which still sets the token the validator receives
 - Validation ensures the token is a valid TIP-20 token with sufficient balance/liquidity
 - Failures reject the transaction before execution (see Token Preferences spec)
 
