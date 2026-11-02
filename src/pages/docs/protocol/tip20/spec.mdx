@@ -190,10 +190,11 @@ interface ITIP20 {
     
     /// @notice Updates the logo URI (requires DEFAULT_ADMIN_ROLE)
     /// @param newLogoURI The new logo URI (max 256 bytes; empty string clears the field)
-    /// @dev If non-empty, MUST be a syntactically valid URI with a scheme in the
-    ///      allowlist {https, http, ipfs, data} (case-insensitive).
+    /// @dev If non-empty, MUST start with an RFC 3986 scheme followed by `:`, and the scheme
+    ///      MUST be in the allowlist {https, http, ipfs, data} (case-insensitive).
+    ///      Only the length and scheme are validated; the rest of the URI is not.
     ///      Reverts LogoURITooLong if length > 256 bytes.
-    ///      Reverts InvalidLogoURI if the scheme is not in the allowlist or the URI is malformed.
+    ///      Reverts InvalidLogoURI if the scheme is missing, malformed, or not in the allowlist.
     function setLogoURI(string calldata newLogoURI) external;
     
     // =========================================================================
@@ -462,7 +463,7 @@ interface ITIP20 {
     /// @notice The provided logoURI exceeds the 256-byte cap
     error LogoURITooLong();
 
-    /// @notice The provided logoURI is malformed or uses a scheme outside the allowlist
+    /// @notice The provided logoURI has no valid scheme or uses a scheme outside the allowlist
     error InvalidLogoURI();
 
 }
@@ -523,7 +524,7 @@ The `DOMAIN_SEPARATOR` is computed dynamically on every call using `block.chaini
 ## Logo URI
 Every TIP-20 exposes an optional on-chain `logoURI`, added in the [T5 network upgrade](/docs/protocol/upgrades/t5). Wallets and explorers read the icon directly from the token contract via `logoURI()`, without an off-chain registry round-trip. Tokens without a `logoURI` continue to work; the field is empty by default.
 
-The admin (`DEFAULT_ADMIN_ROLE`) sets or clears it via `setLogoURI(string newLogoURI)`, which emits `LogoURIUpdated(msg.sender, newLogoURI)`. An empty string is valid and clears the field. A non-empty value must be at most 256 bytes (`LogoURITooLong` otherwise) and a syntactically valid URI whose scheme is in the allowlist `{https, http, ipfs, data}`, matched case-insensitively (`InvalidLogoURI` otherwise).
+The admin (`DEFAULT_ADMIN_ROLE`) sets or clears it via `setLogoURI(string newLogoURI)`, which emits `LogoURIUpdated(msg.sender, newLogoURI)`. An empty string is valid and clears the field. A non-empty value must be at most 256 bytes (`LogoURITooLong` otherwise) and start with a scheme in the allowlist `{https, http, ipfs, data}`, matched case-insensitively and followed by `:` (`InvalidLogoURI` otherwise). The protocol doesn't validate the rest of the URI.
 
 Per the [specification's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP). SVG is allowed by the scheme allowlist but not recommended — integrators that accept SVG must follow its SVG-handling guidance.
 
@@ -625,7 +626,7 @@ interface ITIP20Factory {
     /// @notice Creates and deploys a new TIP-20 token with an initial logoURI
     /// @dev Identical to the 6-arg overload, but additionally sets logoURI at creation.
     ///      Validation rules for logoURI are the same as setLogoURI (256-byte cap,
-    ///      allowlisted schemes, syntactically valid URI). Empty string is valid and
+    ///      allowlisted scheme prefix). Empty string is valid and
     ///      leaves logoURI unset (no LogoURIUpdated event emitted). When non-empty, the
     ///      new token emits LogoURIUpdated(msg.sender, logoURI) from its own address.
     function createToken(
