@@ -37,6 +37,8 @@ The effective gas price includes the base fee and the applicable priority fee. A
 
 Tempo uses a bounded dynamic base fee. The base fee can fall when block gas usage is below target and rise back toward the cap when usage increases. The cap is set such that a TIP-20 transfer costs about $0.0006, with a quiet-period floor around $0.00003.
 
+Each block's `base_fee_per_gas` is computed from the parent block's base fee and total `gas_used` across all lanes. Tempo applies EIP-1559's integer update formula with a fixed gas target of 10,000,000 gas (not half the block gas limit) and a max change denominator of 8, then clamps the result to `[6 × 10^8, 1.2 × 10^10]` attodollars per gas.
+
 The bounded base fee combined with USD-denominated payment provides predictable unit economics. Applications can budget for transaction costs without exposure to native token price fluctuations.
 
 Congestion is managed through:
