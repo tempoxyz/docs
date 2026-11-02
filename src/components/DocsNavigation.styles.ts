@@ -827,3 +827,17 @@ export const docsHeaderAccountEmail = style({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 })
+
+/** Signed-out Log in link: the header's one primary action, inverted like Copy for agent. */
+export const docsHeaderLoginPrimary = style({
+  backgroundColor: inherited.color.backgroundColorInvert,
+  color: inherited.color.textColorInvert,
+  '@media (hover: hover)': {
+    selectors: {
+      '&:hover': {
+        backgroundColor: inherited.color.backgroundColorInvert,
+        opacity: 0.9,
+      },
+    },
+  },
+})

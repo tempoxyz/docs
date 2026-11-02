@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { useRouter, Link as WakuLink } from 'waku'
 import { cx as composeStyles } from 'zyzz'
 import ChevronDownIcon from '~icons/lucide/chevron-down'
+import SquareTerminalIcon from '~icons/lucide/square-terminal'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 
@@ -25,6 +26,7 @@ import {
   docsHeaderBrand,
   docsHeaderDestinations,
   docsHeaderIconButton,
+  docsHeaderLoginPrimary,
   docsHeaderLogo,
   docsHeaderMenuButton,
   docsHeaderMobileActions,
@@ -920,10 +922,21 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
           {/* Absolute: the docs are also mounted at tempo.xyz/developers, where relative links miss the console. */}
           <a
             href={CONSOLE_URL}
-            className={`docs-header-login ${docsHeaderAgentTrigger().className}`}
+            className={
+              email
+                ? `docs-header-login ${docsHeaderAgentTrigger().className}`
+                : `docs-header-login ${docsHeaderAgentTrigger().className} ${docsHeaderLoginPrimary().className}`
+            }
             {...(email ? { 'aria-label': `Open Tempo Console as ${email}`, title: email } : {})}
           >
-            {email ? <span className={docsHeaderAccountEmail().className}>{email}</span> : 'Log in'}
+            {email ? (
+              <>
+                <SquareTerminalIcon aria-hidden="true" width="16" height="16" />
+                <span className={docsHeaderAccountEmail().className}>{email}</span>
+              </>
+            ) : (
+              'Log in'
+            )}
           </a>
           <button
             type="button"
