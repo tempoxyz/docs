@@ -569,10 +569,10 @@ account = Option<Address> (required when an admin access key signs the authoriza
 
 **Signed Format:**
 
-The signed format (`SignedKeyAuthorization`) includes all fields with the `signature` appended:
+The signed format (`SignedKeyAuthorization`) is a two-item list of the unsigned authorization list and the `signature`:
 
 ```
-signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?, signature])
+signed_key_authorization = rlp([[chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?], signature])
 ```
 
 The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key or an active admin access key.
