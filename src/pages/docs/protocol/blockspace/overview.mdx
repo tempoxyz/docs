@@ -21,7 +21,7 @@ This specification defines the structure of valid blocks in the Tempo blockchain
 
 ## Motivation
 
-Tempo blocks extend the Ethereum block format in multiple ways: there are new header fields to account for payment lanes and shared gas accounting, and system transactions are added to the block body for the fee AMM and other protocol operations. This specification contains all the modifications to the block format.
+Tempo blocks extend the Ethereum block format in multiple ways: there are new header fields to account for payment lanes and shared gas accounting, and a protocol system call updates the committee at each epoch boundary. This specification contains all the modifications to the block format.
 
 ## Specification
 
@@ -50,13 +50,10 @@ pub struct TempoConsensusContext {
 Current non-genesis headers MUST contain `consensus_context`. It records the consensus epoch, view, parent view, and proposer public key. RLP decoding MUST reject an invalid Ed25519 proposer key. The header RLP field order is `[general_gas_limit, shared_gas_limit, timestamp_millis_part, inner, consensus_context]`, with context encoded as `[epoch, view, parent_view, proposer]`. The context participates in the header hash. JSON-RPC exposes it as `consensusContext`, with `parentView` in camel case.
 
 ### Block body
-The block body in Tempo retains the canonical Ethereum block body structure, with the addition of system transactions. Transactions are ordered in the following sections:
+The block body in Tempo retains the canonical Ethereum block body structure. It MUST NOT contain system transactions. Its transactions are subject to `general_gas_limit` on non-payment transactions.
 
-1. Start-of-block system transaction(s).
-2. Proposer lane transactions, subject to `general_gas_limit` on non-payment transactions.
-3. Remaining transactions that consume the shared gas budget.
-4. Protocol-defined end-of-block system transactions, when required.
+<span id="system-transactions" />
 
-### System transactions
+### Epoch-boundary committee update
 
-A valid Tempo block must include any required protocol-defined system transactions in the expected order before and after user transactions.
+The VM MUST run a committee update system call after all transactions in the last block of each epoch, at height `h` where `(h + 1) % epoch_length == 0`. It decodes the DKG outcome from the block's `extra_data` and calls `setCommitteeMembers(epoch, publicKeys)` on the current committee precompile at `0xC077E00000000000000000000000000000000000` from the zero address. This call isn't part of the transaction list. The block is invalid if `extra_data` doesn't decode as a DKG outcome or the call fails.
