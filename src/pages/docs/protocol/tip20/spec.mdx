@@ -369,6 +369,8 @@ interface ITIP20 {
     /// @param to The address receiving tokens (address(0) for burns)
     /// @param amount The amount of tokens transferred
     /// @param memo The 32-byte memo associated with this movement
+    /// @dev Not emitted when a receive policy redirects a transfer or mint to ReceivePolicyGuard;
+    ///      the memo is recorded in the blocked-transfer receipt instead.
     event TransferWithMemo(
         address indexed from,
         address indexed to,
