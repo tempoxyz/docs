@@ -20,7 +20,7 @@ To convert the stablecoins held in an account, use the [Exchange](/docs/protocol
 When a user pays fees in a stablecoin that differs from the validator's preference, the Fee AMM automatically converts the payment:
 
 - **User pays**: 1.0 of their chosen stablecoin
-- **Validator receives**: 0.9970 of their preferred stablecoin
+- **Validator receives**: 0.9970 of their preferred stablecoin on a direct conversion. A two-hop conversion through the user token's quote token applies the 0.9970 factor once per hop, rounding down after each hop.
 - **Liquidity providers earn**: 0.003 (0.3%) as fees
 
 The protocol handles conversion as part of fee processing. See the [fee lifecycle](/docs/protocol/fees/spec-fee#fee-payment) and [Fee AMM specification](/docs/protocol/fees/spec-fee-amm) for liquidity reservation, conversion, and refunds.
