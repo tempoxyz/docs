@@ -36,8 +36,6 @@ Use the [Tempo token list](/docs/quickstart/tokenlist) for verified network and 
 | USDC.e | `0x20c000000000000000000000b9537d11c60e8b50` |
 | USDT0 | `0x20c00000000000000000000014f22ca97301eb73` |
 
-A token appearing in Tempo's registry does not guarantee a Socket route for it.
-
 <span id="api-endpoints" />
 
 ## Socket API access
@@ -131,7 +129,7 @@ const receipt = await publicClient.waitForTransactionReceipt({ hash })
 if (receipt.status !== 'success') throw new Error('Source transaction failed')
 ```
 
-Use a [Tempo client](/docs/accounts/examples) when Tempo is the source. See the [Socket API reference](https://docs.socket.tech/api-reference/swap/get-quotes) for full response types and the [integration guide](https://docs.socket.tech/integrate/integration-guides/socket-api) for approval and execution handling.
+Use a [Tempo client](/docs/guide/payments/send-a-payment/examples#payment-client-setup) when Tempo is the source. See the [Socket API reference](https://docs.socket.tech/api-reference/swap/get-quotes) for full response types and the [integration guide](https://docs.socket.tech/integrate/integration-guides/socket-api) for approval and execution handling.
 
 ## Production checklist
 

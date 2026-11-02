@@ -1,0 +1,68 @@
+---
+title: Payment and integration guides
+seoTitle: Payment and Integration Guides | Tempo Docs
+description: Plan stablecoin payment workflows, compare providers and payment rails, and design funding, reconciliation, and operating controls.
+---
+
+[Tempo Docs](/get-started) / Guides
+
+# Payment and integration guides
+
+Choose the task your application needs to complete. Each guide explains the workflow, the Tempo features and onchain controls involved, and the providers that can supply a missing part.
+
+For a first test payment, use the [quickstart](/get-started/quickstart). [Partners](/docs/partners) lists the third-party providers these guides mention, such as wallet, funding, and RPC providers.
+
+## Payment infrastructure
+
+- [Blockchain payment flows](/docs/resources/guides/blockchain-payments)
+- [Stablecoins for business](/docs/resources/guides/stablecoins-for-business)
+- [Plan a payment stack](/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale)
+- [Stablecoin settlement](/docs/resources/guides/stablecoin-settlement)
+- [Compare payment rails](/docs/resources/guides/payment-rails)
+- [Estimate payment fees](/docs/resources/guides/stablecoin-fees)
+
+## Payment workflows
+
+- [Accept stablecoin payments](/docs/resources/guides/how-to-accept-stablecoin-payments)
+- [Create payment links](/docs/resources/guides/payment-links)
+- [Handle refunds](/docs/resources/guides/refunds)
+- [Reconcile payments](/docs/resources/guides/payment-reconciliation)
+- [Plan batch payments](/docs/resources/guides/batch-payments)
+- [Global payouts](/docs/resources/guides/global-payouts)
+- [Global payroll](/docs/resources/guides/stablecoin-payroll-for-global-teams)
+- [Cross-border payments](/docs/resources/guides/cross-border-payments)
+- [Latin America payment routes](/docs/resources/guides/cross-border-payments-latin-america)
+- [Remittance operations](/docs/resources/guides/remittances)
+- [Recurring payments](/docs/resources/guides/subscriptions-on-tempo)
+
+## Liquidity and issuance
+
+- [Corporate treasury](/docs/resources/guides/corporate-treasury)
+- [Nostro and vostro accounts](/docs/resources/guides/nostro-vostro-accounts): how correspondent banks hold balances for each other, and what stablecoin settlement changes.
+- [Plan prefunding](/docs/resources/guides/prefunding)
+- [FBO accounts](/docs/resources/guides/fbo-accounts): for-benefit-of bank accounts that hold customer funds, and how they differ from stablecoin balances.
+- [The GENIUS Act](/docs/resources/guides/genius-act): the U.S. law that regulates payment stablecoin issuers, reserves, and redemption.
+
+## Machine payment models
+
+- [HTTP 402 payment flows](/docs/resources/guides/402-payment-required): a server answers with HTTP `402 Payment Required`, and the client retries with payment through the [Machine Payments Protocol](/docs/agents) (MPP).
+- [Microtransactions and sessions](/docs/resources/guides/microtransactions)
+
+## Choose wallets and funding
+
+- [Add embedded wallets](/docs/resources/guides/embedded-wallets): compare the wallet providers Privy, Dynamic, Turnkey, and Fireblocks by signing and payment requirements.
+- [Fund accounts and pay out](/docs/resources/guides/funding-and-payouts): choose the funding rail and follow the setup path for Bridge, a stablecoin funding and payout provider.
+- [Connect an RPC provider](/docs/partners/rpc-and-nodes): choose hosted network access and verify that its chain ID matches Tempo's.
+
+## Compliance and security
+
+- [Screen blockchain payments](/docs/resources/guides/payment-screening): choose address checks, monitoring, or transaction simulation and see which providers support each.
+- [Configure token and receive controls](/docs/resources/guides/compliance-controls): enforce token policies and [receive policies](/docs/protocol/tip403/receive-policies), which let an address choose the tokens and senders it accepts. Handle funds a receive policy holds for later claim, and keep case records.
+
+## Implement native payment features
+
+These features are built into [TIP-20 tokens](/docs/protocol/tip20/overview), Tempo's native token standard for stablecoins. Each guide shows how to implement one:
+
+- [Sponsor user fees](/docs/guide/payments/sponsor-user-fees): let a fee payer, such as your backend, pay the network fee for a user's transaction, and authorize that sponsorship.
+- [Payment references](/docs/guide/payments/transfer-memos): attach a 32-byte memo, such as an invoice ID, and match a confirmed transfer to your ledger.
+- [Mint and burn TIP-20 tokens](/docs/guide/issuance/mint-stablecoins): manage your stablecoin's supply and distinguish token events from issuer funding and redemption.

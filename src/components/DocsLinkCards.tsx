@@ -1,4 +1,3 @@
-import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
 import BotIcon from '~icons/lucide/bot'
 import BracesIcon from '~icons/lucide/braces'
 import CodeIcon from '~icons/lucide/code-xml'
@@ -7,7 +6,13 @@ import NetworkIcon from '~icons/lucide/network'
 import ServerIcon from '~icons/lucide/server'
 import WalletIcon from '~icons/lucide/wallet'
 import { docsLinkCards } from '../lib/docs-link-cards'
-import { docsSetupCard, docsSetupGrid, docsSetupLinks } from './DocsSetupCards.styles'
+import {
+  docsSetupCard,
+  docsSetupGrid,
+  docsSetupLink,
+  docsSetupLinkChevron,
+  docsSetupLinks,
+} from './DocsSetupCards.styles'
 
 const icons = {
   network: NetworkIcon,
@@ -33,9 +38,21 @@ export function DocsLinkCards({ collection }: { collection: keyof typeof docsLin
             <p>{description}</p>
             <div className={`docs-setup-links ${docsSetupLinks().className}`}>
               {links.map(([label, href]) => (
-                <a key={href} href={href}>
+                <a key={href} href={href} className={docsSetupLink().className}>
                   {label}
-                  <ArrowUpRightIcon aria-hidden="true" focusable="false" width="16" height="16" />
+                  <svg
+                    viewBox="0 0 30.45 53"
+                    aria-hidden="true"
+                    className={docsSetupLinkChevron().className}
+                  >
+                    <path
+                      d="M2.79 2.79 26.5 26.5 2.79 50.21"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="7.9"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </a>
               ))}
             </div>

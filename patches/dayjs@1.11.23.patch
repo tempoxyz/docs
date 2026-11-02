@@ -1,0 +1,21 @@
+diff --git a/package.json b/package.json
+index 95f77a3..c6559f8 100644
+--- a/package.json
++++ b/package.json
+@@ -3,7 +3,16 @@
+   "version": "1.11.23",
+   "description": "2KB immutable date time library alternative to Moment.js with the same modern API ",
+   "main": "dayjs.min.js",
++  "module": "esm/index.js",
+   "types": "index.d.ts",
++  "exports": {
++    ".": {
++      "import": "./esm/index.js",
++      "require": "./dayjs.min.js",
++      "types": "./index.d.ts"
++    },
++    "./*": "./*"
++  },
+   "scripts": {
+     "test": "cross-env TZ=Pacific/Auckland npm run test-tz && cross-env TZ=Europe/London npm run test-tz && cross-env TZ=America/Whitehorse npm run test-tz && npm run test-tz && cross-env TZ=Europe/Paris npm run test-tz-plugin && cross-env TZ=Europe/London npm run test-tz-plugin && cross-env TZ=America/New_York npm run test-tz-plugin && cross-env TZ=Pacific/Auckland npm run test-tz-plugin && jest --coverage --coverageThreshold=\"{ \\\"global\\\": { \\\"lines\\\": 100} }\"",
+     "test-tz": "date && jest test/timezone.test --coverage=false",

@@ -1,7 +1,8 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 'react'
 import { cx } from 'zyzz'
+import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import type { TestMethod } from '../lib/routes-test'
 import { inherited } from '../styles/inherited'
@@ -30,7 +31,11 @@ export type RouteProgress = {
 type Option = { value: string; label: string }
 type Field = { value: string; options: Option[]; onChange: (value: string) => void }
 
-/** A native select under a custom face, so it stays accessible and keyboard friendly. */
+/**
+ * A select-only combobox: the row is the button, and the list shows each choice with its logo.
+ * Keyboard use follows the WAI-ARIA select pattern; focus stays on the button while the list is
+ * open.
+ */
 function PickerRow({
   id,
   label,
@@ -44,37 +49,151 @@ function PickerRow({
   field: Field
   disabled: boolean
   loading?: boolean
-  badge: (option?: Option) => ReactNode
+  badge: (option?: Option, size?: number) => ReactNode
 }) {
-  const selected = field.options.find((option) => option.value === field.value)
-  const current = selected?.label
+  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState(-1)
+  const root = useRef<HTMLDivElement>(null)
+  const list = useRef<HTMLDivElement>(null)
+  const typed = useRef({ text: '', at: 0 })
+  const { options } = field
+  const selectedIndex = options.findIndex((option) => option.value === field.value)
+  const selected = options[selectedIndex]
+  const placeholder = `Choose ${label.toLowerCase()}`
+  const unavailable = disabled || options.length === 0
+  const listId = `${id}-options`
+
+  useEffect(() => {
+    if (!open) return
+    const close = (event: PointerEvent) => {
+      if (!root.current?.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [open])
+  useEffect(() => {
+    if (open && active >= 0) list.current?.children[active]?.scrollIntoView({ block: 'nearest' })
+  }, [open, active])
+  useEffect(() => {
+    if (unavailable) setOpen(false)
+  }, [unavailable])
+
+  const show = (index: number) => {
+    setActive(index)
+    setOpen(true)
+  }
+  const choose = (index: number) => {
+    const option = options[index]
+    setOpen(false)
+    if (option && option.value !== field.value) field.onChange(option.value)
+  }
+  // Typing jumps to the first choice that starts with the typed letters.
+  const typeahead = (key: string) => {
+    const now = Date.now()
+    const text = (now - typed.current.at < 500 ? typed.current.text : '') + key.toLowerCase()
+    typed.current = { text, at: now }
+    const index = options.findIndex((option) => option.label.toLowerCase().startsWith(text))
+    if (index >= 0) show(index)
+  }
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const last = options.length - 1
+    const current = active >= 0 ? active : selectedIndex
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault()
+        show(open ? Math.min(current + 1, last) : Math.max(selectedIndex, 0))
+        return
+      case 'ArrowUp':
+        event.preventDefault()
+        show(open ? Math.max(current - 1, 0) : selectedIndex >= 0 ? selectedIndex : last)
+        return
+      case 'Home':
+        if (!open) return
+        event.preventDefault()
+        show(0)
+        return
+      case 'End':
+        if (!open) return
+        event.preventDefault()
+        show(last)
+        return
+      case 'Enter':
+      case ' ':
+        event.preventDefault()
+        if (open && current >= 0) choose(current)
+        else show(Math.max(selectedIndex, 0))
+        return
+      case 'Escape':
+        if (open) {
+          event.preventDefault()
+          setOpen(false)
+        }
+        return
+      case 'Tab':
+        setOpen(false)
+        return
+      default:
+        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey)
+          typeahead(event.key)
+    }
+  }
+
   return (
-    <div {...pickerRow()}>
-      {badge(selected)}
-      <span {...pickerText()}>
-        <span {...pickerLabel()}>{label}</span>
-        <span {...cx(pickerValue(), !!current && pickerValueChosen())}>
-          {current ?? (loading ? 'Loading…' : `Choose ${label.toLowerCase()}`)}
-        </span>
-      </span>
-      <LucideChevronDown aria-hidden="true" {...pickerChevron()} />
+    <div ref={root} {...pickerAnchor()}>
       <label htmlFor={id} {...visuallyHidden()}>
         {label}
       </label>
-      <select
+      <button
         id={id}
-        value={field.value}
-        disabled={disabled || field.options.length === 0}
-        onChange={(e) => field.onChange(e.target.value)}
-        {...pickerSelect()}
+        type="button"
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-activedescendant={open && active >= 0 ? `${id}-option-${active}` : undefined}
+        data-value={field.value}
+        disabled={unavailable}
+        onClick={() => (open ? setOpen(false) : show(Math.max(selectedIndex, 0)))}
+        onKeyDown={onKeyDown}
+        {...pickerRow()}
       >
-        <option value="">{`Choose ${label.toLowerCase()}`}</option>
-        {field.options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        {badge(selected)}
+        <span {...pickerText()}>
+          <span aria-hidden="true" {...pickerLabel()}>
+            {label}
+          </span>
+          <span {...cx(pickerValue(), !!selected && pickerValueChosen())}>
+            {selected?.label ?? (loading ? 'Loading…' : placeholder)}
+          </span>
+        </span>
+        <LucideChevronDown aria-hidden="true" {...pickerChevron()} />
+      </button>
+      {open && (
+        <div ref={list} id={listId} role="listbox" aria-label={label} {...pickerList()}>
+          {options.map((option, index) => (
+            // biome-ignore lint/a11y/useKeyWithClickEvents: The combobox button handles keys through aria-activedescendant.
+            <div
+              key={option.value}
+              id={`${id}-option-${index}`}
+              role="option"
+              tabIndex={-1}
+              aria-selected={option.value === field.value}
+              data-active={index === active || undefined}
+              // Keep focus on the button so the list stays a popup of it.
+              onPointerDown={(event) => event.preventDefault()}
+              onPointerMove={() => setActive(index)}
+              onClick={() => choose(index)}
+              {...pickerOption()}
+            >
+              {badge(option, 24)}
+              <span {...pickerOptionLabel()}>{option.label}</span>
+              {option.value === field.value && (
+                <LucideCheck aria-hidden="true" {...pickerCheck()} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -109,7 +228,9 @@ function RouteEndpoint({
         field={network}
         disabled={disabled}
         loading={loading}
-        badge={(option) => <ChainLogo chainId={option?.value} name={option?.label} />}
+        badge={(option, size) => (
+          <ChainLogo chainId={option?.value} name={option?.label} size={size} />
+        )}
       />
       <PickerRow
         id={`routes-${key}-asset`}
@@ -117,12 +238,13 @@ function RouteEndpoint({
         field={asset}
         disabled={disabled}
         loading={loading}
-        badge={(option) => (
+        badge={(option, size) => (
           <TokenLogo
             key={option?.value}
             chainId={network.value}
             tokenKey={option?.value}
             symbol={option?.label}
+            size={size}
           />
         )}
       />
@@ -343,14 +465,17 @@ const endpointAddress = style({
   color: tokens.color.gray10,
 })
 
+const pickerAnchor = style({ position: 'relative' })
 const pickerRow = style({
-  position: 'relative',
   display: 'flex',
+  width: '100%',
   minHeight: '48px',
   alignItems: 'center',
   gap: tokens.spacing['2_5'],
   borderRadius: tokens.radius.md,
   paddingInline: tokens.spacing['2_5'],
+  textAlign: 'start',
+  cursor: 'pointer',
   // Tailwind's `transition-colors`.
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
@@ -360,16 +485,16 @@ const pickerRow = style({
     ':hover': { backgroundColor: inherited.color.surfacePanel },
   },
   '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
+  ':focus-visible': {
+    outlineWidth: tokens.borderWidth.emphasis,
+    outlineStyle: 'solid',
+    outlineColor: tokens.color.accent,
+  },
+  ':disabled': { cursor: 'not-allowed', opacity: 0.6 },
   selectors: {
-    '&:has(select:disabled)': { opacity: 0.6 },
-    '&:has(select:disabled):hover': {
+    '&[aria-expanded="true"]': { backgroundColor: inherited.color.surfacePanel },
+    '&:disabled:hover': {
       '@media (hover: hover)': { backgroundColor: 'transparent !custom' },
-    },
-    // The native select is invisible, so its row shows the keyboard focus.
-    '&:has(select:focus-visible)': {
-      outlineWidth: tokens.borderWidth.emphasis,
-      outlineStyle: 'solid',
-      outlineColor: tokens.color.accent,
     },
   },
 })
@@ -395,14 +520,61 @@ const pickerChevron = style({
   height: '16px',
   flexShrink: 0,
   color: tokens.color.gray10,
+  // Tailwind's `transition-transform`.
+  transitionProperty: 'transform, translate, scale, rotate',
+  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  transitionDuration: '150ms',
+  '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
+  selectors: { '[aria-expanded="true"] > &': { rotate: '180deg' } },
 })
-const pickerSelect = style({
+const pickerList = style({
   position: 'absolute',
-  inset: 0,
-  width: '100%',
+  insetBlockStart: '100%',
+  insetInlineStart: 0,
+  insetInlineEnd: 0,
+  // Above the route connector and the API log, like the API key panel.
+  zIndex: tokens.zIndex.floating,
+  marginBlockStart: tokens.spacing['1'],
+  // design-exception: Show about seven choices before the list scrolls.
+  maxHeight: '19rem !custom',
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
+  borderRadius: tokens.radius.lg,
+  borderWidth: tokens.borderWidth.hairline,
+  borderStyle: 'solid',
+  borderColor: tokens.color.lineStrong,
+  backgroundColor: tokens.color.card,
+  padding: tokens.spacing['1'],
+  // design-exception: Lift the choice list off the route canvas like the API key popover.
+  boxShadow: '0 8px 24px rgb(0 0 0 / 0.12) !custom',
+})
+const pickerOption = style({
+  display: 'flex',
+  minHeight: '40px',
+  alignItems: 'center',
+  gap: tokens.spacing['2_5'],
+  borderRadius: tokens.radius.md,
+  paddingInline: tokens.spacing['2'],
   cursor: 'pointer',
-  opacity: 0,
-  ':disabled': { cursor: 'not-allowed' },
+  fontSize: tokens.fontSize.bodySmall,
+  color: inherited.color.textColorPrimary,
+  selectors: {
+    '&[data-active]': { backgroundColor: inherited.color.surfacePanel },
+    '&[aria-selected="true"]': { fontWeight: tokens.fontWeight.medium },
+  },
+})
+const pickerOptionLabel = style({
+  minWidth: 0,
+  flex: 1,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+const pickerCheck = style({
+  width: '16px',
+  height: '16px',
+  flexShrink: 0,
+  color: inherited.color.textColorPrimary,
 })
 
 const connector = style({

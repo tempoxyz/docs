@@ -33,4 +33,18 @@ Tempo JetBrains Mono site fonts. Assets contain no raster images or font binarie
 - Existing guide text remains the source of technical detail. The SVGs introduce
   each product; they are not substitutes for protocol diagrams or working controls.
 
+## Earn guide figures
+
+`earn.mjs` writes `public/illustrations/earn/`, rendered by `EarnIllustration` and
+`EarnStrategyCards`. Each reframes a tempo.xyz/earn figure for its guide:
+
+- `flow`: the vault model (account, vault, engine, one strategy) from the
+  "Design your Tempo Earn program" plate, on How Earn works.
+- `strategy-*`: the three asset-option stills as 320 × 200 tiles on Vaults.
+- `revenue-share`: the "Share returns" panel, still, matching the 20% fixed-fee
+  example in the fees section.
+
+Strategies are categories, not provider listings. Wider scenes pass `width` and
+`height` to `scene()`; keep labels at the kit's 13.3 px.
+
 Edit the scene modules and regenerate; do not hand-edit generated SVG paths.

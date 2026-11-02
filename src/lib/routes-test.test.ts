@@ -3,7 +3,9 @@ import {
   canSubsidize,
   demoMethods,
   directorySchema,
+  linkedRoute,
   routeChoices,
+  routeDemoHref,
   routeQuoteRequest,
   routeTestRequest,
   subsidizedDelivery,
@@ -80,6 +82,21 @@ describe('route test requests', () => {
     ).toThrow('1:1')
     expect(() => routeTestRequest(route, { ...input, subsidize: true })).toThrow('1:1')
   })
+  it('requires Stellar account addresses on Stellar sources', () => {
+    const stellar = { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' }
+    const fromStellar = { ...route, sourceChain: stellar }
+    const account = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR'
+    expect(routeTestRequest(fromStellar, { ...input, sender: account })).toMatchObject({
+      sender: account,
+    })
+    expect(() => routeTestRequest(fromStellar, input)).toThrow(
+      'sender must be a classic Stellar account address (G…).',
+    )
+    const muxed = 'MCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYAAAAAAAAAAAACE3C'
+    expect(() => routeTestRequest(fromStellar, { ...input, sender: muxed })).toThrow(
+      'sender must be a classic Stellar account address (G…).',
+    )
+  })
   it('cascades network and asset choices and fills single options', () => {
     const tempo = { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' }
     const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
@@ -112,6 +129,32 @@ describe('route test requests', () => {
     expect(fromEthereum.options.destinationChains.map((o) => o.label)).toEqual(['Tempo', 'Base'])
     expect(fromEthereum.route).toBeUndefined()
   })
+  it('defaults a Tempo destination to OUSD until the reader picks another asset', () => {
+    const ousd = {
+      ...route,
+      id: 'to-ousd',
+      destinationToken: { tokenKey: 'tempo/ousd', symbol: 'OUSD', decimals: 6 },
+    }
+    const pick = {
+      sourceChain: 'eip155:1',
+      sourceToken: route.sourceToken.tokenKey,
+      destinationChain: 'eip155:4217',
+      destinationToken: '',
+    }
+    expect(routeChoices([route, ousd], pick).route?.id).toBe('to-ousd')
+    expect(
+      routeChoices([route, ousd], { ...pick, destinationToken: route.destinationToken.tokenKey })
+        .route?.id,
+    ).toBe('test-route')
+    const elsewhere = {
+      ...ousd,
+      destinationChain: { id: 'eip155:8453', name: 'Base', addressFormat: 'hex' },
+    }
+    const base = { ...route, id: 'to-base-usdy', destinationChain: elsewhere.destinationChain }
+    expect(
+      routeChoices([base, elsewhere], { ...pick, destinationChain: 'eip155:8453' }).route,
+    ).toBeUndefined()
+  })
   it('reads the 1:1 amount a subsidy guarantees and what Tempo covers', () => {
     const deposit = {
       subsidize: true,
@@ -131,10 +174,12 @@ describe('route test requests', () => {
       covered: 0n,
     })
   })
-  it('offers wallet transfers for EVM and Tron sources, and deposits everywhere', () => {
+  it('offers wallet transfers for EVM, Tron, and Stellar sources, and deposits everywhere', () => {
     expect(demoMethods(route)).toEqual(['transfer', 'depositAddress'])
     const tron = { id: 'tron:0x2b6653dc', name: 'Tron', addressFormat: 'base58check' }
     expect(demoMethods({ ...route, sourceChain: tron })).toEqual(['transfer', 'depositAddress'])
+    const stellar = { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' }
+    expect(demoMethods({ ...route, sourceChain: stellar })).toEqual(['transfer', 'depositAddress'])
     // Routes has no signed action for Solana sources, so they fund through deposit addresses.
     const solana = {
       id: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
@@ -150,23 +195,32 @@ describe('route test requests', () => {
       }),
     ).toEqual([])
   })
-  it('quotes a deposit address without the creation-only recipient and refund address', () => {
-    const deposit = {
-      ...input,
-      method: 'depositAddress' as const,
-      recipient: '',
-      refundAddress: '',
-    }
+  it('quotes a deposit address with the recipient and refund address it is created with', () => {
+    const deposit = { ...input, method: 'depositAddress' as const }
     expect(routeQuoteRequest(route, deposit)).toEqual({
       amount: '1234567',
       sourceChain: route.sourceChain.id,
       sourceToken: route.sourceToken.tokenKey,
       destinationToken: route.destinationToken.tokenKey,
+      recipient: input.recipient,
+      refundAddress: input.refundAddress,
       subsidize: false,
     })
-    expect(() => routeTestRequest(route, deposit)).toThrow('recipient')
+    // Several deposit routes only quote with both addresses, so the quote needs them too.
+    expect(() => routeQuoteRequest(route, { ...deposit, recipient: '' })).toThrow('recipient')
+    expect(() => routeQuoteRequest(route, { ...deposit, refundAddress: '' })).toThrow('refund')
+    expect(routeQuoteRequest(route, deposit)).toEqual(routeTestRequest(route, deposit))
     // Transfer quotes need the same sender and recipient as creation.
     expect(() => routeQuoteRequest(route, { ...input, sender: '' })).toThrow('sender')
     expect(routeQuoteRequest(route, input)).toEqual(routeTestRequest(route, input))
+  })
+  it('links a route to the demo by ID and selects it only while the directory lists it', () => {
+    const odd = { ...route, id: 'a&b=c' }
+    expect(routeDemoHref(route)).toBe('/docs/routes/test?route=test-route')
+    expect(
+      linkedRoute([route, odd], new URL(routeDemoHref(odd), 'https://docs.tempo.xyz').search),
+    ).toBe(odd)
+    expect(linkedRoute([route], '?route=missing')).toBeUndefined()
+    expect(linkedRoute([route], '')).toBeUndefined()
   })
 })

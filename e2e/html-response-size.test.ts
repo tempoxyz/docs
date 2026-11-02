@@ -4,9 +4,12 @@ import { expect, test } from '@playwright/test'
 test.skip(!process.env.CI, 'requires the production build output')
 
 const pages = [
-  { path: '/docs/protocol/transactions', maxBytes: 225_000, shiki: false },
-  // The expanded guide includes CLI, Viem, and Wagmi variants.
-  { path: '/docs/guide/tempo-transaction', maxBytes: 2_100_000, shiki: true },
+  // The serialized navigation grew with the Accounts and Tempo EVM sidebars and the
+  // API reference sidebar, which is built from the live OpenAPI spec (about 250 KB).
+  { path: '/docs/protocol/transactions', maxBytes: 265_000, shiki: false },
+  // The expanded guide includes CLI, Viem, and Wagmi variants. Vocs server-renders
+  // every tab panel (inactive ones hidden), so the HTML holds all of them (about 2.86 MB).
+  { path: '/docs/guide/tempo-transaction', maxBytes: 3_000_000, shiki: true },
   { path: '/docs/changelog', maxBytes: 1_000_000, shiki: false },
 ] as const
 

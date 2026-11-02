@@ -19,15 +19,21 @@ import { Cards, Card } from 'vocs'
 
 Mint tokens to a recipient using an account with the issuer role. These examples use a token created on Moderato testnet.
 
+## Separate token supply from issuance and redemption
+
+Minting increases token supply; burning decreases it. Reserve funding and fiat redemptions happen offchain, so keep the approved request, token operation, and bank movement as separate records.
+
+For each operation, record the network, token contract, amount in base units, signing account, request ID, transaction hash, and outcome. Before retrying after a timeout, check whether the original transaction landed; a repeated mint creates more supply.
+
+A TIP-20 role authorizes contract calls, not regulatory approval. The [GENIUS Act guide](/docs/resources/guides/genius-act) covers the U.S. framework, and [payment reconciliation](/docs/resources/guides/payment-reconciliation) covers payment records.
+
 ## Stablecoin minting steps
 
 :::::steps
 
 ### Create the stablecoin to mint
 
-Before you can mint tokens, you need to create a stablecoin. Follow the [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) guide to deploy your token.
-
-Once you've created your token, you can proceed to grant the issuer role and mint tokens.
+Follow [Create a Stablecoin](/docs/guide/issuance/create-a-stablecoin) to deploy your token.
 
 ### Grant the stablecoin issuer role
 
@@ -247,7 +253,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Burn stablecoins
 
-To decrease supply, you can burn tokens from your own balance. Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
+To decrease supply, burn tokens from your own balance. Burning requires the **`ISSUER_ROLE`** and sufficient balance in the caller's account.
 
 <Demo.Container name="Burn Your Token" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Connect stepNumber={1} />
@@ -393,7 +399,7 @@ Use [`getMetadata`](https://viem.sh/tempo/actions/token.getMetadata) to check yo
 
 ### Separate stablecoin roles
 
-Assign the issuer role to dedicated treasury or minting addresses separate from your admin address. This enhances security by limiting the privileges of any single address.
+Assign the issuer role to dedicated treasury or minting addresses, separate from your admin address, so no single key holds every privilege.
 
 ## Stablecoin minting learning resources
 

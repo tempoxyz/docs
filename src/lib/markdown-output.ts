@@ -14,6 +14,7 @@ import { codeSamples } from '../../node_modules/vocs/dist/internal/openapi/sampl
 import { tempoAgentSetupCommands } from './ai-install-commands'
 import { docsLinkCards } from './docs-link-cards'
 import { loadTempoOpenApi } from './tempo-openapi'
+import { type TidxNetwork, tidxNetworks } from './tidx-networks'
 
 type MarkdownAttribute = {
   name?: string
@@ -26,6 +27,7 @@ type MarkdownExpression = {
     estree?: {
       body?: Array<{
         expression?: {
+          elements?: Array<{ type?: string; value?: unknown } | null>
           expressions?: unknown[]
           quasis?: Array<{ value?: { cooked?: string | null } }>
           type?: string
@@ -70,6 +72,7 @@ const presentationOnlyElements = new Set([
   'style',
   'title',
   'DocsHomeProductIcon',
+  'DocsIcon',
 ])
 const tempoReleasesUrl = 'https://github.com/tempoxyz/tempo/releases'
 
@@ -79,20 +82,34 @@ const interactiveDescriptions: Record<string, string> = {
   EarnWithdrawDemo:
     'In the interactive web page, restore the passkey test account from the deposit demo and redeem its full position in the verified Moderato pathUSD vault. Confirm the withdrawal and inspect the receipt. If the account has no shares, make a test deposit first.',
   EarnVaultDemo:
-    'In the interactive web page, inspect the automatically loaded verified Earn vault directory, starting with the testnet demo vault when available, or select another network and vault to inspect its asset, access rules, deposit status, withdrawal capabilities, and available liquidity. The demo makes read-only requests to Tempo API and starts on Moderato testnet. See the [verified vault API reference](/docs/api/earn#getverifiedearnvaults) for the request and response fields.',
+    'The interactive page defaults to Sentora pathUSD on Tempo mainnet and lets you switch to the pathUSD demo vault on Moderato testnet. The vault dropdown lists only the approved demo for the selected network. It reads that vault directly from Tempo API to show its asset, access rules, deposit status, withdrawal capabilities, and liquidity. See the [Earn API reference](/docs/api/earn) for request and response fields.',
+  SingleKeyAccountDemo:
+    'In the interactive web page, create a single-key account on Moderato testnet from a passkey, a non-extractable P-256 device key, or a secp256k1 private key, kept in the tab. The address comes from the key with no transaction. Then get test stablecoins from the faucet and pay 1 test stablecoin with the key. Each payment is a real testnet transaction.',
   PasskeyAccountDemo:
     'In the interactive web page, create a passkey account or reconnect an existing passkey, inspect and copy its address, and disconnect. Creating the account does not move or fund stablecoins.',
+  P256KeyDemo:
+    'In the interactive web page, create a non-extractable P-256 key with WebCrypto, kept in this browser’s IndexedDB, and see that the browser refuses to export it. Fund its test account on the Tempo Accounts devnet from the faucet, pay 1 AlphaUSD with no prompt, reload to see the key restored, then delete it. Each payment is a real devnet transaction.',
+  AccessKeyDemo:
+    'In the interactive web page, create a test account on the Tempo Accounts devnet whose signer is a non-extractable P-256 key in this browser, fund it with test AlphaUSD from the devnet faucet, authorize a second non-extractable P-256 browser key as an access key with a 10 AlphaUSD daily limit, a one-hour expiry, and transfers only, pay 2 AlphaUSD with it, attempt a 20 AlphaUSD payment that Tempo rejects, and revoke the key. Each step is a real devnet transaction.',
+  UpgradeAccountDemo:
+    'In the interactive web page, create a private-key account on the Tempo Accounts devnet, fund it from the faucet, and pay 1 AlphaUSD with it. Then upgrade it in place to a configurable account with the original key and a new backup key as signers and a threshold of 2. A payment signed by the original key alone is rejected, and a payment approved by both signers succeeds. The address and balance stay the same. Each step is a real devnet transaction.',
+  AccountSandbox:
+    'In the interactive web page, create a Tempo account on the Tempo Accounts devnet from its first signer: a passkey or a generated private key. Then get test funds, add signers, set weights and the threshold, authorize access keys with limits, and send payments. Every change is a real devnet transaction, so the page must be able to reach Tempo Accounts devnet.',
   AdminKeyDemo:
     'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   SupportedRoutesTable:
     'The interactive page lists every route in the live directory, read from GET https://api.tempo.xyz/v1/routes, ' +
-    "with each route's source and destination asset, funding methods, and whether fee coverage (1:1 delivery) is available.",
+    "with each route's source and destination asset, funding methods, and whether fee coverage (1:1 delivery) is available. " +
+    'To open a route in the Routes demo, use `/docs/routes/test?route=ROUTE_ID` with the route `id` from the directory.',
   RoutesTester:
-    'Open the interactive Routes API demo at /docs/routes/test. Choose source and destination assets, ' +
-    'optionally request subsidized 1:1 delivery, get a quote, create the transfer or deposit address, ' +
+    'Open the interactive Routes demo (Try a route) at /docs/routes/test. Choose source and destination assets, ' +
+    'get a quote (without a key, routes that support subsidies preview 1:1 delivery from a quote-only demo organization), ' +
+    'add an API key to create the transfer or deposit address, ' +
     'sign with Tempo Wallet (Tempo sources) or a browser wallet, and track delivery. ' +
     'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
+  GuideDemo:
+    "In the interactive web page, a demo runs the steps that follow on the Tempo Accounts devnet with the reader's own signers: a passkey on their device, or keys the page generates. Each step that changes the account sends a devnet transaction and shows its hash, next to what changed in the app and on the account. It runs only where the page can reach Tempo Accounts devnet.",
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',
   TempoMcpExplorer: 'Use the interactive web page to try the Tempo MCP server.',
   TerminalDemo:
@@ -138,7 +155,7 @@ const demoStepLabels: Record<string, string> = {
   QueryOrder: 'Query order',
   RevokeTokenRoles: 'Revoke token roles',
   ReceivePolicyDemo:
-    'Create a temporary Moderato account, accept AlphaUSD, hold BetaUSD, and recover the blocked payment.',
+    'Create a temporary Tempo Accounts devnet account, accept AlphaUSD, hold BetaUSD, and recover the blocked payment.',
   SendParallelPayments: 'Send parallel payments',
   SendPayment: 'Send payment',
   SendPaymentWithMemo: 'Send payment with memo',
@@ -295,7 +312,31 @@ function rewriteNode(
   if (node.name === 'Demo.Container') return renderDemo(node)
   if (node.name === 'MermaidDiagram' || node.name === 'StaticMermaidDiagram')
     return renderMermaid(node)
-  if (node.name === 'ZoneDiagram') {
+  if (node.name === 'EarnStrategyCards')
+    return [
+      {
+        type: 'list',
+        ordered: false,
+        spread: false,
+        children: (node.children ?? [])
+          .filter((child) => child.name === 'EarnStrategyCard')
+          .map((card) => ({
+            type: 'listItem',
+            spread: false,
+            children: [
+              paragraph([
+                strong(requiredStringAttribute(card, 'title')),
+                text(` — ${requiredStringAttribute(card, 'description')}`),
+              ]),
+            ],
+          })),
+      },
+    ]
+  if (
+    node.name === 'ZoneDiagram' ||
+    node.name === 'AccountDiagram' ||
+    node.name === 'EarnIllustration'
+  ) {
     const alt = requiredStringAttribute(node, 'alt')
     const caption = optionalStaticStringAttribute(node, 'caption')
     return [paragraph([text(alt)]), ...(caption ? [paragraph([text(caption)])] : [])]
@@ -305,9 +346,17 @@ function rewriteNode(
     rewriteChildren(node, headingDepth, context)
     return [...(node.children ?? []), paragraph([text(alt)])]
   }
+  if (node.name === 'TidxQuery' && node.attributes?.some((attribute) => attribute.name === 'sql'))
+    return renderTidxQuery(node)
   if (node.name === 'Badge') return renderBadge(node)
   if (node.name === 'Callout') return renderCallout(node, headingDepth, context)
-  if (node.name === 'DocsLinkButton') return renderLinkButton(node)
+  if (
+    node.name === 'DocsLinkButton' ||
+    node.name === 'ChevronLink' ||
+    node.name === 'HomeColorLink' ||
+    node.name === 'HomeGuideButton'
+  )
+    return renderLinkButton(node)
   if (node.name === 'OpenApi.Endpoints' || node.name === 'OpenApi.Playground')
     return renderOpenApi(node, headingDepth, context.openApi)
   if (node.name && interactiveDescriptions[node.name])
@@ -467,6 +516,54 @@ function renderMermaid(node: MarkdownNode): MarkdownNode[] {
   return [{ type: 'code', lang: 'mermaid', value: chart.trim() }]
 }
 
+function renderTidxQuery(node: MarkdownNode): MarkdownNode[] {
+  const sql = expressionString(node, 'sql') ?? stringAttribute(node, 'sql')
+  if (!sql) throw new TypeError('TidxQuery requires a static sql attribute for Markdown output.')
+  const networkName = optionalStaticStringAttribute(node, 'network') ?? 'mainnet'
+  if (!(networkName in tidxNetworks))
+    throw new TypeError(`Unknown TidxQuery network for Markdown output: ${networkName}`)
+  const network = tidxNetworks[networkName as TidxNetwork]
+  const signatures = staticStringList(node, 'signature')
+  // Mirror the widget's own request so the exported command returns the same rows.
+  const command = [
+    `curl --get "${network.endpoint}/query" \\`,
+    `  --data-urlencode "chainId=${network.chainId}" \\`,
+    '  --data-urlencode "engine=clickhouse" \\',
+    ...signatures.map((signature) => `  --data-urlencode "signature=${signature}" \\`),
+    '  --data-urlencode "sql@query.sql"',
+  ].join('\n')
+  return [
+    paragraph([
+      text('Save this query as '),
+      inlineCode('query.sql'),
+      text(
+        ` and run it against the public Tempo ${networkName} indexer (chain ID ${network.chainId}).`,
+      ),
+    ]),
+    { type: 'code', lang: 'sql', value: sql.trim() },
+    { type: 'code', lang: 'bash', value: command },
+  ]
+}
+
+function staticStringList(node: MarkdownNode, name: string): string[] {
+  const attribute = node.attributes?.find(
+    (candidate) => candidate.type === 'mdxJsxAttribute' && candidate.name === name,
+  )
+  if (!attribute) return []
+  if (typeof attribute.value === 'string') return [attribute.value]
+  const expression = attribute.value?.data?.estree?.body?.[0]?.expression
+  const single = expressionString(node, name)
+  if (single !== undefined) return [single]
+  if (
+    expression?.type === 'ArrayExpression' &&
+    expression.elements?.every(
+      (element) => element?.type === 'Literal' && typeof element.value === 'string',
+    )
+  )
+    return expression.elements.map((element) => String(element?.value))
+  throw new TypeError(`${node.name} requires a static ${name} attribute for Markdown output.`)
+}
+
 function renderBadge(node: MarkdownNode): MarkdownNode[] {
   if (!node.children?.length)
     throw new TypeError('Badge requires text content for Markdown output.')
@@ -492,8 +589,9 @@ function renderCallout(
 
 function renderLinkButton(node: MarkdownNode): MarkdownNode[] {
   const destination = requiredStringAttribute(node, 'href')
-  const label = plainText(node.children ?? [])
-  if (!label) throw new TypeError('DocsLinkButton requires text content for Markdown output.')
+  // Home guide buttons read "Get started"; the guide's name makes the readable link.
+  const label = optionalStaticStringAttribute(node, 'guide') ?? plainText(node.children ?? [])
+  if (!label) throw new TypeError(`${node.name} requires text content for Markdown output.`)
   const content = link(label, destination)
   return node.type === 'mdxJsxTextElement' ? [content] : [paragraph([content])]
 }
@@ -672,19 +770,6 @@ function renderHtmlLink(
   context: MarkdownContext,
 ): MarkdownNode[] {
   const href = requiredStringAttribute(node, 'href')
-  const [title, ...description] = node.children ?? []
-  // Homepage guide cards use a bold title followed by a description inside the same link.
-  if (title?.name === 'strong' && description.some((child) => child.name === 'span')) {
-    rewriteChildren(title, headingDepth, context)
-    const content: MarkdownNode = { type: 'root', children: description }
-    rewriteChildren(content, headingDepth, context)
-    return [
-      paragraph([
-        link(plainText(title.children ?? []), href),
-        text(` — ${plainText(content.children ?? [])}`),
-      ]),
-    ]
-  }
   rewriteChildren(node, headingDepth, context)
   const content: MarkdownNode = { type: 'link', url: href, children: node.children ?? [] }
   return node.type === 'mdxJsxTextElement' ? [content] : [paragraph([content])]

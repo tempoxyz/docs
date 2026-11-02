@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
-import { describe, expect, it } from 'vitest'
-import { prepareTempoOpenApi } from './tempo-openapi'
+import { describe, expect, it, vi } from 'vitest'
+import { loadTempoOpenApi, prepareTempoOpenApi } from './tempo-openapi'
 
 describe('Tempo authentication documentation routes', () => {
   it('keeps Console operations separate from the API-key guide in routes and agent exports', async () => {
@@ -70,6 +70,21 @@ describe('Tempo authentication documentation routes', () => {
 })
 
 describe('Tempo OpenAPI examples', () => {
+  it('omits admin vault lists while preserving public vault detail reads', () => {
+    const source = {
+      paths: {
+        '/v1/earn/vaults': { get: { operationId: 'getEarnVaults' } },
+        '/v1/earn/vaults/verified': { get: { operationId: 'getVerifiedEarnVaults' } },
+        '/v1/earn/vaults/{vaultId}': { get: { operationId: 'getEarnVault' } },
+      },
+    }
+    const result = prepareTempoOpenApi(source)
+    expect(result.paths).toEqual({
+      '/v1/earn/vaults/{vaultId}': source.paths['/v1/earn/vaults/{vaultId}'],
+    })
+    expect(Object.keys(source.paths)).toHaveLength(3)
+  })
+
   it('replaces provider metadata in field, object, and list samples only', () => {
     const vault = {
       label: 'Provider vault',
@@ -132,13 +147,12 @@ describe('Tempo OpenAPI examples', () => {
     expect(result.components.schemas.EarnVaultList.examples).toEqual([{ data: [expected] }])
     expect(result.components.schemas.VerifiedEarnVaultList.examples).toEqual([{ data: [expected] }])
     expect(result.components.schemas.UnrelatedSchema).toEqual(vaultSchema)
-    expect(result.paths).toEqual(source.paths)
+    expect(result.paths).toEqual({})
+    expect(source.paths).toHaveProperty('/v1/earn/vaults')
     expect(source.components.schemas.EarnVault.examples).toEqual([vault])
   })
 
   const vaultReadPaths = [
-    '/v1/earn/vaults',
-    '/v1/earn/vaults/verified',
     '/v1/earn/vaults/{vaultId}',
     '/v1/earn/vaults/{vaultId}/share-prices',
     '/v1/earn/vaults/{vaultId}/positions/{address}',
@@ -339,4 +353,15 @@ describe('Tempo OpenAPI examples', () => {
     expect(result.paths['/rpc'].post['x-openrpc']).toBe('https://api.tempo.xyz/openrpc.json')
     expect(result.paths['/inline']).toEqual(spec.paths['/inline'])
   })
+})
+
+it.each([null, [], 'invalid'])('rejects non-object OpenAPI responses: %j', async (body) => {
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json(body))
+  try {
+    await expect(loadTempoOpenApi('https://example.test/openapi.json')).rejects.toThrow(
+      'JSON object',
+    )
+  } finally {
+    fetcher.mockRestore()
+  }
 })

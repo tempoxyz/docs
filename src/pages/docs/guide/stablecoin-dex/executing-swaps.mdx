@@ -176,127 +176,19 @@ function Sell() {
 
 :::
 
-### Approve stablecoin spend
+<span id="approve-stablecoin-spend" />
 
-To execute a swap, you need to approve the Stablecoin DEX contract to spend the token you're using to fund the swap.
-
-:::code-group
-
-```tsx twoslash [Buy.tsx]
-// @noErrors
-import { Actions, Addresses } from 'viem/tempo' // [!code ++]
-import { Hooks } from 'wagmi/tempo'
-import { formatUnits, parseUnits } from 'viem'
-import { useSendCallsSync } from 'wagmi' // [!code ++]
-
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-const betaUsd = '0x20c0000000000000000000000000000000000002'
-
-function Buy() {
-  const amount = parseUnits('10', 6)
-
-  // How much AlphaUSD do I need to spend to receive 10 BetaUSD?
-  const { data: quote, error } = Hooks.dex.useBuyQuote({
-    tokenIn: alphaUsd,
-    tokenOut: betaUsd,
-    amountOut: amount,
-  })
-
-  // Calculate 0.5% slippage tolerance
-  const slippageBps = 50n
-  const maxAmountIn = quote
-    ? (quote * (10_000n + slippageBps) + 9_999n) / 10_000n
-    : 0n
-
-  const sendCalls = useSendCallsSync() // [!code ++]
-
-  if (error) return <div>{error.message}</div>
-  if (quote === undefined) return <div>Loading quote…</div>
-
-  return (
-    <div>
-      <div>Quote: {formatUnits(quote, 6)}</div>
-      <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div>
-      <button type="button" disabled={sendCalls.isPending} onClick={() => { // [!code ++]
-        const calls = [ // [!code ++]
-          Actions.token.approve.call({ // [!code ++]
-            amount: maxAmountIn, // Approve the max amount with slippage // [!code ++]
-            spender: Addresses.stablecoinDex, // [!code ++]
-            token: alphaUsd, // [!code ++]
-          }), // [!code ++]
-        ] // [!code ++]
-        sendCalls.sendCallsSync({ calls }) // [!code ++]
-      }}> {/* [!code ++] */}
-        Approve Spend {/* [!code ++] */}
-      </button> {/* [!code ++] */}
-    </div>
-  )
-}
-```
-
-```tsx twoslash [Sell.tsx]
-// @noErrors
-import { Actions, Addresses } from 'viem/tempo' // [!code ++]
-import { Hooks } from 'wagmi/tempo'
-import { formatUnits, parseUnits } from 'viem'
-import { useSendCallsSync } from 'wagmi' // [!code ++]
-
-const alphaUsd = '0x20c0000000000000000000000000000000000001'
-const betaUsd = '0x20c0000000000000000000000000000000000002'
-
-function Sell() {
-  const amount = parseUnits('10', 6)
-
-  // How much BetaUSD will I receive for 10 AlphaUSD?
-  const { data: quote, error } = Hooks.dex.useSellQuote({
-    tokenIn: alphaUsd,
-    tokenOut: betaUsd,
-    amountIn: amount,
-  })
-
-  // Calculate 0.5% slippage tolerance
-  const slippageBps = 50n
-  const minAmountOut = quote
-    ? quote * (10_000n - slippageBps) / 10_000n
-    : 0n
-
-  const sendCalls = useSendCallsSync() // [!code ++]
-
-  if (error) return <div>{error.message}</div>
-  if (quote === undefined) return <div>Loading quote…</div>
-
-  return (
-    <div>
-      <div>Quote: {formatUnits(quote, 6)}</div>
-      <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div>
-      <button type="button" disabled={sendCalls.isPending} onClick={() => { // [!code ++]
-        const calls = [ // [!code ++]
-          Actions.token.approve.call({ // [!code ++]
-            amount, // Approve the exact amount being sold // [!code ++]
-            spender: Addresses.stablecoinDex, // [!code ++]
-            token: alphaUsd, // [!code ++]
-          }), // [!code ++]
-        ] // [!code ++]
-        sendCalls.sendCallsSync({ calls }) // [!code ++]
-      }}> {/* [!code ++] */}
-        Approve Spend {/* [!code ++] */}
-      </button> {/* [!code ++] */}
-    </div>
-  )
-}
-```
-
-:::
+The Stablecoin DEX pulls TIP-20 input tokens through [implicit approval](/docs/protocol/tip20/spec#implicit-approvals-for-listed-precompiles), so a separate `approve` transaction is not required. It still checks balances, token transfer policies, and access-key spending limits. Keep enough funds for the input amount and network fees.
 
 ### Execute a swap
 
-Batch the token approval with the swap in a single transaction for better UX.
+Submit the buy or sell call with the slippage bound calculated above. A quote does not reserve liquidity; the swap reverts if the bound cannot be met.
 
 :::code-group
 
 ```tsx twoslash [Buy.tsx]
 // @noErrors
-import { Actions, Addresses } from 'viem/tempo'
+import { Actions } from 'viem/tempo'
 import { Hooks } from 'wagmi/tempo'
 import { formatUnits, parseUnits } from 'viem'
 import { useSendCallsSync } from 'wagmi'
@@ -331,11 +223,6 @@ function Buy() {
       <div>Max input (0.5% slippage): {formatUnits(maxAmountIn, 6)}</div>
       <button type="button" disabled={sendCalls.isPending} onClick={() => {
         const calls = [
-          Actions.token.approve.call({
-            amount: maxAmountIn, // Approve the max amount with slippage
-            spender: Addresses.stablecoinDex,
-            token: alphaUsd,
-          }),
           Actions.dex.buy.call({ // [!code ++]
             amountOut: amount, // [!code ++]
             maxAmountIn, // [!code ++]
@@ -354,7 +241,7 @@ function Buy() {
 
 ```tsx twoslash [Sell.tsx]
 // @noErrors
-import { Actions, Addresses } from 'viem/tempo'
+import { Actions } from 'viem/tempo'
 import { Hooks } from 'wagmi/tempo'
 import { formatUnits, parseUnits } from 'viem'
 import { useSendCallsSync } from 'wagmi'
@@ -389,11 +276,6 @@ function Sell() {
       <div>Min output (0.5% slippage): {formatUnits(minAmountOut, 6)}</div>
       <button type="button" disabled={sendCalls.isPending} onClick={() => {
         const calls = [
-          Actions.token.approve.call({
-            amount, // Approve the exact amount being sold
-            spender: Addresses.stablecoinDex,
-            token: alphaUsd,
-          }),
           Actions.dex.sell.call({ // [!code ++]
             amountIn: amount, // [!code ++]
             minAmountOut, // [!code ++]

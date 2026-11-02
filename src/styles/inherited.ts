@@ -29,8 +29,6 @@ export const inherited = {
       'color-mix(in srgb, var(--color-foreground) 6%, transparent) !custom',
     tempoBorder: 'var(--tempo-border) !custom',
     vocsBorderColorPrimary: 'var(--vocs-border-color-primary) !custom',
-    colorMixInSrgbTempoCalloutAccent10VocsBackgroundColorSurface:
-      'color-mix( in srgb, var(--tempo-callout-accent) 10%, var(--vocs-background-color-surface) ) !custom',
     colorMixInSrgbForeground12Transparent:
       'color-mix(in srgb, var(--foreground) 12%, transparent) !custom',
     colorMixInSrgbForeground4Transparent:
@@ -120,9 +118,6 @@ export const inherited = {
     surfacePage: 'var(--surface-page) !custom',
     textColorPrimary: 'var(--text-color-primary) !custom',
     surfacePanel: 'var(--surface-panel) !custom',
-    colorMixInSrgbTempoCalloutAccent28Transparent:
-      'color-mix(in srgb, var(--tempo-callout-accent) 28%, transparent) !custom',
-    tempoCalloutAccent: 'var(--tempo-callout-accent) !custom',
     colorMixInSrgbForeground78Transparent:
       'color-mix(in srgb, var(--foreground) 78%, transparent) !custom',
     colorMixInSrgbForeground72Transparent:

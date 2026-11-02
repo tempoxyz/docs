@@ -13,7 +13,7 @@ function links(value: unknown): string[] {
   ]
 }
 
-// Retained landing URLs overlap the current Accounts and tools hubs.
+// Retained landing URLs overlap the current Tempo EVM and tools hubs.
 const retainedLandings = new Set([
   '/docs/build',
   '/docs/payments',
@@ -74,6 +74,33 @@ describe('documentation sidebar coverage', () => {
   })
 })
 
+describe('resource guide navigation', () => {
+  it('keeps guides in a collapsed submenu below the main onboarding content', () => {
+    type SidebarNode = { text?: string; link?: string; collapsed?: boolean; items?: SidebarNode[] }
+    const sidebar = sidebarFor('/get-started') as SidebarNode[]
+    const resources = sidebar.at(-1)
+    expect(resources?.text).toBe('Resources')
+    expect(resources?.items?.[0]).toMatchObject({ text: 'Guides', collapsed: true })
+    const guides = resources?.items?.[0]
+    expect(resources?.items?.find(({ text }) => text === 'Partner guides')).toBeUndefined()
+    expect(guides?.items?.filter(({ items }) => items).every(({ collapsed }) => collapsed)).toBe(
+      true,
+    )
+    const compliance = guides?.items?.find(({ text }) => text === 'Compliance and security')
+    expect(links(compliance)).toContain('/docs/resources/guides/payment-screening')
+    expect(links(compliance)).toContain('/docs/resources/guides/compliance-controls')
+    expect(links(resources)).toContain('/docs/resources/guides')
+    expect(sidebar[0].items?.some(({ text }) => text === 'Guides')).toBe(false)
+  })
+
+  it('assigns resource guides to Get Started without a new primary section', () => {
+    for (const route of routes.filter((route) => route.startsWith('/docs/resources/'))) {
+      expect(getActiveDocsSection(route)?.id).toBe('overview')
+      expect(sidebarFor(route)).toBe(sidebarFor('/get-started'))
+    }
+  })
+})
+
 describe('specification navigation ownership', () => {
   it('assigns each route prefix to only one section', () => {
     const prefixes = [...docsSections, ...docsUtilitySections].flatMap(({ matches }) => matches)
@@ -82,8 +109,8 @@ describe('specification navigation ownership', () => {
 
   it.each([
     ['/docs/protocol/transactions/AccountKeychain', 'developers', '/docs/development'],
-    ['/docs/protocol/tip20/virtual-addresses', 'accounts', '/docs/accounts'],
-    ['/docs/protocol/tip403/receive-policies', 'accounts', '/docs/accounts'],
+    ['/docs/protocol/tip20/virtual-addresses', 'developers', '/docs/development'],
+    ['/docs/protocol/tip403/receive-policies', 'developers', '/docs/development'],
     ...['', '/architecture', '/accounts', '/bridging', '/rpc', '/execution', '/proving'].map(
       (suffix) => [`/docs/protocol/zones${suffix}`, 'zones', '/docs/zones'],
     ),

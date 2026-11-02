@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 import { base58Encode } from '../src/lib/base58'
 
 // Drives the Routes demo against a scripted Routes API, browser wallet, and Tempo RPC, so every
@@ -460,6 +460,120 @@ async function mockSolanaWallet(page: Page) {
   })
 }
 
+// A 1 USDC payment built and signed with @stellar/stellar-sdk, as Routes prepares it.
+const stellarSender = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR'
+const stellarUnsigned =
+  'AAAAAgAAAACKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXAAAJxAAAAAAB1vNFgAAAAEAAAAAAAAAAAAAAABw29iAAAAAAQAAAAVxXzEyMwAAAAAAAAEAAAAAAAAAAQAAAACBOXcOqH0XX1ajVGbDTH7My42KkbTuN6Jd9g9bj8mzlAAAAAFVU0RDAAAAADuZETgO/piLoKiQDrHP5E82b32+lGvtB3JA9/Yk3xXFAAAAAACYloAAAAAAAAAAAA=='
+const stellarSigned =
+  'AAAAAgAAAACKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXAAAJxAAAAAAB1vNFgAAAAEAAAAAAAAAAAAAAABw29iAAAAAAQAAAAVxXzEyMwAAAAAAAAEAAAAAAAAAAQAAAACBOXcOqH0XX1ajVGbDTH7My42KkbTuN6Jd9g9bj8mzlAAAAAFVU0RDAAAAADuZETgO/piLoKiQDrHP5E82b32+lGvtB3JA9/Yk3xXFAAAAAACYloAAAAAAAAAAAbQPb1wAAABAaTrtGwYVTE+mI5LshncTmJv5Xdgp6PT+KHuxrSAm1CsJnsPYZBQhy2fzC3yWqEQy+TVUTArm5w5l2owSR3BqCQ=='
+const stellarHash = 'daa3f6e13cd2e76bca765cb6a4ad21ac0e674953b57599a02c49feea8cb89339'
+/**
+ * Hana Wallet's injected Stellar provider, and the Horizon node the demo submits through. Horizon
+ * holds the payment once it is submitted; with `lostAnswer`, the submission's answer never arrives
+ * and the payment lands only after the demo's first check.
+ */
+async function mockStellarWallet(page: Page, { lostAnswer = false } = {}) {
+  await page.addInitScript(
+    ({ account, signedTransaction }) => {
+      const signed: { xdr: string; accountToSign: string; networkPassphrase: string }[] = []
+      const stellar = {
+        getPublicKey: async () => account,
+        async signTransaction(request: (typeof signed)[number]) {
+          signed.push(request)
+          return signedTransaction
+        },
+      }
+      Object.assign(window, { hanaWallet: { stellar }, __stellarSigned: signed })
+    },
+    { account: stellarSender, signedTransaction: stellarSigned },
+  )
+  const submitted: string[] = []
+  let misses = 0
+  await page.route('https://horizon.stellar.org/**', (route) => {
+    const request = route.request()
+    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors })
+    if (request.method() === 'POST') {
+      submitted.push(new URLSearchParams(request.postData() ?? '').get('tx') ?? '')
+      if (lostAnswer) {
+        misses = 1
+        return route.abort('failed')
+      }
+    } else if (submitted.length === 0 || misses > 0) {
+      misses = Math.max(0, misses - 1)
+      return route.fulfill({
+        status: 404,
+        headers: cors,
+        contentType: 'application/json',
+        body: '{}',
+      })
+    }
+    return route.fulfill({
+      headers: cors,
+      contentType: 'application/json',
+      body: JSON.stringify({ hash: stellarHash, successful: true }),
+    })
+  })
+  return submitted
+}
+
+/** Create a Stellar USDC to Tempo OUSD transfer whose action is the prepared envelope. */
+async function createStellarTransfer(page: Page) {
+  const stellarToTempo = {
+    id: 'stellar-usdc-tempo-ousd',
+    sourceChain: { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' },
+    sourceToken: {
+      tokenKey:
+        'stellar:pubnet/asset:USDC-GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN',
+      symbol: 'USDC',
+      decimals: 7,
+    },
+    destinationChain: chains.tempo,
+    destinationToken: {
+      tokenKey: 'eip155:4217/erc20:0x20c0000000000000000000006a37da5c996874be',
+      symbol: 'OUSD',
+      decimals: 6,
+    },
+    capabilities: { depositAddress: true, transfer: { modes: ['exactSource'] } },
+    subsidies: { depositAddress: true, transfer: false },
+  }
+  const api = await mockRoutesApi(page, {
+    'GET /v1/routes': [{ body: { data: [baseToTempo, stellarToTempo], nextCursor: null } }],
+    'GET /v1/routes/transfers/quote': [{ body: transferQuote }],
+    'POST /v1/routes/transfers': [
+      {
+        status: 201,
+        body: {
+          ...createdTransfer,
+          action: {
+            type: 'stellar:xdr',
+            networkPassphrase: 'Public Global Stellar Network ; September 2015',
+            xdr: stellarUnsigned,
+          },
+        },
+      },
+    ],
+    'POST /v1/routes/transfers/rtx_1/source-transactions': [
+      { body: { id: 'rtx_1', status: 'processing' } },
+    ],
+    'GET /v1/routes/transfers/rtx_1': [
+      { body: { id: 'rtx_1', status: 'completed', destinationAmount: usd('0.9991') } },
+    ],
+  })
+  await openDemo(page)
+  await chooseRoute(page, ['Stellar', 'USDC'], ['Tempo', 'OUSD'])
+  await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
+  await page.getByLabel('Amount (USDC)').fill('1')
+  await lifecycle(page).getByRole('button', { name: '(Connect)' }).first().click()
+  await expect(page.getByLabel('Sender on Stellar')).toHaveValue(stellarSender)
+  await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+  await button(page, 'Get quote').click()
+  await button(page, 'Create').click()
+  return api
+}
+/** What the injected Stellar wallet was asked to sign. */
+const signedByStellarWallet = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __stellarSigned: unknown[] }).__stellarSigned)
+
 async function openDemo(page: Page) {
   await page.goto(demo)
   // The anonymous directory load proves the demo has hydrated before the key is added.
@@ -471,11 +585,16 @@ const fromSelect = (page: Page, label: string) =>
   page.getByRole('group', { name: 'From' }).getByLabel(label)
 const toSelect = (page: Page, label: string) =>
   page.getByRole('group', { name: 'To' }).getByLabel(label)
+/** Opens a route picker and chooses the option with this label. */
+async function pick(picker: Locator, label: string) {
+  await picker.click()
+  await picker.page().getByRole('option', { name: label, exact: true }).click()
+}
 async function chooseRoute(page: Page, from: [string, string], to: [string, string]) {
-  await fromSelect(page, 'Network').selectOption({ label: from[0] })
-  await fromSelect(page, 'Asset').selectOption({ label: from[1] })
-  await toSelect(page, 'Network').selectOption({ label: to[0] })
-  await toSelect(page, 'Asset').selectOption({ label: to[1] })
+  await pick(fromSelect(page, 'Network'), from[0])
+  await pick(fromSelect(page, 'Asset'), from[1])
+  await pick(toSelect(page, 'Network'), to[0])
+  await pick(toSelect(page, 'Asset'), to[1])
 }
 const lifecycle = (page: Page) => page.locator('.routes-test-lifecycle')
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
@@ -493,9 +612,9 @@ async function createBaseDepositAddress(page: Page) {
   await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
   await button(page, 'Deposit address').click()
   await page.getByLabel('Amount (USDC)').fill('1')
-  await button(page, 'Get quote').click()
   await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
   await page.getByLabel('Refund address on Base').fill(sender)
+  await button(page, 'Get quote').click()
   await button(page, 'Create').click()
   await expect(lifecycle(page)).toContainText(depositAddress)
 }
@@ -511,20 +630,26 @@ test.describe('Routes demo', () => {
     expect(api.to('GET', '/v1/routes').at(-1)?.headers['tempo-api-key']).toBe(key)
 
     // A single valid continuation fills itself in.
-    await fromSelect(page, 'Network').selectOption({ label: 'Tempo' })
-    await expect(fromSelect(page, 'Asset')).toHaveValue(tempoToTron.sourceToken.tokenKey)
-    await expect(toSelect(page, 'Network')).toHaveValue(chains.tron.id)
-    await expect(toSelect(page, 'Asset')).toHaveValue(tempoToTron.destinationToken.tokenKey)
+    await pick(fromSelect(page, 'Network'), 'Tempo')
+    await expect(fromSelect(page, 'Asset')).toHaveAttribute(
+      'data-value',
+      tempoToTron.sourceToken.tokenKey,
+    )
+    await expect(toSelect(page, 'Network')).toHaveAttribute('data-value', chains.tron.id)
+    await expect(toSelect(page, 'Asset')).toHaveAttribute(
+      'data-value',
+      tempoToTron.destinationToken.tokenKey,
+    )
     await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
     await expect(button(page, 'Deposit address')).toBeDisabled()
 
     // Non-EVM sources fund a deposit address.
-    await fromSelect(page, 'Network').selectOption({ label: 'Solana' })
+    await pick(fromSelect(page, 'Network'), 'Solana')
     await expect(button(page, 'Transfer')).toBeDisabled()
     await expect(button(page, 'Deposit address')).toHaveAttribute('aria-pressed', 'true')
-    // Deposit quotes price the route alone; the recipient and refund address come at creation.
+    // Deposit quotes use the recipient and refund address the address is created with.
     await expect(page.getByLabel('Amount (USDC)')).toBeVisible()
-    await expect(page.getByLabel('Refund address on Solana')).toHaveCount(0)
+    await expect(page.getByLabel('Refund address on Solana')).toBeVisible()
 
     // Both flows, with the subsidy offered.
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
@@ -674,29 +799,36 @@ test.describe('Routes demo', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
-    await expect(page.getByLabel('Recipient on Tempo')).toHaveCount(0)
-    await button(page, 'Get quote').click()
-
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.eFeesNone')
-    const quoteQuery = Object.fromEntries(
-      api.to('GET', '/v1/routes/deposit-addresses/quote')[0].query,
-    )
-    expect(quoteQuery).toMatchObject({ subsidize: 'true', amount: '1000000' })
-    expect(quoteQuery).not.toHaveProperty('recipient')
-    expect(quoteQuery).not.toHaveProperty('refundAddress')
-
-    // The deposit address is on the source network and lands on Tempo, where Tempo Wallet can
-    // fill in the recipient.
-    await expect(lifecycle(page)).toContainText(
-      'Routes creates a Base address for this route. USDC sent to it lands automatically as USDC.e in the Tempo wallet below.',
-    )
-    await expect(lifecycle(page).getByRole('button', { name: '(Connect)' })).toBeEnabled()
+    // The recipient is on Tempo, where Tempo Wallet can fill it in.
+    await expect(lifecycle(page).getByRole('button', { name: '(Connect)' }).first()).toBeEnabled()
     await expect(page.getByLabel('Recipient on Tempo')).toHaveAttribute(
       'placeholder',
       'Tempo destination wallet',
     )
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Base').fill(sender)
+    await button(page, 'Get quote').click()
+
+    // Tempo covers the gap between the routed amount (0.9591) and 1:1 delivery.
+    await expect(lifecycle(page)).toContainText(
+      'Recipient gets1 USDC.eCovered by Tempo0.0409 USDC.eFeesNone',
+    )
+    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
+    const quoteQuery = Object.fromEntries(
+      api.to('GET', '/v1/routes/deposit-addresses/quote')[0].query,
+    )
+    // Several deposit routes only quote with both addresses, so the quote carries them.
+    expect(quoteQuery).toMatchObject({
+      subsidize: 'true',
+      amount: '1000000',
+      recipient: tempoRecipient,
+      refundAddress: sender,
+    })
+
+    // The deposit address is on the source network and lands at the quoted Tempo recipient.
+    await expect(lifecycle(page)).toContainText(
+      'Routes creates a Base address for this route. USDC sent to it lands automatically as USDC.e at the Tempo recipient you quoted.',
+    )
     await button(page, 'Create').click()
     await expect(lifecycle(page)).toContainText(depositAddress)
     await expect(lifecycle(page)).toContainText('Watching for your deposit')
@@ -908,7 +1040,8 @@ test.describe('Routes demo', () => {
     )
     await button(page, 'Retry').click()
     await expect(fromSelect(page, 'Network')).toBeEnabled()
-    await expect(fromSelect(page, 'Network').locator('option')).toHaveCount(4)
+    await fromSelect(page, 'Network').click()
+    await expect(page.getByRole('listbox', { name: 'Network' }).getByRole('option')).toHaveCount(3)
   })
 
   test('explains the live Tron failures, and quotes without 1:1 when inventory runs out', async ({
@@ -936,6 +1069,8 @@ test.describe('Routes demo', () => {
     await chooseRoute(page, ['Tron', 'USDT'], ['Tempo', 'USDT0'])
     await expect(button(page, 'Transfer')).toBeDisabled()
     await page.getByLabel('Amount (USDT)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Tron').fill(tronRecipient)
     await button(page, 'Get quote').click()
     await expect(lifecycle(page)).toContainText(
       'No quote is available for this route right now. Try another amount, or try again later. (quote_not_available · request req_tron_dep)',
@@ -1036,8 +1171,6 @@ test.describe('Routes demo wallets', () => {
 
     // Solana: a Wallet Standard wallet, for the deposit address's refunds.
     await chooseRoute(page, ['Solana', 'USDC'], ['Tempo', 'USDC.e'])
-    await page.getByLabel('Amount (USDC)').fill('1')
-    await button(page, 'Get quote').click()
     await connectFor('Refund address on Solana').click()
     await expect(page.getByLabel('Refund address on Solana')).toHaveValue(solanaAccount)
   })
@@ -1122,6 +1255,53 @@ test.describe('Routes demo wallets', () => {
     })
   })
 
+  test('signs the prepared Stellar envelope with an injected wallet and submits it once', async ({
+    page,
+  }) => {
+    const submitted = await mockStellarWallet(page)
+    const api = await createStellarTransfer(page)
+    await expect(lifecycle(page)).toContainText(
+      'Hana Wallet signs one transaction from the sender.',
+    )
+    await button(page, 'Sign and send').click()
+    await expect(lifecycle(page)).toContainText('Delivered 0.9991 OUSD.', { timeout: 20_000 })
+
+    expect(await signedByStellarWallet(page)).toEqual([
+      {
+        xdr: stellarUnsigned,
+        accountToSign: stellarSender,
+        networkPassphrase: 'Public Global Stellar Network ; September 2015',
+      },
+    ])
+    expect(submitted).toEqual([stellarSigned])
+    // Stellar hashes register without a 0x prefix.
+    expect(api.to('POST', '/v1/routes/transfers/rtx_1/source-transactions')[0].body).toEqual({
+      transactionHashes: [stellarHash],
+    })
+    await expect(
+      lifecycle(page).locator(`a[href="https://stellar.expert/explorer/public/tx/${stellarHash}"]`),
+    ).toHaveCount(1)
+  })
+
+  test('registers a Stellar payment that landed after its answer was lost, without signing again', async ({
+    page,
+  }) => {
+    const submitted = await mockStellarWallet(page, { lostAnswer: true })
+    const api = await createStellarTransfer(page)
+    await button(page, 'Sign and send').click()
+    await expect(lifecycle(page)).toContainText(
+      'Horizon could not be reached. Sign and send again; the payment can land only once.',
+    )
+    await button(page, 'Sign and send').click()
+    await expect(lifecycle(page)).toContainText('Delivered 0.9991 OUSD.', { timeout: 20_000 })
+
+    expect(await signedByStellarWallet(page)).toHaveLength(1)
+    expect(submitted).toHaveLength(1)
+    expect(api.to('POST', '/v1/routes/transfers/rtx_1/source-transactions')[0].body).toEqual({
+      transactionHashes: [stellarHash],
+    })
+  })
+
   test('funds a Solana deposit address with a Wallet Standard wallet', async ({ page }) => {
     const solanaDeposit = 'So11111111111111111111111111111111111111112'
     await mockSolanaWallet(page)
@@ -1136,9 +1316,9 @@ test.describe('Routes demo wallets', () => {
     await openDemo(page)
     await chooseRoute(page, ['Solana', 'USDC'], ['Tempo', 'USDC.e'])
     await page.getByLabel('Amount (USDC)').fill('1')
-    await button(page, 'Get quote').click()
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Solana').fill(solanaAccount)
+    await button(page, 'Get quote').click()
     await button(page, 'Create').click()
     await button(page, 'Send with Phantom').click()
     await expect(button(page, 'Sent')).toBeVisible()
@@ -1167,17 +1347,22 @@ test.describe('Routes demo wallets', () => {
 
 const keyMissing = apiError(401, 'api_key_missing', 'An API key is required.', 'req_missing')
 const organizationQuote = { ...subsidizedDepositQuote, destinationAmount: usd('0.9991') }
+const unsubsidizedDepositQuote = { ...subsidizedDepositQuote, subsidize: false }
+// The same routes with no subsidy, so keyless quotes use public pricing.
+const plainDirectory = {
+  body: {
+    data: directory.body.data.map((route) => ({ ...route, subsidies: null })),
+    nextCursor: null,
+  },
+}
 
 test.describe('Routes demo without a key', () => {
-  test('quotes at public pricing, then prices for the organization once a key is added', async ({
+  test('previews 1:1 delivery with the docs key, then prices for the organization once a key is added', async ({
     page,
   }) => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
-      'GET /v1/routes/deposit-addresses/quote': [
-        { body: { ...subsidizedDepositQuote, subsidize: false, fees: [] } },
-        { body: organizationQuote },
-      ],
+      'GET /v1/routes/deposit-addresses/quote': [{ body: organizationQuote }],
     })
     const proxied = await mockQuoteProxy(page, [{ body: subsidizedDepositQuote }])
     await page.goto(demo)
@@ -1185,16 +1370,21 @@ test.describe('Routes demo without a key', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
     await button(page, 'Get quote').click()
 
-    // The API prices the route publicly, with no key, no docs proxy, and no 1:1 delivery.
+    // Only an approved organization can quote 1:1 delivery, so the docs key prices the preview.
+    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
+    await expect(lifecycle(page)).toContainText('Covered by Tempo0.0409 USDC.e')
+    await expect(lifecycle(page)).toContainText(
+      '1:1 delivery preview from the docs demo organization. Creating a 1:1 route needs subsidy approval for your organization.',
+    )
     await expect(lifecycle(page)).toContainText(
       'Add your Tempo API key here to create routes with configured pricing. Get yours in the Tempo API console.',
     )
-    const [anonymous] = api.to('GET', '/v1/routes/deposit-addresses/quote')
-    expect(anonymous.headers['tempo-api-key']).toBeUndefined()
-    expect(anonymous.query.get('subsidize')).toBe('false')
-    expect(proxied).toHaveLength(0)
+    expect(proxied[0]).toMatchObject({ kind: 'deposit-addresses', subsidize: 'true' })
+    expect(api.to('GET', '/v1/routes/deposit-addresses/quote')).toHaveLength(0)
     await page.getByRole('button', { name: 'Request' }).click()
     await expect(page.locator('pre')).not.toContainText('tempo-api-key')
 
@@ -1208,20 +1398,47 @@ test.describe('Routes demo without a key', () => {
     await expect(page.getByLabel('Project API key')).toBeFocused()
     await page.getByLabel('Project API key').fill(key)
     await button(page, 'Use key').click()
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
+    await expect(lifecycle(page)).toContainText('Covered by Tempo0.0009 USDC.e')
+    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
     const keyed = api.to('GET', '/v1/routes/deposit-addresses/quote').at(-1)
     expect(keyed?.headers['tempo-api-key']).toBe(key)
     expect(keyed?.query.get('subsidize')).toBe('true')
   })
 
-  test('quotes through the docs proxy while the API requires a key, then asks for one to create', async ({
-    page,
-  }) => {
+  test('explains when the added key cannot use 1:1 delivery', async ({ page }) => {
     const api = await mockRoutesApi(page, {
       'GET /v1/routes': [directory],
-      'GET /v1/routes/deposit-addresses/quote': [keyMissing, { body: subsidizedDepositQuote }],
-      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
-      'GET /v1/routes/deposits': [{ body: { data: [], nextCursor: null } }],
+      'GET /v1/routes/deposit-addresses/quote': [
+        apiError(403, 'routes_subsidy_not_allowed', 'Subsidy not allowed.', 'req_sub'),
+        { body: unsubsidizedDepositQuote },
+      ],
+    })
+    await mockQuoteProxy(page, [{ body: subsidizedDepositQuote }])
+    await page.goto(demo)
+    await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
+    await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
+    await button(page, 'Deposit address').click()
+    await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
+    await button(page, 'Get quote').click()
+    await expect(lifecycle(page)).toContainText('1:1 delivery preview')
+
+    await addKey(page, key)
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
+    await expect(lifecycle(page)).toContainText(
+      'Quoted without 1:1 delivery. This organization is not approved for 1:1 delivery on this route. (routes_subsidy_not_allowed · request req_sub)',
+    )
+    await expect(lifecycle(page)).not.toContainText('1:1 delivery preview')
+    expect(
+      api.to('GET', '/v1/routes/deposit-addresses/quote').map((q) => q.query.get('subsidize')),
+    ).toEqual(['true', 'false'])
+  })
+
+  test('quotes a route without 1:1 delivery at public pricing', async ({ page }) => {
+    const api = await mockRoutesApi(page, {
+      'GET /v1/routes': [plainDirectory],
+      'GET /v1/routes/deposit-addresses/quote': [{ body: unsubsidizedDepositQuote }],
     })
     const proxied = await mockQuoteProxy(page, [{ body: subsidizedDepositQuote }])
     await page.goto(demo)
@@ -1229,13 +1446,43 @@ test.describe('Routes demo without a key', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
     await button(page, 'Get quote').click()
 
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
+    // The API prices the route publicly, with no key, no docs proxy, and no 1:1 delivery.
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
+    const [anonymous] = api.to('GET', '/v1/routes/deposit-addresses/quote')
+    expect(anonymous.headers['tempo-api-key']).toBeUndefined()
+    expect(anonymous.query.get('subsidize')).toBe('false')
+    expect(proxied).toHaveLength(0)
+  })
+
+  test('quotes through the docs proxy while the API requires a key, then asks for one to create', async ({
+    page,
+  }) => {
+    const api = await mockRoutesApi(page, {
+      'GET /v1/routes': [plainDirectory],
+      'GET /v1/routes/deposit-addresses/quote': [keyMissing, { body: unsubsidizedDepositQuote }],
+      'POST /v1/routes/deposit-addresses': [{ status: 201, body: createdDepositAddress }],
+      'GET /v1/routes/deposits': [{ body: { data: [], nextCursor: null } }],
+    })
+    const proxied = await mockQuoteProxy(page, [{ body: unsubsidizedDepositQuote }])
+    await page.goto(demo)
+    await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
+    await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
+    await button(page, 'Deposit address').click()
+    await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
+    await button(page, 'Get quote').click()
+
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
     expect(proxied[0]).toMatchObject({
       kind: 'deposit-addresses',
       amount: '1000000',
       sourceChain: chains.base.id,
+      subsidize: 'false',
     })
     // The API refused the anonymous quote, so the docs proxy priced it.
     expect(api.to('GET', '/v1/routes/deposit-addresses/quote')).toHaveLength(1)
@@ -1244,8 +1491,6 @@ test.describe('Routes demo without a key', () => {
     )
 
     // The key panel opens from step 2, and the route and quote survive the keyed reload.
-    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
-    await page.getByLabel('Refund address on Base').fill(sender)
     const keyed = page.waitForResponse(
       (response) =>
         response.url().startsWith('https://api.tempo.xyz/v1/routes?') &&
@@ -1256,11 +1501,13 @@ test.describe('Routes demo without a key', () => {
     await page.getByLabel('Project API key').fill(key)
     await button(page, 'Use key').click()
     await keyed
-    await expect(lifecycle(page)).toContainText('Recipient gets1 USDC.e')
-    await expect(page.getByLabel('Recipient on Tempo')).toHaveValue(tempoRecipient)
+    await expect(lifecycle(page)).toContainText('Recipient gets0.9591 USDC.e')
     await button(page, 'Create').click()
     await expect(lifecycle(page)).toContainText(depositAddress)
-    expect(api.to('POST', '/v1/routes/deposit-addresses')[0].headers['tempo-api-key']).toBe(key)
+    const [created] = api.to('POST', '/v1/routes/deposit-addresses')
+    expect(created.headers['tempo-api-key']).toBe(key)
+    // The addresses entered for the quote carry through to creation.
+    expect(created.body).toMatchObject({ recipient: tempoRecipient, refundAddress: sender })
 
     // The key that created the address stays for the rest of the test.
     await page.getByRole('button', { name: /API key/ }).click()
@@ -1280,6 +1527,8 @@ test.describe('Routes demo without a key', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await button(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
+    await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
+    await page.getByLabel('Refund address on Base').fill(sender)
     await button(page, 'Get quote').click()
     await expect(lifecycle(page)).toContainText(
       'The docs demo key cannot quote this route. Add your project API key to quote this route. (routes_not_allowed · request req_docs)',
@@ -1301,6 +1550,6 @@ test.describe('Routes demo without a key', () => {
       'This key cannot use USDC on Base to USDC.e on Tempo. Choose another route.',
     )
     await expect(fromSelect(page, 'Network')).toBeEnabled()
-    await expect(fromSelect(page, 'Network')).toHaveValue('')
+    await expect(fromSelect(page, 'Network')).toHaveAttribute('data-value', '')
   })
 })

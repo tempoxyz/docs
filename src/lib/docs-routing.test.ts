@@ -24,7 +24,18 @@ type VocsRedirect = {
 
 const vercelConfig = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'vercel.json'), 'utf-8'),
-) as { redirects: Redirect[]; trailingSlash?: boolean }
+) as { redirects: Redirect[]; rewrites: Redirect[]; trailingSlash?: boolean }
+
+describe('public assets on the docs deployment host', () => {
+  it.each([
+    ['/developers/blog/:path*', '/blog/:path*'],
+    ['/developers/images/:path*', '/images/:path*'],
+    ['/developers/api/og', '/api/og'],
+  ])('serves %s from %s without a cross-host redirect', (source, destination) => {
+    expect(vercelConfig.rewrites).toContainEqual({ source, destination })
+    expect(vercelConfig.redirects.find((redirect) => redirect.source === source)).toBeUndefined()
+  })
+})
 
 const redirects = vercelConfig.redirects.filter((redirect) => !redirect.has)
 const hostRedirects = vercelConfig.redirects.filter((redirect) => redirect.has)
@@ -165,6 +176,18 @@ describe('docs routing redirects', () => {
       : destination
     expect(findRedirect(`/developers${source}`)).toMatchObject({
       destination: developersProxyDestination(target),
+      permanent: true,
+    })
+  })
+
+  it.each(
+    vocsRedirects.filter(({ source }) => source.includes('/docs/resources/partners')),
+  )('preserves the public mount when the proxy strips it before redirecting $source', ({
+    source,
+    destination,
+  }) => {
+    expect(findRedirect(source)).toMatchObject({
+      destination: `${canonicalDevelopersOrigin}${destination}`,
       permanent: true,
     })
   })

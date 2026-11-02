@@ -6,32 +6,13 @@ import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 
 const command = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
-const audit = spawnSync(command, ['exec', 'vocs', 'markdown-audit', '--json'], {
-  encoding: 'utf8',
+// Vocs owns component/expression validation and honors the configured mode and
+// emergency override. Keep the artifact checks below for Tempo-specific content.
+const audit = spawnSync(command, ['exec', 'vocs', 'markdown-audit'], {
+  stdio: 'inherit',
 })
-
 if (audit.error) throw audit.error
-
-let report
-try {
-  report = JSON.parse(audit.stdout)
-} catch {
-  console.error(audit.stderr || audit.stdout)
-  throw new Error('Vocs did not produce a JSON Markdown audit report.')
-}
-
-if (audit.status !== 0 && audit.status !== 1) {
-  console.error(audit.stderr)
-  process.exit(audit.status ?? 1)
-}
-
-if (report.errors.length > 0 || report.components.length > 0) {
-  console.error('Markdown component audit failed.')
-  for (const { path, error } of report.errors) console.error(`- ${path}: ${error}`)
-  for (const { name, count } of report.components)
-    console.error(`- ${name}: ${count} unresolved occurrence${count === 1 ? '' : 's'}`)
-  process.exit(1)
-}
+if (audit.status !== 0) process.exit(audit.status ?? 2)
 
 const markdownDirectory = resolve('dist/public/assets/md')
 const files = []

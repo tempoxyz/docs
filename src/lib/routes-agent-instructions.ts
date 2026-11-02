@@ -55,6 +55,7 @@ export function agentInstructions(run: AgentRun): string {
   const quoteQuery = generalize(run.quoteQuery, run.addresses)
   const createBody = generalize(run.createBody, run.addresses)
   const tempoSource = /^eip155:(4217|42431)$/.test(route.sourceChain.id)
+  const stellarSource = route.sourceChain.id.startsWith('stellar:')
   const read = transfer ? 'transfers/<TRANSFER_ID>' : 'deposits/<DEPOSIT_ID>'
   const lines = [
     `# Send ${run.amount} ${run.amountToken.symbol} from ${source} to ${destination}`,
@@ -106,12 +107,22 @@ export function agentInstructions(run: AgentRun): string {
       ? [
           '## 3. Sign and send the source transactions',
           '',
-          tempoSource
-            ? '- Send every entry in `action.calls` in one Tempo transaction from `<SENDER>` (for example with `wallet_sendCalls`), and wait for its receipt.'
-            : `- Sign and broadcast each entry in \`action.calls\` (\`action.type\` is \`${route.sourceChain.id.startsWith('tron:') ? 'tron:calls' : 'evm:calls'}\`) from \`<SENDER>\` on ${route.sourceChain.name}, in order. Wait for each receipt to succeed before sending the next.`,
-          '- Check `quote.expiresAt` before each broadcast, and stop if it has passed.',
-          '- Never send a call again once it may have been broadcast. Check the sender’s history first.',
-          '- Register the hashes:',
+          // A Stellar action is one prepared envelope (`stellar:xdr`), not a list of calls.
+          ...(stellarSource
+            ? [
+                '- Sign `action.xdr` unchanged as `<SENDER>`, for the network in `action.networkPassphrase`. Submit the signed envelope to Horizon (`POST https://horizon.stellar.org/transactions`, form field `tx`) and wait for it to land.',
+                '- Check `quote.expiresAt` before submitting, and stop if it has passed.',
+                '- Submitting the same signed envelope again is safe: its sequence number lets it land only once.',
+                '- Register its hash (64 hexadecimal characters, without `0x`):',
+              ]
+            : [
+                tempoSource
+                  ? '- Send every entry in `action.calls` in one Tempo transaction from `<SENDER>` (for example with `wallet_sendCalls`), and wait for its receipt.'
+                  : `- Sign and broadcast each entry in \`action.calls\` (\`action.type\` is \`${route.sourceChain.id.startsWith('tron:') ? 'tron:calls' : 'evm:calls'}\`) from \`<SENDER>\` on ${route.sourceChain.name}, in order. Wait for each receipt to succeed before sending the next.`,
+                '- Check `quote.expiresAt` before each broadcast, and stop if it has passed.',
+                '- Never send a call again once it may have been broadcast. Check the sender’s history first.',
+                '- Register the hashes:',
+              ]),
           '',
           '```bash',
           `curl -s -X POST "${routesApi}/transfers/<TRANSFER_ID>/source-transactions" \\`,

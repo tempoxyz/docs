@@ -1,6 +1,6 @@
 // Quotes are read-only, so readers can price a route before adding their own API key. The docs
 // key stays server-side and is only used for quotes; creating a transfer or deposit address always
-// uses the reader's key.
+// uses the reader's key. Provision it with `routes:read` only, in a quote-only organization.
 const upstream = 'https://api.tempo.xyz/v1/routes'
 const kinds = new Set(['transfers', 'deposit-addresses'])
 const params = new Set([
@@ -47,6 +47,14 @@ export async function POST(request: Request): Promise<Response> {
       return failure(400, 'param_invalid', `Invalid ${name}.`)
     target.searchParams.set(name, String(value))
   }
+  // The docs key's organization is approved for 1:1 delivery and cannot create routes, so its
+  // quotes preview subsidized terms by default. An explicit `subsidize=false` (the demo's fallback
+  // when a route has no subsidy) is kept; exact-destination transfers cannot be subsidized.
+  if (
+    !target.searchParams.has('subsidize') &&
+    !(kind === 'transfers' && target.searchParams.get('mode') === 'exactDestination')
+  )
+    target.searchParams.set('subsidize', 'true')
   try {
     const response = await fetch(target, {
       headers: { 'tempo-api-key': key },

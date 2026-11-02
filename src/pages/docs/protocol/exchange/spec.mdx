@@ -71,9 +71,11 @@ The platform offers a neutral USD stablecoin, [`pathUSD`](/docs/protocol/exchang
 
 #### Swaps
 
-Swaps execute immediately against the active book. Selling base for quote starts at the current best bid and walks downward as ticks are exhausted; selling quote for base starts at the best ask and walks upward. Within a tick, fills are FIFO and decrement the tick’s total liquidity. When a tick empties, it is de‑initialized.
+Swaps execute immediately against the active book. Selling base for quote starts at the current best bid and walks downward as ticks are exhausted; selling quote for base starts at the best ask and walks upward. Within a tick, fills are FIFO and decrement each filled order's `remaining` amount. When a tick empties, it is de‑initialized.
 
 Callers can swap between any two USD TIP-20 tokens. If `tokenIn` and `tokenOut` are not directly paired, the implementation finds the unique path between them through quote‑token relationships, and performs a multi‑hop swap/quote.
+
+Quotes and swaps MUST use the same per-order fill and integer-rounding rules. For the same starting book and route, the quoted amount MUST match the corresponding successful swap's amount. A quote does not execute token transfers, policy checks on those transfers, or other swap side effects, so a successful quote alone does not guarantee execution.
 
 #### Crossed books
 
@@ -124,7 +126,7 @@ function tickToPrice(int16 tick) external pure returns (uint32 price);
 function priceToTick(uint32 price) external pure returns (int16 tick);
 ```
 
-Convert between discrete ticks and scaled prices. `priceToTick` reverts if `price` is out of bounds.
+Convert between discrete ticks and scaled prices using `price = 100_000 + tick`. Both functions MUST enforce `tick % TICK_SPACING == 0`; off-grid values revert with `InvalidTick`. `priceToTick` additionally enforces the price range `[98_000, 102_000]`, reverting with `TickOutOfBounds` outside that range. `tickToPrice` does not enforce the order-placement bounds: an aligned tick such as `2010` converts to `102010` even though an order cannot be placed at that tick. For example, `tickToPrice(1)` and `priceToTick(100001)` revert with `InvalidTick`, while `tickToPrice(10)` returns `100010`.
 
 <span id="pairing-and-orderbook" />
 
@@ -152,7 +154,7 @@ Returns pair metadata and current best‑of‑side ticks. Best ticks may be sent
 function getTickLevel(address base, int16 tick, bool isBid) external view returns (uint128 head, uint128 tail, uint128 totalLiquidity);
 ```
 
-Returns FIFO head/tail order IDs and aggregate liquidity for a tick on a side, allowing indexers to reconstruct the active book.
+Returns FIFO head/tail order IDs and aggregate liquidity for a tick on a side. `totalLiquidity` is the sum of each active order's `remaining` amount, computed by traversing the tick queue.
 
 #### Internal balances
 
@@ -198,7 +200,7 @@ Notes:
 function cancel(uint128 orderId) external;
 ```
 
-Cancels an order owned by the caller. When canceled, the order is removed from the tick queue, liquidity is decremented, and remaining locked funds are refunded to the order owner's DEX balance which can then be withdrawn.
+Cancels an order owned by the caller. When canceled, the order is removed from the tick queue, its remaining amount leaves the active book, and remaining locked funds are refunded to the order owner's DEX balance which can then be withdrawn.
 
 ```solidity
 function cancelStaleOrder(uint128 orderId) external;
@@ -206,7 +208,7 @@ function cancelStaleOrder(uint128 orderId) external;
 
 Cancels an order if its maker is no longer authorized as a sender of the token locked for the order or as a recipient of the payout token under their [TIP-403 policies](/docs/protocol/tip403/overview). Anyone can call this function to remove stale orders.
 
-When canceled, the order is removed from the tick queue, liquidity is decremented, and remaining locked funds are refunded to the order maker's DEX balance. Reverts with `OrderNotStale` if the maker is still authorized.
+When canceled, the order is removed from the tick queue, its remaining amount leaves the active book, and remaining locked funds are refunded to the order maker's DEX balance. Reverts with `OrderNotStale` if the maker is still authorized.
 
 ```solidity
 function nextOrderId() external view returns (uint128);

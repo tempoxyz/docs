@@ -54,6 +54,9 @@ export function graphiteRelatedDocsPlugin(): Plugin {
     },
     async load(id) {
       if (id !== resolvedVirtualModuleId) return
+      // E2E builds stay deterministic and off the network; Graphite ranking is
+      // third-party data that no browser test asserts.
+      if (process.env.VITE_E2E === 'true') return 'export default {}'
 
       let promise = manifestPromises.get(rootDirectory)
       if (!promise) {

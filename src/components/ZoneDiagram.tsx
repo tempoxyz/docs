@@ -3,11 +3,13 @@ import contracts from '../../public/diagrams/zones/contracts.svg?raw'
 import crossZoneSend from '../../public/diagrams/zones/cross-zone-send.svg?raw'
 import crossZoneSwap from '../../public/diagrams/zones/cross-zone-swap.svg?raw'
 import deposit from '../../public/diagrams/zones/deposit.svg?raw'
+import feeTokenFallback from '../../public/diagrams/zones/fee-token-fallback.svg?raw'
 import overview from '../../public/diagrams/zones/overview.svg?raw'
 import policy from '../../public/diagrams/zones/policy.svg?raw'
 import privacy from '../../public/diagrams/zones/privacy.svg?raw'
 import protocolDeposit from '../../public/diagrams/zones/protocol-deposit.svg?raw'
 import protocolWithdrawal from '../../public/diagrams/zones/protocol-withdrawal.svg?raw'
+import prover from '../../public/diagrams/zones/prover.svg?raw'
 import settlement from '../../public/diagrams/zones/settlement.svg?raw'
 import validation from '../../public/diagrams/zones/validation.svg?raw'
 import withdrawal from '../../public/diagrams/zones/withdrawal.svg?raw'
@@ -21,6 +23,8 @@ const diagrams = {
   accounts,
   'protocol-deposit': protocolDeposit,
   'protocol-withdrawal': protocolWithdrawal,
+  prover,
+  'fee-token-fallback': feeTokenFallback,
   settlement,
   validation,
   deposit,

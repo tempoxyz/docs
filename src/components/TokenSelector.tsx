@@ -4,6 +4,7 @@ import { Hooks } from 'wagmi/tempo'
 import * as ui from './TokenSelector.recipes'
 
 type TokenSelectorProps = {
+  'aria-label': string
   tokens: Address[]
   value: Address
   onChange: (token: Address) => void
@@ -27,6 +28,7 @@ export function TokenSelector(props: TokenSelectorProps) {
 
   return (
     <select
+      aria-label={props['aria-label']}
       name={name}
       value={value}
       onChange={(e) => onChange(e.target.value as Address)}

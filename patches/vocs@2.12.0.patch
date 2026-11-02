@@ -1,0 +1,719 @@
+diff --git a/dist/internal/openapi/query-presets.d.ts b/dist/internal/openapi/query-presets.d.ts
+new file mode 100644
+index 0000000..6198c7f
+--- /dev/null
++++ b/dist/internal/openapi/query-presets.d.ts
+@@ -0,0 +1,4 @@
++import type { IrOperation } from './parser.js';
++export type QueryPreset = { method: string; path: string; query: string };
++export declare function operationWithQuery(operation: IrOperation, query?: string): IrOperation;
++export declare function documentWithQuery(document: Record<string, unknown>, preset?: QueryPreset): Record<string, unknown>;
+diff --git a/dist/internal/openapi/query-presets.js b/dist/internal/openapi/query-presets.js
+new file mode 100644
+index 0000000..39cecdb
+--- /dev/null
++++ b/dist/internal/openapi/query-presets.js
+@@ -0,0 +1,39 @@
++function presetParameters(parameters, query) {
++    const values = new URLSearchParams(query);
++    return parameters.map((parameter) => {
++        if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
++            return parameter;
++        const raw = values.get(parameter.name);
++        const value = parameter.schema?.type === 'array' ? raw.split(',') : raw;
++        const { example: _example, ...rest } = parameter;
++        return {
++            ...rest,
++            // Scalar reads parameter examples and needs optional rows explicitly enabled.
++            examples: { default: { value, 'x-disabled': false } },
++            // Vocs generates snippets from schema examples. Neither changes API defaults.
++            schema: { ...parameter.schema, example: value, examples: [value] },
++        };
++    });
++}
++/** Apply editable query examples to one embed without changing its shared spec. */
++export function operationWithQuery(operation, query) {
++    if (!query)
++        return operation;
++    return { ...operation, parameters: presetParameters(operation.parameters, query) };
++}
++/** Prepare the isolated Scalar document used by this playground instance. */
++export function documentWithQuery(document, preset) {
++    if (!preset?.query)
++        return document;
++    const copy = structuredClone(document);
++    const paths = copy.paths;
++    const path = paths?.[preset.path];
++    const operation = path?.[preset.method.toLowerCase()];
++    if (!operation)
++        return copy;
++    for (const owner of [path, operation]) {
++        if (Array.isArray(owner.parameters))
++            owner.parameters = presetParameters(owner.parameters, preset.query);
++    }
++    return copy;
++}
+diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
+index 808d57f..2b6bf2a 100644
+--- a/dist/react/Head.d.ts
++++ b/dist/react/Head.d.ts
+@@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react").JSX.Element;
+ export declare namespace Head {
+     type Props = {
+         includeJsonLd?: boolean | undefined;
++        includeTitle?: boolean | undefined;
+     };
+ }
+ export declare function resolveTitleTemplate(config: Pick<Config.Config, 'title' | 'titleTemplate'>, path: string, title: string | undefined, frontmatter: Config.Frontmatter | undefined): string | undefined;
+diff --git a/dist/react/Head.js b/dist/react/Head.js
+index 9c74255..b82f9bd 100644
+--- a/dist/react/Head.js
++++ b/dist/react/Head.js
+@@ -6,7 +6,7 @@ import * as JsonLd from './json-ld.js';
+ import * as MdxPageContext from './MdxPageContext.js';
+ import { useConfig } from './useConfig.js';
+ export function Head(props) {
+-    const { includeJsonLd = true } = props;
++    const { includeJsonLd = true, includeTitle = true } = props;
+     const config = useConfig();
+     const { path: pathname } = useRouter();
+     const { frontmatter } = MdxPageContext.use();
+@@ -90,7 +90,7 @@ export function Head(props) {
+                 // biome-ignore lint/security/noDangerouslySetInnerHtml: blocking script to prevent FOUC
+                 dangerouslySetInnerHTML: {
+                     __html: `(function(){try{var e=document.documentElement;var s=function(t){e.setAttribute('data-vocs-theme',t);e.style.colorScheme=t};var t=localStorage.getItem('vocs-theme');if(t==='light'||t==='dark'){s(t)}else if(window.matchMedia('(prefers-color-scheme:dark)').matches){s('dark')}else if(window.matchMedia('(prefers-color-scheme:light)').matches){s('light')}else{s('dark')}}catch(e){}})()`,
+-                } })), _jsx("meta", { name: "color-scheme", content: colorScheme }), !disabled && (_jsxs(_Fragment, { children: [fullTitle && _jsx("title", { children: fullTitle }, "title"), base && _jsx("base", { href: base }), canonical && _jsx("link", { rel: "canonical", href: canonical }), icons && iconUrl && typeof iconUrl === 'string' && (_jsx("link", { rel: "icon", href: iconUrl, type: getIconType(iconUrl) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.light, type: getIconType(iconUrl.light) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.dark, type: getIconType(iconUrl.dark), media: "(prefers-color-scheme: dark)" })), metaTags.map((tag, index) => {
++                } })), _jsx("meta", { name: "color-scheme", content: colorScheme }), !disabled && (_jsxs(_Fragment, { children: [includeTitle && fullTitle && _jsx("title", { children: fullTitle }, "title"), base && _jsx("base", { href: base }), canonical && _jsx("link", { rel: "canonical", href: canonical }), icons && iconUrl && typeof iconUrl === 'string' && (_jsx("link", { rel: "icon", href: iconUrl, type: getIconType(iconUrl) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.light, type: getIconType(iconUrl.light) })), icons && iconUrl && typeof iconUrl !== 'string' && (_jsx("link", { rel: "icon", href: iconUrl.dark, type: getIconType(iconUrl.dark), media: "(prefers-color-scheme: dark)" })), metaTags.map((tag, index) => {
+                         const { charset: charSet, content, 'http-equiv': httpEquiv, media, name, property, } = tag;
+                         return (_jsx("meta", { charSet: charSet, httpEquiv: httpEquiv, name: name, property: property, content: content != null ? String(content) : undefined, media: media }, `${name ?? property ?? httpEquiv ?? charSet}-${index}`));
+                     }), jsonLd && (_jsx("script", { type: "application/ld+json", 
+diff --git a/dist/react/Layout.d.ts b/dist/react/Layout.d.ts
+index 8f4633b..b3389ce 100644
+--- a/dist/react/Layout.d.ts
++++ b/dist/react/Layout.d.ts
+@@ -3,6 +3,7 @@ export declare namespace Layout {
+     type Props = {
+         children: React.ReactNode;
+         includeJsonLd?: boolean | undefined;
++        includeTitle?: boolean | undefined;
+     };
+ }
+ //# sourceMappingURL=Layout.d.ts.map
+\ No newline at end of file
+diff --git a/dist/react/Layout.js b/dist/react/Layout.js
+index dd8f3a8..faea5cb 100644
+--- a/dist/react/Layout.js
++++ b/dist/react/Layout.js
+@@ -2,7 +2,7 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
+ import { Head } from './Head.js';
+ import * as Layout_client from './Layout.client.js';
+ export function Layout(props) {
+-    const { children, includeJsonLd } = props;
+-    return (_jsxs(_Fragment, { children: [_jsx(Head, { includeJsonLd: includeJsonLd }), _jsx(Layout_client.Main, { children: children })] }));
++    const { children, includeJsonLd, includeTitle } = props;
++    return (_jsxs(_Fragment, { children: [_jsx(Head, { includeJsonLd: includeJsonLd, includeTitle: includeTitle }), _jsx(Layout_client.Main, { children: children })] }));
+ }
+ //# sourceMappingURL=Layout.js.map
+\ No newline at end of file
+diff --git a/dist/react/Root.js b/dist/react/Root.js
+index 5f3d063..c58b72a 100644
+--- a/dist/react/Root.js
++++ b/dist/react/Root.js
+@@ -3,13 +3,12 @@ import { config } from 'virtual:vocs/config';
+ import groupIconsStylesUrl from 'virtual:vocs/group-icons.css?url';
+ import userStylesUrl from 'virtual:vocs/user-styles';
+ import stylesUrl from '../styles/index.css?url';
+-import { Head } from './Head.js';
+ import { Root_client } from './Root.client.js';
+ import { ScrollRestoration } from './ScrollRestoration.js';
+ export async function Root({ children }) {
+     const { colorScheme, accentColor } = config;
+     return (_jsxs("html", { "data-vocs": true, ...(colorScheme === 'light' || colorScheme === 'dark'
+             ? { 'data-vocs-theme': colorScheme }
+-            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl }), _jsx(Head, { includeJsonLd: false })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
++            : {}), lang: "en", style: { colorScheme, '--vocs-color-accent': accentColor }, suppressHydrationWarning: true, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { rel: "stylesheet", href: stylesUrl }), userStylesUrl && _jsx("link", { rel: "stylesheet", href: userStylesUrl }), groupIconsStylesUrl && _jsx("link", { rel: "stylesheet", href: groupIconsStylesUrl })] }), _jsxs("body", { "data-version": "1.0", children: [_jsx(Root_client, { children: children }), _jsx(ScrollRestoration, {})] })] }));
+ }
+ //# sourceMappingURL=Root.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/NotFound.js b/dist/react/internal/NotFound.js
+index b189ea5..f78449c 100644
+--- a/dist/react/internal/NotFound.js
++++ b/dist/react/internal/NotFound.js
+@@ -1,8 +1,9 @@
+-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
++import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
++import { config } from 'virtual:vocs/config';
+ import { Link } from 'waku';
+ import LucideFileQuestion from '~icons/lucide/file-question';
+ import LucideHome from '~icons/lucide/home';
+ export function NotFound() {
+-    return (_jsxs("div", { className: "vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center", "data-v-not-found": true, children: [_jsx("div", { className: "vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6", "data-v-not-found-icon": true, children: _jsx(LucideFileQuestion, { className: "vocs:size-10" }) }), _jsx("h1", { className: "vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3", "data-v-not-found-title": true, children: "Page not found" }), _jsx("p", { className: "vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8", "data-v-not-found-description": true, children: "The page you're looking for doesn't exist or has been moved." }), _jsxs(Link, { className: "vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted", "data-v-not-found-link": true, to: "/", children: [_jsx(LucideHome, { className: "vocs:size-4 vocs:text-secondary" }), "Back to home"] })] }));
++    return (_jsxs(_Fragment, { children: [_jsx("title", { children: `Page not found ⋅ ${config.title}` }), _jsx("meta", { name: "robots", content: "noindex, nofollow" }), _jsxs("div", { className: "vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center", "data-v-not-found": true, children: [_jsx("div", { className: "vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6", "data-v-not-found-icon": true, children: _jsx(LucideFileQuestion, { className: "vocs:size-10" }) }), _jsx("h1", { className: "vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3", "data-v-not-found-title": true, children: "Page not found" }), _jsx("p", { className: "vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8", "data-v-not-found-description": true, children: "The page you're looking for doesn't exist or has been moved." }), _jsxs(Link, { className: "vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted", "data-v-not-found-link": true, to: "/", children: [_jsx(LucideHome, { className: "vocs:size-4 vocs:text-secondary" }), "Back to home"] })] })] }));
+ }
+ //# sourceMappingURL=NotFound.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/OpenApiPage.js b/dist/react/internal/openapi/OpenApiPage.js
+index 06cc466..b74f6a6 100644
+--- a/dist/react/internal/openapi/OpenApiPage.js
++++ b/dist/react/internal/openapi/OpenApiPage.js
+@@ -21,7 +21,7 @@ function OpenApiLayout(props) {
+             ...props.frontmatter,
+             content: { ...props.frontmatter?.content, width: props.width ?? 'full' },
+             outline: props.outline ?? true,
+-        }, children: _jsx(Layout, { includeJsonLd: false, children: props.children }) }));
++        }, children: _jsxs(Layout, { includeJsonLd: false, includeTitle: !props.documentTitle, children: [props.documentTitle ? _jsx("title", { children: props.documentTitle }) : null, props.children] }) }));
+ }
+ /**
+  * Renders a consumer-authored "guide" page (a normal MDX page mounted under an
+@@ -44,7 +44,7 @@ function OpenApiLayout(props) {
+ export function OpenApiGuide(props) {
+     const title = props.title ?? props.frontmatter?.title;
+     const description = props.description ?? props.frontmatter?.description;
+-    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, description, title }, width: "full", children: [title ? _jsx("title", { children: title }) : null, _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] })] }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, width: "default", children: _jsxs("div", { "data-v-openapi-guide": true, children: [props.header && title ? (_jsxs("header", { "data-v-openapi-header": true, children: [_jsxs("h1", { "data-v": true, "data-v-openapi-h1": true, id: props.id, children: [title, props.id ? _jsx(HeadingAnchor, { id: props.id }) : null] }), description ? _jsx(Prose, { markdown: description, attr: "description" }) : null] })) : null, props.children] }) }));
+ }
+ /**
+  * Renders an isolated, auto-generated OpenAPI reference section (Vite/RSC site
+@@ -73,10 +73,14 @@ export function OpenApiPage(props) {
+             return (_jsx(OpenApiLayout, { frontmatter: props.frontmatter, children: _jsxs("p", { children: ["No category \u201C", props.group, "\u201D exists in the API mounted at ", props.mount, "."] }) }));
+         const description = props.frontmatter?.description ?? group.description;
+         const title = props.title ?? props.frontmatter?.title ?? `${group.name} · ${ir.info.title}`;
+-        return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, description, title }, outline: false, children: [_jsx("title", { children: title }), _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(ReferenceGroup, { ir: ir, group: group, intro: props.intro, modelSource: props.inlineSchemaModels ? undefined : schemaModelSource(ir.path, group.id) }) })] }));
++        return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, description, title }, outline: false, children: _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(ReferenceGroup, { ir: ir, group: group, intro: props.intro, modelSource: props.inlineSchemaModels ? undefined : schemaModelSource(ir.path, group.id) }) }) }));
+     }
+     // Overview / landing page.
+     const title = props.title ?? props.frontmatter?.title ?? ir.info.title;
+-    return (_jsxs(OpenApiLayout, { frontmatter: { ...props.frontmatter, title }, width: "full", children: [_jsx("title", { children: title }), _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined })] }));
++    return (_jsx(OpenApiLayout, { documentTitle: resolveDocumentTitle(props.frontmatter, title), frontmatter: { ...props.frontmatter, title }, width: "default", children: _jsx(ReferenceOverview, { ir: ir, intro: props.intro, endpoints: props.endpoints ? _jsx(Endpoints, { path: ir.path || undefined }) : undefined }) }));
++}
++function resolveDocumentTitle(frontmatter, fallback) {
++    const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : '';
++    return seoTitle || fallback;
+ }
+ //# sourceMappingURL=OpenApiPage.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/Playground.client.d.ts b/dist/react/internal/openapi/Playground.client.d.ts
+index 1d2726b..c27f2b3 100644
+--- a/dist/react/internal/openapi/Playground.client.d.ts
++++ b/dist/react/internal/openapi/Playground.client.d.ts
+@@ -1,3 +1,4 @@
++import type { QueryPreset } from '../../../internal/openapi/query-presets.js';
+ import * as React from 'react';
+ /**
+  * Mounts the Scalar API client modal once per spec and exposes an `open`
+@@ -11,6 +12,8 @@ export declare namespace PlaygroundProvider {
+         children: React.ReactNode;
+         /** Spec mount path; scopes the persisted auth (e.g. `/api`). */
+         mount?: string | undefined;
++        /** Editable query values scoped to this provider instance. */
++        queryPreset?: QueryPreset | undefined;
+     };
+ }
+ /**
+diff --git a/dist/react/internal/openapi/Playground.client.js b/dist/react/internal/openapi/Playground.client.js
+index 8b2cf49..08c4971 100644
+--- a/dist/react/internal/openapi/Playground.client.js
++++ b/dist/react/internal/openapi/Playground.client.js
+@@ -3,6 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ import * as React from 'react';
+ import { createPortal } from 'react-dom';
+ import LucidePlay from '~icons/lucide/play';
++import { documentWithQuery } from '../../../internal/openapi/query-presets.js';
+ import { useColorScheme } from '../../useColorScheme.js';
+ import * as Auth from './auth.js';
+ const PlaygroundContext = React.createContext(null);
+@@ -13,7 +14,8 @@ const PlaygroundContext = React.createContext(null);
+  * server rendering.
+  */
+ export function PlaygroundProvider(props) {
+-    const { children, mount: specMount = '/' } = props;
++    const { children, mount: specMount = '/', queryPreset } = props;
++    const presetKey = queryPreset ? JSON.stringify(queryPreset) : '';
+     const containerRef = React.useRef(null);
+     // biome-ignore lint/suspicious/noExplicitAny: Scalar's modal type lives in a client-only module.
+     const modalRef = React.useRef(null);
+@@ -39,7 +41,7 @@ export function PlaygroundProvider(props) {
+             storeRef.current = null;
+             initializeRef.current = null;
+         };
+-    }, [specMount]);
++    }, [specMount, presetKey]);
+     // When another playground instance (another page/tab) persists new
+     // credentials, load them into this live store so its "Try" stays in sync
+     // without reopening the modal.
+@@ -84,7 +86,15 @@ export function PlaygroundProvider(props) {
+             });
+             await store.addDocument({
+                 name: 'default',
+-                ...('url' in client ? { url: client.url } : { document: client.content }),
++                ...('url' in client
++                    ? queryPreset
++                        ? { document: documentWithQuery(await fetch(client.url).then((response) => {
++                                if (!response.ok)
++                                    throw new Error(`Failed to load OpenAPI spec: ${response.status}`);
++                                return response.json();
++                            }), queryPreset) }
++                        : { url: client.url }
++                    : { document: documentWithQuery(client.content, queryPreset) }),
+             });
+             if (generation !== generationRef.current)
+                 return null;
+@@ -109,7 +119,7 @@ export function PlaygroundProvider(props) {
+         });
+         initializeRef.current = pending;
+         return pending;
+-    }, [specMount]);
++    }, [specMount, presetKey]);
+     const open = React.useCallback((operation) => {
+         void initialize().then((modal) => modal?.open({
+             method: operation.method.toLowerCase(),
+@@ -170,4 +180,3 @@ export function TestRequestButton(props) {
+     const context = React.useContext(PlaygroundContext);
+     return (_jsxs("button", { type: "button", "data-v-openapi-action": true, "data-v-openapi-test-request": true, disabled: !context || context.loading, onClick: () => context?.open({ method, path, example }), children: [_jsx(LucidePlay, { "data-v-openapi-action-icon": true }), "Try"] }));
+ }
+-//# sourceMappingURL=Playground.client.js.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/PlaygroundStandalone.d.ts b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
+index fbec302..6fb0a3a 100644
+--- a/dist/react/internal/openapi/PlaygroundStandalone.d.ts
++++ b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
+@@ -50,6 +50,8 @@ export declare namespace Playground {
+          * @default false
+          */
+         hideQueryParams?: boolean | undefined;
++        /** Editable query values for this embed, e.g. `chainId=42431`. */
++        query?: string | undefined;
+     };
+ }
+ //# sourceMappingURL=PlaygroundStandalone.d.ts.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/PlaygroundStandalone.js b/dist/react/internal/openapi/PlaygroundStandalone.js
+index 0ef0a76..f63270c 100644
+--- a/dist/react/internal/openapi/PlaygroundStandalone.js
++++ b/dist/react/internal/openapi/PlaygroundStandalone.js
+@@ -1,5 +1,6 @@
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ import { specs } from 'virtual:vocs/openapi';
++import { operationWithQuery } from '../../../internal/openapi/query-presets.js';
+ import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js';
+ import { CodeSample } from './CodeSample.client.js';
+ import { findOperation } from './find-operation.js';
+@@ -35,7 +36,8 @@ export function Playground(props) {
+     const ir = specs[mount];
+     if (!ir)
+         return _jsxs("p", { children: ["No OpenAPI spec is mounted at ", mount, "."] });
+-    const operation = findOperation(ir, props);
++    const found = findOperation(ir, props);
++    const operation = found && operationWithQuery(found, props.query);
+     if (!operation)
+         return (_jsxs("p", { children: ["No matching operation found in the API mounted at ", mount, ". Pass an ", _jsx("code", { children: "operationId" }), ", or a ", _jsx("code", { children: "method" }), " and ", _jsx("code", { children: "path" }), "."] }));
+     const samples = codeSamples(operation, ir.servers[0]?.url, {
+@@ -44,6 +46,5 @@ export function Playground(props) {
+     if (samples.length === 0)
+         return null;
+     const responses = responseSamples(operation);
+-    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
++    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, queryPreset: props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
+ }
+-//# sourceMappingURL=PlaygroundStandalone.js.map
+\ No newline at end of file
+diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
+new file mode 100644
+index 0000000..6ee138e
+--- /dev/null
++++ b/src/internal/openapi/query-presets.ts
+@@ -0,0 +1,53 @@
++import type { IrOperation } from './parser.js'
++
++export type QueryPreset = { method: string; path: string; query: string }
++
++type Parameter = {
++  name?: string
++  in?: string
++  schema?: Record<string, unknown>
++}
++
++function presetParameters<T extends Parameter>(parameters: T[], query: string): T[] {
++  const values = new URLSearchParams(query)
++  return parameters.map((parameter) => {
++    if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
++      return parameter
++    const raw = values.get(parameter.name)!
++    const value = parameter.schema?.type === 'array' ? raw.split(',') : raw
++    const { example: _example, ...rest } = parameter
++    return {
++      ...rest,
++      // Scalar reads parameter examples and needs optional rows explicitly enabled.
++      examples: { default: { value, 'x-disabled': false } },
++      // Vocs generates snippets from schema examples. Neither changes API defaults.
++      schema: { ...parameter.schema, example: value, examples: [value] },
++    } as T
++  })
++}
++
++/** Apply editable query examples to one embed without changing its shared spec. */
++export function operationWithQuery(operation: IrOperation, query?: string): IrOperation {
++  if (!query) return operation
++  return { ...operation, parameters: presetParameters(operation.parameters, query) }
++}
++
++/** Prepare the isolated Scalar document used by this playground instance. */
++export function documentWithQuery(
++  document: Record<string, unknown>,
++  preset?: QueryPreset,
++): Record<string, unknown> {
++  if (!preset?.query) return document
++  const copy = structuredClone(document)
++  const paths = copy.paths as Record<string, Record<string, unknown>> | undefined
++  const path = paths?.[preset.path]
++  const operation = path?.[preset.method.toLowerCase()] as
++    | Record<string, unknown>
++    | undefined
++  if (!operation) return copy
++  for (const owner of [path!, operation]) {
++    if (Array.isArray(owner.parameters))
++      owner.parameters = presetParameters(owner.parameters, preset.query)
++  }
++  return copy
++}
+diff --git a/src/react/Head.tsx b/src/react/Head.tsx
+index e7b51ed..004c472 100644
+--- a/src/react/Head.tsx
++++ b/src/react/Head.tsx
+@@ -9,7 +9,7 @@ import * as MdxPageContext from './MdxPageContext.js'
+ import { useConfig } from './useConfig.js'
+ 
+ export function Head(props: Head.Props) {
+-  const { includeJsonLd = true } = props
++  const { includeJsonLd = true, includeTitle = true } = props
+   const config = useConfig()
+   const { path: pathname } = useRouter()
+   const { frontmatter } = MdxPageContext.use()
+@@ -122,7 +122,7 @@ export function Head(props: Head.Props) {
+       {!disabled && (
+         <>
+           {/* Title */}
+-          {fullTitle && <title key="title">{fullTitle}</title>}
++          {includeTitle && fullTitle && <title key="title">{fullTitle}</title>}
+ 
+           {/* Base URL */}
+           {base && <base href={base} />}
+@@ -225,6 +225,7 @@ export function Head(props: Head.Props) {
+ export declare namespace Head {
+   export type Props = {
+     includeJsonLd?: boolean | undefined
++    includeTitle?: boolean | undefined
+   }
+ }
+ 
+diff --git a/src/react/Layout.tsx b/src/react/Layout.tsx
+index ca77c7a..4c8fbb9 100644
+--- a/src/react/Layout.tsx
++++ b/src/react/Layout.tsx
+@@ -2,10 +2,10 @@ import { Head } from './Head.js'
+ import * as Layout_client from './Layout.client.js'
+ 
+ export function Layout(props: Layout.Props) {
+-  const { children, includeJsonLd } = props
++  const { children, includeJsonLd, includeTitle } = props
+   return (
+     <>
+-      <Head includeJsonLd={includeJsonLd} />
++      <Head includeJsonLd={includeJsonLd} includeTitle={includeTitle} />
+       <Layout_client.Main>{children}</Layout_client.Main>
+     </>
+   )
+@@ -15,5 +15,6 @@ export namespace Layout {
+   export type Props = {
+     children: React.ReactNode
+     includeJsonLd?: boolean | undefined
++    includeTitle?: boolean | undefined
+   }
+ }
+diff --git a/src/react/Root.tsx b/src/react/Root.tsx
+index 77180d1..495ce44 100644
+--- a/src/react/Root.tsx
++++ b/src/react/Root.tsx
+@@ -2,7 +2,6 @@ import { config } from 'virtual:vocs/config'
+ import groupIconsStylesUrl from 'virtual:vocs/group-icons.css?url'
+ import userStylesUrl from 'virtual:vocs/user-styles'
+ import stylesUrl from '../styles/index.css?url'
+-import { Head } from './Head.js'
+ import { Root_client } from './Root.client.js'
+ import { ScrollRestoration } from './ScrollRestoration.js'
+ 
+@@ -24,7 +23,6 @@ export async function Root({ children }: { children: React.ReactNode }) {
+         <link rel="stylesheet" href={stylesUrl} />
+         {userStylesUrl && <link rel="stylesheet" href={userStylesUrl} />}
+         {groupIconsStylesUrl && <link rel="stylesheet" href={groupIconsStylesUrl} />}
+-        <Head includeJsonLd={false} />
+       </head>
+       <body data-version="1.0">
+         <Root_client>{children}</Root_client>
+diff --git a/src/react/internal/NotFound.tsx b/src/react/internal/NotFound.tsx
+index ccbf3ac..409c67c 100644
+--- a/src/react/internal/NotFound.tsx
++++ b/src/react/internal/NotFound.tsx
+@@ -1,43 +1,48 @@
++import { config } from 'virtual:vocs/config'
+ import { Link } from 'waku'
+ import LucideFileQuestion from '~icons/lucide/file-question'
+ import LucideHome from '~icons/lucide/home'
+ 
+ export function NotFound() {
+   return (
+-    <div
+-      className="vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center"
+-      data-v-not-found
+-    >
++    <>
++      <title>{`Page not found ⋅ ${config.title}`}</title>
++      <meta name="robots" content="noindex, nofollow" />
+       <div
+-        className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
+-        data-v-not-found-icon
++        className="vocs:flex vocs:flex-col vocs:items-center vocs:justify-center vocs:min-h-[60vh] vocs:px-6 vocs:py-16 vocs:text-center"
++        data-v-not-found
+       >
+-        <LucideFileQuestion className="vocs:size-10" />
++        <div
++          className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
++          data-v-not-found-icon
++        >
++          <LucideFileQuestion className="vocs:size-10" />
++        </div>
++
++        <h1
++          className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
++          data-v-not-found-title
++        >
++          Page not found
++        </h1>
++
++        <p
++          className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
++          data-v-not-found-description
++        >
++          The page you're looking for doesn't exist or has been moved.
++        </p>
++
++        <Link
++          className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
++          data-v-not-found-link
++          to="/"
++        >
++          <LucideHome className="vocs:size-4 vocs:text-secondary" />
++          Back to home
++        </Link>
+       </div>
+-
+-      <h1
+-        className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
+-        data-v-not-found-title
+-      >
+-        Page not found
+-      </h1>
+-
+-      <p
+-        className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
+-        data-v-not-found-description
+-      >
+-        The page you're looking for doesn't exist or has been moved.
+-      </p>
+-
+-      <Link
+-        className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
+-        data-v-not-found-link
+-        to="/"
+-      >
+-        <LucideHome className="vocs:size-4 vocs:text-secondary" />
+-        Back to home
+-      </Link>
+-    </div>
++    </>
+   )
+ }
+ 
+diff --git a/src/react/internal/openapi/OpenApiPage.tsx b/src/react/internal/openapi/OpenApiPage.tsx
+index 939c937..8207ef5 100644
+--- a/src/react/internal/openapi/OpenApiPage.tsx
++++ b/src/react/internal/openapi/OpenApiPage.tsx
+@@ -20,6 +20,7 @@ import { Prose, ReferenceGroup, ReferenceOverview } from './Reference.js'
+  */
+ function OpenApiLayout(props: {
+   children: React.ReactNode
++  documentTitle?: string | undefined
+   frontmatter?: Frontmatter | undefined
+   outline?: boolean | undefined
+   width?: 'default' | 'full'
+@@ -32,7 +33,10 @@ function OpenApiLayout(props: {
+         outline: props.outline ?? true,
+       }}
+     >
+-      <Layout includeJsonLd={false}>{props.children}</Layout>
++      <Layout includeJsonLd={false} includeTitle={!props.documentTitle}>
++        {props.documentTitle ? <title>{props.documentTitle}</title> : null}
++        {props.children}
++      </Layout>
+     </MdxPageContext.Provider>
+   )
+ }
+@@ -60,8 +64,11 @@ export function OpenApiGuide(props: OpenApiGuide.Props) {
+   const description = props.description ?? props.frontmatter?.description
+ 
+   return (
+-    <OpenApiLayout frontmatter={{ ...props.frontmatter, description, title }} width="full">
+-      {title ? <title>{title}</title> : null}
++    <OpenApiLayout
++      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++      frontmatter={{ ...props.frontmatter, description, title }}
++      width="default"
++    >
+       <div data-v-openapi-guide>
+         {props.header && title ? (
+           <header data-v-openapi-header>
+@@ -140,8 +147,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+     const title = props.title ?? props.frontmatter?.title ?? `${group.name} · ${ir.info.title}`
+ 
+     return (
+-      <OpenApiLayout frontmatter={{ ...props.frontmatter, description, title }} outline={false}>
+-        <title>{title}</title>
++      <OpenApiLayout
++        documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++        frontmatter={{ ...props.frontmatter, description, title }}
++        outline={false}
++      >
+         <PlaygroundProvider mount={ir.path}>
+           <ReferenceGroup
+             ir={ir}
+@@ -160,8 +170,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+   const title = props.title ?? props.frontmatter?.title ?? ir.info.title
+ 
+   return (
+-    <OpenApiLayout frontmatter={{ ...props.frontmatter, title }} width="full">
+-      <title>{title}</title>
++    <OpenApiLayout
++      documentTitle={resolveDocumentTitle(props.frontmatter, title)}
++      frontmatter={{ ...props.frontmatter, title }}
++      width="default"
++    >
+       <ReferenceOverview
+         ir={ir}
+         intro={props.intro}
+@@ -171,6 +184,11 @@ export function OpenApiPage(props: OpenApiPage.Props) {
+   )
+ }
+ 
++function resolveDocumentTitle(frontmatter: Frontmatter | undefined, fallback: string | undefined) {
++  const seoTitle = typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : ''
++  return seoTitle || fallback
++}
++
+ export declare namespace OpenApiPage {
+   type Props = {
+     /** Mount path identifying which spec to render (e.g. `/api`). */
+diff --git a/src/react/internal/openapi/Playground.client.tsx b/src/react/internal/openapi/Playground.client.tsx
+index ff2d824..921f3a9 100644
+--- a/src/react/internal/openapi/Playground.client.tsx
++++ b/src/react/internal/openapi/Playground.client.tsx
+@@ -3,6 +3,7 @@
+ import * as React from 'react'
+ import { createPortal } from 'react-dom'
+ import LucidePlay from '~icons/lucide/play'
++import { documentWithQuery, type QueryPreset } from '../../../internal/openapi/query-presets.js'
+ import { useColorScheme } from '../../useColorScheme.js'
+ import * as Auth from './auth.js'
+ 
+@@ -17,7 +18,8 @@ const PlaygroundContext = React.createContext<{ open: OpenFn; loading: boolean }
+  * server rendering.
+  */
+ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+-  const { children, mount: specMount = '/' } = props
++  const { children, mount: specMount = '/', queryPreset } = props
++  const presetKey = queryPreset ? JSON.stringify(queryPreset) : ''
+   const containerRef = React.useRef<HTMLDivElement>(null)
+   // biome-ignore lint/suspicious/noExplicitAny: Scalar's modal type lives in a client-only module.
+   const modalRef = React.useRef<any>(null)
+@@ -43,7 +45,7 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+       storeRef.current = null
+       initializeRef.current = null
+     }
+-  }, [specMount])
++  }, [specMount, presetKey])
+ 
+   // When another playground instance (another page/tab) persists new
+   // credentials, load them into this live store so its "Try" stays in sync
+@@ -89,7 +91,14 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+         })
+         await store.addDocument({
+           name: 'default',
+-          ...('url' in client ? { url: client.url } : { document: client.content }),
++          ...('url' in client
++            ? queryPreset
++              ? { document: documentWithQuery(await fetch(client.url).then((response) => {
++                  if (!response.ok) throw new Error(`Failed to load OpenAPI spec: ${response.status}`)
++                  return response.json()
++                }), queryPreset) }
++              : { url: client.url }
++            : { document: documentWithQuery(client.content, queryPreset) }),
+         })
+         if (generation !== generationRef.current) return null
+ 
+@@ -112,7 +121,7 @@ export function PlaygroundProvider(props: PlaygroundProvider.Props) {
+       })
+     initializeRef.current = pending
+     return pending
+-  }, [specMount])
++  }, [specMount, presetKey])
+ 
+   const open = React.useCallback<OpenFn>(
+     (operation) => {
+@@ -171,6 +180,8 @@ export declare namespace PlaygroundProvider {
+     children: React.ReactNode
+     /** Spec mount path; scopes the persisted auth (e.g. `/api`). */
+     mount?: string | undefined
++    /** Editable query values scoped to this provider instance. */
++    queryPreset?: QueryPreset | undefined
+   }
+ }
+ 
+diff --git a/src/react/internal/openapi/PlaygroundStandalone.tsx b/src/react/internal/openapi/PlaygroundStandalone.tsx
+index db348a0..f35e4d8 100644
+--- a/src/react/internal/openapi/PlaygroundStandalone.tsx
++++ b/src/react/internal/openapi/PlaygroundStandalone.tsx
+@@ -1,4 +1,5 @@
+ import { specs } from 'virtual:vocs/openapi'
++import { operationWithQuery } from '../../../internal/openapi/query-presets.js'
+ import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js'
+ import { CodeSample } from './CodeSample.client.js'
+ import { findOperation } from './find-operation.js'
+@@ -41,7 +42,8 @@ export function Playground(props: Playground.Props) {
+   const ir = specs[mount]
+   if (!ir) return <p>No OpenAPI spec is mounted at {mount}.</p>
+ 
+-  const operation = findOperation(ir, props)
++  const found = findOperation(ir, props)
++  const operation = found && operationWithQuery(found, props.query)
+   if (!operation)
+     return (
+       <p>
+@@ -58,7 +60,10 @@ export function Playground(props: Playground.Props) {
+ 
+   return (
+     <div data-v-openapi>
+-      <PlaygroundProvider mount={ir.path}>
++      <PlaygroundProvider
++        mount={ir.path}
++        queryPreset={props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined}
++      >
+         <CodeSample
+           samples={samples}
+           responses={responses}
+@@ -107,5 +112,7 @@ export declare namespace Playground {
+      * @default false
+      */
+     hideQueryParams?: boolean | undefined
++    /** Editable query values for this embed, e.g. `chainId=42431`. */
++    query?: string | undefined
+   }
+ }

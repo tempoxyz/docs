@@ -29,15 +29,14 @@ export function createEarnDemoClient(session: EarnDemoCredential) {
   })
 }
 
-/** Fail closed if the live directory no longer lists the tested deployment. */
-export function verifyEarnDemoDirectory(
+/** Fail closed unless the live vault matches the tested deployment. */
+export function verifyEarnDemoConfiguration(
   value: unknown,
   operation: 'inspect' | 'deposit' | 'redeem' = 'deposit',
 ) {
-  const data = record(value).data
-  if (!Array.isArray(data)) throw new Error('The testnet vault directory is unavailable.')
-  const vault = record(data.find((item) => address(record(item).id) === earnDemoVault))
+  const vault = record(value)
   if (
+    address(vault.id) !== earnDemoVault ||
     vault.verified !== true ||
     address(record(vault.assetToken).address) !== earnDemoAsset ||
     address(record(vault.shareToken).address) !== earnDemoShare ||
@@ -66,11 +65,11 @@ function address(value: unknown) {
 
 export async function verifyEarnDemoVault(operation: 'inspect' | 'deposit' | 'redeem' = 'deposit') {
   const response = await fetch(
-    'https://api.tempo.xyz/v1/earn/vaults/verified?chainId=testnet&include=access,capabilities&limit=50',
+    `https://api.tempo.xyz/v1/earn/vaults/${earnDemoVault}?chainId=testnet&include=access,capabilities`,
     { credentials: 'omit', signal: AbortSignal.timeout(20_000) },
   )
   if (!response.ok) throw new Error('Could not verify the testnet vault. Select Check again.')
-  const availability = verifyEarnDemoDirectory(await response.json(), operation)
+  const availability = verifyEarnDemoConfiguration(await response.json(), operation)
   const client = createClient({ chain: tempoModerato })
   verifyEarnDemoNetwork(await client.getChainId())
   const state = await client.earn.getVault({ vault: earnDemoVault })

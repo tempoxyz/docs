@@ -65,7 +65,7 @@ Token rules.
 
 Connect users to Tempo Wallet.
 
-[Connect an account](/docs/accounts/integrate) to send a test payment.
+[Connect an account](/docs/accounts/apps/self-custodial-wallets) to send a test payment.
 
 </DocsProductOverview>
 
@@ -76,7 +76,7 @@ Read the account's transfer history.
 
     expect(output).toContain('# Accounts\n\nConnect users to Tempo Wallet.')
     expect(output).toContain('Connect users to Tempo Wallet.')
-    expect(output).toContain('[Connect an account](/docs/accounts/integrate)')
+    expect(output).toContain('[Connect an account](/docs/accounts/apps/self-custodial-wallets)')
     expect(output).toContain('A connected account receives stablecoins and sends a payment.')
     expect(output).toContain("## Reconcile payments\n\nRead the account's transfer history.")
     expect(output).not.toContain('DocsProductOverview')
@@ -84,6 +84,22 @@ Read the account's transfer history.
     expect(
       output.match(/A connected account receives stablecoins and sends a payment\./g),
     ).toHaveLength(1)
+  })
+
+  test('exports Earn figures as their text alternatives and strategy cards as a list', async () => {
+    const output = await render(`
+<EarnIllustration name="flow" alt="An account deposits into a vault." caption="Strategies are illustrative." />
+
+<EarnStrategyCards>
+  <EarnStrategyCard strategy="treasuries" title="U.S. Treasuries" description="Tokenized Treasury bonds." />
+  <EarnStrategyCard strategy="lending" title="Collateralized lending" description="Onchain lending pools." />
+</EarnStrategyCards>
+`)
+
+    expect(output).toContain('An account deposits into a vault.\n\nStrategies are illustrative.')
+    expect(output).toContain('* **U.S. Treasuries** — Tokenized Treasury bonds.')
+    expect(output).toContain('* **Collateralized lending** — Onchain lending pools.')
+    expect(output).not.toContain('<Earn')
   })
 
   test('keeps agent setup usable without the interactive homepage', async () => {
@@ -200,6 +216,65 @@ Status: <Badge variant="red">Required</Badge>
     expect(output).toContain('Status: **Required**')
     expect(output).toContain('[Open MCP server](https://mcp.tempo.xyz)')
     expect(output).not.toMatch(/<\/?[A-Z]/)
+  })
+
+  test('exports an indexer query as runnable SQL and the request that runs it', async () => {
+    const output = await render(`
+<TidxQuery
+  network="testnet"
+  signature={[
+    'KeyAuthorized(address indexed account, address indexed publicKey)',
+    'KeyRevoked(address indexed account, address indexed publicKey)',
+  ]}
+  sql={\`SELECT publicKey, block_num
+FROM KeyAuthorized
+WHERE account = '0x6028375ea6ae3339b16f29b343f8f32f7bb3ee8a'\`}
+/>
+`)
+    expect(output).toContain(
+      "```sql\nSELECT publicKey, block_num\nFROM KeyAuthorized\nWHERE account = '0x6028375ea6ae3339b16f29b343f8f32f7bb3ee8a'\n```",
+    )
+    expect(output).toContain('curl --get "https://indexer.testnet.tempo.xyz/query"')
+    expect(output).toContain('--data-urlencode "chainId=42431"')
+    expect(output).toContain(
+      '--data-urlencode "signature=KeyAuthorized(address indexed account, address indexed publicKey)"',
+    )
+    expect(output).toContain(
+      '--data-urlencode "signature=KeyRevoked(address indexed account, address indexed publicKey)"',
+    )
+    expect(output).toContain('--data-urlencode "sql@query.sql"')
+    expect(output).not.toContain('interactive web page')
+    expect(output).not.toContain('<TidxQuery')
+  })
+
+  test('exports a single-signature mainnet indexer query', async () => {
+    const output = await render(
+      '<TidxQuery signature="Transfer(address indexed from, address indexed to, uint256 value)" sql={`SELECT value FROM Transfer`} />',
+    )
+    expect(output).toContain('```sql\nSELECT value FROM Transfer\n```')
+    expect(output).toContain('curl --get "https://indexer.tempo.xyz/query"')
+    expect(output).toContain('--data-urlencode "chainId=4217"')
+    expect(output).toContain(
+      '--data-urlencode "signature=Transfer(address indexed from, address indexed to, uint256 value)"',
+    )
+  })
+
+  test('describes the indexer widget when it has no page query', async () => {
+    const output = await render('<TidxQuery />')
+    expect(output).toContain('run SQL against the public Tempo indexer')
+    expect(output).not.toContain('```sql')
+  })
+
+  test('replaces an account diagram with its description', async () => {
+    const output = await render(`
+<AccountDiagram name="signers" alt="Signers approve, and their weights reach the threshold." />
+
+Following text.
+`)
+
+    expect(output).toContain('Signers approve, and their weights reach the threshold.')
+    expect(output).toContain('Following text.')
+    expect(output).not.toContain('AccountDiagram')
   })
 
   test('preserves validator topology relationships in plain Markdown', async () => {
@@ -340,10 +415,14 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(loadOpenApi).not.toHaveBeenCalled()
   })
 
-  test('keeps links inside interactive demo descriptions clickable', async () => {
-    const output = await render('<EarnVaultDemo />\n\n<TempoMcpExplorer />')
-    expect(output).toContain('[verified vault API reference](/docs/api/earn#getverifiedearnvaults)')
-    expect(output).not.toContain('\\[verified vault API reference')
+  test('describes the approved mainnet and testnet vault inspector', async () => {
+    const output = await render('<EarnVaultDemo />')
+    expect(output).toContain('defaults to Sentora pathUSD on Tempo mainnet')
+    expect(output).toContain('[Earn API reference](/docs/api/earn)')
+  })
+
+  test('describes the interactive Tempo MCP explorer', async () => {
+    const output = await render('<TempoMcpExplorer />')
     expect(output).toContain('Use the interactive web page to try the Tempo MCP server.')
   })
 
@@ -363,16 +442,25 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(output).not.toContain('<div')
   })
 
-  test('exports homepage guide cards as readable links and descriptions', async () => {
+  test('exports homepage guides and chevron links as readable links and descriptions', async () => {
     const output = await render(`
-<a href="/get-started/quickstart"><strong>Send your first payment <span aria-hidden="true">→</span></strong><span>Send stablecoins with a test wallet.</span></a>
-<p><a href="/docs/development">Browse developer guides →</a></p>
+<div className="tempo-docs-home-guide">
+
+Send stablecoins with a test wallet.
+
+<HomeGuideButton href="/get-started/quickstart" guide="Send your first payment" />
+
+</div>
+
+<ChevronLink href="/get-started" className="tempo-docs-home-guides-more">Find your starting point</ChevronLink>
+
+- <HomeColorLink href="/docs/sdk/typescript">TypeScript</HomeColorLink>
 `)
-    expect(output).toContain(
-      '[Send your first payment](/get-started/quickstart) — Send stablecoins with a test wallet.',
-    )
-    expect(output).toContain('[Browse developer guides →](/docs/development)')
-    expect(output).not.toMatch(/<(?:a|p|strong|span)\b/)
+    expect(output).toContain('Send stablecoins with a test wallet.')
+    expect(output).toContain('[Send your first payment](/get-started/quickstart)')
+    expect(output).toContain('[Find your starting point](/get-started)')
+    expect(output).toContain('[TypeScript](/docs/sdk/typescript)')
+    expect(output).not.toMatch(/<(?:a|p|div|HomeGuideButton|HomeColorLink|ChevronLink)\b/)
   })
 
   test('preserves anchor-only links used by legacy Zone guides', async () => {
@@ -485,6 +573,12 @@ export const data = [{ label: 'Example' }]
     ['link button', '<DocsLinkButton>Open docs</DocsLinkButton>', 'static href attribute'],
     ['OpenAPI playground', '<OpenApi.Playground />', 'static operationId attribute'],
     ['OpenAPI endpoints', '<OpenApi.Endpoints />', 'static path attribute'],
+    ['indexer query', '<TidxQuery sql={sql} />', 'static sql attribute'],
+    [
+      'indexer signature',
+      '<TidxQuery signature={signatures} sql="SELECT 1" />',
+      'static signature attribute',
+    ],
   ])('rejects incomplete or dynamic %s data', async (_name, source, message) => {
     await expect(render(source)).rejects.toThrow(message)
   })

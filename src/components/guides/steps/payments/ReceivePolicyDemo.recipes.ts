@@ -41,3 +41,42 @@ export const code = style({
   display: 'block',
   wordBreak: 'break-all',
 })
+/** An address or transaction hash with a copy button. This devnet has no public explorer. */
+export const copyValue = style({
+  marginTop: tokens.spacing['1'],
+  display: 'flex',
+  alignItems: 'center',
+  gap: tokens.spacing['2'],
+  fontSize: tokens.fontSize.compact,
+  letterSpacing: tokens.letterSpacing.tight,
+  color: tokens.color.gray9,
+})
+export const copyValueCode = style({
+  minWidth: '0',
+  // Vocs pads inline code; the value sits flush beside its copy button.
+  paddingInline: tokens.spacing['0'],
+  fontFamily: tokens.fontFamily.code,
+  fontSize: tokens.fontSize.xs,
+  color: tokens.color.gray12,
+})
+export const copyValueButton = style({
+  display: 'grid',
+  flexShrink: 0,
+  placeItems: 'center',
+  color: tokens.color.gray9,
+  transitionProperty:
+    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
+  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  transitionDuration: '150ms',
+  selectors: {
+    '&:hover': {
+      '@media (hover: hover)': {
+        color: tokens.color.gray12,
+      },
+    },
+  },
+})
+export const copyValueIcon = style({
+  width: tokens.spacing['3'],
+  height: tokens.spacing['3'],
+})

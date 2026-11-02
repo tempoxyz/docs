@@ -41,8 +41,15 @@ export type RoutePick = {
 type Option = { value: string; label: string }
 const unique = (options: Option[]) => [...new Map(options.map((o) => [o.value, o])).values()]
 const only = (options: Option[]) => (options.length === 1 ? options[0].value : '')
+const isTempo = (chainId: string) => /^eip155:(4217|42431)$/.test(chainId)
+/** On Tempo, OUSD is the default destination asset when the route offers it. */
+const preferred = (chainId: string, options: Option[]) =>
+  (isTempo(chainId) && options.find((o) => o.label === 'OUSD')?.value) || ''
 
-/** Cascade source network → asset → destination network → asset, filling single-option steps. */
+/**
+ * Cascade source network → asset → destination network → asset, filling single-option steps and
+ * defaulting a Tempo destination to OUSD until the reader picks another asset.
+ */
 export function routeChoices(routes: TestRoute[], pick: RoutePick) {
   const sourceChains = unique(
     routes.map((r) => ({ value: r.sourceChain.id, label: r.sourceChain.name })),
@@ -62,7 +69,10 @@ export function routeChoices(routes: TestRoute[], pick: RoutePick) {
   const destinationTokens = unique(
     toChain.map((r) => ({ value: r.destinationToken.tokenKey, label: r.destinationToken.symbol })),
   )
-  const destinationToken = pick.destinationToken || only(destinationTokens)
+  const destinationToken =
+    pick.destinationToken ||
+    only(destinationTokens) ||
+    preferred(destinationChain, destinationTokens)
   return {
     options: { sourceChains, sourceTokens, destinationChains, destinationTokens },
     pick: { sourceChain, sourceToken, destinationChain, destinationToken },
@@ -117,17 +127,35 @@ function address(value: string, format: string, label: string) {
   if (format === 'base58' && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) {
     throw new Error(`${label} must be a source-network Base58 address.`)
   }
+  // Routes takes classic Stellar accounts for senders and refunds, never muxed (M…) addresses.
+  if (format === 'strkey' && !/^G[A-Z2-7]{55}$/.test(trimmed)) {
+    throw new Error(`${label} must be a classic Stellar account address (G…).`)
+  }
   return trimmed
 }
 
-/** Funding methods the demo can run: wallet transfers need an EVM source to sign here. */
+/** Funding methods the demo can run: wallet transfers need a source network it can sign on. */
 export function demoMethods(route: TestRoute): TestMethod[] {
   const methods: TestMethod[] = []
-  // The demo signs transfers on EVM networks and Tron; Solana funds through deposit addresses.
-  if (route.capabilities.transfer?.modes.length && /^(eip155|tron):/.test(route.sourceChain.id))
+  // The demo signs transfers on EVM networks, Tron, and Stellar; Solana funds through deposit addresses.
+  if (
+    route.capabilities.transfer?.modes.length &&
+    /^(eip155|tron|stellar):/.test(route.sourceChain.id)
+  )
     methods.push('transfer')
   if (route.capabilities.depositAddress) methods.push('depositAddress')
   return methods
+}
+
+/** A link that opens the demo with this route selected. Only the route ID goes in the URL. */
+export function routeDemoHref(route: TestRoute) {
+  return `/docs/routes/test?${new URLSearchParams({ route: route.id })}`
+}
+
+/** The route a demo link selects, if the directory still lists it. */
+export function linkedRoute(routes: TestRoute[], search: string) {
+  const id = new URLSearchParams(search).get('route')
+  return id ? routes.find((route) => route.id === id) : undefined
 }
 
 /** Subsidized 1:1 delivery applies to deposit addresses and exact-source transfers only. */
@@ -176,8 +204,12 @@ function pricing(route: TestRoute, input: RouteInput) {
  * Quote parameters. Transfer quotes need the sender and recipient; deposit-address quotes price
  * the route alone, so their recipient and refund address are only asked for at creation.
  */
+/**
+ * Quotes use the creation inputs. The API lists a deposit quote's recipient and refund address as
+ * optional, but several deposit routes (Ethereum, Polygon, BNB, Tron) only quote with them.
+ */
 export function routeQuoteRequest(route: TestRoute, input: RouteInput) {
-  return input.method === 'transfer' ? routeTestRequest(route, input) : pricing(route, input)
+  return routeTestRequest(route, input)
 }
 
 /** The creation request body. */

@@ -22,10 +22,10 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
 - API reference (`/docs/api`) is its own top-nav link, matching Console's "API Docs" link. Partners (`/docs/partners`) contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
 - Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
-- `SKILL.md` is the docs site's published skill. The installable plugin's skill lives in `tempoxyz/plugins`; update it separately when routing changes.
-- `src/lib/ai-docs.ts` and the Vite build hook generate `llms.txt`, `llms-full.txt`, Markdown section context, and the published skill from source. Never edit `dist` or `.vercel` copies by hand.
+- `public/SKILL.md` is the canonical Tempo docs skill, published at `/SKILL.md`. The `tempoxyz/plugins` copy is generated from it by that repo's skill sync, so edit only `public/SKILL.md` here.
+- `src/lib/markdown-output-transform.ts` uses `src/lib/ai-docs.ts` to add section context before Vocs validates and writes Markdown exports. `SKILL.md` links to `public/SKILL.md`, the source Vite serves and copies. Never edit `dist` or `.vercel` copies by hand.
 - After changing navigation or exported components, build and run `pnpm check:markdown` to check content and IA coverage. Keep Markdown exports useful without interactive UI.
-- When a top-nav section is added, renamed, or removed, update its routing description in `src/lib/ai-docs.ts`, the routing table in `SKILL.md`, and the tests that name sections (`DocsHeader.test.ts`, `ai-docs.test.ts`, `ai-docs-dev.test.ts`, `markdown-output.test.ts`).
+- When a top-nav section is added, renamed, or removed, update its routing description in `src/lib/ai-docs.ts`, the routing table in `SKILL.md`, and the tests that name sections (`DocsHeader.test.ts`, `ai-docs.test.ts`, `markdown-output-transform.test.ts`, `markdown-output.test.ts`).
 
 ### API reference sidebar
 
@@ -35,7 +35,7 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Keep the API reference to API pages: endpoints, authentication, conventions, and API guides. Client libraries live under Get Started › Tempo SDK; the Tempo API client for TypeScript (`tapimo`) is at `/docs/sdk/typescript/api-client`.
 - A single-tag section renders its operations directly under the section header, so give that tag the section's name as its `x-displayName`.
 - When renaming or merging a tag, set `x-pagePath` to keep the existing URL; the display name otherwise changes the page path.
-- The `introFlat`, `hide`, `groupExtrasByName`, and `sectionExtras` sidebar options are local additions to vocs. Ship them through `patches/vocs@2.8.5.patch`, including their types, or upstream.
+- `sidebar` uses Vocs's OpenAPI options: `introduction: false` puts the `intro` items at the top level, `hide` drops tags or sections from the sidebar while keeping their pages, `groupItems` adds links inside a tag group after its Overview (keyed by tag or display name), and `tagGroupItems` adds links at the top of an `x-tagGroups` section.
 
 ### Moving, renaming, or removing pages
 
@@ -79,9 +79,12 @@ Use `pnpm`.
 - Vocs reads `vocs.config.ts` (sidebar, redirects, OpenAPI options) only at startup and does not watch it. Batch config edits, then restart once to check them.
 - Vite restarts the server by itself when a file imported by `vite.config.ts` changes, including `src/lib/ai-docs.ts` and `src/lib/docs-sections.ts`. Make all edits to those files in one pass.
 - Adding or deleting a page file also restarts the server, so routes stay current.
-- The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting. If responses stay slow (20 seconds or more per page) after many edits, one restart clears it.
+- The first load of an API page parses the OpenAPI spec and can take a minute or two. Wait for it instead of restarting.
 - Check rendered pages with headless Playwright screenshots against the running server. Wait for React hydration before clicking sidebar controls.
-- If the server runs out of memory, start it with `NODE_OPTIONS=--max-old-space-size=16384`. Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
+- Heap use stays flat across MDX edits, repeat page loads, and Markdown requests (`.md` twins, `curl`). Node cannot unload ES modules, so two kinds of edits still keep memory: an edit to `vocs.config.ts` or a file it imports keeps one copy of the config (about 15 MB), and an edit to a component that a page renders standalone (`<Component />`) keeps one copy of the component modules (50–125 MB) once a Markdown request follows. Restart after many of those edits. Vocs reuses config loads and shares one Markdown component loader; `src/test/vocs-config-resolve.test.ts` fails if a Vocs upgrade drops the config reuse.
+- Each newly compiled page adds 10–15 MB, so loading about 100 distinct pages passes Node's default heap limit. For broad checks such as crawling the site, start the server with `NODE_OPTIONS=--max-old-space-size=16384`.
+- The changelog fetches GitHub releases at most every 10 minutes and serves the last result when GitHub rate-limits. Set `GITHUB_TOKEN` to raise the limit.
+- Set `VITE_USE_HTTP=true` to skip the mkcert HTTPS setup, which needs sudo.
 
 Before finishing docs-only changes, run at least `pnpm check:types` when practical. Run `pnpm build` for config, component, routing, sidebar, or MDX structure changes. Run targeted tests for changed interactive components.
 
@@ -175,12 +178,25 @@ Prefer headings that name the product, API, command, protocol, or task:
 
 Exceptions are allowed for standards-format pages, especially TIP sections with required names such as `Abstract`, `Motivation`, `Specification`, and `Test Cases`.
 
-Before finishing docs changes, scan changed Markdown files for generic H2s:
+Before finishing docs changes, scan changed Markdown files for generic H2s. Accounts and Zones pages follow the Design System template below, so the scan skips them:
 
 ```bash
-git diff --name-only -- '*.md' '*.mdx' \
+git diff --name-only -- '*.md' '*.mdx' | grep -vE '^src/pages/docs/(accounts|zones|guide/private-zones|protocol/zones)' \
   | xargs rg -n '^## +(Overview|Usage|Parameters|Returns?|Examples|Setup|Configuration|Reference|Request|Response|Errors|Best Practices|Next Steps)( +\{#[^}]+\})?$'
 ```
+
+### Design System page template
+
+Accounts and Zones pages follow the [Tempo Design System docs](https://ds.tehq.dev/llms-full.txt) page by page: `src/pages/docs/accounts.mdx`, `src/pages/docs/accounts/`, `src/pages/docs/zones.mdx`, `src/pages/docs/zones/`, `src/pages/docs/guide/private-zones/`, and `src/pages/docs/protocol/zones/`. Other sections move to this template when they are rewritten. On these pages, the template overrides the generic-H2 ban, sentence-case headings, and period labels:
+
+1. **Title:** Title Case `title` frontmatter and `#` heading, matching the sidebar label in `vocs.config.ts`.
+2. **Subhead:** One short sentence after the H1 that defines the page or states its outcome.
+3. **`## Overview`:** Always the first H2. One to three short paragraphs that open by defining the concept or stating what the guide builds.
+4. **Body sections:** Noun labels for concepts (`## Signers`), verb-first labels for tasks (`## Set a Limit`). Guides put their `:::::steps` block under `## Setup`.
+5. **`## Guidelines`:** Optional, and absent from most pages. Put advice in the body, next to the step or fact it concerns. Add Guidelines only when a page has two or more judgment calls that span the page, such as how to weigh signers. Each `###` guideline gives a reason the body doesn't, then an optional `**Do:** …` or `**Don't:** …`. Never restate a body sentence, and never write a Don't that only negates the Do.
+6. **`## Related`:** The last section. Two to five `<Card>`s whose descriptions start with "Covers …" for concepts or "Use for …" for tasks. Getting-started guides (`create`, `fund`) use `## Next Steps` instead.
+
+Headings use Title Case: capitalize every word except a, an, the, and, but, or, nor, for, so, yet, as, at, by, in, of, off, on, per, to, and via, unless first or last. Capitalize a verb particle such as Up in "Set Up". Capitalize prepositions of four or more letters (With, From, Into). Bold-label lists use `- **Label:** Sentence.` with a Title Case label. Title Case alone doesn't change an anchor slug; for any reworded heading, keep the old slug with `<span id="old-slug" />`.
 
 ## Procedural Guides
 
@@ -204,10 +220,45 @@ Each step should be actionable and concrete. Keep long conceptual background out
 
 ## Writing Style
 
+Follows the [Tempo Design System writing style](https://ds.tehq.dev/docs/foundations/content/writing-style), adapted for docs pages.
+
+### Principles
+
+- **Clear before clever.** State exactly what happens, in familiar words.
+- **Short.** Cut every word that does not change the meaning.
+- **Specific.** Name the thing and the action. "Spends up to 500 OUSD a day" carries more than "spends within limits".
+- **Consistent.** Call one thing by one name everywhere. See Protocol Concept Naming below.
+
+### Sentences
+
+- Put one rule or fact in each sentence, so a reader or an agent can quote it alone.
+- Keep sentences under 20 words and headings under six words.
+- Don't chain clauses with colons. A sentence with two colons is always two sentences or a list.
+- Put the important words first: the subject or outcome, then the conditions. "Once the update lands, the lost passkey can't approve anything" leads its paragraph, not ends it.
+- Define before explaining. Open a concept with one sentence that says what it is, then list its parts.
+- State rules as facts that Tempo checks, enforces, or rejects, not as warnings. Prefer "Tempo reverts the transaction" over "the transaction may fail".
+- State what an operation doesn't do, plainly: "It holds no funds." "A configuration update doesn't revoke it."
+- Add a concrete "such as" example to an abstract rule.
+- Use contractions: don't, can't, isn't, it's. Keep "cannot" only inside quoted error strings.
+- Name the thing, not its position. Write "the example" or name the step, not "the code below" or "the steps above".
+- State recommendations as instructions ("Use three signers"), not "we recommend". Use "we" only for Tempo as a company.
+- Keep "may", "might", "can", and "could" only for real permission or real uncertainty.
+
+### Paragraphs and lists
+
+- The paragraph after the H1 renders as the subhead. Make it one short sentence that states the outcome.
+- Keep paragraphs to two or three sentences.
+- Turn a sentence that lists three or more items with explanations into a bold-label list: `- **Label.** Sentence.` outside the Design System template sections, `- **Label:** Sentence.` inside them. A short plain list ("A, B, and C") stays in the sentence.
+- Don't stack several lists back to back. Keep a sentence of prose between them.
+- Give the instruction, then the code, then at most one or two sentences on the result. Skip lead-ins such as "The following code…".
+- Don't write sentences whose only job is a link ("X covers Y", "See Z for more"). Link the meaningful words in a sentence that states a fact, and put navigation in Related cards.
+
+### Voice
+
 - Use active voice, present tense, and second person.
 - Lead with the recommended path, then place alternatives under an advanced or reference section.
 - Keep intro paragraphs short. Avoid repeating sidebar or page titles.
-- Use sentence case for headings unless the product or protocol term requires capitalization.
+- Use sentence case for headings unless the product or protocol term requires capitalization. Accounts and Zones pages use Title Case (see Design System page template).
 - Use code font for commands, file paths, parameters, status codes, object names, and literal values.
 - Use concrete nouns. Avoid vague labels like "things", "stuff", "various", and "etc." when a specific list is possible.
 - Avoid filler such as "simply", "just", "easy", "obviously", and "seamlessly".
@@ -230,6 +281,45 @@ Each step should be actionable and concrete. Keep long conceptual background out
 - Use `Tempo Token Rewards` in sidebar, concept introductions, and rewards-specific resource cards. Do not append `(TIP-20)`.
 - Keep raw TIP references for technical/spec contexts, such as `TIP-20 ABI`, `TIP-403 policy check`, and links titled `TIP-20 Specification`.
 - Add the TIP number in parentheses only when it helps disambiguate.
+
+### Word list
+
+Use one term for one concept. Adapted from the [Design System word list](https://ds.tehq.dev/docs/foundations/content/word-list) for developer docs, where "sign" and code identifiers are expected.
+
+| Use | Avoid | Notes |
+| --- | --- | --- |
+| account | wallet (for what holds funds) | A wallet is the software or provider that signs for an account. |
+| address | public key, wallet ID, account number | The `0x` identifier of an account. |
+| single-key account | EOA (after first mention) | Introduce it once as "like a standard Ethereum account (an EOA)". |
+| configurable account | smart account, multisig account | An account with signers, weights, and a threshold. Use "multisig" only for the team multisig setup. |
+| signer | owner, co-signer, keyholder | `owners` stays in Viem code. |
+| threshold, weight | quorum, voting power | Approvals reach the threshold when their weights add up to it. |
+| approve | co-sign, vote | Signers approve a transaction. "Sign" is right for the cryptographic act and in code. |
+| access key | session key, delegate key, sub-key | Signs onchain within its bounds. Not an API key, which authenticates to the Tempo API. |
+| admin access key | root key, master key | An access key with no bounds. |
+| spending limit, scopes, expiry | allowance, permissions, expiration, TTL | An allowance is a TIP-20 approval, a different thing. |
+| authorize (an access key) | grant, issue, add | Signers authorize an access key. |
+| revoke (an access key or API key) | delete, disable | Remove or replace a signer; revoke a key. |
+| stablecoin | token, coin, crypto (for payment assets) | Use "TIP-20 token" in technical and spec contexts. |
+| OUSD | AlphaUSD, BetaUSD (in prose) | The example stablecoin in prose. Code keeps its own token names. |
+| base units | wei, atomic units | Integer token amounts. |
+| network fee | gas (in prose) | `gas` stays in RPC fields and code. |
+| fee token | gas token | Tempo has no native gas token. |
+| fee payer, sponsor | paymaster, gas station, cover (for fees) | A fee payer sponsors a transaction's network fee. |
+| transaction, transfer, payment | — | Execution, token movement, and the application's business operation. |
+| send | transmit, pay out (as a verb) | Send stablecoins. "Payout" is fine as a noun for a backend's payments. |
+| add funds | top up, load, on-ramp | Use "deposit" for a deposit address or a Zone deposit. |
+| withdraw | cash out, off-ramp | |
+| swap | trade, exchange (as a verb) | Through the Stablecoin DEX. |
+| sign in | log in, login | "Sign-in" as a noun or adjective. |
+| onchain, offchain | on-chain, on chain | |
+| mainnet, testnet, devnet | Mainnet, Testnet (mid-sentence) | Name the Tempo Accounts devnet where configurable accounts run until T14. |
+| Zone | zone, private chain, rollup | Capitalized, as in "Tempo Zones" and "Zone A". |
+| Tempo (the public chain) | public chain, L1, parent chain (in prose) | Say "public Tempo" only to contrast with a Zone's private ledger. Write "Tempo Mainnet" only for mainnet itself. |
+| Zone RPC, authorization token | zone endpoint, auth header, API key | The authenticated endpoint and the signed credential it requires (`X-Authorization-Token`). |
+| operator, sequencer | admin, validator (for Zones) | The operator runs a Zone deployment. The sequencer is the protocol component that orders and submits blocks. |
+| portal, outbox | bridge, gateway | `ZonePortal` on Tempo and `ZoneOutbox` on the Zone. Pair each word with its contract name on first mention. |
+| Tempo Transaction | AA transaction, smart transaction | The transaction type with passkeys, access keys, batches, and fee sponsorship. |
 
 ## Vocs and MDX Patterns
 
@@ -288,3 +378,7 @@ Blog-specific instructions live in `blogs/AGENTS.md`. Read that file before edit
 - Confirm renamed headings preserve important anchors.
 - Run the generic-heading scan for touched Markdown/MDX files.
 - Run the most relevant validation command for the change size.
+
+## Generated Markdown
+
+Follow [MARKDOWN.md](./MARKDOWN.md) for component contracts, validation, and overrides. Add renderer tests and run `pnpm check:markdown` after building.

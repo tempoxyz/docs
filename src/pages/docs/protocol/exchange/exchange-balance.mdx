@@ -11,7 +11,7 @@ The Stablecoin DEX records a token balance for each trading account. This DEX ba
 
 <span id="why-dex-balances" />
 
-Use the DEX balance for repeated trades without transferring tokens into the contract for each operation. See [account balances](/docs/accounts/balances) to read holdings outside the DEX.
+Use the DEX balance for repeated trades without transferring tokens into the contract for each operation. See [account balances](/docs/guide/payments/accept-a-payment#read-balances) to read holdings outside the DEX.
 
 ## Checking Your Balance
 
@@ -31,7 +31,9 @@ uint128 balance = exchange.balanceOf(msg.sender, USDG_ADDRESS);
 
 ## Using Your DEX Balance
 
-Each transaction that you authorize will use your DEX balance before using funds you approve from your wallet. When you execute a swap or place an order, the DEX contract automatically:
+Each transaction you authorize uses your available DEX balance before pulling any TIP-20 shortfall from your account. The DEX has [implicit approval](/docs/protocol/tip20/spec#implicit-approvals-for-listed-precompiles), so it does not require a separate token allowance. The pull still checks balances, token transfer policies, and access-key spending limits.
+
+When you execute a swap or place an order, the DEX contract automatically:
 
 1. Checks if you have sufficient balance in the DEX
 2. If insufficient, transfers the needed amount from your wallet to your DEX balance

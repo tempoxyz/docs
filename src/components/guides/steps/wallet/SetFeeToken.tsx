@@ -145,6 +145,7 @@ export function SetFeeToken(props: DemoStepProps) {
     return (
       <div {...ui.setFeeTokenLayout()}>
         <select
+          aria-label="Fee token"
           {...ui.select()}
           value={selectedFeeToken}
           onChange={(event) => {

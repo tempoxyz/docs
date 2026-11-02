@@ -3,7 +3,7 @@ title: "Introducing stable-bench-v1"
 excerpt: "A reproducible benchmark for measuring whether coding agents can build stablecoin applications on Tempo."
 date: 2026-07-21
 category: technical
-authors: "Parv Ahuja / Brendan Ryan"
+authors: "Parv Ahuja, Brendan Ryan"
 shareImage: /og/2026-q4/og_2026-q4_devblog_introducing-stable-bench-v1_linework-000_v02.png
 ---
 

@@ -52,6 +52,8 @@ For testing on Tempo testnet, use the public fee payer endpoint at `https://spon
 
 ### Configure your client to use the fee payer service
 
+Use `withRelay` from `viem/tempo` for transport-based sponsorship; `withFeePayer` is deprecated. `withRelay` sends every `eth_fillTransaction` request to the relay, including self-paid requests, so your endpoint must support both. Keep `feePayer: true` on transactions you want sponsored. For a self-hosted server, use `Handler.relay` from `tapimo/server` with the [supported server package versions](/docs/server/relay-handler#create-a-relay-handler).
+
 :::code-group
 
 ```ts twoslash [Tempo Wallet]
@@ -156,6 +158,12 @@ function SendSponsoredPayment() {
 ## Fee sponsorship best practices
 
 Configure the fee payer service to check the sender, target contracts, allowed methods, and spending budget before signing. Track sponsored fees against your application or customer records, and show the sender when your application covers the fee.
+
+### Set sponsorship limits and handle declines
+
+Define eligible users, approved contracts and methods, per-user limits, and the application's total fee budget. Decide whether a declined sponsorship request stops submission or offers a user-paid option. Check that your wallet and client support the chosen flow before requesting a signature.
+
+Sponsorship covers the network fee. It does not fund the transfer amount, an FX spread, or a receiving provider's charges. Display those separately and record the actual sponsored fee against the payment. A fee authorization doesn't prove the recipient was paid.
 
 ### Fee sponsorship security considerations
 

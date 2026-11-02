@@ -1,7 +1,8 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 
 const depositPage = '/docs/earn/integrate#try-a-deposit'
-const directoryEndpoint = 'https://api.tempo.xyz/v1/earn/vaults/verified?**'
+const vaultEndpoint =
+  'https://api.tempo.xyz/v1/earn/vaults/0x20147491b5701dea880263241c335caca9be326d?**'
 const corsHeaders = { 'access-control-allow-origin': '*' }
 const deployment = {
   id: '0x20147491b5701dea880263241c335caca9be326d',
@@ -36,7 +37,7 @@ async function expectActionsDisabled(demo: Locator) {
   await expect(demo.getByRole('link', { name: /View (deposit|withdrawal) receipt/ })).toHaveCount(0)
 }
 
-test('shows a directory failure and retries without enabling actions or sending transactions', async ({
+test('shows a vault lookup failure and retries without enabling actions or sending transactions', async ({
   page,
 }) => {
   const writes = await blockAndTrackWrites(page)
@@ -46,7 +47,7 @@ test('shows a directory failure and retries without enabling actions or sending 
   const retryResponse = new Promise<void>((resolve) => {
     releaseRetry = resolve
   })
-  await page.route(directoryEndpoint, async (route) => {
+  await page.route(vaultEndpoint, async (route) => {
     requests.push({ method: route.request().method(), url: new URL(route.request().url()) })
     if (retry) {
       await retryResponse
@@ -54,7 +55,7 @@ test('shows a directory failure and retries without enabling actions or sending 
         status: 200,
         contentType: 'application/json',
         headers: corsHeaders,
-        body: JSON.stringify({ data: [] }),
+        body: JSON.stringify({}),
       })
       return
     }
@@ -62,7 +63,7 @@ test('shows a directory failure and retries without enabling actions or sending 
       status: 503,
       contentType: 'application/json',
       headers: corsHeaders,
-      body: JSON.stringify({ error: { message: 'Directory temporarily unavailable.' } }),
+      body: JSON.stringify({ error: { message: 'Vault temporarily unavailable.' } }),
     })
   })
   await page.goto(depositPage)
@@ -91,31 +92,34 @@ test('shows a directory failure and retries without enabling actions or sending 
   )
   for (const request of requests) {
     expect(request.method).toBe('GET')
+    expect(request.url.pathname).toBe(`/v1/earn/vaults/${deployment.id}`)
     expect(request.url.searchParams.get('chainId')).toBe('testnet')
+    expect(request.url.searchParams.get('include')).toBe('access,capabilities')
+    expect(request.url.searchParams.has('limit')).toBe(false)
   }
   expect(writes).toEqual([])
 })
 
 for (const fixture of [
-  { name: 'malformed directory data', body: { data: {} } },
+  { name: 'malformed vault data', body: { data: {} } },
   {
     name: 'a different asset token',
     body: {
-      data: [
-        { ...deployment, assetToken: { address: '0x20c0000000000000000000000000000000000001' } },
-      ],
+      ...deployment,
+      assetToken: { address: '0x20c0000000000000000000000000000000000001' },
     },
   },
   {
     name: 'a different vault engine',
     body: {
-      data: [{ ...deployment, engine: { address: '0x0000000000000000000000000000000000000001' } }],
+      ...deployment,
+      engine: { address: '0x0000000000000000000000000000000000000001' },
     },
   },
 ]) {
   test(`fails closed for ${fixture.name}`, async ({ page }) => {
     const writes = await blockAndTrackWrites(page)
-    await page.route(directoryEndpoint, (route) =>
+    await page.route(vaultEndpoint, (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -137,12 +141,12 @@ for (const fixture of [
 test('keeps the failure message and retry controls usable on a narrow screen', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   const writes = await blockAndTrackWrites(page)
-  await page.route(directoryEndpoint, (route) =>
+  await page.route(vaultEndpoint, (route) =>
     route.fulfill({
       status: 503,
       contentType: 'application/json',
       headers: corsHeaders,
-      body: JSON.stringify({ error: { message: 'Directory temporarily unavailable.' } }),
+      body: JSON.stringify({ error: { message: 'Vault temporarily unavailable.' } }),
     }),
   )
   await page.goto(depositPage)
@@ -170,7 +174,7 @@ test('keeps the failure message and retry controls usable on a narrow screen', a
 
 test('starts with one pathUSD and validates edited deposit amounts', async ({ page }) => {
   const writes = await blockAndTrackWrites(page)
-  await page.route(directoryEndpoint, (route) =>
+  await page.route(vaultEndpoint, (route) =>
     route.fulfill({
       status: 503,
       contentType: 'application/json',
@@ -200,7 +204,7 @@ test('withdrawal demo explains the shared test account and never fabricates a po
   page,
 }) => {
   const writes = await blockAndTrackWrites(page)
-  await page.route(directoryEndpoint, (route) =>
+  await page.route(vaultEndpoint, (route) =>
     route.fulfill({
       status: 503,
       contentType: 'application/json',

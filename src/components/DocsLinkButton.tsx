@@ -30,8 +30,8 @@ const button = style({
   gap: tokens.spacing['2'],
   whiteSpace: 'nowrap',
   borderRadius: tokens.radius.md,
-  // design-exception: Preserve this surface's layered artwork or focus treatment.
-  border: '1px solid currentColor !custom',
+  '--corner-radius': tokens.radius.md,
+  border: 0,
 
   backgroundColor: inherited.color.backgroundColorInvert,
 
@@ -42,8 +42,10 @@ const button = style({
   fontWeight: tokens.fontWeight.medium,
   fontSize: tokens.fontSize.sm,
   textDecoration: 'none',
-  transition: 'color 150ms, background-color 150ms, border-color 150ms, opacity 150ms',
-  '@media (hover: hover)': { ':hover': { opacity: 0.9 } },
+  transitionProperty: 'opacity',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  '@media (hover: hover)': { ':hover': { opacity: 0.9, transitionDuration: 'var(--tempo-enter)' } },
   ':focus-visible': {
     outlineWidth: tokens.borderWidth.emphasis,
     outlineStyle: 'solid',

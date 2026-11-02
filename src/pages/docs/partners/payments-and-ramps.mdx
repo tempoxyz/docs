@@ -5,17 +5,19 @@ description: Find providers for stablecoin issuance, fiat funding, payouts, fore
 ogImage: /og/2026-q4/og_2026-q4_docs_partners-payments-and-ramps_title-image_v02.jpg
 ---
 
-import { partnerLogo, partnerLogoBrale, partnerLogoBridge, partnerLogoCoinsPh, partnerLogoHercle, partnerLogoMoonpay, partnerLogoMtPelerin, partnerLogoRio, partnerLogoUr, partnerLogoWirex, partnerLogoXfx } from '../../../components/PartnerLogos.styles'
+import { partnerLogo, partnerLogoBrale, partnerLogoBridge, partnerLogoCoinsPh, partnerLogoHercle, partnerLogoMoonpay, partnerLogoMtPelerin, partnerLogoRio, partnerLogoStripe, partnerLogoUr, partnerLogoWirex, partnerLogoXfx } from '../../../components/PartnerLogos.styles'
 
 <span id="issuance--orchestration-for-stablecoins" />
 
 # Payments & ramps
 
-Find providers for stablecoin issuance, fiat funding, payouts, FX, and payment orchestration. Follow each provider's documentation for its supported integration.
+Find providers for stablecoin issuance, fiat funding, payouts, FX, and payment orchestration.
 
 For your application account flow, start with [Accounts](/docs/accounts). To build directly with TIP-20 tokens, use the [stablecoin issuance guides](/docs/guide/issuance). For movement between chains, see [Bridges](/docs/partners/bridges).
 
 <span id="brale" />
+
+Plan [funding and payout delivery](/docs/resources/guides/funding-and-payouts) before selecting a provider.
 
 ## <span className={`partner-logo partner-logo--brale ${partnerLogo().className + ' ' + partnerLogoBrale().className}`} aria-hidden="true" />Brale Stablecoin API
 
@@ -59,7 +61,7 @@ Embed fiat purchases and cash-outs with [MoonPay Ramps](https://www.moonpay.com/
 
 ## <span className={`partner-logo partner-logo--mt-pelerin ${partnerLogo().className + ' ' + partnerLogoMtPelerin().className}`} aria-hidden="true" />Mt Pelerin on- and off-ramps
 
-Embed buy, sell, and swap flows with [Mt Pelerin](https://www.mtpelerin.com/), which lists Tempo among its supported networks. Use its integration guide to configure a hosted flow for the asset and payment method you need.
+Embed buy, sell, and swap flows with [Mt Pelerin](https://www.mtpelerin.com/), which lists Tempo among its supported networks. Its integration guide configures a hosted flow.
 
 [Integration guide](https://developers.mtpelerin.com/integration-guides/getting-started) · [Bridge Wallet](/docs/partners/wallets#bridge-wallet)
 
@@ -67,7 +69,15 @@ Embed buy, sell, and swap flows with [Mt Pelerin](https://www.mtpelerin.com/), w
 
 ## <span className={`partner-logo partner-logo--rio ${partnerLogo().className + ' ' + partnerLogoRio().className}`} aria-hidden="true" />Rio Stablecoin FX
 
-Convert between fiat currencies and stablecoins with [Rio Stablecoin FX](https://www.rio.trade/stablecoin-fx). Contact Rio through the product page to confirm currency coverage and integration access.
+Convert between fiat currencies and stablecoins with [Rio Stablecoin FX](https://www.rio.trade/stablecoin-fx). Contact Rio through the product page for currency coverage and access.
+
+<span id="stripe" />
+
+## <span className={`partner-logo partner-logo--stripe ${partnerLogo().className + ' ' + partnerLogoStripe().className}`} aria-hidden="true" />Stripe
+
+[Stripe Crypto Onramp](https://docs.stripe.com/crypto/onramp) lets your users buy stablecoins with a card or bank transfer and sends them to a Tempo address. You can embed it in your app or send users to a Stripe-hosted page.
+
+[Stripe](https://docs.stripe.com/stablecoins/ecosystem/tempo) also uses Tempo to store and move stablecoins. Businesses can hold and move stablecoin balances with [Stripe Treasury](https://docs.stripe.com/treasury/stablecoins), pay out in stablecoins with [Stripe Connect](https://docs.stripe.com/connect/stablecoin-payouts), issue [stablecoin-backed cards](https://docs.stripe.com/issuing/stablecoin-cards), and accept [stablecoin payments](https://docs.stripe.com/payments/stablecoin-payments) and [payments from agents](https://docs.stripe.com/payments/machine).
 
 <span id="ur" />
 
@@ -85,7 +95,7 @@ For Wirex's card issuance product, integration documentation, and Tempo launch a
 
 ## <span className={`partner-logo partner-logo--xfx ${partnerLogo().className + ' ' + partnerLogoXfx().className}`} aria-hidden="true" />XFX
 
-[XFX](https://xfx.io) provides institutional FX execution and settlement through an API, web interface, or OTC desk. Contact XFX to confirm supported currencies, funding requirements, and settlement terms for your integration.
+[XFX](https://xfx.io) provides institutional FX execution and settlement through an API, web interface, or OTC desk. Contact XFX for supported currencies and settlement terms.
 
 <span id="allunity" />
 

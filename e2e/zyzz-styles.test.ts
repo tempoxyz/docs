@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { selectTab } from './helpers'
 
 test.setTimeout(45_000)
 
@@ -75,9 +76,9 @@ for (const width of [390, 1440]) {
 
 test('compiled homepage layout responds without losing its brand typography', async ({ page }) => {
   await page.goto('/')
-  const start = page.locator('.tempo-docs-home-start')
+  const guides = page.locator('.tempo-docs-home-guide-grid')
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await expect(start).toHaveCSS('display', 'grid')
+  await expect(guides).toHaveCSS('display', 'grid')
   await expect(page.locator('[data-v-gutter-right]')).toBeHidden()
   await expect
     .poll(() =>
@@ -86,14 +87,14 @@ test('compiled homepage layout responds without losing its brand typography', as
         .evaluate((heading) => heading.getBoundingClientRect().top),
     )
     .toBeGreaterThanOrEqual(109)
-  const desktopColumns = await start.evaluate(
+  const desktopColumns = await guides.evaluate(
     (element) => getComputedStyle(element).gridTemplateColumns,
   )
-  expect(desktopColumns.split(' ')).toHaveLength(2)
+  expect(desktopColumns.split(' ')).toHaveLength(3)
   await page.setViewportSize({ width: 390, height: 1000 })
   await expect
     .poll(() =>
-      start.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length),
+      guides.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length),
     )
     .toBe(1)
   await expect(page.locator('.tempo-docs-home h1')).toHaveCSS('font-weight', '500')
@@ -104,10 +105,10 @@ test('component recipes preserve badges and keyboard-accessible docs buttons', a
   const badge = page.locator('.docs-specification-meta span').first()
   // Inline flex is blockified inside the specification's flex link.
   await expect(badge).toHaveCSS('display', 'flex')
-  await expect(badge).toHaveCSS('border-radius', '6px')
+  await expect(badge).toHaveCSS('border-radius', '8px')
 
   await page.goto('/docs/guide/using-tempo-with-ai')
-  await page.getByRole('tab', { name: 'Cursor', exact: true }).click()
+  await selectTab(page.getByRole('tab', { name: 'Cursor', exact: true }))
   const install = page.getByRole('link', { name: 'Install in Cursor', exact: true })
   await expect(install).toHaveCSS('min-height', '40px')
   // The page layout recipe must override the button's default margin.
@@ -184,6 +185,16 @@ test('closed mobile navigation stays outside the viewport and restores focus on 
   await expect(panel).toBeInViewport()
   await expect(panel).toHaveAttribute('aria-modal', 'true')
   await page.keyboard.press('Escape')
+  await expect.poll(rightEdge).toBeLessThanOrEqual(0)
+  await expect(trigger).toBeFocused()
+
+  // Activation need not focus the button (for example, on touch browsers).
+  await trigger.evaluate((element) => {
+    element.blur()
+    element.click()
+  })
+  await expect(panel).toBeInViewport()
+  await panel.getByRole('button', { name: 'Close docs navigation', exact: true }).click()
   await expect.poll(rightEdge).toBeLessThanOrEqual(0)
   await expect(trigger).toBeFocused()
 })

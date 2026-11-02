@@ -1,13 +1,13 @@
 ---
-title: "Withdraw OUSD from a Tempo Zone on testnet"
+title: Withdraw OUSD
 seoTitle: "Withdraw OUSD from a Tempo Zone on Testnet | Docs"
-description: Withdraw OUSD from Zone A back to your public-chain balance with a direct zone outbox withdrawal.
+description: Withdraw OUSD from Zone A back to your Tempo balance with a direct withdrawal through the Zone outbox.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones-withdraw-from-a-zone_title-f5_v02.png
 ---
 
 import * as Demo from '../../../../components/guides/Demo.tsx'
-import { Tab, Tabs } from 'vocs'
+import { Card, Cards, Tab, Tabs } from 'vocs'
 import { WithdrawFromZone } from '../../../../components/guides/zones/WithdrawFromZone.tsx'
 
 export const withdrawalZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
@@ -16,20 +16,23 @@ import { ZoneDiagram } from '../../../../components/ZoneDiagram'
 
 <a id="withdraw-pathusd-from-a-tempo-zone-on-testnet" />
 
-# Withdraw OUSD from a Tempo Zone on testnet
+# Withdraw OUSD
 
-Withdraw `OUSD` test tokens from **Zone A** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility) back to your public Tempo balance.
+Move `OUSD` test tokens from Zone A back to your public Tempo balance.
+
+## Overview
+
+A direct withdrawal moves `OUSD` test tokens from **Zone A** back to your public Tempo balance. It uses the [testnet sandbox](/docs/guide/private-zones#testnet-compatibility), which differs from current deployments. The withdrawal exits through the outbox (`ZoneOutbox`) on the Zone. You submit the request in the Zone, then wait for your Tempo balance to increase after the batch settles.
 
 <ZoneDiagram
   name="withdrawal"
   alt="A signed Zone A outbox request reduces the private balance. Tempo accepts the batch, then processes the withdrawal to deliver OUSD to the public recipient."
 />
 
-Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the withdrawal request in the zone first, then wait for the public balance to increase after the batch settles.
-
 <a id="withdrawing-pathusd-from-zone-a" />
+<span id="withdrawing-ousd-from-zone-a" />
 
-## Withdrawing OUSD from Zone A
+## Withdraw OUSD From Zone A
 
 <Demo.Container
   name="Withdraw from Zone A"
@@ -40,13 +43,11 @@ Direct withdrawals exit through `ZoneOutbox` on the zone chain. You submit the w
   <WithdrawFromZone />
 </Demo.Container>
 
-## Code examples
+## Code Examples
 
-These snippets assume you already have a signed-in `rootClient` on the public chain, a derived `zoneAClient`, and the usual token constants in scope.
+These snippets assume a signed-in `rootClient` on Tempo, a derived `zoneAClient`, and the usual token constants in scope. The calls target the sandbox's SDK interfaces.
 
-These calls target the shared testnet deployment's SDK interfaces. Check the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility) before using them with another Zone.
-
-Standard withdrawals omit an encrypted sender disclosure. Authenticated withdrawals attach sender details encrypted to the holder of the `revealTo` public key. The public recipient and amount remain visible in both flows.
+Standard withdrawals omit an encrypted sender disclosure. Authenticated withdrawals attach sender details encrypted to the holder of the `revealTo` public key. Both flows keep the public recipient and amount visible.
 
 <Tabs stateKey="zone-withdrawal-example-mode">
   <Tab title="Standard">
@@ -95,14 +96,25 @@ console.log(receipt.blockNumber)
   </Tab>
 </Tabs>
 
-## What a Direct Withdrawal Does
+<span id="what-a-direct-withdrawal-does" />
 
-A direct withdrawal is the simplest way to exit a zone. You ask `ZoneOutbox` on the zone to burn the zone balance, include the request in the next withdrawal batch, and settle the amount back to a public Tempo address.
+## Withdrawal Settlement
 
-Like deposits, withdrawals settle in phases. The request is accepted on the zone first, and the public balance changes later when the sequencer submits and processes the corresponding batch on Tempo.
+A direct withdrawal is the most direct way out of a Zone. The outbox burns the Zone balance and includes the request in the next withdrawal batch. Tempo then settles the amount to a public Tempo address.
 
-If Tempo-side processing fails, the withdrawal does not stay stuck in limbo. The protocol re-deposits the withdrawal amount back into the zone to the request's `fallbackRecipient`. The fee is still consumed.
+The Zone accepts the request first. Your Tempo balance changes later, when the sequencer submits and processes the batch on Tempo.
+
+A failed withdrawal doesn't stay stuck. If processing on Tempo fails, the protocol [re-deposits the amount](/docs/protocol/zones/bridging#withdrawal-failure-and-bounce-back) into the Zone to the request's `fallbackRecipient`. The fee is still consumed.
 
 :::warning
-  Even with `gas: 0n`, a direct withdrawal can still fail on Tempo—for example because of token transfer or policy checks. In that case, the amount bounces back to `fallbackRecipient` on the zone instead of increasing the public balance.
+  A direct withdrawal can fail on Tempo even with `gas: 0n`, such as on a token transfer or policy check. The amount then bounces back to `fallbackRecipient` on the Zone. The public balance doesn't increase.
 :::
+
+## Related
+
+<Cards>
+  <Card title="Withdraw From a Zone" description="Use for withdrawing from a current Zone deployment." to="/docs/zones/withdraw" />
+  <Card title="Deposit OUSD" description="Use for moving testnet OUSD from Tempo into a Zone A balance." to="/docs/guide/private-zones/deposit-to-a-zone" />
+  <Card title="Send Across Zones" description="Use for moving OUSD from Zone A into Zone B through Tempo." to="/docs/guide/private-zones/send-tokens-across-zones" />
+  <Card title="Testnet Sandbox" description="Covers the sandbox Zones, router deployment, and compatibility limits." to="/docs/guide/private-zones" />
+</Cards>

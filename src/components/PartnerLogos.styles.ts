@@ -151,6 +151,9 @@ global({
   ':root[data-vocs-theme="dark"] .partner-logo--ondo': {
     filter: 'brightness(0) invert(1)',
   },
+  ':root[data-vocs-theme="dark"] .partner-logo--moralis': {
+    backgroundImage: 'url("/assets/partners/directory/moralis-dark.webp")',
+  },
 })
 
 export const partnerLogo = style({
@@ -231,6 +234,11 @@ export const partnerLogoOpenUsdOusd = style({
   backgroundImage: 'url("/assets/partners/directory/open-usd-ousd.svg")',
 })
 
+export const partnerLogoEnvio = style({
+  width: '84px',
+  backgroundImage: 'url("/assets/partners/directory/envio.svg")',
+})
+
 export const partnerLogoGoldsky = style({
   width: '24px',
   backgroundImage: 'url("/assets/partners/directory/goldsky.svg")',
@@ -281,6 +289,11 @@ export const partnerLogoMtPelerin = style({
 export const partnerLogoBrale = style({
   width: '24px',
   backgroundImage: 'url("/assets/partners/directory/brale.svg")',
+})
+
+export const partnerLogoStripe = style({
+  width: '56px',
+  backgroundImage: 'url("/assets/partners/directory/stripe.svg")',
 })
 
 export const partnerLogoMoonpay = style({
@@ -533,4 +546,14 @@ export const partnerLogoFigure = style({
 
 export const partnerLogoHastra = style({
   backgroundImage: 'url("/assets/partners/directory/hastra.ico")',
+})
+
+export const partnerLogoDwellir = style({
+  width: '84px',
+  backgroundImage: 'url("/assets/partners/directory/dwellir.svg")',
+})
+
+export const partnerLogoMoralis = style({
+  width: '84px',
+  backgroundImage: 'url("/assets/partners/directory/moralis.webp")',
 })

@@ -26,7 +26,8 @@ global({
 
     fontSize: tokens.fontSize.body,
   },
-  ':where(.dark, [data-vocs-theme="dark"], [style*="color-scheme: dark"]) .docs-product-overview-art':
+  // Generated illustrations (scripts/illustrations) read these tokens; Earn guide figures share them.
+  ':where(.dark, [data-vocs-theme="dark"], [style*="color-scheme: dark"]) :is(.docs-product-overview-art, .docs-earn-art)':
     {
       '--tempo-art-ink': '#f5f5f5',
       '--tempo-art-secondary': '#b5b5b5',

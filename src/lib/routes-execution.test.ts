@@ -129,7 +129,7 @@ it('quotes without a key at public pricing, and with one at the organization pri
   await executeRoutesRequest(quote, ' ')
   const [url, init] = fetcher.mock.calls[0]
   expect(url).toBe(
-    'https://api.tempo.xyz/v1/routes/deposit-addresses/quote?amount=1500000&sourceChain=eip155%3A1&sourceToken=source&destinationToken=destination&subsidize=false',
+    `https://api.tempo.xyz/v1/routes/deposit-addresses/quote?amount=1500000&sourceChain=eip155%3A1&sourceToken=source&destinationToken=destination&subsidize=false&recipient=${recipient}&refundAddress=${sender}`,
   )
   expect(init.headers).toEqual({})
   await executeRoutesRequest(quote, 'key')
@@ -166,6 +166,8 @@ it('falls back to the docs quote proxy while the API still requires a key', asyn
     sourceToken: 'source',
     destinationToken: 'destination',
     subsidize: 'false',
+    recipient,
+    refundAddress: sender,
   })
   await expect(executeRoutesRequest(quote, '')).rejects.toThrow(
     'The docs demo key cannot quote this route. Add your project API key to quote this route. (routes_not_allowed · request r)',
@@ -173,8 +175,8 @@ it('falls back to the docs quote proxy while the API still requires a key', asyn
 })
 it('runs deposit quote, creation, paginated discovery and individual status reads', async () => {
   const quote = quoteRequest(route, { ...input, method: 'depositAddress' })
-  expect(quote.query).not.toHaveProperty('recipient')
-  expect(quote.query).not.toHaveProperty('refundAddress')
+  // Several deposit routes only quote with the addresses the deposit address is created with.
+  expect(quote.query).toMatchObject({ recipient, refundAddress: sender })
   const fetcher = vi
     .fn()
     .mockResolvedValue(Response.json({ data: [{ id: 'rdp_one' }], nextCursor: 'next-page' }))

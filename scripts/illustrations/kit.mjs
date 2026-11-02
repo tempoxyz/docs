@@ -101,6 +101,9 @@ export function fade(id, x1, y1, x2, y2, color = ink.line, ends = 'both') {
   return `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"><stop offset="0" stop-color="${color}" stop-opacity="${ends === 'end' ? 1 : 0}"/><stop offset=".2" stop-color="${color}"/><stop offset=".8" stop-color="${color}"/><stop offset="1" stop-color="${color}" stop-opacity="${ends === 'start' ? 1 : 0}"/></linearGradient></defs>`
 }
 
-export function scene({ title, description, system = 'interface' }, body) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 480 360" role="img" data-illustration="${system}" aria-labelledby="title description"><title id="title">${escapeXml(title)}</title><desc id="description">${escapeXml(description)}</desc>${body}</svg>\n`
+export function scene(
+  { title, description, system = 'interface', width = 480, height = 360 },
+  body,
+) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width * 2}" height="${height * 2}" viewBox="0 0 ${width} ${height}" role="img" data-illustration="${system}" aria-labelledby="title description"><title id="title">${escapeXml(title)}</title><desc id="description">${escapeXml(description)}</desc>${body}</svg>\n`
 }

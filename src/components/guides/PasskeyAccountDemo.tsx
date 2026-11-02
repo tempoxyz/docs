@@ -68,10 +68,7 @@ export function PasskeyAccountDemo() {
 
   return (
     <div data-testid="passkey-account-demo">
-      <Container
-        headerLeft={<span {...ui.passkeyAccountDemoText()}>Passkey account</span>}
-        footer="Creating a passkey does not fund the account. Add funds when you are ready to try a payment."
-      >
+      <Container>
         <div {...ui.passkeyAccountDemoLayout()}>
           {!ready ? (
             <Button type="button" disabled>
@@ -93,7 +90,7 @@ export function PasskeyAccountDemo() {
                     if (!(await copyAddress(address))) setError('Could not copy the address.')
                   }}
                 >
-                  {copied ? 'Copied address' : 'Copy address'}
+                  {copied ? 'Copied' : 'Copy address'}
                 </Button>
                 <Button
                   type="button"

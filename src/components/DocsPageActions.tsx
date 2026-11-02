@@ -3,10 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'waku'
+import CheckIcon from '~icons/lucide/check'
 import CopyIcon from '~icons/lucide/copy'
 import DownloadIcon from '~icons/lucide/download'
 import ExternalLinkIcon from '~icons/lucide/external-link'
+import GitHubIcon from '~icons/simple-icons/github'
 import { publicAssetPath } from '../lib/public-asset-path'
+import { CopyButton, type CopyButtonState } from './CopyButton'
+import { CopyIconSwap } from './CopyIconSwap'
 import { usePathname } from './DocsHeader'
 import * as ui from './DocsPageActions.recipes'
 import { docsPageActions, docsPageActionsError } from './DocsPageActions.styles'
@@ -21,14 +25,12 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
       pathname.startsWith('/get-started/')) &&
     openApi === isApiArticle
   const [host, setHost] = useState<HTMLElement | null>(null)
-  const [state, setState] = useState<'idle' | 'copying' | 'copied' | 'error'>('idle')
-  const request = useRef(0)
+  const [state, setState] = useState<CopyButtonState>('idle')
   const marker = useRef<HTMLSpanElement>(null)
   const markdownPath = publicAssetPath(`/assets/md${pathname.replace(/\/$/, '')}.md`)
 
   useEffect(() => {
     setState('idle')
-    request.current += 1
     if (!isDocsArticle) return
     const article = marker.current?.closest('article[data-v-content]')
     const observedRoot = openApi ? document.body : article
@@ -59,26 +61,18 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
     const observer = new MutationObserver(attach)
     observer.observe(observedRoot, { childList: true, subtree: true })
     return () => {
-      request.current += 1
       observer.disconnect()
       element?.remove()
       setHost(null)
     }
   }, [pathname, isDocsArticle, openApi])
 
-  const copyPage = async () => {
-    const currentRequest = ++request.current
-    setState('copying')
-    try {
-      const response = await fetch(markdownPath)
-      if (!response.ok) throw new Error('Could not load page Markdown')
-      const markdown = await response.text()
-      if (/^\s*<!doctype html/i.test(markdown)) throw new Error('Markdown unavailable')
-      await navigator.clipboard.writeText(markdown)
-      if (currentRequest === request.current) setState('copied')
-    } catch {
-      if (currentRequest === request.current) setState('error')
-    }
+  const loadMarkdown = async () => {
+    const response = await fetch(markdownPath)
+    if (!response.ok) throw new Error('Could not load page Markdown')
+    const markdown = await response.text()
+    if (/^\s*<!doctype html/i.test(markdown)) throw new Error('Markdown unavailable')
+    return markdown
   }
 
   if (!isDocsArticle) return null
@@ -92,10 +86,20 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
             aria-label="Page tools"
             className={`docs-page-actions ${docsPageActions().className}`}
           >
-            <button type="button" onClick={copyPage} disabled={state === 'copying'}>
-              <CopyIcon aria-hidden="true" width="14" height="14" />
-              {state === 'copied' ? 'Copied' : state === 'copying' ? 'Copying…' : 'Copy for agent'}
-            </button>
+            <CopyButton
+              key={pathname}
+              text={loadMarkdown}
+              label="Copy for agent"
+              icon={
+                <CopyIconSwap
+                  copied={state === 'copied'}
+                  copyIcon={<CopyIcon width="14" height="14" />}
+                  checkIcon={<CheckIcon width="14" height="14" />}
+                />
+              }
+              resetAfter={1200}
+              onStateChange={setState}
+            />
             <a href={markdownPath} target="_blank" rel="noreferrer" title="View Markdown">
               <ExternalLinkIcon aria-hidden="true" width="14" height="14" />
               <span className="docs-page-action-label">View Markdown</span>
@@ -107,6 +111,17 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
               <DownloadIcon aria-hidden="true" width="14" height="14" />
               <span className="docs-page-action-label">Install agent tools</span>
             </Link>
+            {pathname.replace(/\/$/, '') === '/docs/earn' && (
+              <a
+                href="https://github.com/tempoxyz/earn"
+                target="_blank"
+                rel="noreferrer"
+                title="View Earn on GitHub"
+              >
+                <GitHubIcon aria-hidden="true" width="14" height="14" />
+                <span className="docs-page-action-label">GitHub</span>
+              </a>
+            )}
             <span
               role="status"
               className={

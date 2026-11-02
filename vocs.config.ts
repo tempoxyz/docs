@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
   developerSurfaceRedirects,
@@ -12,6 +13,8 @@ import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
 import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
+import { transformMarkdownOutput } from './src/lib/markdown-output-transform'
+import { renderMermaid } from './src/lib/markdown-renderers'
 import { annotateRoutesAvailability } from './src/lib/routes-openapi'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 
@@ -22,21 +25,26 @@ const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/op
 
 const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
 const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
-const tempoChangelog = Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' })
+// Page renders, Markdown exports, and builds share one GitHub request per cache window.
+const tempoChangelog = cacheChangelog(
+  Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
+  { name: 'tempoxyz/tempo' },
+)
 
 const changelog = Changelog.from({
   ...tempoChangelog,
   async fetch(options = {}) {
     const limit = options.limit ?? 50
     // The repository also publishes package-only tags. Over-fetch, then retain
-    // the requested number of network releases for the public changelog.
+    // the requested number of network releases for the public changelog. Node releases
+    // are tagged vX.Y.Z until v1.16.x and tempo/vX.Y.Z from v1.17.0.
     const releases = await tempoChangelog.fetch({
       ...options,
       limit: Math.min(limit * 5, 100),
     })
 
     return releases
-      .filter((release) => /^v\d+\.\d+\.\d+(?:[-+].*)?$/.test(release.version))
+      .filter((release) => /^(?:tempo\/)?v\d+\.\d+\.\d+(?:[-+].*)?$/.test(release.version))
       .slice(0, limit)
       .map((release) => {
         // GitHub-generated release notes use HTML disclosures. Markdown output cannot retain
@@ -259,6 +267,17 @@ export default defineConfig({
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
   markdown: {
+    output: {
+      validation: 'fail',
+      transform: transformMarkdownOutput,
+      // These modules depend on browser styles/hooks. Resolve by module + export
+      // without importing their React implementations during Markdown generation.
+      components: ['MermaidDiagram', 'StaticMermaidDiagram'].map((name) => ({
+        module: `./src/components/${name}.tsx`,
+        export: name,
+        render: renderMermaid,
+      })),
+    },
     rehypePlugins: [rehypeCompactShikiStyles],
     outputRemarkPlugins: [plainMarkdownComponents],
   },
@@ -361,10 +380,10 @@ export default defineConfig({
       sidebar: {
         backLink: false,
         collapsed: true,
-        introFlat: true,
+        introduction: false,
         hide: ['MCP'],
         // Each guide sits inside the endpoint group it explains.
-        groupExtrasByName: {
+        groupItems: {
           'JSON-RPC': [{ text: 'Guide', link: '/docs/api/json-rpc' }],
           Indexer: [{ text: 'Guide', link: '/docs/api/indexer-api' }],
           'API keys': [{ text: 'Guide', link: '/docs/api/console/api-keys' }],
@@ -373,7 +392,7 @@ export default defineConfig({
           Team: [{ text: 'Guide', link: '/docs/api/console/team' }],
           'Billing and usage': [{ text: 'Guide', link: '/docs/api/console/usage-and-billing' }],
         },
-        sectionExtras: {
+        tagGroupItems: {
           Accounts: [
             { text: 'Transactions and transfers', link: '/docs/api/transactions-and-transfers' },
           ],
@@ -497,67 +516,267 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Resources',
+        items: [
+          {
+            text: 'Guides',
+            collapsed: true,
+            items: [
+              { text: 'All guides', link: '/docs/resources/guides' },
+              {
+                text: 'Payment infrastructure',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Blockchain payment flows',
+                    link: '/docs/resources/guides/blockchain-payments',
+                  },
+                  {
+                    text: 'Stablecoins for business',
+                    link: '/docs/resources/guides/stablecoins-for-business',
+                  },
+                  {
+                    text: 'Plan a payment stack',
+                    link: '/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale',
+                  },
+                  {
+                    text: 'Stablecoin settlement',
+                    link: '/docs/resources/guides/stablecoin-settlement',
+                  },
+                  { text: 'Compare payment rails', link: '/docs/resources/guides/payment-rails' },
+                  { text: 'Estimate payment fees', link: '/docs/resources/guides/stablecoin-fees' },
+                ],
+              },
+              {
+                text: 'Payment workflows',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Accept stablecoin payments',
+                    link: '/docs/resources/guides/how-to-accept-stablecoin-payments',
+                  },
+                  { text: 'Create payment links', link: '/docs/resources/guides/payment-links' },
+                  { text: 'Handle refunds', link: '/docs/resources/guides/refunds' },
+                  {
+                    text: 'Reconcile payments',
+                    link: '/docs/resources/guides/payment-reconciliation',
+                  },
+                  { text: 'Plan batch payments', link: '/docs/resources/guides/batch-payments' },
+                  { text: 'Global payouts', link: '/docs/resources/guides/global-payouts' },
+                  {
+                    text: 'Global payroll',
+                    link: '/docs/resources/guides/stablecoin-payroll-for-global-teams',
+                  },
+                  {
+                    text: 'Cross-border payments',
+                    link: '/docs/resources/guides/cross-border-payments',
+                  },
+                  {
+                    text: 'Latin America payment routes',
+                    link: '/docs/resources/guides/cross-border-payments-latin-america',
+                  },
+                  { text: 'Remittance operations', link: '/docs/resources/guides/remittances' },
+                  {
+                    text: 'Recurring payments',
+                    link: '/docs/resources/guides/subscriptions-on-tempo',
+                  },
+                ],
+              },
+              {
+                text: 'Liquidity and issuance',
+                collapsed: true,
+                items: [
+                  { text: 'Corporate treasury', link: '/docs/resources/guides/corporate-treasury' },
+                  {
+                    text: 'Nostro and vostro accounts',
+                    link: '/docs/resources/guides/nostro-vostro-accounts',
+                  },
+                  { text: 'Plan prefunding', link: '/docs/resources/guides/prefunding' },
+                  { text: 'FBO accounts', link: '/docs/resources/guides/fbo-accounts' },
+                  { text: 'The GENIUS Act', link: '/docs/resources/guides/genius-act' },
+                ],
+              },
+              {
+                text: 'Machine payment models',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'HTTP 402 payment flows',
+                    link: '/docs/resources/guides/402-payment-required',
+                  },
+                  {
+                    text: 'Microtransactions and sessions',
+                    link: '/docs/resources/guides/microtransactions',
+                  },
+                ],
+              },
+              {
+                text: 'Wallets and funding',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Choose embedded wallets',
+                    link: '/docs/resources/guides/embedded-wallets',
+                  },
+                  {
+                    text: 'Choose funding and payouts',
+                    link: '/docs/resources/guides/funding-and-payouts',
+                  },
+                ],
+              },
+              {
+                text: 'Compliance and security',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Screen blockchain payments',
+                    link: '/docs/resources/guides/payment-screening',
+                  },
+                  {
+                    text: 'Design payment controls',
+                    link: '/docs/resources/guides/compliance-controls',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ]
     const accountsSidebar = [
       {
-        text: 'Accounts',
+        text: 'Getting Started',
         items: [
           { text: 'Introduction', link: '/docs/accounts' },
-          { text: 'Choose an account model', link: '/docs/accounts/integration' },
-          {
-            text: 'Account setup',
-            collapsed: true,
-            items: [
-              { text: 'Client setup', link: '/docs/accounts/examples' },
-              { text: 'Create an account', link: '/docs/accounts/create' },
-              { text: 'Connect a wallet', link: '/docs/accounts/integrate' },
-              { text: 'Wallet providers', link: '/docs/accounts/providers' },
-            ],
-          },
-          { text: 'Balances and activity', link: '/docs/accounts/balances' },
-          { text: 'Delegate account access', link: '/docs/accounts/agents' },
+          { text: 'How It Works', link: '/docs/accounts/how-it-works' },
+          { text: 'Use Cases', link: '/docs/accounts/use-cases' },
+          { text: 'Security', link: '/docs/accounts/security' },
+          { text: 'Create an Account', link: '/docs/accounts/create' },
+          { text: 'Add Funds', link: '/docs/accounts/fund' },
         ],
       },
       {
-        text: 'Payments',
+        text: 'Features',
         items: [
-          { text: 'Payment integration', link: '/docs/guide/payments' },
-          { text: 'Fund an account', link: '/docs/guide/getting-funds' },
           {
-            text: 'Send payments',
-            link: '/docs/guide/payments/send-a-payment',
+            text: 'Signing Methods',
+            link: '/docs/accounts/authentication',
             collapsed: true,
             items: [
-              { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
+              { text: 'Passkeys', link: '/docs/accounts/authentication/passkeys' },
+              { text: 'Device Keys', link: '/docs/accounts/authentication/device-keys' },
+              { text: 'Private Keys', link: '/docs/accounts/authentication/private-keys' },
+            ],
+          },
+          {
+            text: 'Account Policies',
+            link: '/docs/accounts/policies',
+            collapsed: true,
+            items: [
+              { text: 'Signing Thresholds', link: '/docs/accounts/policies/signing-thresholds' },
+              { text: 'Receive Policies', link: '/docs/accounts/policies/receive-policies' },
+            ],
+          },
+          {
+            text: 'Access Keys',
+            link: '/docs/accounts/access-keys',
+            collapsed: true,
+            items: [
+              { text: 'Spending Limits', link: '/docs/accounts/access-keys/spending-limits' },
+              { text: 'Scopes', link: '/docs/accounts/access-keys/scopes' },
+              { text: 'Expiry', link: '/docs/accounts/access-keys/expiry' },
+              { text: 'Revocation', link: '/docs/accounts/access-keys/revocation' },
+              { text: 'Admin Access Keys', link: '/docs/accounts/access-keys/admin-access-keys' },
+            ],
+          },
+          {
+            text: 'Account Configuration',
+            link: '/docs/accounts/account-configuration',
+            collapsed: true,
+            items: [
               {
-                text: 'Parallel payments',
-                link: '/docs/guide/payments/send-parallel-transactions',
+                text: 'Configuration Updates',
+                link: '/docs/accounts/account-configuration/configuration-updates',
+              },
+              {
+                text: 'Account Upgrade',
+                link: '/docs/accounts/account-configuration/account-upgrade',
               },
             ],
           },
           {
-            text: 'Receive payments',
-            link: '/docs/guide/payments/accept-a-payment',
+            text: 'Fee Management',
+            link: '/docs/accounts/fees',
             collapsed: true,
             items: [
-              {
-                text: 'Customer deposit addresses',
-                link: '/docs/guide/payments/virtual-addresses',
-              },
-              { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
-              { text: 'Receive policies', link: '/docs/guide/payments/configure-receive-policies' },
-              { text: 'Verify payments', link: '/docs/guide/payments/accept-a-payment/examples' },
-              { text: 'Deposit address reference', link: '/docs/protocol/tip20/virtual-addresses' },
-              { text: 'Receive policy reference', link: '/docs/protocol/tip403/receive-policies' },
+              { text: 'Fee Tokens', link: '/docs/accounts/fees/fee-tokens' },
+              { text: 'Fee Sponsorship', link: '/docs/accounts/fees/fee-sponsorship' },
             ],
           },
+          { text: 'Virtual Addresses', link: '/docs/accounts/virtual-addresses' },
         ],
       },
       {
-        text: 'Fees',
+        text: 'Build',
         items: [
-          { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
-          { text: 'Choose a fee token', link: '/docs/guide/payments/pay-fees-in-any-stablecoin' },
+          {
+            text: 'Apps',
+            link: '/docs/accounts/apps',
+            collapsed: true,
+            items: [
+              {
+                text: 'Set Up a Self-Custodial Wallet With a Provider',
+                link: '/docs/accounts/apps/self-custodial-wallets',
+              },
+              { text: "Recover a User's Account", link: '/docs/accounts/apps/recover-an-account' },
+            ],
+          },
+          {
+            text: 'Automations',
+            link: '/docs/accounts/automations',
+            collapsed: true,
+            items: [
+              {
+                text: 'Pay Out From a Backend',
+                link: '/docs/accounts/automations/pay-out-from-a-backend',
+              },
+              {
+                text: "Pay From a User's Embedded Wallet",
+                link: '/docs/accounts/automations/pay-from-an-embedded-wallet',
+              },
+              {
+                text: 'Give an Agent a Wallet',
+                link: '/docs/accounts/automations/give-an-agent-a-wallet',
+              },
+            ],
+          },
+          {
+            text: 'Custodians',
+            link: '/docs/accounts/custodians',
+            collapsed: true,
+            items: [
+              {
+                text: 'Hold Customer Funds in an Omnibus Account',
+                link: '/docs/accounts/custodians/omnibus-accounts',
+              },
+              {
+                text: 'Set Up a Team Multisig',
+                link: '/docs/accounts/custodians/team-multisig',
+              },
+            ],
+          },
+          {
+            text: 'Wallets',
+            link: '/docs/accounts/wallets',
+            collapsed: true,
+            items: [
+              {
+                text: 'Add Tempo to Your Wallet',
+                link: '/docs/accounts/wallets/add-tempo-to-your-wallet',
+              },
+            ],
+          },
         ],
       },
     ]
@@ -603,6 +822,8 @@ export default defineConfig({
         text: 'Routes',
         items: [
           { text: 'Introduction', link: '/docs/routes' },
+          { text: 'Try a route', link: '/docs/routes/test' },
+          { text: 'Set up API access', link: '/docs/routes/api-setup' },
           { text: 'Supported routes', link: '/docs/routes/networks' },
           { text: 'Quotes and fees', link: '/docs/routes/quotes' },
           { text: 'Accept deposits', link: '/docs/routes/deposits' },
@@ -611,10 +832,8 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Integration guides',
+        text: 'cURL examples',
         items: [
-          { text: 'Test a route', link: '/docs/routes/test' },
-          { text: 'API setup', link: '/docs/routes/api-setup' },
           { text: 'Deposit address example', link: '/docs/routes/examples/deposits' },
           { text: 'Transfer example', link: '/docs/routes/examples/transfers' },
         ],
@@ -622,52 +841,61 @@ export default defineConfig({
     ]
     const zonesSidebar = [
       {
-        text: 'Zones',
+        text: 'Getting Started',
         items: [
           { text: 'Introduction', link: '/docs/zones' },
           { text: 'Privacy', link: '/docs/zones/privacy' },
-          { text: 'Connect', link: '/docs/zones/connect' },
-          { text: 'Deposit', link: '/docs/zones/deposit' },
-          { text: 'Balances and activity', link: '/docs/zones/balances' },
-          { text: 'Withdraw', link: '/docs/zones/withdraw' },
-          { text: 'Client setup', link: '/docs/zones/examples' },
-          { text: 'Testnet sandbox', link: '/docs/guide/private-zones' },
+          {
+            text: 'Testnet Sandbox',
+            link: '/docs/guide/private-zones',
+            collapsed: true,
+            items: [
+              {
+                text: 'Connect to the Sandbox',
+                link: '/docs/guide/private-zones/connect-to-a-zone',
+              },
+              { text: 'Deposit OUSD', link: '/docs/guide/private-zones/deposit-to-a-zone' },
+              {
+                text: 'Send Within a Zone',
+                link: '/docs/guide/private-zones/send-tokens-within-a-zone',
+              },
+              {
+                text: 'Send Across Zones',
+                link: '/docs/guide/private-zones/send-tokens-across-zones',
+              },
+              { text: 'Swap Across Zones', link: '/docs/guide/private-zones/swap-across-zones' },
+              { text: 'Withdraw OUSD', link: '/docs/guide/private-zones/withdraw-from-a-zone' },
+            ],
+          },
         ],
       },
       {
-        text: 'Technical reference',
+        text: 'Build',
+        items: [
+          { text: 'Connect to a Zone', link: '/docs/zones/connect' },
+          { text: 'Client Setup', link: '/docs/zones/examples' },
+          { text: 'Deposit Into a Zone', link: '/docs/zones/deposit' },
+          { text: 'Balances and Activity', link: '/docs/zones/balances' },
+          { text: 'Withdraw From a Zone', link: '/docs/zones/withdraw' },
+        ],
+      },
+      {
+        text: 'Technical Reference',
         collapsed: true,
         items: [
-          { text: 'How Zones work', link: '/docs/protocol/zones' },
+          { text: 'How Zones Work', link: '/docs/protocol/zones' },
           { text: 'Architecture', link: '/docs/protocol/zones/architecture' },
-          { text: 'Accounts and privacy', link: '/docs/protocol/zones/accounts' },
+          { text: 'Accounts and Privacy', link: '/docs/protocol/zones/accounts' },
           { text: 'Bridging', link: '/docs/protocol/zones/bridging' },
-          { text: 'RPC reference', link: '/docs/protocol/zones/rpc' },
-          { text: 'Execution and gas', link: '/docs/protocol/zones/execution' },
-          { text: 'Proving and settlement', link: '/docs/protocol/zones/proving' },
-        ],
-      },
-    ]
-    const sandboxSidebar = [
-      ...zonesSidebar,
-      {
-        text: 'Sandbox guides',
-        items: [
-          { text: 'Connect', link: '/docs/guide/private-zones/connect-to-a-zone' },
-          { text: 'Deposit', link: '/docs/guide/private-zones/deposit-to-a-zone' },
-          {
-            text: 'Send within a Zone',
-            link: '/docs/guide/private-zones/send-tokens-within-a-zone',
-          },
-          { text: 'Send across Zones', link: '/docs/guide/private-zones/send-tokens-across-zones' },
-          { text: 'Swap across Zones', link: '/docs/guide/private-zones/swap-across-zones' },
-          { text: 'Withdraw', link: '/docs/guide/private-zones/withdraw-from-a-zone' },
+          { text: 'RPC Reference', link: '/docs/protocol/zones/rpc' },
+          { text: 'Execution and Gas', link: '/docs/protocol/zones/execution' },
+          { text: 'Proving and Settlement', link: '/docs/protocol/zones/proving' },
         ],
       },
     ]
     const ecosystemSidebar = [
       {
-        text: 'ECOSYSTEM',
+        text: 'Ecosystem',
         items: [
           { text: 'All partners', link: '/docs/partners' },
           {
@@ -689,7 +917,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'INFRA',
+        text: 'Infrastructure',
         items: [
           { text: 'RPC & nodes', link: '/docs/partners/rpc-and-nodes' },
           { text: 'Data & oracles', link: '/docs/partners/data-and-oracles' },
@@ -750,6 +978,10 @@ export default defineConfig({
               link: '/docs/guide/node/validator-keys',
             },
             {
+              text: 'Validator rotation',
+              link: '/docs/guide/node/validator-rotation',
+            },
+            {
               text: 'Validator failover',
               link: '/docs/guide/node/validator-failover',
             },
@@ -784,13 +1016,22 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
-                text: 'T12',
+                text: 'T14',
+                badge: { text: 'Planned', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t14',
+              },
+              {
+                text: 'T13',
                 badge: { text: 'Testnet', variant: 'info' as const },
+                link: '/docs/protocol/upgrades/t13',
+              },
+              {
+                text: 'T12',
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
                 text: 'T11',
-                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t11',
               },
               {
@@ -910,12 +1151,66 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Account model', link: '/docs/accounts/keys' },
-              { text: 'Access keys', link: '/docs/accounts/access-keys' },
-              { text: 'Admin keys', link: '/docs/accounts/admin-keys' },
+              { text: 'Single-key accounts', link: '/docs/development/single-key-accounts' },
+              { text: 'Configurable accounts', link: '/docs/development/configurable-accounts' },
+              { text: 'Account Keychain', link: '/docs/development/account-keychain' },
               { text: 'Integrate a wallet', link: '/docs/quickstart/wallet-developers' },
               {
                 text: 'Keychain specification',
                 link: '/docs/protocol/transactions/AccountKeychain',
+              },
+            ],
+          },
+          {
+            text: 'Payments',
+            collapsed: true,
+            items: [
+              { text: 'Payment integration', link: '/docs/guide/payments' },
+              { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
+              {
+                text: 'Choose a fee token',
+                link: '/docs/guide/payments/pay-fees-in-any-stablecoin',
+              },
+              { text: 'Fund an account', link: '/docs/guide/getting-funds' },
+              {
+                text: 'Send payments',
+                link: '/docs/guide/payments/send-a-payment',
+                collapsed: true,
+                items: [
+                  { text: 'Browser payments', link: '/docs/guide/payments/send-a-payment/browser' },
+                  {
+                    text: 'Parallel payments',
+                    link: '/docs/guide/payments/send-parallel-transactions',
+                  },
+                  {
+                    text: 'Payment examples',
+                    link: '/docs/guide/payments/send-a-payment/examples',
+                  },
+                ],
+              },
+              {
+                text: 'Receive payments',
+                link: '/docs/guide/payments/accept-a-payment',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Customer deposit addresses',
+                    link: '/docs/guide/payments/virtual-addresses',
+                  },
+                  { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
+                  {
+                    text: 'Verify payments',
+                    link: '/docs/guide/payments/accept-a-payment/examples',
+                  },
+                  {
+                    text: 'Deposit address reference',
+                    link: '/docs/protocol/tip20/virtual-addresses',
+                  },
+                  {
+                    text: 'Receive policy reference',
+                    link: '/docs/protocol/tip403/receive-policies',
+                  },
+                ],
               },
             ],
           },
@@ -1052,7 +1347,7 @@ export default defineConfig({
           section.matches.map((path) => [path, productSidebars[section.id]]),
         ),
       ),
-      '/docs/guide/private-zones': sandboxSidebar,
+      '/docs/guide/private-zones': zonesSidebar,
       '/docs/partners': partnerResourcesSidebar,
       '/docs/partners/join': partnerResourcesSidebar,
       '/docs/guide/ousd': partnerResourcesSidebar,
@@ -1070,6 +1365,212 @@ export default defineConfig({
     { text: 'Blog', link: '/blog' },
   ],
   redirects: [
+    {
+      source: '/docs/resources/partners.md',
+      destination: '/docs/resources/guides.md',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners.md',
+      destination: '/assets/md/docs/resources/guides.md',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/privy.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#privy',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/privy.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#privy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/dynamic.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#dynamic',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/dynamic.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#dynamic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/turnkey.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#turnkey',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/turnkey.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#turnkey',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/fireblocks.md',
+      destination: '/docs/resources/guides/embedded-wallets.md#fireblocks',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/fireblocks.md',
+      destination: '/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/bridge.md',
+      destination: '/docs/resources/guides/funding-and-payouts.md#bridge',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/bridge.md',
+      destination: '/assets/md/docs/resources/guides/funding-and-payouts.md#bridge',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/alchemy.md',
+      destination: '/docs/partners/rpc-and-nodes.md#alchemy',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/alchemy.md',
+      destination: '/assets/md/docs/partners/rpc-and-nodes.md#alchemy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/quicknode.md',
+      destination: '/docs/partners/rpc-and-nodes.md#quicknode',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/quicknode.md',
+      destination: '/assets/md/docs/partners/rpc-and-nodes.md#quicknode',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/allium.md',
+      destination: '/docs/resources/guides/payment-reconciliation.md#allium',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/allium.md',
+      destination: '/assets/md/docs/resources/guides/payment-reconciliation.md#allium',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/goldsky.md',
+      destination: '/docs/resources/guides/payment-reconciliation.md#goldsky',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/goldsky.md',
+      destination: '/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/trm.md',
+      destination: '/docs/resources/guides/payment-screening.md#trm',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/trm.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#trm',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/chainalysis.md',
+      destination: '/docs/resources/guides/payment-screening.md#chainalysis',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/chainalysis.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#chainalysis',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/elliptic.md',
+      destination: '/docs/resources/guides/payment-screening.md#elliptic',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/elliptic.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#elliptic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/blockaid.md',
+      destination: '/docs/resources/guides/payment-screening.md#blockaid',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/resources/partners/blockaid.md',
+      destination: '/assets/md/docs/resources/guides/payment-screening.md#blockaid',
+      status: 301,
+    },
+    { source: '/docs/resources/partners', destination: '/docs/resources/guides', status: 301 },
+    {
+      source: '/docs/resources/partners/privy',
+      destination: '/docs/resources/guides/embedded-wallets#privy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/dynamic',
+      destination: '/docs/resources/guides/embedded-wallets#dynamic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/turnkey',
+      destination: '/docs/resources/guides/embedded-wallets#turnkey',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/fireblocks',
+      destination: '/docs/resources/guides/embedded-wallets#fireblocks',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/bridge',
+      destination: '/docs/resources/guides/funding-and-payouts#bridge',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/alchemy',
+      destination: '/docs/partners/rpc-and-nodes#alchemy',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/quicknode',
+      destination: '/docs/partners/rpc-and-nodes#quicknode',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/allium',
+      destination: '/docs/resources/guides/payment-reconciliation#allium',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/goldsky',
+      destination: '/docs/resources/guides/payment-reconciliation#goldsky',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/trm',
+      destination: '/docs/resources/guides/payment-screening#trm',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/chainalysis',
+      destination: '/docs/resources/guides/payment-screening#chainalysis',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/elliptic',
+      destination: '/docs/resources/guides/payment-screening#elliptic',
+      status: 301,
+    },
+    {
+      source: '/docs/resources/partners/blockaid',
+      destination: '/docs/resources/guides/payment-screening#blockaid',
+      status: 301,
+    },
     { source: '/docs/ecosystem/assets', destination: '/docs/partners/stablecoins', status: 301 },
     { source: '/docs/partners/assets', destination: '/docs/partners/stablecoins', status: 301 },
     { source: '/docs/ecosystem/wallets', destination: '/docs/partners/wallets', status: 301 },
@@ -1295,6 +1796,266 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/accounts/sandbox',
+      destination: '/docs/accounts/create',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/new-device',
+      destination: '/docs/accounts/authentication/device-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/admin-keys',
+      destination: '/docs/accounts/access-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/create/legacy-accounts',
+      destination: '/docs/accounts/wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/identity-provider',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/relay',
+      destination: '/docs/accounts/authentication',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/p256-keys',
+      destination: '/docs/accounts/authentication/device-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/email-otp',
+      destination: '/docs/accounts/authentication',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/privy',
+      destination: '/docs/accounts/apps/self-custodial-wallets#build-with-privy',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/login-services',
+      destination: '/docs/accounts/authentication',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/relays',
+      destination: '/docs/accounts/authentication',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/add-signers',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/multi-factor',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/rotate-keys',
+      destination: '/docs/accounts/custodians/team-multisig#rotate-an-approvers-key',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/replace-keys',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/change-email',
+      destination: '/docs/accounts/account-configuration/configuration-updates#remove-a-signer',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/revoke-keys',
+      destination: '/docs/accounts/access-keys#revoke-an-access-key',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/export',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/recover',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/upgrade',
+      destination: '/docs/accounts/account-configuration/account-upgrade',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/verify-approvals',
+      destination: '/docs/accounts/policies/signing-thresholds',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/team-accounts',
+      destination: '/docs/accounts/custodians/team-multisig#give-a-team-a-budget',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/approval-rules',
+      destination: '/docs/accounts/policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/integration',
+      destination: '/docs/accounts/use-cases',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/agents',
+      destination: '/docs/accounts/automations/give-an-agent-a-wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/backend-automation',
+      destination: '/docs/accounts/automations/pay-out-from-a-backend',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/security-policies',
+      destination: '/docs/accounts/policies/signing-thresholds',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/wallet-provider',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/enterprise-sso',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/self-custody',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/automate-backend',
+      destination: '/docs/accounts/automations/pay-out-from-a-backend',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/spending-account',
+      destination: '/docs/accounts/automations/pay-from-an-embedded-wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/agent-wallet',
+      destination: '/docs/accounts/automations/give-an-agent-a-wallet',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/company-treasury',
+      destination: '/docs/accounts/custodians/team-multisig',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation',
+      destination: '/docs/accounts/account-configuration',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation/signer-rotation',
+      destination: '/docs/accounts/account-configuration/configuration-updates#remove-a-signer',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation/signer-recovery',
+      destination: '/docs/accounts/account-configuration/configuration-updates#remove-a-signer',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/key-rotation/account-upgrade',
+      destination: '/docs/accounts/account-configuration/account-upgrade',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/authentication/oidc',
+      destination: '/docs/accounts/authentication',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/guides/users/sign-in-with-your-login',
+      destination: '/docs/accounts/apps',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/policies/escalation-rules',
+      destination: '/docs/accounts/policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/policies/private-policies',
+      destination: '/docs/accounts/policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/recovery',
+      destination: '/docs/accounts/account-configuration',
+      status: 301,
+    },
+    {
+      source: '/docs/guide/payments/configure-receive-policies',
+      destination: '/docs/accounts/policies/receive-policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/approvals',
+      destination: '/docs/accounts/policies/signing-thresholds',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/team-budgets',
+      destination: '/docs/accounts/custodians/team-multisig#give-a-team-a-budget',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/private-policies',
+      destination: '/docs/accounts/policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/advanced/verified-facts',
+      destination: '/docs/accounts/policies',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/integrate',
+      destination: '/docs/accounts/wallets#connect-a-wallet-to-your-app',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/balances',
+      destination: '/docs/accounts/fund#check-the-balance',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/examples',
+      destination: '/docs/guide/payments/send-a-payment/examples#payment-client-setup',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/providers',
+      destination: '/docs/accounts/apps/self-custodial-wallets',
+      status: 301,
+    },
+    {
       source: '/guide/use-accounts/fee-sponsorship',
       destination: '/docs/guide/payments/sponsor-user-fees',
       status: 301,
@@ -1321,6 +2082,7 @@ export default defineConfig({
     status: 301 as const,
   })),
   codeHighlight: {
+    engine: 'highlights',
     langAlias: {
       sol: 'solidity',
     },

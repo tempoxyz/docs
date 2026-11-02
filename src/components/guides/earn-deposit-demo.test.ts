@@ -8,8 +8,8 @@ import {
   earnDemoVault,
   minimumEarnDemoShares,
   parseEarnDemoAmount,
+  verifyEarnDemoConfiguration,
   verifyEarnDemoDeposit,
-  verifyEarnDemoDirectory,
   verifyEarnDemoNetwork,
 } from './earn-deposit-demo'
 
@@ -31,21 +31,24 @@ function vault() {
 
 describe('Earn demo deployment guard', () => {
   it('accepts only the verified, open and active tested deployment', () => {
-    expect(() => verifyEarnDemoDirectory({ data: [vault()] })).not.toThrow()
+    expect(() => verifyEarnDemoConfiguration(vault())).not.toThrow()
     expect(() => verifyEarnDemoNetwork(42431)).not.toThrow()
     expect(() => verifyEarnDemoNetwork(4217)).toThrow('Moderato testnet')
   })
 
   it('keeps supported redemption available when new deposits pause', () => {
-    const directory = { data: [{ ...vault(), state: { depositsPaused: true } }] }
-    expect(() => verifyEarnDemoDirectory(directory, 'deposit')).toThrow()
-    expect(verifyEarnDemoDirectory(directory, 'redeem')).toEqual({ deposit: false, redeem: true })
-    expect(verifyEarnDemoDirectory(directory, 'inspect')).toEqual({ deposit: false, redeem: true })
+    const configuration = { ...vault(), state: { depositsPaused: true } }
+    expect(() => verifyEarnDemoConfiguration(configuration, 'deposit')).toThrow()
+    expect(verifyEarnDemoConfiguration(configuration, 'redeem')).toEqual({
+      deposit: false,
+      redeem: true,
+    })
+    expect(verifyEarnDemoConfiguration(configuration, 'inspect')).toEqual({
+      deposit: false,
+      redeem: true,
+    })
     expect(() =>
-      verifyEarnDemoDirectory(
-        { data: [{ ...vault(), capabilities: { redeem: false } }] },
-        'redeem',
-      ),
+      verifyEarnDemoConfiguration({ ...vault(), capabilities: { redeem: false } }, 'redeem'),
     ).toThrow()
   })
 
@@ -58,8 +61,8 @@ describe('Earn demo deployment guard', () => {
     { assetToken: { address: otherAccount } },
     { shareToken: { address: otherAccount } },
     { engine: { address: otherAccount } },
-  ])('rejects an unsafe directory change: %j', (change) => {
-    expect(() => verifyEarnDemoDirectory({ data: [{ ...vault(), ...change }] })).toThrow(
+  ])('rejects an unsafe vault change: %j', (change) => {
+    expect(() => verifyEarnDemoConfiguration({ ...vault(), ...change })).toThrow(
       'not currently available',
     )
   })
@@ -67,11 +70,11 @@ describe('Earn demo deployment guard', () => {
   it.each([
     null,
     {},
-    { data: [] },
-    { data: [{ id: 12 }] },
-    { data: [null] },
-  ])('fails closed on a missing or malformed directory: %j', (response) =>
-    expect(() => verifyEarnDemoDirectory(response)).toThrow())
+    [],
+    { id: 12 },
+    { data: [vault()] },
+  ])('fails closed on a missing or malformed vault: %j', (response) =>
+    expect(() => verifyEarnDemoConfiguration(response)).toThrow())
 
   it('constructs a testnet passkey client without any network or signing action', () => {
     const request = vi.fn()

@@ -7,7 +7,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_protocol-blockspace-consensus_title-f5_v02.
 
 # Consensus and finality using Simplex BFT
 
-Tempo uses Simplex BFT consensus to provide deterministic, sub-second finality. This page describes the consensus mechanism, finality guarantees, and fault tolerance properties.
+Tempo uses Simplex BFT consensus to provide deterministic, sub-second finality.
 
 ## Simplex BFT Consensus
 
@@ -20,8 +20,6 @@ Blocks are produced approximately every 600ms under normal network conditions (5
 ### Deterministic Finality
 
 Tempo provides deterministic finality rather than probabilistic finality. When a block is marked as finalized, transactions in that block are guaranteed to remain in the canonical chain. There is no reorg risk after finality.
-
-For payment applications, this provides the settlement certainty that operators expect from traditional financial systems.
 
 ## Validator Set
 
@@ -44,7 +42,7 @@ Tempo uses a distributed validator set rather than a single sequencer. Multiple 
 
 ## Degraded State Behavior
 
-Under adverse conditions, Simplex consensus degrades gracefully:
+Under adverse conditions, Simplex consensus behaves as follows:
 
 | Condition | Behavior |
 |-----------|----------|

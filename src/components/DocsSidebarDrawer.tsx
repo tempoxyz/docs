@@ -3,7 +3,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useActiveSidebarAnchor, useConfig } from 'vocs'
-import { useRouter } from 'waku'
 import { resolveSidebarItems, SidebarNodes, usePathname } from './DocsHeader'
 import * as ui from './DocsSidebarDrawer.recipes'
 
@@ -24,13 +23,13 @@ function collectSidebarLinks(nodes: ReturnType<typeof resolveSidebarItems>): str
  */
 export default function DocsSidebarDrawer() {
   const pathname = usePathname()
-  const { hash } = useRouter()
   const config = useConfig()
   const items = resolveSidebarItems(config?.sidebar, pathname)
   const links = useMemo(() => collectSidebarLinks(items), [items])
-  const activeAnchor = useActiveSidebarAnchor(links, pathname, hash)
+  const activeAnchor = useActiveSidebarAnchor(links)
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
   const dialogId = useId()
   const titleId = useId()
@@ -81,7 +80,6 @@ export default function DocsSidebarDrawer() {
     if (!open) return
     const panel = panelRef.current
     if (!panel) return
-    const previousFocus = document.activeElement
     const desktop = window.matchMedia('(min-width: 1080px)')
     const focusableElements = () =>
       Array.from(
@@ -160,9 +158,9 @@ export default function DocsSidebarDrawer() {
       document.removeEventListener('focusin', onFocus)
       desktop.removeEventListener('change', closeOnDesktop)
       document.body.style.overflow = prevOverflow
-      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {
-        previousFocus.focus({ preventScroll: true })
-      }
+      // Activation may not focus the trigger, and the outline can replace its
+      // portal host. Restore the current button rather than a captured element.
+      triggerRef.current?.focus({ preventScroll: true })
     }
   }, [open])
 
@@ -171,6 +169,7 @@ export default function DocsSidebarDrawer() {
   const toggle = host
     ? createPortal(
         <button
+          ref={triggerRef}
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-label={open ? 'Close docs navigation' : 'Open docs navigation'}

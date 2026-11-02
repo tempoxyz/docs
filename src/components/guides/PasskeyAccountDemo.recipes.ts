@@ -1,10 +1,6 @@
 import { inherited } from '../../styles/inherited'
 import { style } from '../../styles/recipes'
 import { vars as tokens } from '../../styles/theme'
-export const passkeyAccountDemoText = style({
-  fontSize: tokens.fontSize.sm,
-  color: tokens.color.gray12,
-})
 export const passkeyAccountDemoLayout = style({
   selectors: {
     ':where(& > :not(:last-child))': {

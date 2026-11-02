@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.28.1",
   "scripts": {
-    "dev": "node --env-file-if-exists=.env --import=tsx node_modules/vite/bin/vite.js",
+    "dev": "node --env-file-if-exists=.env --import=tsx --import=./scripts/native-json-imports.mjs node_modules/vite/bin/vite.js",
     "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && pnpm run build:site",
     "build:site": "pnpm run check:styles && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe . && pnpm run check:styles",
@@ -41,18 +41,18 @@
     "@vercel/speed-insights": "^2.0.0",
     "@wagmi/core": "3.6.5",
     "abitype": "^1.2.4",
-    "accounts": "0.18.4",
-    "hono": "^4.13.5",
-    "mermaid": "^11.14.0",
+    "accounts": "0.19.1",
+    "hono": "^4.13.14",
+    "mermaid": "^11.17.2",
     "minisearch": "7.2.0",
     "monaco-editor": "^0.55.1",
     "ox": "0.14.54",
     "posthog-js": "^1.393.5",
     "posthog-node": "^5.38.5",
     "prool": "^0.2.4",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-server-dom-webpack": "~19.2.7",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-server-dom-webpack": "~19.3.0",
     "rehype-raw": "^7.0.0",
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
@@ -65,14 +65,14 @@
     "tapimo": "0.18.2",
     "unified": "^11.0.5",
     "unplugin-icons": "^23.0.1",
-    "viem": "^2.57.4",
+    "viem": "2.57.5",
     "viem-zones-sandbox": "npm:viem@2.54.6",
-    "vocs": "2.8.5",
+    "vocs": "2.12.0",
     "wagmi": "3.7.7",
-    "waku": "^1.0.0-beta.6",
+    "waku": "1.0.0-rc.3",
     "webauthx": "~0.1.2",
-    "zod": "^4.4.3",
-    "zyzz": "0.0.27"
+    "zod": "^4.6.7",
+    "zyzz": "0.0.36"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.1",
@@ -89,14 +89,14 @@
     "remark-stringify": "^11.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "vite": "^8.1.0",
+    "vite": "~8.1.6",
     "vite-plugin-mkcert": "^2.1.0",
     "vitest": "^4.1.9"
   },
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": "24.12.0",
+      "version": "24.22.1",
       "onFail": "download"
     }
   }

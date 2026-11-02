@@ -1,22 +1,31 @@
 ---
-title: Send tokens within a zone
-description: Send OUSD inside Zone A with a signed zone transfer and confirm the updated zone balance.
+title: Send Within a Zone
+seoTitle: Send Tokens Within a Zone | Tempo Docs
+description: Send OUSD inside Zone A with a signed Zone transfer and confirm the updated Zone balance.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_guide-private-zones-send-tokens-within-a-zone_title-f5_v02.png
 ---
 
+import { Card, Cards } from 'vocs'
 import * as Demo from '../../../../components/guides/Demo.tsx'
 import { SendTokensWithinZone } from '../../../../components/guides/zones/SendTokensWithinZone.tsx'
 
 export const inZoneBalances = [{ label: 'Zone A', token: Demo.ousd, zone: 6 }]
 
-# Send tokens within a zone
+# Send Within a Zone
 
-Send `OUSD` test tokens between accounts in **Zone A** in the [earlier testnet sandbox](/docs/guide/private-zones#testnet-compatibility). This deployment supports direct token transfers inside the Zone without moving funds back through the public chain.
+Send `OUSD` test tokens between accounts in Zone A without leaving the Zone.
+
+## Overview
+
+A Zone is a private stablecoin ledger connected to Tempo, the public chain. A Zone transfer moves `OUSD` test tokens between two accounts inside one Zone, here **Zone A**.
+
+This guide uses the [testnet sandbox](/docs/guide/private-zones), an earlier deployment with two example Zones (Zone A and Zone B) on Tempo Moderato testnet. The sandbox allows direct [TIP-20](/docs/protocol/tip20/overview) transfers inside a Zone, so the transfer never passes through Tempo. [Current deployments](/docs/guide/private-zones#testnet-compatibility) disable direct transfers and move tokens only through deposits and withdrawals, so this guide works only in the sandbox.
 
 <a id="sending-pathusd-within-zone-a" />
+<span id="sending-ousd-within-zone-a" />
 
-## Sending OUSD within Zone A
+## Send OUSD Within Zone A
 
 <Demo.Container
   name="Send tokens within Zone A"
@@ -27,19 +36,21 @@ Send `OUSD` test tokens between accounts in **Zone A** in the [earlier testnet s
   <SendTokensWithinZone />
 </Demo.Container>
 
-## Code example
+## Code Example
 
-This snippet assumes you already have a signed-in `rootClient` on the public chain and a derived `zoneAClient`.
+The snippet needs two Viem clients that share one account:
 
-This example uses the earlier testnet deployment's TIP-20 token interface. The current initial permissioned Zone runtime disables direct `transfer`, `transferFrom`, and memo variants; this code does not apply to that runtime. See the [testnet compatibility notes](/docs/guide/private-zones#testnet-compatibility).
+- **`rootClient`:** Your signed-in client on Tempo. Its `account` signs the transfer.
+- **`zoneAClient`:** A Zone A client for the same account, built as in [Connect to the Sandbox](/docs/guide/private-zones/connect-to-a-zone#create-a-viem-client).
 
-It shows the core zone transfer path; use the demo above when you want to watch the updated zone balance.
+The snippet first signs an [authorization token](/docs/zones/connect#authorize-access) for Zone ID `6` (Zone A), which the Zone RPC requires on every request. It then sends 25 `OUSD` and pays the network fee in `OUSD`. `transferSync` waits for the Zone receipt.
 
 ```ts
 import { parseUnits, type Address } from 'viem'
 
-const transferAmount = parseUnits('25', 6)
-const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address
+const ousd = '0x20c0000000000000000000006a37da5c996874be' as Address // OUSD test token
+const transferAmount = parseUnits('25', 6) // 25 OUSD in base units
+const demoRecipient = '0xbeefcafe54750903ac1c8909323af7beb21ea2cb' as Address // any address
 
 await zoneAClient.zone.signAuthorizationToken({ zoneId: 6 })
 
@@ -51,3 +62,16 @@ const { receipt } = await zoneAClient.token.transferSync({
   token: ousd,
 })
 ```
+
+## Transfer Settlement
+
+The transfer stays inside Zone A. Deposits and withdrawals move funds between Tempo and a Zone through the Zone's portal, and their amounts are public on Tempo. This transfer creates neither, so Tempo shows no record of it. Each account reads its updated balance through the Zone RPC with its own authorization token.
+
+## Related
+
+<Cards>
+  <Card title="Send Across Zones" description="Use for moving OUSD from Zone A into Zone B through Tempo." to="/docs/guide/private-zones/send-tokens-across-zones" />
+  <Card title="Withdraw OUSD" description="Use for moving OUSD from Zone A back to your public balance." to="/docs/guide/private-zones/withdraw-from-a-zone" />
+  <Card title="Balances and Activity" description="Use for reading private balances and activity on a current Zone deployment." to="/docs/zones/balances" />
+  <Card title="Testnet Sandbox" description="Covers the sandbox Zones, router deployment, and compatibility limits." to="/docs/guide/private-zones" />
+</Cards>

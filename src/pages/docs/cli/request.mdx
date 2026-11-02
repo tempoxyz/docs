@@ -48,17 +48,6 @@ tempo request -X POST \
   https://fal.mpp.tempo.xyz/fal-ai/flux/dev
 ```
 
-Capture headers for an agent-controlled MPP Credits flow:
-
-```bash [Terminal]
-headers="$(mktemp)"
-tempo request -t --dry-run -D "$headers" -X POST \
-  --json '{"input":"hello"}' \
-  <SERVICE_URL>/<ENDPOINT_PATH>
-```
-
-Find the right URL and request schema first with [`tempo wallet services`](/docs/cli/wallet#discover-services).
-
 <span id="tempo-request-flags" />
 
 ## Flags

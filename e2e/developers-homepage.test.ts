@@ -55,6 +55,9 @@ test('keeps documentation page tools off the blog', async ({ page }) => {
   }
 })
 
+// CI always tests the E2E build; set VITE_E2E=true to test one locally.
+const e2eBuild = Boolean(process.env.CI) || process.env.VITE_E2E === 'true'
+
 for (const entry of ['direct', 'client navigation'] as const) {
   test(`opens the inline account example via ${entry}`, async ({ page, context, baseURL }) => {
     const pageErrors: string[] = []
@@ -125,7 +128,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
       }),
     ).toBeDisabled()
 
-    if (process.env.CI) {
+    if (e2eBuild) {
       // The E2E build deliberately uses local WebAuthn instead of Tempo Wallet.
       const cdp = await context.newCDPSession(page)
       await cdp.send('WebAuthn.enable')
@@ -157,7 +160,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
       )
     }
 
-    if (!process.env.CI) await expect(addFunds).toBeDisabled()
+    if (!e2eBuild) await expect(addFunds).toBeDisabled()
     expect(pageErrors).toEqual([])
   })
 }

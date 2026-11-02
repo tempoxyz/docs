@@ -4,8 +4,6 @@ const canonicalSpecUrl = 'https://api.tempo.xyz/openapi.json'
 // The verified Moderato deployment also used by the interactive Earn deposit demo.
 const earnVaultExample = '0x20147491b5701dea880263241c335caca9be326d'
 const earnReadPaths = new Set([
-  '/v1/earn/vaults',
-  '/v1/earn/vaults/verified',
   '/v1/earn/vaults/{vaultId}',
   '/v1/earn/vaults/{vaultId}/share-prices',
   '/v1/earn/vaults/{vaultId}/positions/{address}',
@@ -120,6 +118,8 @@ export function prepareTempoOpenApi(
     }
   }
   if (isObject(spec.paths)) {
+    delete spec.paths['/v1/earn/vaults']
+    delete spec.paths['/v1/earn/vaults/verified']
     for (const [pathname, path] of Object.entries(spec.paths)) {
       if (!isObject(path)) continue
       prepareEarnRequestExamples(pathname, path)
@@ -140,7 +140,9 @@ export async function loadTempoOpenApi(source = canonicalSpecUrl) {
   if (remote) {
     const response = await fetch(source)
     if (!response.ok) throw new Error(`Failed to fetch Tempo OpenAPI: ${response.status}`)
-    spec = await response.json()
+    const body: unknown = await response.json()
+    if (!isObject(body)) throw new TypeError('Tempo OpenAPI must be a JSON object.')
+    spec = body
   } else spec = JSON.parse(await readFile(source, 'utf8'))
   return prepareTempoOpenApi(spec, remote ? source : canonicalSpecUrl)
 }

@@ -6,9 +6,10 @@ import { findBlockedReceipt } from './ReceivePolicyDemo'
 
 vi.mock('../../Demo', () => ({
   Button: () => null,
-  ExplorerAccountLink: () => null,
-  ExplorerLink: () => null,
   Step: () => null,
+  StringFormatter: { truncate: (value: string) => value },
+  useCopyToClipboard: () => [false, async () => true],
+  useHydrated: () => true,
 }))
 const receiver = '0x0000000000000000000000000000000000000001'
 const witness = '0x1234'

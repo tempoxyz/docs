@@ -1,8 +1,9 @@
 // Category definitions, post metadata shape, and date helpers for the blog.
 // Kept free of node/build imports so client components can use it directly.
 
+// Labels are display copy; slugs are the frontmatter and filter values and stay put.
 export const categories = [
-  { slug: 'product-announcements', label: 'Product announcements', badge: 'product announcement' },
+  { slug: 'product-announcements', label: 'Announcements', badge: 'announcement' },
   { slug: 'network-upgrades', label: 'Network upgrades', badge: 'network upgrade' },
   { slug: 'events', label: 'Events', badge: 'events' },
   { slug: 'technical', label: 'Technical posts', badge: 'technical' },

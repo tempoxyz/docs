@@ -17,9 +17,9 @@ import { DocsProductOverview } from '../../components/DocsProductOverview'
 
 Move stablecoins between Tempo and supported networks. Accept deposits from external wallets or make a transfer your application can authorize.
 
-[Explore supported routes →](/docs/routes/networks)
+[Try a live route →](/docs/routes/test)
 
-[Test a route →](/docs/routes/test)
+[Explore supported routes →](/docs/routes/networks)
 
 </DocsProductOverview>
 
@@ -31,7 +31,7 @@ Routes is in beta. [Contact Tempo](https://tempo.xyz/contact) to discuss access 
 
 A route connects a source network and token to a destination network and token. Routes prepares the funding instructions or source-chain calls, then tracks delivery to the recipient. A successful source transaction starts the route; your app confirms completion at the destination.
 
-Use the [live directory](/docs/routes/networks) to check the supported pair and flow. For payments that stay on Tempo, start with [Send payments](/docs/guide/payments/send-a-payment) or [Swap stablecoins](/docs/guide/stablecoin-dex/executing-swaps).
+For payments that stay on Tempo, use [Send payments](/docs/guide/payments/send-a-payment) or [Swap stablecoins](/docs/guide/stablecoin-dex/executing-swaps) instead.
 
 <span id="build-with-routes" />
 <span id="choose-a-funding-flow" />
@@ -50,21 +50,37 @@ Use the [live directory](/docs/routes/networks) to check the supported pair and 
 <span id="create-a-reusable-address" />
 <span id="show-the-funding-instructions" />
 <span id="track-each-deposit" />
+<span id="start-building" />
 
 ## Choose a flow
 
+Choose by who submits the source transaction.
+
 <Cards>
-  <Card title="Accept deposits" description="Give a customer an address to fund from an external wallet." to="/docs/routes/deposits" icon="lucide:arrow-down-left" />
-  <Card title="Make a transfer" description="Request signatures through a connected wallet or your signing infrastructure." to="/docs/routes/transfers" icon="lucide:arrow-left-right" />
+  <Card title="Accept deposits" description="The sender pays from any external wallet to an address you show them." to="/docs/routes/deposits" icon="lucide:arrow-down-left" />
+  <Card title="Make a transfer" description="Your application signs the source calls through a connected wallet or its own signer." to="/docs/routes/transfers" icon="lucide:arrow-left-right" />
 </Cards>
 
 <span id="prepare-api-access" />
 <span id="handle-pricing-retries-and-incomplete-routes" />
 <span id="track-the-payment-through-delivery" />
 
-Both flows use [quotes and fees](/docs/routes/quotes) and [delivery tracking](/docs/routes/delivery). Create an API key after confirming beta access; each guide lists the required permissions.
+## Build a Routes integration
+
+Each page in this section covers one step. Read them in order:
+
+1. [Try a route](/docs/routes/test) in the browser to see every API call from quote to delivery. Without an API key, the demo quotes listed routes and previews 1:1 delivery where a route supports it.
+2. [Set up API access](/docs/routes/api-setup) with the scopes your backend needs.
+3. Pick a pair and funding method from [Supported routes](/docs/routes/networks).
+4. Read [Quotes and fees](/docs/routes/quotes) to choose the fixed amount and show the payment terms.
+5. Build the flow: [Accept deposits](/docs/routes/deposits) or [Make a transfer](/docs/routes/transfers).
+6. [Track delivery](/docs/routes/delivery) to completion or refund before you credit a balance.
+
+To run a flow from a terminal, use the [deposit address](/docs/routes/examples/deposits) or [transfer](/docs/routes/examples/transfers) cURL example.
 
 <span id="use-routed-funds-across-tempo" />
+
+## Use funds after delivery
 
 After funds arrive on Tempo, you can deposit them into [Earn](/docs/earn/integrate) or a [Zone](/docs/zones/deposit). Those are separate operations; direct Routes transfers into vaults or Zones are not implemented.
 

@@ -84,11 +84,11 @@ export const proxiedLegacyDocsRoutes = [
   },
   {
     source: '/learn/tempo/receive-policies',
-    destination: '/docs/guide/payments/configure-receive-policies',
+    destination: '/docs/accounts/policies/receive-policies',
   },
   {
     source: '/docs/learn/tempo/receive-policies',
-    destination: '/docs/guide/payments/configure-receive-policies',
+    destination: '/docs/accounts/policies/receive-policies',
   },
   {
     source: '/learn/use-cases/agentic-commerce',
@@ -222,11 +222,11 @@ export const legacyDocsHostRoutes = [
   },
   {
     source: '/learn/tempo/receive-policies',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
+    destination: `${canonicalDevelopersOrigin}/docs/accounts/policies/receive-policies`,
   },
   {
     source: '/docs/learn/tempo/receive-policies',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/payments/configure-receive-policies`,
+    destination: `${canonicalDevelopersOrigin}/docs/accounts/policies/receive-policies`,
   },
   {
     source: '/learn/use-cases/agentic-commerce',

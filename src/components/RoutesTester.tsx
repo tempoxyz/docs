@@ -51,6 +51,7 @@ import {
 import {
   canSubsidize,
   demoMethods,
+  linkedRoute,
   type RoutePick,
   routeChoices,
   routeQuoteRequest,
@@ -67,6 +68,17 @@ import {
   useSolanaWallets,
   waitForSolanaSignature,
 } from '../lib/solana-wallets'
+import {
+  connectStellarAccount,
+  findStellarTransaction,
+  StellarFailedError,
+  StellarNotLandedError,
+  sendStellarTransaction,
+  stellarMainnet,
+  stellarTransactionHash,
+  useStellarWallets,
+  waitForStellarTransaction,
+} from '../lib/stellar-wallets'
 import {
   connectTronAccount,
   sendTronCall,
@@ -97,6 +109,7 @@ const explorers: Record<string, (hash: string) => string> = {
   'eip155:42431': (hash) => `https://explore.testnet.tempo.xyz/tx/${hash}`,
   'tron:0x2b6653dc': (hash) => `https://tronscan.org/#/transaction/${hash}`,
   'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp': (hash) => `https://solscan.io/tx/${hash}`,
+  'stellar:pubnet': (hash) => `https://stellar.expert/explorer/public/tx/${hash}`,
 }
 const quantity = (value: unknown) =>
   typeof value === 'object' && value && 'formatted' in value ? String(value.formatted) : '—'
@@ -136,6 +149,8 @@ export function RoutesTester() {
   const [keyLocked, setKeyLocked] = useState(false)
   const [notice, setNotice] = useState('')
   const chosen = useRef<TestRoute>(undefined)
+  // A link from the supported routes table preselects its route on the first load only.
+  const linked = useRef(true)
   // The directory reflects the key's access policy, so reload it (debounced) when the key changes.
   // A route chosen before the key was added stays chosen, quote and all, if the key can use it.
   useEffect(() => {
@@ -145,7 +160,9 @@ export function RoutesTester() {
     const timer = setTimeout(() => {
       loadRoutes(AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]), apiKey)
         .then((list) => {
-          const previous = chosen.current
+          const previous =
+            chosen.current ?? (linked.current ? linkedRoute(list, location.search) : undefined)
+          linked.current = false
           const kept = previous && list.find((r) => routeKey(r) === routeKey(previous))
           setRoutes(list)
           setPick(kept ? pickOf(kept) : noPick)
@@ -349,7 +366,11 @@ function RouteLifecycle({
   const [refundAddress, setRefundAddress] = useState('')
   // 1:1 delivery is requested wherever the route offers it, until the API refuses the subsidy.
   const [subsidyRefused, setSubsidyRefused] = useState(false)
+  // Why the open quote lacks 1:1 delivery, when the API refused it.
+  const [subsidyNotice, setSubsidyNotice] = useState('')
   const [quote, setQuote] = useState<ApiResult>()
+  // Without a key, a 1:1 quote is the docs demo organization's preview, not the reader's terms.
+  const [quoteKeyed, setQuoteKeyed] = useState(false)
   const [created, setCreated] = useState<ApiResult>()
   const [hashes, setHashes] = useState<string[]>([])
   const [confirmedCalls, setConfirmedCalls] = useState(0)
@@ -392,18 +413,22 @@ function RouteLifecycle({
       ? 'tron'
       : route.sourceChain.id === solanaMainnet
         ? 'solana'
-        : route.sourceChain.id.startsWith('eip155:')
-          ? 'evm'
-          : undefined
+        : route.sourceChain.id === stellarMainnet
+          ? 'stellar'
+          : route.sourceChain.id.startsWith('eip155:')
+            ? 'evm'
+            : undefined
   const evmWallets = useEvmWallets()
   const tronWallets = useTronWallets()
   const solanaWallets = useSolanaWallets()
+  const stellarWallets = useStellarWallets()
   const [walletId, setWalletId] = useState('')
   const pick = <T extends { name: string }>(list: readonly T[], key: (w: T) => string) =>
     list.find((w) => key(w) === walletId) ?? list[0]
   const evmWallet = pick(evmWallets, (w) => w.id)
   const tronWallet = pick(tronWallets, (w) => w.id)
   const solanaWallet = pick(solanaWallets, (w) => w.name)
+  const stellarWallet = pick(stellarWallets, (w) => w.id)
   const walletOptions =
     family === 'evm'
       ? evmWallets.map((w) => ({ id: w.id, name: w.name }))
@@ -411,7 +436,9 @@ function RouteLifecycle({
         ? tronWallets.map((w) => ({ id: w.id, name: w.name }))
         : family === 'solana'
           ? solanaWallets.map((w) => ({ id: w.name, name: w.name }))
-          : []
+          : family === 'stellar'
+            ? stellarWallets.map((w) => ({ id: w.id, name: w.name }))
+            : []
   const walletName =
     family === 'tempo'
       ? 'Tempo Wallet'
@@ -419,7 +446,9 @@ function RouteLifecycle({
         ? evmWallet?.name
         : family === 'tron'
           ? tronWallet?.name
-          : solanaWallet?.name
+          : family === 'stellar'
+            ? stellarWallet?.name
+            : solanaWallet?.name
   const sourceTokenAddress = tempoChainId ? erc20Address(route.sourceToken.tokenKey) : undefined
   const senderAddress = /^0x[\da-fA-F]{40}$/.test(sender) ? (sender as `0x${string}`) : undefined
   const sourceBalance = useReadContract({
@@ -440,8 +469,8 @@ function RouteLifecycle({
     sender,
     recipient,
     refundAddress,
-    // 1:1 delivery is organization pricing, so only a quote with the reader's key asks for it.
-    subsidize: subsidyAvailable && !subsidyRefused && !!apiKey.trim(),
+    // Without a key, the docs demo key quotes 1:1 delivery as a preview; it cannot create routes.
+    subsidize: subsidyAvailable && !subsidyRefused,
   }
   let quoteParams: ReturnType<typeof routeQuoteRequest> | undefined
   let quoteValidation = ''
@@ -470,12 +499,17 @@ function RouteLifecycle({
   const shortfall = balance !== undefined && requiredSource > 0n && balance < requiredSource
   const id = typeof created?.data.id === 'string' ? created.data.id : ''
   const parsedAction = sourceActionSchema.safeParse(created?.data.action)
-  // Tron sources get Tron calls; every other transfer source gets EVM calls.
+  // Tron sources get Tron calls, Stellar sources one envelope, and every other source EVM calls.
+  const actionType =
+    family === 'tron' ? 'tron:calls' : family === 'stellar' ? 'stellar:xdr' : 'evm:calls'
   const action =
-    parsedAction.success && (parsedAction.data.type === 'tron:calls') === (family === 'tron')
+    parsedAction.success && parsedAction.data.type === actionType
       ? parsedAction
       : { success: false as const }
-  const calls = action.success ? action.data.calls : []
+  const calls = action.success && action.data.type !== 'stellar:xdr' ? action.data.calls : []
+  const stellarXdr = action.success && action.data.type === 'stellar:xdr' ? action.data.xdr : ''
+  // Each call is its own transaction; a Stellar envelope is one.
+  const transactionCount = stellarXdr ? 1 : calls.length
   const expiresAt = (created?.data.quote as { expiresAt?: string } | undefined)?.expiresAt
   const current = status?.data
   const frozen = !!quote || !!creation.current || busy
@@ -626,28 +660,35 @@ function RouteLifecycle({
   const unsubsidizedQuote = () => call(quoteRequest(route, { ...input, subsidize: false }))
   // The quote's price list: public without a key, the organization's with one.
   const quotedWith = useRef(apiKey)
-  const getQuote = () =>
+  // A new key gets its own chance at 1:1 delivery, even if the previous key was refused it.
+  const getQuote = ({ retrySubsidy = false } = {}) =>
     task(async () => {
       quotedWith.current = apiKey
+      const request = retrySubsidy ? { ...input, subsidize: subsidyAvailable } : input
+      if (retrySubsidy) setSubsidyRefused(false)
+      setSubsidyNotice('')
       let result: ApiResult
       try {
-        result = await call(quoteRequest(route, input))
+        result = await call(quoteRequest(route, request))
       } catch (e) {
         // Without approval or inventory for 1:1 delivery, quote the route without it.
-        if (!input.subsidize || !isSubsidyRefusal(e)) throw e
+        if (!request.subsidize || !isSubsidyRefusal(e)) throw e
         setSubsidyRefused(true)
+        setSubsidyNotice(`Quoted without 1:1 delivery. ${(e as Error).message}`)
         result = await unsubsidizedQuote()
       }
       setQuote(result)
+      setQuoteKeyed(!!apiKey.trim())
       quoteReady.current = true
     })
   // Adding or removing a key changes the price list, so an open quote is priced again.
   useEffect(() => {
     if (!quote || creation.current || quotedWith.current === apiKey) return
-    void getQuote()
+    void getQuote({ retrySubsidy: true })
   }, [apiKey])
   const editQuote = () => {
     setSubsidyRefused(false)
+    setSubsidyNotice('')
     setQuote(undefined)
     quoteReady.current = false
     onLock(false)
@@ -682,6 +723,7 @@ function RouteLifecycle({
         if (!request.body?.subsidize || !isSubsidyRefusal(e)) throw e
         creation.current = null
         setSubsidyRefused(true)
+        setSubsidyNotice('')
         setQuote(await unsubsidizedQuote())
         throw new Error(
           'Your organization cannot use 1:1 delivery on this route, so the quote is now without it. Review it, then create.',
@@ -811,12 +853,47 @@ function RouteLifecycle({
       }
       await register(submitted)
     })
+  const signWithStellarWallet = () =>
+    task(async () => {
+      if (!stellarWallet) throw new Error('Install a Stellar wallet, such as Hana Wallet, to sign.')
+      let hash = hashes[0]
+      try {
+        // A saved hash is one Horizon took: wait for it rather than prompting the wallet again.
+        if (!hash) {
+          // Every attempt submits the same envelope, so one that already landed is found by its
+          // hash and registered without a new signature, even after its quote expired.
+          const prepared = stellarTransactionHash(stellarXdr)
+          if (await findStellarTransaction(prepared)) {
+            hash = prepared
+            setHashes([hash])
+          } else {
+            assertUnexpired(expiresAt)
+            hash = await sendStellarTransaction({
+              wallet: stellarWallet,
+              sender,
+              xdr: stellarXdr,
+              onHash: (submitted) => setHashes([submitted]),
+            })
+          }
+        }
+        await waitForStellarTransaction(hash)
+      } catch (e) {
+        if (e instanceof StellarFailedError) setReverted(true)
+        // A payment not in a ledger can be submitted again, since its sequence number applies once.
+        if (e instanceof StellarNotLandedError) setHashes([])
+        throw e
+      }
+      setConfirmedCalls(1)
+      await register([hash])
+    })
   const signAndSend = () =>
     family === 'tempo'
       ? signWithTempo()
       : family === 'tron'
         ? signWithTronWallet()
-        : signWithBrowserWallet()
+        : family === 'stellar'
+          ? signWithStellarWallet()
+          : signWithBrowserWallet()
   /** Fund the deposit address from a wallet on the source network; any wallet also works. */
   const fundWithWallet = () =>
     task(async () => {
@@ -975,8 +1052,8 @@ function RouteLifecycle({
   const amountToken =
     isTransfer && mode === 'exactDestination' ? route.destinationToken : route.sourceToken
   // Every address field can be filled from a wallet on its network: Tempo Wallet (the Tempo
-  // accounts SDK) on Tempo, wagmi's browser wallets on other EVM networks, and Tron and Solana
-  // wallets on theirs. Connecting only shares an address; nothing is signed.
+  // accounts SDK) on Tempo, wagmi's browser wallets on other EVM networks, and Tron, Solana, and
+  // Stellar wallets on theirs. Connecting only shares an address; nothing is signed.
   const [connectedAddresses, setConnectedAddresses] = useState<Record<string, string>>({})
   // The field whose wallet choices are showing, when the network has more than one wallet.
   const [choosingWallet, setChoosingWallet] = useState<string>()
@@ -1009,6 +1086,12 @@ function RouteLifecycle({
         id: w.name,
         name: w.name,
         connect: () => connectSolanaAccount(w),
+      }))
+    if (chainId === stellarMainnet)
+      return stellarWallets.map((w) => ({
+        id: w.id,
+        name: w.name,
+        connect: () => connectStellarAccount(w),
       }))
     if (chainId.startsWith('eip155:'))
       return evmWallets.map((w) => ({
@@ -1111,6 +1194,16 @@ function RouteLifecycle({
       placeholder: walletLabel(route.destinationChain, 'destination'),
       wide,
     })
+  const refundField = (disabled: boolean) =>
+    addressField({
+      id: 'routes-refund',
+      label: `Refund address on ${route.sourceChain.name}`,
+      chainId: route.sourceChain.id,
+      value: refundAddress,
+      onChange: setRefundAddress,
+      disabled,
+      placeholder: 'Where refunds go',
+    })
   const tempoSignIn = (
     <Demo.Button
       variant="accent"
@@ -1133,7 +1226,8 @@ function RouteLifecycle({
         value={
           family === 'solana'
             ? solanaWallet?.name
-            : (family === 'tron' ? tronWallet : evmWallet)?.id
+            : (family === 'tron' ? tronWallet : family === 'stellar' ? stellarWallet : evmWallet)
+                ?.id
         }
         disabled={busy || hashes.length > 0}
         onChange={(e) => setWalletId(e.target.value)}
@@ -1148,7 +1242,7 @@ function RouteLifecycle({
   )
   const signAction = !action.success ? null : shortfall && hashes.length === 0 ? (
     recheck
-  ) : confirmedCalls === calls.length && hashes.length > 0 ? (
+  ) : confirmedCalls === transactionCount && hashes.length > 0 ? (
     <Demo.Button
       variant="accent"
       type="button"
@@ -1170,7 +1264,7 @@ function RouteLifecycle({
     </Demo.Button>
   )
   // One line that follows the wallet: what to do now, and what is happening.
-  const total = family === 'tempo' ? 1 : calls.length
+  const total = family === 'tempo' ? 1 : transactionCount
   const sent = hashes.filter(Boolean).length
   const nth = (i: number) => (total > 1 ? `transaction ${i + 1} of ${total}` : 'the transaction')
   const capitalized = (text: string) => text[0].toUpperCase() + text.slice(1)
@@ -1197,10 +1291,10 @@ function RouteLifecycle({
       : `${walletName ?? 'Your wallet'} signs ${
           family === 'tempo'
             ? 'every call in one transaction'
-            : calls.length === 1
+            : transactionCount === 1
               ? 'one transaction'
-              : `${calls.length} transactions`
-        } from the sender${family !== 'tempo' && calls.length > 1 ? ', one at a time' : ''}.`
+              : `${transactionCount} transactions`
+        } from the sender${family !== 'tempo' && transactionCount > 1 ? ', one at a time' : ''}.`
   const instructions =
     current?.status === 'completed' && quoteParams && body
       ? agentInstructions({
@@ -1243,7 +1337,20 @@ function RouteLifecycle({
           }
         >
           {quote ? (
-            <QuoteSummary data={terms ?? quote.data} route={route} />
+            <>
+              <QuoteSummary data={terms ?? quote.data} route={route} />
+              {subsidyNotice && (
+                <p role="status" {...cx(stepBody(), cautionText())}>
+                  {subsidyNotice}
+                </p>
+              )}
+              {!quoteKeyed && subsidizedTerms && (
+                <p {...cx(stepBody(), noteStyle())}>
+                  1:1 delivery preview from the docs demo organization. Creating a 1:1 route needs
+                  subsidy approval for your organization.
+                </p>
+              )}
+            </>
           ) : (
             <div {...stepForm()}>
               <div {...fieldGrid()}>
@@ -1287,6 +1394,12 @@ function RouteLifecycle({
                       placeholder: walletLabel(route.sourceChain, 'source'),
                     })}
                     {recipientField(frozen, true)}
+                  </>
+                )}
+                {!isTransfer && (
+                  <>
+                    {recipientField(frozen)}
+                    {refundField(frozen)}
                   </>
                 )}
               </div>
@@ -1337,21 +1450,10 @@ function RouteLifecycle({
               <p {...bodyText()}>
                 Routes creates a {route.sourceChain.name} address for this route.{' '}
                 {route.sourceToken.symbol} sent to it lands automatically as{' '}
-                {route.destinationToken.symbol} in the {route.destinationChain.name} wallet below.
+                {route.destinationToken.symbol} at the {route.destinationChain.name} recipient you
+                quoted.
               </p>
-              <div {...fieldGrid()}>
-                {recipientField(!!creation.current || busy)}
-                {addressField({
-                  id: 'routes-refund',
-                  label: `Refund address on ${route.sourceChain.name}`,
-                  chainId: route.sourceChain.id,
-                  value: refundAddress,
-                  onChange: setRefundAddress,
-                  disabled: !!creation.current || busy,
-                  placeholder: 'Where refunds go',
-                })}
-              </div>
-              {(recipient || refundAddress) && validation && <p {...noteStyle()}>{validation}</p>}
+              {validation && <p {...noteStyle()}>{validation}</p>}
               {!hasKey && <p {...noteStyle()}>{pricingNote}</p>}
               {hasKey && (
                 <Demo.Button
@@ -1438,7 +1540,10 @@ function RouteLifecycle({
                     This address is not active. Do not fund it.
                   </p>
                 ) : (
-                  family && (
+                  // The demo signs only the Stellar envelopes Routes prepares for transfers, so
+                  // Stellar deposit addresses are funded from the reader's own wallet.
+                  family &&
+                  family !== 'stellar' && (
                     <div {...fundActions()}>
                       {walletPicker}
                       {family === 'tempo' && !tempoAccount ? (
@@ -1669,6 +1774,11 @@ function QuoteSummary({ data, route }: { data: Record<string, unknown>; route: T
       <Row label="Recipient gets">
         {received} {symbol}
       </Row>
+      {delivery && delivery.covered > 0n && (
+        <Row label="Covered by Tempo">
+          {formatUnits(delivery.covered, decimals)} {symbol}
+        </Row>
+      )}
       {fees.length === 0 ? (
         <Row label="Fees">None</Row>
       ) : (

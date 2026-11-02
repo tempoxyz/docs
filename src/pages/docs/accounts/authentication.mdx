@@ -1,0 +1,90 @@
+---
+title: Signing Methods
+seoTitle: Sign for Tempo Accounts with Private Keys, Device Keys, or Passkeys | Tempo Docs
+description: Choose a private key, device key, or passkey for each key on a Tempo account by who should hold it, and set weights so no outside party can approve alone.
+---
+
+import { Card, Cards } from 'vocs'
+import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
+
+# Signing Methods
+
+A signing method is the kind of key that approves an account's transactions.
+
+<span id="tempo-account-signer-types" />
+<span id="tempo-sign-in-methods" />
+<span id="tempo-signing-methods" />
+<span id="what-a-signer-is" />
+<span id="what-a-signing-method-is" />
+<span id="how-it-works" />
+
+## Overview
+
+A signing method is a passkey, a device key, or a private key. Choose one by who should hold it. A passkey or device key stays with the customer. A private key on your server or with a wallet provider lets that party sign too.
+
+Every method works on mainnet and testnet today. Each can be the one key of a [single-key account](/docs/accounts/how-it-works#address) or an [access key](/docs/accounts/access-keys).
+
+Tempo verifies three kinds of signature onchain:
+
+- **secp256k1:** Ethereum wallets use it.
+- **P-256:** Device keys and P-256 private keys use it.
+- **WebAuthn P-256:** Passkeys use it.
+
+The kind of key decides where it can live and how the holder approves. Its role on the account decides what it can do.
+
+<span id="signer-rules" />
+<span id="authentication-limits" />
+<span id="signing-method-limits" />
+<span id="choose-a-signing-method" />
+<span id="set-up-a-sign-in-method" />
+<span id="private-keys" />
+<span id="p-256-keys" />
+<span id="device-sessions" />
+<span id="try-a-passkey-account" />
+<span id="add-email-sign-in" />
+<span id="how-login-signers-work" />
+<span id="use-a-hosted-auth-service-as-the-issuer" />
+<span id="restore-the-session-on-a-returning-visit" />
+<span id="publish-your-providers-keys" />
+<span id="self-hosted-relay" />
+<span id="run-your-relay" />
+<span id="relay-trust" />
+<span id="who-can-sign-in-as-a-customer" />
+<span id="who-can-sign-for-a-customer" />
+<span id="choose-a-key-by-who-holds-it" />
+
+## Methods
+
+<Cards>
+  <Card title="Passkeys" description="The customer approves with Face ID or a fingerprint. Synced across their devices, and tied to your domain." to="/docs/accounts/authentication/passkeys" />
+  <Card title="Device Keys" description="A key the customer's phone, computer, or browser creates and can't export, for payments without a prompt." to="/docs/accounts/authentication/device-keys" />
+  <Card title="Private Keys" description="A key in a wallet, a wallet provider, or your KMS or HSM, for servers, treasury approvers, and backups." to="/docs/accounts/authentication/private-keys" />
+</Cards>
+
+<span id="combine-signing-methods" />
+
+## Combining Methods
+
+Each key joins the account in one of two roles:
+
+| Role | What it does |
+| --- | --- |
+| Signer | Approves with a weight. A transaction runs once the approving signers' weights reach the account's [threshold](/docs/accounts/policies/signing-thresholds). |
+| [Access key](/docs/accounts/access-keys) | Pays alone within its limits. Never counts toward the threshold. |
+
+Add device keys and server payout keys as access keys. A signer has no spending limit.
+
+<ConfigurableAccountsT14 />
+
+Several weighted signers on one account need a configurable account. Tempo has no override. Your app or a provider can approve only with the signers it holds. Set weights so no one but the customer reaches the threshold alone. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts, embedded wallets, and treasuries.
+
+<span id="login-sign-in-in-code" />
+
+## Related
+
+<Cards>
+  <Card title="Signing Thresholds" description="Covers signer weights and the threshold a transaction must reach." to="/docs/accounts/policies/signing-thresholds" />
+  <Card title="Access Keys" description="Covers keys that pay alone within limits, expiry, and scopes." to="/docs/accounts/access-keys" />
+  <Card title="Configurable Accounts" description="Covers accounts with several weighted signers and a threshold." to="/docs/development/configurable-accounts" />
+  <Card title="Multisig Signatures" description="Covers the signature format for a transaction that several signers approve." to="/docs/development/configurable-accounts#multisig-signature-format" />
+</Cards>

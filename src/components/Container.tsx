@@ -29,9 +29,10 @@ export function Container(
 
 const container = style({
   borderRadius: tokens.radius.lg,
+  '--corner-radius': tokens.radius.lg,
   borderWidth: tokens.borderWidth.hairline,
   borderStyle: 'solid',
-  borderColor: tokens.color.line,
+  borderColor: tokens.color.cardLine,
   backgroundColor: tokens.color.card,
   selectors: {
     '& > :not(:last-child)': {
