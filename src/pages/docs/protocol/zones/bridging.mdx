@@ -86,6 +86,7 @@ Both operations are atomic. If the callback reverts, the transfer reverts too. R
 - Implement `IWithdrawalReceiver`.
 - Verify `msg.sender == zoneMessenger`.
 - Validate `zoneId` and `sourcePortal` against the intended source Zone.
+- Return the `onWithdrawalReceived` selector, `0x0a137ff5`. The messenger reverts with `CallbackRejected` on any other value.
 
 This enables direct composition with DEX swaps, staking, or cross-Zone deposits.
 
