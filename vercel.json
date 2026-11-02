@@ -3,12 +3,12 @@
   "redirects": [
     {
       "source": "/login",
-      "destination": "/console",
+      "destination": "https://console.tempo.xyz",
       "permanent": false
     },
     {
       "source": "/developers/login",
-      "destination": "https://developers.tempo.xyz/console",
+      "destination": "https://console.tempo.xyz",
       "permanent": false
     },
     {
