@@ -2,16 +2,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/console",
-      "destination": "https://tempo.xyz/developers/console",
-      "permanent": false
-    },
-    {
-      "source": "/console/:path(.*)",
-      "destination": "https://tempo.xyz/developers/console/:path",
-      "permanent": false
-    },
-    {
       "source": "/login",
       "destination": "https://console.tempo.xyz",
       "permanent": false
@@ -19,6 +9,16 @@
     {
       "source": "/developers/login",
       "destination": "https://console.tempo.xyz",
+      "permanent": false
+    },
+    {
+      "source": "/developers/console",
+      "destination": "https://developers.tempo.xyz/console",
+      "permanent": false
+    },
+    {
+      "source": "/developers/console/:path(.*)",
+      "destination": "https://developers.tempo.xyz/console/:path",
       "permanent": false
     },
     {
@@ -2098,6 +2098,14 @@
     {
       "source": "/ingest/:path(.*)",
       "destination": "https://us.i.posthog.com/:path"
+    },
+    {
+      "source": "/console",
+      "destination": "https://console.tempo.xyz/console"
+    },
+    {
+      "source": "/console/:path(.*)",
+      "destination": "https://console.tempo.xyz/console/:path"
     }
   ]
 }
