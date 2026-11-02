@@ -626,6 +626,7 @@ When a TempoTransaction is received, the protocol:
 4. **Validates Key Authorization** (for Access Keys)
    - Queries precompile: `getKey(account, keyId)` returns `KeyInfo`
    - Checks key is active (not revoked)
+   - Checks the inner signature type equals the key's stored `key_type` (P256 and WebAuthn are distinct), otherwise rejects with `SignatureTypeMismatch`; a key authorized in the same transaction must have `key_type` matching the inner signature type
    - Checks expiry: `current_timestamp < expiry`; non-expiring keys are stored with `expiry = u64::MAX`
    - Rejects transaction if validation fails
 
