@@ -266,7 +266,7 @@ token.changeTransferPolicyId(policyId);
 
 ### Authorization Logic
 
-For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
+For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. Before any policy lookup, `isAuthorized()`, `isAuthorizedSender()`, `isAuthorizedRecipient()`, and `isAuthorizedMintRecipient()` return `true` for ReceivePolicyGuard (`0xb10c000000000000000000000000000000000000`) under every policy ID, including `0` and nonexistent IDs. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
 
 ```solidity
 if (policyId < 2) {
