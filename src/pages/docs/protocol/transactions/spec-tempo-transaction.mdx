@@ -215,7 +215,7 @@ Each authorization in the list:
 **Implementation Note:** Nonces are stored in the storage of a designated precompile at address `0x4E4F4E4345000000000000000000000000000000` (ASCII hex for "NONCE"), as there is currently no clean way to extend account state in Reth.
 
 **Storage Layout at 0x4E4F4E4345:**
-- Storage key: `keccak256(abi.encode(account_address, nonce_key))`
+- Storage key: `keccak256(abi.encode(nonce_key, keccak256(abi.encode(account_address, 0))))` (Solidity nested mapping at slot 0)
 - Storage value: `nonce` (uint64)
 
 Note: Protocol Nonce key (0), is directly stored in the account state, just like normal transaction types.
@@ -253,12 +253,15 @@ interface INonce {
 
 #### Precompile Implementation
 
-The precompile contract maintains a single storage mapping:
+The precompile contract maintains the nonce mapping and expiring-nonce replay storage:
 
 ```solidity
 contract Nonce is INonce {
     /// @dev Mapping from account -> nonce key -> nonce value
-    mapping(address => mapping(uint256 => uint64)) private nonces;
+    mapping(address => mapping(uint256 => uint64)) private nonces;            // slot 0
+    mapping(bytes32 => uint64) private expiringNonceSeen;                     // slot 1: replay hash => expiry
+    mapping(uint32 => bytes32) private expiringNonceRing;                     // slot 2: circular buffer of replay hashes
+    uint32 private expiringNonceRingPtr;                                      // slot 3: circular buffer position
 }
 ```
 
