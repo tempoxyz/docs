@@ -168,7 +168,7 @@ Returns a user’s internal balance for `token` held on the DEX.
 function withdraw(address token, uint128 amount) external;
 ```
 
-Transfers `amount` of `token` from the caller’s internal balance to the caller. Reverts if insufficient internal balance.
+Transfers `amount` of `token` from the caller’s internal balance to the caller. Reverts if insufficient internal balance. A receiver-policy rejection holds the tokens in ReceivePolicyGuard instead of reverting.
 
 #### Order placement and lifecycle
 
@@ -234,13 +234,13 @@ Simulates an exact‑out swap and returns the required input. Reverts if insuffi
 function swapExactAmountIn(address tokenIn, address tokenOut, uint128 amountIn, uint128 minAmountOut) external returns (uint128 amountOut);
 ```
 
-Executes an exact‑in swap against the active book. Deducts `amountIn` from caller’s internal balance (transferring any shortfall) and transfers output to the caller. Reverts if resulting `amountOut` is below `minAmountOut` or liquidity is insufficient.
+Executes an exact‑in swap against the active book. Deducts `amountIn` from caller’s internal balance (transferring any shortfall) and transfers output to the caller. Reverts if resulting `amountOut` is below `minAmountOut` or liquidity is insufficient. A receiver-policy rejection holds the output in ReceivePolicyGuard instead of reverting.
 
 ```solidity
 function swapExactAmountOut(address tokenIn, address tokenOut, uint128 amountOut, uint128 maxAmountIn) external returns (uint128 amountIn);
 ```
 
-Executes an exact‑out swap. Deducts the actual input from the caller’s internal balance (transferring any shortfall from the user) and transfers `amountOut` to the caller. Reverts if required input exceeds `maxAmountIn` or liquidity is insufficient.
+Executes an exact‑out swap. Deducts the actual input from the caller’s internal balance (transferring any shortfall from the user) and transfers `amountOut` to the caller. Reverts if required input exceeds `maxAmountIn` or liquidity is insufficient. A receiver-policy rejection holds the output in ReceivePolicyGuard instead of reverting.
 
 #### Events
 
