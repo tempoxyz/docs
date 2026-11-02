@@ -685,7 +685,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 
 **Root Key Behavior:** Spending limit checks are skipped entirely (no limits apply)
 
-**Recurring Limits:** When a `TokenLimit.period` is non-zero, the limit recurs. `remaining` rolls over to `max` once `current_timestamp >= periodEnd`, and `periodEnd` advances by `period`. Callers observe rollover state via `getRemainingLimitWithPeriod`.
+**Recurring Limits:** When a `TokenLimit.period` is non-zero, the limit recurs. `remaining` rolls over to `max` once `current_timestamp >= periodEnd`, and `periodEnd` advances by the smallest whole number of `period`s that puts it after `current_timestamp`. Callers observe rollover state via `getRemainingLimitWithPeriod`.
 
 **Limit Updates:**
 - Limits deplete as tokens are spent
