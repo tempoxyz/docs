@@ -17,6 +17,7 @@ import { AgentSetupCommand } from './AgentSetupCommand'
 import { CopyIconSwap } from './CopyIconSwap'
 import * as ui from './DocsHeader.recipes'
 import {
+  docsHeaderAccountEmail,
   docsHeaderActions,
   docsHeaderAgentMenu,
   docsHeaderAgentPanel,
@@ -60,6 +61,27 @@ const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 
 /** Tempo Console. This host forwards to developers.tempo.xyz/console once the console moves there. */
 const CONSOLE_URL = 'https://console.tempo.xyz'
+/** Console session lookup, proxied by this host; its cookie is scoped to `/console` so docs pages never see it. */
+const CONSOLE_ME_PATH = '/console/api/v1/me'
+
+/** Email of the signed-in console user, or undefined while signed out or off the console's host. */
+function useConsoleEmail() {
+  const [email, setEmail] = useState<string | undefined>()
+  useEffect(() => {
+    // The tempo.xyz/developers mount is a different origin from the console, so it never has a session.
+    if (window.location.hostname === 'tempo.xyz') return
+    const controller = new AbortController()
+    fetch(CONSOLE_ME_PATH, { credentials: 'same-origin', signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : undefined))
+      .then((body: unknown) => {
+        if (body && typeof body === 'object' && 'email' in body && typeof body.email === 'string')
+          setEmail(body.email)
+      })
+      .catch(() => {})
+    return () => controller.abort()
+  }, [])
+  return email
+}
 
 function isExternal(href: string) {
   return !href.startsWith('/') && !href.startsWith('#')
@@ -712,6 +734,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [agentsOpen, setAgentsOpen] = useState(false)
+  const email = useConsoleEmail()
   // Keep the Agent setup panel rendered through its exit fade (G5).
   const [agentsRendered, setAgentsRendered] = useState(false)
   useEffect(() => {
@@ -898,8 +921,9 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
           <a
             href={CONSOLE_URL}
             className={`docs-header-login ${docsHeaderAgentTrigger().className}`}
+            {...(email ? { 'aria-label': `Open Tempo Console as ${email}`, title: email } : {})}
           >
-            Log in
+            {email ? <span className={docsHeaderAccountEmail().className}>{email}</span> : 'Log in'}
           </a>
           <button
             type="button"

@@ -819,3 +819,11 @@ export const docsApiMenuItem = style({
     },
   },
 })
+
+/** Signed-in email in the header's account link, cut short so the actions row keeps its width. */
+export const docsHeaderAccountEmail = style({
+  maxWidth: '24ch',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
