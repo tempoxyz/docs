@@ -136,13 +136,13 @@ To avoid depending on the pathUSD fallback, set an explicit fee token preference
 
 ### Transaction level
 
-Tempo's [new transaction type](/docs/protocol/transactions/spec-tempo-transaction), allows transactions to specify a `fee_token` on the transaction. This overrides any preferences set at the account, contract, or validator level.
+Tempo's [new transaction type](/docs/protocol/transactions/spec-tempo-transaction), allows transactions to specify a `fee_token` on the transaction. This overrides any preferences set at the account or contract level. It doesn't change the validator's preferred fee token, which the Fee AMM converts the fee into.
 
 For [sponsored transactions](#fee-payer), the `tx.origin` address does not sign over the `fee_token` field (allowing the `fee_payer` to choose the fee token).
 
 ### Account level
 
-An account can specify a fee token preference for all transactions for which it is the `fee_payer` (including both transactions it sponsors as well as non-sponsored transactions for which it is the `tx.origin`). This overrides any preference set at the contract or validator level.
+An account can specify a fee token preference for all transactions for which it is the `fee_payer` (including both transactions it sponsors as well as non-sponsored transactions for which it is the `tx.origin`). This overrides any preference set at the contract level. It doesn't change the validator's preferred fee token.
 
 To set its preference, the account can call the `setUserToken` function on the FeeManager precompile.
 
