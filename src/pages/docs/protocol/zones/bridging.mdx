@@ -53,7 +53,7 @@ The encryption uses ECIES with secp256k1:
 
 1. Sequencer publishes a secp256k1 encryption public key via `setSequencerEncryptionKey()` with a proof of possession.
 2. User generates an ephemeral keypair and derives a shared secret via ECDH.
-3. User encrypts `(to || memo)` with AES-256-GCM using the derived key.
+3. User encrypts the 64-byte plaintext `to (20 bytes) || memo (32 bytes) || zero padding (12 bytes)` with AES-256-GCM using the derived key.
 4. User calls `depositEncrypted(token, amount, keyIndex, encryptedPayload, tempoRefundRecipient)` on the portal.
 
 The inbox verifies a Chaum–Pedersen proof of the ECDH shared secret before decrypting. Ciphertext authentication can fail, or the Zone can be unable to mint to the recipient. In either case, the inbox queues a refund to `tempoRefundRecipient` on Tempo. The refund deducts the configured bounce-back fee when that fee can be collected.
