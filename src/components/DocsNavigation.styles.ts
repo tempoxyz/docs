@@ -820,12 +820,16 @@ export const docsApiMenuItem = style({
   },
 })
 
-/** Signed-in email in the header's account link, cut short so the actions row keeps its width. */
+/** Signed-in email in the header's account link, cut short (and hidden on narrow screens) so the logo keeps its width. */
 export const docsHeaderAccountEmail = style({
   maxWidth: '24ch',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  // Below the full header the link shows only its icon; its aria-label and title carry the email.
+  '@media (width < 1080px)': {
+    display: 'none',
+  },
 })
 
 /** Signed-out Log in link: the header's one primary action, inverted like Copy for agent. */
