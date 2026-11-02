@@ -47,7 +47,7 @@ pub struct TempoConsensusContext {
 - `general_gas_limit` and `shared_gas_limit` partition the canonical `gas_limit` for payment and non-payment capacity (see [payment lane specification](/docs/protocol/blockspace/payment-lane-specification)).
 - `timestamp_millis_part` stores the sub‑second component; the full timestamp is `inner.timestamp * 1000 + timestamp_millis_part` .
 
-Current non-genesis headers MUST contain `consensus_context`. It records the consensus epoch, view, parent view, and proposer public key. RLP decoding MUST reject an invalid Ed25519 proposer key. The header RLP field order is `[general_gas_limit, shared_gas_limit, timestamp_millis_part, inner, consensus_context]`, with context encoded as `[epoch, view, parent_view, proposer]`. The context participates in the header hash. JSON-RPC exposes it as `consensusContext`, with `parentView` in camel case.
+Current non-genesis headers MUST contain `consensus_context`. It records the consensus epoch, view, parent view, and proposer public key. Validators MUST reject a proposal whose context doesn't exactly match the consensus round's epoch, view, parent view, and leader. RLP decoding MUST reject an invalid Ed25519 proposer key. The header RLP field order is `[general_gas_limit, shared_gas_limit, timestamp_millis_part, inner, consensus_context]`, with context encoded as `[epoch, view, parent_view, proposer]`. The context participates in the header hash. JSON-RPC exposes it as `consensusContext`, with `parentView` in camel case.
 
 ### Block body
 The block body in Tempo retains the canonical Ethereum block body structure. It MUST NOT contain system transactions. Its transactions are subject to `general_gas_limit` on non-payment transactions.
