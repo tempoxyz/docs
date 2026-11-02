@@ -10,6 +10,8 @@ const earnReadPaths = new Set([
   '/v1/earn/vaults/{vaultId}/earnings/{address}',
   '/v1/earn/addresses/{address}/positions',
 ])
+// Console-internal endpoints the API serves but the public reference leaves out.
+const hiddenTags = new Set(['Apps', 'Routes Access Requests', 'Zone Delegations'])
 const vaultExampleFields: Record<string, string> = {
   label: 'Example vault',
   slug: 'example-vault',
@@ -117,7 +119,27 @@ export function prepareTempoOpenApi(
         server.url = new URL(server.url, sourceUrl).href.replace(/\/$/, '')
     }
   }
+  if (Array.isArray(spec.tags))
+    spec.tags = spec.tags.filter((tag) => !(isObject(tag) && hiddenTags.has(tag.name as string)))
   if (isObject(spec.paths)) {
+    for (const [pathname, path] of Object.entries(spec.paths)) {
+      if (!isObject(path)) continue
+      let hidden = false
+      for (const [method, operation] of Object.entries(path))
+        if (
+          isObject(operation) &&
+          Array.isArray(operation.tags) &&
+          operation.tags.some((tag) => hiddenTags.has(tag))
+        ) {
+          delete path[method]
+          hidden = true
+        }
+      if (
+        hidden &&
+        !Object.values(path).some((operation) => isObject(operation) && 'tags' in operation)
+      )
+        delete spec.paths[pathname]
+    }
     delete spec.paths['/v1/earn/vaults']
     delete spec.paths['/v1/earn/vaults/verified']
     for (const [pathname, path] of Object.entries(spec.paths)) {
