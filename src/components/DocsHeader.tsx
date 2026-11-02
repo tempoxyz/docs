@@ -58,6 +58,9 @@ const DOCS_BASE_PATH = '/docs'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 
+/** Tempo Console, served by the docs host under `/console`. */
+const CONSOLE_URL = 'https://developers.tempo.xyz/console'
+
 function isExternal(href: string) {
   return !href.startsWith('/') && !href.startsWith('#')
 }
@@ -891,6 +894,13 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
               </div>
             ) : null}
           </div>
+          {/* Absolute: the docs are also mounted at tempo.xyz/developers, but the console lives on this host. */}
+          <a
+            href={CONSOLE_URL}
+            className={`docs-header-login ${docsHeaderAgentTrigger().className}`}
+          >
+            Log in
+          </a>
           <button
             type="button"
             onClick={openSearch}
