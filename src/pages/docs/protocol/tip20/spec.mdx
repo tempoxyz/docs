@@ -272,6 +272,40 @@ interface ITIP20 {
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 
     // =========================================================================
+    //                                Rewards
+    // =========================================================================
+
+    struct UserRewardInfo {
+        address rewardRecipient;
+        uint256 rewardPerToken;
+        uint256 rewardBalance;
+    }
+
+    /// @notice No-op. New reward distributions are disabled (TIP-1075).
+    function distributeReward(uint256 amount) external;
+
+    /// @notice No-op. Reward opt-ins and recipient changes are disabled (TIP-1075).
+    function setRewardRecipient(address recipient) external;
+
+    /// @notice Transfers the caller's settled reward balance from the token contract
+    /// @dev Pays at most the token contract's own balance; any remainder stays claimable.
+    ///      Reverts if the token is paused or the TIP-403 policy rejects the transfer.
+    /// @return The amount claimed
+    function claimRewards() external returns (uint256);
+
+    /// @notice Returns the settled reward balance claimable by an account
+    function getPendingRewards(address account) external view returns (uint128);
+
+    /// @notice Returns an account's stored reward state
+    function userRewardInfo(address account) external view returns (UserRewardInfo memory);
+
+    /// @notice Returns the stored global reward-per-token accumulator
+    function globalRewardPerToken() external view returns (uint256);
+
+    /// @notice Returns the stored opted-in supply
+    function optedInSupply() external view returns (uint128);
+
+    // =========================================================================
     //                                Events
     // =========================================================================
 
