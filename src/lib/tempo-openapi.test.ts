@@ -365,31 +365,3 @@ it.each([null, [], 'invalid'])('rejects non-object OpenAPI responses: %j', async
     fetcher.mockRestore()
   }
 })
-
-describe('Console-internal endpoints', () => {
-  it('leaves Apps, Routes access requests and Zone delegations out of the public reference', () => {
-    const ok = { responses: { '200': { description: 'Success' } } }
-    const prepared = prepareTempoOpenApi({
-      openapi: '3.1.0',
-      info: { title: 'Tempo API', version: '1.0.0' },
-      tags: [
-        { name: 'Balances' },
-        { name: 'Apps' },
-        { name: 'Routes Access Requests' },
-        { name: 'Zone Delegations' },
-      ],
-      paths: {
-        '/v1/balances': { get: { ...ok, tags: ['Balances'] } },
-        '/v1/orgs/{orgId}/projects/{projectId}/apps': {
-          parameters: [],
-          get: { ...ok, tags: ['Apps'] },
-          post: { ...ok, tags: ['Apps'] },
-        },
-        '/v1/orgs/{orgId}/routes-access': { get: { ...ok, tags: ['Routes Access Requests'] } },
-        '/v1/orgs/{orgId}/zone-delegations': { get: { ...ok, tags: ['Zone Delegations'] } },
-      },
-    })
-    expect(Object.keys(prepared.paths as object)).toEqual(['/v1/balances'])
-    expect(prepared.tags).toEqual([{ name: 'Balances' }])
-  })
-})

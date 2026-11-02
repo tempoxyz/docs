@@ -381,7 +381,8 @@ export default defineConfig({
         backLink: false,
         collapsed: true,
         introduction: false,
-        hide: ['MCP'],
+        // Console-internal groups stay in the agent exports but out of the sidebar.
+        hide: ['MCP', 'Apps', 'Routes Access Requests', 'Zone Delegations'],
         // Each guide sits inside the endpoint group it explains.
         groupItems: {
           'JSON-RPC': [{ text: 'Guide', link: '/docs/api/json-rpc' }],
