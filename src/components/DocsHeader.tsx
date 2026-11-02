@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { useRouter, Link as WakuLink } from 'waku'
 import { cx as composeStyles } from 'zyzz'
 import ChevronDownIcon from '~icons/lucide/chevron-down'
+import SquareTerminalIcon from '~icons/lucide/square-terminal'
 import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 
@@ -17,6 +18,7 @@ import { AgentSetupCommand } from './AgentSetupCommand'
 import { CopyIconSwap } from './CopyIconSwap'
 import * as ui from './DocsHeader.recipes'
 import {
+  docsHeaderAccountEmail,
   docsHeaderActions,
   docsHeaderAgentMenu,
   docsHeaderAgentPanel,
@@ -24,6 +26,7 @@ import {
   docsHeaderBrand,
   docsHeaderDestinations,
   docsHeaderIconButton,
+  docsHeaderLoginPrimary,
   docsHeaderLogo,
   docsHeaderMenuButton,
   docsHeaderMobileActions,
@@ -57,6 +60,30 @@ import { SmoothCorners } from './SmoothCorners'
 const DOCS_BASE_PATH = '/docs'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
+
+/** Tempo Console. This host forwards to developers.tempo.xyz/console once the console moves there. */
+const CONSOLE_URL = 'https://console.tempo.xyz'
+/** Console session lookup, proxied by this host; its cookie is scoped to `/console` so docs pages never see it. */
+const CONSOLE_ME_PATH = '/console/api/v1/me'
+
+/** Email of the signed-in console user, or undefined while signed out or off the console's host. */
+function useConsoleEmail() {
+  const [email, setEmail] = useState<string | undefined>()
+  useEffect(() => {
+    // The tempo.xyz/developers mount is a different origin from the console, so it never has a session.
+    if (window.location.hostname === 'tempo.xyz') return
+    const controller = new AbortController()
+    fetch(CONSOLE_ME_PATH, { credentials: 'same-origin', signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : undefined))
+      .then((body: unknown) => {
+        if (body && typeof body === 'object' && 'email' in body && typeof body.email === 'string')
+          setEmail(body.email)
+      })
+      .catch(() => {})
+    return () => controller.abort()
+  }, [])
+  return email
+}
 
 function isExternal(href: string) {
   return !href.startsWith('/') && !href.startsWith('#')
@@ -709,6 +736,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [agentsOpen, setAgentsOpen] = useState(false)
+  const email = useConsoleEmail()
   // Keep the Agent setup panel rendered through its exit fade (G5).
   const [agentsRendered, setAgentsRendered] = useState(false)
   useEffect(() => {
@@ -891,6 +919,25 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
               </div>
             ) : null}
           </div>
+          {/* Absolute: the docs are also mounted at tempo.xyz/developers, where relative links miss the console. */}
+          <a
+            href={CONSOLE_URL}
+            className={
+              email
+                ? `docs-header-login ${docsHeaderAgentTrigger().className}`
+                : `docs-header-login ${docsHeaderAgentTrigger().className} ${docsHeaderLoginPrimary().className}`
+            }
+            {...(email ? { 'aria-label': `Open Tempo Console as ${email}`, title: email } : {})}
+          >
+            {email ? (
+              <>
+                <SquareTerminalIcon aria-hidden="true" width="16" height="16" />
+                <span className={docsHeaderAccountEmail().className}>{email}</span>
+              </>
+            ) : (
+              'Log in'
+            )}
+          </a>
           <button
             type="button"
             onClick={openSearch}
