@@ -79,7 +79,7 @@ import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet({
-    feePayer: 'https://api.tempo.xyz/rpc/sponsor?key=tempo_sandbox:sk:...', // [!code focus]
+    feePayer: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
   })],
   chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
@@ -103,13 +103,15 @@ export const config = createConfig({
   transports: {
     [tempoModerato.id]: withRelay( // [!code focus]
       http(), // [!code focus]
-      http('https://api.tempo.xyz/rpc/sponsor?key=tempo_sandbox:sk:...'), // [!code focus]
+      http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
     ), // [!code focus]
   },
 })
 ```
 
 :::
+
+The Wagmi tabs run in the browser, so they use the keyless [public testnet fee payer](#public-testnet-fee-payer). Never put an API key in browser code. For keyed or mainnet sponsorship, point them at your own backend running the [relay and fee payer handler](/docs/server/relay-handler).
 
 `withRelay` sends every `eth_fillTransaction` request to the relay, including self-paid ones. `withFeePayer` is deprecated.
 
