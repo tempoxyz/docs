@@ -103,7 +103,7 @@ import {
   Select,
 } from './RoutesControls'
 
-const consoleApiKeysUrl = 'https://console.tempo.xyz/?to=/:org/api-keys'
+const consoleApiKeysUrl = 'https://tempo.xyz/console/?to=/:org/api-keys'
 const explorers: Record<string, (hash: string) => string> = {
   'eip155:4217': (hash) => `https://explore.tempo.xyz/tx/${hash}`,
   'eip155:42431': (hash) => `https://explore.testnet.tempo.xyz/tx/${hash}`,

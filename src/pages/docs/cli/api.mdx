@@ -29,7 +29,7 @@ tempo api login
 tempo api whoami
 ```
 
-`login` prints a code and a `console.tempo.xyz` link, and opens the browser when it can. Check that the code matches, then click **Authorize CLI**. The request expires after 10 minutes.
+`login` prints a code and a `tempo.xyz/console` link, and opens the browser when it can. Check that the code matches, then click **Authorize CLI**. The request expires after 10 minutes.
 
 - On a remote host, run `tempo api login --no-browser` and open the link on another device.
 - The session lasts 30 days and acts as you in Tempo Console. Run `tempo api logout` to revoke it.

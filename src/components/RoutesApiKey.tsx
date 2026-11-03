@@ -94,7 +94,7 @@ export function ApiKeyPill({
           <p {...note()}>
             Add your API key from the{' '}
             <a
-              href="https://console.tempo.xyz/?to=/:org/api-keys"
+              href="https://tempo.xyz/console/?to=/:org/api-keys"
               target="_blank"
               rel="noreferrer"
               {...noteLink()}
