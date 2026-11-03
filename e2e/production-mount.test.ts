@@ -99,7 +99,7 @@ test('production mobile menus keep the docs mount and current sidebar selection'
   await trigger.click()
   await expect(drawer.locator('a[aria-current]')).toHaveAttribute(
     'href',
-    '/developers/get-started/quickstart',
+    '/docs/get-started/quickstart',
   )
   await page.keyboard.press('Escape')
   await expect(drawer).toBeHidden()

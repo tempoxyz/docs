@@ -6,12 +6,7 @@ import { unified } from 'unified'
 import { describe, expect, test } from 'vitest'
 
 const docsRoot = path.resolve('src/pages/docs')
-const docsFiles = () => [
-  ...markdownFiles(docsRoot),
-  ...markdownFiles(path.resolve('src/pages/get-started')),
-  path.resolve('src/pages/index.mdx'),
-  path.resolve('src/pages/get-started.mdx'),
-]
+const docsFiles = () => markdownFiles(docsRoot)
 const markdownParser = unified().use(remarkParse).use(remarkMdx)
 
 const migratedOpenApiTitleFiles = [

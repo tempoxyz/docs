@@ -21,8 +21,8 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
   const isApiArticle = pathname === '/docs/api' || pathname.startsWith('/docs/api/')
   const isDocsArticle =
     (pathname.startsWith('/docs/') ||
-      pathname === '/get-started' ||
-      pathname.startsWith('/get-started/')) &&
+      pathname === '/docs/get-started' ||
+      pathname.startsWith('/docs/get-started/')) &&
     openApi === isApiArticle
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [state, setState] = useState<CopyButtonState>('idle')

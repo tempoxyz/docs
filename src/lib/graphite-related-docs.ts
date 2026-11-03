@@ -1,7 +1,8 @@
 export const GRAPHITE_RELATED_DOCS_ENDPOINT =
   'https://ilapi.graphite.io/tempoxyz/docs/related-links'
 export const PUBLIC_DEVELOPERS_PREFIX = '/developers'
-export const PUBLIC_DOCS_PREFIX = `${PUBLIC_DEVELOPERS_PREFIX}/docs`
+/** Public path of the docs pages, served at tempo.xyz/docs. */
+export const PUBLIC_DOCS_PREFIX = '/docs'
 export const TEMPO_ORIGIN = 'https://tempo.xyz'
 const MAX_LINKS = 32
 const MAX_TITLE_CHARS = 240
@@ -31,7 +32,7 @@ export function normalizeDocsRoutePath(pathname: string): string {
 export function canonicalDocsUrl(routePath: string): string | undefined {
   const normalized = normalizeDocsRoutePath(routePath)
   if (normalized !== '/docs' && !normalized.startsWith('/docs/')) return
-  return `${TEMPO_ORIGIN}${PUBLIC_DEVELOPERS_PREFIX}${normalized}`
+  return `${TEMPO_ORIGIN}${normalized}`
 }
 
 export function relatedDocsForRoute(
@@ -50,7 +51,8 @@ export function parseGraphiteRelatedDocs(
   const source = parseTempoUrl(sourceCanonicalUrl)
   if (!source) return []
 
-  const sourcePath = normalizeComparablePath(source.pathname)
+  // Links indexed before the move to tempo.xyz/docs still carry the /developers mount.
+  const sourcePath = normalizeDocsRoutePath(source.pathname)
   const seen = new Set<string>()
   const links: RelatedDocsLink[] = []
 
@@ -60,18 +62,19 @@ export function parseGraphiteRelatedDocs(
 
     const title = boundedText(candidate.title, MAX_TITLE_CHARS)
     const target = typeof candidate.url === 'string' ? parseTempoUrl(candidate.url) : undefined
+    const targetPath = target ? normalizeDocsRoutePath(target.pathname) : undefined
     if (
       !title ||
       !target ||
-      (target.pathname !== PUBLIC_DOCS_PREFIX &&
-        !target.pathname.startsWith(`${PUBLIC_DOCS_PREFIX}/`))
+      !targetPath ||
+      (targetPath !== PUBLIC_DOCS_PREFIX && !targetPath.startsWith(`${PUBLIC_DOCS_PREFIX}/`))
     ) {
       continue
     }
-    if (normalizeComparablePath(target.pathname) === sourcePath) continue
+    if (targetPath === sourcePath) continue
 
-    const href = `${target.pathname.slice(PUBLIC_DEVELOPERS_PREFIX.length)}${target.search}${target.hash}`
-    const targetKey = `${normalizeComparablePath(target.pathname)}${target.search}`
+    const href = `${targetPath}${target.search}${target.hash}`
+    const targetKey = `${targetPath}${target.search}`
     if (seen.has(targetKey)) continue
     seen.add(targetKey)
 
@@ -96,11 +99,6 @@ function parseTempoUrl(value: string): URL | undefined {
   } catch {
     return
   }
-}
-
-function normalizeComparablePath(pathname: string): string {
-  const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
-  return normalized || '/'
 }
 
 function boundedText(value: unknown, maxChars: number): string | undefined {

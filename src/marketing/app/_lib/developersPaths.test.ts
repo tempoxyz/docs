@@ -36,9 +36,9 @@ describe('developersApiPath', () => {
 
   it.each([
     ['https://developers.tempo.xyz/docs/routes/test', '/api/routes-quote'],
-    ['https://tempo.xyz/developers/docs/routes/test', '/developers/api/routes-quote'],
+    ['https://tempo.xyz/docs/routes/test', '/developers/api/routes-quote'],
     ['https://tempo.xyz/developers', '/developers/api/routes-quote'],
-    ['https://tempo.xyz/developersx/docs', '/api/routes-quote'],
+    ['https://tempo.xyz/developersx/docs', '/developers/api/routes-quote'],
     ['http://localhost:5173/docs/routes/test', '/api/routes-quote'],
   ])('follows the mount the page was served from: %s', async (page, expected) => {
     vi.stubEnv('VERCEL_ENV', 'production')

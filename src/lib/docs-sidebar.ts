@@ -33,7 +33,8 @@ export function resolveSidebarItems(sidebar: unknown, pathname: string): Sidebar
       if (bestKey === null || key.length > bestKey.length) bestKey = key
     }
   }
-  const entry = entries[bestKey ?? '/get-started'] ?? entries['/docs'] ?? Object.values(entries)[0]
+  const entry =
+    entries[bestKey ?? '/docs/get-started'] ?? entries['/docs'] ?? Object.values(entries)[0]
   if (!entry) return []
   return Array.isArray(entry) ? entry : (entry.items ?? [])
 }

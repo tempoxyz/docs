@@ -12,7 +12,7 @@ import { canonicalizeGeneratedDeveloperLinks } from './canonical-developer-links
 
 const input = `# Tempo Docs
 
-- [Start](/get-started): Choose a task.
+- [Start](/docs/get-started): Choose a task.
 - [Deposit](/docs/earn/integrate): Deposit into a vault.
 - [Legacy swap](/docs/guide/private-zones/swap-across-zones): Sandbox swap.
 - [Earn](/docs/earn): Earn introduction.
@@ -83,21 +83,21 @@ describe('AI documentation navigation', () => {
   it('uses canonical Markdown links under the production mount', () => {
     const output = canonicalizeGeneratedDeveloperLinks(
       renderAiIndex(input),
-      'https://tempo.xyz/developers/docs',
+      'https://tempo.xyz/docs',
     )
-    expect(output).toContain('(https://tempo.xyz/developers/docs/earn/integrate.md)')
-    expect(output).toContain('(https://tempo.xyz/developers/get-started.md)')
+    expect(output).toContain('(https://tempo.xyz/docs/earn/integrate.md)')
+    expect(output).toContain('(https://tempo.xyz/docs/get-started.md)')
     expect(output).toContain('(https://tempo.xyz/developers/llms.txt)')
     expect(output).toContain('(https://tempo.xyz/developers/SKILL.md)')
     expect(output).toContain('(https://tempo.xyz/developers/index.md)')
-    expect(markdownRoute('https://tempo.xyz/developers/docs/sdk/index.md')).toBe('/docs/sdk')
+    expect(markdownRoute('https://tempo.xyz/docs/sdk/index.md')).toBe('/docs/sdk')
     expect(markdownRoute('/developers/docs/sdk/')).toBe('/docs/sdk')
   })
 
   it('keeps the published skill aligned with every visible navigation home', () => {
     const skill = readFileSync('SKILL.md', 'utf8')
     for (const { label, href } of aiDocsSections)
-      expect(skill).toContain(`[${label}](https://tempo.xyz/developers${href}.md)`)
+      expect(skill).toContain(`[${label}](https://tempo.xyz${href}.md)`)
     expect(skill).toContain('Earn is in beta')
     expect(skill).toContain('Routes is in beta')
     expect(skill).toContain('Zones is in limited preview')

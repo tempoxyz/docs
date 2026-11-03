@@ -15,7 +15,7 @@ const skill = read('SKILL.md')
 
 for (const { href, label } of aiDocsSections)
   assert(
-    skill.includes(`[${label}](https://tempo.xyz/developers${href}.md)`),
+    skill.includes(`[${label}](https://tempo.xyz${href}.md)`),
     `SKILL.md: missing current ${label} landing`,
   )
 
