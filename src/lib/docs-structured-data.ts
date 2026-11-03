@@ -217,7 +217,7 @@ export function docsStructuredDataHead(
               name: 'Tempo API',
               alternateName: ['Tempo Fee Payer API', 'Tempo Routes API'],
               ...(description ? { description } : {}),
-              url: 'https://api.tempo.xyz/v1',
+              url: 'https://api.tempo.xyz',
               documentation: url,
               provider: { '@id': organizationId },
               keywords: [
