@@ -209,6 +209,26 @@ export function docsStructuredDataHead(
         publisher: { '@id': organizationId },
         breadcrumb: { '@id': breadcrumbId },
       },
+      ...(pagePath === '/docs/api'
+        ? [
+            {
+              '@type': 'WebAPI',
+              '@id': 'https://tempo.xyz/developers/docs/api#webapi',
+              name: 'Tempo API',
+              alternateName: ['Tempo Fee Payer API', 'Tempo Routes API'],
+              ...(description ? { description } : {}),
+              url: 'https://api.tempo.xyz/v1',
+              documentation: url,
+              provider: { '@id': organizationId },
+              keywords: [
+                'gas sponsorship',
+                'fee payer',
+                'stablecoin routes',
+                'stablecoin payments API',
+              ],
+            },
+          ]
+        : []),
       {
         '@type': 'BreadcrumbList',
         '@id': breadcrumbId,

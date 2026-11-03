@@ -79,9 +79,9 @@ const cases: {
   },
   {
     path: '/docs/api',
-    title: 'Tempo API reference | Tempo Docs',
+    title: 'Tempo API: Sponsor Gas Fees and Route Stablecoins | Tempo Docs',
     ogTitle: 'Tempo API',
-    descriptionIncludes: 'network fees and move stablecoins onto Tempo with one API key',
+    descriptionIncludes: "pay your customers' gas with a hosted fee payer",
     ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_api_linework-000_v02.png',
   },
   {
