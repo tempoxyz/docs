@@ -23,12 +23,12 @@
     },
     {
       "source": "/developers/console",
-      "destination": "https://developers.tempo.xyz/console",
+      "destination": "https://tempo.xyz/console",
       "permanent": false
     },
     {
       "source": "/developers/console/:path(.*)",
-      "destination": "https://developers.tempo.xyz/console/:path",
+      "destination": "https://tempo.xyz/console/:path",
       "permanent": false
     },
     {
