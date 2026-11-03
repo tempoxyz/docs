@@ -81,7 +81,7 @@ import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [tempoWallet({
-    feePayer: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
+    feePayer: 'https://api.tempo.xyz/rpc/sponsor?key=tempo_sandbox:sk:...', // [!code focus]
   })],
   chains: [tempoModerato],
   multiInjectedProviderDiscovery: false,
@@ -105,7 +105,7 @@ export const config = createConfig({
   transports: {
     [tempoModerato.id]: withRelay( // [!code focus]
       http(), // [!code focus]
-      http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
+      http('https://api.tempo.xyz/rpc/sponsor?key=tempo_sandbox:sk:...'), // [!code focus]
     ), // [!code focus]
   },
 })
