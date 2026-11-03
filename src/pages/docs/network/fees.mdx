@@ -10,7 +10,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_network-fees_title-f5_v02.png
 Pay transaction fees with a supported USD-denominated TIP-20 token. Tempo has no native gas token. The sender can pay, or a separate fee payer can sponsor the transaction.
 
 :::info[Interactive walkthrough]
-Try [Sponsor fees](/docs/guide/payments/sponsor-user-fees#fee-sponsorship-demo) in Accounts: send a test payment with a fee payer, then follow the wallet implementation.
+Try [Sponsor fees](/docs/api/fee-payer#fee-sponsorship-demo) in Accounts: send a test payment with a fee payer, then follow the wallet implementation.
 :::
 
 Use the [Network example setup](/docs/network/examples) for these Moderato examples. The sender needs test AlphaUSD and a recipient address.
@@ -77,7 +77,7 @@ cast erc20 transfer "$TOKEN" "$TEMPO_RECIPIENT" 1000000 \
 
 The public testnet endpoint needs no API key. For authenticated sandbox and production sponsorship, use the [Fee Payer API](/docs/api/fee-payer). The [Python SDK](/docs/sdk/python#fee-sponsorship-with-python) supports co-signing with a separate fee payer account. A raw RPC request must already contain the required signatures.
 
-Use the [sponsorship demo](/docs/guide/payments/sponsor-user-fees) to try the flow, or the [relay handler](/docs/server/relay-handler) to enforce your own sponsorship policy.
+Use the [sponsorship demo](/docs/api/fee-payer) to try the flow, or the [relay handler](/docs/server/relay-handler) to enforce your own sponsorship policy.
 
 ## Estimate costs
 

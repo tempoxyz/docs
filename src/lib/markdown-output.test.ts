@@ -163,6 +163,20 @@ Read the account's transfer history.
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 
+  test('renders the children of a Providers wrapper', async () => {
+    const output = await render(`
+<Providers>
+<Demo.Container name="Sponsor User Fees">
+  <Connect stepNumber={1} />
+</Demo.Container>
+</Providers>
+`)
+
+    expect(output).toContain('**Interactive demo: Sponsor User Fees**')
+    expect(output).toContain('1. Connect')
+    expect(output).not.toMatch(/<\/?[A-Z]/)
+  })
+
   test('describes the admin key demo and preserves the following instructions', async () => {
     const output = await render(`
 <AdminKeyDemo />

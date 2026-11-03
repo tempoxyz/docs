@@ -91,7 +91,7 @@
     "typescript": "^6.0.3",
     "vite": "~8.1.6",
     "vite-plugin-mkcert": "^2.1.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.12"
   },
   "devEngines": {
     "runtime": {

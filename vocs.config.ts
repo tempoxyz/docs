@@ -388,7 +388,6 @@ export default defineConfig({
           'JSON-RPC': [{ text: 'Guide', link: '/docs/api/json-rpc' }],
           Indexer: [{ text: 'Guide', link: '/docs/api/indexer-api' }],
           'API keys': [{ text: 'Guide', link: '/docs/api/console/api-keys' }],
-          'Fee payer': [{ text: 'Guide', link: '/docs/api/fee-payer' }],
           Projects: [{ text: 'Guide', link: '/docs/api/console/projects-and-environments' }],
           Team: [{ text: 'Guide', link: '/docs/api/console/team' }],
           'Billing and usage': [{ text: 'Guide', link: '/docs/api/console/usage-and-billing' }],
@@ -397,16 +396,17 @@ export default defineConfig({
           Accounts: [
             { text: 'Transactions and transfers', link: '/docs/api/transactions-and-transfers' },
           ],
-          'Routes API': [{ text: 'API setup', link: '/docs/routes/api-setup' }],
           Console: [{ text: 'About Tempo Console', link: '/docs/api/console' }],
         },
         flatten: apiFlattenedGroups,
         intro: [
           {
             text: 'API reference',
-            collapsed: true,
+            collapsed: false,
             items: [
               { text: 'Overview', link: '/docs/api' },
+              { text: 'Sponsor fees', link: '/docs/api/fee-payer' },
+              { text: 'Set up Routes', link: '/docs/routes/api-setup' },
               { text: 'Authentication', link: '/docs/api/authentication' },
               {
                 text: 'Conventions',
@@ -824,7 +824,7 @@ export default defineConfig({
         items: [
           { text: 'Introduction', link: '/docs/routes' },
           { text: 'Try a route', link: '/docs/routes/test' },
-          { text: 'Set up API access', link: '/docs/routes/api-setup' },
+          { text: 'Set up Routes', link: '/docs/routes/api-setup' },
           { text: 'Supported routes', link: '/docs/routes/networks' },
           { text: 'Quotes and fees', link: '/docs/routes/quotes' },
           { text: 'Accept deposits', link: '/docs/routes/deposits' },
@@ -1023,12 +1023,11 @@ export default defineConfig({
               },
               {
                 text: 'T13',
-                badge: { text: 'Testnet', variant: 'info' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t13',
               },
               {
                 text: 'T12',
-                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
@@ -1167,7 +1166,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Payment integration', link: '/docs/guide/payments' },
-              { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
+              { text: 'Sponsor fees', link: '/docs/api/fee-payer' },
               {
                 text: 'Choose a fee token',
                 link: '/docs/guide/payments/pay-fees-in-any-stablecoin',
@@ -1737,6 +1736,11 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/guide/payments/sponsor-user-fees',
+      destination: '/docs/api/fee-payer',
+      status: 301,
+    },
+    {
       source: '/docs/api/typed-client',
       destination: '/docs/sdk/typescript/api-client',
       status: 301,
@@ -2058,7 +2062,7 @@ export default defineConfig({
     },
     {
       source: '/guide/use-accounts/fee-sponsorship',
-      destination: '/docs/guide/payments/sponsor-user-fees',
+      destination: '/docs/api/fee-payer',
       status: 301,
     },
     {

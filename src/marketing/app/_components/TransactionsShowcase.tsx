@@ -67,7 +67,7 @@ const rows: Row[] = [
   {
     title: 'Fee sponsorship',
     desc: 'Apps and agents can pay on behalf of users.',
-    href: '/docs/guide/payments/sponsor-user-fees',
+    href: '/docs/api/fee-payer',
     spec: {
       kind: 'sponsor',
       user: { accent: 0, label: 'USER', detail: 'SENDS TX' },

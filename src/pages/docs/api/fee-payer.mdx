@@ -1,78 +1,64 @@
 ---
-title: "Tempo Fee Payer API: Sponsor Transaction Fees"
-description: Sponsor and broadcast Tempo transactions through the hosted Fee Payer API with authenticated production and sandbox endpoints or a public testnet service.
+title: "Sponsor your users' fees"
+description: Pay network fees for your users with Tempo's hosted fee payer. Try the demo, create an API key, and send a sponsored transaction in three steps.
+interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_api-fee-payer_title-f5_v02.png
 ---
 
 import { Cards, Card } from 'vocs'
+import Providers from '../../../components/Providers'
+import * as Demo from '../../../components/guides/Demo.tsx'
+import { AddFunds } from '../../../components/guides/steps/payments/AddFunds.tsx'
+import { Connect } from '../../../components/guides/steps/auth/Connect.tsx'
+import { SendRelayerSponsoredPayment } from '../../../components/guides/steps/payments/SponsorUserFees.tsx'
 
 <span id="fee-payer-api" />
+<span id="sponsor-user-fees-with-feepayer" />
 
-# Tempo Fee Payer API
+# Sponsor your users' fees
 
-Use the Fee Payer API to cover transaction fees for your users. To run the relay on your own backend with your own sponsorship policy, use the [relay and fee payer handler](/docs/server/relay-handler). For the end-to-end flow, see [Sponsor fees](/docs/guide/payments/sponsor-user-fees).
+Pay network fees for your users so they only hold the stablecoins they send.
 
-<span id="how-hosted-fee-sponsorship-works" />
+## Fee sponsorship demo
 
-## How the Fee Payer API works
+Send a testnet payment whose fee Tempo's public fee payer covers.
 
-A fee payer pays the fee for a transaction sent by another account. Use one to cover transaction costs for your users.
-
-The sender authorizes the transaction, and the fee payer separately authorizes the fee. When you prepare a transaction, request sponsorship from a fee payer endpoint. The service applies its policy, fills the required fields, and reports whether the request was sponsored.
-
-Tempo supports this flow natively, so you do not need a paymaster contract, bundler, or EntryPoint contract.
-
-<span id="hosted-fee-payer-endpoints" />
-
-## Hosted fee payer endpoint
-
-The Tempo API provides a hosted JSON-RPC relay that fills, sponsors, and broadcasts Tempo Transactions. Authenticate with a [Tempo API key](/docs/api/authentication), then use the Fee Payer API as your sponsorship RPC URL:
-
-```text
-https://api.tempo.xyz/rpc/sponsor
-```
-
-<span id="configure-clients-for-hosted-fee-sponsorship" />
+{/* API pages render through the OpenAPI layout, which skips the interactive providers. */}
+<Providers>
+<Demo.Container name="Sponsor User Fees">
+  <Connect stepNumber={1} />
+  <AddFunds stepNumber={2} />
+  <SendRelayerSponsoredPayment stepNumber={3} last />
+</Demo.Container>
+</Providers>
 
 <span id="get-started" />
+<span id="configure-clients-for-hosted-fee-sponsorship" />
+<span id="fee-sponsorship-implementation-steps" />
 
 ## Set up fee sponsorship
 
 :::::steps
 
-### Sign into the Tempo Console
-
-Open the [Tempo Console](https://tempo.xyz/console/?to=/:org/projects) and select **Sign in with Tempo**.
-
-:::info
-Tempo Console signups are currently limited. [Contact us](https://tempo.xyz/contact/) to request access.
-:::
-
 <span id="set-up-organization" />
-
-### Create an organization
-
-Create an organization and project.
-
-### Set up billing
-
-For this testnet example, switch to [**Sandbox mode**](https://tempo.xyz/console/?to=/:org/projects%3Fenv%3Dsandbox) (located in the top-left organization picker), then open [**Billing**](https://tempo.xyz/console/?to=/:org/billing%3Fenv%3Dsandbox) and add a payment method.
-
 <span id="get-an-api-key" />
 
 ### Create an API key
 
-Open [**API Keys**](https://tempo.xyz/console/?to=/:org/api-keys%3Fenv%3Dsandbox), select [**New key**](https://tempo.xyz/console/?to=/:org/api-keys/new%3Fenv%3Dsandbox), choose your project, and create the key. Copy it when prompted; it is shown only once.
+Sign in to [Tempo Console](https://tempo.xyz/console/?to=/:org/projects), create an organization and project, add a payment method in [**Billing**](https://tempo.xyz/console/?to=/:org/billing), and create a key in [**API Keys**](https://tempo.xyz/console/?to=/:org/api-keys/new). Console shows the key once.
 
-### Sponsor transaction fees
+The key's environment picks the network. A production key (`tempo:sk:...`) sponsors mainnet transactions. A sandbox key (`tempo_sandbox:sk:...`) sponsors testnet transactions, and the examples on this page use one. Switch environments in the organization picker. To try sponsorship without a key, use the [public testnet fee payer](#public-testnet-fee-payer).
 
-Configure Viem's [`withRelay`](https://viem.sh/tempo/transports/withRelay) transport with a default RPC transport and the Tempo API sponsorship endpoint. Add your Tempo API key through the endpoint's `key` search parameter, then set `feePayer: true` when sending a transaction to request sponsorship.
+<span id="hosted-fee-payer-endpoints" />
+<span id="hosted-fee-payer-endpoint" />
 
-:::info
-The transaction’s chain ID selects the network; `testnet: true` sets Moderato in this example. For mainnet, remove that flag, use a production key (`tempo:sk:...`), and activate production billing. Sandbox keys cannot sponsor mainnet transactions.
-:::
+### Point your client at the fee payer
 
-```ts twoslash [example.ts]
+The hosted fee payer is a JSON-RPC relay at `https://api.tempo.xyz/rpc/sponsor`. It fills, sponsors, and broadcasts Tempo Transactions. Pass your key in the `key` search parameter and wrap your transport with Viem's [`withRelay`](https://viem.sh/tempo/transports/withRelay).
+
+:::code-group
+
+```ts twoslash [Viem]
 import { Account, createClient, http, withRelay } from 'viem/tempo'
 
 const client = createClient({
@@ -83,7 +69,61 @@ const client = createClient({
     http('https://api.tempo.xyz/rpc/sponsor?key=tempo_sandbox:sk:...'), // relay transport // [!code focus]
   ), // [!code focus]
 })
+```
 
+```ts twoslash [Wagmi (Tempo Wallet)]
+// @noErrors
+import { tempoModerato } from 'viem/chains'
+import { createConfig, http } from 'wagmi'
+import { tempoWallet } from 'wagmi/connectors'
+
+export const config = createConfig({
+  connectors: [tempoWallet({
+    feePayer: 'https://sponsor.moderato.tempo.xyz', // [!code focus]
+  })],
+  chains: [tempoModerato],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [tempoModerato.id]: http(),
+  },
+})
+```
+
+```ts twoslash [Wagmi (WebAuthn)]
+// @noErrors
+import { tempoModerato } from 'viem/chains'
+import { withRelay } from 'viem/tempo'
+import { createConfig, http } from 'wagmi'
+import { webAuthn } from 'wagmi/tempo'
+
+export const config = createConfig({
+  connectors: [webAuthn({ authUrl: '/auth' })],
+  chains: [tempoModerato],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [tempoModerato.id]: withRelay( // [!code focus]
+      http(), // [!code focus]
+      http('https://sponsor.moderato.tempo.xyz'), // [!code focus]
+    ), // [!code focus]
+  },
+})
+```
+
+:::
+
+The Wagmi tabs run in the browser, so they use the keyless [public testnet fee payer](#public-testnet-fee-payer). Never put an API key in browser code. For keyed or mainnet sponsorship, point them at your own backend running the [relay and fee payer handler](/docs/server/relay-handler).
+
+`withRelay` sends every `eth_fillTransaction` request to the relay, including self-paid ones. `withFeePayer` is deprecated.
+
+<span id="sponsor-transaction-fees" />
+
+### Send a sponsored transaction
+
+Set `feePayer: true` on each transaction you want sponsored.
+
+:::code-group
+
+```ts [Viem]
 const receipt = await client.sendTransactionSync({
   data: '0xdeadbeef',
   feePayer: true, // [!code focus]
@@ -91,47 +131,98 @@ const receipt = await client.sendTransactionSync({
 })
 ```
 
+```tsx twoslash [React (Wagmi)]
+import { Hooks } from 'wagmi/tempo'
+import { getAddress, parseUnits } from 'viem'
+
+const alphaUsd = '0x20c0000000000000000000000000000000000001'
+
+// @noErrors
+function SendSponsoredPayment() {
+  const sendPayment = Hooks.token.useTransferSync() // [!code hl]
+
+  return (
+    <form onSubmit={
+      (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.target as HTMLFormElement)
+
+        const recipient = getAddress(String(formData.get('recipient')))
+
+        sendPayment.mutate({ // [!code hl]
+          amount: parseUnits('100', 6), // [!code hl]
+          feePayer: true, // [!code focus]
+          to: recipient, // [!code hl]
+          token: alphaUsd, // [!code hl]
+        }) // [!code hl]
+      }
+    }>
+      <div>
+        <label htmlFor="recipient"> Recipient address </label>
+        <input type="text" name="recipient" placeholder="0x..." required />
+      </div>
+      <button type="submit" disabled={sendPayment.isPending}>
+        Send Payment
+      </button>
+    </form>
+  )
+}
+```
+
+:::
+
+For mainnet, remove `testnet: true`, use a production key (`tempo:sk:...`), and activate production billing. Sandbox keys can't sponsor mainnet transactions.
+
 :::::
+
+<span id="how-hosted-fee-sponsorship-works" />
+
+## How the Fee Payer API works
+
+The sender signs the transaction, and the fee payer separately signs the fee. The fee payer applies its policy, fills the fee fields, and reports whether it sponsored the request. Tempo supports this natively, so you don't need a paymaster contract, bundler, or EntryPoint contract.
+
+A fee payer signs one specific transaction. Sponsorship doesn't grant authority over the sender's account. The [Tempo Transaction specification](/docs/protocol/transactions/spec-tempo-transaction#fee-payer-signature-details) lists the fields each signer commits to.
 
 ## Public testnet fee payer
 
-For demos and testnet development without an API key, use Tempo's public fee payer endpoint:
-
-```text
-https://sponsor.moderato.tempo.xyz
-```
-
-Use the Fee Payer API above for authenticated sandbox and production integrations.
+For demos and testnet development without an API key, use `https://sponsor.moderato.tempo.xyz`. Use the hosted fee payer with a sandbox key for authenticated testing.
 
 <span id="use-a-fee-payer-in-production" />
+<span id="fee-sponsorship-best-practices" />
+
+## Fee sponsorship limits
+
+Decide who you sponsor, which contracts and methods you cover, per-user limits, and your total fee budget. To enforce your own policy before signing, run the fee payer yourself with the [relay and fee payer handler](/docs/server/relay-handler).
+
+Sponsorship covers the network fee only. It doesn't fund the transfer amount, an FX spread, or a receiving provider's charges. Record the sponsored fee against each payment.
 
 <span id="learn-more" />
 
-## Fee sponsorship guides
+## Related
 
 <Cards>
   <Card
-    title="Viem Fee Sponsorship"
-    description="Use a local account or fee payer endpoint to sponsor transaction fees with Viem."
-    to="https://viem.sh/tempo/guides/sponsor-fees"
-    icon="lucide:square-function"
+    title="Relay and fee payer handler"
+    description="Use for running your own fee payer with a custom sponsorship policy."
+    to="/docs/server/relay-handler"
+    icon="lucide:server"
   />
   <Card
-    title="Tempo API Authentication"
-    description="Authenticate fee payer requests with a production or sandbox API key."
+    title="Choose a fee token"
+    description="Covers paying fees in any supported stablecoin."
+    to="/docs/guide/payments/pay-fees-in-any-stablecoin"
+    icon="lucide:coins"
+  />
+  <Card
+    title="Tempo API authentication"
+    description="Covers production and sandbox API keys."
     to="/docs/api/authentication"
     icon="lucide:key-round"
   />
   <Card
-    title="Sponsor User Fees"
-    description="Learn how Tempo fee sponsorship works across supported SDKs."
-    to="/docs/guide/payments/sponsor-user-fees"
-    icon="lucide:hand-coins"
-  />
-  <Card
-    title="Tempo Transaction Spec"
-    description="Read the fee payer signature details in the Tempo Transaction specification."
-    to="/docs/protocol/transactions/spec-tempo-transaction#fee-payer-signature-details"
-    icon="lucide:file-code"
+    title="Fee specification"
+    description="Covers how fees work on Tempo."
+    to="/docs/protocol/fees/spec-fee"
+    icon="lucide:book"
   />
 </Cards>
