@@ -61,17 +61,17 @@ const DOCS_BASE_PATH = '/docs'
 const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 
-/** Tempo Console. This host forwards to developers.tempo.xyz/console once the console moves there. */
-const CONSOLE_URL = 'https://console.tempo.xyz'
-/** Console session lookup, proxied by this host; its cookie is scoped to `/console` so docs pages never see it. */
+/** Tempo Console, served by tempo.xyz. */
+const CONSOLE_URL = 'https://tempo.xyz/console'
+/** Console session lookup on tempo.xyz, where the console's cookie is scoped to `/console`. */
 const CONSOLE_ME_PATH = '/console/api/v1/me'
 
 /** Email of the signed-in console user, or undefined while signed out or off the console's host. */
 function useConsoleEmail() {
   const [email, setEmail] = useState<string | undefined>()
   useEffect(() => {
-    // The tempo.xyz/developers mount is a different origin from the console, so it never has a session.
-    if (window.location.hostname === 'tempo.xyz') return
+    // Only tempo.xyz shares the console's origin; developers.tempo.xyz never has its session.
+    if (window.location.hostname !== 'tempo.xyz') return
     const controller = new AbortController()
     fetch(CONSOLE_ME_PATH, { credentials: 'same-origin', signal: controller.signal })
       .then((response) => (response.ok ? response.json() : undefined))
@@ -919,7 +919,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
               </div>
             ) : null}
           </div>
-          {/* Absolute: the docs are also mounted at tempo.xyz/developers, where relative links miss the console. */}
+          {/* Absolute: developers.tempo.xyz serves these docs too, and the console lives only on tempo.xyz. */}
           <a
             href={CONSOLE_URL}
             className={
