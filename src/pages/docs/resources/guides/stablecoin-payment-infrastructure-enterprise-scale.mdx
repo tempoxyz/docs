@@ -53,7 +53,7 @@ Tempo network fees are paid in eligible USD-denominated TIP-20 tokens when the f
 
 A simple transfer, atomic batch, and contract call can consume different resources. Model the operations your application actually runs. Include custody, funding, conversion, provider charges, local payout, and operational work when evaluating unit economics.
 
-Use [fee-token configuration](/docs/guide/payments/pay-fees-in-any-stablecoin) and [fee sponsorship](/docs/guide/payments/sponsor-user-fees) to define who pays. Monitor the payer's usable balances and handle unavailable fee tokens or depleted sponsorship before they interrupt a run.
+Use [fee-token configuration](/docs/guide/payments/pay-fees-in-any-stablecoin) and [fee sponsorship](/docs/api/fee-payer) to define who pays. Monitor the payer's usable balances and handle unavailable fee tokens or depleted sponsorship before they interrupt a run.
 
 ## Separate policy primitives from business controls
 

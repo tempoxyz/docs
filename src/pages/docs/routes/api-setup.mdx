@@ -1,17 +1,41 @@
 ---
-title: Set up API access
-seoTitle: Routes API Setup | Tempo Docs
-description: Create a Routes API key with the right scopes, configure your backend client, and set idempotency keys for create requests.
+title: Set up Routes
+seoTitle: Set Up the Routes API | Tempo Docs
+description: Create a Routes API key, get your first quote, and create a transfer or deposit address from your backend.
+interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_routes-api-setup_title-f5_v02.png
 ---
 
+import { Cards, Card, OpenApi } from 'vocs'
+
 <span id="routes-api-setup" />
 
-# Set up API access
+# Set up Routes
 
-Configure your backend to call the Routes API. Confirm [beta access](/docs/routes), create a key in [Tempo Console](/docs/api/console), and keep the key out of browser code.
+Bring stablecoins from other networks onto Tempo with a quote and one create call.
 
-## Routes API key scopes
+:::warning
+Routes is in beta. [Contact Tempo](https://tempo.xyz/contact) to discuss access and the routes your application needs.
+:::
+
+<Cards>
+  <Card
+    title="Try a route in your browser"
+    description="Quote, create, fund, and track a live route while the demo logs each Routes API call."
+    to="/docs/routes/test"
+    icon="lucide:play"
+  />
+</Cards>
+
+## Set up the Routes API
+
+:::::steps
+
+<span id="routes-api-key-scopes" />
+
+### Create a Routes API key
+
+Create a key in [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys) with the scopes your flow needs. Keep it on your backend; it authenticates your application and doesn't sign transactions.
 
 | Scope | Allows |
 | --- | --- |
@@ -19,11 +43,11 @@ Configure your backend to call the Routes API. Confirm [beta access](/docs/route
 | `routes:write` | Creating transfers and deposit addresses, and registering source transactions |
 | `data:read` | Reading the [route directory](/docs/routes/networks) with your key, which applies your organization's access policy |
 
-The route directory also accepts requests without a key at the [public rate limit](/docs/api/rate-limits). The Routes API key authenticates your application; it does not sign blockchain transactions.
+<span id="configure-the-client" />
 
-## Configure the client
+### Configure the client
 
-Set `TEMPO_API_KEY` in your environment. TypeScript uses Node.js with built-in `fetch`; Python uses `requests` (`python -m pip install requests`); cURL examples require `curl` and `jq`.
+Set `TEMPO_API_KEY` in your environment. TypeScript uses Node.js with built-in `fetch`. Python uses `requests`. cURL examples require `curl` and `jq`.
 
 ::::code-group
 
@@ -54,12 +78,20 @@ curl --fail-with-body 'https://api.tempo.xyz/v1/routes' \
 
 ::::
 
-Each request builder in the flow guides generates cURL and TypeScript for its endpoint with these headers.
+
+### Get a quote
+
+Quote a transfer from your backend. Pick a pair from [supported routes](/docs/routes/networks). [Quotes and fees](/docs/routes/quotes) explains the amounts and fees in the response.
+
+<OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
 
 <span id="prepare-a-transfer-request" />
 <span id="prepare-a-deposit-address-request" />
+<span id="set-idempotency-keys" />
 
-## Set idempotency keys
+### Create a transfer or a deposit address
+
+Create a [transfer](/docs/routes/transfers) when your user's wallet signs the source calls. Create a [deposit address](/docs/routes/deposits) when the sender pays from any wallet or exchange.
 
 Create requests require an `idempotency-key` header. Assign one key per operation, such as one payment or one customer's deposit address, and store it with that record before sending the request:
 
@@ -82,6 +114,15 @@ ROUTE_REQUEST_KEY="my-payment-001"
 
 ::::
 
-Reuse the key when you retry the same request with unchanged inputs. Matching requests replay the successful response for 24 hours; a request with changed inputs conflicts. Use a new key for a new operation.
 
-Continue with [Supported routes](/docs/routes/networks) to choose a pair, then [Quotes and fees](/docs/routes/quotes).
+Reuse the key when you retry the same request with unchanged inputs. Matching requests replay the successful response for 24 hours. A request with changed inputs conflicts.
+
+:::::
+
+## Related
+
+<Cards>
+  <Card title="Make a transfer" description="Use for sending from a wallet your application controls or connects." to="/docs/routes/transfers" icon="lucide:arrow-right-left" />
+  <Card title="Accept deposits" description="Use for letting senders pay from any wallet or exchange." to="/docs/routes/deposits" icon="lucide:inbox" />
+  <Card title="Supported routes" description="Covers available networks, tokens, and funding methods." to="/docs/routes/networks" icon="lucide:map" />
+</Cards>

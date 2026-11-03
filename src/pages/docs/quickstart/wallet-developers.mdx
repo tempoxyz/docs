@@ -49,7 +49,7 @@ const { receipt } = await client.token.transferSync({
 :::tip
 With Tempo Transactions, you can also:
 - Set the fee token for your users' transactions ([guide](/docs/guide/payments/pay-fees-in-any-stablecoin))
-- Sponsor transaction fees for your users ([guide](/docs/guide/payments/sponsor-user-fees))
+- Sponsor transaction fees for your users ([guide](/docs/api/fee-payer))
 - Send concurrent transactions with independent nonces ([guide](/docs/guide/payments/send-parallel-transactions))
 - Use expiring nonces for cheaper transactions that don't require nonce tracking ([guide](/docs/guide/tempo-transaction#expiring-nonces))
 :::
@@ -208,7 +208,7 @@ Before launching Tempo support, ensure your wallet:
 - [ ] Quotes gas prices in the user's fee token
 - [ ] Provides fee token selection in the UI (dropdown or account setting)
 - [ ] Pulls token/network assets from Tempo's tokenlist
-- [ ] (Recommended) Sponsors fees for your users via [fee sponsorship](/docs/guide/payments/sponsor-user-fees)
+- [ ] (Recommended) Sponsors fees for your users via [fee sponsorship](/docs/api/fee-payer)
 - [ ] (Recommended) Uses [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) for lower-cost transactions that don't require nonce management
 
 ## Learning Resources
@@ -230,7 +230,7 @@ Before launching Tempo support, ensure your wallet:
     description="Sponsor user fees to enable feeless transaction experiences in your application"
     icon="lucide:shield-check"
     title="Sponsor fees"
-    to="/docs/guide/payments/sponsor-user-fees"
+    to="/docs/api/fee-payer"
   />
   <Card
     description="How Tempo Transactions compare to EIP-7702 delegation"

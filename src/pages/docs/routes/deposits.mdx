@@ -21,7 +21,7 @@ For payments already on Tempo, use [Receive payments](/docs/guide/payments/accep
 
 Before you start, have:
 
-- A Tempo API key on your backend, created in [Set up API access](/docs/routes/api-setup). `routes:read` covers quotes and deposit reads; `routes:write` covers creating deposit addresses. Keep the key on the backend; show customers only the returned funding instructions.
+- A Tempo API key on your backend, created in [Set up Routes](/docs/routes/api-setup). `routes:read` covers quotes and deposit reads; `routes:write` covers creating deposit addresses. Keep the key on the backend; show customers only the returned funding instructions.
 - A route with deposit-address support from [Supported routes](/docs/routes/networks).
 - A Tempo recipient, and a refund address on the source network. Routes sends refunds to this address; a refunded deposit's status moves from `refunding` to `refunded`.
 

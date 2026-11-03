@@ -34,7 +34,7 @@ For example, an application can request authorization for up to 50 units of its 
 
 Fixed durations are different from calendar months. If the product bills on a monthly anniversary, define how that schedule maps to the authorized fixed-duration budget rather than calling a fixed number of days “one month.”
 
-A spending limit also covers fees paid by the account, approval increases, and other counted TIP-20 outflows. A charge equal to the whole limit can fail if the same limited balance must cover its network fee. Use a separately funded [fee payer](/docs/guide/payments/sponsor-user-fees) where appropriate, or make the fee allowance explicit. Read [what counts against a spending limit](/docs/accounts/access-keys/spending-limits#what-counts).
+A spending limit also covers fees paid by the account, approval increases, and other counted TIP-20 outflows. A charge equal to the whole limit can fail if the same limited balance must cover its network fee. Use a separately funded [fee payer](/docs/api/fee-payer) where appropriate, or make the fee allowance explicit. Read [what counts against a spending limit](/docs/accounts/access-keys/spending-limits#what-counts).
 
 A `transferFrom` that uses an allowance the account already granted doesn't count against the key's spending limit, so a periodic key limit doesn't cap every debit from the account. Review existing token allowances.
 
