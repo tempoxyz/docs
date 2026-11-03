@@ -57,7 +57,7 @@ export const proxiedLegacyDocsRoutes = [
   },
   {
     source: '/docs/guide/use-accounts/fee-sponsorship',
-    destination: '/docs/guide/payments/sponsor-user-fees',
+    destination: '/docs/api/fee-payer',
   },
   {
     source: '/docs/guide/use-accounts/scheduled-transactions',
@@ -189,7 +189,7 @@ export const legacyDocsHostRoutes = [
   },
   {
     source: '/guide/use-accounts/fee-sponsorship',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/payments/sponsor-user-fees`,
+    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/guide/use-accounts/scheduled-transactions',

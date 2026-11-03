@@ -582,6 +582,11 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/api/typed-client",
       "destination": "/developers/docs/sdk/typescript/api-client",
       "permanent": true
@@ -643,7 +648,7 @@
     },
     {
       "source": "/developers/guide/use-accounts/fee-sponsorship",
-      "destination": "/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1078,7 +1083,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1898,7 +1903,7 @@
     },
     {
       "source": "/developers/docs/guide/use-accounts/fee-sponsorship",
-      "destination": "/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
