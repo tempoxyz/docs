@@ -1023,12 +1023,11 @@ export default defineConfig({
               },
               {
                 text: 'T13',
-                badge: { text: 'Testnet', variant: 'info' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t13',
               },
               {
                 text: 'T12',
-                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
