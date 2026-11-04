@@ -241,6 +241,34 @@ interface ITIP20 {
     function getRoleAdmin(bytes32 role) external view returns (bytes32);
     
     // =========================================================================
+    //                     Legacy rewards (deprecated by TIP-1075)
+    // =========================================================================
+
+    struct UserRewardInfo {
+        address rewardRecipient;
+        uint256 rewardPerToken;
+        uint256 rewardBalance;
+    }
+
+    /// @notice Deprecated. A successful no-op from T7. Before T7, distributed `amount` pro rata over the opted-in supply
+    function distributeReward(uint256 amount) external;
+
+    /// @notice Deprecated. A successful no-op from T7. Before T7, opted the caller in to rewards paid to `recipient`
+    function setRewardRecipient(address recipient) external;
+
+    /// @notice Pays the caller's settled reward balance, capped at the token's own balance. Reverts while paused
+    /// @dev From T8, no new rewards accrue; only rewards settled before T8 are paid
+    /// @return The amount paid
+    function claimRewards() external returns (uint256);
+
+    function optedInSupply() external view returns (uint128);
+    function globalRewardPerToken() external view returns (uint256);
+    function userRewardInfo(address account) external view returns (UserRewardInfo memory);
+
+    /// @notice Returns the account's unclaimed rewards. From T8, only the settled reward balance
+    function getPendingRewards(address account) external view returns (uint128);
+
+    // =========================================================================
     //                     EIP-2612 Permit
     // =========================================================================
 
@@ -369,6 +397,12 @@ interface ITIP20 {
     /// @param newLogoURI The new logo URI value
     event LogoURIUpdated(address indexed updater, string newLogoURI);
 
+    /// @notice Legacy rewards: emitted by distributeReward before T7
+    event RewardDistributed(address indexed funder, uint256 amount);
+
+    /// @notice Legacy rewards: emitted by setRewardRecipient before T7
+    event RewardRecipientSet(address indexed holder, address indexed recipient);
+
     // =========================================================================
     //                                Errors
     // =========================================================================
@@ -393,6 +427,9 @@ interface ITIP20 {
 
     /// @notice The provided amount is zero or otherwise invalid for the attempted operation
     error InvalidAmount();
+
+    /// @notice Legacy rewards: distributeReward found no opted-in supply (before T7)
+    error NoOptedInSupply();
 
     /// @notice The provided currency identifier is invalid or unsupported
     error InvalidCurrency();
@@ -510,9 +547,10 @@ Roles are assigned and managed through `grantRole`, `revokeRole`, `renounceRole`
 `transferFeePreTx` respects the token's pause state and will revert if the token is paused. However, `transferFeePostTx` is intentionally allowed to execute even when the token is paused. This ensures that a transaction which pauses the token can still complete successfully and receive its fee refund. Apart from this specific refund transfer, no other token transfers can occur after a pause event.
 
 ### Implicit approvals for listed precompiles
-An Implicit Approval List names the precompiles that may pull TIP-20 tokens without a prior `approve`. The StablecoinDEX and FeeAMM use the internal `system_transfer_from(from, to, amount)` path, which:
+An Implicit Approval List names the precompiles that may pull TIP-20 tokens without a prior `approve`. The StablecoinDEX and FeeAMM use the internal `system_transfer_from(from, amount)` path, which:
 
 - Is **not** part of the public TIP-20 ABI and **not** callable by external contracts or EOAs.
+- Takes no recipient: it always credits the calling precompile.
 - Skips allowance checks and the allowance storage write.
 - Still enforces balance checks, TIP-403 transfer policies, and AccountKeychain spending limits.
 - Emits the standard TIP-20 `Transfer` event.
@@ -534,7 +572,7 @@ See [TIP-1095](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md) for
 The `TIP20Factory` contract is the canonical entrypoint for creating new TIP-20 tokens on Tempo. The factory derives deterministic deployment addresses using a caller-provided salt, combined with the caller's address, under a fixed 12-byte TIP-20 prefix. The resulting address is predictable; if it is already occupied, creation reverts rather than overwriting the existing token. The `TIP20Factory` precompile is deployed at `0x20Fc000000000000000000000000000000000000`.
 
 Newly created TIP-20 addresses are deployed to a deterministic address derived from `TIP20_PREFIX || lowerBytes`, where:
-- `TIP20_PREFIX` is the 12-byte prefix `20C00000000000000000000000`
+- `TIP20_PREFIX` is the 12-byte prefix `0x20C000000000000000000000`
 - `lowerBytes` is the highest 64 bits of `keccak256(msg.sender, salt)`
 
 The first 1024 addresses (where `lowerBytes < 1024`) are reserved for protocol use and cannot be deployed to via the factory.
@@ -646,11 +684,18 @@ interface ITIP20Factory {
     //                                Errors
     // =========================================================================
 
-    /// @notice The computed address falls within the reserved range (lowerBytes < 1000)
+    /// @notice The computed address falls within the reserved range (lowerBytes < 1024)
     error AddressReserved();
+
+    /// @notice A protocol deployment at a reserved address used an address outside the reserved range.
+    ///         Not raised by createToken
+    error AddressNotReserved();
 
     /// @notice The provided quote token address is invalid or not a TIP-20
     error InvalidQuoteToken();
+
+    /// @notice A TIP-20 token is already deployed at the computed address
+    error TokenAlreadyExists(address token);
 }
 ```
 

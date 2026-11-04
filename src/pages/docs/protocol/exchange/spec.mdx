@@ -46,6 +46,8 @@ The contract maintains per‑user, per‑token internal balances. Order placemen
 
 A flip order behaves like a normal resting order until it is fully filled. When filled, the DEX rewrites the order in place under the same `orderId` on the opposite side at a configured `flipTick`. The `flipTick` must be greater than or equal to `tick` for bids and less than or equal to `tick` for asks. The flip emits `OrderFlipped` instead of `OrderPlaced`, and `nextOrderId` does not advance. This enables passive liquidity with flexible strategies.
 
+In-place flips, `OrderFlipped`, `FlipFailed` and `flipTick == tick` apply from T5. Before T5, a filled flip order was deleted and re-placed under a new `orderId` (emitting `OrderPlaced`), a failed flip emitted no event, and `flipTick` had to be strictly greater than `tick` for bids and strictly less for asks.
+
 When a flip order flips, it draws funds exclusively from the maker's internal DEX balance. Unlike initial order placement, the DEX does not fall back to `transferFrom` if the internal balance is insufficient—the flip simply does not occur. This ensures that flip execution is self-contained and does not require additional token approvals or external balance checks at fill time.
 
 #### Pairs, ticks, and prices
@@ -75,7 +77,7 @@ Swaps execute immediately against the active book. Selling base for quote starts
 
 Callers can swap between any two USD TIP-20 tokens. If `tokenIn` and `tokenOut` are not directly paired, the implementation finds the unique path between them through quote‑token relationships, and performs a multi‑hop swap/quote.
 
-Quotes and swaps MUST use the same per-order fill and integer-rounding rules. For the same starting book and route, the quoted amount MUST match the corresponding successful swap's amount. A quote does not execute token transfers, policy checks on those transfers, or other swap side effects, so a successful quote alone does not guarantee execution.
+From T12, quotes and swaps MUST use the same per-order fill and integer-rounding rules. For the same starting book and route, the quoted amount MUST match the corresponding successful swap's amount. A quote does not execute token transfers, policy checks on those transfers, or other swap side effects, so a successful quote alone does not guarantee execution. Before T12, quotes used each tick's stored aggregate liquidity and rounded once per tick, so they could differ from the swap result.
 
 #### Crossed books
 
@@ -126,7 +128,7 @@ function tickToPrice(int16 tick) external pure returns (uint32 price);
 function priceToTick(uint32 price) external pure returns (int16 tick);
 ```
 
-Convert between discrete ticks and scaled prices using `price = 100_000 + tick`. Both functions MUST enforce `tick % TICK_SPACING == 0`; off-grid values revert with `InvalidTick`. `priceToTick` additionally enforces the price range `[98_000, 102_000]`, reverting with `TickOutOfBounds` outside that range. `tickToPrice` does not enforce the order-placement bounds: an aligned tick such as `2010` converts to `102010` even though an order cannot be placed at that tick. For example, `tickToPrice(1)` and `priceToTick(100001)` revert with `InvalidTick`, while `tickToPrice(10)` returns `100010`.
+Convert between discrete ticks and scaled prices using `price = 100_000 + tick`. From T2, both functions MUST enforce `tick % TICK_SPACING == 0`; off-grid values revert with `InvalidTick` (before T2 neither checked spacing). `priceToTick` additionally enforces the price range `[98_000, 102_000]`, reverting with `TickOutOfBounds` outside that range. `tickToPrice` does not enforce the order-placement bounds: an aligned tick such as `2010` converts to `102010` even though an order cannot be placed at that tick. For example, `tickToPrice(1)` and `priceToTick(100001)` revert with `InvalidTick`, while `tickToPrice(10)` returns `100010`.
 
 <span id="pairing-and-orderbook" />
 
@@ -136,7 +138,7 @@ Convert between discrete ticks and scaled prices using `price = 100_000 + tick`.
 function pairKey(address tokenA, address tokenB) external pure returns (bytes32 key);
 ```
 
-Deterministic key for a pair derived from the two token addresses (order‑independent).
+Returns `keccak256(abi.encodePacked(tokenA, tokenB))`. The key depends on argument order: pass the base token first and its quote token second to get the key that `createPair` returns and `books` accepts. `pairKey(a, b)` and `pairKey(b, a)` differ.
 
 ```solidity
 function createPair(address base) external returns (bytes32 key);
@@ -154,7 +156,7 @@ Returns pair metadata and current best‑of‑side ticks. Best ticks may be sent
 function getTickLevel(address base, int16 tick, bool isBid) external view returns (uint128 head, uint128 tail, uint128 totalLiquidity);
 ```
 
-Returns FIFO head/tail order IDs and aggregate liquidity for a tick on a side. `totalLiquidity` is the sum of each active order's `remaining` amount, computed by traversing the tick queue.
+Returns FIFO head/tail order IDs and aggregate liquidity for a tick on a side. From T12, `totalLiquidity` is the sum of each active order's `remaining` amount, computed by traversing the tick queue; before T12 it was a stored aggregate maintained on every order change.
 
 #### Internal balances
 
@@ -188,7 +190,7 @@ Notes:
 function placeFlip(address token, uint128 amount, bool isBid, int16 tick, int16 flipTick) external returns (uint128 orderId);
 ```
 
-Like `place`, but marks the order as a flip order. When fully filled, the same `orderId` is rewritten in place on the opposite side at `flipTick` (which must be greater than or equal to `tick` for bids and less than or equal to `tick` for asks).
+Like `place`, but marks the order as a flip order. From T5, when fully filled, the same `orderId` is rewritten in place on the opposite side at `flipTick` (which must be greater than or equal to `tick` for bids and less than or equal to `tick` for asks).
 
 Notes:
 
@@ -206,7 +208,7 @@ Cancels an order owned by the caller. When canceled, the order is removed from t
 function cancelStaleOrder(uint128 orderId) external;
 ```
 
-Cancels an order if its maker is no longer authorized as a sender of the token locked for the order or as a recipient of the payout token under their [TIP-403 policies](/docs/protocol/tip403/overview). Anyone can call this function to remove stale orders.
+Cancels an order if its maker is no longer authorized as a sender of the token locked for the order or, from T4, as a recipient of the payout token under their [TIP-403 policies](/docs/protocol/tip403/overview). Anyone can call this function to remove stale orders.
 
 When canceled, the order is removed from the tick queue, its remaining amount leaves the active book, and remaining locked funds are refunded to the order maker's DEX balance. Reverts with `OrderNotStale` if the maker is still authorized.
 
@@ -247,9 +249,9 @@ Executes an exact‑out swap. Deducts the actual input from the caller’s inter
 ```solidity
 event PairCreated(bytes32 indexed key, address indexed base, address indexed quote);
 event OrderPlaced(uint128 indexed orderId, address indexed maker, address indexed token, uint128 amount, bool isBid, int16 tick, bool isFlipOrder, int16 flipTick);
-event OrderFlipped(uint128 indexed orderId, address indexed maker, address indexed token, uint128 amount, bool isBid, int16 tick, int16 flipTick);
+event OrderFlipped(uint128 indexed orderId, address indexed maker, address indexed token, uint128 amount, bool isBid, int16 tick, int16 flipTick); // from T5
 event OrderCancelled(uint128 indexed orderId);
-event FlipFailed(uint128 indexed orderId, address indexed maker, bytes4 reason);
+event FlipFailed(uint128 indexed orderId, address indexed maker, bytes4 reason); // from T5
 event OrderFilled(uint128 indexed orderId, address indexed maker, address indexed taker, uint128 amountFilled, bool partialFill);
 ```
 

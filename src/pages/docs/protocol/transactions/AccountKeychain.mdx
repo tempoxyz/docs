@@ -73,7 +73,8 @@ The precompile uses a `keyId` (address) to uniquely identify each access key for
 - `keys[account][keyId]` → Packed `AuthorizedKey` struct (signature type, expiry, enforce_limits, is_revoked, is_admin)
 - `spendingLimits[keccak256(account || keyId)][token]` → `SpendingLimitState { remaining, max, period, periodEnd }`
 - `keyScopes[keccak256(account || keyId)]` → Tree of `(target, selector, recipients)` allowlists used during call-scope checks
-- `transactionKey` → Transient storage for the key ID that signed the current transaction (slot 0)
+- `transactionKey` → Transient storage for the key ID that signed the current transaction (transient slot 4)
+- `txOrigin` → Transient storage for the current transaction's sender (transient slot 5)
 
 **AuthorizedKey Storage Layout (packed into single slot):**
 - byte 0: signature_type (u8)
@@ -248,7 +249,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - Creates a new key entry with the specified `signatureType`, `config.expiry`, `config.enforceLimits`, and `isRevoked` set to `false`
 - If `enforceLimits` is `true`, initializes spending limits for each specified token. Each `TokenLimit` carries a `period` (0 = one-time, non-zero = recurring in seconds).
 - If `allowAnyCalls` is `false`, stores the `allowedCalls` allowlist in `keyScopes`. `allowAnyCalls = false` with `allowedCalls = []` means scoped deny-all.
-- Recipient-constrained selector rules are validated before any state is written.
+- Call scopes, including recipient-constrained selector rules, are validated after the key entry is written and the key's scope tree is reset (before T4, each scope is validated as it is stored). An invalid scope reverts the whole call, so no state persists.
 - Emits `KeyAuthorized` event
 
 **Requirements:**
@@ -257,7 +258,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - `keyId` MUST NOT be `address(0)` (reverts with `ZeroPublicKey`)
 - `keyId` MUST NOT already be authorized with `expiry > 0` (reverts with `KeyAlreadyExists`)
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked` - prevents replay attacks)
-- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn) (reverts with `InvalidSignatureType`)
+- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn). From T11, `3` or any value of `4` or more reverts with empty data; before T11 these revert with `InvalidSignatureType`.
 - `config.expiry` MUST be strictly greater than the current block timestamp (reverts with `ExpiryInPast`)
 - To authorize a non-expiring key, omit `key_authorization.expiry` in the transaction RLP or pass `u64::MAX` when calling the precompile ABI directly. Do not pass `0`.
 - `enforceLimits` determines whether spending limits are enforced for this key
@@ -277,7 +278,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - `keyId` MUST NOT be the account address (reverts with `InvalidKeyId`).
 - `keyId` MUST NOT already be authorized (reverts with `KeyAlreadyExists`).
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked`).
-- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn) (reverts with `InvalidSignatureType`).
+- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn). From T11, `3` or any value of `4` or more reverts with empty data; before T11 these revert with `InvalidSignatureType`.
 
 ### Witness revocation
 
