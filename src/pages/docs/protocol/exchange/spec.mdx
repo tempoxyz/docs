@@ -195,8 +195,8 @@ Like `place`, but marks the order as a flip order. From T5, when fully filled, t
 Notes:
 
 - Both `tick` and `flipTick` must be within `[MIN_TICK, MAX_TICK]` and divisible by `TICK_SPACING` (10).
-- When the order flips, funds are drawn exclusively from the maker's internal DEX balance. If the internal balance is insufficient, the flip fails and emits `FlipFailed`—no `transferFrom` is attempted, even if the maker has sufficient external balance and approval.
-- The maker must be authorized by the TIP-403 transfer policies of both the base and quote tokens, both at initial placement and when the order flips. If the maker becomes unauthorized before a flip, the flip emits `FlipFailed` and no flipped order is inserted (although the existing order is executed).
+- When the order flips, funds are drawn exclusively from the maker's internal DEX balance. If the internal balance is insufficient, the flip fails and, from T5, emits `FlipFailed`—no `transferFrom` is attempted, even if the maker has sufficient external balance and approval.
+- The maker must be authorized by the TIP-403 transfer policies of both the base and quote tokens, both at initial placement and when the order flips. If the maker becomes unauthorized before a flip, the flip fails (emitting `FlipFailed` from T5) and no flipped order is inserted (although the existing order is executed).
 
 ```solidity
 function cancel(uint128 orderId) external;

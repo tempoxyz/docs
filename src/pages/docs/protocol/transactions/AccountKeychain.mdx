@@ -258,7 +258,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - `keyId` MUST NOT be `address(0)` (reverts with `ZeroPublicKey`)
 - `keyId` MUST NOT already be authorized with `expiry > 0` (reverts with `KeyAlreadyExists`)
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked` - prevents replay attacks)
-- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn). From T11, `3` or any value of `4` or more reverts with empty data; before T11 these revert with `InvalidSignatureType`.
+- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn). On mainnet and testnet, from T11, `3` or any value of `4` or more reverts with empty data; before T11 these revert with `InvalidSignatureType`. From T14, `3` is the configurable-account type (already accepted on the Tempo Accounts devnet).
 - `config.expiry` MUST be strictly greater than the current block timestamp (reverts with `ExpiryInPast`)
 - To authorize a non-expiring key, omit `key_authorization.expiry` in the transaction RLP or pass `u64::MAX` when calling the precompile ABI directly. Do not pass `0`.
 - `enforceLimits` determines whether spending limits are enforced for this key
@@ -278,7 +278,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - `keyId` MUST NOT be the account address (reverts with `InvalidKeyId`).
 - `keyId` MUST NOT already be authorized (reverts with `KeyAlreadyExists`).
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked`).
-- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn). From T11, `3` or any value of `4` or more reverts with empty data; before T11 these revert with `InvalidSignatureType`.
+- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn). On mainnet and testnet, from T11, `3` or any value of `4` or more reverts with empty data; before T11 these revert with `InvalidSignatureType`. From T14, `3` is the configurable-account type (already accepted on the Tempo Accounts devnet).
 
 ### Witness revocation
 

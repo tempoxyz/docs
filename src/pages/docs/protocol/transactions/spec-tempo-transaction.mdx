@@ -507,7 +507,7 @@ The verifier splits the payload after the 37-byte authenticator data, parses `cl
 - At least one of User Presence (UP) or User Verification (UV) is set
 - Attested credential data (AT) and extension data (ED) flags are clear
 - `"type":"webauthn.get"` in clientDataJSON
-- Challenge matches the signed digest (unpadded Base64URL): the sender signing hash for a transaction signature, the Keychain V2 hash inside a Keychain signature, or `key_authorization_digest` for a key authorization. It is never the transaction hash.
+- Challenge matches the signed digest (unpadded Base64URL): the sender signing hash for a transaction signature, the Keychain V2 hash inside a Keychain signature, `key_authorization_digest` for a key authorization, or the EIP-7702 authorization signing hash for an `aa_authorization_list` entry. It is never the transaction hash.
 - P256 signature validity
 
 #### What We Skip
