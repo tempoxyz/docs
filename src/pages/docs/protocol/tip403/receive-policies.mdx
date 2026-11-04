@@ -82,7 +82,7 @@ The recovery authority controls who can claim future blocked receipts:
 | receiver address | the receiver |
 | another nonzero address | that address |
 
-Nonzero recovery authorities must not be Tempo precompile addresses (TIP-20 token addresses and Tempo system precompiles, including `ReceivePolicyGuard`) or [virtual addresses](/docs/protocol/tip20/virtual-addresses). Ethereum precompile addresses are not rejected. A virtual address must not call `setReceivePolicy(...)`; configure the resolved master address instead.
+Nonzero recovery authorities must not be Tempo precompile addresses (TIP-20 token addresses and Tempo system precompiles, including `ReceivePolicyGuard`) or [virtual addresses](/docs/protocol/tip20/virtual-addresses). Other precompile addresses, such as `0x01`, are accepted. A virtual address must not call `setReceivePolicy(...)`; configure the resolved master address instead.
 
 If no receive policy is set, all transfers and mints are allowed by the receive-policy layer.
 

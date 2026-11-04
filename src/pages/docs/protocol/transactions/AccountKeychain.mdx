@@ -249,7 +249,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - Creates a new key entry with the specified `signatureType`, `config.expiry`, `config.enforceLimits`, and `isRevoked` set to `false`
 - If `enforceLimits` is `true`, initializes spending limits for each specified token. Each `TokenLimit` carries a `period` (0 = one-time, non-zero = recurring in seconds).
 - If `allowAnyCalls` is `false`, stores the `allowedCalls` allowlist in `keyScopes`. `allowAnyCalls = false` with `allowedCalls = []` means scoped deny-all.
-- Call scopes, including recipient-constrained selector rules, are validated after the key entry is written and the key's scope tree is reset. An invalid scope reverts the whole call, so no state persists.
+- An invalid call scope, including a recipient-constrained selector rule, reverts the whole call, so no state persists.
 - Emits `KeyAuthorized` event
 
 **Requirements:**

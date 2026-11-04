@@ -214,7 +214,7 @@ Each authorization in the list:
 **Implementation Note:** Nonces are stored in the storage of a designated precompile at address `0x4E4F4E4345000000000000000000000000000000` (ASCII hex for "NONCE"), as there is currently no clean way to extend account state in Reth.
 
 **Storage Layout at 0x4E4F4E4345:**
-- Storage key: `nonces[account_address][nonce_key]`, a Solidity nested mapping at slot 0: `keccak256(abi.encode(nonce_key, keccak256(abi.encode(account_address, uint256(0)))))`
+- Storage slot: `keccak256(nonce_key || keccak256(account_address || 0))`, with each value left-padded to 32 bytes
 - Storage value: `nonce` (uint64)
 
 Note: Protocol Nonce key (0), is directly stored in the account state, just like normal transaction types.
@@ -506,7 +506,7 @@ The verifier splits the payload after the 37-byte authenticator data, parses `cl
 - At least one of User Presence (UP) or User Verification (UV) is set
 - Attested credential data (AT) and extension data (ED) flags are clear
 - `"type":"webauthn.get"` in clientDataJSON
-- Challenge matches the signed digest (unpadded Base64URL): the sender signing hash for a transaction signature, the Keychain V2 hash inside a Keychain signature, `key_authorization_digest` for a key authorization, or the EIP-7702 authorization signing hash for an `aa_authorization_list` entry. It is never the transaction hash.
+- Challenge matches the signed digest (unpadded Base64URL): the sender signing hash for a transaction signature, the Keychain V2 hash inside a Keychain signature, `key_authorization_digest` for a key authorization, or the authorization signing hash for an `aa_authorization_list` entry. It is never the transaction hash.
 - P256 signature validity
 
 #### What We Skip

@@ -21,7 +21,7 @@ This specification defines the structure of valid blocks in the Tempo blockchain
 
 ## Motivation
 
-Tempo blocks extend the Ethereum block format in multiple ways: there are new header fields to account for payment lanes and shared gas accounting. This specification contains all the modifications to the block format.
+Tempo block headers carry extra fields for payment lanes and shared gas accounting. This specification defines every Tempo-specific part of the block format.
 
 ## Specification
 
@@ -50,7 +50,7 @@ pub struct TempoConsensusContext {
 Current non-genesis headers MUST contain `consensus_context`. It records the consensus epoch, view, parent view, and proposer public key. RLP decoding MUST reject an invalid Ed25519 proposer key. The header RLP field order is `[general_gas_limit, shared_gas_limit, timestamp_millis_part, inner, consensus_context]`, with context encoded as `[epoch, view, parent_view, proposer]`. The context participates in the header hash. JSON-RPC exposes it as `consensusContext`, with `parentView` in camel case.
 
 ### Block body
-The block body in Tempo retains the canonical Ethereum block body structure. Every transaction is a proposer lane transaction, and non-payment transactions are bounded by `general_gas_limit`. A transaction that does not fit the lane budgets makes the block invalid.
+The block body holds the block's transactions. Every transaction is a proposer lane transaction, and non-payment transactions are bounded by `general_gas_limit`. A transaction that does not fit the lane budgets makes the block invalid.
 
 ### System transactions
 

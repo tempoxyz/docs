@@ -540,7 +540,7 @@ Roles are assigned and managed through `grantRole`, `revokeRole`, `renounceRole`
 `transferFeePreTx` respects the token's pause state and will revert if the token is paused. However, `transferFeePostTx` is intentionally allowed to execute even when the token is paused. This ensures that a transaction which pauses the token can still complete successfully and receive its fee refund. Apart from this specific refund transfer, no other token transfers can occur after a pause event.
 
 ### Implicit approvals for listed precompiles
-An Implicit Approval List names the precompiles that may pull TIP-20 tokens without a prior `approve`. The StablecoinDEX and FeeAMM use the internal `system_transfer_from(from, amount)` path, which:
+An Implicit Approval List names the precompiles that may pull TIP-20 tokens without a prior `approve`. The StablecoinDEX and FeeAMM pull tokens through a protocol-internal system transfer, which:
 
 - Is **not** part of the public TIP-20 ABI and **not** callable by external contracts or EOAs.
 - Takes no recipient: it always credits the calling precompile.
