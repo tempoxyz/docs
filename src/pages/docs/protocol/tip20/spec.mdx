@@ -25,7 +25,6 @@ It also enables deeper integration with token-specific Tempo features like payin
 ## Specification
 TIP-20 tokens support standard fungible token operations such as transfers, mints, and burns. They also support transfers, mints, and burns with an attached 32-byte memo and a role-based access control system for token administrative operations.
 
-
 ## TIP20
 The core TIP-20 contract exposes standard ERC-20 functions for balances, allowances, transfers, and delegated transfers, and also adds:
 - 32-byte memo support on transfers, mints, and burns.
@@ -250,14 +249,14 @@ interface ITIP20 {
         uint256 rewardBalance;
     }
 
-    /// @notice Deprecated. A successful no-op from T7. Before T7, distributed `amount` pro rata over the opted-in supply
+    /// @notice Deprecated. A successful no-op
     function distributeReward(uint256 amount) external;
 
-    /// @notice Deprecated. A successful no-op from T7. Before T7, opted the caller in to rewards paid to `recipient`
+    /// @notice Deprecated. A successful no-op
     function setRewardRecipient(address recipient) external;
 
     /// @notice Pays the caller's settled reward balance, capped at the token's own balance. Reverts while paused
-    /// @dev From T8, no new rewards accrue; only rewards settled before T8 are paid
+    /// @dev No new rewards accrue; only previously settled rewards are paid
     /// @return The amount paid
     function claimRewards() external returns (uint256);
 
@@ -265,7 +264,7 @@ interface ITIP20 {
     function globalRewardPerToken() external view returns (uint256);
     function userRewardInfo(address account) external view returns (UserRewardInfo memory);
 
-    /// @notice Returns the account's unclaimed rewards. From T8, only the settled reward balance
+    /// @notice Returns the account's settled, unclaimed reward balance
     function getPendingRewards(address account) external view returns (uint128);
 
     // =========================================================================
@@ -341,7 +340,6 @@ interface ITIP20 {
     /// @param newQuoteToken The new quote token that has been set
     event QuoteTokenUpdate(address indexed updater, ITIP20 indexed newQuoteToken);
 
-
     /// @notice Emitted when the token's supply cap is updated
     /// @param updater The account that updated the supply cap
     /// @param newSupplyCap The new maximum total supply
@@ -397,10 +395,10 @@ interface ITIP20 {
     /// @param newLogoURI The new logo URI value
     event LogoURIUpdated(address indexed updater, string newLogoURI);
 
-    /// @notice Legacy rewards: emitted by distributeReward before T7
+    /// @notice Legacy rewards event; no longer emitted
     event RewardDistributed(address indexed funder, uint256 amount);
 
-    /// @notice Legacy rewards: emitted by setRewardRecipient before T7
+    /// @notice Legacy rewards event; no longer emitted
     event RewardRecipientSet(address indexed holder, address indexed recipient);
 
     // =========================================================================
@@ -428,7 +426,7 @@ interface ITIP20 {
     /// @notice The provided amount is zero or otherwise invalid for the attempted operation
     error InvalidAmount();
 
-    /// @notice Legacy rewards: distributeReward found no opted-in supply (before T7)
+    /// @notice Legacy rewards error; no longer raised
     error NoOptedInSupply();
 
     /// @notice The provided currency identifier is invalid or unsupported
@@ -446,7 +444,6 @@ interface ITIP20 {
 
     /// @notice The new supply cap is invalid, for example lower than the current total supply
     error InvalidSupplyCap();
-
 
     /// @notice The configured transfer policy denies authorization for the sender or recipient
     error PolicyForbids();
@@ -469,11 +466,9 @@ interface ITIP20 {
 }
 ```
 
-
 :::warning
 When interacting with precompiles, **always use the provided ABI** rather than reading directly from storage slots. Direct storage access may lead to undefined behavior.
 :::
-
 
 ## Memos
 Memo functions `transferWithMemo`, `transferFromWithMemo`, `mintWithMemo`, and `burnWithMemo` behave like their ERC-20 equivalents but additionally emit memo data in dedicated events. The memo is always a fixed 32-byte field. Callers should pack shorter strings or identifiers directly into this field, and use hashes or external references when the underlying payload exceeds 32 bytes.
@@ -511,7 +506,6 @@ Updating the quote token occurs in two phases:
 
 The implementation must validate that the new quote token is a TIP-20 token, matches currency rules, and does not create circular quote-token chains.
 
-
 :::note
 While quote tokens can be changed, choose carefully as the update process requires careful coordination with the DEX.
 :::
@@ -540,7 +534,6 @@ TIP-20 uses a role-based authorization system. The main roles are:
 
 Roles are assigned and managed through `grantRole`, `revokeRole`, `renounceRole`, and `setRoleAdmin`, via the contract admin.
 
-
 ## System Functions
 `system_transfer_from`, `transfer_fee_pre_tx`, and `transfer_fee_post_tx` are internal implementation hooks used by protocol execution and approved precompiles. They are not functions in the TIP-20 public ABI. They support fee collection, refunds, and token movement for the Fee AMM and Stablecoin DEX.
 
@@ -566,7 +559,6 @@ The enshrined `TIP20ChannelReserve` precompile at [`0x4D505000000000000000000000
 - Custody movement MUST retain pause, recipient, balance, and applicable access-key spending-limit checks, and emit standard `Transfer` events. A receive-policy rejection MUST revert the channel operation instead of creating a guarded payment. Failed delivery MUST leave channel accounting unchanged.
 
 See [TIP-1095](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md) for the operation-specific authorization rules and the [channel lifecycle](/docs/protocol/upgrades/t5#enshrined-tip-20-reserve-channel) for descriptors and vouchers.
-
 
 ## TIP20Factory
 The `TIP20Factory` contract is the canonical entrypoint for creating new TIP-20 tokens on Tempo. The factory derives deterministic deployment addresses using a caller-provided salt, combined with the caller's address, under a fixed 12-byte TIP-20 prefix. The resulting address is predictable; if it is already occupied, creation reverts rather than overwriting the existing token. The `TIP20Factory` precompile is deployed at `0x20Fc000000000000000000000000000000000000`.

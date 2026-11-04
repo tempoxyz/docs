@@ -55,7 +55,7 @@ Before the execution of each transaction, the protocol takes the following steps
 * Determine the `fee_token` of the transaction, according to the [rules for fee token preferences](#fee-token-preferences). If the fee token cannot be determined, the transaction is invalid.
 * Compute the `max_fee` of the transaction as `ceil(gas_limit * gas_price / 10^12)` base units.
 * Deduct `max_fee` from the `fee_payer`'s balance of `fee_token`. If `fee_payer` does not have sufficient balance in `fee_token`, the transaction is invalid.
-* Check that the [fee AMM](/docs/protocol/fees/spec-fee-amm) can convert `max_fee` from `fee_token` to the validator's preferred fee token: the pool must hold at least `floor(max_fee * 0.9970)` of the validator token (on a two-hop route, each hop's output is rounded down in turn). If there is insufficient liquidity, the transaction is invalid. From T1C, that output is reserved in each pool on the route for the rest of the transaction.
+* Check that the [fee AMM](/docs/protocol/fees/spec-fee-amm) can convert `max_fee` from `fee_token` to the validator's preferred fee token: the pool must hold at least `floor(max_fee * 0.9970)` of the validator token (on a two-hop route, each hop's output is rounded down in turn). If there is insufficient liquidity, the transaction is invalid. That output is reserved in each pool on the route for the rest of the transaction.
 
 After the execution of each transaction:
 
@@ -69,7 +69,7 @@ Fee-balance and liquidity checks happen before execution. A transaction that can
 
 ### Fee-policy authorization
 
-Pre-collection MUST authorize the fee payer as a sender on the fee token. From T8 ([TIP-1042](https://tips.sh/1042)), it MUST NOT require FeeManager to be authorized as a recipient for the fee deposit; before T8, FeeManager is also checked as a recipient. The unused-fee refund returns to the original fee payer without a separate issuer recipient-policy check or receiver-policy evaluation. Fee pre-collection still enforces pause, balance, liquidity, and applicable access-key spending limits.
+Pre-collection MUST authorize the fee payer as a sender on the fee token. It MUST NOT require FeeManager to be authorized as a recipient for the fee deposit ([TIP-1042](https://tips.sh/1042)). The unused-fee refund returns to the original fee payer without a separate issuer recipient-policy check or receiver-policy evaluation. Fee pre-collection still enforces pause, balance, liquidity, and applicable access-key spending limits.
 
 `distributeFees(validator, token)` is a public, ordinary token-transfer path: each nonzero distribution MUST authorize FeeManager as sender and the resolved validator as recipient, and apply pause and receive-policy rules. Successful collection therefore does not guarantee that fees can currently be distributed. In particular, same-token fees can be collected while issuer policy blocks FeeManager as a sender and prevents distribution.
 
@@ -108,7 +108,6 @@ When `feePayerSignature` is present:
 * Recovered fee payer must differ from the transaction sender; self-payment requires an absent `feePayerSignature`
 * Fee payer must have sufficient balance in the fee token
 * Transaction is rejected if either signature fails or fee payer's balance is insufficient
-
 
 ## Fee token preferences
 
@@ -161,7 +160,6 @@ then that TIP-20 token is used as the user's fee token for that transaction (unl
 
 For [Tempo Transactions](/docs/protocol/transactions/spec-tempo-transaction), this rule applies only if _all_ top-level calls are to the same TIP-20 contract, and each such call is to one of the functions listed above, with `fee_payer == tx.origin`.
 
-
 ### Stablecoin DEX contract
 
 If the top-level call of a transaction is to the [Stablecoin DEX](/docs/protocol/exchange/spec) contract, the function being called is either `swapExactAmountIn` or `swapExactAmountOut`, and the `tokenIn` argument to that function is the address of a TIP-20 token for which the currency is USD, then the `tokenIn` argument is used as the user's fee token for the transaction (unless there is a preference specified at the [transaction](#transaction-level) or [account](#account-level) level).
@@ -210,7 +208,7 @@ Tempo uses the following mainnet gas parameters:
 
 A standard TIP-20 transfer (~50,000 gas) costs approximately 600 microdollars ($0.0006) at the cap and approximately 30 microdollars ($0.00003) at the floor.
 
-Precompile input charges include the selector and are deducted before dispatch and ABI decoding. A DELEGATECALL or CALLCODE to a Tempo precompile reverts with `DelegateCallNotAllowed()` before the charge. Duplicate-check charges apply to AccountKeychain call scopes and ZoneFactory role lists before sorting. T11 requires canonical ABI encoding without gaps, overlaps, trailing bytes, or nonzero padding. T12 permits trailing bytes while retaining the other checks; see the [T12 activation schedule](/docs/protocol/upgrades/t12).
+Precompile input charges include the selector and are deducted before dispatch and ABI decoding. A DELEGATECALL or CALLCODE to a Tempo precompile reverts with `DelegateCallNotAllowed()` before the charge. Duplicate-check charges apply to AccountKeychain call scopes and ZoneFactory role lists before sorting. Calldata must use canonical ABI encoding without gaps, overlaps, or nonzero padding; trailing bytes after valid arguments are allowed. T12 permits trailing bytes while retaining the other checks; see the [T12 activation schedule](/docs/protocol/upgrades/t12).
 
 ### Removing validator preference
 

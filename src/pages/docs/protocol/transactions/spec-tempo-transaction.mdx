@@ -29,7 +29,6 @@ This spec introduces native protocol support for the following features, using T
 Current accounts are limited to secp256k1 signatures and sequential nonces, creating UX and scalability challenges.  
 Users cannot leverage modern authentication methods like passkeys, applications face throughput limitations due to sequential nonces. 
 
-
 ## Specification
 ### Transaction Type
 
@@ -68,7 +67,7 @@ pub struct Call {
 // Key authorization for provisioning access keys
 // RLP encoding: [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]
 pub struct KeyAuthorization {
-    chain_id: u64,                              // Chain ID for replay protection (must match the executing chain; before T1C, 0 = any chain)
+    chain_id: u64,                              // Chain ID for replay protection (must match the executing chain)
     key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
     key_id: Address,                            // Key identifier (address derived from public key)
     expiry: Option<NonZeroU64>,                 // Unix timestamp when key expires (omit / None for never expires)
@@ -530,7 +529,7 @@ be able to sign transactions on the sender's behalf without inducing another pas
 More information about Access Keys can be found in the [Account Keychain Specification](./AccountKeychain).
 
 A sender can authorize a key by signing over a "key authorization" item that contains the following information:
-- **Chain ID** for replay protection (MUST equal the executing chain ID; from T1C zero is not a wildcard; before T1C, 0 meant any chain)
+- **Chain ID** for replay protection (MUST equal the executing chain ID; zero is not a wildcard)
 - **Key type** (Secp256k1, P256, or WebAuthn)
 - **Key ID** (address derived from the public key)
 - **Expiration** timestamp of when the key should expire (optional - None means never expires)
@@ -556,7 +555,7 @@ The root key or an active admin access key signs over the keccak256 hash of the 
 ```
 key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))
 
-chain_id = u64 (MUST equal the executing chain ID; from T1C zero is not a wildcard; before T1C, 0 meant any chain)
+chain_id = u64 (MUST equal the executing chain ID; zero is not a wildcard)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
 expiry = Option<NonZeroU64> (nonzero unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
@@ -888,7 +887,6 @@ const currentKey = await precompile.getTransactionKey();
 // Returns: address (0x0 for Root Key, keyId for Access Key)
 ```
 
-
 ## Rationale
 
 ### Signature Type Detection by Length
@@ -950,7 +948,6 @@ The active fork's gas schedule determines nonce and access-key storage costs. Th
 Use `eth_estimateGas` with the complete transaction on the target network. Implementers can use the [canonical intrinsic-gas calculation](https://github.com/tempoxyz/tempo/blob/main/crates/evm/src/handler.rs) together with the [fork-dependent gas parameters](https://github.com/tempoxyz/tempo/blob/main/crates/hardfork/src/gas_params.rs); a fixed per-key formula omits state and fork-dependent charges.
 
 ## Security Considerations
-
 
 ### Mempool DOS Protection
 

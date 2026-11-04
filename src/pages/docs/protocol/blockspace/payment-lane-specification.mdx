@@ -16,7 +16,7 @@ import { Badge } from '../../../../components/Badge'
 
 ## Abstract
 
-This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be less than the `gas_limit`. Non-payment transactions executed in the proposer's lane (i.e. before the gas incentive section) consume at most `general_gas_limit`, a new field added to the header. From T4, a transaction that does not fit the lane budgets makes the block invalid. Before T4, it instead starts the gas incentive section, which only the block `gas_limit` bounds.
+This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be less than the `gas_limit`. Non-payment transactions consume at most `general_gas_limit`, a new field added to the header. A transaction that does not fit the lane budgets makes the block invalid.
 
 ## Motivation
 
@@ -63,7 +63,4 @@ for all i such that !is_payment(tx[i]) and tx[i] is in the proposer's lane
 
 Where `gas_consumed` includes intrinsic gas and gas burned by reverts, as in the existing protocol.
 
-The first transaction that does not fit ends the proposer's lane:
-
-- **From T4**, `shared_gas_limit` is 0 and the block is invalid. Every non-payment transaction must fit the remaining `general_gas_limit`, and every transaction must fit the remaining `gas_limit`.
-- **Before T4**, that transaction and every later one, payment or not, form the gas incentive section and the block is valid. No lane budget applies to the incentive section, and `shared_gas_limit` does not bound it; only the block `gas_limit` does.
+`shared_gas_limit` is 0. Every non-payment transaction must fit the remaining `general_gas_limit`, and every transaction must fit the remaining `gas_limit`; otherwise the block is invalid.

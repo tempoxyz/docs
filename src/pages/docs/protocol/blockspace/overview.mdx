@@ -21,7 +21,7 @@ This specification defines the structure of valid blocks in the Tempo blockchain
 
 ## Motivation
 
-Tempo blocks extend the Ethereum block format in multiple ways: there are new header fields to account for payment lanes and shared gas accounting, and, before T4, a system transaction ends the block body. This specification contains all the modifications to the block format.
+Tempo blocks extend the Ethereum block format in multiple ways: there are new header fields to account for payment lanes and shared gas accounting. This specification contains all the modifications to the block format.
 
 ## Specification
 
@@ -50,14 +50,8 @@ pub struct TempoConsensusContext {
 Current non-genesis headers MUST contain `consensus_context`. It records the consensus epoch, view, parent view, and proposer public key. RLP decoding MUST reject an invalid Ed25519 proposer key. The header RLP field order is `[general_gas_limit, shared_gas_limit, timestamp_millis_part, inner, consensus_context]`, with context encoded as `[epoch, view, parent_view, proposer]`. The context participates in the header hash. JSON-RPC exposes it as `consensusContext`, with `parentView` in camel case.
 
 ### Block body
-The block body in Tempo retains the canonical Ethereum block body structure, with the addition of a system transaction before T4. Transactions are ordered in the following sections:
-
-1. Proposer lane transactions, subject to `general_gas_limit` on non-payment transactions.
-2. Before T4 only: the gas incentive section, made of the first transaction that did not fit the lane budgets and every transaction after it. Only the block `gas_limit` bounds it. From T4, a block with this section is invalid.
-3. Before T4 only: exactly one end-of-block system transaction.
-
-No fork defines a start-of-block system transaction.
+The block body in Tempo retains the canonical Ethereum block body structure. Every transaction is a proposer lane transaction, and non-payment transactions are bounded by `general_gas_limit`. A transaction that does not fit the lane budgets makes the block invalid.
 
 ### System transactions
 
-Before T4, a valid Tempo block must end with exactly one protocol-defined system transaction, and no user transaction may follow it. From T4, a block must not contain any system transaction.
+A block must not contain any system transaction.

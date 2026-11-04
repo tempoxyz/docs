@@ -38,7 +38,7 @@ Custom policies start with `policyId = 2`. The registry reserves the first two i
 - `policyId = 0` is the `always-reject` policy and rejects all token transfers
 - `policyId = 1` is the `always-allow` policy and allows all token transfers
 
-From T6, every authorization check (`isAuthorized` and its sender, recipient, and mint-recipient variants) returns true for ReceivePolicyGuard (`0xB10C000000000000000000000000000000000000`) under any policy ID, including `0` and IDs that do not exist.
+Every authorization check (`isAuthorized` and its sender, recipient, and mint-recipient variants) returns true for ReceivePolicyGuard (`0xB10C000000000000000000000000000000000000`) under any policy ID, including `0` and IDs that do not exist.
 
 The `policyIdCounter` starts at `2` and increments with each new policy creation.
 
@@ -153,7 +153,7 @@ interface ITIP403Registry {
     /// @param policyId Policy ID to check against
     /// @param user Address to check
     /// @return True if authorized, false if blocked
-    /// @dev From T6, ReceivePolicyGuard is authorized under every policyId; the rules below apply to all other addresses.
+    /// @dev ReceivePolicyGuard is authorized under every policyId; the rules below apply to all other addresses.
     /// For policyId = 0 (always-reject): Always returns false
     /// For policyId = 1 (always-allow): Always returns true
     /// For whitelist policies: Returns true if address is in the whitelist, false otherwise
@@ -242,9 +242,9 @@ interface ITIP403Registry {
 
 The registry's `tokenTransferPolicyId(token)` returns `(isSet, policyId)`. When `isSet` is true, that binding is authoritative for the token's transfer policy. `TIP20.transferPolicyId()` returns the effective policy ID. Transfers check `isAuthorizedSender()` for the source and `isAuthorizedRecipient()` for the resolved destination. Mints check `isAuthorizedMintRecipient()` for the resolved destination. The policy to use for the token can only be set by the admin of the token.
 
-**Default Policy:** From T9, token creation registers a binding with `isSet = true` and `policyId = 1` (always-allow). Tokens created before T9 store `policyId = 1` in the token-local field and have no binding until migrated.
+**Default Policy:** Token creation registers a binding with `isSet = true` and `policyId = 1` (always-allow).
 
-**Policy Changes:** From T9, the token admin's `changeTransferPolicyId()` updates the registry binding (before T9 it wrote the token-local field). All subsequent policy checks use the new policy. The binding is an internal protocol write; ordinary callers cannot set an arbitrary token's binding.
+**Policy Changes:** The token admin's `changeTransferPolicyId()` updates the registry binding. All subsequent policy checks use the new policy. The binding is an internal protocol write; ordinary callers cannot set an arbitrary token's binding.
 
 **Unset bindings:** If `isSet` is false, both `tokenTransferPolicyId(token).policyId` and the token's `transferPolicyId()` getter return the token-local policy value. `migrateTransferPolicyIds(tokens)` permissionlessly registers that same effective value and clears the token-local slot, skipping invalid or already-registered tokens and returning the number registered. It MUST NOT change transfer authorization.
 
@@ -269,7 +269,7 @@ token.changeTransferPolicyId(policyId);
 
 ### Authorization Logic
 
-For an existing simple policy, `isAuthorized()` implements the logic below. From T2, an unknown policy ID reverts with `PolicyNotFound`; before T2 it returned `false`. From T6, ReceivePolicyGuard is authorized before this logic runs. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
+For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. ReceivePolicyGuard is authorized before this logic runs. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
 
 ```solidity
 if (policyId < 2) {
