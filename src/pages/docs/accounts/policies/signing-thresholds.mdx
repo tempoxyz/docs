@@ -44,7 +44,7 @@ The passkey approves alone. The backup and recovery keys approve together. Eithe
 
 Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, configuration updates, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it. Each pays alone within its limits.
 
-An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits. Once the signers authorize one, it can pay and authorize other access keys without reaching the threshold. Authorize one only if you'd let that single key act for the whole account.
+An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits. Once the signers authorize one, it can pay and authorize other access keys without reaching the threshold. Authorize one only if you'd let that single key act for the whole account. From [T14](/docs/protocol/upgrades/t14), Tempo rejects new admin access keys, so add a trusted device as a signer instead.
 
 To change signers or the threshold, send a [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer), approved at the current threshold.
 
