@@ -95,6 +95,8 @@ const interactiveDescriptions: Record<string, string> = {
     'In the interactive web page, create a private-key account on the Tempo Accounts devnet, fund it from the faucet, and pay 1 AlphaUSD with it. Then upgrade it in place to a configurable account with the original key and a new backup key as signers and a threshold of 2. A payment signed by the original key alone is rejected, and a payment approved by both signers succeeds. The address and balance stay the same. Each step is a real devnet transaction.',
   AccountSandbox:
     'In the interactive web page, create a Tempo account on the Tempo Accounts devnet from its first signer: a passkey or a generated private key. Then get test funds, add signers, set weights and the threshold, authorize access keys with limits, and send payments. Every change is a real devnet transaction, so the page must be able to reach Tempo Accounts devnet.',
+  ConfigurableAccountsDemo:
+    'In the interactive web page, four examples run a real account on the Tempo Accounts devnet: a team multisig where one approver is rejected and two send a payment, recovering access after a lost passkey, upgrading a single-key account at the same address, and an open sandbox to add signers, set weights and the threshold, and send payments. The page must be able to reach Tempo Accounts devnet.',
   AdminKeyDemo:
     'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   SupportedRoutesTable:

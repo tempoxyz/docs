@@ -1,41 +1,33 @@
 ---
 title: Configurable Accounts
 seoTitle: "Configurable Accounts and the T14 Network Upgrade | Tempo Docs"
-description: See what changes with configurable accounts and the T14 network upgrade, what existing integrations need to do, and try a team multisig, account recovery, or an account upgrade on the devnet.
+description: See what configurable accounts let you build, from team multisigs and account recovery to account upgrades, try them on the devnet, and check what the T14 network upgrade means for existing integrations.
 interactive: true
 ---
 
-import { Card, Cards, Tab, Tabs } from 'vocs'
-import { AccountSandbox } from '../../../components/guides/AccountSandbox'
-import { UpgradeAccountDemo } from '../../../components/guides/UpgradeAccountDemo'
+import { Card, Cards } from 'vocs'
+import { ConfigurableAccountsDemo } from '../../../components/guides/ConfigurableAccountsDemo'
 
 # Configurable Accounts
 
-This page walks through what's possible and what changes with configurable accounts and the T14 network upgrade.
-
-<span id="terms" />
+This page walks through what configurable accounts let you build, how to try them, and what changes for existing integrations with the T14 network upgrade.
 
 ## Overview
 
 A configurable account is a Tempo account with several signers, each with a weight. A transaction runs once its approvers' weights reach the account's threshold, such as any 2 of 3, which makes it a multisig. The signers can change, but the address, balances, and history stay the same.
 
-<span id="admin-access-keys-removed" />
+A [single-key account](/docs/development/single-key-accounts) has one key, and losing that key loses the account. Configurable accounts arrive on testnet and mainnet with the [T14 network upgrade](/docs/protocol/upgrades/t14), and run on the Tempo Accounts devnet today.
 
-## What Changes With T14
+## Terms
 
-- **Configurable Accounts:** Accounts can have several signers and a threshold, and replace signers at the same address.
-- **Single-Key Accounts:** Existing accounts keep working unchanged. Upgrading one to a configurable account is optional.
-- **Admin Access Keys:** Tempo rejects new [admin access keys](/docs/accounts/access-keys/admin-access-keys). Existing ones keep paying as access keys without limits, and only an account's own key or its signers manage its access keys.
-
-### Migrate Admin Access Keys
-
-If you use admin access keys to manage a user's other keys, change that before T14:
-
-1. Add the device that held the admin key as a [signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer).
-2. Revoke the admin keys you no longer need, since they keep paying without limits.
-3. [Contact us](https://tempo.xyz/contact) to plan the change.
-
-Single-key accounts and limited access keys need no changes.
+| Term | Meaning |
+| --- | --- |
+| Configurable account | A Tempo account whose signers, weights, and threshold can change at the same address. |
+| Signer | A [passkey, device key, or private key](/docs/accounts/authentication) that approves the account's transactions. Viem calls it an owner. |
+| Threshold | The total signer weight a transaction needs. See [Signing Thresholds](/docs/accounts/policies/signing-thresholds). |
+| Multisig | A configurable account whose threshold needs more than one signer. It isn't a separate account type. |
+| Configuration update | One transaction that replaces the signers and threshold. See [Account Configuration](/docs/accounts/account-configuration). |
+| Access key | A key that pays for the account on its own, within limits. See [Access Keys](/docs/accounts/access-keys). |
 
 <span id="whats-possible" />
 <span id="team-multisig" />
@@ -62,24 +54,26 @@ Single-key accounts and limited access keys need no changes.
 
 Each example runs a real account on the Tempo Accounts devnet. Balances shown before you start are example data.
 
-<Tabs stateKey="configurable-accounts-demo">
-  <Tab title="Team Multisig">
-    <AccountSandbox preset="team-treasury" variant="compact" lesson={{ start: 'Start the demo to create Acme’s treasury on the devnet with test funds. Then pick one approver and send $50, which Tempo rejects, and send again with two.' }} />
-  </Tab>
-  <Tab title="Recover Access">
-    <AccountSandbox preset="recover" variant="compact" lesson={{ start: 'Start the demo to create Maya’s account. Her passkey approves alone, and her backup key and recovery provider approve together. Then lose the passkey, replace it, and pay again.' }} />
-  </Tab>
-  <Tab title="Upgrade an Account">
-    Upgrade a single-key account, then check that its address and balance stay the same.
+<ConfigurableAccountsDemo />
 
-    <UpgradeAccountDemo />
-  </Tab>
-  <Tab title="Explore Freely">
-    Pick a first signer to create an account, then add signers, authorize access keys, and send payments.
+<span id="what-changes-with-t14" />
+<span id="admin-access-keys-removed" />
 
-    <AccountSandbox />
-  </Tab>
-</Tabs>
+## Integration Impact
+
+T14 adds configurable accounts without changing existing ones. See the [T14 Network Upgrade](/docs/protocol/upgrades/t14) page for every integration change.
+
+- **Single-Key Accounts:** Existing accounts keep working unchanged. Upgrading one to a configurable account is optional.
+- **Limited Access Keys:** Keep working unchanged.
+- **Admin Access Keys:** Tempo rejects new [admin access keys](/docs/accounts/access-keys/admin-access-keys). Existing ones keep paying as access keys without limits, and only an account's own key or its signers manage its access keys.
+
+### Migrate Admin Access Keys
+
+If you use admin access keys to manage a user's other keys, change that before T14:
+
+1. Add the device that held the admin key as a [signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer).
+2. Revoke the admin keys you no longer need, since they keep paying without limits.
+3. [Contact us](https://tempo.xyz/contact) to plan the change.
 
 ## Get Started
 
