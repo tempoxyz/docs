@@ -35,3 +35,11 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 | [TIP-1113](https://tips.sh/1113) | Upgrading a single-key account in place |
 
 The specifications are under review and may change before T14 activates. Try the behavior now on the [devnet](/docs/accounts/create#connect-to-the-devnet), and see [Configurable accounts](/docs/development/configurable-accounts) for the Tempo EVM reference.
+
+## Integration impact
+
+- **Existing accounts:** single-key accounts and limited access keys keep working unchanged. Upgrading an account to a configurable account is optional.
+- **Admin access keys:** Tempo rejects new [admin access keys](/docs/accounts/access-keys/admin-access-keys), and only an account's own key or its signers authorize, change, or revoke its access keys. Admin keys authorized before T14 keep paying as access keys without limits. If you use an admin key to manage a user's other keys, [add that device as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) instead, revoke admin keys you no longer need, and [contact us](https://tempo.xyz/contact) to plan the change before T14.
+- **Account upgrades:** until T14 activates on a network, an account upgrade transaction there charges its fee and changes nothing. Send upgrades only after activation.
+- **Signature parsing:** configurable accounts sign with the [`0x05` multisig signature](/docs/development/configurable-accounts#multisig-signature-format). Viem builds and reads it. If you parse or verify Tempo transaction signatures yourself, handle this type. It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
+- **Contracts that check signatures:** to check that a configurable account approved a message, call `verifyMultisig` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract) rather than recovering a single signer.
