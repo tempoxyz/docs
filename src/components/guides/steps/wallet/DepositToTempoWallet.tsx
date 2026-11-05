@@ -26,7 +26,7 @@ export function DepositToTempoWallet(props: DemoStepProps) {
         request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
       }
       // The wallet runs each request on the app's current chain, and the guides connect on
-      // Moderato, so fund on mainnet and switch back for the other demos.
+      // testnet, so fund on mainnet and switch back for the other demos.
       const previousChainId = chainId
       if (previousChainId !== tempo.id)
         await switchChain.switchChainAsync({ chainId: tempo.id, connector })

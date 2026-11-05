@@ -260,7 +260,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
             {mode === 'deposit' ? 'Deposit into a test vault' : 'Withdraw from the test vault'}
           </span>
         }
-        headerRight={<span {...ui.earnDepositDemoText2()}>Moderato testnet</span>}
+        headerRight={<span {...ui.earnDepositDemoText2()}>Testnet</span>}
         footer={<span>Test tokens only. This vault does not demonstrate or promise a return.</span>}
       >
         <div {...ui.earnDepositDemoLayout()} aria-busy={pending !== null}>

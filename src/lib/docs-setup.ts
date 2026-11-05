@@ -1,7 +1,7 @@
 export const docsSetupChoices = [
   {
     title: 'Connect to Tempo',
-    description: 'Find RPC endpoints and chain IDs, then fund a test account on Moderato.',
+    description: 'Find RPC endpoints and chain IDs, then fund a test account on testnet.',
     icon: 'network',
     links: [
       ['RPC and chain IDs', '/docs/quickstart/connection-details'],
