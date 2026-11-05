@@ -650,6 +650,7 @@ export default defineConfig({
         text: 'Getting Started',
         items: [
           { text: 'Introduction', link: '/docs/accounts' },
+          { text: 'Configurable Accounts', link: '/docs/accounts/configurable-accounts' },
           { text: 'How It Works', link: '/docs/accounts/how-it-works' },
           { text: 'Use Cases', link: '/docs/accounts/use-cases' },
           { text: 'Security', link: '/docs/accounts/security' },
