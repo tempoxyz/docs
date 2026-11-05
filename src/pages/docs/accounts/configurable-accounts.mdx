@@ -1,7 +1,7 @@
 ---
 title: Configurable Accounts
 seoTitle: "Configurable Accounts and the T14 Network Upgrade | Tempo Docs"
-description: What configurable accounts make possible, what changes when they reach testnet and mainnet with the T14 network upgrade, and how to try them on the devnet today.
+description: What configurable accounts make possible and what changes with the T14 network upgrade, from team multisigs and account recovery to the removal of admin access keys.
 interactive: true
 ---
 
@@ -10,54 +10,41 @@ import { AccountSandbox } from '../../../components/guides/AccountSandbox'
 
 # Configurable Accounts
 
-This page walks through what configurable accounts make possible, what changes when they arrive with the T14 network upgrade, and how to try them today.
+This page walks through what configurable accounts make possible and what changes with the T14 network upgrade.
 
 ## Overview
 
 A configurable account is a Tempo account with several signers. Each signer has a weight, and a transaction runs once the weights of its approvers reach the account's threshold, such as any 2 of 3. The signers can change, but the address, balances, and history stay the same.
 
-Today, every account on mainnet and testnet is a [single-key account](/docs/development/single-key-accounts): one key controls it, and losing that key loses the account. Configurable accounts run on the [Tempo Accounts devnet](#try-it-on-the-devnet) now, and reach testnet and mainnet with [T14](/docs/protocol/upgrades/t14).
+A [single-key account](/docs/development/single-key-accounts) has one key, and losing that key loses the account. Configurable accounts arrive with the [T14 network upgrade](/docs/protocol/upgrades/t14).
 
 ## Terms
 
-| Term | Meaning |
-| --- | --- |
-| Configurable account | A Tempo account whose signers, weights, and threshold can change at the same address. |
-| Signer | A [passkey, device key, or private key](/docs/accounts/authentication) that approves the account's transactions. Viem calls it an owner. |
-| Threshold | The total signer weight a transaction needs. See [Signing Thresholds](/docs/accounts/policies/signing-thresholds). |
-| Multisig | A configurable account whose threshold needs more than one signer. It isn't a separate account type. |
-| Configuration update | One transaction that replaces the signers and threshold. See [Account Configuration](/docs/accounts/account-configuration). |
-| Access key | A key that pays for the account on its own, within limits. See [Access Keys](/docs/accounts/access-keys). |
+- **Signer:** A [passkey, device key, or private key](/docs/accounts/authentication) that approves the account's transactions. Viem calls it an owner.
+- **Threshold:** The total signer weight a transaction needs, set with each signer's [weight](/docs/accounts/policies/signing-thresholds).
+- **Multisig:** A configurable account whose threshold needs more than one signer. It isn't a separate account type.
+- **Configuration update:** One transaction that replaces the signers and threshold at the same address.
+- **Access key:** A key that pays for the account on its own, within the [limits](/docs/accounts/access-keys) you set.
 
-## What's Possible
+## What Changes With T14
 
-| Use case | What it does | Guide |
+| Change | What it does | Guide |
 | --- | --- | --- |
 | Team multisig | Any two of three approvers sign each payment, so no one moves funds alone. | [Set Up a Team Multisig](/docs/accounts/custodians/team-multisig) |
 | Account recovery | The remaining signers replace a lost passkey or key, at the same address. | [Recover a User's Account](/docs/accounts/apps/recover-an-account) |
 | Key rotation and offboarding | Swap a key or remove an approver in one update, without moving funds. | [Configuration Updates](/docs/accounts/account-configuration/configuration-updates) |
-| Upgrade an existing account | Add backup signers to a single-key account, keeping its address and balances. | [Account Upgrade](/docs/accounts/account-configuration/account-upgrade) |
+| Account upgrade | Adds backup signers to a single-key account, keeping its address and balances. Accounts that don't upgrade keep working unchanged. | [Account Upgrade](/docs/accounts/account-configuration/account-upgrade) |
 | Self-custodial wallets with a provider | Your provider's key and the user's passkey approve together, and the user can leave without you. | [Self-Custodial Wallets](/docs/accounts/apps/self-custodial-wallets) |
 | A team account as an access key | A team's configurable account acts as another account's access key, approving with its own signers. | [Account Keychain](/docs/development/account-keychain#access-key-types) |
+| Admin access keys removed | Tempo rejects new admin access keys. Existing ones keep paying as access keys without limits. | [Admin Access Keys](/docs/accounts/access-keys/admin-access-keys) |
 
-## What Changes With T14
+Single-key accounts and limited access keys need no changes. If you use admin access keys to manage a user's other keys, add that device as a signer instead, and [contact us](https://tempo.xyz/contact) to plan the change.
 
-T14 activates on testnet first, then on mainnet, on the dates in the [T14 timeline](/docs/protocol/upgrades/t14#timeline). Its scope may still change before activation.
+The specifications are [Configurable Accounts](https://tips.sh/1107), [Configurable Account Access Keys](https://tips.sh/1111), [Account Migration and Original-Key Retirement](https://tips.sh/1113), and [Remove Admin Access Keys](https://tips.sh/1137).
 
-| | Before T14 | From T14 |
-| --- | --- | --- |
-| Several signers and a threshold | Devnet only | Testnet and mainnet |
-| Existing single-key accounts | Unchanged | Keep working unchanged. Upgrading one is optional. |
-| Account upgrade transaction | Charges its fee and does nothing on testnet and mainnet | Turns the account into a configurable account |
-| [Admin access keys](/docs/accounts/access-keys/admin-access-keys) | Authorize, change, and revoke other access keys | Tempo rejects new admin keys. Existing ones keep paying as access keys without limits, and only the account's own key or its signers manage access keys. |
+## Try Configurable Accounts
 
-Single-key accounts and limited access keys need no changes. If you use admin access keys to manage a user's other keys, add that device as a signer instead, and [contact us](https://tempo.xyz/contact) to plan the change before T14.
-
-The specifications are [TIP-1107](https://tips.sh/1107) (configurable accounts), [TIP-1111](https://tips.sh/1111) (configurable accounts as access keys), [TIP-1113](https://tips.sh/1113) (account upgrade), and [TIP-1137](https://tips.sh/1137) (removing admin access keys).
-
-## Try It on the Devnet
-
-Pick a first signer to create a configurable account on the Tempo Accounts devnet, then add signers and send a payment. The demos on these pages run with no setup.
+Pick a first signer to create a configurable account, then add signers and send a payment. The demo runs with no setup.
 
 <AccountSandbox />
 
