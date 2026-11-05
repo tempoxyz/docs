@@ -45,6 +45,7 @@ import {
   type LogEntry,
   loadPreset,
   type Notice,
+  type PresetId,
   remainingLimit,
   removeSigner,
   requiredWeight,
@@ -99,6 +100,8 @@ export type AccountSandboxProps = {
   variant?: 'full' | 'compact'
   /** Defaults to on for the full variant and off for the compact variant. */
   showLog?: boolean
+  /** The example account to start from, such as a team treasury. Defaults to an empty account. */
+  preset?: PresetId
 }
 
 /**
@@ -106,13 +109,13 @@ export type AccountSandboxProps = {
  * reader adds creates it. Every signer, key, and payment is real there; nothing is simulated.
  */
 export function AccountSandbox(props: AccountSandboxProps) {
-  const { variant = 'full', showLog = variant === 'full' } = props
+  const { variant = 'full', showLog = variant === 'full', preset = 'from-scratch' } = props
   const network = useNetwork()
   // It sits under the page's own title, and its address line names the network.
   return (
     <Container>
       {network.ready ? (
-        <Playground network={network} showLog={showLog} variant={variant} />
+        <Playground network={network} preset={preset} showLog={showLog} variant={variant} />
       ) : (
         <div {...accountSandbox({ className: 'account-sandbox' })} data-variant={variant}>
           <p className="as-gate" role="status">
@@ -533,9 +536,14 @@ function SignerChooser(props: {
 }
 
 /** The reader's account: its state, then what they can do to it. It starts with no signers. */
-function Playground(props: { network: Network; showLog: boolean; variant: 'full' | 'compact' }) {
-  const { network, showLog, variant } = props
-  const [account, setAccount] = React.useState(() => loadPreset('from-scratch'))
+function Playground(props: {
+  network: Network
+  preset: PresetId
+  showLog: boolean
+  variant: 'full' | 'compact'
+}) {
+  const { network, preset, showLog, variant } = props
+  const [account, setAccount] = React.useState(() => loadPreset(preset))
   const [before, setBefore] = React.useState<SandboxAccount | null>(null)
   const health = React.useMemo(() => analyzeAccount(account), [account])
   const diff = before ? diffAccounts(before, account) : undefined
@@ -779,10 +787,10 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
         </fieldset>
 
         <section className="as-panel" aria-label="Try it">
-          {created && !funded && fundTried && !network.status && (
+          {created && !funded && (fundTried || !account.devnet) && !network.status && (
             <div className="as-fund">
               <button type="button" className="as-button as-button-primary" onClick={fund}>
-                Get test funds
+                {account.devnet ? 'Get test funds' : 'Create this account on devnet'}
               </button>
             </div>
           )}
