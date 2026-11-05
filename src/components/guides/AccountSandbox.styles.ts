@@ -606,7 +606,10 @@ export const accountSandbox = style({
       opacity: 0,
       cursor: 'pointer',
     },
-    '& .as-fund, & .as-upgrade': {
+    '& .as-start p': {
+      margin: 0,
+    },
+    '& .as-fund, & .as-upgrade, & .as-start': {
       display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'center',

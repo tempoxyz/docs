@@ -1,11 +1,11 @@
 ---
 title: Configurable Accounts
 seoTitle: "Configurable Accounts and the T14 Network Upgrade | Tempo Docs"
-description: Try what configurable accounts make possible with the T14 network upgrade, from team multisigs and account recovery to key rotation, account upgrades, and the removal of admin access keys.
+description: See what changes with configurable accounts and the T14 network upgrade, what existing integrations need to do, and try a team multisig, account recovery, or an account upgrade on the devnet.
 interactive: true
 ---
 
-import { Card, Cards } from 'vocs'
+import { Card, Cards, Tab, Tabs } from 'vocs'
 import { AccountSandbox } from '../../../components/guides/AccountSandbox'
 import { UpgradeAccountDemo } from '../../../components/guides/UpgradeAccountDemo'
 
@@ -13,91 +13,84 @@ import { UpgradeAccountDemo } from '../../../components/guides/UpgradeAccountDem
 
 This page walks through what's possible and what changes with configurable accounts and the T14 network upgrade.
 
+<span id="terms" />
+
 ## Overview
 
-A configurable account is a Tempo account with several signers. Each signer has a weight, and a transaction runs once the weights of its approvers reach the account's threshold, such as any 2 of 3. The signers can change, but the address, balances, and history stay the same.
+A configurable account is a Tempo account with several signers, each with a weight. A transaction runs once its approvers' weights reach the account's threshold, such as any 2 of 3, which makes it a multisig. The signers can change, but the address, balances, and history stay the same.
 
-A [single-key account](/docs/development/single-key-accounts) has one key, and losing that key loses the account. Configurable accounts arrive with the [T14 network upgrade](/docs/protocol/upgrades/t14).
+<span id="admin-access-keys-removed" />
 
-Each demo on this page runs a real account on the Tempo Accounts devnet, with no setup.
+## What Changes With T14
 
-## Terms
+- **Configurable Accounts:** Accounts can have several signers and a threshold, and replace signers at the same address.
+- **Single-Key Accounts:** Existing accounts keep working unchanged. Upgrading one to a configurable account is optional.
+- **Admin Access Keys:** Tempo rejects new [admin access keys](/docs/accounts/access-keys/admin-access-keys). Existing ones keep paying as access keys without limits, and only an account's own key or its signers manage its access keys.
 
-- **Signer:** A [passkey, device key, or private key](/docs/accounts/authentication) that approves the account's transactions. Viem calls it an owner.
-- **Threshold:** The total signer weight a transaction needs, set with each signer's [weight](/docs/accounts/policies/signing-thresholds).
-- **Multisig:** A configurable account whose threshold needs more than one signer. It isn't a separate account type.
-- **Configuration update:** One transaction that replaces the signers and threshold at the same address.
-- **Access key:** A key that pays for the account on its own, within the [limits](/docs/accounts/access-keys) you set.
+### Migrate Admin Access Keys
 
-## Team Multisig
+If you use admin access keys to manage a user's other keys, change that before T14:
 
-Finance, operations, and a controller each hold a signer, and any two approve each payment. No one moves funds alone. Send a payment with one approver, then with two.
+1. Add the device that held the admin key as a [signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer).
+2. Revoke the admin keys you no longer need, since they keep paying without limits.
+3. [Contact us](https://tempo.xyz/contact) to plan the change.
 
-<AccountSandbox preset="team-treasury" variant="compact" />
+Single-key accounts and limited access keys need no changes.
 
-Build it with [Set Up a Team Multisig](/docs/accounts/custodians/team-multisig).
+<span id="whats-possible" />
+<span id="team-multisig" />
+<span id="multi-factor-accounts" />
+<span id="account-recovery" />
+<span id="key-rotation" />
+<span id="self-custodial-wallets" />
+<span id="account-upgrade" />
 
-## Multi-Factor Accounts
+## What You Can Build
 
-A user's passkey approves alone, and a backup key and a recovery provider approve together. Losing any one signer doesn't lock the account.
+- **Team Multisig:** Any two of three approvers sign each payment, so no one moves funds alone. See [Set Up a Team Multisig](/docs/accounts/custodians/team-multisig).
+- **Account Recovery:** A backup key and a recovery provider replace a lost passkey at the same address. See [Recover a User's Account](/docs/accounts/apps/recover-an-account).
+- **Key Rotation:** Swap a key or remove an approver in one update, without moving funds. See [Configuration Updates](/docs/accounts/account-configuration/configuration-updates).
+- **Account Upgrade:** Add backup signers to a single-key account, keeping its address and balances. See [Account Upgrade](/docs/accounts/account-configuration/account-upgrade).
+- **Self-Custodial Wallets:** A provider's key and the user's passkey approve together, and the user can leave the provider. See [Set Up a Self-Custodial Wallet](/docs/accounts/apps/self-custodial-wallets).
+- **Team Account as an Access Key:** A team's configurable account pays for another account, approving with its own signers. See [Access Keys](/docs/accounts/access-keys).
 
-<AccountSandbox preset="multi-factor" variant="compact" />
+<span id="try-configurable-accounts" />
+<span id="try-it-on-the-devnet" />
+<span id="build-your-own" />
 
-[Signing Thresholds](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) lists the recommended setups.
+## Try It
 
-## Account Recovery
+Each example runs a real account on the Tempo Accounts devnet. Balances shown before you start are example data.
 
-The remaining signers replace a lost passkey in one configuration update, at the same address. Replace the passkey, then pay with the new one.
+<Tabs stateKey="configurable-accounts-demo">
+  <Tab title="Team Multisig">
+    <AccountSandbox preset="team-treasury" variant="compact" lesson={{ start: 'Start the demo to create Acme’s treasury on the devnet with test funds. Then pick one approver and send $50, which Tempo rejects, and send again with two.' }} />
+  </Tab>
+  <Tab title="Recover Access">
+    <AccountSandbox preset="recover" variant="compact" lesson={{ start: 'Start the demo to create Maya’s account. Her passkey approves alone, and her backup key and recovery provider approve together. Then lose the passkey, replace it, and pay again.' }} />
+  </Tab>
+  <Tab title="Upgrade an Account">
+    Upgrade a single-key account, then check that its address and balance stay the same.
 
-<AccountSandbox preset="recover" variant="compact" />
+    <UpgradeAccountDemo />
+  </Tab>
+  <Tab title="Explore Freely">
+    Pick a first signer to create an account, then add signers, authorize access keys, and send payments.
 
-Build it with [Recover a User's Account](/docs/accounts/apps/recover-an-account).
+    <AccountSandbox />
+  </Tab>
+</Tabs>
 
-## Key Rotation
+## Get Started
 
-Swap a key or remove an approver in one update, without moving funds. Rotate the operations key, and the old key stops approving.
+Your own app needs an RPC key to reach the devnet. [Contact us](https://tempo.xyz/contact) for one. The specifications are [Configurable Accounts](https://tips.sh/1107), [Configurable Account Access Keys](https://tips.sh/1111), [Account Migration and Original-Key Retirement](https://tips.sh/1113), and [Remove Admin Access Keys](https://tips.sh/1137).
 
-<AccountSandbox preset="rotate-keys" variant="compact" />
-
-Build it with [Configuration Updates](/docs/accounts/account-configuration/configuration-updates).
-
-## Self-Custodial Wallets
-
-A wallet provider's key and the user's own signers share the account, and the user can leave the provider without moving funds. Move the account from its provider to the user's wallet.
-
-<AccountSandbox preset="export" variant="compact" />
-
-Build it with [Set Up a Self-Custodial Wallet](/docs/accounts/apps/self-custodial-wallets).
-
-## Account Upgrade
-
-An existing single-key account becomes a configurable account at the same address, keeping its balances. Accounts that don't upgrade keep working unchanged.
-
-<UpgradeAccountDemo />
-
-Build it with [Account Upgrade](/docs/accounts/account-configuration/account-upgrade).
-
-## Admin Access Keys Removed
-
-T14 removes [admin access keys](/docs/accounts/access-keys/admin-access-keys). Tempo rejects new ones, and existing ones keep paying as access keys without limits. To let a second device manage keys, add it as a signer instead.
-
-Single-key accounts and limited access keys need no changes. If you use admin access keys today, [contact us](https://tempo.xyz/contact) to plan the change.
-
-## Build Your Own
-
-Pick a first signer to create an account, then add signers, authorize access keys, and send payments.
-
-<AccountSandbox />
-
-Your own app needs an RPC key to reach the devnet. [Contact us](https://tempo.xyz/contact) for one, then follow [Create an Account](/docs/accounts/create#create-a-configurable-account) to create one in code.
-
-The specifications are [Configurable Accounts](https://tips.sh/1107), [Configurable Account Access Keys](https://tips.sh/1111), [Account Migration and Original-Key Retirement](https://tips.sh/1113), and [Remove Admin Access Keys](https://tips.sh/1137).
-
-## Related
+<span id="related" />
 
 <Cards>
   <Card title="Create an Account" description="Use for creating a configurable account in code and connecting to the devnet." to="/docs/accounts/create#create-a-configurable-account" />
-  <Card title="Account Configuration" description="Covers adding, removing, and rotating signers while the address stays the same." to="/docs/accounts/account-configuration" />
-  <Card title="Access Keys" description="Covers keys that pay for an account on their own, including a team account as another account's access key." to="/docs/accounts/access-keys" />
+  <Card title="Set Up a Team Multisig" description="Use for an account where any two of three approvers sign each payment." to="/docs/accounts/custodians/team-multisig" />
+  <Card title="Recover a User's Account" description="Use for replacing a lost passkey at the same address." to="/docs/accounts/apps/recover-an-account" />
+  <Card title="Account Upgrade" description="Use for adding signers to a single-key account." to="/docs/accounts/account-configuration/account-upgrade" />
   <Card title="Configurable Accounts Reference" description="Covers the protocol reference for signers, updates, and addresses." to="/docs/development/configurable-accounts" />
 </Cards>

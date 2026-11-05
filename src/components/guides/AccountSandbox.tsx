@@ -102,20 +102,34 @@ export type AccountSandboxProps = {
   showLog?: boolean
   /** The example account to start from, such as a team treasury. Defaults to an empty account. */
   preset?: PresetId
+  /**
+   * A focused lesson on a preset: only the controls it needs, a Start demo step first, and
+   * payments below the threshold allowed so the reader sees them rejected.
+   */
+  lesson?: SandboxLesson
 }
+
+/** What the reader does in a focused example, shown with its Start demo button. */
+export type SandboxLesson = { start: string }
 
 /**
  * Create the reader's account on the Tempo Accounts devnet: it starts with no signers, and the first one the
  * reader adds creates it. Every signer, key, and payment is real there; nothing is simulated.
  */
 export function AccountSandbox(props: AccountSandboxProps) {
-  const { variant = 'full', showLog = variant === 'full', preset = 'from-scratch' } = props
+  const { variant = 'full', showLog = variant === 'full', preset = 'from-scratch', lesson } = props
   const network = useNetwork()
   // It sits under the page's own title, and its address line names the network.
   return (
     <Container>
       {network.ready ? (
-        <Playground network={network} preset={preset} showLog={showLog} variant={variant} />
+        <Playground
+          network={network}
+          preset={preset}
+          lesson={lesson}
+          showLog={showLog}
+          variant={variant}
+        />
       ) : (
         <div {...accountSandbox({ className: 'account-sandbox' })} data-variant={variant}>
           <p className="as-gate" role="status">
@@ -539,10 +553,12 @@ function SignerChooser(props: {
 function Playground(props: {
   network: Network
   preset: PresetId
+  lesson: SandboxLesson | undefined
   showLog: boolean
   variant: 'full' | 'compact'
 }) {
-  const { network, preset, showLog, variant } = props
+  const { network, preset, lesson, showLog, variant } = props
+  const guided = Boolean(lesson)
   const [account, setAccount] = React.useState(() => loadPreset(preset))
   const [before, setBefore] = React.useState<SandboxAccount | null>(null)
   const health = React.useMemo(() => analyzeAccount(account), [account])
@@ -576,9 +592,12 @@ function Playground(props: {
   const owners = configuredSigners(account)
   // An example's own step, each a real update. Adding a backup is the same as Add signer, and
   // losing a passkey sends nothing, so neither is offered here.
+  // A focused lesson offers Lose the passkey, which only marks it lost here.
   const steps = guidedActions(account).filter(
-    (item) => item.id !== 'add-backup' && item.id !== 'lose-passkey',
+    (item) => item.id !== 'add-backup' && (guided || item.id !== 'lose-passkey'),
   )
+  /** In a lesson, payments and keys show without the access keys it doesn't cover. */
+  const view = guided ? { ...account, accessKeys: [] } : account
 
   /** Whether the automatic faucet call ran; if it left no funds, Get test funds retries. */
   const [fundTried, setFundTried] = React.useState(false)
@@ -667,6 +686,26 @@ function Playground(props: {
     return outcome.result
   }
 
+  /** The example's own steps, such as Replace the passkey. */
+  const stepButtons = steps.length > 0 && (
+    <div className="as-choices">
+      {steps.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          className="as-button"
+          onClick={() =>
+            item.id === 'lose-passkey'
+              ? setAccount(runGuidedAction(account, item.id))
+              : change(runGuidedAction(account, item.id))
+          }
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  )
+
   const edit: AccountEdit | undefined = editable
     ? {
         threshold: (
@@ -711,20 +750,7 @@ function Playground(props: {
         ),
         signersFooter: (
           <>
-            {steps.length > 0 && (
-              <div className="as-choices">
-                {steps.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="as-button"
-                    onClick={() => change(runGuidedAction(account, item.id))}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            {stepButtons}
             <AddSelect
               label="Add signer"
               disabled={owners.length >= sandboxLimits.maxSandboxOwners}
@@ -761,6 +787,17 @@ function Playground(props: {
         ),
       }
     : undefined
+  /** A lesson keeps only its own steps: no weights, removal, new signers, or access keys. */
+  const shownEdit: AccountEdit | undefined =
+    guided && edit
+      ? {
+          threshold: <span className="as-note">threshold {account.threshold}</span>,
+          signerControls: () => null,
+          keyControls: () => null,
+          signersFooter: stepButtons,
+          keysFooter: null,
+        }
+      : edit
 
   return (
     <div
@@ -771,23 +808,36 @@ function Playground(props: {
       <fieldset className="as-lock" disabled={Boolean(network.status)}>
         <legend className="as-hidden">Your account</legend>
 
+        {lesson && !account.devnet && !network.status && (
+          <div className="as-start">
+            <p>{lesson.start}</p>
+            <button type="button" className="as-button as-button-primary" onClick={fund}>
+              Start demo
+            </button>
+          </div>
+        )}
+
         {/* Signers and keys change on their cards once the account has test funds for fees. */}
         <fieldset className="as-lock" disabled={created && !funded}>
           <legend className="as-hidden">Signers and access keys</legend>
           <AccountState
-            account={account}
+            account={view}
             health={health}
             diff={diff}
-            badge={networkBadge(network, account)}
+            badge={
+              networkBadge(network, account) ??
+              (preset === 'from-scratch' ? undefined : 'example data')
+            }
             pending={Boolean(network.status)}
             terse
-            edit={edit}
+            edit={shownEdit}
             secrets={secrets}
+            hideKeys={guided}
           />
         </fieldset>
 
         <section className="as-panel" aria-label="Try it">
-          {created && !funded && (fundTried || !account.devnet) && !network.status && (
+          {created && !funded && (fundTried || (!account.devnet && !guided)) && !network.status && (
             <div className="as-fund">
               <button type="button" className="as-button as-button-primary" onClick={fund}>
                 {account.devnet ? 'Get test funds' : 'Create this account on devnet'}
@@ -815,7 +865,12 @@ function Playground(props: {
               ) : (
                 <div className="as-panel-body">
                   <span className="as-label">Send a payment</span>
-                  <PayPanel key={account.presetId} account={account} onSubmit={submit} />
+                  <PayPanel
+                    key={account.presetId}
+                    account={view}
+                    onSubmit={submit}
+                    tryBelowThreshold={guided}
+                  />
                 </div>
               )}
             </fieldset>
@@ -874,8 +929,11 @@ export function AccountState(props: {
   secrets?: Record<string, string> | undefined
   /** A devnet request is running, such as getting test funds. */
   pending?: boolean | undefined
+  /** Leave out the access keys column, for a lesson that doesn't cover them. */
+  hideKeys?: boolean | undefined
 }) {
-  const { account, health, diff, badge, terse, onAddBackup, edit, secrets, pending } = props
+  const { account, health, diff, badge, terse, onAddBackup, edit, secrets, pending, hideKeys } =
+    props
   const signers = account.signers.filter(
     (signer) => !signer.revoked || diff?.signers[signer.id]?.change === 'removed',
   )
@@ -947,27 +1005,29 @@ export function AccountState(props: {
           )}
           {edit?.signersFooter}
         </div>
-        <div>
-          <div className="as-column-head">
-            <span className="as-label">Access keys</span>
+        {!hideKeys && (
+          <div>
+            <div className="as-column-head">
+              <span className="as-label">Access keys</span>
+            </div>
+            {keys.length > 0 ? (
+              <ul className="as-state-list">
+                {keys.map((key) => (
+                  <StateKey
+                    key={key.id}
+                    accessKey={key}
+                    change={diff?.keys[key.id]}
+                    secret={secrets?.[key.id]}
+                    controls={edit && key.status !== 'revoked' ? edit.keyControls(key) : undefined}
+                  />
+                ))}
+              </ul>
+            ) : (
+              !edit && <p className="as-slot">No access keys</p>
+            )}
+            {edit?.keysFooter}
           </div>
-          {keys.length > 0 ? (
-            <ul className="as-state-list">
-              {keys.map((key) => (
-                <StateKey
-                  key={key.id}
-                  accessKey={key}
-                  change={diff?.keys[key.id]}
-                  secret={secrets?.[key.id]}
-                  controls={edit && key.status !== 'revoked' ? edit.keyControls(key) : undefined}
-                />
-              ))}
-            </ul>
-          ) : (
-            !edit && <p className="as-slot">No access keys</p>
-          )}
-          {edit?.keysFooter}
-        </div>
+        )}
       </div>
 
       {/* Before the first signer, the empty slots say what to do; blocked actions still show. */}
@@ -1068,8 +1128,10 @@ function StateKey(props: {
 function PayPanel(props: {
   account: SandboxAccount
   onSubmit: (request: ActionRequest) => Promise<ActionResult>
+  /** Let the reader send with too little weight, so Tempo's threshold check rejects it. */
+  tryBelowThreshold?: boolean
 }) {
-  const { account, onSubmit } = props
+  const { account, onSubmit, tryBelowThreshold = false } = props
   const [chosenAmount, setAmount] = React.useState<number>(paymentAmount)
   const [payer, setPayer] = React.useState<Payer>({ type: 'signers', ids: [] })
   const [sent, setSent] = React.useState<{ result: ActionResult; amount: number } | null>(null)
@@ -1224,7 +1286,9 @@ function PayPanel(props: {
           <button
             type="button"
             className="as-button as-button-primary"
-            disabled={!result?.ok || busy}
+            disabled={
+              !(result?.ok || (tryBelowThreshold && result?.code === 'insufficient-weight')) || busy
+            }
             onClick={send}
           >
             {busy ? 'Sending…' : `Send $${formatUsd(amount)}`}
