@@ -26,6 +26,14 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 - **Upgrades from single-key accounts:** an existing single-key account becomes a configurable account at the same address. See [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
 - **Configurable accounts as access keys:** a team's configurable account can act as another account's access key, approving with its own signers. See [Account Keychain](/docs/development/account-keychain#access-key-types).
 
+## T14 validator changes
+
+T14 adds checks on validator endpoints and block beneficiaries. Upgrade every validator to the T14 release before each activation.
+
+- **Endpoint format:** `addValidator`, `rotateValidator`, and `setIpAddresses` revert with `InvalidIp` when an ingress or egress address is longer than 255 bytes. They also revert for the IPv4-mapped IPv6 form, such as `::ffff:192.0.2.1`. Register the IPv4 form instead, such as `192.0.2.1`. Tempo doesn't recheck endpoints registered before T14.
+- **Fee recipient:** Tempo rejects a block whose beneficiary isn't the proposer's fee recipient in `ValidatorConfigV2`. Since `v1.7.0`, the node uses the [onchain fee recipient](/docs/guide/node/validator-lifecycle#update-the-fee-recipient), so a standard node needs no change. A registered zero address burns the fees.
+- **Consensus verification:** `--consensus.verification-mode` defaults to `hardfork`. It switches from immediate to deferred verification at the first epoch boundary after T14. An explicit `immediate` or `deferred` setting still overrides the default.
+
 ## T14 specifications
 
 | Specification | What it covers |
@@ -33,5 +41,6 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 | [TIP-1107](https://tips.sh/1107) | Configurable accounts: configuration, address derivation, signature format, commitment storage, and owner updates |
 | [TIP-1111](https://tips.sh/1111) | Configurable accounts as access keys |
 | [TIP-1113](https://tips.sh/1113) | Upgrading a single-key account in place |
+| [TIP-1152](https://tips.sh/1152) | T14 meta TIP, including the validator endpoint, fee recipient, and consensus verification changes |
 
 The specifications are under review and may change before T14 activates. Try the behavior now on the [devnet](/docs/accounts/create#connect-to-the-devnet), and see [Configurable accounts](/docs/development/configurable-accounts) for the Tempo EVM reference.
