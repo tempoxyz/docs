@@ -1,16 +1,18 @@
 ---
 title: "T14 Network Upgrade"
 seoTitle: "T14 Network Upgrade | Tempo Docs"
-description: T14 is planned to bring configurable accounts to testnet and mainnet, with weighted signers and a threshold at one address, configuration updates, in-place upgrades from single-key accounts, and configurable accounts as access keys.
+description: T14 is planned to change how Tempo accounts are controlled, remove admin access keys, extend account changes to Zones, and tighten validator, consensus and Zone Portal rules.
 ---
 
 # T14 Network Upgrade
 
-T14 is the planned network upgrade that brings configurable accounts to testnet and mainnet.
+T14 is the planned network upgrade that changes how Tempo accounts are controlled, removes admin access keys, and tightens validator, consensus and Zone Portal rules.
 
 :::tip[T14 status]
-T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on December 1, 2026, both at 15:00 UTC. Its scope may still change before activation. Until T14 activates, configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on December 1, 2026, both at 15:00 UTC. Its scope may still change before activation. Until T14 activates, accounts with several signers run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 :::
+
+**Integration note:** T14 removes admin access keys. Admin keys authorized before T14 become regular access keys without limits and can no longer authorize, change or revoke other keys. [See admin access key removal](#t14-overview).
 
 ## Timeline
 
@@ -21,17 +23,21 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 
 ## T14 overview
 
-- **Configurable accounts:** each signer has a weight, and a transaction runs once the signing weights reach the account's threshold. The address stays the same when signers change. See [Tempo Accounts](/docs/accounts).
-- **Configuration updates:** the current signers replace the signer list and threshold in one transaction, at the same address. See [Account configuration](/docs/accounts/account-configuration).
-- **Upgrades from single-key accounts:** an existing single-key account becomes a configurable account at the same address. See [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
-- **Configurable accounts as access keys:** a team's configurable account can act as another account's access key, approving with its own signers. See [Account Keychain](/docs/development/account-keychain#access-key-types).
+- **Changes to accounts:** one address can be controlled by several signers, each with a weight, and a transaction runs once the signing weights reach the account's threshold. Signers and the threshold can change at the same address, an existing single-key account can upgrade in place, and such an account can act as another account's access key. See [Configurable accounts](/docs/development/configurable-accounts).
+- **Admin access keys removed:** from T14, no key can become an admin key and only an account's root key manages its access keys. Admin keys authorized before T14 become regular access keys without limits. See [Admin access keys](/docs/accounts/access-keys/admin-access-keys).
+- **Account changes on Zones:** Zones read account configurations from Tempo, so accounts with several signers also work on Zones.
+- **Validator and consensus rules:** a block must pay the proposer's registered fee recipient, validator endpoints longer than 255 bytes or written as IPv4-mapped IPv6 addresses are rejected, and consensus defaults to deferred verification after the fork.
+- **Paused Zone Portals:** a paused Zone Portal rejects refund claims and batch settlement until it resumes.
 
 ## T14 specifications
 
 | Specification | What it covers |
 | --- | --- |
-| [TIP-1107](https://tips.sh/1107) | Configurable accounts: configuration, address derivation, signature format, commitment storage, and owner updates |
-| [TIP-1111](https://tips.sh/1111) | Configurable accounts as access keys |
+| [TIP-1107](https://tips.sh/1107) | Accounts with several signers: configuration, address derivation, signature format, commitment storage, and signer updates |
 | [TIP-1113](https://tips.sh/1113) | Upgrading a single-key account in place |
+| [TIP-1111](https://tips.sh/1111) | These accounts as access keys |
+| [TIP-1154](https://tips.sh/1154) | Support for these accounts on Zones |
+| [TIP-1137](https://tips.sh/1137) | Removing admin access keys |
+| [TIP-1152](https://tips.sh/1152) | T14 meta TIP: links every T14 change and specifies the validator, consensus and Zone Portal changes |
 
-The specifications are under review and may change before T14 activates. Try the behavior now on the [devnet](/docs/accounts/create#connect-to-the-devnet), and see [Configurable accounts](/docs/development/configurable-accounts) for the Tempo EVM reference.
+The specifications may change before T14 activates. Try the account changes now on the [devnet](/docs/accounts/create#connect-to-the-devnet), and see [Configurable accounts](/docs/development/configurable-accounts) for the Tempo EVM reference.
