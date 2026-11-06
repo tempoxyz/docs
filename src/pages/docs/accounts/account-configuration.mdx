@@ -102,7 +102,7 @@ The account has the same address on other EVM chains. A sender can pay it on the
 
 To keep a way to recover them, create the account from a fresh secp256k1 key instead ([TIP-1113](https://tips.sh/1113)). Before you share or fund its address, have that key [upgrade the account](/docs/accounts/account-configuration/account-upgrade) to its real signers, without listing itself. A fee payer can sponsor the upgrade. Tempo then retires the key, but it still controls the address on other chains.
 
-Keep that key offline and use it only to move mistaken transfers out. Applications that check signatures with `ecrecover` alone still accept it, so don't sign anything else with it.
+Keep that key offline and use it only to move mistaken transfers out. Contracts that try `ecrecover` before or instead of ERC-1271, such as OpenZeppelin `SignatureChecker`, still accept it, so don't sign anything else with it.
 
 <span id="changes" />
 

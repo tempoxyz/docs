@@ -36,7 +36,7 @@ The upgrade gives the account a list of signers, each with a weight. It also set
 
 Any single-key account can upgrade, whether its key is a standard secp256k1 key, a P-256 key, or a passkey. The upgrade costs 250,000 gas, which a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor.
 
-Tempo retires the original key. It can no longer sign transactions, TIP-20 permits, or fee sponsorships for the account, even ones it signed before the upgrade. The upgrade installs a one-byte code marker, so Permit2 and other contracts that check for code route signatures to the account's [ERC-1271 check](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). Contracts that check signatures with `ecrecover` alone may still accept the original key. It also still controls the address on other EVM chains.
+Tempo retires the original key. It can no longer sign transactions, TIP-20 permits, or fee sponsorships for the account, even ones it signed before the upgrade. The upgrade installs a one-byte code marker, so Permit2 and other contracts that check for code route signatures to the account's [ERC-1271 check](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). Contracts that try `ecrecover` before or instead of ERC-1271, such as OpenZeppelin `SignatureChecker`, still accept the original key. It also still controls the address on other EVM chains.
 
 <span id="choose-signers-and-threshold" />
 

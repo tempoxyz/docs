@@ -139,7 +139,7 @@ Changing keys protects an account only while its old keys are still safe. An att
 A retired key can also still act outside the account's own rules:
 
 - **On Other Chains:** A secp256k1 key controls the same address on other EVM chains, whatever happens to it on Tempo.
-- **In Contracts That Use `ecrecover` Alone:** These contracts may still accept the original key. Permit2 checks the upgraded account through ERC-1271 instead ([what an upgrade changes](/docs/accounts/account-configuration/account-upgrade#what-an-upgrade-changes)).
+- **In Contracts That Try `ecrecover` First:** Contracts that try `ecrecover` before or instead of ERC-1271 still accept the original key, such as those using OpenZeppelin `SignatureChecker`. Permit2 checks the upgraded account through ERC-1271 only ([what an upgrade changes](/docs/accounts/account-configuration/account-upgrade#what-an-upgrade-changes)).
 
 ## Related
 
