@@ -1187,6 +1187,17 @@ test.describe('Routes demo wallets', () => {
     await createBaseDepositAddress(page)
     await button(page, 'Send with Browser wallet').click()
     await expect(button(page, 'Send with Browser wallet')).toBeDisabled()
+    // The button disables as soon as it's clicked, so wait for the wallet call itself.
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (window as unknown as { __walletCalls: { method: string }[] }).__walletCalls.filter(
+              (call) => call.method === 'eth_sendTransaction',
+            ).length,
+        ),
+      )
+      .toBe(1)
 
     const [transfer] = await page.evaluate(() =>
       (
