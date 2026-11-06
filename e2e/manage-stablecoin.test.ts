@@ -61,7 +61,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   await expect(grantButton).toBeVisible()
   await grantButton.click()
 
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(1))
+  await expectDemoSuccess(page, grantStep.getByRole('link', { name: 'View receipt' }))
 
   // Step 5: Revoke issuer role
   const revokeStep = getDemoStep(page, /Revoke issuer role on /)
@@ -74,7 +74,7 @@ test('manage stablecoin - grant and revoke roles', async ({ page }) => {
   await revokeButton.click()
 
   // Wait for revoke receipt
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(2))
+  await expectDemoSuccess(page, revokeStep.getByRole('link', { name: 'View receipt' }))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
