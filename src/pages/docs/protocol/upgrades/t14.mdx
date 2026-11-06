@@ -1,18 +1,18 @@
 ---
 title: "T14 Network Upgrade"
 seoTitle: "T14 Network Upgrade | Tempo Docs"
-description: T14 is planned to change how Tempo accounts are controlled, remove admin access keys, extend these account changes to Zones, and tighten validator, consensus and Zone Portal rules.
+description: T14 is planned to change how Tempo accounts are controlled, end admin access keys' key-management powers, extend these account changes to Zones, and tighten validator, consensus and Zone Portal rules.
 ---
 
 # T14 Network Upgrade
 
-T14 is the planned network upgrade that changes how Tempo accounts are controlled, removes admin access keys, and tightens validator, consensus and Zone Portal rules.
+T14 is the planned network upgrade that changes how Tempo accounts are controlled, ends admin access keys' key-management powers, and tightens validator, consensus and Zone Portal rules.
 
 :::tip[T14 status]
 T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on December 1, 2026, both at 15:00 UTC. Its scope may still change before activation. Until T14 activates, the account changes run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 :::
 
-**Integration note:** T14 removes admin access keys. If you use an admin key to manage a user's other keys, plan the change before T14. [See integration impact](#integration-impact).
+**Integration note:** T14 stops new admin access keys and removes existing ones' power to manage other keys. Existing admin keys can still spend without limit until you revoke them. If you use an admin key to manage a user's other keys, plan the change before T14. [See integration impact](#integration-impact).
 
 ## Timeline
 
