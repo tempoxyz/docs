@@ -29,6 +29,7 @@ import { Container as ParentContainer } from '../Container'
 import { CopyIconSwap } from '../CopyIconSwap'
 import { isFundableWalletConnector } from '../lib/wallets'
 import * as ui from './Demo.recipes'
+import { useStepGroupCollapsed } from './StepGroup'
 import { alphaUsd } from './tokens'
 
 export { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd } from './tokens'
@@ -365,7 +366,10 @@ export function Step(
   props: React.PropsWithChildren<{
     actions?: React.ReactNode | undefined
     active: boolean
-    /** Fold a finished step down to its header. Its title then opens and closes the body. */
+    /**
+     * Fold the step down to its header, where its title opens and closes the body. Inside a demo
+     * container a finished step folds on its own once a later step finishes; set this to override.
+     */
     collapsed?: boolean | undefined
     completed: boolean
     error?: BaseError | Error | null | undefined
@@ -373,7 +377,9 @@ export function Step(
     title: React.ReactNode
   }>,
 ) {
-  const { actions, active, children, collapsed = false, completed, error, number, title } = props
+  const { actions, active, children, completed, error, number, title } = props
+  const grouped = useStepGroupCollapsed({ completed, failed: Boolean(error), number })
+  const collapsed = props.collapsed ?? grouped
   const [expanded, setExpanded] = React.useState(false)
   const bodyId = React.useId()
 

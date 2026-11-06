@@ -271,6 +271,10 @@ export const stepLayout5 = style({
 export const stepLayout6 = style({
   opacity: '40%',
   selectors: {
+    // One width for every step button, so labels such as Pay and Get test funds line up.
+    '& > button': {
+      minWidth: '128px',
+    },
     '&:is(:where(.group)[data-active="true"] *)': {
       opacity: '100%',
     },
