@@ -15,6 +15,7 @@ import {
 import { Hooks } from 'wagmi/tempo'
 import { cx, type Props as StyleProps } from 'zyzz'
 import LucideCheck from '~icons/lucide/check'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 import LucideCopy from '~icons/lucide/copy'
 import LucideExternalLink from '~icons/lucide/external-link'
 import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
@@ -364,31 +365,60 @@ export function Step(
   props: React.PropsWithChildren<{
     actions?: React.ReactNode | undefined
     active: boolean
+    /** Fold a finished step down to its header. Its title then opens and closes the body. */
+    collapsed?: boolean | undefined
     completed: boolean
     error?: BaseError | Error | null | undefined
     number: number
     title: React.ReactNode
   }>,
 ) {
-  const { actions, active, children, completed, error, number, title } = props
+  const { actions, active, children, collapsed = false, completed, error, number, title } = props
+  const [expanded, setExpanded] = React.useState(false)
+  const bodyId = React.useId()
+
+  // Fold again each time the step collapses, so a step opened earlier doesn't stay open.
+  React.useEffect(() => {
+    if (collapsed) setExpanded(false)
+  }, [collapsed])
+
+  const hidden = collapsed && !expanded
+  const heading = (
+    <>
+      <div
+        {...cx(ui.stepLayout2(), !!completed && ui.stepLayout3(), !completed && ui.stepLayout4())}
+      >
+        {completed ? <LucideCheck className={ui.lucideCheck2().className} /> : number}
+      </div>
+      <div {...ui.stepLayout5()}>{title}</div>
+    </>
+  )
+
   return (
-    <div data-active={active} data-completed={completed} className="group">
+    <div data-active={active} data-completed={completed} data-collapsed={hidden} className="group">
       <header {...ui.stepHeader()}>
-        <div {...ui.stepLayout()}>
-          <div
-            {...cx(
-              ui.stepLayout2(),
-              !!completed && ui.stepLayout3(),
-              !completed && ui.stepLayout4(),
-            )}
+        {collapsed ? (
+          <button
+            type="button"
+            aria-controls={bodyId}
+            aria-expanded={!hidden}
+            onClick={() => setExpanded((open) => !open)}
+            {...cx(ui.stepLayout(), ui.stepToggle())}
           >
-            {completed ? <LucideCheck className={ui.lucideCheck2().className} /> : number}
-          </div>
-          <div {...ui.stepLayout5()}>{title}</div>
-        </div>
+            {heading}
+            <LucideChevronDown
+              aria-hidden="true"
+              {...cx(ui.stepChevron(), !hidden && ui.stepChevronOpen())}
+            />
+          </button>
+        ) : (
+          <div {...ui.stepLayout()}>{heading}</div>
+        )}
         <div {...ui.stepLayout6()}>{actions}</div>
       </header>
-      {children}
+      <div id={bodyId} hidden={hidden}>
+        {children}
+      </div>
       {error && (
         <>
           <div {...ui.stepLayout7()} />

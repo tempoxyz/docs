@@ -190,6 +190,18 @@ export function UpgradeAccountDemo() {
   const funded = balance !== null && Number(balance) > 0
   const disabled = !preview || pending !== null
 
+  // A finished step folds to its header once a later step finishes, so the demo stays about one
+  // screen tall and the latest result stays open. Clicking a folded step's title opens it again.
+  const done = [
+    Boolean(keys),
+    funded,
+    Boolean(results.pay),
+    upgraded,
+    Boolean(results.alone),
+    Boolean(results.both),
+  ]
+  const collapsed = (step: number) => done[step - 1] && done.slice(step).some(Boolean)
+
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Upgrade a private-key account</span>}
@@ -207,6 +219,7 @@ export function UpgradeAccountDemo() {
         >
           <Step
             number={1}
+            collapsed={collapsed(1)}
             title="Create a private-key account"
             active
             completed={Boolean(keys)}
@@ -228,6 +241,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={2}
+            collapsed={collapsed(2)}
             title="Fund it"
             active={Boolean(keys)}
             completed={funded}
@@ -246,6 +260,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={3}
+            collapsed={collapsed(3)}
             title="Pay 1 AlphaUSD with the private key"
             active={funded}
             completed={Boolean(results.pay)}
@@ -274,6 +289,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={4}
+            collapsed={collapsed(4)}
             title="Upgrade it to a configurable account"
             active={Boolean(results.pay)}
             completed={upgraded}
@@ -296,6 +312,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={5}
+            collapsed={collapsed(5)}
             title="Pay with the original key alone"
             active={upgraded}
             completed={Boolean(results.alone)}
@@ -314,6 +331,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={6}
+            collapsed={collapsed(6)}
             title="Pay with both signers"
             active={upgraded}
             completed={Boolean(results.both)}

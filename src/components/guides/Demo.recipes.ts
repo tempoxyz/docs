@@ -201,6 +201,25 @@ export const stepLayout = style({
   alignItems: 'center',
   gap: tokens.spacing['3_5'],
 })
+export const stepToggle = style({
+  margin: 0,
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  font: 'inherit',
+  textAlign: 'start',
+  cursor: 'pointer',
+})
+export const stepChevron = style({
+  width: '14px',
+  height: '14px',
+  flexShrink: 0,
+  color: tokens.color.gray9,
+  transition: 'transform 150ms ease',
+})
+export const stepChevronOpen = style({
+  transform: 'rotate(180deg)',
+})
 export const stepLayout2 = style({
   display: 'flex',
   width: tokens.spacing['7'],
