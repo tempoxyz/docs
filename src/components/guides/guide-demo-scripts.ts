@@ -617,8 +617,12 @@ const recover: DemoScript = {
         const { account: added, signer } = addHeldDeviceKey(removed, state.held, 2)
         const named = patchSigner(added, signer.id, { name: 'New device key' })
         const sent = await update(state, ctx, asOneUpdate(state.account, named))
+        const replaced = updateLocal(sent.state, 'old-device-signer', {
+          detail: 'Lost · removed as a signer on Tempo',
+          status: 'gone',
+        })
         return {
-          state: updateLocal(sent.state, 'device-signer', {
+          state: updateLocal(replaced, 'device-signer', {
             detail: deviceKeyDetail('signer'),
             status: 'done',
           }),
