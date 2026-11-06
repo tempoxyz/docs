@@ -129,7 +129,7 @@ Check the replacement's [peer and DKG metrics](/docs/guide/node/validator-status
 
 ## Update IP addresses
 
-Use this procedure when the public key stays the same and only the ingress or egress address changes. Ingress addresses must be unique across active validators.
+Use this procedure when the public key stays the same and only the ingress or egress address changes. Ingress addresses must be unique across active validators. From [T14](/docs/protocol/upgrades/t14), Tempo rejects an address longer than 255 bytes or in IPv4-mapped IPv6 form, such as `::ffff:192.0.2.1`, with `InvalidIp`. Use the IPv4 form, such as `192.0.2.1`.
 
 :::::steps
 
