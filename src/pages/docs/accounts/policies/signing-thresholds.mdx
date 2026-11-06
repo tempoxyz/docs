@@ -164,26 +164,26 @@ A configuration update works the same way. Put `Actions.accounts.updateConfig.ca
 
 ## Verify in a Contract
 
-A contract checks that an account's signers approved a message with `verifyMultisig`. It's on the [signature verifier](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. Like configurable accounts, `verifyMultisig` exists only on the devnet until T14. On mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
+A registered account answers ERC-1271 `isValidSignature`, so Permit2 and other contracts that check signatures that way accept its signers' approvals unchanged. A contract can also call `verifyConfigurableAccount` directly. It's on the [signature verifier](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. Like configurable accounts, `verifyConfigurableAccount` exists only on the devnet until T14. On mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
 
 ```solidity [ApprovalCheck.sol]
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 interface ISignatureVerifier {
-    function verifyMultisig(address account, bytes32 hash, bytes calldata signature) external view returns (bool);
+    function verifyConfigurableAccount(address account, bytes32 hash, bytes calldata signature) external view returns (bool);
 }
 
 contract ApprovalCheck {
     ISignatureVerifier constant VERIFIER = ISignatureVerifier(0x5165300000000000000000000000000000000000);
 
     function isApproved(address account, bytes32 hash, bytes calldata signature) external view returns (bool) {
-        return VERIFIER.verifyMultisig(account, hash, signature); // [!code hl]
+        return VERIFIER.verifyConfigurableAccount(account, hash, signature); // [!code hl]
     }
 }
 ```
 
-`verifyMultisig` checks the account's signers at call time, so approvals from removed signers fail. An account that hasn't sent a transaction yet verifies against its first signers. The call returns `false` when the signers don't match the account. It reverts with `InvalidSignature()` when approvals fall short. Include your chain ID, contract address, and the account in `hash`, so an approval can't be replayed elsewhere.
+`verifyConfigurableAccount` checks the account's signers at call time, so approvals from removed signers fail. An account that hasn't sent a transaction yet verifies against its first signers. The call returns `false` when the signers don't match the account. It reverts with `InvalidSignature()` when approvals fall short. Include your chain ID, contract address, and the account in `hash`, so an approval can't be replayed elsewhere.
 
 To check a single access key's signature instead, call `verifyKeychain`. It also works on mainnet and testnet. It accepts only access keys that sign with one key. A call for a configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`.
 

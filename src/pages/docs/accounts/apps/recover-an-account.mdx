@@ -159,7 +159,7 @@ If you didn't save the lost key's address, [list the keys the account has author
 
 The passkey and the provider replace a lost backup the same way. Attach `passkey` and `providerAccount` to `openAccount`, and swap the lost backup's address for the new backup's. Have the user sign a test message or approve one small payment with the new backup before relying on it.
 
-The provider's key can't approve alone. If the user loses both the passkey and the backup, the account stays locked. It recovers only if it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
+The provider's key can't approve alone. Tempo has no timelock or delay on recovery: an update applies as soon as signers reach the threshold. Run identity checks before your recovery signer approves. If the user loses both the passkey and the backup, the account stays locked. It recovers only if it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
 
 ## Related
 

@@ -39,7 +39,7 @@ Tempo stores only a 32-byte hash of the configuration, not the owners themselves
 
 ## Configurable account address
 
-The address is a CREATE2 address computed from the version-0 configuration, with no chain ID ([TIP-1107](https://tips.sh/1107)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold contract code or an EIP-7702 delegation. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The address is the last 20 bytes of a hash of the version-0 configuration, with no chain ID ([TIP-1107](https://tips.sh/1107)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold an EIP-7702 delegation or deployed contract code. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
 ::::code-group
 
@@ -74,11 +74,22 @@ export const saved = { address: account.address, config: account.config } // [!c
 
 `address: 'infer'` derives the address from this configuration, so creating the account sends nothing. `Account.fromConfig` sorts owners by address, defaults each weight and the threshold to `1`, and defaults the salt to zero. An owner given as a local account, like `finance`, is a key Viem signs with. An owner given as an address, like the controller's passkey, signs on its own device.
 
-The address is the same on other EVM chains, so a sender can pay it on the wrong chain by mistake. [TIP-1107](https://tips.sh/1107) defines a recovery factory contract for those chains. It would let the initial secp256k1 owners deploy a recovery wallet at the address and retrieve the funds, if their weights reach the original threshold. P-256 and WebAuthn owners don't count. No chain has the recovery factory yet, so those funds can't be retrieved today. See [Recover funds sent on another chain](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain).
+```text
+account = last20(keccak256(
+  "tempo:configurable-account:account" || salt || uint8(threshold) || uint8(owner_count) ||
+  owner[0].address || uint8(owner[0].weight) || ...
+))
+```
+
+Keep high-value funds out of an unregistered address. Whoever chose the salt can search, in about 2^80 work, for a standard key whose address matches. Register the account and check its signers onchain before it receives large deposits. Use an unregistered address only for small amounts, or when your app chose the salt.
+
+The address is the same on other EVM chains, but nothing controls it there, so funds sent to it on another chain are lost. To keep a way to recover them, [create the account from a fresh key](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain) instead.
 
 ### Account registration
 
-The account's first transaction registers it: Tempo stores the version-0 hash before running any call. Registration sticks even if the calls revert, and an invalid transaction registers nothing. An existing single-key account skips this step: it [upgrades in place](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) and starts at version 1.
+The account's first transaction registers it: Tempo stores the version-0 hash before running any call. Registration sticks even if the calls revert, and an invalid transaction registers nothing. It adds 250,000 gas to that transaction, as for creating any new account.
+
+Registration also installs a one-byte `0xef` code marker at the address. Only Tempo can install it. From then on, contracts see the account as having code: `EXTCODESIZE` returns 1, and signature checks such as Permit2 call the account's [ERC-1271 `isValidSignature`](#verify-owner-approvals-in-a-contract). Contracts that reject callers or recipients with code reject the account, and ERC-1155 safe transfers to it revert. An existing single-key account skips this step: it [upgrades in place](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) and starts at version 1.
 
 ## Owner approvals
 
@@ -100,12 +111,14 @@ Viem builds this signature for you. You need its format ([TIP-1107](https://tips
 signature = 0x05 || rlp([account, config, signatures])
 config    = [salt, version, threshold, owners]
 owner     = [address, weight]
-digest    = keccak256("tempo:multisig:signature" || inner_digest || account || uint64(version))
+digest    = keccak256("tempo:configurable-account:signature" || inner_digest || account || uint64(version))
 ```
 
-Each owner signs `digest`. For a transaction, `inner_digest` is the transaction's signing hash; for a contract check, it's the `hash` passed to [`verifyMultisig`](#verify-owner-approvals-in-a-contract). Tempo checks the configuration against the stored hash (before registration, it derives the address from the configuration instead), then adds up the signers' weights.
+Each owner signs `digest`. For a transaction, `inner_digest` is the transaction's signing hash; for a contract check, it's the `hash` passed to [`verifyConfigurableAccount`](#verify-owner-approvals-in-a-contract) or `isValidSignature`. Tempo checks the configuration against the stored hash (before registration, it derives the address from the configuration instead), then adds up the signers' weights.
 
-The `0x05` signature also approves [access-key grants](/docs/development/account-keychain#access-keys-on-each-account-type). It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
+The `0x05` signature also approves [access-key grants](/docs/development/account-keychain#access-keys-on-each-account-type). It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists. A configurable account can pay its own fees or be sponsored, but it can't sponsor other accounts.
+
+There's no `0x05` form of TIP-20 `permit` or of payment-channel vouchers. To approve a spender, the signers approve an `approve` call. To open a payment channel, name an ordinary `authorizedSigner` for its vouchers.
 
 ## Configuration updates
 
@@ -116,7 +129,7 @@ The `0x05` signature also approves [access-key grants](/docs/development/account
 | Called by | The account, in a transaction its owners approve at the current threshold. Access keys and contracts can't call it. |
 | Version | Increments by 1, which invalidates approvals collected for the old version |
 | Batches | Several updates in one transaction must form consecutive versions |
-| Event | `MultisigConfigUpdated(account, salt, version, threshold, owners)` |
+| Event | `ConfigurableAccountConfigUpdated(account, salt, version, threshold, owners)`, also emitted at registration with version 0 |
 
 ```ts [update.ts]
 import { account, env, finance, operations, saved } from './account'
@@ -190,30 +203,48 @@ Chain history holds the configuration only once the account has used it:
 | --- | --- |
 | Never transacted | Nowhere. Your saved copy, including the salt, is the only record. |
 | Version 0, transacted | In each transaction's [`0x05` signature](#multisig-signature-format), which carries the full configuration |
-| Updated or upgraded | In the latest `MultisigConfigUpdated` or `AccountUpgraded` event, which carries the salt, threshold, and owners. An upgrade installs version 1. |
+| Updated or upgraded | In the latest `ConfigurableAccountConfigUpdated` or `AccountUpgraded` event, which carries the salt, threshold, and owners. An upgrade installs version 1. |
 
-If an update landed but your app failed to save the returned `config`, rebuild it from the update you sent with `AccountConfig.update(saved.config, nextConfig)`, or from the account's latest `MultisigConfigUpdated` event. Before you use the rebuilt configuration, check it against `getConfigCommitment` as above.
+If an update landed but your app failed to save the returned `config`, rebuild it from the update you sent with `AccountConfig.update(saved.config, nextConfig)`, or from the account's latest `ConfigurableAccountConfigUpdated` event. Before you use the rebuilt configuration, check it against `getConfigCommitment` as above.
 
 <span id="login-signers" />
 
 ## Verify owner approvals in a contract
 
-A contract checks that an account's owners approved a message with the signature verifier precompile, a contract built into Tempo at `0x5165300000000000000000000000000000000000`:
+A registered account answers ERC-1271 `isValidSignature(hash, signature)` through its code marker. It returns `0x1626ba7e` when the owners approved `hash`, so Permit2 and `SignatureChecker`-style contracts work unchanged. An unregistered account has no code, so those contracts fall back to `ecrecover` and reject the `0x05` signature. Have it send one transaction first.
+
+A contract can also call the signature verifier precompile directly, a contract built into Tempo at `0x5165300000000000000000000000000000000000`. This works before registration too:
 
 ```solidity
 interface ISignatureVerifier {
-    function verifyMultisig(address account, bytes32 hash, bytes calldata signature) external view returns (bool); // [!code hl]
+    function verifyConfigurableAccount(address account, bytes32 hash, bytes calldata signature) external view returns (bool); // [!code hl]
 }
 ```
 
 | Result | When |
 | --- | --- |
 | `true` | Owners at the current version signed the [`0x05` digest](#multisig-signature-format) of `hash`, and their weights reached the threshold |
-| `false` | The configuration doesn't match the stored hash or derive the address, or the account has code |
+| `false` | The configuration doesn't match the stored hash or derive the address, or the account has code other than the marker, such as an EIP-7702 delegation |
 | Reverts `InvalidFormat()` | The encoding or configuration is invalid |
 | Reverts `InvalidSignature()` | The owner approvals are invalid |
 
 An unregistered account verifies against its version-0 configuration, and the check doesn't register it. Include your chain ID, contract address, and the account in `hash` so an approval can't be replayed elsewhere. [Verify approvals in a contract](/docs/accounts/policies/signing-thresholds#verify-approvals-in-a-contract) has a full contract.
+
+<span id="network-fee-costs" />
+
+## Configurable account gas costs
+
+The network fee depends on which owners approve and with which key type ([TIP-1107](https://tips.sh/1107)).
+
+| Item | Gas |
+| --- | --- |
+| Each secp256k1 approval | 3,000 |
+| Each P-256 or WebAuthn approval | 8,000 |
+| Configuration hashing and calldata | Grows with the owner count |
+| Registration or upgrade | 250,000, once per account |
+| Configuration update | 5,000 for the write |
+
+An ordinary transaction already includes 3,000 gas for one signature, which Tempo subtracts once. For example, two passkey approvals add about 13,000 gas plus hashing and calldata. Estimate gas with the configuration and the owners who'll actually approve.
 
 ## Native multisig precompile
 

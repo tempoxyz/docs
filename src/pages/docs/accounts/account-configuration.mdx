@@ -53,19 +53,24 @@ A configuration update doesn't touch access keys or token approvals. A device ke
 
 ## Watch Changes
 
-Each [configuration update](/docs/development/configurable-accounts#configuration-updates) emits `MultisigConfigUpdated` with the account, its new version, threshold, and signer list. The public indexer doesn't cover the Tempo Accounts devnet. Read the event with Viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
+Each [configuration update](/docs/development/configurable-accounts#configuration-updates) emits `ConfigurableAccountConfigUpdated` with the account, its new version, threshold, and signer list. Registration emits it too, with version 0. The public indexer doesn't cover the Tempo Accounts devnet. Read the event with Viem's `getContractEvents` from a devnet client. The devnet RPC searches at most 100,000 blocks per request.
 
 ```ts [watch-signers.ts]
-import { Abis, Addresses } from 'viem/tempo'
+import { parseAbiItem } from 'viem'
+import { Addresses } from 'viem/tempo'
 import { account } from './account'
 import { client } from './client'
 
 const latestBlock = await client.getBlockNumber()
 
 const updates = await client.getContractEvents({ // [!code hl]
-  abi: Abis.nativeMultisig,
+  abi: [ // [!code hl]
+    parseAbiItem( // [!code hl]
+      'event ConfigurableAccountConfigUpdated(address indexed account, bytes32 salt, uint64 version, uint8 threshold, (address owner, uint8 weight)[] owners)', // [!code hl]
+    ), // [!code hl]
+  ], // [!code hl]
   address: Addresses.nativeMultisig,
-  eventName: 'MultisigConfigUpdated', // [!code hl]
+  eventName: 'ConfigurableAccountConfigUpdated', // [!code hl]
   args: { account: account.address },
   fromBlock: latestBlock - 99_999n,
   toBlock: latestBlock,
@@ -93,11 +98,11 @@ A recovery signer can approve payments at its weight too, so give it no more wei
 
 ### Funds on Other Chains
 
-The account has the same address on other EVM chains. A sender can pay it on the wrong chain by mistake. Those funds can't be retrieved today.
+The account has the same address on other EVM chains. A sender can pay it on the wrong chain by mistake. Nothing controls an address derived from a configuration on another chain, so those funds are lost.
 
-The [specification for configurable account addresses](/docs/development/configurable-accounts#configurable-account-address) defines a recovery factory contract for that chain. With it, the account's original secp256k1 signers could deploy a recovery wallet at the address. That wallet retrieves the funds. Those are standard Ethereum keys, such as KMS or hardware wallet keys. That works if their weights reach the original threshold, even after you remove them on Tempo. No chain has the recovery factory yet.
+To keep a way to recover them, create the account from a fresh secp256k1 key instead ([TIP-1113](https://tips.sh/1113)). Before you share or fund its address, have that key [upgrade the account](/docs/accounts/account-configuration/account-upgrade) to its real signers, without listing itself. A fee payer can sponsor the upgrade. Tempo then retires the key, but it still controls the address on other chains.
 
-Passkeys and device keys don't count. Accounts [upgraded in place](/docs/accounts/account-configuration/account-upgrade) don't use the factory. On other chains, their original key still controls the address. To keep the option open, create the account with secp256k1 signers whose weights reach the threshold on their own.
+Keep that key offline and use it only to move mistaken transfers out. Applications that check signatures with `ecrecover` alone still accept it, so don't sign anything else with it.
 
 <span id="changes" />
 
