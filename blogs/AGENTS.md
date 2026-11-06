@@ -1,4 +1,10 @@
-# Writing blog posts
+# Archived blog sources
+
+Publish future blog edits in `tempoxyz/tempo.xyz`, which owns the six migrated posts.
+This folder preserves the original sources for rollback; docs builds no longer render or index them.
+Keep `public/blog/` assets reachable for existing links. The guidance below describes the archived format.
+
+## Original authoring format
 
 Posts in this folder are rendered at `/blog` (index with category filters) and `/blog/<filename>` (post page). Drop a `.md` file here and it ships — no registration step.
 

@@ -25,6 +25,26 @@ for (const directory of outputs) {
   const full = read(path.join(directory, 'llms-full.txt'))
   const entries = parseAiIndex(index)
   const routes = entries.map(({ route }) => route)
+  assert(
+    routes.every((route) => !/^\/(?:developers\/)?blog(?:\/|$)/.test(route)),
+    `${directory}: retired blog routes must not appear in LLM exports`,
+  )
+  // The external Blog navigation link is fine; legacy docs blog results are not.
+  const searchFiles = readdirSync(path.join(directory, 'assets')).filter((file) =>
+    /^search-index-.*\.json$/.test(file),
+  )
+  assert(searchFiles.length > 0, `${directory}: search index is missing`)
+  for (const file of searchFiles) {
+    const search = JSON.parse(read(path.join(directory, 'assets', file))) as {
+      storedFields: Record<string, { href?: string }>
+    }
+    assert(
+      Object.values(search.storedFields).every(
+        ({ href }) => !/^\/(?:developers\/)?blog(?:\/|[?#]|$)/.test(href ?? ''),
+      ),
+      `${directory}: retired blog routes must not appear in search results`,
+    )
+  }
   const markdownDir = path.join(directory, 'assets/md')
   const files = readdirSync(markdownDir, { recursive: true }).filter(
     (file): file is string => typeof file === 'string' && file.endsWith('.md'),

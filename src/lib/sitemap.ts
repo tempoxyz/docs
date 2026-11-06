@@ -6,11 +6,9 @@ export function sitemapCoverage(sitemap: string, routes: readonly string[]) {
   const locations = new Set(
     Array.from(sitemap.matchAll(LOCATION_PATTERN), ([, location]) => location.replace(/\/$/, '')),
   )
-  const indexUrl = [...locations].find((location) =>
-    /\/(?:blog|get-started|docs\/api)$/.test(location),
-  )
+  const indexUrl = [...locations].find((location) => /\/(?:get-started|docs\/api)$/.test(location))
   if (!indexUrl) throw new Error('Could not resolve the site base URL from the sitemap')
-  const baseUrl = indexUrl.replace(/\/(?:blog|get-started|docs\/api)$/, '')
+  const baseUrl = indexUrl.replace(/\/(?:get-started|docs\/api)$/, '')
   const urls = [...new Set(routes)].map((route) => {
     const pathname = route.replace(/^\/+|\/+$/g, '')
     return pathname
@@ -20,42 +18,21 @@ export function sitemapCoverage(sitemap: string, routes: readonly string[]) {
   return { urls, missing: urls.filter((url) => !locations.has(url)) }
 }
 
-export type BlogSitemapEntry = {
-  slug: string
-  lastmod?: string
-}
-
 export function finalizeSitemap(
   sitemap: string,
-  blogPosts: readonly BlogSitemapEntry[],
   openApiRouteSlugs: readonly string[] = [],
 ): string {
-  let blogBaseUrl: string | undefined
-
-  let withoutTemplates = sitemap.replace(TEMPLATE_URL_PATTERN, (_entry, location: string) => {
-    const blogTemplate = /^(.*\/blog\/)\[slug\]\/?$/.exec(location)
-    if (blogTemplate) blogBaseUrl = blogTemplate[1]
-    return ''
-  })
+  let withoutTemplates = sitemap.replace(TEMPLATE_URL_PATTERN, '')
 
   const existingLocations = new Set(
     Array.from(withoutTemplates.matchAll(LOCATION_PATTERN), ([, location]) => location),
   )
 
-  if (!blogBaseUrl) {
-    const blogIndexUrl = Array.from(existingLocations).find((location) =>
-      /\/blog\/?$/.test(location),
-    )
-    if (blogIndexUrl) blogBaseUrl = `${blogIndexUrl.replace(/\/$/, '')}/`
-  }
-
-  // Redirected marketing pages are not canonical content. Keep the sitemap
-  // limited to the docs and blog surfaces, including when finalizing older output.
+  // Marketing and blog pages now live on tempo.xyz, not the docs mount.
   const docsIndexUrl = Array.from(existingLocations).find((location) =>
-    /\/(?:docs|get-started)\/?$/.test(location),
+    /\/(?:get-started|docs\/api)\/?$/.test(location),
   )
-  const siteBaseUrl =
-    blogBaseUrl?.replace(/blog\/$/, '') ?? docsIndexUrl?.replace(/(?:docs|get-started)\/?$/, '')
+  const siteBaseUrl = docsIndexUrl?.replace(/(?:get-started|docs\/api)\/?$/, '')
   if (siteBaseUrl) {
     // The mounted docs homepage uses a canonical URL without a trailing slash.
     withoutTemplates = withoutTemplates.replace(LOCATION_PATTERN, (entry, location: string) =>
@@ -73,8 +50,7 @@ export function finalizeSitemap(
           location === siteBaseUrl.replace(/\/$/, '') ||
           relativePath === '' ||
           /^get-started(?:\/|$)/.test(relativePath ?? '') ||
-          /^docs\/.+/.test(relativePath ?? '') ||
-          /^blog(?:\/|$)/.test(relativePath ?? '')
+          /^docs\/.+/.test(relativePath ?? '')
         ) {
           return entry
         }
@@ -84,11 +60,8 @@ export function finalizeSitemap(
     )
   }
 
-  const uniqueBlogPosts = [
-    ...new Map(blogPosts.map((post) => [post.slug, post] as const)).values(),
-  ].sort((a, b) => a.slug.localeCompare(b.slug))
   const uniqueOpenApiSlugs = [...new Set(openApiRouteSlugs)].sort((a, b) => a.localeCompare(b))
-  if (uniqueBlogPosts.length === 0 && uniqueOpenApiSlugs.length === 0) return withoutTemplates
+  if (uniqueOpenApiSlugs.length === 0) return withoutTemplates
   if (!withoutTemplates.includes('</urlset>')) {
     throw new Error('Could not find the sitemap urlset closing tag')
   }
@@ -106,16 +79,6 @@ export function finalizeSitemap(
     entries.push(
       ...uniqueOpenApiSlugs.map((slug) => ({
         location: `${openApiBaseUrl}${slug.split('/').map(encodeURIComponent).join('/')}`,
-      })),
-    )
-  }
-
-  if (uniqueBlogPosts.length > 0) {
-    if (!blogBaseUrl) throw new Error('Could not resolve the blog base URL from the sitemap')
-    entries.push(
-      ...uniqueBlogPosts.map(({ slug, lastmod }) => ({
-        location: `${blogBaseUrl}${encodeURIComponent(slug)}`,
-        lastmod,
       })),
     )
   }

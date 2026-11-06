@@ -3,7 +3,8 @@ import { selectTab } from './helpers'
 
 test.setTimeout(45_000)
 
-// Exercise every top-level site surface and both authored and generated docs.
+// Exercise every docs surface and both authored and generated pages.
+// The external blog owns its own style coverage; docs tests its redirects separately.
 const routes = [
   '/',
   '/get-started',
@@ -17,8 +18,6 @@ const routes = [
   '/docs/partners',
   '/docs/api',
   '/docs/guide/issuance/create-a-stablecoin',
-  '/blog',
-  '/blog/introducing-mercator',
 ]
 
 for (const width of [390, 1440]) {

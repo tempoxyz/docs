@@ -48,13 +48,13 @@ test('production navigation preserves the mount through history and page tools',
   expect(audit.failedRequests).toEqual([])
 })
 
-test('production blog search opens the passkey guide with its interactive demo', async ({
+test('production docs search opens the passkey guide with its interactive demo', async ({
   context,
 }) => {
   const audit = await proxyProductionMount(context, upstream)
   const page = await context.newPage()
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.goto(`${productionDocsUrl}/blog`)
+  await page.goto(`${productionDocsUrl}/`)
   await page.getByRole('button', { name: 'Search documentation', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Search documentation', exact: true })
   await dialog.getByRole('combobox').fill('passkeys')
@@ -83,7 +83,7 @@ test('production mobile menus keep the docs mount and current sidebar selection'
   const audit = await proxyProductionMount(context, upstream)
   const page = await context.newPage()
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(`${productionDocsUrl}/blog/privacy-with-tempo-zones`)
+  await page.goto(`${productionDocsUrl}/docs/accounts`)
   await page.getByRole('button', { name: 'Open menu', exact: true }).click()
   const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
   await menu.getByRole('link', { name: 'Get Started', exact: true }).click()

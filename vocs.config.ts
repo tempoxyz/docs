@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { blogMigrationRedirects, engineeringBlogUrl } from './src/lib/blog-migration'
 import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
@@ -261,7 +262,7 @@ export default defineConfig({
   },
   sitemap: {
     include: (path) =>
-      (path === '/' || /^\/(?:get-started|docs|blog)(?:\/|$)/.test(path)) &&
+      (path === '/' || /^\/(?:get-started|docs)(?:\/|$)/.test(path)) &&
       !/^\/docs\/?$/.test(path) &&
       !path.split('/').some((segment) => /^\[.*\]$/.test(segment)),
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
@@ -1362,9 +1363,10 @@ export default defineConfig({
       link: '/',
     },
 
-    { text: 'Blog', link: '/blog' },
+    { text: 'Blog', link: engineeringBlogUrl },
   ],
   redirects: [
+    ...blogMigrationRedirects.map((redirect) => ({ ...redirect, status: 301 as const })),
     {
       source: '/docs/resources/partners.md',
       destination: '/docs/resources/guides.md',

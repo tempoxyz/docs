@@ -10,6 +10,7 @@ import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 
 export { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
+import { engineeringBlogUrl } from '../lib/blog-migration'
 import { DOCS_SEARCH_PARAM, docsSearchUrl } from '../lib/docs-search'
 import { publicAssetPath } from '../lib/public-asset-path'
 import { navActiveSquare } from '../styles/surfaces.styles'
@@ -867,14 +868,13 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
 
   const destinations = (
     <div className={`docs-header-destinations ${docsHeaderDestinations().className}`}>
-      <WakuLink
-        to="/blog"
+      <a
+        href={engineeringBlogUrl}
         onClick={close}
-        aria-current={surface === 'blog' ? 'page' : undefined}
         className={`docs-header-wordmark ${docsHeaderWordmark().className}`}
       >
         Blog
-      </WakuLink>
+      </a>
     </div>
   )
 
