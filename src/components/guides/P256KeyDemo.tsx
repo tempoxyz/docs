@@ -85,7 +85,8 @@ export function P256KeyDemo() {
     try {
       const result = await work()
       if (result) setResults((current) => ({ ...current, [action]: result }))
-      await refresh()
+      // After Delete, refresh still holds the deleted key's client and would restore its balance.
+      if (action !== 'delete') await refresh()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Something went wrong. Try again.')
     } finally {
