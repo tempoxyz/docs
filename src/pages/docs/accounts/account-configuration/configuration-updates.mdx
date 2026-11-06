@@ -28,11 +28,13 @@ Use a configuration update to back up a key, add an approver, end an approver's 
 Build each update from the address and configuration your app saved for the account ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)):
 
 1. Rebuild the account with the approving signers' keys attached, as in [Signing Thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals).
-2. Pass the new signer list and threshold to `updateConfigSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold.
+2. Build the call with `Actions.accounts.updateConfig.call` and send it with `writeContractSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold.
 
 Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
-Each update raises the configuration's version by one. Save the `config` it returns with the account record. Rebuild from the latest saved record before every payment or update. An account built from the old configuration no longer matches the hash Tempo stores, so its next transaction fails.
+Each update raises the configuration's version by one. After the transaction succeeds, save `AccountConfig.update(config, nextConfig)` with the account record. Rebuild from the latest saved record before every payment or update. An account built from the old configuration no longer matches the hash Tempo stores, so its next transaction fails.
+
+These examples avoid Viem 2.57.5's `updateConfigSync`, which still expects the old event name and throws after a successful devnet update.
 
 Once the update lands, a removed signer can't approve anything. Approvals collected under the old signer list stop counting.
 
@@ -58,20 +60,23 @@ A recovery signer can approve payments at its weight too. Give it enough weight 
 
 ```ts [add-signer.ts]
 import { writeFileSync } from 'node:fs'
-import { AccountConfig } from 'viem/tempo'
+import { AccountConfig, Actions } from 'viem/tempo'
 import { account, config } from './account'
 import { client } from './client'
 
 // The new signer's address
 const newSigner = process.env.NEW_SIGNER as `0x${string}`
 
-const { config: updated } = await client.accounts.updateConfigSync({
+const nextConfig = { // [!code hl]
+  owners: [...config.owners, { owner: newSigner, weight: 1 }], // [!code hl]
+  threshold: config.threshold, // [!code hl]
+} // [!code hl]
+await client.writeContractSync({
   account,
-  nextConfig: { // [!code hl]
-    owners: [...config.owners, { owner: newSigner, weight: 1 }], // [!code hl]
-    threshold: config.threshold, // [!code hl]
-  }, // [!code hl]
+  ...Actions.accounts.updateConfig.call({ currentConfig: config, nextConfig }),
+  throwOnReceiptRevert: true,
 })
+const updated = AccountConfig.update(config, nextConfig)
 
 // Save the new configuration. The next action rebuilds the account from it.
 writeFileSync('account.json', JSON.stringify({ address: account.address, config: AccountConfig.toRpc(updated) }))
@@ -120,20 +125,23 @@ When an approver leaves or a key is lost, the remaining signers approve a list w
 ```ts [remove-signer.ts]
 import { writeFileSync } from 'node:fs'
 import { isAddressEqual } from 'viem'
-import { AccountConfig } from 'viem/tempo'
+import { AccountConfig, Actions } from 'viem/tempo'
 import { account, config } from './account'
 import { client } from './client'
 
 // The address of the signer that's leaving
 const departing = process.env.DEPARTING_SIGNER as `0x${string}`
 
-const { config: updated } = await client.accounts.updateConfigSync({
+const nextConfig = { // [!code hl]
+  owners: config.owners.filter(({ owner }) => !isAddressEqual(owner, departing)), // [!code hl]
+  threshold: config.threshold, // [!code hl]
+} // [!code hl]
+await client.writeContractSync({
   account,
-  nextConfig: { // [!code hl]
-    owners: config.owners.filter(({ owner }) => !isAddressEqual(owner, departing)), // [!code hl]
-    threshold: config.threshold, // [!code hl]
-  }, // [!code hl]
+  ...Actions.accounts.updateConfig.call({ currentConfig: config, nextConfig }),
+  throwOnReceiptRevert: true,
 })
+const updated = AccountConfig.update(config, nextConfig)
 
 writeFileSync('account.json', JSON.stringify({ address: account.address, config: AccountConfig.toRpc(updated) }))
 ```
@@ -153,7 +161,7 @@ Rotate when the holder stays but the key changes, such as a new hardware wallet,
 ```ts [rotate-signer.ts]
 import { writeFileSync } from 'node:fs'
 import { isAddressEqual } from 'viem'
-import { AccountConfig } from 'viem/tempo'
+import { AccountConfig, Actions } from 'viem/tempo'
 import { account, config } from './account'
 import { client } from './client'
 
@@ -161,15 +169,18 @@ import { client } from './client'
 const oldSigner = process.env.OLD_SIGNER as `0x${string}`
 const newSigner = process.env.NEW_SIGNER as `0x${string}`
 
-const { config: updated } = await client.accounts.updateConfigSync({
+const nextConfig = { // [!code hl]
+  owners: config.owners.map((entry) => // [!code hl]
+    isAddressEqual(entry.owner, oldSigner) ? { owner: newSigner, weight: entry.weight } : entry, // [!code hl]
+  ), // [!code hl]
+  threshold: config.threshold, // [!code hl]
+} // [!code hl]
+await client.writeContractSync({
   account,
-  nextConfig: { // [!code hl]
-    owners: config.owners.map((entry) => // [!code hl]
-      isAddressEqual(entry.owner, oldSigner) ? { owner: newSigner, weight: entry.weight } : entry, // [!code hl]
-    ), // [!code hl]
-    threshold: config.threshold, // [!code hl]
-  }, // [!code hl]
+  ...Actions.accounts.updateConfig.call({ currentConfig: config, nextConfig }),
+  throwOnReceiptRevert: true,
 })
+const updated = AccountConfig.update(config, nextConfig)
 
 writeFileSync('account.json', JSON.stringify({ address: account.address, config: AccountConfig.toRpc(updated) }))
 ```

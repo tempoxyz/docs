@@ -83,7 +83,7 @@ Rebuild the account from `saved`, and attach the two keys that approve:
 
 A signer without an attached key stays an address that can't sign, such as the lost passkey at `lostPasskey`.
 
-`openAccount` passes the saved address. Once signers change, `address: 'infer'` derives a different one.
+At version 0, `openAccount` derives the address from the original configuration. After an update, it passes the saved address instead.
 
 The update swaps the lost passkey for the new one at the same weight. Viem signs it with both attached keys, and their weights of 1 each reach the threshold of 2.
 
@@ -93,6 +93,7 @@ The update swaps the lost passkey for the new one at the same weight. Viem signs
 
 ```ts [recover.ts]
 import { isAddressEqual } from 'viem'
+import { AccountConfig, Actions } from 'viem/tempo'
 import { client } from './client'
 import { providerAccount } from './provider-account'
 
@@ -103,24 +104,28 @@ function openAccount(approvers: Account.RootAccount[]) {
     owner: approvers.find((key) => isAddressEqual(key.address, owner)) ?? owner,
     weight,
   }))
+  if (config.version === 0n)
+    return Account.fromConfig({ address: 'infer', owners, salt: config.salt, threshold: config.threshold })
   return Account.fromConfig({ ...config, address, owners })
 }
 
 // the user's backup passkey, from its saved id and public key
 const backup = Account.fromWebAuthnP256(backupCredential)
 
-const { config } = await client.accounts.updateConfigSync({ // [!code hl]
+const nextConfig = { // [!code hl]
+  owners: saved.config.owners.map(({ owner, weight }) => ({ // [!code hl]
+    owner: isAddressEqual(owner, lostPasskey) ? passkey.address : owner, // [!code hl]
+    weight, // [!code hl]
+  })), // [!code hl]
+  threshold: saved.config.threshold, // [!code hl]
+} // [!code hl]
+await client.writeContractSync({ // [!code hl]
   account: openAccount([providerAccount, backup]), // [!code hl]
-  nextConfig: { // [!code hl]
-    owners: saved.config.owners.map(({ owner, weight }) => ({ // [!code hl]
-      owner: isAddressEqual(owner, lostPasskey) ? passkey.address : owner, // [!code hl]
-      weight, // [!code hl]
-    })), // [!code hl]
-    threshold: saved.config.threshold, // [!code hl]
-  }, // [!code hl]
+  ...Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig }), // [!code hl]
+  throwOnReceiptRevert: true, // [!code hl]
 }) // [!code hl]
-// persist it: the version increments, and the next step builds from it
-saved.config = config // [!code hl]
+// Save only after success. The next step builds from this new version.
+saved.config = AccountConfig.update(saved.config, nextConfig) // [!code hl]
 ```
 
 ```ts [client.ts]
@@ -159,7 +164,7 @@ If you didn't save the lost key's address, [list the keys the account has author
 
 The passkey and the provider replace a lost backup the same way. Attach `passkey` and `providerAccount` to `openAccount`, and swap the lost backup's address for the new backup's. Have the user sign a test message or approve one small payment with the new backup before relying on it.
 
-The provider's key can't approve alone. If the user loses both the passkey and the backup, the account stays locked. It recovers only if it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
+The provider's key can't approve alone. Tempo has no timelock or delay on recovery: an update applies as soon as signers reach the threshold. Run identity checks before your recovery signer approves. If the user loses both the passkey and the backup, the account stays locked. It recovers only if it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
 
 ## Related
 

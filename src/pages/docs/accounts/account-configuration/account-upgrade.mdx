@@ -34,7 +34,9 @@ Until T14, the upgrade transaction does nothing on mainnet or testnet. It succee
 
 The upgrade gives the account a list of signers, each with a weight. It also sets a threshold, the total weight an approval needs. From then on, signers whose weights reach the threshold approve for the account. The original key approves only if you list it, at its weight. The address, balances, token approvals, nonce, contract storage, and access keys with their limits stay the same.
 
-Contracts that verify signatures themselves, such as Permit2, may still accept the original key. The original key also still controls the address on other EVM chains.
+Any single-key account can upgrade, whether its key is a standard secp256k1 key, a P-256 key, or a passkey. The upgrade costs 250,000 gas, which a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor.
+
+Tempo retires the original key. It can no longer sign transactions, TIP-20 permits, or fee sponsorships for the account, even ones it signed before the upgrade. The upgrade installs a one-byte code marker, so Permit2 and other contracts that check for code route signatures to the account's [ERC-1271 check](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). Contracts that try `ecrecover` before or instead of ERC-1271, such as OpenZeppelin `SignatureChecker`, still accept the original key. It also still controls the address on other EVM chains.
 
 <span id="choose-signers-and-threshold" />
 
@@ -53,7 +55,7 @@ In any setup, the signers left after losing any one must still reach the thresho
 
 ## Send the Upgrade
 
-The original key signs one transaction whose only call is `upgradeAccount(threshold, owners)` on Tempo's built-in multisig contract. Call it with `writeContractSync`, and stop unless the client is on the devnet. Set `feeToken` to the stablecoin that pays the fee. Without it, Viem sends a standard Ethereum transaction, and the upgrade reverts with `PrimitiveRootRequired`.
+The original key signs a transaction with a top-level `upgradeAccount(threshold, owners)` call on Tempo's built-in multisig contract. Call it with `writeContractSync`, and stop unless the client is on the devnet. Set `feeToken` to the stablecoin that pays the fee. Without it, Viem sends a standard Ethereum transaction, and the upgrade reverts with `PrimitiveRootRequired`.
 
 `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -78,7 +80,7 @@ const account = Account.fromConfig({ // [!code hl]
   address: original.address, // [!code hl]
   owners: [original, backup], // [!code hl]
   threshold: 1, // [!code hl]
-  salt: keccak256(concat([toHex('tempo:multisig:upgrade'), original.address])), // [!code hl]
+  salt: keccak256(concat([toHex('tempo:configurable-account:upgrade'), original.address])), // [!code hl]
   version: 1n, // [!code hl]
 }) // [!code hl]
 const { owners, threshold } = account.config
@@ -112,17 +114,18 @@ After the upgrade, the record your app [saves](/docs/development/configurable-ac
 
 Viem signs with the attached keys until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
-[Adding](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [removing](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) signers later raises the version. Save the `config` that `updateConfigSync` returns and rebuild the account from it. Otherwise the next transaction fails with `multisig configuration commitment mismatch`.
+[Adding](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [removing](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) signers later raises the version. After the update succeeds, save `AccountConfig.update(saved.config, nextConfig)` and rebuild the account from it. Otherwise the next transaction fails with `multisig configuration commitment mismatch`.
 
 <span id="account-upgrade-limits" />
 
 ## Limits
 
 - Only the original key can sign the upgrade. Access keys can't, but a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it.
-- The upgrade must be the transaction's only call, with no `keyAuthorization` and no EIP-7702 authorization list.
+- The upgrade must be a top-level call, with no EIP-7702 authorization list. It can sit anywhere in a batch. Calls before it run under the original key, and calls after it see the new signers.
 - Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
 - Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
-- Upgraded accounts don't use the [recovery factory](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain) for funds sent to their address on another chain.
+- An account can upgrade only once. Later changes are [configuration updates](/docs/accounts/account-configuration/configuration-updates).
+- Access keys survive the upgrade, including admin keys authorized before T14. [Revoke](/docs/accounts/access-keys/revocation) any you don't want.
 
 ## Related
 

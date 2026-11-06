@@ -71,7 +71,7 @@ The example reads raw keys from the environment. To keep a key in its wallet, KM
 ## Limits
 
 - A signer has no spending limit. To cap what a key can pay, make it an access key instead.
-- Only the secp256k1 signers you create the account with could [recover funds sent to its address on another chain](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain). No chain supports that recovery yet.
+- Signers don't control the account's address on other chains. To [recover funds sent there](/docs/accounts/account-configuration#recover-funds-sent-on-another-chain), create the account from a fresh key that upgrades it.
 
 ## Related
 
