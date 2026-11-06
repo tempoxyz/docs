@@ -3,6 +3,7 @@
 import * as React from 'react'
 
 /** pinned: the step holds controls readers keep using, so it never folds on its own. */
+/** number: the step's position in its demo, in page order. */
 type Entry = { completed: boolean; failed: boolean; number: number; pinned: boolean }
 
 type State = { entries: Record<string, Entry>; latest: string | null }

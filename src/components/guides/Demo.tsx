@@ -382,14 +382,23 @@ export function Step(
   // A step whose body holds form fields, such as a network picker or an amount, stays open:
   // readers keep using them after the step finishes.
   const [interactive, setInteractive] = React.useState(false)
+  // The step's place in its demo. Step numbers restart in demos with several sections, so the
+  // folding rule orders steps by where they sit on the page instead.
+  const root = React.useRef<HTMLDivElement>(null)
+  const [order, setOrder] = React.useState(number)
   React.useLayoutEffect(() => {
     const next = Boolean(body.current?.querySelector(formFields))
     if (next !== interactive) setInteractive(next)
+    const element = root.current
+    const scope = element?.closest('.docs-demo') ?? element?.parentElement
+    const index =
+      element && scope ? Array.from(scope.querySelectorAll(stepSelector)).indexOf(element) : -1
+    if (index >= 0 && index !== order) setOrder(index)
   })
   const grouped = useStepGroupCollapsed({
     completed,
     failed: Boolean(error),
-    number,
+    number: order,
     pinned: interactive,
   })
   const collapsed = props.collapsed ?? grouped
@@ -414,7 +423,13 @@ export function Step(
   )
 
   return (
-    <div data-active={active} data-completed={completed} data-collapsed={hidden} className="group">
+    <div
+      ref={root}
+      data-active={active}
+      data-completed={completed}
+      data-collapsed={hidden}
+      className="group"
+    >
       <header {...ui.stepHeader()}>
         {collapsed ? (
           <button
@@ -450,6 +465,7 @@ export function Step(
   )
 }
 
+const stepSelector = '[data-active][data-completed]'
 const formFields = 'input, select, textarea, fieldset, [role="combobox"], [contenteditable="true"]'
 
 export namespace StringFormatter {
