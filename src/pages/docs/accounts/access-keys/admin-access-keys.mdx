@@ -5,13 +5,10 @@ description: Let a customer's trusted device or your key-management service auth
 ---
 
 import { Card, Cards } from 'vocs'
-import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
 
 # Admin Access Keys
 
 Manages an account's other access keys without the signers approving each change.
-
-<AdminAccessKeysT14 />
 
 ## Overview
 
@@ -40,11 +37,11 @@ An admin key isn't a signer. It can't change the signers or the threshold, or lo
 
 ## Use Cases
 
-Give an admin key only to a party you'd trust with the whole balance. On a configurable account on the devnet, an admin key also skips the [signing threshold](/docs/accounts/policies/signing-thresholds). It removes the protection of requiring several signers. From T14, no account can authorize a new admin key.
+Give an admin key only to a party you'd trust with the whole balance. On a configurable account (devnet until [T14](/docs/protocol/upgrades/t14)), an admin key also skips the [signing threshold](/docs/accounts/policies/signing-thresholds). It removes the protection of requiring several signers.
 
 | Holder | Key |
 | --- | --- |
-| A customer's trusted device, or your key-management service | Admin key until T14, then a [signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) |
+| A customer's trusted device, or your key-management service | Admin key |
 | An [AI agent](/docs/accounts/automations/give-an-agent-a-wallet) | Limited key |
 | A [backend that pays out](/docs/accounts/automations/pay-out-from-a-backend) | Limited key |
 | A [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) | Limited key |

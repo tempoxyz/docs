@@ -25,7 +25,6 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 - **Configuration updates:** the current signers replace the signer list and threshold in one transaction, at the same address. See [Account configuration](/docs/accounts/account-configuration).
 - **Upgrades from single-key accounts:** an existing single-key account becomes a configurable account at the same address. See [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
 - **Configurable accounts as access keys:** a team's configurable account can act as another account's access key, approving with its own signers. See [Account Keychain](/docs/development/account-keychain#access-key-types).
-- **Admin access keys removed:** Tempo rejects new admin access keys, and only an account's own key or its signers manage its access keys. Existing admin keys keep paying as access keys without limits. See [Admin Access Keys](/docs/accounts/access-keys/admin-access-keys).
 
 ## T14 specifications
 
@@ -34,6 +33,5 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 | [TIP-1107](https://tips.sh/1107) | Configurable accounts: configuration, address derivation, signature format, commitment storage, and owner updates |
 | [TIP-1111](https://tips.sh/1111) | Configurable accounts as access keys |
 | [TIP-1113](https://tips.sh/1113) | Upgrading a single-key account in place |
-| [TIP-1137](https://tips.sh/1137) | Removing admin access keys |
 
 The specifications are under review and may change before T14 activates. Try the behavior now on the [devnet](/docs/accounts/create#connect-to-the-devnet), and see [Configurable accounts](/docs/development/configurable-accounts) for the Tempo EVM reference.
