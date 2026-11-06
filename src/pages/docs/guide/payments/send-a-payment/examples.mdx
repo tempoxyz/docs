@@ -29,7 +29,7 @@ Send a payment using the standard `transfer` function. The Solidity examples are
 
     const { receipt } = await client.token.transferSync({
       amount: parseUnits('100', 6), // 100 tokens (6 decimals) // [!code hl]
-      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+      to: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb', // [!code hl]
       token: '0x20c0000000000000000000000000000000000001', // AlphaUSD // [!code hl]
     })
     ```
@@ -57,7 +57,7 @@ Send a payment using the standard `transfer` function. The Solidity examples are
           onClick={() =>
             mutate({ // [!code hl]
               amount: parseUnits('100', 6), // [!code hl]
-              to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb', // [!code hl]
+              to: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb', // [!code hl]
               token: '0x20c0000000000000000000000000000000000001', // [!code hl]
             }) // [!code hl]
           }
@@ -95,7 +95,7 @@ Send a payment using the standard `transfer` function. The Solidity examples are
 
         let receipt = token // [!code hl]
             .transfer( // [!code hl]
-                address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"), // [!code hl]
+                address!("0x742d35cc6634c0532925a3b844bc9e7595f0bebb"), // [!code hl]
                 U256::from(100_000_000), // 100 tokens (6 decimals) // [!code hl]
             ) // [!code hl]
             .send() // [!code hl]
@@ -131,7 +131,7 @@ Send a payment using the standard `transfer` function. The Solidity examples are
 
     data = TRANSFER_SELECTOR + encode( # [!code hl]
         ["address", "uint256"], # [!code hl]
-        ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000], # [!code hl]
+        ["0x742d35cc6634c0532925a3b844bc9e7595f0bebb", 100_000_000], # [!code hl]
     ) # [!code hl]
 
     tx = TempoTransaction.create(
@@ -193,7 +193,7 @@ Send a payment using the standard `transfer` function. The Solidity examples are
 
     	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
 
-    	recipient := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+    	recipient := common.HexToAddress("0x742d35cc6634c0532925a3b844bc9e7595f0bebb")
     	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
 
         tx := transaction.NewBuilder(big.NewInt(42431)).
@@ -229,7 +229,7 @@ Send a payment using the standard `transfer` function. The Solidity examples are
     ```bash
     cast erc20 transfer \
       0x20c0000000000000000000000000000000000001 \
-      0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb \
+      0x742d35cc6634c0532925a3b844bc9e7595f0bebb \
       100000000 \
       --tempo.fee-token 0x20c0000000000000000000000000000000000001 \
       --rpc-url "$TEMPO_RPC_URL" \
@@ -280,7 +280,7 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
 
     const { receipt } = await client.token.transferSync({
       amount: parseUnits('100', 6),
-      to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+      to: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
       token: '0x20c0000000000000000000000000000000000001',
       memo: invoiceId, // [!code hl]
     })
@@ -309,7 +309,7 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
           onClick={() =>
             mutate({
               amount: parseUnits('100', 6),
-              to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb',
+              to: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
               token: '0x20c0000000000000000000000000000000000001',
               memo: toHex('INV-12345', { size: 32 }), // [!code hl]
             })
@@ -348,7 +348,7 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
 
         let receipt = token
             .transferWithMemo( // [!code hl]
-                address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb"),
+                address!("0x742d35cc6634c0532925a3b844bc9e7595f0bebb"),
                 U256::from(100_000_000),
                 B256::right_padding_from("INV-12345".as_bytes()), // [!code hl]
             )
@@ -387,7 +387,7 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
 
     data = TRANSFER_WITH_MEMO_SELECTOR + encode( # [!code hl]
         ["address", "uint256", "bytes32"], # [!code hl]
-        ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000, memo], # [!code hl]
+        ["0x742d35cc6634c0532925a3b844bc9e7595f0bebb", 100_000_000, memo], # [!code hl]
     ) # [!code hl]
 
     tx = TempoTransaction.create(
@@ -450,7 +450,7 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
 
     	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
 
-    	recipient := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+    	recipient := common.HexToAddress("0x742d35cc6634c0532925a3b844bc9e7595f0bebb")
     	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
 
     	var memo [32]byte // [!code hl]
@@ -490,7 +490,7 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
     cast send \
       0x20c0000000000000000000000000000000000001 \
       "transferWithMemo(address,uint256,bytes32)" \
-      0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb \
+      0x742d35cc6634c0532925a3b844bc9e7595f0bebb \
       100000000 \
       "$(cast format-bytes32-string "INV-12345")" \
       --tempo.fee-token 0x20c0000000000000000000000000000000000001 \
@@ -626,7 +626,7 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
     async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let provider = provider::get_provider().await?;
 
-        let recipient1 = address!("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb");
+        let recipient1 = address!("0x742d35cc6634c0532925a3b844bc9e7595f0bebb");
         let recipient2 = address!("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
         let token_address: Address = address!("0x20c0000000000000000000000000000000000001");
 
@@ -702,7 +702,7 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
         calls=( # [!code hl]
             Call.create( # [!code hl]
                 to=ALPHA_USD, # [!code hl]
-                data=build_transfer("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000), # [!code hl]
+                data=build_transfer("0x742d35cc6634c0532925a3b844bc9e7595f0bebb", 100_000_000), # [!code hl]
             ), # [!code hl]
             Call.create( # [!code hl]
                 to=ALPHA_USD, # [!code hl]
@@ -759,7 +759,7 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
 
     	nonce, _ := c.GetTransactionCount(ctx, sgn.Address().Hex())
 
-    	recipient1 := common.HexToAddress("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb")
+    	recipient1 := common.HexToAddress("0x742d35cc6634c0532925a3b844bc9e7595f0bebb")
     	recipient2 := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
     	alphaUSD := common.HexToAddress("0x20c0000000000000000000000000000000000001")
 
@@ -795,7 +795,7 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
       --tempo.fee-token 0x20c0000000000000000000000000000000000001 \
       --rpc-url "$TEMPO_RPC_URL" \
       --private-key "$TEMPO_PRIVATE_KEY" \
-      --call "0x20c0000000000000000000000000000000000001::transfer(address,uint256):0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb,100000000" \
+      --call "0x20c0000000000000000000000000000000000001::transfer(address,uint256):0x742d35cc6634c0532925a3b844bc9e7595f0bebb,100000000" \
       --call "0x20c0000000000000000000000000000000000001::transfer(address,uint256):0x70997970C51812dc3A010C7d01b50e0d17dc79C8,50000000" # [!code hl]
     ```
 
