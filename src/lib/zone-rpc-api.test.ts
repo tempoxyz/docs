@@ -13,7 +13,7 @@ const rpc = {
 
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock)
-  vi.stubEnv('ZONE_RPC_BASIC_AUTH', 'eng:docs-key')
+  vi.stubEnv('ZONE_RPC_BASIC_AUTH', 'eng:docs-key\n')
   fetchMock.mockReset()
 })
 afterEach(() => {
@@ -88,8 +88,12 @@ describe('sandbox Zone RPC proxy', () => {
     expect(response.headers.get('authorization')).toBeNull()
   })
 
-  test('forwards without HTTP credentials when none are configured', async () => {
-    vi.stubEnv('ZONE_RPC_BASIC_AUTH', '')
+  test.each([
+    '',
+    '  \n',
+    'no-colon',
+  ])('forwards without HTTP credentials when %j is configured', async (value) => {
+    vi.stubEnv('ZONE_RPC_BASIC_AUTH', value)
     fetchMock.mockResolvedValueOnce(Response.json({ result: '0x0' }))
     expect((await POST(request())).status).toBe(200)
     const [, init] = fetchMock.mock.calls[0]

@@ -62,8 +62,9 @@ export async function POST(request: Request): Promise<Response> {
   }
   // `user:key` of a sandbox gateway client. Without it the gateway serves the demo under its
   // anonymous rate limit.
-  const credential = process.env.ZONE_RPC_BASIC_AUTH
-  if (credential) headers.authorization = `Basic ${Buffer.from(credential).toString('base64')}`
+  const credential = process.env.ZONE_RPC_BASIC_AUTH?.trim()
+  if (credential?.includes(':'))
+    headers.authorization = `Basic ${Buffer.from(credential).toString('base64')}`
 
   try {
     const response = await fetch(new URL(upstreams[zoneId]), {
