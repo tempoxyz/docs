@@ -192,8 +192,8 @@ export function UpgradeAccountDemo() {
   const funded = balance !== null && Number(balance) > 0
   const disabled = !preview || pending !== null
 
-  // A finished step folds to its header once a later step finishes, so the demo stays about one
-  // screen tall. The step that ran last and steps whose result failed stay open. Clicking a folded
+  // A finished step folds to its header once two later steps finish, so the last two results stay
+  // open beside the current step. The step that ran last and steps whose result failed stay open. Clicking a folded
   // step's title opens it again.
   const order: Action[] = ['create', 'fund', 'pay', 'upgrade', 'alone', 'both']
   const done = [
@@ -205,7 +205,7 @@ export function UpgradeAccountDemo() {
     results.both?.ok === true,
   ]
   const collapsed = (step: number) =>
-    done[step - 1] && order[step - 1] !== lastRun && done.slice(step).some(Boolean)
+    done[step - 1] && order[step - 1] !== lastRun && done.slice(step).filter(Boolean).length >= 2
 
   return (
     <Container

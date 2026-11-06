@@ -17,8 +17,8 @@ const Context = React.createContext<StepGroup | null>(null)
 
 /**
  * Tracks the demo steps rendered inside one demo container. A finished step folds to its header
- * once a later step finishes, so long demos stay about one screen tall. The step that finished last,
- * steps showing an error and steps with form fields stay open.
+ * once two later steps finish, so long demos stay short while the last two results stay readable.
+ * The step that finished last, steps showing an error and steps with form fields stay open.
  */
 export function StepGroupProvider(props: React.PropsWithChildren) {
   const [state, setState] = React.useState<State>({ entries: {}, latest: null })
@@ -53,9 +53,12 @@ export function StepGroupProvider(props: React.PropsWithChildren) {
       collapsed(id) {
         const entry = state.entries[id]
         if (!entry?.completed || entry.failed || entry.pinned || id === state.latest) return false
-        return Object.values(state.entries).some(
+        // Fold only once two later steps finished, so the step that just finished and the one
+        // before it stay open beside the step the reader is on.
+        const laterFinished = Object.values(state.entries).filter(
           (other) => other.completed && other.number > entry.number,
-        )
+        ).length
+        return laterFinished >= 2
       },
       remove,
       report,
