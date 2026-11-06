@@ -297,7 +297,7 @@ See the [T3 network upgrade](/docs/protocol/upgrades/t3) page for breaking chang
 
 | | |
 |---|---|
-| **Scope** | T1A removes the 16.7M per-transaction gas limit in favor of Tempo's 30M cap; T1B adds keychain precompile gas metering and expiring nonce replay-protection hardening |
+| **Scope** | T1A removes the 16.7M per-transaction gas limit in favor of Tempo's 30M cap; T1B charges key authorizations as intrinsic gas sized to their storage writes, replacing T1's in-call metering of the keychain precompile, and hardens expiring nonce replay protection |
 | **TIPs** | T1A: [Mainnet gas parameters](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1010.md); T1B: upgrade hardening release |
 | **Release** | [v1.3.1](https://github.com/tempoxyz/tempo/releases/tag/v1.3.1) |
 | **Testnet** | T1A + T1B: Feb 23, 2026 15:00 UTC (unix: 1771858800) |
@@ -318,10 +318,13 @@ See the [T3 network upgrade](/docs/protocol/upgrades/t3) page for breaking chang
 
 ---
 
-## T0 (Genesis)
+<span id="t0-genesis" />
+
+## T0
 
 | | |
 |---|---|
-| **Scope** | Initial mainnet launch |
+| **Scope** | Initial mainnet launch. Mainnet starts at T0; the earlier Genesis rule set ran only on Moderato, until T0 and T1 activated together there |
+| **Testnet** | Moderato: Feb 5, 2026 15:00 UTC (unix: 1770303600), together with T1 |
 | **Mainnet** | Jan 16, 2026 (genesis) — Release: [v1.0.0](https://github.com/tempoxyz/tempo/releases/tag/v1.0.0) |
 | **Priority** | <Badge variant="red">Required</Badge> |

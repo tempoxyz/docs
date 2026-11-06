@@ -15,7 +15,7 @@ Tempo uses Simplex Consensus, implemented by [Commonware](https://www.commonware
 
 ### Block Production
 
-Blocks are produced approximately every 600ms under normal network conditions (500ms builder loop plus network latency and block validation). Proposer selection uses a VRF (Verifiable Random Function) for random leader election, providing DoS protection and MEV resistance. Once a block is finalized, it cannot be reverted.
+Validators target about 550 ms between blocks under normal network conditions. The block builder adapts its build time to hit that target while reserving at least 50 ms for propagation, voting, and validation, and raises that reservation when it observes slower network conditions. Proposer selection uses a VRF (Verifiable Random Function) for random leader election, providing DoS protection and MEV resistance. Once a block is finalized, it cannot be reverted.
 
 ### Deterministic Finality
 
@@ -58,5 +58,5 @@ Treat finalized blocks as irreversible for settlement purposes. No additional co
 
 ## Further Reading
 
-- [Commonware Simplex Documentation](https://docs.rs/commonware-consensus/0.0.65/commonware_consensus/simplex/)
-- [Simplex with BLS12-381 Threshold Scheme](https://docs.rs/commonware-consensus/0.0.65/commonware_consensus/simplex/index.html#schemebls12381_threshold)
+- [Commonware Simplex Documentation](https://docs.rs/commonware-consensus/2026.9.0/commonware_consensus/simplex/)
+- [Simplex with BLS12-381 Threshold Scheme](https://docs.rs/commonware-consensus/2026.9.0/commonware_consensus/simplex/scheme/bls12381_threshold/index.html)

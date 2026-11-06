@@ -115,7 +115,7 @@ function burn(
 
 Burns LP tokens and receives pro-rata share of reserves. Emits `Burn` event.
 
-Burning MUST authorize `msg.sender` as a sender on **both** pool tokens, independently of `to`. Each nonzero underlying payout also checks FeeManager as sender and the resolved payout destination as recipient on that token, with ordinary token-transfer restrictions. An authorized `to` cannot redeem shares on behalf of a policy-blocked LP caller. Issuer-policy failures revert with `PolicyForbids`; subsequent issuer-policy changes can therefore prevent redemption.
+Burning MUST authorize `msg.sender` as a sender on **both** pool tokens, independently of `to`. Each underlying payout, including a zero amount, is an ordinary transfer that checks FeeManager as sender and the resolved payout destination as recipient on that token, with ordinary token-transfer restrictions. An authorized `to` cannot redeem shares on behalf of a policy-blocked LP caller. Issuer-policy failures revert with `PolicyForbids`; subsequent issuer-policy changes can therefore prevent redemption.
 
 ```solidity
 function executeFeeSwap(
@@ -194,8 +194,8 @@ Returns the amount of accumulated fees for a validator and specific token. Distr
    - Protocol determines user's fee token using logic that considers: explicit tx fee token, setUserToken calls, stored user preference, tx.to if TIP-20
    - Protocol calculates the maximum token charge from the gas limit and applicable gas price, converting attodollars to base units with upward rounding
    - `FeeManager.collectFeePreTx(user, userToken, maxAmount)` is called:
-     - If user token differs from validator token, checks AMM has sufficient liquidity via `checkSufficientLiquidity()`
      - Collects maximum fee from user using `transferFeePreTx()`
+     - If user token differs from validator token, checks AMM has sufficient liquidity via `checkSufficientLiquidity()` and reserves that output for the rest of the transaction
    - If any check fails (insufficient balance, insufficient liquidity), transaction is invalid
 
 2. **Post-Transaction**:
