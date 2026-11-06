@@ -378,7 +378,20 @@ export function Step(
   }>,
 ) {
   const { actions, active, children, completed, error, number, title } = props
-  const grouped = useStepGroupCollapsed({ completed, failed: Boolean(error), number })
+  const body = React.useRef<HTMLDivElement>(null)
+  // A step whose body holds form fields, such as a network picker or an amount, stays open:
+  // readers keep using them after the step finishes.
+  const [interactive, setInteractive] = React.useState(false)
+  React.useLayoutEffect(() => {
+    const next = Boolean(body.current?.querySelector(formFields))
+    if (next !== interactive) setInteractive(next)
+  })
+  const grouped = useStepGroupCollapsed({
+    completed,
+    failed: Boolean(error),
+    number,
+    pinned: interactive,
+  })
   const collapsed = props.collapsed ?? grouped
   const [expanded, setExpanded] = React.useState(false)
   const bodyId = React.useId()
@@ -422,7 +435,7 @@ export function Step(
         )}
         <div {...ui.stepLayout6()}>{actions}</div>
       </header>
-      <div id={bodyId} hidden={hidden}>
+      <div id={bodyId} ref={body} hidden={hidden}>
         {children}
       </div>
       {error && (
@@ -436,6 +449,8 @@ export function Step(
     </div>
   )
 }
+
+const formFields = 'input, select, textarea, fieldset, [role="combobox"], [contenteditable="true"]'
 
 export namespace StringFormatter {
   export function truncate(

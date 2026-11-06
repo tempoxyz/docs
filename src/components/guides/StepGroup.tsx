@@ -2,7 +2,10 @@
 
 import * as React from 'react'
 
-type Entry = { completed: boolean; failed: boolean; number: number }
+/** pinned: the step holds controls readers keep using, so it never folds on its own. */
+type Entry = { completed: boolean; failed: boolean; number: number; pinned: boolean }
+
+type State = { entries: Record<string, Entry>; latest: string | null }
 
 type StepGroup = {
   collapsed: (id: string) => boolean
@@ -14,48 +17,50 @@ const Context = React.createContext<StepGroup | null>(null)
 
 /**
  * Tracks the demo steps rendered inside one demo container. A finished step folds to its header
- * once a later step finishes, so long demos stay about one screen tall. The step that finished last
- * and steps showing an error stay open.
+ * once a later step finishes, so long demos stay about one screen tall. The step that finished last,
+ * steps showing an error and steps with form fields stay open.
  */
 export function StepGroupProvider(props: React.PropsWithChildren) {
-  const [entries, setEntries] = React.useState<Record<string, Entry>>({})
-  const [latest, setLatest] = React.useState<string | null>(null)
+  const [state, setState] = React.useState<State>({ entries: {}, latest: null })
 
   const report = React.useCallback((id: string, entry: Entry) => {
-    setEntries((current) => {
-      const previous = current[id]
+    setState((current) => {
+      const previous = current.entries[id]
       if (
         previous?.completed === entry.completed &&
         previous.failed === entry.failed &&
-        previous.number === entry.number
+        previous.number === entry.number &&
+        previous.pinned === entry.pinned
       )
         return current
-      if (entry.completed && !previous?.completed) setLatest(id)
-      return { ...current, [id]: entry }
+      return {
+        entries: { ...current.entries, [id]: entry },
+        latest: entry.completed && !previous?.completed ? id : current.latest,
+      }
     })
   }, [])
 
   const remove = React.useCallback((id: string) => {
-    setEntries((current) => {
-      if (!(id in current)) return current
-      const { [id]: _, ...rest } = current
-      return rest
+    setState((current) => {
+      if (!(id in current.entries)) return current
+      const { [id]: _, ...entries } = current.entries
+      return { entries, latest: current.latest === id ? null : current.latest }
     })
   }, [])
 
   const value = React.useMemo<StepGroup>(
     () => ({
       collapsed(id) {
-        const entry = entries[id]
-        if (!entry?.completed || entry.failed || id === latest) return false
-        return Object.values(entries).some(
+        const entry = state.entries[id]
+        if (!entry?.completed || entry.failed || entry.pinned || id === state.latest) return false
+        return Object.values(state.entries).some(
           (other) => other.completed && other.number > entry.number,
         )
       },
       remove,
       report,
     }),
-    [entries, latest, remove, report],
+    [state, remove, report],
   )
 
   return <Context.Provider value={value}>{props.children}</Context.Provider>
@@ -65,13 +70,14 @@ export function StepGroupProvider(props: React.PropsWithChildren) {
 export function useStepGroupCollapsed(entry: Entry) {
   const group = React.useContext(Context)
   const id = React.useId()
-  const { completed, failed, number } = entry
+  const { completed, failed, number, pinned } = entry
+  const report = group?.report
+  const remove = group?.remove
 
   React.useEffect(() => {
-    group?.report(id, { completed, failed, number })
-  }, [group, id, completed, failed, number])
+    report?.(id, { completed, failed, number, pinned })
+  }, [report, id, completed, failed, number, pinned])
 
-  const remove = group?.remove
   React.useEffect(() => () => remove?.(id), [remove, id])
 
   return group ? group.collapsed(id) : false
