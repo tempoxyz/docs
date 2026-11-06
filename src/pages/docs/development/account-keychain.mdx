@@ -50,7 +50,7 @@ Tempo rejects an expired key with [`KeyExpired`](/docs/protocol/transactions/Acc
 | Authorizes, changes, and revokes keys | The root key | Owners whose weights reach the threshold, with a `0x05` [multisig signature](/docs/development/configurable-accounts#multisig-signature-format) |
 | Acts as another account's access key | As type `0`, `1`, or `2`, matching its root key | As type `3`, signed by its owners |
 
-Any account can also be another account's access key, as the second row shows. [Admin access keys](#admin-access-keys) can also manage keys on either type. Access keys never count toward a threshold.
+Any account can also be another account's access key, as the second row shows. [Admin access keys](#admin-access-keys) can also manage keys on either type until [T14](/docs/protocol/upgrades/t14), which removes them. Access keys never count toward a threshold.
 
 <span id="authorizing-an-access-key" />
 
@@ -87,6 +87,8 @@ The access key signs `inner_digest`; a configurable account acting as an access 
 ## Admin access keys
 
 An admin access key ([TIP-1049](https://tips.sh/1049), live since the [T6 upgrade](/docs/protocol/upgrades/t6#admin-access-keys)) has no limits, expiry, or scopes. It can authorize and revoke keys, including admin keys, and change a limited key's limits and scopes, but it can't change a configurable account's owners. Its holder can spend the whole balance, so store it as carefully as a root or owner key.
+
+From [T14](/docs/protocol/upgrades/t14), Tempo rejects new admin keys ([TIP-1137](https://tips.sh/1137)), and only the account's own key or its owners authorize, change, or revoke access keys. An admin key authorized before T14 keeps paying as an access key without limits.
 
 ## Account Keychain functions
 
