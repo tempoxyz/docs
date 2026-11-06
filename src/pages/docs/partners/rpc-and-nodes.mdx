@@ -27,13 +27,13 @@ curl --fail --silent --show-error '<TEMPO_HTTP_URL>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
 ```
 
-Expect `result: "0x1079"` for mainnet (`4217`) or `result: "0xa5bf"` for Moderato (`42431`). Method support still varies by provider.
+Expect `result: "0x1079"` for mainnet (`4217`) or `result: "0xa5bf"` for testnet (`42431`). Method support still varies by provider.
 
 <span id="alchemy" />
 
 ## <span className={`partner-logo partner-logo--alchemy ${partnerLogo().className + ' ' + partnerLogoAlchemy().className}`} aria-hidden="true" />Alchemy
 
-[Alchemy](https://www.alchemy.com/rpc/tempo) provides HTTP and WebSocket RPC endpoints for Tempo mainnet and Moderato. Create an app in the [dashboard](https://dashboard.alchemy.com/?utm_source=chain_partner&utm_medium=referral&utm_campaign=tempo), select the network, and follow its [Tempo quickstart](https://www.alchemy.com/docs/reference/tempo-api-quickstart).
+[Alchemy](https://www.alchemy.com/rpc/tempo) provides HTTP and WebSocket RPC endpoints for Tempo mainnet and testnet. Create an app in the [dashboard](https://dashboard.alchemy.com/?utm_source=chain_partner&utm_medium=referral&utm_campaign=tempo), select the network, and follow its [Tempo quickstart](https://www.alchemy.com/docs/reference/tempo-api-quickstart).
 
 Alchemy's indexed APIs, webhooks, and Gas Manager have their own chain support lists. Its native-balance example doesn't return a spendable stablecoin balance; use [TIP-20 balance reads](/docs/guide/payments/accept-a-payment#read-balances).
 
@@ -81,7 +81,7 @@ Create an API key in the [Dwellir dashboard](https://dashboard.dwellir.com) and 
 
 [QuickNode](https://www.quicknode.com/chains/tempo) provides HTTP and WebSocket Tempo RPC endpoints. Follow the [Tempo quickstart](https://www.quicknode.com/docs/tempo/quickstart), then check the historical, Debug, or Trace methods you need in its [API overview](https://www.quicknode.com/docs/tempo/api-overview). Use HTTP POST for responses that exceed [WebSocket size limits](https://www.quicknode.com/docs/tempo/endpoints).
 
-The API overview lists testnet chain ID `42429`, not current Moderato (`42431`). Run the [network check](#verify-the-endpoints-network) before using a QuickNode testnet endpoint.
+The API overview lists testnet chain ID `42429`, not the current testnet (`42431`). Run the [network check](#verify-the-endpoints-network) before using a QuickNode testnet endpoint.
 
 ## <span className={`partner-logo partner-logo--senseinode ${partnerLogo().className + ' ' + partnerLogoSenseinode().className}`} aria-hidden="true" />SenseiNode
 

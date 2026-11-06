@@ -38,8 +38,8 @@ pnpm preview        # Preview the production build
 Add a Tempo API key with the `data:read` scope as the `TEMPO_RPC_API_KEY`
 repository Actions secret in [GitHub settings](https://github.com/tempoxyz/docs/settings/secrets/actions).
 The Verify workflow passes it only to the Playwright runner. Live tests forward
-Moderato HTTP requests through Node to `https://api.tempo.xyz/rpc/42431` with the
-key and disable anonymous WebSocket fallback. The API reaches Moderato as an
+Testnet HTTP requests through Node to `https://api.tempo.xyz/rpc/42431` with the
+key and disable anonymous WebSocket fallback. The API reaches testnet as an
 authenticated client, so shared CI egress IPs do not hit the anonymous per-IP
 connection limit. Without the secret (including fork PRs), tests use the public RPC.
 

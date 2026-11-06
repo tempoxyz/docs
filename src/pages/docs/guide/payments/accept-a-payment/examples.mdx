@@ -9,7 +9,7 @@ import { Tabs, Tab } from 'vocs'
 
 # Payment verification examples
 
-Read incoming transfers and verify delivery before crediting a customer. These full examples use AlphaUSD on Moderato testnet. Use [Receive payments](/docs/guide/payments/accept-a-payment) for the integration flow and short API examples.
+Read incoming transfers and verify delivery before crediting a customer. These full examples use AlphaUSD on testnet. Use [Receive payments](/docs/guide/payments/accept-a-payment) for the integration flow and short API examples.
 
 Set `RPC_URL` or `TEMPO_RPC_URL` to `https://rpc.moderato.tempo.xyz`. Use the [SDK setup](/docs/sdk) for your language. The Rust watcher also requires `cargo add futures`.
 
@@ -129,7 +129,7 @@ Set `TEMPO_RECIPIENT` to your receiving account. Viem and Cast watch incoming tr
     from web3 import Web3
 
     w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
-    assert w3.eth.chain_id == 42431, "Expected Moderato testnet"
+    assert w3.eth.chain_id == 42431, "Expected testnet"
     ```
 
     :::
@@ -233,7 +233,7 @@ Store the network, transaction hash, and transfer log index as a unique event ke
 
 :::::
 
-This example verifies one payment of 10 AlphaUSD to a regular account on Moderato testnet. Replace the expected values with your invoice details and set `PAYMENT_TX_HASH` to the payment transaction hash. It prints an event key for your database to record.
+This example verifies one payment of 10 AlphaUSD to a regular account on testnet. Replace the expected values with your invoice details and set `PAYMENT_TX_HASH` to the payment transaction hash. It prints an event key for your database to record.
 
 ```ts [verify-payment.ts]
 import {
@@ -257,7 +257,7 @@ if (!hash || !/^0x[0-9a-fA-F]{64}$/.test(hash)) {
   throw new Error('Set PAYMENT_TX_HASH to the payment transaction hash')
 }
 if (await client.getChainId() !== tempoModerato.id) {
-  throw new Error('Expected Moderato testnet')
+  throw new Error('Expected testnet')
 }
 
 const receipt = await client.waitForTransactionReceipt({

@@ -20,12 +20,12 @@ Any wallet, such as a browser extension, mobile wallet, or hardware wallet, alre
 
 ### Add the Tempo Networks
 
-Add mainnet for production and Moderato testnet for development. Both use `USD` as the currency symbol, because fees are denominated in USD.
+Add mainnet for production and testnet for development. Both use `USD` as the currency symbol, because fees are denominated in USD.
 
 | Network | Chain ID | HTTP RPC | WebSocket RPC | Explorer |
 | --- | --- | --- | --- | --- |
 | Tempo Mainnet | `4217` | `https://rpc.tempo.xyz` | `wss://rpc.tempo.xyz` | [explore.tempo.xyz](https://explore.tempo.xyz) |
-| Tempo Testnet (Moderato) | `42431` | `https://rpc.moderato.tempo.xyz` | `wss://rpc.moderato.tempo.xyz` | [explore.testnet.tempo.xyz](https://explore.testnet.tempo.xyz) |
+| Tempo Testnet | `42431` | `https://rpc.moderato.tempo.xyz` | `wss://rpc.moderato.tempo.xyz` | [explore.testnet.tempo.xyz](https://explore.testnet.tempo.xyz) |
 
 In Viem, use the `tempo` and `tempoModerato` chains from `viem/chains`.
 
@@ -40,7 +40,7 @@ import { client } from './client'
 
 const balance = await client.token.getBalance({
   account: '0x742d35cc6634c0532925a3b844bc9e7595f0bebb',
-  token: '0x20c0000000000000000000000000000000000001', // a Moderato test stablecoin
+  token: '0x20c0000000000000000000000000000000000001', // a test stablecoin
 })
 // { amount: bigint; decimals: number; formatted: string }
 ```

@@ -33,7 +33,7 @@ describe('Earn demo deployment guard', () => {
   it('accepts only the verified, open and active tested deployment', () => {
     expect(() => verifyEarnDemoConfiguration(vault())).not.toThrow()
     expect(() => verifyEarnDemoNetwork(42431)).not.toThrow()
-    expect(() => verifyEarnDemoNetwork(4217)).toThrow('Moderato testnet')
+    expect(() => verifyEarnDemoNetwork(4217)).toThrow('only supports testnet')
   })
 
   it('keeps supported redemption available when new deposits pause', () => {

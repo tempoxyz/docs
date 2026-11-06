@@ -37,7 +37,7 @@ const keyTypes: { type: KeyType; label: string; note: string }[] = [
 ]
 
 /**
- * Creates a single-key account on Moderato testnet from a passkey, a WebCrypto device key, or a
+ * Creates a single-key account on testnet from a passkey, a WebCrypto device key, or a
  * private key, then funds it from the faucet and pays with it. Keys live in this tab's memory.
  */
 export function SingleKeyAccountDemo() {
@@ -128,7 +128,7 @@ export function SingleKeyAccountDemo() {
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Create a single-key account</span>}
-      headerRight={<span {...ui.accountDemoMuted()}>Moderato testnet</span>}
+      headerRight={<span {...ui.accountDemoMuted()}>Testnet</span>}
     >
       <div {...ui.accountDemoSteps()} data-testid="single-key-demo" aria-busy={pending !== null}>
         <Step
