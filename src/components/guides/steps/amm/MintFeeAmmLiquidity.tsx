@@ -115,18 +115,16 @@ export function MintFeeAmmLiquidity(props: DemoStepProps & { waitForBalance?: bo
       actions={
         <Button
           variant={active ? (allMinted ? 'default' : 'accent') : 'default'}
-          disabled={!active || mintFeeLiquidity.isPending}
+          disabled={!active || allMinted || mintFeeLiquidity.isPending}
           onClick={handleMintAll}
           type="button"
           className={form.actionButton().className}
         >
           {mintFeeLiquidity.isPending
             ? 'Adding...'
-            : allMinted
-              ? 'Done'
-              : someMinted
-                ? 'Continue Adding'
-                : 'Add Liquidity'}
+            : someMinted && !allMinted
+              ? 'Continue Adding'
+              : 'Add Liquidity'}
         </Button>
       }
       error={mintFeeLiquidity.error}

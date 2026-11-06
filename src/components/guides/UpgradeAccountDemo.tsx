@@ -56,6 +56,7 @@ export function UpgradeAccountDemo() {
   const [upgraded, setUpgraded] = React.useState(false)
   const [results, setResults] = React.useState<Partial<Record<Action, Result>>>({})
   const [pending, setPending] = React.useState<Action | null>(null)
+  const [lastRun, setLastRun] = React.useState<Action | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const busy = React.useRef(false)
 
@@ -87,6 +88,7 @@ export function UpgradeAccountDemo() {
     try {
       const result = await work()
       if (result) setResults((current) => ({ ...current, [action]: result }))
+      setLastRun(action)
       await refresh()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message.split('\n')[0] : 'Something went wrong.')
@@ -190,6 +192,21 @@ export function UpgradeAccountDemo() {
   const funded = balance !== null && Number(balance) > 0
   const disabled = !preview || pending !== null
 
+  // A finished step folds to its header once two later steps finish, so the last two results stay
+  // open beside the current step. The step that ran last and steps whose result failed stay open. Clicking a folded
+  // step's title opens it again.
+  const order: Action[] = ['create', 'fund', 'pay', 'upgrade', 'alone', 'both']
+  const done = [
+    Boolean(keys),
+    funded,
+    results.pay?.ok === true,
+    upgraded,
+    results.alone?.ok === true,
+    results.both?.ok === true,
+  ]
+  const collapsed = (step: number) =>
+    done[step - 1] && order[step - 1] !== lastRun && done.slice(step).filter(Boolean).length >= 2
+
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Upgrade a private-key account</span>}
@@ -207,6 +224,7 @@ export function UpgradeAccountDemo() {
         >
           <Step
             number={1}
+            collapsed={collapsed(1)}
             title="Create a private-key account"
             active
             completed={Boolean(keys)}
@@ -217,7 +235,7 @@ export function UpgradeAccountDemo() {
                 disabled={disabled || Boolean(keys)}
                 onClick={() => run('create', create)}
               >
-                {preview === undefined ? 'Connecting…' : keys ? 'Created' : 'Create key'}
+                {preview === undefined ? 'Connecting…' : 'Create key'}
               </Button>
             }
           >
@@ -228,6 +246,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={2}
+            collapsed={collapsed(2)}
             title="Fund it"
             active={Boolean(keys)}
             completed={funded}
@@ -237,7 +256,7 @@ export function UpgradeAccountDemo() {
                 disabled={disabled || !keys || funded}
                 onClick={() => run('fund', fund)}
               >
-                {pending === 'fund' ? 'Funding…' : funded ? 'Funded' : 'Get test funds'}
+                {pending === 'fund' ? 'Funding…' : 'Get test funds'}
               </Button>
             }
           >
@@ -246,6 +265,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={3}
+            collapsed={collapsed(3)}
             title="Pay 1 AlphaUSD with the private key"
             active={funded}
             completed={Boolean(results.pay)}
@@ -274,6 +294,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={4}
+            collapsed={collapsed(4)}
             title="Upgrade it to a configurable account"
             active={Boolean(results.pay)}
             completed={upgraded}
@@ -284,7 +305,7 @@ export function UpgradeAccountDemo() {
                 disabled={disabled || !results.pay || upgraded}
                 onClick={() => run('upgrade', upgrade)}
               >
-                {pending === 'upgrade' ? 'Upgrading…' : upgraded ? 'Upgraded' : 'Upgrade'}
+                {pending === 'upgrade' ? 'Upgrading…' : 'Upgrade'}
               </Button>
             }
           >
@@ -296,6 +317,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={5}
+            collapsed={collapsed(5)}
             title="Pay with the original key alone"
             active={upgraded}
             completed={Boolean(results.alone)}
@@ -314,6 +336,7 @@ export function UpgradeAccountDemo() {
 
           <Step
             number={6}
+            collapsed={collapsed(6)}
             title="Pay with both signers"
             active={upgraded}
             completed={Boolean(results.both)}
