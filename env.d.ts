@@ -8,6 +8,7 @@ interface EnvironmentVariables {
 
   readonly INDEXSUPPLY_API_KEY: string
   readonly SLACK_FEEDBACK_WEBHOOK: string
+  readonly ZONE_RPC_BASIC_AUTH?: string
 
   readonly VERCEL_URL: string
   readonly VERCEL_BRANCH_URL: string

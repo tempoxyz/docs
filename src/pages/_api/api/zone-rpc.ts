@@ -1,8 +1,8 @@
-// Sandbox gateways currently omit X-Authorization-Token from their CORS allowlist.
-// Keep HTTP credentials server-side; the caller still supplies a signed Zone token.
+// Sandbox gateways currently omit X-Authorization-Token from their CORS allowlist, so the
+// browser calls this route; the caller still supplies a signed Zone token.
 const upstreams: Record<string, string> = {
-  '6': 'https://eng:bold-raman-silly-torvalds@rpc-zone-a.testnet.tempo.xyz',
-  '7': 'https://eng:bold-raman-silly-torvalds@rpc-zone-b.testnet.tempo.xyz',
+  '6': 'https://rpc-zone-a.testnet.tempo.xyz',
+  '7': 'https://rpc-zone-b.testnet.tempo.xyz',
 }
 
 const maxRequestBytes = 128 * 1024
@@ -56,21 +56,19 @@ export async function POST(request: Request): Promise<Response> {
     return failure(400, 'Invalid JSON-RPC request')
   }
 
-  const upstream = new URL(upstreams[zoneId])
-  const authorization = `Basic ${Buffer.from(
-    `${decodeURIComponent(upstream.username)}:${decodeURIComponent(upstream.password)}`,
-  ).toString('base64')}`
-  upstream.username = ''
-  upstream.password = ''
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    'X-Authorization-Token': token,
+  }
+  // `user:key` of a sandbox gateway client. Without it the gateway serves the demo under its
+  // anonymous rate limit.
+  const credential = process.env.ZONE_RPC_BASIC_AUTH
+  if (credential) headers.authorization = `Basic ${Buffer.from(credential).toString('base64')}`
 
   try {
-    const response = await fetch(upstream, {
+    const response = await fetch(new URL(upstreams[zoneId]), {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization,
-        'X-Authorization-Token': token,
-      },
+      headers,
       body,
       redirect: 'error',
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(15_000)]),
