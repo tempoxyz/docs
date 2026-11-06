@@ -21,8 +21,8 @@ function node(schema: ReturnType<typeof graph>, type: string) {
 
 describe('docs structured data', () => {
   test.each([
-    ['/', '/index'],
-    ['/get-started', '/get-started'],
+    ['/docs', '/docs'],
+    ['/docs/get-started', '/docs/get-started'],
     ['/docs/guide/payments/send-a-payment', '/docs/guide/payments/send-a-payment'],
     ['/docs/api/activities', '/docs/api/activities'],
   ])('advertises existing text exports for %s before hydration', (route, markdownRoute) => {
@@ -43,13 +43,17 @@ describe('docs structured data', () => {
   })
 
   test('uses the no-slash homepage canonical in both head and structured data', () => {
-    const head = docsStructuredDataHead('/', { frontmatter: { title: 'Documentation' } })
-    expect(head).toMatchObject({ canonical: 'https://tempo.xyz/developers' })
-    expect(node(graph('/', { title: 'Documentation' }), 'TechArticle').url).toBe(head?.canonical)
-    expect(docsStructuredDataHead('/', {})).toMatchObject({
-      canonical: 'https://tempo.xyz/developers',
+    const head = docsStructuredDataHead('/docs', { frontmatter: { title: 'Documentation' } })
+    expect(head).toMatchObject({ canonical: 'https://tempo.xyz/docs' })
+    expect(node(graph('/docs', { title: 'Documentation' }), 'TechArticle').url).toBe(
+      head?.canonical,
+    )
+    expect(docsStructuredDataHead('/docs/', {})).toMatchObject({
+      canonical: 'https://tempo.xyz/docs',
     })
-    expect(docsStructuredDataHead('/get-started', {})).not.toHaveProperty('canonical')
+    expect(docsStructuredDataHead('/docs/get-started', {})).toMatchObject({
+      canonical: 'https://tempo.xyz/docs/get-started',
+    })
   })
 
   test('uses authored page metadata for TechArticle semantics', () => {
@@ -59,13 +63,13 @@ describe('docs structured data', () => {
     })
 
     expect(node(schema, 'TechArticle')).toMatchObject({
-      '@id': 'https://tempo.xyz/developers/docs/guide/payments/send-a-payment',
-      url: 'https://tempo.xyz/developers/docs/guide/payments/send-a-payment',
+      '@id': 'https://tempo.xyz/docs/guide/payments/send-a-payment',
+      url: 'https://tempo.xyz/docs/guide/payments/send-a-payment',
       name: 'Send a Payment',
       headline: 'Send a Payment',
       description: 'Send stablecoin payments between accounts on Tempo.',
       breadcrumb: {
-        '@id': 'https://tempo.xyz/developers/docs/guide/payments/send-a-payment#breadcrumb',
+        '@id': 'https://tempo.xyz/docs/guide/payments/send-a-payment#breadcrumb',
       },
     })
   })
@@ -77,7 +81,8 @@ describe('docs structured data', () => {
       name: 'Tempo API',
       description: 'Sponsor gas.',
       url: 'https://api.tempo.xyz/v1',
-      documentation: 'https://tempo.xyz/developers/docs/api',
+      documentation: 'https://tempo.xyz/docs/api',
+      '@id': 'https://tempo.xyz/docs/api#webapi',
       provider: { '@id': 'https://tempo.xyz/#organization' },
     })
     expect(() => node(graph('/docs/api/balances', { title: 'Balances' }), 'WebAPI')).toThrow()
@@ -126,13 +131,13 @@ describe('docs structured data', () => {
         '@type': 'ListItem',
         position: 1,
         name: 'Tempo Docs',
-        item: 'https://tempo.xyz/developers',
+        item: 'https://tempo.xyz/docs',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Authentication',
-        item: 'https://tempo.xyz/developers/docs/api/authentication',
+        item: 'https://tempo.xyz/docs/api/authentication',
       },
     ])
   })
@@ -150,21 +155,19 @@ describe('docs structured data', () => {
   })
 
   test.each([
-    ['/', 'Documentation'],
-    ['/get-started', 'Get Started'],
-    ['/get-started/stablecoins', 'Stablecoins on Tempo'],
+    ['/docs', 'Documentation'],
+    ['/docs/get-started', 'Get Started'],
+    ['/docs/get-started/stablecoins', 'Stablecoins on Tempo'],
   ])('includes %s with the canonical docs root breadcrumb', (path, title) => {
     const schema = graph(path, { title })
-    expect(node(schema, 'TechArticle').url).toBe(
-      `https://tempo.xyz/developers${path === '/' ? '' : path}`,
-    )
+    expect(node(schema, 'TechArticle').url).toBe(`https://tempo.xyz${path}`)
     expect(node(schema, 'BreadcrumbList').itemListElement).toEqual(
       expect.arrayContaining([
         {
           '@type': 'ListItem',
           position: 1,
           name: 'Tempo Docs',
-          item: 'https://tempo.xyz/developers',
+          item: 'https://tempo.xyz/docs',
         },
       ]),
     )
@@ -172,6 +175,7 @@ describe('docs structured data', () => {
 
   test('omits the base tag on non-docs routes too', () => {
     expect(docsStructuredDataHead('/blog', {})).toEqual({ base: false, meta: {} })
+    expect(docsStructuredDataHead('/', {})).toEqual({ base: false, meta: {} })
     expect(docsStructuredDataHead('/get-started-extra', {})).toEqual({ base: false, meta: {} })
   })
 

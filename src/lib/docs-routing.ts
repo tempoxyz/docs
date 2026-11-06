@@ -4,11 +4,15 @@ export type DocsRouteContract = {
 }
 
 export const canonicalDevelopersOrigin = 'https://tempo.xyz/developers'
+/** Public origin of the docs pages, served at tempo.xyz/docs. */
+export const canonicalDocsOrigin = 'https://tempo.xyz'
 
 // The developer site has two page surfaces: documentation and the engineering
 // blog. Keep the previous marketing entry points useful as permanent redirects.
 export const developerSurfaceRedirects = [
-  { source: '/docs', destination: '/' },
+  { source: '/', destination: '/docs' },
+  { source: '/get-started', destination: '/docs/get-started' },
+  { source: '/get-started/:path*', destination: '/docs/get-started/:path*' },
   { source: '/build', destination: '/docs/build' },
   { source: '/build/tip20-tokens', destination: '/docs/protocol/tip20/overview' },
   { source: '/build/tempo-transactions', destination: '/docs/protocol/transactions' },
@@ -136,97 +140,97 @@ export const legacyDocsHostRoutes = [
   },
   {
     source: '/guide/bridge-usdc-stargate',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/bridge-layerzero`,
+    destination: `${canonicalDocsOrigin}/docs/guide/bridge-layerzero`,
   },
   {
     source: '/guide/bridge-usdc-relay',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/bridge-relay`,
+    destination: `${canonicalDocsOrigin}/docs/guide/bridge-relay`,
   },
   {
     source: '/guide/node/validator-config-v2',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/node/network-upgrades`,
+    destination: `${canonicalDocsOrigin}/docs/guide/node/network-upgrades`,
   },
   {
     source: '/AccountKeychain',
-    destination: `${canonicalDevelopersOrigin}/docs/protocol/transactions/AccountKeychain`,
+    destination: `${canonicalDocsOrigin}/docs/protocol/transactions/AccountKeychain`,
   },
-  { source: '/developer-tools', destination: `${canonicalDevelopersOrigin}/docs/partners` },
+  { source: '/developer-tools', destination: `${canonicalDocsOrigin}/docs/partners` },
   {
     source: '/developer-tools/fee-payer',
-    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
+    destination: `${canonicalDocsOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/developer-tools/indexer',
-    destination: `${canonicalDevelopersOrigin}/docs/api/indexer-api`,
+    destination: `${canonicalDocsOrigin}/docs/api/indexer-api`,
   },
-  { source: '/hosted-services', destination: `${canonicalDevelopersOrigin}/docs/api` },
-  { source: '/hosted-services/:path*', destination: `${canonicalDevelopersOrigin}/docs/api` },
-  { source: '/learn/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
+  { source: '/hosted-services', destination: `${canonicalDocsOrigin}/docs/api` },
+  { source: '/hosted-services/:path*', destination: `${canonicalDocsOrigin}/docs/api` },
+  { source: '/learn/partners', destination: `${canonicalDocsOrigin}/docs/partners/join` },
   {
     source: '/docs/learn/partners',
-    destination: `${canonicalDevelopersOrigin}/docs/partners/join`,
+    destination: `${canonicalDocsOrigin}/docs/partners/join`,
   },
   {
     source: '/docs/guide/using-tempo-with-ai/partners',
-    destination: `${canonicalDevelopersOrigin}/docs/partners/join`,
+    destination: `${canonicalDocsOrigin}/docs/partners/join`,
   },
-  { source: '/build/partners', destination: `${canonicalDevelopersOrigin}/docs/partners/join` },
+  { source: '/build/partners', destination: `${canonicalDocsOrigin}/docs/partners/join` },
   {
     source: '/network-upgrades',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/node/network-upgrades`,
+    destination: `${canonicalDocsOrigin}/docs/guide/node/network-upgrades`,
   },
   {
     source: '/guide/use-accounts/add-funds',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/getting-funds`,
+    destination: `${canonicalDocsOrigin}/docs/guide/getting-funds`,
   },
   {
     source: '/guide/use-accounts/authorize-access-keys',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/tempo-transaction#access-keys`,
+    destination: `${canonicalDocsOrigin}/docs/guide/tempo-transaction#access-keys`,
   },
   {
     source: '/guide/use-accounts/batch-transactions',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/tempo-transaction#batch-calls`,
+    destination: `${canonicalDocsOrigin}/docs/guide/tempo-transaction#batch-calls`,
   },
   {
     source: '/guide/use-accounts/fee-sponsorship',
-    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
+    destination: `${canonicalDocsOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/guide/use-accounts/scheduled-transactions',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/tempo-transaction#scheduled-transactions`,
+    destination: `${canonicalDocsOrigin}/docs/guide/tempo-transaction#scheduled-transactions`,
   },
   {
     source: '/guide/use-accounts/webauthn-p256-signatures',
-    destination: `${canonicalDevelopersOrigin}/docs/protocol/transactions/spec-tempo-transaction#signature-types`,
+    destination: `${canonicalDocsOrigin}/docs/protocol/transactions/spec-tempo-transaction#signature-types`,
   },
   {
     source: '/sdk/typescript/server',
-    destination: `${canonicalDevelopersOrigin}/docs/server`,
+    destination: `${canonicalDocsOrigin}/docs/server`,
   },
   {
     source: '/sdk/typescript/server/handlers',
-    destination: `${canonicalDevelopersOrigin}/docs/server`,
+    destination: `${canonicalDocsOrigin}/docs/server`,
   },
   {
     source: '/sdk/typescript/server/handler.feePayer',
-    destination: `${canonicalDevelopersOrigin}/docs/server/relay-handler#feepayer`,
+    destination: `${canonicalDocsOrigin}/docs/server/relay-handler#feepayer`,
   },
-  { source: '/accounts/server', destination: `${canonicalDevelopersOrigin}/docs/server` },
+  { source: '/accounts/server', destination: `${canonicalDocsOrigin}/docs/server` },
   {
     source: '/accounts/server/handler.feePayer',
-    destination: `${canonicalDevelopersOrigin}/docs/server/relay-handler#feepayer`,
+    destination: `${canonicalDocsOrigin}/docs/server/relay-handler#feepayer`,
   },
   {
     source: '/accounts/server/handler.relay',
-    destination: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
+    destination: `${canonicalDocsOrigin}/docs/server/relay-handler`,
   },
   {
     source: '/learn/tempo/receive-policies',
-    destination: `${canonicalDevelopersOrigin}/docs/accounts/policies/receive-policies`,
+    destination: `${canonicalDocsOrigin}/docs/accounts/policies/receive-policies`,
   },
   {
     source: '/docs/learn/tempo/receive-policies',
-    destination: `${canonicalDevelopersOrigin}/docs/accounts/policies/receive-policies`,
+    destination: `${canonicalDocsOrigin}/docs/accounts/policies/receive-policies`,
   },
   {
     source: '/learn/use-cases/agentic-commerce',
@@ -268,7 +272,7 @@ export const routingSmokeCases = {
       path: '/developers',
       expectedStatus: 200,
     },
-    { path: '/developers/get-started', expectedStatus: 200 },
+    { path: '/docs/get-started', expectedStatus: 200 },
     {
       path: '/developers/docs',
       expectedLocation: canonicalDevelopersOrigin,
@@ -278,17 +282,17 @@ export const routingSmokeCases = {
     { path: '/developers/docs/quickstart/developer-tools', expectedStatus: 200 },
     {
       path: '/developers/docs/hosted-services',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/api`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/api`,
       expectedFinalStatus: 200,
     },
     {
       path: '/developers/docs/guide/use-accounts/batch-transactions',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/guide/tempo-transaction#batch-calls`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/guide/tempo-transaction#batch-calls`,
       expectedFinalStatus: 200,
     },
     {
       path: '/developers/accounts/server/handler.relay',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/server/relay-handler`,
       expectedFinalStatus: 200,
     },
     {
@@ -303,27 +307,27 @@ export const routingSmokeCases = {
     { path: '/docs', expectedLocation: canonicalDevelopersOrigin, expectedFinalStatus: 200 },
     {
       path: '/guide/bridge-usdc-stargate',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/guide/bridge-layerzero`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/guide/bridge-layerzero`,
       expectedFinalStatus: 200,
     },
     {
       path: '/developer-tools/fee-payer',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/api/fee-payer`,
       expectedFinalStatus: 200,
     },
     {
       path: '/docs/quickstart/integrate-tempo',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/quickstart/integrate-tempo`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/quickstart/integrate-tempo`,
       expectedFinalStatus: 200,
     },
     {
       path: '/guide/use-accounts/batch-transactions',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/guide/tempo-transaction#batch-calls`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/guide/tempo-transaction#batch-calls`,
       expectedFinalStatus: 200,
     },
     {
       path: '/accounts/server/handler.relay',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
+      expectedLocation: `${canonicalDocsOrigin}/docs/server/relay-handler`,
       expectedFinalStatus: 200,
     },
     {

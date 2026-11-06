@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import vocsConfig from '../../vocs.config'
 import {
   canonicalDevelopersOrigin,
+  canonicalDocsOrigin,
   developerSurfaceRedirects,
   docsRouteDestination,
   legacyDocsHostRoutes,
@@ -79,6 +80,10 @@ function findHostRedirectIndex(source: string, host: string) {
   )
 }
 
+function developersProxySource(source: string) {
+  return `/developers${source === '/' ? '' : source}`
+}
+
 function developersProxyDestination(destination: string) {
   if (URL.canParse(destination)) return destination
   return `/developers${destination === '/' ? '' : destination}`
@@ -97,19 +102,20 @@ describe('docs routing redirects', () => {
           status: 301,
         }),
       )
-      expect(findRedirect(`/developers${source}`)).toMatchObject({
+      expect(findRedirect(developersProxySource(source))).toMatchObject({
         destination: developersProxyDestination(destination),
         permanent: true,
       })
     })
 
-    it('serves the docs landing and getting-started page without a redirect', () => {
-      expect(vocsRedirects.some(({ source }) => source === '/' || source === '/get-started')).toBe(
-        false,
-      )
-      expect(findRedirect('/developers')).toBeUndefined()
-      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/index.mdx'))).toBe(true)
-      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/get-started.mdx'))).toBe(true)
+    it('serves the docs landing and getting-started page at /docs without a redirect', () => {
+      expect(
+        vocsRedirects.some(({ source }) => source === '/docs' || source === '/docs/get-started'),
+      ).toBe(false)
+      expect(findRedirect('/developers/docs')).toBeUndefined()
+      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/index.mdx'))).toBe(false)
+      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/docs/index.mdx'))).toBe(true)
+      expect(fs.existsSync(path.join(process.cwd(), 'src/pages/docs/get-started.mdx'))).toBe(true)
     })
 
     it('removes marketing pages from the file-based route tree', () => {
@@ -174,7 +180,7 @@ describe('docs routing redirects', () => {
     const target = destination.startsWith(canonicalDevelopersOrigin)
       ? destination.slice(canonicalDevelopersOrigin.length) || '/'
       : destination
-    expect(findRedirect(`/developers${source}`)).toMatchObject({
+    expect(findRedirect(developersProxySource(source))).toMatchObject({
       destination: developersProxyDestination(target),
       permanent: true,
     })
@@ -187,7 +193,10 @@ describe('docs routing redirects', () => {
     destination,
   }) => {
     expect(findRedirect(source)).toMatchObject({
-      destination: `${canonicalDevelopersOrigin}${destination}`,
+      // Markdown assets stay under the /developers mount; pages live at tempo.xyz/docs.
+      destination: destination.startsWith('/assets/')
+        ? `${canonicalDevelopersOrigin}${destination}`
+        : `${canonicalDocsOrigin}${destination}`,
       permanent: true,
     })
   })
@@ -279,10 +288,11 @@ describe('docs routing redirects', () => {
 
   describe.each(['docs.tempo.xyz', 'next.docs.tempo.xyz'])('canonical redirects for %s', (host) => {
     it.each([
-      ['/', 'https://tempo.xyz/developers'],
-      ['/developers', 'https://tempo.xyz/developers'],
-      ['/docs', 'https://tempo.xyz/developers'],
-      ['/developers/docs', 'https://tempo.xyz/developers'],
+      ['/', 'https://tempo.xyz/docs'],
+      ['/developers', 'https://tempo.xyz/docs'],
+      ['/docs', 'https://tempo.xyz/docs'],
+      ['/developers/docs', 'https://tempo.xyz/docs'],
+      ['/docs/:path*', 'https://tempo.xyz/docs/:path*'],
       ['/developers/:path*', 'https://tempo.xyz/developers/:path*'],
       ['/:path*', 'https://tempo.xyz/developers/:path*'],
     ])('redirects %s to %s', (source, destination) => {
@@ -314,11 +324,11 @@ describe('docs routing redirects', () => {
     it.each([
       [
         '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)',
-        `${canonicalDevelopersOrigin}/docs/:section`,
+        `${canonicalDocsOrigin}/docs/:section`,
       ],
       [
         '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*',
-        `${canonicalDevelopersOrigin}/docs/:section/:path*`,
+        `${canonicalDocsOrigin}/docs/:section/:path*`,
       ],
     ])('redirects legacy section %s to %s before the host catch-all', (source, destination) => {
       expect(findHostRedirect(source, host)).toMatchObject({ source, destination, permanent: true })

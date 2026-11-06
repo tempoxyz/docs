@@ -62,8 +62,8 @@ test('seven sections expose product tasks and expandable developer chapters', as
   for (const section of [
     {
       label: 'Get Started',
-      path: '/get-started',
-      links: ['/get-started/quickstart', '/docs/guide/using-tempo-with-ai'],
+      path: '/docs/get-started',
+      links: ['/docs/get-started/quickstart', '/docs/guide/using-tempo-with-ai'],
     },
     {
       label: 'Accounts',
@@ -157,9 +157,9 @@ test('seven sections expose product tasks and expandable developer chapters', as
 for (const section of [
   {
     label: 'Get Started',
-    overview: '/get-started',
+    overview: '/docs/get-started',
     paths: [
-      '/get-started/quickstart',
+      '/docs/get-started/quickstart',
       '/docs/guide/using-tempo-with-ai',
       '/docs/quickstart/faucet',
     ],
@@ -227,7 +227,7 @@ for (const section of [
   },
   {
     label: 'Get Started (SDKs and CLI)',
-    overview: '/get-started',
+    overview: '/docs/get-started',
     paths: ['/docs/sdk', '/docs/cli', '/docs/cli/api', '/docs/sdk/typescript/api-client'],
   },
   {
@@ -277,7 +277,7 @@ for (const section of [
 test('Get started recommends a test payment and offers build paths and tool links', async ({
   page,
 }) => {
-  await page.goto('/get-started')
+  await page.goto('/docs/get-started')
   const article = page.locator('article[data-v-content]')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Build on Tempo')
   const quickstart = article.getByRole('link', { name: 'interactive quickstart', exact: true })

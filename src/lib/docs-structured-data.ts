@@ -90,18 +90,14 @@ export function docsStructuredDataHead(
     ? { ogImage: image.startsWith('/') ? `${developersUrl}${image}` : image }
     : {}
 
-  if (
-    pagePath !== '/' &&
-    pagePath !== '/get-started' &&
-    !pagePath.startsWith('/get-started/') &&
-    !pagePath.startsWith('/docs/')
-  ) {
+  if (pagePath !== '/docs' && !pagePath.startsWith('/docs/')) {
     return { base: false, meta: ogImage }
   }
 
-  // The public mount has no trailing slash. Match its redirect policy and the
-  // URLs used by the docs graph instead of Vocs' default baseUrl + "/".
-  const canonical = pagePath === '/' ? { canonical: developersUrl } : {}
+  // Docs pages are served at tempo.xyz/docs without a trailing slash, while Vocs' baseUrl is the
+  // tempo.xyz/developers mount that serves assets and APIs, so set every page's canonical here.
+  const docsSiteUrl = 'https://tempo.xyz'
+  const canonical = { canonical: `${docsSiteUrl}${pagePath.replace(/\/$/, '')}` }
   // Advertise the existing generated text without requiring hydration or a
   // reader to discover the page-tools menu. Use the canonical public mount.
   const markdownRoute = pagePath === '/' ? '/index' : pagePath.replace(/\/$/, '')
@@ -128,12 +124,12 @@ export function docsStructuredDataHead(
       meta: { articleModifiedTime: false as const, ...ogImage },
     }
 
-  const docsUrl = developersUrl
+  const docsUrl = `${docsSiteUrl}/docs`
   const organizationId = 'https://tempo.xyz/#organization'
   const websiteId = 'https://tempo.xyz/#website'
   const entityDescription =
     'Tempo is a payments-first Layer 1 blockchain built for stablecoin payments, global payouts, agentic payments, and enterprise settlement.'
-  const url = `${developersUrl}${pagePath === '/' ? '' : pagePath}`
+  const url = `${docsSiteUrl}${pagePath.replace(/\/$/, '')}`
   const description = frontmatter?.description?.trim()
   const breadcrumbId = `${url}#breadcrumb`
   const breadcrumbs = [
@@ -145,7 +141,7 @@ export function docsStructuredDataHead(
     },
   ]
 
-  if (pagePath !== '/') {
+  if (pagePath !== '/docs') {
     breadcrumbs.push({
       '@type': 'ListItem',
       position: 2,
@@ -213,7 +209,7 @@ export function docsStructuredDataHead(
         ? [
             {
               '@type': 'WebAPI',
-              '@id': 'https://tempo.xyz/developers/docs/api#webapi',
+              '@id': `${url}#webapi`,
               name: 'Tempo API',
               alternateName: ['Tempo Fee Payer API', 'Tempo Routes API'],
               ...(description ? { description } : {}),

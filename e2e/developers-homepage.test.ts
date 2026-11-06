@@ -32,9 +32,9 @@ test('keeps legacy docs queries and anchors when opening the new landing', async
 })
 
 test('serves getting started directly with its overview sidebar', async ({ page, request }) => {
-  expect((await request.get('/get-started', { maxRedirects: 0 })).status()).toBe(200)
+  expect((await request.get('/docs/get-started', { maxRedirects: 0 })).status()).toBe(200)
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.goto('/get-started')
+  await page.goto('/docs/get-started')
   await expect(
     page.getByRole('heading', { level: 1, name: 'Build on Tempo', exact: true }),
   ).toBeVisible()
@@ -42,7 +42,7 @@ test('serves getting started directly with its overview sidebar', async ({ page,
   await expect(sidebar).toBeVisible()
   await expect(sidebar.getByRole('link', { name: 'Start building', exact: true })).toHaveAttribute(
     'href',
-    '/get-started',
+    '/docs/get-started',
   )
 })
 
@@ -89,7 +89,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
     )
 
     if (entry === 'direct') {
-      await page.goto('/get-started/quickstart#try-a-payment')
+      await page.goto('/docs/get-started/quickstart#try-a-payment')
     } else {
       await page.goto('/docs/accounts')
       await page
@@ -102,7 +102,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
         .click()
     }
 
-    await expect(page).toHaveURL((url) => url.pathname === '/get-started/quickstart')
+    await expect(page).toHaveURL((url) => url.pathname === '/docs/get-started/quickstart')
     await expect(page.locator('#try-a-payment')).toBeAttached()
     await expect(page.locator('h2#try-a-payment')).toBeVisible()
     const pageTools = page.getByRole('navigation', { name: 'Page tools' })
@@ -175,8 +175,10 @@ for (const entry of ['direct', 'client navigation'] as const) {
     const sections = page.getByRole('navigation', { name: 'Documentation sections' })
 
     if (entry === 'direct') {
-      expect((await request.get('/get-started/quickstart', { maxRedirects: 0 })).status()).toBe(200)
-      await page.goto('/get-started/quickstart')
+      expect(
+        (await request.get('/docs/get-started/quickstart', { maxRedirects: 0 })).status(),
+      ).toBe(200)
+      await page.goto('/docs/get-started/quickstart')
     } else {
       await page.goto('/docs/accounts')
       await sections.getByRole('link', { name: 'Get Started', exact: true }).click()
@@ -193,12 +195,12 @@ for (const entry of ['direct', 'client navigation'] as const) {
     await expect(sidebar).toBeVisible()
     await expect(sidebar.locator('a[data-active]')).toHaveAttribute(
       'href',
-      '/get-started/quickstart',
+      '/docs/get-started/quickstart',
     )
 
     await sidebar.getByRole('link', { name: 'Start building', exact: true }).click()
     await expect(page).toHaveURL(/\/get-started\/?$/)
     await expect(sections).toBeVisible()
-    await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', '/get-started')
+    await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', '/docs/get-started')
   })
 }

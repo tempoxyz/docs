@@ -25,13 +25,13 @@ describe('vocs.config docs SEO controls', () => {
         'Send a Stablecoin Payment on Tempo | Docs',
       ),
     ).toBe('Send a Stablecoin Payment on Tempo | Docs')
-    expect(titleFor('/', 'Build on Tempo', 'Tempo Developer Docs: APIs, SDKs & Guides')).toBe(
+    expect(titleFor('/docs', 'Build on Tempo', 'Tempo Developer Docs: APIs, SDKs & Guides')).toBe(
       'Tempo Developer Docs: APIs, SDKs & Guides',
     )
   })
 
   test('uses Tempo Docs title suffix for docs pages', () => {
-    expect(titleFor('/', 'Documentation')).toBe('Documentation ⋅ Tempo Docs')
+    expect(titleFor('/docs', 'Documentation')).toBe('Documentation ⋅ Tempo Docs')
     expect(titleFor('/docs/guide/payments/send-a-payment', 'Send a Payment')).toBe(
       'Send a Payment ⋅ Tempo Docs',
     )
@@ -39,7 +39,7 @@ describe('vocs.config docs SEO controls', () => {
     expect(titleFor('/docs/protocol/transactions', 'Tempo Transactions')).toBe(
       'Tempo Transactions ⋅ Tempo Docs',
     )
-    expect(titleFor('/get-started', 'Get Started')).toBe('Get Started ⋅ Tempo Docs')
+    expect(titleFor('/docs/get-started', 'Get Started')).toBe('Get Started ⋅ Tempo Docs')
     expect(titleFor('/blog', 'Blog')).toBe('Blog ⋅ Tempo')
   })
 
@@ -64,8 +64,8 @@ describe('vocs.config docs SEO controls', () => {
     expect(typeof head).toBe('function')
     if (typeof head !== 'function') return
 
-    expect(head('/', {})).toMatchObject({ meta: { articleModifiedTime: false } })
-    expect(head('/get-started', {})).toMatchObject({ meta: { articleModifiedTime: false } })
+    expect(head('/docs', {})).toMatchObject({ meta: { articleModifiedTime: false } })
+    expect(head('/docs/get-started', {})).toMatchObject({ meta: { articleModifiedTime: false } })
     expect(head('/docs/guide/payments/send-a-payment', {})).toMatchObject({
       meta: { articleModifiedTime: false },
     })
@@ -87,8 +87,9 @@ describe('vocs.config docs SEO controls', () => {
     if (typeof include !== 'function') return
 
     const context = { filePath: 'blog/[slug].tsx' }
-    expect(include('/', context)).toBe(true)
-    expect(include('/get-started', context)).toBe(true)
+    expect(include('/', context)).toBe(false)
+    expect(include('/get-started', context)).toBe(false)
+    expect(include('/docs/get-started', context)).toBe(true)
     expect(include('/build', context)).toBe(false)
     expect(include('/build/tempo-transactions', context)).toBe(false)
     expect(include('/performance', context)).toBe(false)
@@ -96,7 +97,7 @@ describe('vocs.config docs SEO controls', () => {
     expect(include('/example/[id]/details', context)).toBe(false)
     expect(include('/example/[[...slug]]', context)).toBe(false)
     expect(include('/blog/stablecoins-as-a-platform', context)).toBe(true)
-    expect(include('/docs', context)).toBe(false)
+    expect(include('/docs', context)).toBe(true)
     expect(include('/docs/api', context)).toBe(true)
   })
 
@@ -115,7 +116,9 @@ describe('vocs.config docs SEO controls', () => {
     expect(typeof lastmod).toBe('function')
     if (typeof lastmod !== 'function') return
 
-    expect(lastmod('/', { filePath: 'index.mdx', lastmod: '2026-07-07' })).toBe('2026-07-07')
+    expect(lastmod('/docs', { filePath: 'docs/index.mdx', lastmod: '2026-07-07' })).toBe(
+      '2026-07-07',
+    )
     expect(
       lastmod('/docs/api/authentication', {
         filePath: 'docs/api/authentication.mdx',

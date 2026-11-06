@@ -8,3 +8,9 @@ export function resolveBaseUrl(): string {
   if (productionUrl) return `https://${productionUrl}`
   return ''
 }
+
+/** Public origin of the docs pages: tempo.xyz/docs in production, the deployment elsewhere. */
+export function resolveDocsSiteUrl(): string {
+  const baseUrl = resolveBaseUrl()
+  return baseUrl.replace(/\/developers$/, '')
+}

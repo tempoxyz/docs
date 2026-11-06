@@ -3,7 +3,7 @@ import { docsSections, getActiveDocsSection } from '../lib/docs-sections'
 import { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
 const sidebar = {
-  '/get-started': [{ text: 'Get Started' }],
+  '/docs/get-started': [{ text: 'Get Started' }],
   '/docs': [{ text: 'Get Started' }],
   '/docs/protocol': [{ text: 'Tempo EVM' }],
   '/docs/protocol/rpc': [{ text: 'RPC reference' }],
@@ -14,7 +14,7 @@ describe('normalizeDocsPath', () => {
     ['/developers/docs/protocol', '/docs/protocol'],
     ['/developers/docs/protocol/tip20/overview', '/docs/protocol/tip20/overview'],
     ['/developers', '/'],
-    ['/developers/get-started', '/get-started'],
+    ['/docs/get-started', '/docs/get-started'],
     ['/docs/tools', '/docs/tools'],
     ['', '/'],
   ])('normalizes %s to %s', (pathname, expected) => {
@@ -24,7 +24,7 @@ describe('normalizeDocsPath', () => {
 
 describe('resolveSidebarItems', () => {
   it('resolves the standalone getting-started sidebar under the production mount', () => {
-    expect(resolveSidebarItems(sidebar, '/developers/get-started')[0]?.text).toBe('Get Started')
+    expect(resolveSidebarItems(sidebar, '/docs/get-started')[0]?.text).toBe('Get Started')
   })
 
   it('uses the current docs section when served from the developers mount', () => {
@@ -60,17 +60,17 @@ describe('getActiveDocsSection', () => {
 
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
     expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('api')
-    expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
+    expect(getActiveDocsSection('/docs/get-started/')?.id).toBe('overview')
     expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('developers')
     expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Tempo EVM')
   })
 
   it.each([
-    ['/get-started', 'overview'],
-    ['/get-started/quickstart', 'overview'],
+    ['/docs/get-started', 'overview'],
+    ['/docs/get-started/quickstart', 'overview'],
     ['/docs/network', 'developers'],
     ['/docs/network/transactions', 'developers'],
-    ['/get-started/stablecoins', 'overview'],
+    ['/docs/get-started/stablecoins', 'overview'],
     ['/docs/development', 'developers'],
     ['/docs/api/console', 'api'],
     ['/docs/quickstart/evm-compatibility', 'developers'],

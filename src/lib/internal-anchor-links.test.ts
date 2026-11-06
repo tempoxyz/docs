@@ -86,17 +86,21 @@ import Shared from '../snippets/shared.mdx'
 
   it('checks the landing, getting started, and legacy home fragments', () => {
     const directory = pages({
-      'index.mdx':
-        '# Documentation\n<span id="start-here" />\n[Start](/get-started#first-payment)\n',
-      'get-started.mdx':
-        '# Get Started\n## First payment\n[Home](/#start-here)\n[Legacy](/docs?ref=legacy#start-here)\n[Mounted](/developers#start-here)\n[Mounted start](/developers/get-started#first-payment)\n[Stale](/docs#missing)\n',
+      'docs/index.mdx':
+        '# Documentation\n<span id="start-here" />\n[Start](/docs/get-started#first-payment)\n',
+      'docs/get-started.mdx':
+        '# Get Started\n## First payment\n[Home](/#start-here)\n[Legacy](/docs?ref=legacy#start-here)\n[Mounted](/developers#start-here)\n[Mounted start](/docs/get-started#first-payment)\n[Stale](/docs#missing)\n',
     })
 
     expect(checkInternalAnchors(directory)).toMatchObject({
       pagesChecked: 2,
       linksChecked: 6,
       failures: [
-        expect.objectContaining({ href: '/docs#missing', targetRoute: '/', fragment: 'missing' }),
+        expect.objectContaining({
+          href: '/docs#missing',
+          targetRoute: '/docs',
+          fragment: 'missing',
+        }),
       ],
     })
   })
@@ -111,11 +115,11 @@ import Shared from '../snippets/shared.mdx'
 
   it('checks links into and out of nested getting-started pages', () => {
     const directory = pages({
-      'get-started.mdx': '[Tokens](/get-started/stablecoins#token-amounts)\n',
-      'get-started/stablecoins.mdx':
+      'docs/get-started.mdx': '[Tokens](/docs/get-started/stablecoins#token-amounts)\n',
+      'docs/get-started/stablecoins.mdx':
         '## Token amounts\n[Payment](/docs/payments#send)\n[Same](#token-amounts)\n[Missing](#old-heading)\n',
       'docs/payments.mdx':
-        '## Send\n[Tokens](/developers/get-started/stablecoins#token-amounts)\n[Stale](/get-started/stablecoins#old-heading)\n',
+        '## Send\n[Tokens](/docs/get-started/stablecoins#token-amounts)\n[Stale](/docs/get-started/stablecoins#old-heading)\n',
     })
 
     expect(checkInternalAnchors(directory)).toMatchObject({
@@ -123,12 +127,12 @@ import Shared from '../snippets/shared.mdx'
       linksChecked: 6,
       failures: [
         expect.objectContaining({
-          href: '/get-started/stablecoins#old-heading',
-          targetRoute: '/get-started/stablecoins',
+          href: '#old-heading',
+          targetRoute: '/docs/get-started/stablecoins',
         }),
         expect.objectContaining({
-          href: '#old-heading',
-          targetRoute: '/get-started/stablecoins',
+          href: '/docs/get-started/stablecoins#old-heading',
+          targetRoute: '/docs/get-started/stablecoins',
         }),
       ],
     })

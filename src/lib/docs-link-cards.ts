@@ -9,7 +9,7 @@ export const docsLinkCards = {
       icon: 'code',
       links: [
         ['Testnet faucet', '/docs/quickstart/faucet'],
-        ['Send a test payment', '/get-started/quickstart'],
+        ['Send a test payment', '/docs/get-started/quickstart'],
       ],
     },
     {

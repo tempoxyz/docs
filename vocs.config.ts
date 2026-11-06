@@ -214,8 +214,7 @@ export default defineConfig({
     const seoTitle =
       typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : undefined
     if (seoTitle) return seoTitle
-    if (pagePath === '/' || /^\/get-started(?:\/|$)/.test(pagePath)) return '%s ⋅ Tempo Docs'
-    if (pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    if (pagePath === '/docs' || pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
     if (title?.includes('Tempo')) return undefined
     return '%s ⋅ Tempo'
   },
@@ -261,8 +260,7 @@ export default defineConfig({
   },
   sitemap: {
     include: (path) =>
-      (path === '/' || /^\/(?:get-started|docs|blog)(?:\/|$)/.test(path)) &&
-      !/^\/docs\/?$/.test(path) &&
+      /^\/(?:docs|blog)(?:\/|$)/.test(path) &&
       !path.split('/').some((segment) => /^\[.*\]$/.test(segment)),
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
   },
@@ -454,12 +452,12 @@ export default defineConfig({
       {
         text: 'Get Started',
         items: [
-          { text: 'Start building', link: '/get-started' },
-          { text: 'Quickstart', link: '/get-started/quickstart' },
+          { text: 'Start building', link: '/docs/get-started' },
+          { text: 'Quickstart', link: '/docs/get-started/quickstart' },
           { text: 'Testnet faucet', link: '/docs/quickstart/faucet' },
           { text: 'Build with AI', link: '/docs/guide/using-tempo-with-ai' },
-          { text: 'Stablecoins on Tempo', link: '/get-started/stablecoins' },
-          { text: 'Use cases', link: '/get-started/use-cases' },
+          { text: 'Stablecoins on Tempo', link: '/docs/get-started/stablecoins' },
+          { text: 'Use cases', link: '/docs/get-started/use-cases' },
         ],
       },
       {
@@ -1359,7 +1357,7 @@ export default defineConfig({
   topNav: [
     {
       text: 'Docs',
-      link: '/',
+      link: '/docs',
     },
 
     { text: 'Blog', link: '/blog' },

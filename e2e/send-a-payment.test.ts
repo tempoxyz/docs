@@ -17,7 +17,7 @@ test('send a payment from the quickstart', async ({ page }) => {
     },
   })
 
-  await page.goto('/get-started/quickstart')
+  await page.goto('/docs/get-started/quickstart')
 
   // Step 1: Sign in
   const signUpButton = page.getByRole('button', { name: 'Sign in' }).first()

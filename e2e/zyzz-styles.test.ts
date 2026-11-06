@@ -6,7 +6,7 @@ test.setTimeout(45_000)
 // Exercise every top-level site surface and both authored and generated docs.
 const routes = [
   '/',
-  '/get-started',
+  '/docs/get-started',
   '/docs/accounts',
   '/docs/earn',
   '/docs/routes',

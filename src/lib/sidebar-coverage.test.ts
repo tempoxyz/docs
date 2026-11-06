@@ -58,6 +58,11 @@ function sidebarLinks(route: string) {
 describe('documentation sidebar coverage', () => {
   it.each(routes)('%s has a navigation home', (route) => {
     if (retainedLandings.has(route) || generatedApiGroups.has(route)) return
+    // The docs home is the top navigation's Docs link.
+    if (route === '/docs') {
+      expect(config.topNav).toContainEqual(expect.objectContaining({ link: '/docs' }))
+      return
+    }
     const parent = supportingPages.get(route)
     if (parent) {
       expect(sidebarLinks(route).has(parent), `${route} has a visible parent guide`).toBe(true)
@@ -77,7 +82,7 @@ describe('documentation sidebar coverage', () => {
 describe('resource guide navigation', () => {
   it('keeps guides in a collapsed submenu below the main onboarding content', () => {
     type SidebarNode = { text?: string; link?: string; collapsed?: boolean; items?: SidebarNode[] }
-    const sidebar = sidebarFor('/get-started') as SidebarNode[]
+    const sidebar = sidebarFor('/docs/get-started') as SidebarNode[]
     const resources = sidebar.at(-1)
     expect(resources?.text).toBe('Resources')
     expect(resources?.items?.[0]).toMatchObject({ text: 'Guides', collapsed: true })
@@ -96,7 +101,7 @@ describe('resource guide navigation', () => {
   it('assigns resource guides to Get Started without a new primary section', () => {
     for (const route of routes.filter((route) => route.startsWith('/docs/resources/'))) {
       expect(getActiveDocsSection(route)?.id).toBe('overview')
-      expect(sidebarFor(route)).toBe(sidebarFor('/get-started'))
+      expect(sidebarFor(route)).toBe(sidebarFor('/docs/get-started'))
     }
   })
 })

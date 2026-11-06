@@ -1,5 +1,6 @@
 import { Address, Hex } from 'ox'
 import * as z from 'zod/mini'
+import { developersApiPath } from '../../marketing/app/_lib/developersPaths'
 
 export const rowValueSchema = z.union([z.string(), z.number(), z.null()])
 
@@ -48,7 +49,7 @@ type RunQueryOptions = {
 }
 
 export async function runIndexSupplyQuery(query: string, options: RunQueryOptions) {
-  const response = await fetch('/api/index-supply', {
+  const response = await fetch(developersApiPath('/api/index-supply'), {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
