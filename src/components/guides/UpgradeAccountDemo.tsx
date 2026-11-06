@@ -56,6 +56,7 @@ export function UpgradeAccountDemo() {
   const [upgraded, setUpgraded] = React.useState(false)
   const [results, setResults] = React.useState<Partial<Record<Action, Result>>>({})
   const [pending, setPending] = React.useState<Action | null>(null)
+  const [lastRun, setLastRun] = React.useState<Action | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const busy = React.useRef(false)
 
@@ -87,6 +88,7 @@ export function UpgradeAccountDemo() {
     try {
       const result = await work()
       if (result) setResults((current) => ({ ...current, [action]: result }))
+      setLastRun(action)
       await refresh()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message.split('\n')[0] : 'Something went wrong.')
@@ -191,16 +193,19 @@ export function UpgradeAccountDemo() {
   const disabled = !preview || pending !== null
 
   // A finished step folds to its header once a later step finishes, so the demo stays about one
-  // screen tall and the latest result stays open. Clicking a folded step's title opens it again.
+  // screen tall. The step that ran last and steps whose result failed stay open. Clicking a folded
+  // step's title opens it again.
+  const order: Action[] = ['create', 'fund', 'pay', 'upgrade', 'alone', 'both']
   const done = [
     Boolean(keys),
     funded,
-    Boolean(results.pay),
+    results.pay?.ok === true,
     upgraded,
-    Boolean(results.alone),
-    Boolean(results.both),
+    results.alone?.ok === true,
+    results.both?.ok === true,
   ]
-  const collapsed = (step: number) => done[step - 1] && done.slice(step).some(Boolean)
+  const collapsed = (step: number) =>
+    done[step - 1] && order[step - 1] !== lastRun && done.slice(step).some(Boolean)
 
   return (
     <Container
