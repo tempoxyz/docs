@@ -1,16 +1,18 @@
 ---
 title: "T14 Network Upgrade"
 seoTitle: "T14 Network Upgrade | Tempo Docs"
-description: T14 is planned to bring configurable accounts to testnet and mainnet, with weighted signers and a threshold at one address, configuration updates, in-place upgrades from single-key accounts, and configurable accounts as access keys.
+description: T14 upgrades the Account Keychain so accounts on Tempo support multiple signers, with approval thresholds, key rotation, and recovery at the same address. It also ends admin access keys' key management and tightens validator, consensus, and Zone Portal rules.
 ---
 
 # T14 Network Upgrade
 
-T14 is the planned network upgrade that brings configurable accounts to testnet and mainnet.
+T14 upgrades the Account Keychain so accounts on Tempo support multiple signers, with approval thresholds, key rotation, and recovery built into the protocol. It also ends admin access keys' key management and tightens validator, consensus, and Zone Portal rules.
 
 :::tip[T14 status]
-T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on December 1, 2026, both at 15:00 UTC. Its scope may still change before activation. Until T14 activates, configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on December 1, 2026, both at 15:00 UTC. Its scope may still change before activation. Until T14 activates, the account changes run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 :::
+
+**Integration note:** T14 stops new admin access keys and removes existing ones' power to manage other keys. Existing admin keys can still spend without limit until you revoke them. If you use an admin key to manage a user's other keys, plan the change before T14. [See integration impact](#integration-impact).
 
 ## Timeline
 
@@ -19,19 +21,67 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 | Testnet | Scheduled | November 24, 2026 15:00 | `1795532400` |
 | Mainnet | Scheduled | December 1, 2026 15:00 | `1796137200` |
 
+<span id="overview" />
+
 ## T14 overview
 
-- **Configurable accounts:** each signer has a weight, and a transaction runs once the signing weights reach the account's threshold. The address stays the same when signers change. See [Tempo Accounts](/docs/accounts).
-- **Configuration updates:** the current signers replace the signer list and threshold in one transaction, at the same address. See [Account configuration](/docs/accounts/account-configuration).
-- **Upgrades from single-key accounts:** an existing single-key account becomes a configurable account at the same address. See [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
-- **Configurable accounts as access keys:** a team's configurable account can act as another account's access key, approving with its own signers. See [Account Keychain](/docs/development/account-keychain#access-key-types).
+- **Multiple signers per account:** several signers approve together once their weights reach a threshold, such as any two of three finance leads, with no multisig contract to deploy.
+- **Keys change, the address doesn't:** signers replace a lost key or add a backup at the same address, without moving funds.
+- **Existing accounts upgrade in place:** a single-key account gains signers and a threshold and keeps its address and balances.
+- **Team approval for access keys:** a team's account can act as another account's access key, approving with its own signers.
+- **Zone support:** these accounts work on Zones with the same signers and threshold.
+- **Admin access keys removed:** Tempo rejects new admin access keys, and only an account's own key or its signers manage its access keys.
+- **Validator and consensus rules:** blocks must pay the proposer's registered fee recipient, endpoint formats are stricter, and consensus defaults to deferred verification.
+- **Paused Zone Portals:** a paused Zone Portal rejects refund claims and batch settlement.
 
-## T14 specifications
+<span id="features" />
 
-| Specification | What it covers |
-| --- | --- |
-| [TIP-1107](https://tips.sh/1107) | Configurable accounts: configuration, address derivation, signature format, commitment storage, and owner updates |
-| [TIP-1111](https://tips.sh/1111) | Configurable accounts as access keys |
-| [TIP-1113](https://tips.sh/1113) | Upgrading a single-key account in place |
+## T14 features
 
-The specifications are under review and may change before T14 activates. Try the behavior now on the [devnet](/docs/accounts/create#connect-to-the-devnet), and see [Configurable accounts](/docs/development/configurable-accounts) for the Tempo EVM reference.
+<span id="changes-to-accounts" />
+
+### Multiple signers for accounts
+
+T14 extends the Account Keychain so one address can be controlled by up to 48 signers. Each signer has a weight, and a transaction runs once the weights of the approving signers reach the account's threshold. With three signers at weight 1 and a threshold of 2, any two can approve a payment.
+
+- **Mixed signing methods:** signers can be passkeys, P-256 keys, or standard Ethereum keys, so a user's passkey and a provider's key can approve together.
+- **Rotation and recovery at the same address:** the current signers replace the signer list and threshold in one transaction. The address and balances stay the same, so anyone paying the account needs no update.
+- **In-place upgrades:** an existing single-key account adds signers at the same address, and its original key is retired.
+- **Team approval for access keys:** an account with multiple signers can be another account's [access key](/docs/accounts/access-keys) and approves with its own signers.
+
+Read the specifications for [multiple signers](https://tips.sh/1107), [in-place upgrades](https://tips.sh/1113), and [access keys](https://tips.sh/1111), and the [Tempo EVM reference](/docs/development/configurable-accounts).
+
+### Multiple signers on Zones
+
+Zones read each account's signer configuration from Tempo, so an account uses the same signers and threshold on a Zone as on Tempo.
+
+Read the [specification](https://tips.sh/1154).
+
+### Admin access key removal
+
+From T14, Tempo rejects new admin access keys, and only an account's own key or its signers authorize, change, or revoke access keys. An admin key authorized before T14 keeps spending as an access key without limits until you revoke it. To let a second device manage keys, [add it as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer).
+
+Read the [specification](https://tips.sh/1137).
+
+### Validator and consensus changes
+
+- **Fee recipient:** Tempo rejects a block whose beneficiary isn't the proposer's fee recipient in `ValidatorConfigV2`, or whose proposer has no entry. A registered zero address burns the fees.
+- **Endpoint format:** `addValidator`, `rotateValidator`, and `setIpAddresses` revert with `InvalidIp` when an ingress or egress address is longer than 255 bytes. They also revert for the IPv4-mapped IPv6 form, such as `::ffff:192.0.2.1`. Tempo doesn't recheck endpoints registered before T14.
+- **Consensus verification:** `--consensus.verification-mode` defaults to `hardfork`, which switches to deferred verification at the first epoch boundary after T14. An explicit `immediate` or `deferred` setting still overrides it.
+
+Read the [specification](https://tips.sh/1152).
+
+### Paused Zone Portals
+
+From T14, a paused Zone Portal rejects refund claims and batch settlement. The sequencer stops preparing and submitting batches until the portal resumes.
+
+Read the [specification](https://tips.sh/1152).
+
+## Integration impact
+
+- **Existing accounts:** single-key accounts and limited access keys keep working unchanged. Adding signers to an account is optional.
+- **Admin access keys:** Tempo rejects new [admin access keys](/docs/accounts/access-keys/admin-access-keys), and only an account's own key or its signers authorize, change, or revoke its access keys. Admin keys authorized before T14 keep paying as access keys without limits. If you use an admin key to manage a user's other keys, [add that device as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) instead, revoke admin keys you no longer need, and [contact us](https://tempo.xyz/contact) to plan the change before T14.
+- **Account upgrades:** until T14 activates on a network, an account upgrade transaction there charges its fee and changes nothing. Send upgrades only after activation.
+- **Signature parsing:** accounts with multiple signers sign with the [`0x05` multisig signature](/docs/development/configurable-accounts#multisig-signature-format). Viem builds and reads it. If you parse or verify Tempo transaction signatures yourself, handle this type. It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
+- **Contracts that check signatures:** to check that an account with multiple signers approved a message, call `verifyMultisig` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract) rather than recovering a single signer.
+- **Validators:** block execution rejects a block whose beneficiary differs from the proposer's registered fee recipient, or whose proposer has no registered fee recipient. Validator endpoints over 255 bytes or written as IPv4-mapped IPv6 addresses revert; use the IPv4 form.
