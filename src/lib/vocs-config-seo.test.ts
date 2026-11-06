@@ -75,7 +75,7 @@ describe('vocs.config docs SEO controls', () => {
     })
   })
 
-  test('includes only docs and blog pages without route templates in the sitemap', () => {
+  test('includes only docs pages without route templates in the sitemap', () => {
     const sitemap = vocsConfig.sitemap
 
     expect(sitemap).not.toBe(false)
@@ -95,7 +95,8 @@ describe('vocs.config docs SEO controls', () => {
     expect(include('/blog/[slug]', context)).toBe(false)
     expect(include('/example/[id]/details', context)).toBe(false)
     expect(include('/example/[[...slug]]', context)).toBe(false)
-    expect(include('/blog/stablecoins-as-a-platform', context)).toBe(true)
+    expect(include('/blog/stablecoins-as-a-platform', context)).toBe(false)
+    expect(include('/blog', context)).toBe(false)
     expect(include('/docs', context)).toBe(false)
     expect(include('/docs/api', context)).toBe(true)
   })

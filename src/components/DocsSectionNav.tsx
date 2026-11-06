@@ -9,6 +9,7 @@ import CodeIcon from '~icons/lucide/code-xml'
 import CompassIcon from '~icons/lucide/compass'
 import ScanSearchIcon from '~icons/lucide/scan-search'
 import TerminalIcon from '~icons/lucide/terminal'
+import { engineeringBlogUrl } from '../lib/blog-migration'
 import {
   type DocsSection,
   docsSections,
@@ -265,14 +266,12 @@ export default function DocsSectionNav() {
             </Link>
           ),
         )}
-        <Link
-          to="/blog"
+        <a
+          href={engineeringBlogUrl}
           className={`docs-section-utility-link ${docsSectionUtilityLink().className}`}
-          unstable_prefetchOnEnter={{}}
-          unstable_prefetchOnView={{}}
         >
           Blog
-        </Link>
+        </a>
       </div>
     </div>
   )
