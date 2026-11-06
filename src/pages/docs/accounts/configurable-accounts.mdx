@@ -1,16 +1,15 @@
 ---
-title: Configurable Accounts
-seoTitle: "Configurable Accounts and the T14 Network Upgrade | Tempo Docs"
-description: See what configurable accounts let you build, from team multisigs and account recovery to account upgrades, try them on the devnet, and check what the T14 network upgrade means for existing integrations.
+title: Configurable Accounts Overview
+seoTitle: "Configurable Accounts Overview: Use Cases, Demo, and T14 | Tempo Docs"
+description: The starting point for configurable accounts. See what they let you build, from team multisigs and account recovery to account upgrades, try them on the devnet, and check what the T14 network upgrade means for existing integrations.
 interactive: true
 ---
 
-import { Card, Cards } from 'vocs'
 import { ConfigurableAccountsDemo } from '../../../components/guides/ConfigurableAccountsDemo'
 
-# Configurable Accounts
+# Configurable Accounts Overview
 
-This page walks through what configurable accounts let you build, how to try them, and what changes for existing integrations with the T14 network upgrade.
+This page is the starting point for configurable accounts: what they let you build, a demo to try, every guide and reference page, and what changes for existing integrations with the T14 network upgrade.
 
 ## Overview
 
@@ -81,10 +80,18 @@ Your own app needs an RPC key to reach the devnet. [Contact us](https://tempo.xy
 
 <span id="related" />
 
-<Cards>
-  <Card title="Create an Account" description="Use for creating a configurable account in code and connecting to the devnet." to="/docs/accounts/create#create-a-configurable-account" />
-  <Card title="Set Up a Team Multisig" description="Use for an account where any two of three approvers sign each payment." to="/docs/accounts/custodians/team-multisig" />
-  <Card title="Recover a User's Account" description="Use for replacing a lost passkey at the same address." to="/docs/accounts/apps/recover-an-account" />
-  <Card title="Account Upgrade" description="Use for adding signers to a single-key account." to="/docs/accounts/account-configuration/account-upgrade" />
-  <Card title="Configurable Accounts Reference" description="Covers the protocol reference for signers, updates, and addresses." to="/docs/development/configurable-accounts" />
-</Cards>
+## All Configurable Account Docs
+
+| Page | Use it for |
+| --- | --- |
+| [Create an Account](/docs/accounts/create#create-a-configurable-account) | Creating a configurable account in code and connecting to the devnet |
+| [Set Up a Team Multisig](/docs/accounts/custodians/team-multisig) | An account where any two of three approvers sign each payment |
+| [Recover a User's Account](/docs/accounts/apps/recover-an-account) | Replacing a lost passkey at the same address |
+| [Set Up a Self-Custodial Wallet](/docs/accounts/apps/self-custodial-wallets) | Sharing an account between a provider and the user's own signers |
+| [Account Configuration](/docs/accounts/account-configuration) | Adding, removing, and rotating signers at the same address |
+| [Configuration Updates](/docs/accounts/account-configuration/configuration-updates) | Changing signers and the threshold in one update |
+| [Account Upgrade](/docs/accounts/account-configuration/account-upgrade) | Adding signers to an existing single-key account |
+| [Signing Thresholds](/docs/accounts/policies/signing-thresholds) | Choosing signer weights and a threshold |
+| [Access Keys](/docs/accounts/access-keys) | Letting a key or a team account pay within limits |
+| [Configurable Accounts Reference](/docs/development/configurable-accounts) | The protocol reference for signers, signatures, and addresses |
+| [T14 Network Upgrade](/docs/protocol/upgrades/t14) | Activation dates and every integration change |
