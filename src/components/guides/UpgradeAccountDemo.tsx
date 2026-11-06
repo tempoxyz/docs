@@ -235,7 +235,7 @@ export function UpgradeAccountDemo() {
                 disabled={disabled || Boolean(keys)}
                 onClick={() => run('create', create)}
               >
-                {preview === undefined ? 'Connecting…' : keys ? 'Created' : 'Create key'}
+                {preview === undefined ? 'Connecting…' : 'Create key'}
               </Button>
             }
           >
@@ -256,7 +256,7 @@ export function UpgradeAccountDemo() {
                 disabled={disabled || !keys || funded}
                 onClick={() => run('fund', fund)}
               >
-                {pending === 'fund' ? 'Funding…' : funded ? 'Funded' : 'Get test funds'}
+                {pending === 'fund' ? 'Funding…' : 'Get test funds'}
               </Button>
             }
           >
@@ -305,7 +305,7 @@ export function UpgradeAccountDemo() {
                 disabled={disabled || !results.pay || upgraded}
                 onClick={() => run('upgrade', upgrade)}
               >
-                {pending === 'upgrade' ? 'Upgrading…' : upgraded ? 'Upgraded' : 'Upgrade'}
+                {pending === 'upgrade' ? 'Upgrading…' : 'Upgrade'}
               </Button>
             }
           >

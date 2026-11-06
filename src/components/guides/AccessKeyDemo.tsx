@@ -183,7 +183,7 @@ export function AccessKeyDemo() {
           actions={
             client ? (
               <Button type="button" disabled={disabled || funded} onClick={() => run('fund', fund)}>
-                {pending === 'fund' ? 'Funding…' : funded ? 'Funded' : 'Get test funds'}
+                {pending === 'fund' ? 'Funding…' : 'Get test funds'}
               </Button>
             ) : (
               <Button

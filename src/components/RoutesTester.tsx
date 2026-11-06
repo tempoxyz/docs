@@ -1555,7 +1555,7 @@ function RouteLifecycle({
                           disabled={busy || uncertain || reverted || hashes.length > 0}
                           onClick={() => void fundWithWallet()}
                         >
-                          {hashes.length > 0 ? 'Sent' : `Send with ${walletName}`}
+                          {`Send with ${walletName}`}
                         </Demo.Button>
                       ) : (
                         <p {...noteStyle()}>
