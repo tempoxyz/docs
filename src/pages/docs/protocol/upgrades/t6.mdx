@@ -71,7 +71,7 @@ Practical benefits:
 - Recovery and delegated-access flows can reduce dependence on the root EOA.
 - Contracts can use canonical keychain verification through `verifyKeychain` and `verifyKeychainAdmin`.
 
-Admin keys are only for key management and admin verification. They can authorize and revoke other keys, but they cannot carry spending limits, call scopes, or expiry settings.
+Admin keys are unrestricted access keys: they can spend and call contracts without limits, and also manage keys and pass admin verification. They can authorize and revoke other keys, but they cannot carry spending limits, call scopes, or expiry settings.
 
 Read the [technical specification](https://tips.sh/1049).
 

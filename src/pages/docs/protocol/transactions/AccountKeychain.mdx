@@ -322,6 +322,7 @@ Burning a witness does not revoke keys already authorized with it; use `revokeKe
 **Requirements:**
 - MUST be called by the Root Key or an active admin access key
 - `keyId` MUST exist and not be revoked
+- `keyId` MUST not be expired (reverts with `KeyExpired`)
 - `keyId` MUST not be an admin access key, because admin keys do not carry call scopes (reverts with `InvalidKeyId`)
 
 ### View Behavior

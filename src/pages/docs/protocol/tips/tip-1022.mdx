@@ -292,6 +292,8 @@ For `transfer`, `transferFrom`, `transferWithMemo`, `transferFromWithMemo`, and 
 4. **Apply balance changes**: debit sender, credit `effectiveRecipient`.
 5. **Emit events**: per **Event Emission** (two-hop `Transfer` if virtual, single `Transfer` otherwise).
 
+If the [TIP-1028 receive policy](/docs/protocol/tip403/receive-policies) of `effectiveRecipient` blocks the inbound, the precompile instead moves the funds to `ReceivePolicyGuard` and records a claim receipt for `effectiveRecipient`. It doesn't credit `effectiveRecipient` or emit the two-hop `Transfer` events.
+
 If any step reverts, the enclosing TIP-20 operation MUST revert atomically with no balance changes and no events.
 
 #### Mint Entrypoints
@@ -302,6 +304,8 @@ For `mint` and `mintWithMemo`:
 2. **Token-level mint-recipient check**: apply the standard TIP-1015 mint-recipient authorization rules to `effectiveRecipient`.
 3. **Apply balance changes**: credit `effectiveRecipient`.
 4. **Emit events**: per **Event Emission**.
+
+If the [TIP-1028 receive policy](/docs/protocol/tip403/receive-policies) of `effectiveRecipient` blocks the inbound, the precompile instead mints the funds to `ReceivePolicyGuard` and records a claim receipt for `effectiveRecipient`. It doesn't credit `effectiveRecipient` or emit the two-hop `Transfer` events.
 
 If any step reverts, the enclosing TIP-20 operation MUST revert atomically with no balance changes and no events.
 
@@ -466,7 +470,7 @@ It is theoretically possible to deploy a contract or control an EOA whose addres
 
 ### Core Invariants
 
-1. **No fund loss**: A TIP-20 transfer to a virtual address MUST either credit the registered master's balance by exactly the transfer amount, or revert. Funds MUST NOT be credited to the virtual address itself or lost.
+1. **No fund loss**: A TIP-20 transfer to a virtual address MUST either credit the registered master's balance by exactly the transfer amount, move it to `ReceivePolicyGuard` when the master's TIP-1028 receive policy blocks it, or revert. Funds MUST NOT be credited to the virtual address itself or lost.
 
 2. **Revert on unregistered**: A transfer to an address matching the virtual-address format whose `masterId` is not registered MUST revert. It MUST NOT credit any account.
 

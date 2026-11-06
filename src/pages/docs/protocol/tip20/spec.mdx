@@ -190,10 +190,11 @@ interface ITIP20 {
     
     /// @notice Updates the logo URI (requires DEFAULT_ADMIN_ROLE)
     /// @param newLogoURI The new logo URI (max 256 bytes; empty string clears the field)
-    /// @dev If non-empty, MUST be a syntactically valid URI with a scheme in the
-    ///      allowlist {https, http, ipfs, data} (case-insensitive).
+    /// @dev If non-empty, MUST start with an RFC 3986 scheme followed by `:`, and the scheme
+    ///      MUST be in the allowlist {https, http, ipfs, data} (case-insensitive).
+    ///      Only the length and scheme are validated; the rest of the URI is not.
     ///      Reverts LogoURITooLong if length > 256 bytes.
-    ///      Reverts InvalidLogoURI if the scheme is not in the allowlist or the URI is malformed.
+    ///      Reverts InvalidLogoURI if the scheme is missing, malformed, or not in the allowlist.
     function setLogoURI(string calldata newLogoURI) external;
     
     // =========================================================================
@@ -272,6 +273,40 @@ interface ITIP20 {
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 
     // =========================================================================
+    //                                Rewards
+    // =========================================================================
+
+    struct UserRewardInfo {
+        address rewardRecipient;
+        uint256 rewardPerToken;
+        uint256 rewardBalance;
+    }
+
+    /// @notice No-op. New reward distributions are disabled (TIP-1075).
+    function distributeReward(uint256 amount) external;
+
+    /// @notice No-op. Reward opt-ins and recipient changes are disabled (TIP-1075).
+    function setRewardRecipient(address recipient) external;
+
+    /// @notice Transfers the caller's settled reward balance from the token contract
+    /// @dev Pays at most the token contract's own balance; any remainder stays claimable.
+    ///      Reverts if the token is paused or the TIP-403 policy rejects the transfer.
+    /// @return The amount claimed
+    function claimRewards() external returns (uint256);
+
+    /// @notice Returns the settled reward balance claimable by an account
+    function getPendingRewards(address account) external view returns (uint128);
+
+    /// @notice Returns an account's stored reward state
+    function userRewardInfo(address account) external view returns (UserRewardInfo memory);
+
+    /// @notice Returns the stored global reward-per-token accumulator
+    function globalRewardPerToken() external view returns (uint256);
+
+    /// @notice Returns the stored opted-in supply
+    function optedInSupply() external view returns (uint128);
+
+    // =========================================================================
     //                                Events
     // =========================================================================
 
@@ -335,6 +370,8 @@ interface ITIP20 {
     /// @param to The address receiving tokens (address(0) for burns)
     /// @param amount The amount of tokens transferred
     /// @param memo The 32-byte memo associated with this movement
+    /// @dev Not emitted when a receive policy redirects a transfer or mint to ReceivePolicyGuard;
+    ///      the memo is recorded in the blocked-transfer receipt instead.
     event TransferWithMemo(
         address indexed from,
         address indexed to,
@@ -426,7 +463,7 @@ interface ITIP20 {
     /// @notice The provided logoURI exceeds the 256-byte cap
     error LogoURITooLong();
 
-    /// @notice The provided logoURI is malformed or uses a scheme outside the allowlist
+    /// @notice The provided logoURI has no valid scheme or uses a scheme outside the allowlist
     error InvalidLogoURI();
 
 }
@@ -487,7 +524,7 @@ The `DOMAIN_SEPARATOR` is computed dynamically on every call using `block.chaini
 ## Logo URI
 Every TIP-20 exposes an optional on-chain `logoURI`, added in the [T5 network upgrade](/docs/protocol/upgrades/t5). Wallets and explorers read the icon directly from the token contract via `logoURI()`, without an off-chain registry round-trip. Tokens without a `logoURI` continue to work; the field is empty by default.
 
-The admin (`DEFAULT_ADMIN_ROLE`) sets or clears it via `setLogoURI(string newLogoURI)`, which emits `LogoURIUpdated(msg.sender, newLogoURI)`. An empty string is valid and clears the field. A non-empty value must be at most 256 bytes (`LogoURITooLong` otherwise) and a syntactically valid URI whose scheme is in the allowlist `{https, http, ipfs, data}`, matched case-insensitively (`InvalidLogoURI` otherwise).
+The admin (`DEFAULT_ADMIN_ROLE`) sets or clears it via `setLogoURI(string newLogoURI)`, which emits `LogoURIUpdated(msg.sender, newLogoURI)`. An empty string is valid and clears the field. A non-empty value must be at most 256 bytes (`LogoURITooLong` otherwise) and start with a scheme in the allowlist `{https, http, ipfs, data}`, matched case-insensitively and followed by `:` (`InvalidLogoURI` otherwise). The protocol doesn't validate the rest of the URI.
 
 Per the [specification's recommended formats](https://tips.sh/1026#recommended-formats), use a square, single-frame rasterized image (PNG or WebP). SVG is allowed by the scheme allowlist but not recommended — integrators that accept SVG must follow its SVG-handling guidance.
 
@@ -522,7 +559,7 @@ TIP20ChannelReserve also has implicit approval, with the logical-participant aut
 ### Payment-channel reserve
 The enshrined `TIP20ChannelReserve` precompile at [`0x4D50500000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x4D50500000000000000000000000000000000000) (ASCII `MPP`) uses an internal custody-transfer path without requiring ERC-20 allowance. For channels opened under these rules:
 
-- `open` and `topUp` MUST authorize the logical payer as sender and resolved payee as recipient, and validate the payee's receive policy against the payer. The reserve need not be issuer-policy-authorized as the physical custody recipient.
+- `open` and nonzero `topUp` MUST authorize the logical payer as sender and resolved payee as recipient, and validate the payee's receive policy against the payer. The reserve need not be issuer-policy-authorized as the physical custody recipient. A zero `topUp` moves no funds and runs no token-policy checks; it only cancels a pending close request.
 - `settle` and positive capture in `close` MUST recheck the payer-to-payee issuer policy. Delivery to the payee evaluates its receive policy against the logical payer, not the physical reserve sender.
 - Descriptor-bound refunds MUST return only to the authenticated payer. They bypass TIP-403 sender/recipient authorization, including authorization of the reserve itself, but MUST pass the payer's receive policy with the reserve as sender.
 - Custody movement MUST retain pause, recipient, balance, and applicable access-key spending-limit checks, and emit standard `Transfer` events. A receive-policy rejection MUST revert the channel operation instead of creating a guarded payment. Failed delivery MUST leave channel accounting unchanged.
@@ -589,7 +626,7 @@ interface ITIP20Factory {
     /// @notice Creates and deploys a new TIP-20 token with an initial logoURI
     /// @dev Identical to the 6-arg overload, but additionally sets logoURI at creation.
     ///      Validation rules for logoURI are the same as setLogoURI (256-byte cap,
-    ///      allowlisted schemes, syntactically valid URI). Empty string is valid and
+    ///      allowlisted scheme prefix). Empty string is valid and
     ///      leaves logoURI unset (no LogoURIUpdated event emitted). When non-empty, the
     ///      new token emits LogoURIUpdated(msg.sender, logoURI) from its own address.
     function createToken(
