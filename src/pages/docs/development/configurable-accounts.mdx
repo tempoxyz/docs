@@ -202,7 +202,7 @@ Chain history holds the configuration only once the account has used it:
 | Account state | Where the configuration is onchain |
 | --- | --- |
 | Never transacted | Nowhere. Your saved copy, including the salt, is the only record. |
-| Version 0, transacted | In each transaction's [`0x05` signature](#multisig-signature-format), which carries the full configuration |
+| Version 0, transacted | In the registration's `ConfigurableAccountConfigUpdated` event, and in each transaction's [`0x05` signature](#multisig-signature-format), which carries the full configuration |
 | Updated or upgraded | In the latest `ConfigurableAccountConfigUpdated` or `AccountUpgraded` event, which carries the salt, threshold, and owners. An upgrade installs version 1. |
 
 If an update landed but your app failed to save the returned `config`, rebuild it from the update you sent with `AccountConfig.update(saved.config, nextConfig)`, or from the account's latest `ConfigurableAccountConfigUpdated` event. Before you use the rebuilt configuration, check it against `getConfigCommitment` as above.
