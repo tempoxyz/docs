@@ -395,7 +395,7 @@ test('API reference is a keyboard-accessible utility and the old tools hub redir
   await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Get Started')
 })
 
-for (const path of ['/', '/blog']) {
+for (const path of ['/', '/docs/accounts']) {
   test(`mobile navigation separates products, utilities, and external tools on ${path}`, async ({
     page,
   }) => {
@@ -432,7 +432,7 @@ for (const path of ['/', '/blog']) {
   })
 }
 
-for (const path of ['/', '/blog']) {
+for (const path of ['/', '/docs/accounts']) {
   for (const width of [1080, 1440]) {
     test(`desktop header destinations and agent setup stay usable on ${path} at ${width}px`, async ({
       page,
@@ -443,45 +443,32 @@ for (const path of ['/', '/blog']) {
       await expect(
         navigation.getByRole('combobox', { name: 'Color theme', includeHidden: true }),
       ).toHaveCount(0)
-      const headerBlog = navigation.getByRole('link', { name: 'Blog', exact: true })
-      const destinations = path === '/blog' ? [headerBlog] : []
-      if (path === '/') {
-        await expect(headerBlog).toBeHidden()
-        const utilities = page.locator('.docs-section-utilities')
-        await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
-        const blog = utilities.getByRole('link', { name: 'Blog', exact: true })
-        await expect(blog).toBeVisible()
-        await expect(blog).toHaveAttribute('href', '/blog')
-        const partnersBox = await utilities
-          .getByRole('link', { name: 'Partners', exact: true })
-          .boundingBox()
-        const blogBox = await blog.boundingBox()
-        if (!partnersBox || !blogBox) throw new Error('Utility links have no visible bounds')
-        expect(blogBox.x).toBeGreaterThanOrEqual(partnersBox.x + partnersBox.width)
-      }
+      await expect(navigation.getByRole('link', { name: 'Blog', exact: true })).toBeHidden()
+      const utilities = page.locator('.docs-section-utilities')
+      await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
+      const blog = utilities.getByRole('link', { name: 'Blog', exact: true })
+      await expect(blog).toBeVisible()
+      await expect(blog).toHaveAttribute('href', 'https://tempo.xyz/blog/?channel=engineering')
+      const partnersBox = await utilities
+        .getByRole('link', { name: 'Partners', exact: true })
+        .boundingBox()
+      const blogBox = await blog.boundingBox()
+      if (!partnersBox || !blogBox) throw new Error('Utility links have no visible bounds')
+      expect(blogBox.x).toBeGreaterThanOrEqual(partnersBox.x + partnersBox.width)
       const search = navigation.getByRole('button', { name: 'Search documentation', exact: true })
       const agents = navigation.getByRole('button', { name: 'Agent setup', exact: true })
       await expect(agents).toBeEnabled()
       await page.evaluate(() => document.fonts.ready)
 
       const boxes = await Promise.all(
-        [...destinations, search, agents].map(async (control) => {
+        [search, agents].map(async (control) => {
           await expect(control).toBeVisible()
           const box = await control.boundingBox()
           if (!box) throw new Error('Header control has no visible bounds')
           return box
         }),
       )
-      // Blog pages retain the centered destination; docs use the utility row.
-      const [searchBox, agentsBox] = boxes.slice(-2)
-      if (path === '/blog') {
-        const blogBox = boxes[0]
-        const navBox = await navigation.boundingBox()
-        if (!navBox) throw new Error('Header has no visible bounds')
-        const destinationsCenter = blogBox.x + blogBox.width / 2
-        expect(Math.abs(destinationsCenter - (navBox.x + navBox.width / 2))).toBeLessThanOrEqual(2)
-        expect(agentsBox.x).toBeGreaterThan(blogBox.x + blogBox.width)
-      }
+      const [searchBox, agentsBox] = boxes
       expect(searchBox.x).toBeGreaterThan(agentsBox.x + agentsBox.width)
       expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(width)
       for (const [index, a] of boxes.entries()) {
@@ -495,11 +482,7 @@ for (const path of ['/', '/blog']) {
       await expect(panel).toBeVisible()
       await expect(agents).toHaveAttribute('aria-expanded', 'true')
       const sections = page.getByRole('navigation', { name: 'Documentation sections', exact: true })
-      if (path === '/') await expect(sections).toBeVisible()
-      else {
-        await expect(sections).toHaveCount(0)
-        await expect(page.locator('.docs-section-nav')).toHaveCount(0)
-      }
+      await expect(sections).toBeVisible()
       // Visibility alone does not detect another stacking context covering the panel.
       const overlap = await panel.evaluate((element) => {
         const sectionNav = document.querySelector('.docs-section-nav')
@@ -821,7 +804,7 @@ test('agent setup closes when keyboard focus leaves and when resizing to mobile'
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.goto('/blog')
+  await page.goto('/docs/accounts')
   const trigger = page.getByRole('button', { name: 'Agent setup', exact: true })
   const panel = page.locator('#docs-agent-tools')
   await trigger.click()
@@ -868,19 +851,27 @@ test('article tools copy readable Markdown and survive client navigation', async
   )
 })
 
-test('blog search reaches working docs search and appearance persists between surfaces', async ({
+test('mobile docs search works and appearance persists through navigation and reload', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/blog')
+  await page.goto('/docs/accounts')
   const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
   await page.getByRole('button', { name: 'Open menu', exact: true }).click()
   await menu.getByRole('combobox', { name: 'Color theme' }).selectOption('dark')
   await expect(page.locator('html')).toHaveAttribute('data-vocs-theme', 'dark')
   await menu.getByRole('button', { name: 'Search documentation', exact: true }).click()
-  await page.waitForURL((url) => url.pathname === '/')
-  await expect(page.getByRole('dialog')).toBeVisible()
-  await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
+  const search = page.getByRole('dialog', { name: 'Search documentation', exact: true })
+  await expect(search).toBeVisible()
+  await search.getByRole('combobox').fill('passkeys')
+  const result = search.locator('a[href="/docs/accounts/authentication/passkeys#create-a-passkey"]')
+  await expect(result).toBeVisible()
+  await result.click()
+  await expect(page).toHaveURL(/\/docs\/accounts\/authentication\/passkeys#create-a-passkey$/)
+  await expect(search).toBeHidden()
+  await expect(page.locator('html')).toHaveAttribute('data-vocs-theme', 'dark')
+  await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-vocs-theme', 'dark')
   await page.getByRole('button', { name: 'Open menu', exact: true }).click()
   await menu.getByRole('combobox', { name: 'Color theme' }).selectOption('light')
