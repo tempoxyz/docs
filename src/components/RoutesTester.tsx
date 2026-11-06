@@ -52,6 +52,7 @@ import {
   canSubsidize,
   demoMethods,
   linkedRoute,
+  quoteCosts,
   type RoutePick,
   routeChoices,
   routeQuoteRequest,
@@ -97,6 +98,8 @@ import * as Demo from './guides/Demo'
 import { RouteCanvas, type RouteProgress } from './RouteCanvas'
 import { ApiKeyPill } from './RoutesApiKey'
 import {
+  chip,
+  chipRow,
   input as inputStyle,
   label as labelStyle,
   note as noteStyle,
@@ -104,6 +107,7 @@ import {
 } from './RoutesControls'
 
 const consoleApiKeysUrl = 'https://console.tempo.xyz/?to=/:org/api-keys'
+const consoleRoutesUrl = 'https://console.tempo.xyz/?to=/:org/routes'
 const explorers: Record<string, (hash: string) => string> = {
   'eip155:4217': (hash) => `https://explore.tempo.xyz/tx/${hash}`,
   'eip155:42431': (hash) => `https://explore.testnet.tempo.xyz/tx/${hash}`,
@@ -387,6 +391,8 @@ function RouteLifecycle({
   const [funding, setFunding] = useState(false)
   const [registering, setRegistering] = useState(false)
   const [error, setError] = useState('')
+  // The key can read but not create: creating and registering need routes:write.
+  const [writeForbidden, setWriteForbidden] = useState(false)
   const [apiCalls, setApiCalls] = useState<ApiCall[]>([])
   const callId = useRef(0)
   const creation = useRef<{ request: ApiRequest; startedAt: number } | null>(null)
@@ -459,6 +465,21 @@ function RouteLifecycle({
     chainId: tempoChainId,
     query: { enabled: !!sourceTokenAddress && !!senderAddress && method === 'transfer' },
   })
+  // Max reads the sender's balance on any EVM source network the wallet config knows. On Tempo it
+  // shares the query above. Solana and Tron sources, and unknown networks, have no Max.
+  const balanceChainId =
+    sourceChainId && wagmiConfig.chains.some((c) => c.id === Number(sourceChainId))
+      ? Number(sourceChainId)
+      : undefined
+  const balanceTokenAddress = balanceChainId ? erc20Address(route.sourceToken.tokenKey) : undefined
+  const maxBalance = useReadContract({
+    address: balanceTokenAddress,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: senderAddress ? [senderAddress] : undefined,
+    chainId: balanceChainId as typeof tempoChainId,
+    query: { enabled: !!balanceTokenAddress && !!senderAddress && method === 'transfer' },
+  })
   const tempoAccount =
     tempoWallet && connection.connector?.id === tempoWallet.id ? connection.address : undefined
   const subsidyAvailable = canSubsidize(route, method, mode)
@@ -498,6 +519,12 @@ function RouteLifecycle({
   const balance = isTransfer ? sourceBalance.data : undefined
   const shortfall = balance !== undefined && requiredSource > 0n && balance < requiredSource
   const id = typeof created?.data.id === 'string' ? created.data.id : ''
+  // A single-source deposit address has one address, in the source chain's family.
+  const depositEntry = (
+    created?.data.addresses as { address?: unknown; status?: unknown }[] | undefined
+  )?.[0]
+  const depositAddressValue = String(depositEntry?.address ?? '')
+  const depositActive = depositEntry?.status === 'active'
   const parsedAction = sourceActionSchema.safeParse(created?.data.action)
   // Tron sources get Tron calls, Stellar sources one envelope, and every other source EVM calls.
   const actionType =
@@ -530,10 +557,21 @@ function RouteLifecycle({
         {caution}
       </p>
     ) : null
+  // Console cannot issue routes:write yet, so point at where approval is requested.
+  const approvalFor = (n: number) =>
+    writeForbidden && error && step === n ? (
+      <p role="status" {...cx(stepBody(), cautionText())}>
+        Routes transfers need Tempo approval.{' '}
+        <a href={consoleRoutesUrl} target="_blank" rel="noreferrer" {...accentLink()}>
+          Request access in Tempo Console
+        </a>
+        .
+      </p>
+    ) : null
   // What the canvas shows: where the route is, the amounts at each end, and the addresses.
-  // A created transfer carries its final terms. A created deposit address has only its address,
-  // so its amounts stay those of the quote.
-  const terms = (created?.data.sourceAmount ? created : quote)?.data
+  // A created transfer carries its final terms. A created deposit address carries none, so its
+  // amounts stay those of the quote.
+  const terms = (isTransfer && created ? created : quote)?.data
   const subsidizedTerms = terms?.subsidize === true
   const { decimals: destinationDecimals, symbol: destinationSymbol } = route.destinationToken
   const guaranteed =
@@ -589,6 +627,7 @@ function RouteLifecycle({
     inFlight.current = true
     setBusy(true)
     setError('')
+    setWriteForbidden(false)
     onLock(true)
     try {
       await work()
@@ -625,6 +664,12 @@ function RouteLifecycle({
       finish(result)
       return result
     } catch (e) {
+      if (
+        e instanceof RoutesApiError &&
+        e.code === 'api_key_forbidden' &&
+        request.method === 'POST'
+      )
+        setWriteForbidden(true)
       finish(
         e instanceof RoutesApiError
           ? e.result
@@ -702,7 +747,7 @@ function RouteLifecycle({
         startedAt: Date.now(),
         request: {
           method: 'POST',
-          path: `/${isTransfer ? 'transfers' : 'deposit-addresses'}`,
+          path: isTransfer ? '/transfers' : '/v2/deposit-addresses',
           body,
           idempotencyKey: crypto.randomUUID(),
         },
@@ -731,6 +776,12 @@ function RouteLifecycle({
       }
       if (typeof result.data.id !== 'string')
         throw new Error('Creation returned no ID. Retry to recover the response.')
+      if (
+        !isTransfer &&
+        typeof (result.data.addresses as { address?: unknown }[] | undefined)?.[0]?.address !==
+          'string'
+      )
+        throw new Error('Creation returned no deposit address. Retry to recover the response.')
       setCreated(result)
     })
   const signWithTempo = () =>
@@ -905,7 +956,7 @@ function RouteLifecycle({
       }
     })
   const fund = async () => {
-    const to = String(created?.data.address ?? '')
+    const to = depositAddressValue
     const token = route.sourceToken.tokenKey.split(':').at(-1) ?? ''
     const amount = requiredSource
     const onHash = (hash: string) => {
@@ -980,7 +1031,8 @@ function RouteLifecycle({
     const result = await call({
       method: 'GET',
       path: '/deposits',
-      query: { depositAddress: created?.data.address, limit: 50 },
+      // The deposit address ID matches deposits on every address it holds.
+      query: { depositAddressId: id, limit: 50 },
     })
     const rows = Array.isArray(result.data.data)
       ? (result.data.data as Record<string, unknown>[])
@@ -1010,11 +1062,7 @@ function RouteLifecycle({
   const pollTimeout = () =>
     setPollError('Stopped checking after 30 minutes. Check again to resume.')
   const watchingDeposit =
-    step === 3 &&
-    !isTransfer &&
-    created?.data.status === 'active' &&
-    !(deposits && deposits.length > 1) &&
-    !pollError
+    step === 3 && !isTransfer && depositActive && !(deposits && deposits.length > 1) && !pollError
   const tracking = step === 4 && !finalStatuses.has(String(current?.status ?? '')) && !pollError
   usePolling(watchingDeposit, poll(readDeposits), pollTimeout)
   usePolling(tracking, poll(readStatus), pollTimeout)
@@ -1036,6 +1084,13 @@ function RouteLifecycle({
     </Demo.Button>
   )
   const hasKey = !!apiKey.trim()
+  // Max fills the sender's whole balance of the token being sent, when it can be read.
+  const maxBalanceUnits =
+    isTransfer && mode === 'exactSource' && senderAddress ? maxBalance.data : undefined
+  const maxAmount =
+    maxBalanceUnits !== undefined && maxBalanceUnits > 0n
+      ? formatUnits(maxBalanceUnits, sourceDecimals)
+      : undefined
   const pricingNote = (
     <>
       Add your Tempo API key{' '}
@@ -1111,6 +1166,8 @@ function RouteLifecycle({
     placeholder: string
     /** Span both columns of the field grid on wider screens. */
     wide?: boolean
+    /** An extra control after the label, beside the connect links. */
+    extra?: ReactNode
   }) => {
     const wallets = walletsFor(options.chainId)
     const connected =
@@ -1168,6 +1225,7 @@ function RouteLifecycle({
                 </button>
               </>
             ))}
+          {options.extra}
         </span>
         <input
           id={options.id}
@@ -1183,8 +1241,28 @@ function RouteLifecycle({
   }
   const walletLabel = (chain: { id: string; name: string }, role: string) =>
     tempoChainFor(chain.id) ? `Tempo ${role} wallet` : `${chain.name} wallet address`
+  // Between EVM networks the same account usually receives, so offer the sender as the recipient.
+  const canUseSender =
+    isTransfer &&
+    route.sourceChain.addressFormat === 'hex' &&
+    route.destinationChain.addressFormat === 'hex' &&
+    !!senderAddress &&
+    recipient.trim() !== senderAddress
   const recipientField = (disabled: boolean, wide?: boolean) =>
     addressField({
+      extra: canUseSender && (
+        <>
+          {' '}
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => setRecipient(sender.trim())}
+            {...connectLink()}
+          >
+            (Use sender address)
+          </button>
+        </>
+      ),
       id: 'routes-recipient',
       label: `Recipient on ${route.destinationChain.name}`,
       chainId: route.destinationChain.id,
@@ -1371,17 +1449,46 @@ function RouteLifecycle({
                     </Select>
                   </label>
                 )}
-                <label {...labelStyle()}>
-                  Amount ({amountToken.symbol})
-                  <input
-                    {...inputStyle()}
-                    inputMode="decimal"
-                    disabled={frozen}
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="1.00"
-                  />
-                </label>
+                <div {...labelStyle()}>
+                  <label htmlFor="routes-amount">Amount ({amountToken.symbol})</label>
+                  <div {...amountRow()}>
+                    <input
+                      id="routes-amount"
+                      {...cx(inputStyle(), amountInput())}
+                      inputMode="decimal"
+                      disabled={frozen}
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="1.00"
+                    />
+                    <fieldset aria-label="Quick amounts" {...chipRow()}>
+                      {quickAmounts.map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-pressed={amount === value}
+                          disabled={frozen}
+                          onClick={() => setAmount(value)}
+                          {...chip()}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                      {maxAmount && (
+                        <button
+                          type="button"
+                          title={`Your ${sourceSymbol} balance on ${route.sourceChain.name}`}
+                          aria-pressed={amount === maxAmount}
+                          disabled={frozen}
+                          onClick={() => setAmount(maxAmount)}
+                          {...chip()}
+                        >
+                          Max
+                        </button>
+                      )}
+                    </fieldset>
+                  </div>
+                </div>
                 {isTransfer && (
                   <>
                     {addressField({
@@ -1468,13 +1575,14 @@ function RouteLifecycle({
             </div>
           )}
           {cautionFor(2)}
+          {approvalFor(2)}
           {created && (
             <ReferenceLink
               id={id}
               href={
                 isTransfer
                   ? '/docs/api/routes/transfers#getroutestransfer'
-                  : '/docs/api/routes/deposit-addresses#getroutesdepositaddress'
+                  : '/docs/api/routes/deposit-addresses#getroutesdepositaddressv2'
               }
             />
           )}
@@ -1497,6 +1605,7 @@ function RouteLifecycle({
               </p>
             )}
             {cautionFor(3)}
+            {approvalFor(3)}
             {step === 3 && walletPicker && <div {...stepBody()}>{walletPicker}</div>}
             {hashes.length > 0 && (
               <div {...hashList()}>
@@ -1517,7 +1626,7 @@ function RouteLifecycle({
               step === 3 ? (
                 <Demo.Button
                   type="button"
-                  disabled={busy || created?.data.status !== 'active'}
+                  disabled={busy || !depositActive}
                   onClick={() => void findDeposit()}
                 >
                   {busy ? 'Checking…' : 'Check now'}
@@ -1532,10 +1641,10 @@ function RouteLifecycle({
                   automatically as {route.destinationToken.symbol} on {route.destinationChain.name}.
                 </p>
                 <div {...depositAddress()}>
-                  <span {...depositAddressText()}>{String(created.data.address ?? '')}</span>
-                  <CopyButton text={String(created.data.address ?? '')} />
+                  <span {...depositAddressText()}>{depositAddressValue}</span>
+                  <CopyButton text={depositAddressValue} />
                 </div>
-                {created.data.status !== 'active' ? (
+                {!depositActive ? (
                   <p role="alert" {...errorText()}>
                     This address is not active. Do not fund it.
                   </p>
@@ -1654,6 +1763,7 @@ function RouteLifecycle({
   )
 }
 
+const quickAmounts = ['1', '5', '10']
 const finalStatuses = new Set(['completed', 'refunded', 'action-required', 'expired'])
 const pollIntervalMs = 6_000
 
@@ -1757,7 +1867,11 @@ function usePolling(
 type Fee = { amount?: { formatted?: string }; token?: { symbol?: string } }
 const feeDigits = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 4 })
 
-/** The quote as a receipt: what is sent, what arrives, and the fees the API lists. */
+/**
+ * The quote as a receipt: what is sent, what arrives, and what the difference is made of. The
+ * costs add up: listed fees plus price impact (the rest of the gap between sent and received,
+ * which no fee explains). When Tempo covers the gap, none of it is charged to the sender.
+ */
 function QuoteSummary({ data, route }: { data: Record<string, unknown>; route: TestRoute }) {
   const subsidized = data.subsidize === true
   const { decimals, symbol } = route.destinationToken
@@ -1766,6 +1880,26 @@ function QuoteSummary({ data, route }: { data: Record<string, unknown>; route: T
     ? formatUnits(delivery.guaranteed, decimals)
     : quantity(data.destinationAmount)
   const fees = Array.isArray(data.fees) ? (data.fees as Fee[]) : []
+  const costs = quoteCosts(data, decimals)
+  const covered = !!delivery && delivery.covered > 0n
+  const total = covered ? delivery.covered : costs?.total
+  const inSymbol = (units: bigint) =>
+    `${feeDigits.format(Number(formatUnits(units, decimals)))} ${symbol}`
+  const costRows = (nested: boolean) => (
+    <>
+      {fees.map((fee, index) => (
+        <Row key={`${fee.token?.symbol}-${index}`} label="Provider fee" nested={nested}>
+          {fee.amount?.formatted ? feeDigits.format(Number(fee.amount.formatted)) : '—'}{' '}
+          {fee.token?.symbol}
+        </Row>
+      ))}
+      {costs?.priceImpact !== undefined && (
+        <Row label="Price impact" nested={nested}>
+          {inSymbol(costs.priceImpact)}
+        </Row>
+      )}
+    </>
+  )
   return (
     <dl {...quoteSummary()}>
       <Row label="You send">
@@ -1774,29 +1908,40 @@ function QuoteSummary({ data, route }: { data: Record<string, unknown>; route: T
       <Row label="Recipient gets">
         {received} {symbol}
       </Row>
-      {delivery && delivery.covered > 0n && (
-        <Row label="Covered by Tempo">
-          {formatUnits(delivery.covered, decimals)} {symbol}
-        </Row>
-      )}
-      {fees.length === 0 ? (
-        <Row label="Fees">None</Row>
+      {total === undefined || total <= 0n ? (
+        fees.length === 0 ? (
+          <Row label="Fees">None</Row>
+        ) : (
+          costRows(false)
+        )
+      ) : covered ? (
+        <>
+          <Row label="Covered by Tempo">{inSymbol(total)}</Row>
+          {costRows(true)}
+        </>
       ) : (
-        fees.map((fee, index) => (
-          <Row key={`${fee.token?.symbol}-${index}`} label="Fee">
-            {fee.amount?.formatted ? feeDigits.format(Number(fee.amount.formatted)) : '—'}{' '}
-            {fee.token?.symbol}
-          </Row>
-        ))
+        <>
+          {costRows(false)}
+          <Row label="Total cost">{inSymbol(total)}</Row>
+        </>
       )}
     </dl>
   )
 }
 
-function Row({ label, children }: { label: string; children: ReactNode }) {
+function Row({
+  label,
+  children,
+  nested = false,
+}: {
+  label: string
+  children: ReactNode
+  /** A part of the row above, indented under it. */
+  nested?: boolean
+}) {
   return (
     <div {...summaryRow()}>
-      <dt {...summaryLabel()}>{label}</dt>
+      <dt {...cx(summaryLabel(), nested && summaryNested())}>{label}</dt>
       <dd {...summaryValue()}>{children}</dd>
     </div>
   )
@@ -1866,6 +2011,14 @@ const stepForm = style({
     },
   },
 })
+const amountRow = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: tokens.spacing['2'],
+})
+// The input takes the row's width, and the quick amounts wrap below it when it is narrow.
+const amountInput = style({ flex: '1 1 8rem', width: 'auto' })
 const fieldGrid = style({
   display: 'grid',
   gap: tokens.spacing['3'],
@@ -2022,6 +2175,7 @@ const summaryRow = style({
   ':last-child': { paddingBlockEnd: 0 },
 })
 const summaryLabel = style({ fontSize: tokens.fontSize.compact, color: tokens.color.gray10 })
+const summaryNested = style({ paddingInlineStart: tokens.spacing['4'] })
 const summaryValue = style({
   textAlign: 'right',
   fontSize: tokens.fontSize.sm,

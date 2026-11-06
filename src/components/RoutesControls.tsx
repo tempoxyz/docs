@@ -4,7 +4,7 @@ import LucideChevronDown from '~icons/lucide/chevron-down'
 import { style, vars as tokens } from '../styles/theme'
 import { input } from './RoutesControls.styles'
 
-export { input, label, note } from './RoutesControls.styles'
+export { chip, chipRow, input, label, note } from './RoutesControls.styles'
 
 /** A native select with the demo input style and a consistent chevron. */
 export function Select(props: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'className'>) {

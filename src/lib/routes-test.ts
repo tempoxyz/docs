@@ -4,6 +4,8 @@ const chain = z.object({
   id: z.string().min(1),
   name: z.string(),
   addressFormat: z.string(),
+  /** The chain family, such as `evm` or `solana`, that keys a deposit address's refund address. */
+  kind: z.string().min(1),
 })
 const token = z.object({
   tokenKey: z.string().min(1),
@@ -104,6 +106,31 @@ export function subsidizedDelivery(data: Record<string, unknown>, decimals: numb
   }
 }
 
+type Amount = Quantity & { currency?: string }
+const usdUnits = (value: unknown, decimals: number) =>
+  (value as Amount | undefined)?.currency === 'USD' ? inDecimals(value, decimals) : undefined
+/**
+ * What a quote costs the sender, in destination base units, so the summary adds up. Both amounts
+ * must be USD-denominated (stablecoins); otherwise no cost is claimed. `total` is what is sent
+ * (or, for a subsidized quote, the guaranteed amount) minus what the route delivers. `priceImpact`
+ * is the part of it that the listed fees do not explain, and is left out when the fees are not all
+ * USD-denominated or when they already cover the whole difference.
+ */
+export function quoteCosts(data: Record<string, unknown>, decimals: number) {
+  const sent =
+    data.subsidize === true
+      ? subsidizedDelivery(data, decimals)?.guaranteed
+      : usdUnits(data.sourceAmount, decimals)
+  const routed = usdUnits(data.destinationAmount, decimals)
+  if (sent === undefined || routed === undefined || routed > sent) return undefined
+  const total = sent - routed
+  const fees = Array.isArray(data.fees) ? (data.fees as { amount?: Amount }[]) : []
+  const listed = fees.map((fee) => usdUnits(fee.amount, decimals))
+  if (listed.some((fee) => fee === undefined)) return { total }
+  const impact = total - listed.reduce<bigint>((sum, fee) => sum + (fee ?? 0n), 0n)
+  return { total, priceImpact: impact > 0n ? impact : undefined }
+}
+
 export function toBaseUnits(amount: string, decimals: number): string {
   if (!/^\d+(\.\d+)?$/.test(amount)) throw new Error('Enter a positive decimal amount.')
   const [whole, fraction = ''] = amount.split('.')
@@ -201,19 +228,11 @@ function pricing(route: TestRoute, input: RouteInput) {
 }
 
 /**
- * Quote parameters. Transfer quotes need the sender and recipient; deposit-address quotes price
- * the route alone, so their recipient and refund address are only asked for at creation.
- */
-/**
- * Quotes use the creation inputs. The API lists a deposit quote's recipient and refund address as
- * optional, but several deposit routes (Ethereum, Polygon, BNB, Tron) only quote with them.
+ * Quote parameters, which use the creation inputs. The API lists a deposit quote's recipient and
+ * refund address as optional, but several deposit routes (Ethereum, Polygon, BNB, Tron) only quote
+ * with them.
  */
 export function routeQuoteRequest(route: TestRoute, input: RouteInput) {
-  return routeTestRequest(route, input)
-}
-
-/** The creation request body. */
-export function routeTestRequest(route: TestRoute, input: RouteInput) {
   const common = {
     ...pricing(route, input),
     recipient: address(input.recipient, route.destinationChain.addressFormat, 'recipient'),
@@ -229,4 +248,12 @@ export function routeTestRequest(route: TestRoute, input: RouteInput) {
         ...common,
         refundAddress: address(input.refundAddress, route.sourceChain.addressFormat, 'refund'),
       }
+}
+
+/** The creation request body. A v2 deposit address takes one refund address per chain family. */
+export function routeTestRequest(route: TestRoute, input: RouteInput) {
+  const request = routeQuoteRequest(route, input)
+  if (!('refundAddress' in request)) return request
+  const { refundAddress, ...rest } = request
+  return { ...rest, refundAddresses: { [route.sourceChain.kind]: refundAddress } }
 }
