@@ -110,7 +110,11 @@ export type AccountSandboxProps = {
 }
 
 /** What the reader does in a focused example, shown with its Start demo button. */
-export type SandboxLesson = { start: string }
+export type SandboxLesson = {
+  start: string
+  /** Walk the reader through a payment with one approval, then two, a step at a time. */
+  steps?: 'two-approvals'
+}
 
 /**
  * Create the reader's account on the Tempo Accounts devnet: it starts with no signers, and the first one the
@@ -870,6 +874,7 @@ function Playground(props: {
                     account={view}
                     onSubmit={submit}
                     tryBelowThreshold={guided}
+                    approvalSteps={lesson?.steps === 'two-approvals'}
                   />
                 </div>
               )}
@@ -1130,8 +1135,11 @@ function PayPanel(props: {
   onSubmit: (request: ActionRequest) => Promise<ActionResult>
   /** Let the reader send with too little weight, so Tempo's threshold check rejects it. */
   tryBelowThreshold?: boolean
+  /** Guide the reader through one approval, then two, in plain words. */
+  approvalSteps?: boolean
 }) {
-  const { account, onSubmit, tryBelowThreshold = false } = props
+  const { account, onSubmit, tryBelowThreshold = false, approvalSteps = false } = props
+  const [blocked, setBlocked] = React.useState(false)
   const [chosenAmount, setAmount] = React.useState<number>(paymentAmount)
   const [payer, setPayer] = React.useState<Payer>({ type: 'signers', ids: [] })
   const [sent, setSent] = React.useState<{ result: ActionResult; amount: number } | null>(null)
@@ -1170,14 +1178,51 @@ function PayPanel(props: {
     try {
       const result = await onSubmit(request)
       setSent({ result, amount })
+      if (!result.ok && result.code === 'insufficient-weight') setBlocked(true)
       if (result.ok && payer.type === 'signers') setPayer({ type: 'signers', ids: [] })
     } finally {
       setBusy(false)
     }
   }
 
+  const approvals = payer.type === 'signers' ? payer.ids.length : 0
+  const guide = !approvalSteps
+    ? null
+    : sent?.result.ok
+      ? null
+      : blocked
+        ? {
+            step: 'Step 2 of 2: Add a second approval',
+            text:
+              approvals >= 2
+                ? 'Two team members approve now. Send the payment again.'
+                : 'Blocked: this payment needs 2 approvals and had 1, so one person can’t send it alone. Pick a second team member, then send again.',
+            tone: approvals >= 2 ? 'ready' : 'blocked',
+          }
+        : {
+            step: 'Step 1 of 2: Send with one approval',
+            text:
+              approvals === 0
+                ? 'Pick one team member below, then send $50 and see what happens.'
+                : 'One team member approves. Send the payment.',
+            tone: 'ready',
+          }
+
   return (
     <div className="as-panel-body">
+      {guide && (
+        <div className="as-guide" data-tone={guide.tone} role="status">
+          {guide.tone === 'blocked' ? (
+            <LucideCircleX aria-hidden="true" />
+          ) : (
+            <LucideCircleCheck aria-hidden="true" />
+          )}
+          <div className="as-success-text">
+            <strong>{guide.step}</strong>
+            <span>{guide.text}</span>
+          </div>
+        </div>
+      )}
       <Field label="Amount">
         {amounts.length > 1 ? (
           <Segmented
@@ -1270,19 +1315,38 @@ function PayPanel(props: {
         <div className="as-success" role="status">
           <LucideCircleCheck aria-hidden="true" />
           <div className="as-success-text">
-            <strong>Sent ${formatUsd(sent.amount)}</strong>
-            <span>{sent.result.message}</span>
+            <strong>
+              Sent ${formatUsd(sent.amount)}
+              {approvalSteps ? ' with 2 approvals' : ''}
+            </strong>
+            <span>
+              {approvalSteps
+                ? 'Two team members approved, so the payment went through. One person alone couldn’t have sent it.'
+                : sent.result.message}
+            </span>
           </div>
-          <button type="button" className="as-button" onClick={() => setSent(null)}>
+          <button
+            type="button"
+            className="as-button"
+            onClick={() => {
+              setSent(null)
+              setBlocked(false)
+            }}
+          >
             Send another
           </button>
         </div>
       ) : (
         <div className="as-outcome" aria-live="polite">
           {payer.type === 'signers' && (
-            <Meter value={weight} target={required} ok={Boolean(result?.ok)} />
+            <Meter
+              value={weight}
+              target={required}
+              ok={Boolean(result?.ok)}
+              unit={approvalSteps ? 'approvals' : undefined}
+            />
           )}
-          <Outcome result={sent?.result ?? result} />
+          {!approvalSteps && <Outcome result={sent?.result ?? result} />}
           <button
             type="button"
             className="as-button as-button-primary"
@@ -1351,7 +1415,8 @@ function Outcome({ result }: { result: ActionResult | null }) {
   )
 }
 
-function Meter({ value, target, ok }: { value: number; target: number; ok: boolean }) {
+function Meter(props: { value: number; target: number; ok: boolean; unit?: string }) {
+  const { value, target, ok, unit } = props
   const segments = Math.min(target, 12)
   const filled = Math.min(segments, Math.round((Math.min(value, target) / target) * segments))
   return (
@@ -1363,6 +1428,7 @@ function Meter({ value, target, ok }: { value: number; target: number; ok: boole
       </span>
       <span className="as-meter-label">
         {value} of {target}
+        {unit ? ` ${unit}` : ''}
       </span>
     </span>
   )

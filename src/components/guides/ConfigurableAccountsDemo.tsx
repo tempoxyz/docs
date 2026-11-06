@@ -17,7 +17,8 @@ const scenarios: Scenario[] = [
         variant="compact"
         lesson={{
           start:
-            'Start the demo to create Acme’s treasury on the devnet with test funds. Then pick one approver and send $50, which Tempo rejects, and send again with two.',
+            'Try a payment that needs two approvals. See why one person can’t send it alone. This demo uses test funds, not real money.',
+          steps: 'two-approvals',
         }}
       />
     ),

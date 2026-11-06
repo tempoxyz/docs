@@ -14,20 +14,9 @@ This page walks through what configurable accounts let you build, how to try the
 
 ## Overview
 
-A configurable account is a Tempo account with several signers, each with a weight. A transaction runs once its approvers' weights reach the account's threshold, such as any 2 of 3, which makes it a multisig. The signers can change, but the address, balances, and history stay the same.
+Configurable accounts let you share control of payments, replace lost keys, and change who has access, all while keeping the same account address. For example, a business can require two team members to approve each payment.
 
-A [single-key account](/docs/development/single-key-accounts) has one key, and losing that key loses the account. Configurable accounts arrive on testnet and mainnet with the [T14 network upgrade](/docs/protocol/upgrades/t14), and run on the Tempo Accounts devnet today.
-
-## Terms
-
-| Term | Meaning |
-| --- | --- |
-| Configurable account | A Tempo account whose signers, weights, and threshold can change at the same address. |
-| Signer | A [passkey, device key, or private key](/docs/accounts/authentication) that approves the account's transactions. Viem calls it an owner. |
-| Threshold | The total signer weight a transaction needs. See [Signing Thresholds](/docs/accounts/policies/signing-thresholds). |
-| Multisig | A configurable account whose threshold needs more than one signer. It isn't a separate account type. |
-| Configuration update | One transaction that replaces the signers and threshold. See [Account Configuration](/docs/accounts/account-configuration). |
-| Access key | A key that pays for the account on its own, within limits. See [Access Keys](/docs/accounts/access-keys). |
+Configurable accounts arrive on testnet and mainnet with the [T14 network upgrade](/docs/protocol/upgrades/t14), and run on the Tempo Accounts devnet today.
 
 <span id="whats-possible" />
 <span id="team-multisig" />
@@ -46,13 +35,24 @@ A [single-key account](/docs/development/single-key-accounts) has one key, and l
 - **Self-Custodial Wallets:** A provider's key and the user's passkey approve together, and the user can leave the provider. See [Set Up a Self-Custodial Wallet](/docs/accounts/apps/self-custodial-wallets).
 - **Team Account as an Access Key:** A team's configurable account pays for another account, approving with its own signers. See [Access Keys](/docs/accounts/access-keys).
 
+## Terms
+
+| Term | Meaning |
+| --- | --- |
+| Configurable account | A Tempo account whose signers, weights, and threshold can change at the same address. |
+| Signer | A [passkey, device key, or private key](/docs/accounts/authentication) that approves the account's transactions. |
+| Threshold | The total signer weight a transaction needs. See [Signing Thresholds](/docs/accounts/policies/signing-thresholds). |
+| Multisig | A configurable account whose threshold needs more than one signer. It isn't a separate account type. |
+| Configuration update | One transaction that replaces the signers and threshold. See [Account Configuration](/docs/accounts/account-configuration). |
+| Access key | A key that pays for the account on its own, within limits. See [Access Keys](/docs/accounts/access-keys). |
+
 <span id="try-configurable-accounts" />
 <span id="try-it-on-the-devnet" />
 <span id="build-your-own" />
 
 ## Try It
 
-Each example runs a real account on the Tempo Accounts devnet. Balances shown before you start are example data.
+Each example runs on a test network with test funds, not real money. Balances shown before you start are example data.
 
 <ConfigurableAccountsDemo />
 

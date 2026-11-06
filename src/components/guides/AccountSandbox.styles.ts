@@ -615,6 +615,27 @@ export const accountSandbox = style({
       alignItems: 'center',
       gap: tokens.spacing['3'],
     },
+    // A lesson's current step, above the payment.
+    '& .as-guide': {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: tokens.spacing['3'],
+      paddingBlock: tokens.spacing['3'],
+      paddingInline: tokens.spacing['3_5'],
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.lineStrong,
+      borderRadius: tokens.radius.lg,
+      backgroundColor: tokens.color.card,
+    },
+    '& .as-guide > svg': {
+      flexShrink: 0,
+      marginTop: tokens.spacing['0_5'],
+      color: tokens.color.muted,
+    },
+    '& .as-guide[data-tone="blocked"] > svg': {
+      color: tokens.color.foreground,
+    },
     // A sent payment, in place of the send row.
     '& .as-success': {
       display: 'flex',
