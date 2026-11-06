@@ -132,25 +132,30 @@ There's no `0x05` form of TIP-20 `permit` or of payment-channel vouchers. To app
 | Event | `ConfigurableAccountConfigUpdated(account, salt, version, threshold, owners)`, also emitted at registration with version 0 |
 
 ```ts [update.ts]
+import { AccountConfig, Actions } from 'viem/tempo'
 import { account, env, finance, operations, saved } from './account'
 import { client } from './client'
 
-const { config } = await client.accounts.updateConfigSync({ // [!code hl]
+const nextConfig = { // [!code hl]
+  owners: [ // [!code hl]
+    { owner: finance.address, weight: 1 }, // [!code hl]
+    { owner: operations.address, weight: 1 }, // [!code hl]
+    { owner: env('NEW_PASSKEY_ADDRESS'), weight: 1 }, // [!code hl]
+  ], // [!code hl]
+  threshold: 2, // [!code hl]
+} // [!code hl]
+await client.writeContractSync({ // [!code hl]
   account, // [!code hl]
-  nextConfig: { // [!code hl]
-    owners: [ // [!code hl]
-      { owner: finance.address, weight: 1 }, // [!code hl]
-      { owner: operations.address, weight: 1 }, // [!code hl]
-      { owner: env('NEW_PASSKEY_ADDRESS'), weight: 1 }, // [!code hl]
-    ], // [!code hl]
-    threshold: 2, // [!code hl]
-  }, // [!code hl]
+  ...Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig }), // [!code hl]
+  throwOnReceiptRevert: true, // [!code hl]
 }) // [!code hl]
-// version 1 replaces version 0 in the account record
-saved.config = config // [!code hl]
+// Save only after the update succeeds. Version 1 replaces version 0.
+saved.config = AccountConfig.update(saved.config, nextConfig) // [!code hl]
 ```
 
-Viem sorts the new owners and signs with `finance` and `operations`, whose weights reach the current threshold of 2. The returned `config` is version 1, with the same salt. Save it, then [rebuild the account](#keep-the-current-configuration) from it before the next action. [Configuration updates](/docs/accounts/account-configuration/configuration-updates#add-a-signer) walks through a full update.
+Viem sorts the new owners and signs with `finance` and `operations`, whose weights reach the current threshold of 2. `AccountConfig.update` builds version 1 with the same salt. Save it after the transaction succeeds, then [rebuild the account](#keep-the-current-configuration) before the next action. [Configuration updates](/docs/accounts/account-configuration/configuration-updates#add-a-signer) walks through a full update.
+
+Viem 2.57.5's `updateConfigSync` expects the old event name and throws after a successful devnet update. Use `writeContractSync` as above until Viem supports `ConfigurableAccountConfigUpdated`.
 
 <span id="read-the-current-configuration" />
 
@@ -205,7 +210,7 @@ Chain history holds the configuration only once the account has used it:
 | Version 0, transacted | In the registration's `ConfigurableAccountConfigUpdated` event, and in each transaction's [`0x05` signature](#multisig-signature-format), which carries the full configuration |
 | Updated or upgraded | In the latest `ConfigurableAccountConfigUpdated` or `AccountUpgraded` event, which carries the salt, threshold, and owners. An upgrade installs version 1. |
 
-If an update landed but your app failed to save the returned `config`, rebuild it from the update you sent with `AccountConfig.update(saved.config, nextConfig)`, or from the account's latest `ConfigurableAccountConfigUpdated` event. Before you use the rebuilt configuration, check it against `getConfigCommitment` as above.
+If an update landed but your app failed to save the new configuration, rebuild it with `AccountConfig.update(saved.config, nextConfig)`, or from the account's latest `ConfigurableAccountConfigUpdated` event. Before you use the rebuilt configuration, check it against `getConfigCommitment` as above.
 
 <span id="login-signers" />
 
@@ -248,7 +253,7 @@ An ordinary transaction already includes 3,000 gas for one signature, which Temp
 
 ## Native multisig precompile
 
-The native multisig precompile is at `0xAACC000000000000000000000000000000000000` on the devnet. Viem's `updateConfigSync` and `getConfigCommitment` call it for you.
+The native multisig precompile is at `0xAACC000000000000000000000000000000000000` on the devnet. Viem's `Actions.accounts.updateConfig.call` builds calls to it, and `getConfigCommitment` reads its stored configuration hash.
 
 | Function | Purpose |
 | --- | --- |

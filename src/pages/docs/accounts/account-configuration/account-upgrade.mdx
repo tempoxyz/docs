@@ -114,7 +114,7 @@ After the upgrade, the record your app [saves](/docs/development/configurable-ac
 
 Viem signs with the attached keys until their weights reach the threshold. If they fall short, it throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
-[Adding](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [removing](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) signers later raises the version. Save the `config` that `updateConfigSync` returns and rebuild the account from it. Otherwise the next transaction fails with `multisig configuration commitment mismatch`.
+[Adding](/docs/accounts/account-configuration/configuration-updates#add-a-signer) or [removing](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) signers later raises the version. After the update succeeds, save `AccountConfig.update(saved.config, nextConfig)` and rebuild the account from it. Otherwise the next transaction fails with `multisig configuration commitment mismatch`.
 
 <span id="account-upgrade-limits" />
 

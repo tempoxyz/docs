@@ -106,7 +106,7 @@ Tempo stores only a hash of the account's configuration, which covers its signer
 
 Before each transaction, rebuild the account from the latest saved record. The examples call that helper [`openAccount`](/docs/accounts/apps/self-custodial-wallets). It passes `saved` to `Account.fromConfig` with the approving keys on this device in place of their addresses. It uses `address: 'infer'` until the first configuration update, then the saved address.
 
-A configuration update raises the configuration's version. Tempo checks every later transaction against the new hash, so save the `config` that `updateConfigSync` returns. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
+A configuration update raises the configuration's version. After it succeeds, save `AccountConfig.update(saved.config, nextConfig)`. Tempo checks every later transaction against the new hash. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
 When the keys on one device reach the threshold, attach them and send the transaction as usual. Here the customer's passkey reaches the threshold alone, so the payment runs in the customer's browser. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
 
@@ -154,7 +154,7 @@ Approvals can arrive in any order. Viem sorts them by signer address when it com
 
 An approval also covers the transaction's nonce, its place in the account's sequence of transactions. If another transaction from the account lands first, submitting fails with `nonce too low`, so prepare again and collect new approvals. To keep slow approvals valid while the account keeps paying, pass `prepareTransactionRequest` its own `nonceKey`. Use a random `bigint` from `1n` to `2n ** 256n - 2n`, which starts a [separate sequence](/docs/guide/tempo-transaction#concurrent-transactions) for this transaction. The maximum `uint256` selects an [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) instead.
 
-A configuration update works the same way. Put `Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig })` in `calls`, and collect approvals from the current signers. Once it lands, save `AccountConfig.update(saved.config, nextConfig)` as the account's configuration. That's the same configuration `updateConfigSync` returns. An update voids approvals collected under the old configuration, so collect those again.
+A configuration update works the same way. Put `Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig })` in `calls`, and collect approvals from the current signers. Set `throwOnReceiptRevert: true` when sending it, and save `AccountConfig.update(saved.config, nextConfig)` only after success. An update voids approvals collected under the old configuration, so collect those again.
 
 <span id="verify-approvals" />
 <span id="signature-verification" />
