@@ -143,42 +143,42 @@
     },
     {
       "source": "/docs/resources/partners/alchemy.md",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.xyz/partners/alchemy/",
       "permanent": true
     },
     {
       "source": "/developers/docs/resources/partners/alchemy.md",
-      "destination": "/developers/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.xyz/partners/alchemy/",
       "permanent": true
     },
     {
       "source": "/assets/md/docs/resources/partners/alchemy.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.xyz/partners/alchemy/",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/docs/resources/partners/alchemy.md",
-      "destination": "/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.xyz/partners/alchemy/",
       "permanent": true
     },
     {
       "source": "/docs/resources/partners/quicknode.md",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.xyz/partners/quicknode/",
       "permanent": true
     },
     {
       "source": "/developers/docs/resources/partners/quicknode.md",
-      "destination": "/developers/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.xyz/partners/quicknode/",
       "permanent": true
     },
     {
       "source": "/assets/md/docs/resources/partners/quicknode.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.xyz/partners/quicknode/",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/docs/resources/partners/quicknode.md",
-      "destination": "/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.xyz/partners/quicknode/",
       "permanent": true
     },
     {
@@ -363,22 +363,22 @@
     },
     {
       "source": "/docs/resources/partners/alchemy",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#alchemy",
+      "destination": "https://tempo.xyz/partners/alchemy/",
       "permanent": true
     },
     {
       "source": "/developers/docs/resources/partners/alchemy",
-      "destination": "/developers/docs/partners/rpc-and-nodes#alchemy",
+      "destination": "https://tempo.xyz/partners/alchemy/",
       "permanent": true
     },
     {
       "source": "/docs/resources/partners/quicknode",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#quicknode",
+      "destination": "https://tempo.xyz/partners/quicknode/",
       "permanent": true
     },
     {
       "source": "/developers/docs/resources/partners/quicknode",
-      "destination": "/developers/docs/partners/rpc-and-nodes#quicknode",
+      "destination": "https://tempo.xyz/partners/quicknode/",
       "permanent": true
     },
     {
@@ -447,13 +447,193 @@
       "permanent": true
     },
     {
+      "source": "/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/stablecoins",
+      "destination": "https://tempo.xyz/partners/stablecoins/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/stablecoins",
+      "destination": "https://tempo.xyz/partners/stablecoins/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/rwas",
+      "destination": "https://tempo.xyz/partners/tokenized-assets/#tokenized-assets",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/rwas",
+      "destination": "https://tempo.xyz/partners/tokenized-assets/#tokenized-assets",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/wallets",
+      "destination": "https://tempo.xyz/partners/wallets-and-custody/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/wallets",
+      "destination": "https://tempo.xyz/partners/wallets-and-custody/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/smart-accounts",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#smart-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/smart-accounts",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#smart-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/exchanges",
+      "destination": "https://tempo.xyz/partners/exchanges/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/exchanges",
+      "destination": "https://tempo.xyz/partners/exchanges/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/bridges",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#bridges",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/bridges",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#bridges",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/payments-and-ramps",
+      "destination": "https://tempo.xyz/partners/ramps-and-fx/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/payments-and-ramps",
+      "destination": "https://tempo.xyz/partners/ramps-and-fx/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/cards",
+      "destination": "https://tempo.xyz/partners/ramps-and-fx/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/cards",
+      "destination": "https://tempo.xyz/partners/ramps-and-fx/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/rpc-and-nodes",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#nodes",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/rpc-and-nodes",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#nodes",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/data-and-oracles",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#data",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/data-and-oracles",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#data",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/explorers-and-debugging",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/explorers-and-debugging",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/developer-tools",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/developer-tools",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/security-and-compliance",
+      "destination": "https://tempo.xyz/partners/compliance/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/security-and-compliance",
+      "destination": "https://tempo.xyz/partners/compliance/",
+      "permanent": true
+    },
+    {
       "source": "/docs/partners/assets",
-      "destination": "/docs/partners/stablecoins",
+      "destination": "https://tempo.xyz/partners/stablecoins/",
       "permanent": true
     },
     {
       "source": "/developers/docs/partners/assets",
-      "destination": "/developers/docs/partners/stablecoins",
+      "destination": "https://tempo.xyz/partners/stablecoins/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/partners/:path*",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners/:path*",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/partners.md",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/partners.md",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/assets/md/docs/partners/:path*",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/assets/md/docs/partners/:path*",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
@@ -518,22 +698,22 @@
     },
     {
       "source": "/developers/docs/learn/partners",
-      "destination": "/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
       "source": "/developers/learn/partners",
-      "destination": "/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
       "source": "/developers/docs/guide/using-tempo-with-ai/partners",
-      "destination": "/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
       "source": "/developers/build/partners",
-      "destination": "/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
@@ -668,122 +848,122 @@
     },
     {
       "source": "/docs/ecosystem/assets",
-      "destination": "/docs/partners/stablecoins",
+      "destination": "https://tempo.xyz/partners/stablecoins/",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/assets",
-      "destination": "/developers/docs/partners/stablecoins",
+      "destination": "https://tempo.xyz/partners/stablecoins/",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/wallets",
-      "destination": "/docs/partners/wallets",
+      "destination": "https://tempo.xyz/partners/wallets-and-custody/",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/wallets",
-      "destination": "/developers/docs/partners/wallets",
+      "destination": "https://tempo.xyz/partners/wallets-and-custody/",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/smart-contract-libraries",
-      "destination": "/docs/partners/smart-accounts",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#smart-accounts",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/smart-contract-libraries",
-      "destination": "/developers/docs/partners/smart-accounts",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#smart-accounts",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/exchanges",
-      "destination": "/docs/partners/exchanges",
+      "destination": "https://tempo.xyz/partners/exchanges/",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/exchanges",
-      "destination": "/developers/docs/partners/exchanges",
+      "destination": "https://tempo.xyz/partners/exchanges/",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/bridges",
-      "destination": "/docs/partners/bridges",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#bridges",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/bridges",
-      "destination": "/developers/docs/partners/bridges",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#bridges",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/orchestration",
-      "destination": "/docs/partners/payments-and-ramps",
+      "destination": "https://tempo.xyz/partners/ramps-and-fx/",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/orchestration",
-      "destination": "/developers/docs/partners/payments-and-ramps",
+      "destination": "https://tempo.xyz/partners/ramps-and-fx/",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/node-infrastructure",
-      "destination": "/docs/partners/rpc-and-nodes",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#nodes",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/node-infrastructure",
-      "destination": "/developers/docs/partners/rpc-and-nodes",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#nodes",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/data-analytics",
-      "destination": "/docs/partners/data-and-oracles",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#data",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/data-analytics",
-      "destination": "/developers/docs/partners/data-and-oracles",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#data",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/block-explorers",
-      "destination": "/docs/partners/explorers-and-debugging",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/block-explorers",
-      "destination": "/developers/docs/partners/explorers-and-debugging",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/security-compliance",
-      "destination": "/docs/partners/security-and-compliance",
+      "destination": "https://tempo.xyz/partners/compliance/",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/security-compliance",
-      "destination": "/developers/docs/partners/security-and-compliance",
+      "destination": "https://tempo.xyz/partners/compliance/",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem/developer-tools",
-      "destination": "/docs/partners/developer-tools",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem/developer-tools",
-      "destination": "/developers/docs/partners/developer-tools",
+      "destination": "https://tempo.xyz/partners/onchain-infrastructure/#explorers",
       "permanent": true
     },
     {
       "source": "/docs/ecosystem",
-      "destination": "/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
       "source": "/developers/docs/ecosystem",
-      "destination": "/developers/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
@@ -940,7 +1120,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
@@ -973,7 +1153,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
@@ -984,7 +1164,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
@@ -995,7 +1175,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
@@ -1006,7 +1186,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
@@ -1573,7 +1753,7 @@
     },
     {
       "source": "/ecosystem",
-      "destination": "/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
@@ -1583,7 +1763,7 @@
     },
     {
       "source": "/developers/docs/developer-tools",
-      "destination": "/developers/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
@@ -1998,7 +2178,7 @@
     },
     {
       "source": "/developer-tools",
-      "destination": "/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
@@ -2033,27 +2213,27 @@
     },
     {
       "source": "/partners",
-      "destination": "/docs/partners",
+      "destination": "https://tempo.xyz/partners/",
       "permanent": true
     },
     {
       "source": "/learn/partners",
-      "destination": "/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
       "source": "/docs/learn/partners",
-      "destination": "/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
       "source": "/docs/guide/using-tempo-with-ai/partners",
-      "destination": "/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {
       "source": "/build/partners",
-      "destination": "/docs/partners/join",
+      "destination": "https://tempo.xyz/contact",
       "permanent": true
     },
     {

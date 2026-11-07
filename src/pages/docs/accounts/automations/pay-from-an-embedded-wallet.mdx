@@ -16,7 +16,7 @@ This guide gives your backend an [access key](/docs/accounts/access-keys) that p
 
 The provider keeps the account key and signs the key's authorization once. After that, your backend signs each payment with its own key. It stays within the limit, recipients, and expiry the user approved.
 
-The example funds a card program. Your card backend gets a key that sends up to 100 OUSD a day for 30 days. It pays only the card program's funding address from your [card issuing partner](/docs/partners/cards). The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
+The example funds a card program. Your card backend gets a key that sends up to 100 OUSD a day for 30 days. It pays only the card program's funding address from your [card issuing partner](https://tempo.xyz/partners/ramps-and-fx/). The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
 
 <span id="who-holds-which-key" />
 
@@ -239,5 +239,5 @@ const { keyAuthorization, rootAddress } = await provider.request({ // [!code hl]
   <Card title="Access Keys" description="Covers the keys an account authorizes with limits, scopes, and expiry." to="/docs/accounts/access-keys" />
   <Card title="Apps" description="Covers provider wallets and routing raw signing through one backend." to="/docs/accounts/apps" />
   <Card title="Revocation" description="Covers ending an access key's access for good." to="/docs/accounts/access-keys/revocation" />
-  <Card title="Cards" description="Covers card issuing partners on Tempo." to="/docs/partners/cards" />
+  <Card title="Cards" description="Covers card issuing partners on Tempo." to="https://tempo.xyz/partners/ramps-and-fx/" />
 </Cards>

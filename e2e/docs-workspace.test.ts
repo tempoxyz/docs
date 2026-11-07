@@ -205,6 +205,8 @@ for (const section of [
       '/docs/guide/payments/transfer-memos',
       '/docs/guide/payments/send-a-payment/examples',
       '/docs/guide/getting-funds',
+      '/docs/guide/bridge-relay',
+      '/docs/guide/ousd',
       '/docs/quickstart/connection-details',
       '/docs/quickstart/wallet-developers',
       '/docs/protocol/rpc',
@@ -229,15 +231,6 @@ for (const section of [
     label: 'Get Started (SDKs and CLI)',
     overview: '/get-started',
     paths: ['/docs/sdk', '/docs/cli', '/docs/cli/api', '/docs/sdk/typescript/api-client'],
-  },
-  {
-    label: 'Partners',
-    overview: '/docs/partners',
-    paths: [
-      '/docs/partners/wallets',
-      '/docs/partners/bridges#coinbase',
-      '/docs/guide/bridge-relay',
-    ],
   },
   {
     label: 'API reference',

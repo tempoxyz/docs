@@ -187,7 +187,9 @@ describe('docs routing redirects', () => {
     destination,
   }) => {
     expect(findRedirect(source)).toMatchObject({
-      destination: `${canonicalDevelopersOrigin}${destination}`,
+      destination: URL.canParse(destination)
+        ? destination
+        : `${canonicalDevelopersOrigin}${destination}`,
       permanent: true,
     })
   })
@@ -200,11 +202,28 @@ describe('docs routing redirects', () => {
     for (const prefix of ['', '/developers']) {
       for (const source of ['/docs/ecosystem/assets', '/docs/partners/assets']) {
         expect(findRedirect(`${prefix}${source}`)).toMatchObject({
-          destination: `${prefix}/docs/partners/stablecoins`,
+          destination: 'https://tempo.xyz/partners/stablecoins/',
           permanent: true,
         })
       }
     }
+  })
+
+  it('sends retired partner docs to the partner directory on tempo.xyz', () => {
+    for (const prefix of ['', '/developers']) {
+      for (const [source, destination] of [
+        ['/docs/partners', 'https://tempo.xyz/partners/'],
+        ['/docs/partners/wallets', 'https://tempo.xyz/partners/wallets-and-custody/'],
+        ['/docs/partners/bridges', 'https://tempo.xyz/partners/onchain-infrastructure/#bridges'],
+        ['/docs/partners/security-and-compliance', 'https://tempo.xyz/partners/compliance/'],
+        ['/docs/partners/:path*', 'https://tempo.xyz/partners/'],
+      ]) {
+        expect(findRedirect(`${prefix}${source}`)).toMatchObject({ destination, permanent: true })
+      }
+    }
+    expect(
+      vocsRedirects.filter(({ destination }) => destination.includes('/docs/partners')),
+    ).toEqual([])
   })
 
   it('normalizes trailing slashes before static route handling', () => {
@@ -340,12 +359,15 @@ describe('docs routing redirects', () => {
   it.each([
     ['/tools', '/docs/sdk'],
     ['/tools/:path*', '/docs/sdk'],
-    ['/partners', '/docs/partners'],
-    ['/docs/ecosystem', '/docs/partners'],
-    ['/docs/ecosystem/node-infrastructure', '/docs/partners/rpc-and-nodes'],
+    ['/partners', 'https://tempo.xyz/partners/'],
+    ['/docs/ecosystem', 'https://tempo.xyz/partners/'],
+    [
+      '/docs/ecosystem/node-infrastructure',
+      'https://tempo.xyz/partners/onchain-infrastructure/#nodes',
+    ],
     [
       '/developers/docs/ecosystem/smart-contract-libraries',
-      '/developers/docs/partners/smart-accounts',
+      'https://tempo.xyz/partners/onchain-infrastructure/#smart-accounts',
     ],
     ['/api', '/docs/api'],
     ['/api/authentication', '/docs/api/authentication'],
@@ -361,7 +383,7 @@ describe('docs routing redirects', () => {
     ['/api/transactions-and-transfers', '/docs/api/transactions-and-transfers'],
     ['/api/transfers', '/docs/api/transfers'],
     ['/api/versioning-policy', '/docs/api/versioning-policy'],
-    ['/developers/docs/developer-tools', '/developers/docs/partners'],
+    ['/developers/docs/developer-tools', 'https://tempo.xyz/partners/'],
     ['/developers/docs/developer-tools/fee-payer', '/developers/docs/api/fee-payer'],
     ['/developers/docs/developer-tools/indexer', '/developers/docs/api/indexer-api'],
     ['/developers/docs/hosted-services', '/developers/docs/api'],

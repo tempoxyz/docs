@@ -190,7 +190,7 @@ export const docsLinkCards = {
       icon: 'server',
       links: [
         ['Run a node', '/docs/guide/node'],
-        ['Infrastructure providers', '/docs/partners/rpc-and-nodes'],
+        ['Infrastructure providers', 'https://tempo.xyz/partners/onchain-infrastructure/#nodes'],
       ],
     },
     {
