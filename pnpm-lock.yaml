@@ -5086,7 +5086,7 @@ packages:
           targets:
             - cpu: x64
               os: win32
-    version: 0.0.0
+    version: 24.22.1
     hasBin: true
 
   npm-run-path@6.0.0:
