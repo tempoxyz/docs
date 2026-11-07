@@ -59,6 +59,7 @@ import {
   subsidizedDelivery,
   type TestMethod,
   type TestMode,
+  type TestPriority,
   type TestRoute,
 } from '../lib/routes-test'
 import {
@@ -360,6 +361,7 @@ function RouteLifecycle({
   onNeedKey: () => void
 }) {
   const [mode, setMode] = useState<TestMode>(route.capabilities.transfer?.modes[0] ?? 'exactSource')
+  const [priority, setPriority] = useState<TestPriority>('price')
   const [amount, setAmount] = useState('')
   const [sender, setSender] = useState('')
   const [recipient, setRecipient] = useState('')
@@ -461,7 +463,9 @@ function RouteLifecycle({
   })
   const tempoAccount =
     tempoWallet && connection.connector?.id === tempoWallet.id ? connection.address : undefined
-  const subsidyAvailable = canSubsidize(route, method, mode)
+  // The API refuses 1:1 delivery for speed-priority transfers, so choosing speed drops it.
+  const speed = method === 'transfer' && priority === 'speed'
+  const subsidyAvailable = !speed && canSubsidize(route, method, mode)
   const input = {
     method,
     mode,
@@ -471,6 +475,7 @@ function RouteLifecycle({
     refundAddress,
     // Without a key, the docs demo key quotes 1:1 delivery as a preview; it cannot create routes.
     subsidize: subsidyAvailable && !subsidyRefused,
+    priority: speed ? priority : undefined,
   }
   let quoteParams: ReturnType<typeof routeQuoteRequest> | undefined
   let quoteValidation = ''
@@ -1368,6 +1373,20 @@ function RouteLifecycle({
                           {m === 'exactSource' ? 'Amount sent' : 'Amount received'}
                         </option>
                       ))}
+                    </Select>
+                  </label>
+                )}
+                {isTransfer && (
+                  <label {...cx(labelStyle(), wideField())} htmlFor="routes-priority">
+                    Priority
+                    <Select
+                      id="routes-priority"
+                      disabled={frozen}
+                      value={priority}
+                      onChange={(e) => setPriority(e.target.value as TestPriority)}
+                    >
+                      <option value="price">Best price</option>
+                      <option value="speed">Speed</option>
                     </Select>
                   </label>
                 )}
