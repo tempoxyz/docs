@@ -140,6 +140,18 @@ test('dynamic benchmark bars bind compiled CSS variables', async ({ page }) => {
   expect(ratios[2]).toBeCloseTo(0.03, 2)
 })
 
+test('client navigation loads page-owned styles', async ({ page }) => {
+  await page.goto('/docs/agents')
+  await page.locator('main a[href="/docs/guide/using-tempo-with-ai"]').first().click()
+  await expect(page).toHaveURL(/\/docs\/guide\/using-tempo-with-ai\/?$/)
+  await selectTab(page.getByRole('tab', { name: 'Cursor', exact: true }))
+  // The page's own recipe removes the button's default top margin.
+  await expect(page.getByRole('link', { name: 'Install in Cursor', exact: true })).toHaveCSS(
+    'margin-top',
+    '0px',
+  )
+})
+
 test('closed mobile navigation stays outside the viewport and restores focus on dismissal', async ({
   page,
 }) => {

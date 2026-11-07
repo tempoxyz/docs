@@ -1683,6 +1683,11 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/partners.md',
+      destination: 'https://tempo.xyz/partners/',
+      status: 301,
+    },
+    {
       source: '/assets/md/docs/partners.md',
       destination: 'https://tempo.xyz/partners/',
       status: 301,

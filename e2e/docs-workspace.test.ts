@@ -9,7 +9,7 @@ const sectionLabels = [
   'Machine Payments',
   'Tempo EVM',
 ]
-const utilityLabels = ['API reference', 'Partners']
+const utilityLabels = ['API reference']
 const externalTools = [
   ['MPP', 'https://mpp.dev/'],
   ['Mercator', 'https://mercator.sh/'],
@@ -445,12 +445,12 @@ for (const path of ['/', '/blog']) {
         const blog = utilities.getByRole('link', { name: 'Blog', exact: true })
         await expect(blog).toBeVisible()
         await expect(blog).toHaveAttribute('href', '/blog')
-        const partnersBox = await utilities
-          .getByRole('link', { name: 'Partners', exact: true })
+        const apiBox = await utilities
+          .getByRole('link', { name: 'API reference', exact: true })
           .boundingBox()
         const blogBox = await blog.boundingBox()
-        if (!partnersBox || !blogBox) throw new Error('Utility links have no visible bounds')
-        expect(blogBox.x).toBeGreaterThanOrEqual(partnersBox.x + partnersBox.width)
+        if (!apiBox || !blogBox) throw new Error('Utility links have no visible bounds')
+        expect(blogBox.x).toBeGreaterThanOrEqual(apiBox.x + apiBox.width)
       }
       const search = navigation.getByRole('button', { name: 'Search documentation', exact: true })
       const agents = navigation.getByRole('button', { name: 'Agent setup', exact: true })

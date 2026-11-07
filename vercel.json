@@ -617,6 +617,16 @@
       "permanent": true
     },
     {
+      "source": "/docs/partners.md",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/partners.md",
+      "destination": "https://tempo.xyz/partners/",
+      "permanent": true
+    },
+    {
       "source": "/assets/md/docs/partners.md",
       "destination": "https://tempo.xyz/partners/",
       "permanent": true

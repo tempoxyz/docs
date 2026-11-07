@@ -4,13 +4,13 @@ test('outline links align headings below the sticky header, including repeated c
   page,
 }) => {
   await page.setViewportSize({ width: 1600, height: 1000 })
-  await page.goto('/docs/resources/guides/embedded-wallets')
+  await page.goto('/docs/guide/bridge-layerzero')
   const outline = page.locator('[data-v-outline]:not([data-v-outline-mobile])')
 
   for (const name of [
-    'Privy: customer wallets and payments',
-    'Turnkey: policy-controlled signing',
-    'Fireblocks: vaults and transaction approvals',
+    'Bridged tokens on Tempo',
+    'LayerZero contracts on Tempo',
+    'Stargate tokens',
   ]) {
     const link = outline.getByRole('link', { name, exact: true })
     await link.click()
