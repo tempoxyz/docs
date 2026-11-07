@@ -5,9 +5,103 @@ name: Dependency Scan
 
 permissions: {}
 
+# Inline the pinned shared workflow until it forwards the Aegis CA to Go.
+# Keep digest checks and SLSA verification enabled for both scanner revisions.
 jobs:
   dependency-scan:
-    uses: tempoxyz/gh-actions/.github/workflows/dependency-scan.yml@35019557465e3c38ee3468be171771fd73577584 # 2026-10-20T06-22-38Z-35019557
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       id-token: write
+    outputs:
+      vulnerabilities-found: ${{ steps.report.outputs.vulnerabilities-found }}
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@68a1e4645c9596fee5398dd1e2ba07f0a4aa6a71 # 2026-10-20T04-40-18Z-68a1e464
+
+      - name: Forward runner CA to Go tools
+        shell: bash
+        run: |
+          # The scanner sanitizes child environments but preserves SSL_CERT_FILE.
+          if [ -n "${NODE_EXTRA_CA_CERTS:-}" ]; then
+            test -r "$NODE_EXTRA_CA_CERTS"
+            printf 'SSL_CERT_FILE=%s\n' "$NODE_EXTRA_CA_CERTS" >> "$GITHUB_ENV"
+          fi
+
+      - name: Resolve revisions and prepare isolated results directory
+        id: prepare
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_INPUT: ""
+          HEAD_INPUT: ""
+          EVENT_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          EVENT_HEAD: ${{ github.sha }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync, mkdtempSync } from 'node:fs';
+          import { join } from 'node:path';
+          const { EVENT_NAME, BASE_INPUT, HEAD_INPUT, EVENT_BASE, EVENT_HEAD } = process.env;
+          if (['pull_request_target', 'workflow_run'].includes(EVENT_NAME)) {
+            throw new Error('Use pull_request or merge_group to scan proposed code with an unprivileged event.');
+          }
+          const automatic = ['pull_request', 'merge_group'].includes(EVENT_NAME);
+          const base = BASE_INPUT || (automatic ? EVENT_BASE : '');
+          const head = HEAD_INPUT || (automatic ? EVENT_HEAD : '');
+          if (!base || !head || /[\r\n]/.test(base + head)) {
+            throw new Error('Provide base-ref and head-ref (required outside pull_request and merge_group).');
+          }
+          const results = mkdtempSync(join(process.env.RUNNER_TEMP, 'osv-results-'));
+          appendFileSync(process.env.GITHUB_OUTPUT, `base=${base}\nhead=${head}\nresults=${results}\n`);
+          NODE
+
+      - name: Checkout base revision
+        uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # main
+        with:
+          ref: ${{ steps.prepare.outputs.base }}
+          persist-credentials: false
+          submodules: false
+
+      - name: Scan existing dependencies
+        uses: tempoxyz/gh-actions/actions/osv-scanner-action@68a1e4645c9596fee5398dd1e2ba07f0a4aa6a71 # 2026-10-20T04-40-18Z-68a1e464
+        with:
+          scan-args: |-
+            --recursive
+            ./
+          results-directory: ${{ steps.prepare.outputs.results }}
+          results-file: old-results.json
+
+      - name: Checkout proposed revision
+        uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # main
+        with:
+          ref: ${{ steps.prepare.outputs.head }}
+          persist-credentials: false
+          submodules: false
+
+      - name: Scan proposed dependencies
+        uses: tempoxyz/gh-actions/actions/osv-scanner-action@68a1e4645c9596fee5398dd1e2ba07f0a4aa6a71 # 2026-10-20T04-40-18Z-68a1e464
+        with:
+          scan-args: |-
+            --recursive
+            ./
+          results-directory: ${{ steps.prepare.outputs.results }}
+          results-file: new-results.json
+
+      - name: Report newly introduced vulnerabilities
+        id: report
+        uses: tempoxyz/gh-actions/actions/osv-scanner-action@68a1e4645c9596fee5398dd1e2ba07f0a4aa6a71 # 2026-10-20T04-40-18Z-68a1e464
+        with:
+          mode: report
+          results-directory: ${{ steps.prepare.outputs.results }}
+          fail-on-vuln: true
+
+      - name: Upload scan reports
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependency-scan
+          path: ${{ steps.prepare.outputs.results }}/
+          retention-days: 5
+          if-no-files-found: warn
