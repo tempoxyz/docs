@@ -1376,20 +1376,6 @@ function RouteLifecycle({
                     </Select>
                   </label>
                 )}
-                {isTransfer && (
-                  <label {...cx(labelStyle(), wideField())} htmlFor="routes-priority">
-                    Priority
-                    <Select
-                      id="routes-priority"
-                      disabled={frozen}
-                      value={priority}
-                      onChange={(e) => setPriority(e.target.value as TestPriority)}
-                    >
-                      <option value="price">Best price</option>
-                      <option value="speed">Speed</option>
-                    </Select>
-                  </label>
-                )}
                 <label {...labelStyle()}>
                   Amount ({amountToken.symbol})
                   <input
@@ -1413,6 +1399,19 @@ function RouteLifecycle({
                       placeholder: walletLabel(route.sourceChain, 'source'),
                     })}
                     {recipientField(frozen, true)}
+                    {/* Best price is the API default; speed is an opt-in shown last. */}
+                    <label {...cx(labelStyle(), wideField())} htmlFor="routes-priority">
+                      Priority
+                      <Select
+                        id="routes-priority"
+                        disabled={frozen}
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value as TestPriority)}
+                      >
+                        <option value="price">Best price</option>
+                        <option value="speed">Speed</option>
+                      </Select>
+                    </label>
                   </>
                 )}
                 {!isTransfer && (
