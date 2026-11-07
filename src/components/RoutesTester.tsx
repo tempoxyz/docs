@@ -52,6 +52,7 @@ import {
   canSubsidize,
   demoMethods,
   linkedRoute,
+  quickRoutes,
   type RoutePick,
   routeChoices,
   routeQuoteRequest,
@@ -95,6 +96,7 @@ import { type ApiCall, ApiLog, CopyButton } from './ApiLog'
 import { Container } from './Container'
 import * as Demo from './guides/Demo'
 import { RouteCanvas, type RouteProgress } from './RouteCanvas'
+import { ChainLogo } from './RouteIcons'
 import { ApiKeyPill } from './RoutesApiKey'
 import {
   input as inputStyle,
@@ -208,6 +210,8 @@ export function RoutesTester() {
   })
   const selected = choices.route
   chosen.current = selected
+  // One-click starts until a route is chosen; picking one fills all four fields.
+  const suggestions = selected || loading || locked || error ? [] : quickRoutes(routes)
   const methods = selected ? demoMethods(selected) : []
   const usable = methods.length > 0
   const activeMethod = method && methods.includes(method) ? method : methods[0]
@@ -249,6 +253,47 @@ export function RoutesTester() {
           completed={!!(selected && usable)}
         >
           <div {...stepBody()}>
+            {suggestions.length > 0 && (
+              <div {...quickRow()}>
+                <span id="routes-quick-label" {...quickLabel()}>
+                  Suggested
+                </span>
+                <fieldset aria-labelledby="routes-quick-label" {...quickList()}>
+                  {suggestions.map((route) => (
+                    <button
+                      key={route.id}
+                      type="button"
+                      aria-label={`${route.sourceToken.symbol} on ${route.sourceChain.name} to ${route.destinationToken.symbol} on ${route.destinationChain.name}`}
+                      onClick={() => {
+                        setNotice('')
+                        setPick(pickOf(route))
+                      }}
+                      {...quickButton()}
+                    >
+                      <ChainLogo
+                        chainId={route.sourceChain.id}
+                        name={route.sourceChain.name}
+                        size={16}
+                      />
+                      <span>
+                        {route.sourceChain.name} {route.sourceToken.symbol}
+                      </span>
+                      <span aria-hidden="true" {...quickArrow()}>
+                        →
+                      </span>
+                      <ChainLogo
+                        chainId={route.destinationChain.id}
+                        name={route.destinationChain.name}
+                        size={16}
+                      />
+                      <span>
+                        {route.destinationChain.name} {route.destinationToken.symbol}
+                      </span>
+                    </button>
+                  ))}
+                </fieldset>
+              </div>
+            )}
             <RouteCanvas
               source={{
                 network: field('sourceChain', choices.options.sourceChains),
@@ -1857,6 +1902,54 @@ const stepList = style({
 })
 const stepColumn = style({ minWidth: 0 })
 const stepBody = style({ marginBlockStart: tokens.spacing['3'] })
+const quickRow = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: tokens.spacing['2'],
+  marginBlockEnd: tokens.spacing['3'],
+})
+const quickLabel = style({ fontSize: tokens.fontSize.compact, color: tokens.color.gray10 })
+const quickList = style({
+  display: 'flex',
+  minWidth: 0,
+  flexWrap: 'wrap',
+  gap: tokens.spacing['2'],
+  margin: tokens.spacing['0'],
+  borderWidth: tokens.borderWidth.none,
+  padding: tokens.spacing['0'],
+})
+const quickButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: tokens.spacing['1_5'],
+  borderRadius: tokens.radius.full,
+  borderWidth: tokens.borderWidth.hairline,
+  borderStyle: 'solid',
+  borderColor: tokens.color.lineStrong,
+  backgroundColor: tokens.color.card,
+  paddingInline: tokens.spacing['2_5'],
+  paddingBlock: tokens.spacing['1'],
+  fontSize: tokens.fontSize.compact,
+  whiteSpace: 'nowrap',
+  color: inherited.color.textColorPrimary,
+  cursor: 'pointer',
+  // Tailwind's `transition-colors`.
+  transitionProperty:
+    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
+  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  transitionDuration: '150ms',
+  '@media (hover: hover)': {
+    ':hover': { borderColor: tokens.color.accent, backgroundColor: inherited.color.surfacePanel },
+  },
+  '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
+  ':focus-visible': {
+    outlineWidth: tokens.borderWidth.emphasis,
+    outlineStyle: 'solid',
+    outlineColor: tokens.color.accent,
+  },
+})
+const quickArrow = style({ color: tokens.color.gray10 })
 const stepForm = style({
   marginBlockStart: tokens.spacing['3'],
   selectors: {
