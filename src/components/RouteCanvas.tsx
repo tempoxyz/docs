@@ -42,6 +42,7 @@ function PickerRow({
   field,
   disabled,
   loading,
+  next,
   badge,
 }: {
   id: string
@@ -49,6 +50,8 @@ function PickerRow({
   field: Field
   disabled: boolean
   loading?: boolean
+  /** A short cue, such as Start here, that marks this as the field to choose next. */
+  next?: string
   badge: (option?: Option, size?: number) => ReactNode
 }) {
   const [open, setOpen] = useState(false)
@@ -152,6 +155,7 @@ function PickerRow({
         aria-controls={listId}
         aria-activedescendant={open && active >= 0 ? `${id}-option-${active}` : undefined}
         data-value={field.value}
+        data-next={next ? '' : undefined}
         disabled={unavailable}
         onClick={() => (open ? setOpen(false) : show(Math.max(selectedIndex, 0)))}
         onKeyDown={onKeyDown}
@@ -161,6 +165,7 @@ function PickerRow({
         <span {...pickerText()}>
           <span aria-hidden="true" {...pickerLabel()}>
             {label}
+            {next && <span {...pickerCue()}>{next}</span>}
           </span>
           <span {...cx(pickerValue(), !!selected && pickerValueChosen())}>
             {selected?.label ?? (loading ? 'Loading…' : placeholder)}
@@ -206,6 +211,7 @@ function RouteEndpoint({
   amount,
   address,
   loading,
+  next,
 }: {
   side: 'From' | 'To'
   network: Field
@@ -214,6 +220,8 @@ function RouteEndpoint({
   amount?: string
   address?: string
   loading?: boolean
+  /** The field to choose next on this side, and the cue it shows. */
+  next?: { field: 'network' | 'asset'; cue: string }
 }) {
   const key = side.toLowerCase()
   return (
@@ -228,6 +236,7 @@ function RouteEndpoint({
         field={network}
         disabled={disabled}
         loading={loading}
+        next={next?.field === 'network' ? next.cue : undefined}
         badge={(option, size) => (
           <ChainLogo chainId={option?.value} name={option?.label} size={size} />
         )}
@@ -238,6 +247,7 @@ function RouteEndpoint({
         field={asset}
         disabled={disabled}
         loading={loading}
+        next={next?.field === 'asset' ? next.cue : undefined}
         badge={(option, size) => (
           <TokenLogo
             key={option?.value}
@@ -350,6 +360,28 @@ export function RouteCanvas(props: {
   loading?: boolean
 }) {
   const { progress } = props
+  // Mark the first empty field in choice order, so the reader knows where to start.
+  const order = [
+    ['From', 'network'],
+    ['From', 'asset'],
+    ['To', 'network'],
+    ['To', 'asset'],
+  ] as const
+  const fields = [
+    props.source.network,
+    props.source.asset,
+    props.destination.network,
+    props.destination.asset,
+  ]
+  const nextIndex = props.disabled
+    ? -1
+    : fields.findIndex((field) => !field.value && field.options.length > 0)
+  const nextOn = (side: 'From' | 'To') => {
+    const entry = order[nextIndex]
+    return entry && entry[0] === side
+      ? { field: entry[1], cue: nextIndex === 0 ? 'Start here' : 'Next' }
+      : undefined
+  }
   return (
     <div {...canvas()}>
       <div {...endpoints()}>
@@ -360,6 +392,7 @@ export function RouteCanvas(props: {
           loading={props.loading}
           amount={progress.sendAmount}
           address={progress.sourceAddress}
+          next={nextOn('From')}
         />
         <RouteConnector
           phase={progress.phase}
@@ -375,6 +408,7 @@ export function RouteCanvas(props: {
           loading={props.loading}
           amount={progress.receiveAmount}
           address={progress.destinationAddress}
+          next={nextOn('To')}
         />
       </div>
     </div>
@@ -493,6 +527,14 @@ const pickerRow = style({
   ':disabled': { cursor: 'not-allowed', opacity: 0.6 },
   selectors: {
     '&[aria-expanded="true"]': { backgroundColor: inherited.color.surfacePanel },
+    // The field to choose next carries an accent ring until it has a value.
+    '&[data-next]': {
+      backgroundColor: tokens.color.infoContainer,
+      outlineWidth: tokens.borderWidth.hairline,
+      outlineStyle: 'solid',
+      outlineColor: tokens.color.accent,
+      outlineOffset: '-1px',
+    },
     '&:disabled:hover': {
       '@media (hover: hover)': { backgroundColor: 'transparent !custom' },
     },
@@ -512,7 +554,17 @@ const pickerValue = style({
   whiteSpace: 'nowrap',
   fontSize: tokens.fontSize.bodySmall,
   lineHeight: tokens.lineHeight.control,
-  color: tokens.color.gray10,
+  color: tokens.color.gray11,
+  selectors: { '[data-next] &': { color: tokens.color.accent } },
+})
+const pickerCue = style({
+  marginInlineStart: tokens.spacing['1_5'],
+  borderRadius: tokens.radius.full,
+  backgroundColor: tokens.color.accent,
+  paddingInline: tokens.spacing['1_5'],
+  fontWeight: tokens.fontWeight.medium,
+  fontSize: tokens.fontSize.tiny,
+  color: tokens.color.white,
 })
 const pickerValueChosen = style({ color: inherited.color.textColorPrimary })
 const pickerChevron = style({
@@ -525,7 +577,10 @@ const pickerChevron = style({
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   transitionDuration: '150ms',
   '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
-  selectors: { '[aria-expanded="true"] > &': { rotate: '180deg' } },
+  selectors: {
+    '[aria-expanded="true"] > &': { rotate: '180deg' },
+    '[data-next] > &': { color: tokens.color.accent },
+  },
 })
 const pickerList = style({
   position: 'absolute',
