@@ -894,39 +894,6 @@ export default defineConfig({
         ],
       },
     ]
-    const ecosystemSidebar = [
-      {
-        text: 'Ecosystem',
-        items: [
-          { text: 'All partners', link: '/docs/partners' },
-          {
-            text: 'Stablecoins',
-            collapsed: false,
-            items: [
-              { text: 'Overview', link: '/docs/partners/stablecoins' },
-              { text: 'OUSD on Tempo', link: '/docs/guide/ousd' },
-            ],
-          },
-          { text: 'RWAs', link: '/docs/partners/rwas' },
-          { text: 'Wallets', link: '/docs/partners/wallets' },
-          { text: 'Smart accounts', link: '/docs/partners/smart-accounts' },
-          { text: 'Exchanges', link: '/docs/partners/exchanges' },
-          { text: 'Bridges', link: '/docs/partners/bridges' },
-          { text: 'Payments & ramps', link: '/docs/partners/payments-and-ramps' },
-          { text: 'Cards', link: '/docs/partners/cards' },
-          { text: 'Partner with Tempo', link: '/docs/partners/join' },
-        ],
-      },
-      {
-        text: 'Infrastructure',
-        items: [
-          { text: 'RPC & nodes', link: '/docs/partners/rpc-and-nodes' },
-          { text: 'Data & oracles', link: '/docs/partners/data-and-oracles' },
-          { text: 'Explorers & debugging', link: '/docs/partners/explorers-and-debugging' },
-          { text: 'Security & compliance', link: '/docs/partners/security-and-compliance' },
-        ],
-      },
-    ]
     const nodeSidebar = {
       text: 'Run a node',
       collapsed: true,
@@ -1171,7 +1138,16 @@ export default defineConfig({
                 text: 'Choose a fee token',
                 link: '/docs/guide/payments/pay-fees-in-any-stablecoin',
               },
-              { text: 'Fund an account', link: '/docs/guide/getting-funds' },
+              {
+                text: 'Fund an account',
+                link: '/docs/guide/getting-funds',
+                collapsed: true,
+                items: [
+                  { text: 'Bridge with LayerZero', link: '/docs/guide/bridge-layerzero' },
+                  { text: 'Bridge with Bungee', link: '/docs/guide/bridge-bungee' },
+                  { text: 'Bridge with Relay', link: '/docs/guide/bridge-relay' },
+                ],
+              },
               {
                 text: 'Send payments',
                 link: '/docs/guide/payments/send-a-payment',
@@ -1251,6 +1227,7 @@ export default defineConfig({
             items: [
               { text: 'Introduction', link: '/docs/network/tokens' },
               { text: 'Token lists', link: '/docs/quickstart/tokenlist' },
+              { text: 'OUSD on Tempo', link: '/docs/guide/ousd' },
               { text: 'Create a token', link: '/docs/guide/issuance/create-a-stablecoin' },
               { text: 'Mint and burn', link: '/docs/guide/issuance/mint-stablecoins' },
               { text: 'Manage tokens', link: '/docs/guide/issuance/manage-stablecoin' },
@@ -1326,7 +1303,6 @@ export default defineConfig({
       },
     ]
     const toolsSidebar = developerToolsSidebar
-    const partnerResourcesSidebar = [...ecosystemSidebar]
     const productSidebars = {
       overview: getStartedSidebar,
       accounts: accountsSidebar,
@@ -1337,7 +1313,6 @@ export default defineConfig({
       'machine-payments': machinePaymentsSidebar,
       api: [{ text: 'API reference', items: [{ text: 'Introduction', link: '/docs/api' }] }],
       tools: toolsSidebar,
-      ecosystem: partnerResourcesSidebar,
     }
 
     return {
@@ -1348,12 +1323,6 @@ export default defineConfig({
         ),
       ),
       '/docs/guide/private-zones': zonesSidebar,
-      '/docs/partners': partnerResourcesSidebar,
-      '/docs/partners/join': partnerResourcesSidebar,
-      '/docs/guide/ousd': partnerResourcesSidebar,
-      '/docs/guide/bridge-layerzero': partnerResourcesSidebar,
-      '/docs/guide/bridge-bungee': partnerResourcesSidebar,
-      '/docs/guide/bridge-relay': partnerResourcesSidebar,
     }
   })(),
   topNav: [
@@ -1427,22 +1396,22 @@ export default defineConfig({
     },
     {
       source: '/docs/resources/partners/alchemy.md',
-      destination: '/docs/partners/rpc-and-nodes.md#alchemy',
+      destination: 'https://tempo.xyz/partners/alchemy/',
       status: 301,
     },
     {
       source: '/assets/md/docs/resources/partners/alchemy.md',
-      destination: '/assets/md/docs/partners/rpc-and-nodes.md#alchemy',
+      destination: 'https://tempo.xyz/partners/alchemy/',
       status: 301,
     },
     {
       source: '/docs/resources/partners/quicknode.md',
-      destination: '/docs/partners/rpc-and-nodes.md#quicknode',
+      destination: 'https://tempo.xyz/partners/quicknode/',
       status: 301,
     },
     {
       source: '/assets/md/docs/resources/partners/quicknode.md',
-      destination: '/assets/md/docs/partners/rpc-and-nodes.md#quicknode',
+      destination: 'https://tempo.xyz/partners/quicknode/',
       status: 301,
     },
     {
@@ -1533,12 +1502,12 @@ export default defineConfig({
     },
     {
       source: '/docs/resources/partners/alchemy',
-      destination: '/docs/partners/rpc-and-nodes#alchemy',
+      destination: 'https://tempo.xyz/partners/alchemy/',
       status: 301,
     },
     {
       source: '/docs/resources/partners/quicknode',
-      destination: '/docs/partners/rpc-and-nodes#quicknode',
+      destination: 'https://tempo.xyz/partners/quicknode/',
       status: 301,
     },
     {
@@ -1571,47 +1540,163 @@ export default defineConfig({
       destination: '/docs/resources/guides/payment-screening#blockaid',
       status: 301,
     },
-    { source: '/docs/ecosystem/assets', destination: '/docs/partners/stablecoins', status: 301 },
-    { source: '/docs/partners/assets', destination: '/docs/partners/stablecoins', status: 301 },
-    { source: '/docs/ecosystem/wallets', destination: '/docs/partners/wallets', status: 301 },
     {
-      source: '/docs/ecosystem/smart-contract-libraries',
-      destination: '/docs/partners/smart-accounts',
+      source: '/docs/ecosystem/assets',
+      destination: 'https://tempo.xyz/partners/stablecoins/',
       status: 301,
     },
-    { source: '/docs/ecosystem/exchanges', destination: '/docs/partners/exchanges', status: 301 },
-    { source: '/docs/ecosystem/bridges', destination: '/docs/partners/bridges', status: 301 },
+    {
+      source: '/docs/ecosystem/wallets',
+      destination: 'https://tempo.xyz/partners/wallets-and-custody/',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/smart-contract-libraries',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#smart-accounts',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/exchanges',
+      destination: 'https://tempo.xyz/partners/exchanges/',
+      status: 301,
+    },
+    {
+      source: '/docs/ecosystem/bridges',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#bridges',
+      status: 301,
+    },
     {
       source: '/docs/ecosystem/orchestration',
-      destination: '/docs/partners/payments-and-ramps',
+      destination: 'https://tempo.xyz/partners/ramps-and-fx/',
       status: 301,
     },
     {
       source: '/docs/ecosystem/node-infrastructure',
-      destination: '/docs/partners/rpc-and-nodes',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#nodes',
       status: 301,
     },
     {
       source: '/docs/ecosystem/data-analytics',
-      destination: '/docs/partners/data-and-oracles',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#data',
       status: 301,
     },
     {
       source: '/docs/ecosystem/block-explorers',
-      destination: '/docs/partners/explorers-and-debugging',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#explorers',
       status: 301,
     },
     {
       source: '/docs/ecosystem/security-compliance',
-      destination: '/docs/partners/security-and-compliance',
+      destination: 'https://tempo.xyz/partners/compliance/',
       status: 301,
     },
     {
       source: '/docs/ecosystem/developer-tools',
-      destination: '/docs/partners/developer-tools',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#explorers',
       status: 301,
     },
-    { source: '/docs/ecosystem', destination: '/docs/partners', status: 301 },
+    { source: '/docs/ecosystem', destination: 'https://tempo.xyz/partners/', status: 301 },
+    // The partner directory moved to tempo.xyz/partners; each retired page goes to its category.
+    {
+      source: '/docs/partners',
+      destination: 'https://tempo.xyz/partners/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/stablecoins',
+      destination: 'https://tempo.xyz/partners/stablecoins/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/rwas',
+      destination: 'https://tempo.xyz/partners/tokenized-assets/#tokenized-assets',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/wallets',
+      destination: 'https://tempo.xyz/partners/wallets-and-custody/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/smart-accounts',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#smart-accounts',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/exchanges',
+      destination: 'https://tempo.xyz/partners/exchanges/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/bridges',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#bridges',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/payments-and-ramps',
+      destination: 'https://tempo.xyz/partners/ramps-and-fx/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/cards',
+      destination: 'https://tempo.xyz/partners/ramps-and-fx/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/join',
+      destination: 'https://tempo.xyz/contact',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/rpc-and-nodes',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#nodes',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/data-and-oracles',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#data',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/explorers-and-debugging',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#explorers',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/developer-tools',
+      destination: 'https://tempo.xyz/partners/onchain-infrastructure/#explorers',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/security-and-compliance',
+      destination: 'https://tempo.xyz/partners/compliance/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/assets',
+      destination: 'https://tempo.xyz/partners/stablecoins/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners/:path*',
+      destination: 'https://tempo.xyz/partners/',
+      status: 301,
+    },
+    {
+      source: '/docs/partners.md',
+      destination: 'https://tempo.xyz/partners/',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/partners.md',
+      destination: 'https://tempo.xyz/partners/',
+      status: 301,
+    },
+    {
+      source: '/assets/md/docs/partners/:path*',
+      destination: 'https://tempo.xyz/partners/',
+      status: 301,
+    },
 
     {
       source: '/docs/guide/machine-payments/use-cases/:path*',
@@ -1673,22 +1758,22 @@ export default defineConfig({
     },
     {
       source: '/docs/learn/partners',
-      destination: '/docs/partners/join',
+      destination: 'https://tempo.xyz/contact',
       status: 301,
     },
     {
       source: '/learn/partners',
-      destination: '/docs/partners/join',
+      destination: 'https://tempo.xyz/contact',
       status: 301,
     },
     {
       source: '/docs/guide/using-tempo-with-ai/partners',
-      destination: '/docs/partners/join',
+      destination: 'https://tempo.xyz/contact',
       status: 301,
     },
     {
       source: '/build/partners',
-      destination: '/docs/partners/join',
+      destination: 'https://tempo.xyz/contact',
       status: 301,
     },
     {

@@ -24,8 +24,6 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   developers:
     'Build on Tempo EVM: wallets and keys, payments, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.',
   api: 'Tempo API reference: authentication, conventions, endpoints grouped by product, Console management endpoints, JSON-RPC, and the indexer. An API key authenticates API requests; an account signing key authorizes transactions.',
-  ecosystem:
-    'Find wallet providers, bridges, RPC infrastructure, data services, and other third-party integrations.',
 }
 
 export const aiDocsSections = [...docsSections, ...docsUtilitySections]

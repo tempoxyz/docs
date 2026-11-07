@@ -124,7 +124,7 @@ const [address] = await provider.request({ method: 'eth_requestAccounts' }) // [
 if (!address) throw new Error('No account was selected')
 ```
 
-Track the wallet connection separately from your app's signed-in session. On `accountsChanged`, update the selected address, or clear it when the wallet disconnects. On `chainChanged`, refresh network-dependent state before you enable transactions. To send payments, create wallet and public clients from this provider as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). You can also connect other [wallet partners](/docs/partners/wallets).
+Track the wallet connection separately from your app's signed-in session. On `accountsChanged`, update the selected address, or clear it when the wallet disconnects. On `chainChanged`, refresh network-dependent state before you enable transactions. To send payments, create wallet and public clients from this provider as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). You can also connect other [wallet partners](https://tempo.xyz/partners/wallets-and-custody/).
 
 <span id="wallet-guides" />
 
@@ -134,5 +134,5 @@ Track the wallet connection separately from your app's signed-in session. On `ac
   <Card title="Add Tempo to Your Wallet" description="Use for adding the networks, stablecoin balances, fee tokens, and Tempo Transactions to a wallet." to="/docs/accounts/wallets/add-tempo-to-your-wallet" />
   <Card title="Signing Methods" description="Covers passkeys, device keys, and private keys." to="/docs/accounts/authentication" />
   <Card title="Account Upgrade" description="Use for adding signers to an existing address. Devnet until T14." to="/docs/accounts/account-configuration/account-upgrade" />
-  <Card title="Wallet Partners" description="Covers wallets that support Tempo." to="/docs/partners/wallets" />
+  <Card title="Wallet Partners" description="Covers wallets that support Tempo." to="https://tempo.xyz/partners/wallets-and-custody/" />
 </Cards>
