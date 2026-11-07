@@ -4243,7 +4243,6 @@ packages:
 
   intersection-observer@0.10.0:
     resolution: {integrity: sha512-fn4bQ0Xq8FTej09YC/jqKZwtijpvARlRp6wxL5WTA6yPe2YWSJ5RJh7Nm79rK2qB0wr6iDQzH60XGq5V/7u8YQ==}
-    deprecated: The Intersection Observer polyfill is no longer needed and can safely be removed. Intersection Observer has been Baseline since 2019.
 
   ip-address@10.7.5:
     resolution: {integrity: sha512-t2v0rkILYv9WXmSL7TpAaU3HXgaFYOPUcH3QHgwQ++gpJuH3bqyMy4Fvt/DJCTKwzH3Cf+bAp5W/mFL39KPLzA==}
@@ -5087,7 +5086,7 @@ packages:
           targets:
             - cpu: x64
               os: win32
-    version: 24.22.1
+    version: 0.0.0
     hasBin: true
 
   npm-run-path@6.0.0:
@@ -5182,7 +5181,7 @@ packages:
         optional: true
 
   ox@https://pkg.pr.new/ox@bf010ee:
-    resolution: {tarball: https://pkg.pr.new/ox@bf010ee}
+    resolution: {integrity: sha512-CSWABGIgNHezjt0UVCh4Rn0UCfTv9SdHvO9BpZ6WYogVIuW/D/bCjHRK6ELMnT2aQBWo2rtI7gb8GZQfHJ1vjA==, tarball: https://pkg.pr.new/ox@bf010ee}
     version: 0.14.57-755f436.0
     peerDependencies:
       typescript: '>=5.4.0'

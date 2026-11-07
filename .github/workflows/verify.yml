@@ -94,7 +94,7 @@ jobs:
         uses: tempoxyz/gh-actions/vendor/pnpm/action-setup@35019557465e3c38ee3468be171771fd73577584 # 2026-10-20T06-22-38Z-35019557
         with:
           run_install: false
-          version: 10.28.1
+          version: 10.34.5
 
       # pnpm installs the exact Node runtime pinned in devEngines and the lockfile.
       # Reuse it instead of downloading a second copy through setup-node.
