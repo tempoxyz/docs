@@ -13,10 +13,17 @@ test('fund an address via faucet', async ({ page }) => {
 
   // Enter an address
   const addressInput = page.getByPlaceholder('0x...')
-  await addressInput.fill('0xbeefcafe54750903ac1c8909323af7beb21ea2cb')
+  const addFunds = page.getByRole('button', { name: 'Add funds' })
+  // A fill before hydration never reaches React, and React ignores a repeat of the
+  // same value, so clear the field before each retry.
+  await expect(async () => {
+    await addressInput.fill('')
+    await addressInput.fill('0xbeefcafe54750903ac1c8909323af7beb21ea2cb')
+    await expect(addFunds).toBeEnabled({ timeout: 2000 })
+  }).toPass({ timeout: 30000 })
 
   // Click "Add funds" button
-  await page.getByRole('button', { name: 'Add funds' }).click()
+  await addFunds.click()
 
   // Confirm the explorer link resolves to the funded account's transfers
   const transfersLink = page.getByRole('link', { name: 'View transfers' })
