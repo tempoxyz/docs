@@ -104,7 +104,7 @@ Get a finalized block by height or latest.
 |------|------|-------------|
 | `query` | `"latest"` or `{"height": number}` | Which finalization to retrieve |
 
-**Returns:** `CertifiedBlock | null`
+**Returns:** `CertifiedBlock`. If unavailable, the method returns a JSON-RPC error: code `204` when the archive service is not ready, or code `503` when the requested certification, certificate, or block is missing.
 
 | Field | Type | Description |
 |-------|------|-------------|
