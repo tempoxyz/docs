@@ -137,7 +137,7 @@ function checkSufficientLiquidity(
 ) internal view
 ```
 
-Verifies sufficient validator token reserves for the fee swap. Calculates `maxAmountOut = (maxAmount * M) / SCALE`. Reverts if insufficient liquidity.
+Verifies sufficient validator token reserves for the fee swap. Calculates `maxAmountOut = (maxAmount * M) / SCALE`. Reverts if insufficient liquidity. Each selected pool MUST have a nonzero validator-token reserve covering the rounded output, even when that output is zero. This requirement applies to both hops of a two-hop route.
 
 #### 2. FeeManager Contract
 
