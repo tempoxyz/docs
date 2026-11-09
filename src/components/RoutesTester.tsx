@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@tempoxyz/ds'
 import { ExecutionError } from 'accounts'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import {
@@ -260,15 +261,16 @@ export function RoutesTester() {
                 </span>
                 <fieldset aria-labelledby="routes-quick-label" {...quickList()}>
                   {suggestions.map((route) => (
-                    <button
+                    <Button
                       key={route.id}
                       type="button"
+                      size="xsmall"
+                      variant="secondary"
                       aria-label={`${route.sourceToken.symbol} on ${route.sourceChain.name} to ${route.destinationToken.symbol} on ${route.destinationChain.name}`}
                       onClick={() => {
                         setNotice('')
                         setPick(pickOf(route))
                       }}
-                      {...quickButton()}
                     >
                       <ChainLogo
                         chainId={route.sourceChain.id}
@@ -289,7 +291,7 @@ export function RoutesTester() {
                       <span>
                         {route.destinationChain.name} {route.destinationToken.symbol}
                       </span>
-                    </button>
+                    </Button>
                   ))}
                 </fieldset>
               </div>
@@ -1918,36 +1920,6 @@ const quickList = style({
   margin: tokens.spacing['0'],
   borderWidth: tokens.borderWidth.none,
   padding: tokens.spacing['0'],
-})
-const quickButton = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: tokens.spacing['1_5'],
-  borderRadius: tokens.radius.full,
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: tokens.color.lineStrong,
-  backgroundColor: tokens.color.card,
-  paddingInline: tokens.spacing['2_5'],
-  paddingBlock: tokens.spacing['1'],
-  fontSize: tokens.fontSize.compact,
-  whiteSpace: 'nowrap',
-  color: inherited.color.textColorPrimary,
-  cursor: 'pointer',
-  // Tailwind's `transition-colors`.
-  transitionProperty:
-    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
-  '@media (hover: hover)': {
-    ':hover': { borderColor: tokens.color.accent, backgroundColor: inherited.color.surfacePanel },
-  },
-  '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
-  ':focus-visible': {
-    outlineWidth: tokens.borderWidth.emphasis,
-    outlineStyle: 'solid',
-    outlineColor: tokens.color.accent,
-  },
 })
 const quickArrow = style({ color: tokens.color.gray10 })
 const stepForm = style({

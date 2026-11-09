@@ -1041,7 +1041,7 @@ test.describe('Routes demo', () => {
     await button(page, 'Retry').click()
     await expect(fromSelect(page, 'Network')).toBeEnabled()
     await fromSelect(page, 'Network').click()
-    await expect(page.getByRole('listbox', { name: 'Network' }).getByRole('option')).toHaveCount(3)
+    await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(3)
   })
 
   test('explains the live Tron failures, and quotes without 1:1 when inventory runs out', async ({

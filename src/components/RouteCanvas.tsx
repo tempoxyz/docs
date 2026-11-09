@@ -1,9 +1,7 @@
 'use client'
 
-import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 'react'
-import { cx } from 'zyzz'
-import LucideCheck from '~icons/lucide/check'
-import LucideChevronDown from '~icons/lucide/chevron-down'
+import { Badge, Button, Field, Select, Surface } from '@tempoxyz/ds'
+import type { ReactNode } from 'react'
 import type { TestMethod } from '../lib/routes-test'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
@@ -29,12 +27,11 @@ export type RouteProgress = {
 }
 
 type Option = { value: string; label: string }
-type Field = { value: string; options: Option[]; onChange: (value: string) => void }
+type Choice = { value: string; options: Option[]; onChange: (value: string) => void }
 
 /**
- * A select-only combobox: the row is the button, and the list shows each choice with its logo.
- * Keyboard use follows the WAI-ARIA select pattern; focus stays on the button while the list is
- * open.
+ * One route field as a TDS Select: the trigger shows the chosen logo and label, and the list
+ * shows each choice with its logo.
  */
 function PickerRow({
   id,
@@ -47,159 +44,54 @@ function PickerRow({
 }: {
   id: string
   label: string
-  field: Field
+  field: Choice
   disabled: boolean
   loading?: boolean
   /** A short cue, such as Start here, that marks this as the field to choose next. */
   next?: string
   badge: (option?: Option, size?: number) => ReactNode
 }) {
-  const [open, setOpen] = useState(false)
-  const [active, setActive] = useState(-1)
-  const root = useRef<HTMLDivElement>(null)
-  const list = useRef<HTMLDivElement>(null)
-  const typed = useRef({ text: '', at: 0 })
   const { options } = field
-  const selectedIndex = options.findIndex((option) => option.value === field.value)
-  const selected = options[selectedIndex]
-  const placeholder = `Choose ${label.toLowerCase()}`
-  const unavailable = disabled || options.length === 0
-  const listId = `${id}-options`
-
-  useEffect(() => {
-    if (!open) return
-    const close = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false)
-    }
-    document.addEventListener('pointerdown', close)
-    return () => document.removeEventListener('pointerdown', close)
-  }, [open])
-  useEffect(() => {
-    if (open && active >= 0) list.current?.children[active]?.scrollIntoView({ block: 'nearest' })
-  }, [open, active])
-  useEffect(() => {
-    if (unavailable) setOpen(false)
-  }, [unavailable])
-
-  const show = (index: number) => {
-    setActive(index)
-    setOpen(true)
-  }
-  const choose = (index: number) => {
-    const option = options[index]
-    setOpen(false)
-    if (option && option.value !== field.value) field.onChange(option.value)
-  }
-  // Typing jumps to the first choice that starts with the typed letters.
-  const typeahead = (key: string) => {
-    const now = Date.now()
-    const text = (now - typed.current.at < 500 ? typed.current.text : '') + key.toLowerCase()
-    typed.current = { text, at: now }
-    const index = options.findIndex((option) => option.label.toLowerCase().startsWith(text))
-    if (index >= 0) show(index)
-  }
-  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-    const last = options.length - 1
-    const current = active >= 0 ? active : selectedIndex
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault()
-        show(open ? Math.min(current + 1, last) : Math.max(selectedIndex, 0))
-        return
-      case 'ArrowUp':
-        event.preventDefault()
-        show(open ? Math.max(current - 1, 0) : selectedIndex >= 0 ? selectedIndex : last)
-        return
-      case 'Home':
-        if (!open) return
-        event.preventDefault()
-        show(0)
-        return
-      case 'End':
-        if (!open) return
-        event.preventDefault()
-        show(last)
-        return
-      case 'Enter':
-      case ' ':
-        event.preventDefault()
-        if (open && current >= 0) choose(current)
-        else show(Math.max(selectedIndex, 0))
-        return
-      case 'Escape':
-        if (open) {
-          event.preventDefault()
-          setOpen(false)
-        }
-        return
-      case 'Tab':
-        setOpen(false)
-        return
-      default:
-        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey)
-          typeahead(event.key)
-    }
-  }
-
+  const items = Object.fromEntries(options.map((option) => [option.value, option.label]))
+  const selected = options.find((option) => option.value === field.value)
   return (
-    <div ref={root} {...pickerAnchor()}>
-      <label htmlFor={id} {...visuallyHidden()}>
-        {label}
-      </label>
-      <button
-        id={id}
-        type="button"
-        role="combobox"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listId}
-        aria-activedescendant={open && active >= 0 ? `${id}-option-${active}` : undefined}
-        data-value={field.value}
-        data-next={next ? '' : undefined}
-        disabled={unavailable}
-        onClick={() => (open ? setOpen(false) : show(Math.max(selectedIndex, 0)))}
-        onKeyDown={onKeyDown}
-        {...pickerRow()}
+    <Field.Root {...pickerField()}>
+      <span {...pickerHeading()}>
+        <Field.Label>{label}</Field.Label>
+        {next && (
+          <Badge size="small" variant="soft">
+            {next}
+          </Badge>
+        )}
+      </span>
+      <Select.Root
+        items={items}
+        value={field.value || null}
+        onValueChange={(value) => {
+          if (typeof value === 'string' && value !== field.value) field.onChange(value)
+        }}
       >
-        {badge(selected)}
-        <span {...pickerText()}>
-          <span aria-hidden="true" {...pickerLabel()}>
-            {label}
-            {next && <span {...pickerCue()}>{next}</span>}
-          </span>
-          <span {...cx(pickerValue(), !!selected && pickerValueChosen())}>
-            {selected?.label ?? (loading ? 'Loading…' : placeholder)}
-          </span>
-        </span>
-        <LucideChevronDown aria-hidden="true" {...pickerChevron()} />
-      </button>
-      {open && (
-        <div ref={list} id={listId} role="listbox" aria-label={label} {...pickerList()}>
-          {options.map((option, index) => (
-            // biome-ignore lint/a11y/useKeyWithClickEvents: The combobox button handles keys through aria-activedescendant.
-            <div
-              key={option.value}
-              id={`${id}-option-${index}`}
-              role="option"
-              tabIndex={-1}
-              aria-selected={option.value === field.value}
-              data-active={index === active || undefined}
-              // Keep focus on the button so the list stays a popup of it.
-              onPointerDown={(event) => event.preventDefault()}
-              onPointerMove={() => setActive(index)}
-              onClick={() => choose(index)}
-              {...pickerOption()}
-            >
-              {badge(option, 24)}
-              <span {...pickerOptionLabel()}>{option.label}</span>
-              {option.value === field.value && (
-                <LucideCheck aria-hidden="true" {...pickerCheck()} />
-              )}
-            </div>
+        <Select.Trigger
+          id={id}
+          data-value={field.value}
+          data-next={next ? '' : undefined}
+          disabled={disabled || options.length === 0}
+          {...pickerTrigger()}
+        >
+          {selected && <span {...pickerLogo()}>{badge(selected, 20)}</span>}
+          <Select.Value placeholder={loading ? 'Loading…' : `Choose ${label.toLowerCase()}`} />
+          <Select.Icon />
+        </Select.Trigger>
+        <Select.Popup aria-label={label}>
+          {options.map((option) => (
+            <Select.Item key={option.value} label={option.label} value={option.value}>
+              <Select.ItemPrefix>{badge(option, 20)}</Select.ItemPrefix>
+              <Select.ItemText>{option.label}</Select.ItemText>
+            </Select.Item>
           ))}
-        </div>
-      )}
-    </div>
+        </Select.Popup>
+      </Select.Root>
+    </Field.Root>
   )
 }
 
@@ -214,8 +106,8 @@ function RouteEndpoint({
   next,
 }: {
   side: 'From' | 'To'
-  network: Field
-  asset: Field
+  network: Choice
+  asset: Choice
   disabled: boolean
   amount?: string
   address?: string
@@ -225,39 +117,41 @@ function RouteEndpoint({
 }) {
   const key = side.toLowerCase()
   return (
-    <fieldset {...endpoint()}>
+    <Surface render={<fieldset />} {...endpoint()}>
       <legend {...visuallyHidden()}>{side}</legend>
       <span aria-hidden="true" {...endpointSide()}>
         {side}
       </span>
-      <PickerRow
-        id={`routes-${key}-network`}
-        label="Network"
-        field={network}
-        disabled={disabled}
-        loading={loading}
-        next={next?.field === 'network' ? next.cue : undefined}
-        badge={(option, size) => (
-          <ChainLogo chainId={option?.value} name={option?.label} size={size} />
-        )}
-      />
-      <PickerRow
-        id={`routes-${key}-asset`}
-        label="Asset"
-        field={asset}
-        disabled={disabled}
-        loading={loading}
-        next={next?.field === 'asset' ? next.cue : undefined}
-        badge={(option, size) => (
-          <TokenLogo
-            key={option?.value}
-            chainId={network.value}
-            tokenKey={option?.value}
-            symbol={option?.label}
-            size={size}
-          />
-        )}
-      />
+      <div {...endpointFields()}>
+        <PickerRow
+          id={`routes-${key}-network`}
+          label="Network"
+          field={network}
+          disabled={disabled}
+          loading={loading}
+          next={next?.field === 'network' ? next.cue : undefined}
+          badge={(option, size) => (
+            <ChainLogo chainId={option?.value} name={option?.label} size={size} />
+          )}
+        />
+        <PickerRow
+          id={`routes-${key}-asset`}
+          label="Asset"
+          field={asset}
+          disabled={disabled}
+          loading={loading}
+          next={next?.field === 'asset' ? next.cue : undefined}
+          badge={(option, size) => (
+            <TokenLogo
+              key={option?.value}
+              chainId={network.value}
+              tokenKey={option?.value}
+              symbol={option?.label}
+              size={size}
+            />
+          )}
+        />
+      </div>
       {(amount || address) && (
         <div {...endpointSummary()}>
           {amount && <p {...endpointAmount()}>{amount}</p>}
@@ -268,7 +162,7 @@ function RouteEndpoint({
           )}
         </div>
       )}
-    </fieldset>
+    </Surface>
   )
 }
 
@@ -328,17 +222,18 @@ function RouteConnector({
         ).map(([value, label]) => {
           const available = methods.includes(value)
           return (
-            <button
+            <Button
               key={value}
               type="button"
+              size="xsmall"
+              variant={method === value ? 'primary' : 'tertiary'}
               aria-pressed={method === value}
               disabled={!available || locked}
               title={available ? undefined : 'Not available for this route'}
               onClick={() => onMethod(value)}
-              {...methodButton()}
             >
               {label}
-            </button>
+            </Button>
           )
         })}
       </fieldset>
@@ -348,8 +243,8 @@ function RouteConnector({
 
 /** Choose a route on a canvas: two endpoints and the path between them. */
 export function RouteCanvas(props: {
-  source: { network: Field; asset: Field }
-  destination: { network: Field; asset: Field }
+  source: { network: Choice; asset: Choice }
+  destination: { network: Choice; asset: Choice }
   disabled: boolean
   progress: RouteProgress
   method?: TestMethod
@@ -451,21 +346,17 @@ const endpoints = style({
 })
 
 const endpoint = style({
+  display: 'grid',
   minWidth: 0,
-  borderRadius: tokens.radius.lg,
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: tokens.color.lineStrong,
-  backgroundColor: tokens.color.card,
-  padding: tokens.spacing['1_5'],
-  // design-exception: A faint 1px lift that separates the endpoint cards from the dotted canvas.
-  boxShadow: '0 1px 2px rgb(0 0 0 / 0.06) !custom',
+  gap: tokens.spacing['3'],
+  margin: tokens.spacing['0'],
+})
+const endpointFields = style({
+  display: 'grid',
+  gap: tokens.spacing['4'],
 })
 const endpointSide = style({
   display: 'block',
-  paddingInline: tokens.spacing['2_5'],
-  paddingBlockStart: tokens.spacing['1_5'],
-  paddingBlockEnd: tokens.spacing['0_5'],
   fontWeight: tokens.fontWeight.medium,
   fontSize: tokens.fontSize.caption,
   color: tokens.color.gray10,
@@ -474,9 +365,6 @@ const endpointSide = style({
   letterSpacing: '0.08em !custom',
 })
 const endpointSummary = style({
-  marginInline: tokens.spacing['2_5'],
-  marginBlockStart: tokens.spacing['1'],
-  marginBlockEnd: tokens.spacing['1_5'],
   borderTopWidth: tokens.borderWidth.hairline,
   borderTopStyle: 'solid',
   borderTopColor: tokens.color.line,
@@ -499,138 +387,32 @@ const endpointAddress = style({
   color: tokens.color.gray10,
 })
 
-const pickerAnchor = style({ position: 'relative' })
-const pickerRow = style({
+const pickerField = style({
+  display: 'grid',
+  minWidth: 0,
+  gap: tokens.spacing['1_5'],
+})
+const pickerHeading = style({
   display: 'flex',
-  width: '100%',
-  minHeight: '48px',
   alignItems: 'center',
-  gap: tokens.spacing['2_5'],
-  borderRadius: tokens.radius.md,
-  paddingInline: tokens.spacing['2_5'],
-  textAlign: 'start',
-  cursor: 'pointer',
-  // Tailwind's `transition-colors`.
-  transitionProperty:
-    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
-  '@media (hover: hover)': {
-    ':hover': { backgroundColor: inherited.color.surfacePanel },
-  },
-  '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
-  ':focus-visible': {
-    outlineWidth: tokens.borderWidth.emphasis,
-    outlineStyle: 'solid',
-    outlineColor: tokens.color.accent,
-  },
-  ':disabled': { cursor: 'not-allowed', opacity: 0.6 },
+  justifyContent: 'space-between',
+  gap: tokens.spacing['2'],
+  // Reserve the badge height so From and To line up whether or not a cue shows.
+  minHeight: tokens.spacing['7'],
+})
+const pickerTrigger = style({
+  width: '100%',
   selectors: {
-    '&[aria-expanded="true"]': { backgroundColor: inherited.color.surfacePanel },
     // The field to choose next carries an accent ring until it has a value.
     '&[data-next]': {
-      backgroundColor: tokens.color.infoContainer,
       outlineWidth: tokens.borderWidth.hairline,
       outlineStyle: 'solid',
       outlineColor: tokens.color.accent,
       outlineOffset: '-1px',
     },
-    '&:disabled:hover': {
-      '@media (hover: hover)': { backgroundColor: 'transparent !custom' },
-    },
   },
 })
-const pickerText = style({ minWidth: 0, flex: 1 })
-const pickerLabel = style({
-  display: 'block',
-  fontSize: tokens.fontSize.caption,
-  lineHeight: tokens.lineHeight.caption,
-  color: tokens.color.gray10,
-})
-const pickerValue = style({
-  display: 'block',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  fontSize: tokens.fontSize.bodySmall,
-  lineHeight: tokens.lineHeight.control,
-  color: tokens.color.gray11,
-  selectors: { '[data-next] &': { color: tokens.color.accent } },
-})
-const pickerCue = style({
-  marginInlineStart: tokens.spacing['1_5'],
-  borderRadius: tokens.radius.full,
-  backgroundColor: tokens.color.accent,
-  paddingInline: tokens.spacing['1_5'],
-  fontWeight: tokens.fontWeight.medium,
-  fontSize: tokens.fontSize.tiny,
-  color: tokens.color.white,
-})
-const pickerValueChosen = style({ color: inherited.color.textColorPrimary })
-const pickerChevron = style({
-  width: '16px',
-  height: '16px',
-  flexShrink: 0,
-  color: tokens.color.gray10,
-  // Tailwind's `transition-transform`.
-  transitionProperty: 'transform, translate, scale, rotate',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
-  '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
-  selectors: {
-    '[aria-expanded="true"] > &': { rotate: '180deg' },
-    '[data-next] > &': { color: tokens.color.accent },
-  },
-})
-const pickerList = style({
-  position: 'absolute',
-  insetBlockStart: '100%',
-  insetInlineStart: 0,
-  insetInlineEnd: 0,
-  // Above the route connector and the API log, like the API key panel.
-  zIndex: tokens.zIndex.floating,
-  marginBlockStart: tokens.spacing['1'],
-  // design-exception: Show about seven choices before the list scrolls.
-  maxHeight: '19rem !custom',
-  overflowY: 'auto',
-  overscrollBehavior: 'contain',
-  borderRadius: tokens.radius.lg,
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: tokens.color.lineStrong,
-  backgroundColor: tokens.color.card,
-  padding: tokens.spacing['1'],
-  // design-exception: Lift the choice list off the route canvas like the API key popover.
-  boxShadow: '0 8px 24px rgb(0 0 0 / 0.12) !custom',
-})
-const pickerOption = style({
-  display: 'flex',
-  minHeight: '40px',
-  alignItems: 'center',
-  gap: tokens.spacing['2_5'],
-  borderRadius: tokens.radius.md,
-  paddingInline: tokens.spacing['2'],
-  cursor: 'pointer',
-  fontSize: tokens.fontSize.bodySmall,
-  color: inherited.color.textColorPrimary,
-  selectors: {
-    '&[data-active]': { backgroundColor: inherited.color.surfacePanel },
-    '&[aria-selected="true"]': { fontWeight: tokens.fontWeight.medium },
-  },
-})
-const pickerOptionLabel = style({
-  minWidth: 0,
-  flex: 1,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-})
-const pickerCheck = style({
-  width: '16px',
-  height: '16px',
-  flexShrink: 0,
-  color: inherited.color.textColorPrimary,
-})
+const pickerLogo = style({ display: 'inline-flex', flexShrink: 0 })
 
 const connector = style({
   display: 'flex',
@@ -659,30 +441,6 @@ const methodToggle = style({
   borderStyle: 'solid',
   borderColor: tokens.color.lineStrong,
   backgroundColor: tokens.color.card,
+  gap: tokens.spacing['0_5'],
   padding: tokens.spacing['0_5'],
-})
-const methodButton = style({
-  whiteSpace: 'nowrap',
-  borderRadius: tokens.radius.full,
-  paddingInline: tokens.spacing['2_5'],
-  paddingBlock: tokens.spacing['1'],
-  fontSize: tokens.fontSize.xs,
-  color: tokens.color.gray10,
-  // Tailwind's `transition-colors`.
-  transitionProperty:
-    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
-  '@media (hover: hover)': {
-    ':hover': { color: inherited.color.textColorPrimary },
-  },
-  '@media (prefers-reduced-motion: reduce)': { transitionProperty: 'none' },
-  ':disabled': { cursor: 'not-allowed', opacity: 0.4 },
-  selectors: {
-    '&[aria-pressed="true"]': {
-      backgroundColor: inherited.color.backgroundColorInvert,
-      color: inherited.color.textColorInvert,
-    },
-    '&:disabled:hover': { '@media (hover: hover)': { color: tokens.color.gray10 } },
-  },
 })
