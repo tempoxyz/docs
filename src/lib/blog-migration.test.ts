@@ -100,18 +100,36 @@ describe('engineering blog retirement', () => {
     })
   })
 
-  it('uses an external engineering link in both docs navigation surfaces', () => {
-    expect(vocsConfig.topNav).toContainEqual({ text: 'Blog', link: engineeringBlogUrl })
-    for (const file of ['DocsHeader.tsx', 'DocsSectionNav.tsx']) {
-      const source = fs.readFileSync(`src/components/${file}`, 'utf8')
-      expect(source).toMatch(/<a\s+href=\{engineeringBlogUrl\}/)
-      expect(source).not.toContain('to="/blog"')
+  it('keeps blog navigation and promotions out of the developer site', () => {
+    expect(JSON.stringify(vocsConfig.topNav)).not.toMatch(/blog/i)
+    for (const file of [
+      'src/components/DocsHeader.tsx',
+      'src/components/DocsSectionNav.tsx',
+      'src/marketing/app/_components/Header.tsx',
+      'src/marketing/app/_components/Footer.tsx',
+      'src/marketing/app/_components/HomeBelowFold.tsx',
+      'src/marketing/app/_components/SearchDialog.tsx',
+      'src/marketing/main.tsx',
+      'src/marketing/routeMetadata.ts',
+    ]) {
+      expect(fs.readFileSync(file, 'utf8'), file).not.toMatch(/blog/i)
     }
   })
 
   it('removes blog page rendering and indexing without removing archived posts', () => {
     expect(fs.existsSync('src/pages/blog.tsx')).toBe(false)
     expect(fs.existsSync('src/pages/blog/[slug].tsx')).toBe(false)
+    for (const file of [
+      'src/marketing/app/blog/page.tsx',
+      'src/marketing/app/blog/[slug]/page.tsx',
+      'src/marketing/BlogPostRoute.tsx',
+      'src/marketing/app/_components/BlogSection.tsx',
+      'src/marketing/blogPlugin.ts',
+      'src/marketing/seo.ts',
+    ]) {
+      expect(fs.existsSync(file), file).toBe(false)
+    }
+    expect(fs.readFileSync('src/marketing/next.d.ts', 'utf8')).not.toContain('virtual:blog-')
     expect(fs.readFileSync('vite.config.ts', 'utf8')).not.toContain('blogPostsPlugin()')
     expect(fs.readFileSync('src/marketing/search.ts', 'utf8')).not.toContain(
       'virtual:blog-search-documents',

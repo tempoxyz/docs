@@ -179,7 +179,6 @@ const menu: MenuItem[] = [
   { label: 'Build', href: `${developersPath('/')}#protocol`, mega: protocolMenu },
   { label: 'Resources', href: developersPath('/docs'), mega: developersMenu },
   { label: 'Performance', href: developersPath('/performance') },
-  { label: 'Blog', href: developersPath('/blog') },
   { label: 'Docs', href: TEMPO_DOCS_URL },
 ]
 

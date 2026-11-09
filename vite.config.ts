@@ -31,7 +31,6 @@ export default defineConfig(({ mode }) => {
           'src/snippets/**',
           'src/test/**',
           'src/pages/_api/**',
-          'src/marketing/blogPlugin.ts',
           'scripts/**',
           'e2e/**',
           'search-benchmark/**',

@@ -42,27 +42,34 @@ for (const suffix of ['', '/']) {
 }
 
 for (const width of [390, 1440]) {
-  test(`opens the external engineering blog from docs navigation at ${width}px`, async ({
-    page,
-  }) => {
-    // Fulfill the destination locally: exercise real anchor navigation without
-    // making CI depend on the website's release state or network availability.
-    await page.route('https://tempo.xyz/**', (route) =>
-      route.fulfill({ contentType: 'text/html', body: '<h1>Blog destination</h1>' }),
-    )
+  test(`does not offer a blog section in docs navigation at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 })
     await page.goto('/')
-    const navigation =
-      width < 1080
-        ? page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
-        : page.locator('.docs-section-utilities')
-    if (width < 1080) await page.getByRole('button', { name: 'Open menu', exact: true }).click()
-    const blog = navigation.getByRole('link', { name: 'Blog', exact: true })
-    await expect(blog).toHaveAttribute('href', engineeringBlogUrl)
-    await blog.focus()
-    await page.keyboard.press('Enter')
-    await expect(page).toHaveURL(engineeringBlogUrl)
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Blog destination')
+    await expect(
+      page.getByRole('button', { name: 'Search documentation', exact: true }),
+    ).toBeEnabled()
+    await expect(
+      page.locator('header').getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
+    ).toHaveCount(0)
+    await expect(
+      page
+        .locator('.docs-section-utilities')
+        .getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
+    ).toHaveCount(0)
+    await expect(page.locator('#blog, .tempo-blog')).toHaveCount(0)
+    if (width < 1080) {
+      await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+      const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
+      await expect(menu).toBeVisible()
+      await expect(
+        menu.getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
+      ).toHaveCount(0)
+      await expect(menu.getByRole('link', { name: 'Get Started', exact: true })).toBeVisible()
+    } else {
+      await expect(
+        page.getByRole('navigation', { name: 'Documentation sections', exact: true }),
+      ).toBeVisible()
+    }
   })
 }
 

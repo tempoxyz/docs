@@ -1,7 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
-import { blogMigrationRedirects, engineeringBlogUrl } from './src/lib/blog-migration'
+import { blogMigrationRedirects } from './src/lib/blog-migration'
 import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
@@ -300,7 +300,6 @@ export default defineConfig({
       accounts: 'ACCOUNTS',
       agents: 'MACHINE PAYMENTS',
       api: 'API',
-      blog: 'BLOG',
       build: 'BUILD',
       cli: 'CLI',
       'developer-tools': 'DEVELOPER TOOLS',
@@ -366,12 +365,7 @@ export default defineConfig({
       v: '4',
     }).toString()
 
-    // The HBSet display font's mixed-case "Blog" wordmark has awkward
-    // spacing at OG scale. Keep the page title sentence-cased, but use the
-    // cleaner all-caps treatment in the blog index thumbnail.
-    const imageTitle = docsPath === '/blog' ? 'BLOG' : '%title'
-
-    return `${urlBase}/api/og?title=${imageTitle}&${extra}`
+    return `${urlBase}/api/og?title=%title&${extra}`
   },
   openapi: [
     {
@@ -1362,8 +1356,6 @@ export default defineConfig({
       text: 'Docs',
       link: '/',
     },
-
-    { text: 'Blog', link: engineeringBlogUrl },
   ],
   redirects: [
     ...blogMigrationRedirects.map((redirect) => ({ ...redirect, status: 301 as const })),

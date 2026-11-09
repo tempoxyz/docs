@@ -79,15 +79,11 @@ describe('vocs.config ogImageUrl stays in sync with src/lib/og-sections', () => 
 
   it('uses the shared OG_IMAGE_VERSION cache-buster', () => {
     // /api/og responses are cached immutable for a year, so the version in the
-    // serialized config must match the one blog JSON-LD URLs use (seo.ts).
+    // serialized config must match the shared version constant.
     expect(param(ogImageUrl('/guide/payments/send-a-payment'), 'v')).toBe(OG_IMAGE_VERSION)
   })
 
   it('omits the unused description param', () => {
     expect(ogImageUrl('/guide/payments/send-a-payment')).not.toContain('description')
-  })
-
-  it('uses a clean all-caps title for the blog index thumbnail', () => {
-    expect(param(ogImageUrl('/blog'), 'title')).toBe('BLOG')
   })
 })

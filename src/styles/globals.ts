@@ -822,7 +822,7 @@ global({
   },
 })
 
-/* Blog diagram (inlined SVG) palette — kept identical to the original
+/* Documentation diagram (inlined SVG) palette — kept identical to the original
      dark-only artwork so dark mode is unchanged; the light overrides below
      swap these for legible values on a light page. */
 
@@ -1116,14 +1116,14 @@ global({
  * --------------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------------------
- * Blog prose — markdown bodies rendered on /blog/[slug].
+ * Zone diagrams — SVGs embedded in technical documentation.
  * --------------------------------------------------------------------------- */
 
-/* Diagrams are inlined as SVG at build time (see blogPlugin) so they can
+/* ZoneDiagram inlines SVGs so they can
    follow the active theme. Text uses currentColor; shapes use diagram tokens. */
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram': {
+  '.docs-zone-diagram svg.blog-diagram': {
     display: 'block',
     width: '100%',
     height: 'auto',
@@ -1137,7 +1137,7 @@ global({
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram :is(text, tspan)': {
+  '.docs-zone-diagram svg.blog-diagram :is(text, tspan)': {
     WebkitUserSelect: 'text',
     userSelect: 'text',
     cursor: 'text',
@@ -1147,31 +1147,31 @@ global({
 /* SVG glyph fills stay unchanged during selection in Chromium. */
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram :is(text, tspan)::selection': {
+  '.docs-zone-diagram svg.blog-diagram :is(text, tspan)::selection': {
     backgroundColor: inherited.color.diagramSelectionBg,
   },
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram [fill="var(--on-surface-onyx)"]': {
+  '.docs-zone-diagram svg.blog-diagram [fill="var(--on-surface-onyx)"]': {
     '--diagram-selection-bg': '#234b75',
   },
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram [fill="var(--diagram-box)"]': {
+  '.docs-zone-diagram svg.blog-diagram [fill="var(--diagram-box)"]': {
     '--diagram-selection-bg': 'var(--diagram-inverse-selection-bg)',
   },
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-bg': {
+  '.docs-zone-diagram svg.blog-diagram .dgm-bg': {
     fill: inherited.color.diagramBg,
   },
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-box': {
+  '.docs-zone-diagram svg.blog-diagram .dgm-box': {
     fill: inherited.color.diagramBox,
 
     stroke: inherited.color.diagramBoxBorder,
@@ -1179,7 +1179,7 @@ global({
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent-box': {
+  '.docs-zone-diagram svg.blog-diagram .dgm-accent-box': {
     fill: inherited.color.diagramAccentBg,
 
     stroke: inherited.color.diagramAccent,
@@ -1187,30 +1187,28 @@ global({
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-line': {
+  '.docs-zone-diagram svg.blog-diagram .dgm-line': {
     stroke: inherited.color.diagramLine,
   },
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-line-soft': {
+  '.docs-zone-diagram svg.blog-diagram .dgm-line-soft': {
     stroke: inherited.color.diagramLineSoft,
   },
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent-line': {
+  '.docs-zone-diagram svg.blog-diagram .dgm-accent-line': {
     stroke: inherited.color.diagramAccent,
   },
 })
 
 global({
-  ':is(.blog-prose, .docs-zone-diagram) svg.blog-diagram .dgm-accent': {
+  '.docs-zone-diagram svg.blog-diagram .dgm-accent': {
     fill: inherited.color.diagramAccent,
   },
 })
-
-/* An italic-only paragraph right after an image/diagram is a caption. */
 
 /* A quiet navigation surface frames the denser developer reading workspace. */
 

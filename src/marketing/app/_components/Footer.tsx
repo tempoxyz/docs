@@ -85,7 +85,6 @@ const columns: FooterColumn[] = [
   {
     header: 'Resources',
     links: [
-      { label: 'Blog', href: developersPath('/blog') },
       { label: 'Performance', href: developersPath('/performance') },
       { label: 'Open source', href: developersPath('/#open-source') },
       { label: 'Contact', href: CONTACT_URL },

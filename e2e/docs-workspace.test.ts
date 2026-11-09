@@ -58,7 +58,7 @@ test('seven sections expose product tasks and expandable developer chapters', as
   const utilities = page.locator('.docs-section-utilities')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(navigation.getByRole('link')).toHaveText(sectionLabels)
-  await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
+  await expect(utilities.getByRole('link')).toHaveText(utilityLabels)
   for (const section of [
     {
       label: 'Get Started',
@@ -443,18 +443,10 @@ for (const path of ['/', '/docs/accounts']) {
       await expect(
         navigation.getByRole('combobox', { name: 'Color theme', includeHidden: true }),
       ).toHaveCount(0)
-      await expect(navigation.getByRole('link', { name: 'Blog', exact: true })).toBeHidden()
+      await expect(navigation.getByRole('link', { name: 'Blog', exact: true })).toHaveCount(0)
       const utilities = page.locator('.docs-section-utilities')
-      await expect(utilities.getByRole('link')).toHaveText([...utilityLabels, 'Blog'])
-      const blog = utilities.getByRole('link', { name: 'Blog', exact: true })
-      await expect(blog).toBeVisible()
-      await expect(blog).toHaveAttribute('href', 'https://tempo.xyz/blog/?channel=engineering')
-      const partnersBox = await utilities
-        .getByRole('link', { name: 'Partners', exact: true })
-        .boundingBox()
-      const blogBox = await blog.boundingBox()
-      if (!partnersBox || !blogBox) throw new Error('Utility links have no visible bounds')
-      expect(blogBox.x).toBeGreaterThanOrEqual(partnersBox.x + partnersBox.width)
+      await expect(utilities.getByRole('link')).toHaveText(utilityLabels)
+      await expect(utilities.getByRole('link', { name: 'Blog', exact: true })).toHaveCount(0)
       const search = navigation.getByRole('button', { name: 'Search documentation', exact: true })
       const agents = navigation.getByRole('button', { name: 'Agent setup', exact: true })
       await expect(agents).toBeEnabled()
