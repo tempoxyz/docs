@@ -582,7 +582,7 @@ The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed 
 
 Note: `expiry`, `limits`, `allowed_calls`, `witness`, `is_admin`, and `account` use RLP trailing field semantics — they can be omitted entirely when None.
 
-When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` must be omitted or empty because admin keys are unrestricted: no spending limits, call scopes, or expiry apply to them. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
+When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` MUST be absent (`None`); present empty lists (`Some([])`) are invalid because admin keys are unrestricted: no spending limits, call scopes, or expiry apply to them. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
 
 :::warning[Expiry encoding]
 For `key_authorization`, the canonical non-expiring encoding omits `expiry` (`None`).
