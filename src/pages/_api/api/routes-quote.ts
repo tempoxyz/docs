@@ -8,6 +8,7 @@ const params = new Set([
   'destinationChain',
   'destinationToken',
   'mode',
+  'priority',
   'recipient',
   'refundAddress',
   'sender',
@@ -49,10 +50,15 @@ export async function POST(request: Request): Promise<Response> {
   }
   // The docs key's organization is approved for 1:1 delivery and cannot create routes, so its
   // quotes preview subsidized terms by default. An explicit `subsidize=false` (the demo's fallback
-  // when a route has no subsidy) is kept; exact-destination transfers cannot be subsidized.
+  // when a route has no subsidy) is kept; exact-destination and speed-priority transfers cannot be
+  // subsidized.
   if (
     !target.searchParams.has('subsidize') &&
-    !(kind === 'transfers' && target.searchParams.get('mode') === 'exactDestination')
+    !(
+      kind === 'transfers' &&
+      (target.searchParams.get('mode') === 'exactDestination' ||
+        target.searchParams.get('priority') === 'speed')
+    )
   )
     target.searchParams.set('subsidize', 'true')
   try {
