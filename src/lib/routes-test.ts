@@ -31,6 +31,8 @@ export const directorySchema = z.object({
 export type TestRoute = z.infer<typeof routeSchema>
 export type TestMethod = 'transfer' | 'depositAddress'
 export type TestMode = 'exactSource' | 'exactDestination'
+/** What a transfer quote optimizes for: the best guaranteed amount, or a faster route at near-best terms. */
+export type TestPriority = 'price' | 'speed'
 
 export type RoutePick = {
   sourceChain: string
@@ -173,6 +175,7 @@ type RouteInput = {
   recipient: string
   refundAddress: string
   subsidize?: boolean
+  priority?: TestPriority
 }
 
 /** Fields every quote and creation shares, after checking the route supports the request. */
@@ -180,6 +183,12 @@ function pricing(route: TestRoute, input: RouteInput) {
   const { method, mode } = input
   if (input.subsidize && !canSubsidize(route, method, mode)) {
     throw new Error('This route does not offer 1:1 delivery for that funding method.')
+  }
+  if (input.priority === 'speed' && method !== 'transfer') {
+    throw new Error('Only transfers can prioritize speed.')
+  }
+  if (input.priority === 'speed' && input.subsidize) {
+    throw new Error('Speed priority cannot be combined with 1:1 delivery.')
   }
   if (method === 'depositAddress' && !route.capabilities.depositAddress) {
     throw new Error('This route does not support deposit addresses.')
@@ -223,6 +232,8 @@ export function routeTestRequest(route: TestRoute, input: RouteInput) {
         ...common,
         destinationChain: route.destinationChain.id,
         mode: input.mode,
+        // Price is the API default, so only a speed choice is sent.
+        ...(input.priority === 'speed' && { priority: input.priority }),
         sender: address(input.sender, route.sourceChain.addressFormat, 'sender'),
       }
     : {
