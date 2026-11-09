@@ -2,6 +2,26 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/login",
+      "destination": "https://console.tempo.xyz",
+      "permanent": false
+    },
+    {
+      "source": "/developers/login",
+      "destination": "https://console.tempo.xyz",
+      "permanent": false
+    },
+    {
+      "source": "/developers/console",
+      "destination": "https://developers.tempo.xyz/console",
+      "permanent": false
+    },
+    {
+      "source": "/developers/console/:path(.*)",
+      "destination": "https://developers.tempo.xyz/console/:path",
+      "permanent": false
+    },
+    {
       "source": "/docs/resources/partners.md",
       "destination": "https://tempo.xyz/developers/docs/resources/guides.md",
       "permanent": true
@@ -562,6 +582,11 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/api/typed-client",
       "destination": "/developers/docs/sdk/typescript/api-client",
       "permanent": true
@@ -623,7 +648,7 @@
     },
     {
       "source": "/developers/guide/use-accounts/fee-sponsorship",
-      "destination": "/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1058,7 +1083,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1878,7 +1903,7 @@
     },
     {
       "source": "/developers/docs/guide/use-accounts/fee-sponsorship",
-      "destination": "/developers/docs/guide/payments/sponsor-user-fees",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -2078,6 +2103,18 @@
     {
       "source": "/ingest/:path(.*)",
       "destination": "https://us.i.posthog.com/:path"
+    },
+    {
+      "source": "/console",
+      "destination": "https://console.tempo.xyz/console"
+    },
+    {
+      "source": "/console/:path(.*)",
+      "destination": "https://console.tempo.xyz/console/:path"
+    },
+    {
+      "source": "/v1/auth/:path(.*)",
+      "destination": "https://console.tempo.xyz/v1/auth/:path"
     }
   ]
 }

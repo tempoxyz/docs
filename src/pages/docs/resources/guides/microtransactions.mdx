@@ -53,7 +53,7 @@ Request another voucher when more usage needs authorization. Add channel funds w
 
 [Access keys](/docs/accounts/access-keys) let a device, backend, or agent sign within defined spending limits, scopes, and expiry. A [spending limit](/docs/accounts/access-keys/spending-limits) caps the TIP-20 spending counted by the keychain; it doesn't measure API usage or schedule invoices. Transfers that use an existing allowance and assets other than TIP-20 tokens fall outside that limit, so review existing approvals as well as the key's bounds.
 
-Set scopes for the contracts and functions the integration needs. Add recipient restrictions where the supported function allows them. Scopes check direct calls, so permit only contracts you trust. Fees the account pays consume its access-key limit; [fee sponsorship](/docs/guide/payments/sponsor-user-fees) moves that network expense to a separate fee payer.
+Set scopes for the contracts and functions the integration needs. Add recipient restrictions where the supported function allows them. Scopes check direct calls, so permit only contracts you trust. Fees the account pays consume its access-key limit; [fee sponsorship](/docs/api/fee-payer) moves that network expense to a separate fee payer.
 
 Access keys work on mainnet and testnet with single-key accounts. Configurable-account access keys remain on the Tempo Accounts devnet until [T14](/docs/protocol/upgrades/t14).
 

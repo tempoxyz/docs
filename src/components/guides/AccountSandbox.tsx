@@ -1039,16 +1039,18 @@ function StateKey(props: {
           {tag && <span className="as-tag">{tag}</span>}
         </span>
         <span className="as-item-detail">{keyDetail(key)}</span>
-        <span className="as-limit" data-changed={change?.change === 'spent'}>
-          <span className="as-limit-bar" aria-hidden="true">
-            <span
-              {...accountSandboxLimitFill({ width: `${Math.round((left / key.limit) * 100)}%` })}
-            />
+        {status === 'active' && (
+          <span className="as-limit" data-changed={change?.change === 'spent'}>
+            <span className="as-limit-bar" aria-hidden="true">
+              <span
+                {...accountSandboxLimitFill({ width: `${Math.round((left / key.limit) * 100)}%` })}
+              />
+            </span>
+            <span>
+              ${formatUsd(left)} left this {key.period}
+            </span>
           </span>
-          <span>
-            ${formatUsd(left)} left this {key.period}
-          </span>
-        </span>
+        )}
       </span>
       {controls && <span className="as-item-controls">{controls}</span>}
       {secret && <SecretLine value={secret} />}

@@ -231,7 +231,7 @@ for (let row = 0; row < 7; row += 1) {
     const nearRoute =
       (y === 132 && x > 200 && x <= 296) ||
       (y === 180 && x >= 296 && x <= 344) ||
-      (y === 228 && x >= 296)
+      (y === 228 && x >= 296 && x <= 392)
     if (selected || nearRoute) continue
     const edge = Math.min(column, 8 - column, row, 6 - row)
     const opacity = edge === 0 ? 0.18 : edge === 1 ? 0.45 : 0.8
@@ -259,7 +259,7 @@ const partners = illustration(
     ),
     group(
       'Marks',
-      join([node(200, 132), node(248, 132, 4), node(360, 228, 4), pill(388, 216, 56, 24, 'APP')]),
+      join([node(200, 132), node(248, 132, 4), node(360, 228, 4), node(392, 228)]),
     ),
   ]),
 )

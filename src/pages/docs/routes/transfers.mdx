@@ -19,7 +19,7 @@ Move stablecoins between networks when your application can sign the source tran
 
 Before you start, have:
 
-- A Tempo API key on your backend, created in [Set up API access](/docs/routes/api-setup). `routes:read` covers quotes and status reads; `routes:write` covers creating transfers and registering source transactions.
+- A Tempo API key on your backend, created in [Set up Routes](/docs/routes/api-setup). `routes:read` covers quotes and status reads; `routes:write` covers creating transfers and registering source transactions.
 - A route with transfer support from [Supported routes](/docs/routes/networks). This guide sets the quote's `mode` to `exactSource`, which fixes the amount sent; `exactDestination` fixes the amount received instead ([Quotes and fees](/docs/routes/quotes#choose-which-amount-to-fix)). Check that the route lists `exactSource`.
 - A signer for the sender account on the source network, such as a connected wallet or your own signing service. The API key doesn't sign transactions.
 

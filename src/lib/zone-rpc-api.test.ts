@@ -13,9 +13,13 @@ const rpc = {
 
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock)
+  vi.stubEnv('ZONE_RPC_BASIC_AUTH', 'eng:docs-key\n')
   fetchMock.mockReset()
 })
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
 
 function request(zone = '6', body: unknown = rpc, auth: string | null = token) {
   return new Request(`http://localhost:5174/api/zone-rpc?zone=${zone}`, {
@@ -74,12 +78,27 @@ describe('sandbox Zone RPC proxy', () => {
     expect(init?.method).toBe('POST')
     expect(init?.body).toBe(JSON.stringify(rpc))
     expect(new Headers(init?.headers).get('X-Authorization-Token')).toBe(token)
-    expect(new Headers(init?.headers).get('authorization')).toMatch(/^Basic /)
+    expect(new Headers(init?.headers).get('authorization')).toBe(
+      `Basic ${Buffer.from('eng:docs-key').toString('base64')}`,
+    )
     expect(init?.redirect).toBe('error')
     expect(init?.signal).toBeInstanceOf(AbortSignal)
     expect(await response.text()).toBe(body)
     expect(response.headers.get('cache-control')).toBe('no-store')
     expect(response.headers.get('authorization')).toBeNull()
+  })
+
+  test.each([
+    '',
+    '  \n',
+    'no-colon',
+  ])('forwards without HTTP credentials when %j is configured', async (value) => {
+    vi.stubEnv('ZONE_RPC_BASIC_AUTH', value)
+    fetchMock.mockResolvedValueOnce(Response.json({ result: '0x0' }))
+    expect((await POST(request())).status).toBe(200)
+    const [, init] = fetchMock.mock.calls[0]
+    expect(new Headers(init?.headers).get('authorization')).toBeNull()
+    expect(new Headers(init?.headers).get('X-Authorization-Token')).toBe(token)
   })
 
   test('accepts omitted params for methods without arguments', async () => {

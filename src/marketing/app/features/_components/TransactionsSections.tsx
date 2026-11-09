@@ -76,7 +76,7 @@ const feeItems: TransactionPrimitive[] = [
   {
     title: 'Fee sponsorship',
     desc: 'Apps and agents can pay on behalf of users.',
-    href: '/docs/guide/payments/sponsor-user-fees',
+    href: '/docs/api/fee-payer',
     panelTitle: 'sponsor-fees.ts',
     spec: {
       kind: 'sponsor',
