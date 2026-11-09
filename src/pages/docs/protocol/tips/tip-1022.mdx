@@ -474,11 +474,11 @@ It is theoretically possible to deploy a contract or control an EOA whose addres
 
 2. **Revert on unregistered**: A transfer to an address matching the virtual-address format whose `masterId` is not registered MUST revert. It MUST NOT credit any account.
 
-3. **Balance consistency**: After a successful virtual-forwarded transfer of amount `X`, `balanceOf(master)` MUST have increased by exactly `X`.
+3. **Balance consistency**: After a successful virtual-forwarded transfer of amount `X` that is not redirected to `ReceivePolicyGuard`, `balanceOf(master)` MUST have increased by exactly `X`.
 
 4. **Zero-balance invariant**: For every virtual address, `balanceOf(virtualAddress)` MUST equal 0 from T3 activation onwards. Pre-T3, the TIP-20 precompile does not perform virtual-address resolution, so a transfer targeting an address that matches the virtual format will credit the literal address. Such pre-T3 balances are stranded (no party can claim them) and do not violate this invariant, which applies only to the T3-and-later transfer path. The probability of anyone controlling a private key for such an address is negligible.
 
-5. **Event consistency**: For virtual-forwarded entrypoints, the precompile MUST emit two `Transfer` events: `Transfer(sender, virtualAddress, amount)` followed by `Transfer(virtualAddress, masterAddress, amount)`. `TransferWithMemo` events MUST immediately follow their matching `Transfer` and MUST use `virtualAddress` as the recipient to preserve deposit attribution. `Mint` events MUST use `virtualAddress`.
+5. **Event consistency**: For virtual-forwarded entrypoints that are not redirected to `ReceivePolicyGuard`, the precompile MUST emit two `Transfer` events: `Transfer(sender, virtualAddress, amount)` followed by `Transfer(virtualAddress, masterAddress, amount)`. `TransferWithMemo` events MUST immediately follow their matching `Transfer` and MUST use `virtualAddress` as the recipient to preserve deposit attribution. `Mint` events MUST use `virtualAddress`.
 
 6. **Non-virtual path unaffected**: Transfers to addresses that do not match the virtual-address format MUST behave identically to pre-TIP-1022 semantics, with no registry lookup.
 
