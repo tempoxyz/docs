@@ -55,13 +55,13 @@ Before the execution of each transaction, the protocol takes the following steps
 
 * Determine the [`fee_payer`](#fee-payer) of the transaction.
 * Determine the `fee_token` of the transaction, according to the [rules for fee token preferences](#fee-token-preferences). If the fee token cannot be determined, the transaction is invalid.
-* Compute the `max_fee` of the transaction as `gas_limit * gas_price`.
+* Compute the `max_fee` of the transaction as `ceil(gas_limit * gas_price / 10^12)` in token base units, using the effective gas price.
 * Deduct `max_fee` from the `fee_payer`'s balance of `fee_token`. If `fee_payer` does not have sufficient balance in `fee_token`, the transaction is invalid.
 * Reserve `max_fee` of liquidity on the [fee AMM](/docs/protocol/fees/spec-fee-amm) between the `fee_token` and the validator's preferred fee token. If there is insufficient liquidity, the transaction is invalid.
 
 After the execution of each transaction:
 
-* Compute the `refund_amount` as `(gas_limit - gas_used) * gas_price`.
+* Compute the actual fee as `ceil(gas_used * gas_price / 10^12)` in token base units, using the effective gas price. Compute `refund_amount` as `max_fee` minus this rounded actual fee.
 * Credit the `fee_payer`'s address with `refund_amount` of `fee_token`.
 * Log a `Transfer` event from the user to the [fee manager contract](/docs/protocol/fees/spec-fee-amm) for the net amount of the fee payment.
 
