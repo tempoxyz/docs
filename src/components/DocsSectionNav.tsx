@@ -50,7 +50,7 @@ const sectionIcons: Partial<Record<DocsSection['id'], typeof CompassIcon>> = {
 export const docsExternalTools = [
   { label: 'MPP', href: 'https://mpp.dev/', logo: MppLogo },
   { label: 'Mercator', href: 'https://mercator.sh/', logo: MercatorLogo },
-  { label: 'Tempo Console', href: 'https://console.tempo.xyz/', logo: TempoMark },
+  { label: 'Tempo Console', href: 'https://tempo.xyz/console', logo: TempoMark },
   { label: 'Tempo Wallet', href: 'https://wallet.tempo.xyz/', logo: TempoMark },
 ]
 

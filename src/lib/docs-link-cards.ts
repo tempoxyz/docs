@@ -161,7 +161,7 @@ export const docsLinkCards = {
       icon: 'code',
       links: [
         ['Console guide', '/docs/api/console'],
-        ['Open Tempo Console', 'https://console.tempo.xyz/'],
+        ['Open Tempo Console', 'https://tempo.xyz/console'],
       ],
     },
   ],

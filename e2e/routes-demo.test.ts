@@ -1392,7 +1392,7 @@ test.describe('Routes demo without a key', () => {
     // "here" opens the key panel; the console link is where keys are made.
     await expect(lifecycle(page).getByRole('link', { name: 'Tempo API console' })).toHaveAttribute(
       'href',
-      'https://console.tempo.xyz/?to=/:org/api-keys',
+      'https://tempo.xyz/console/?to=/:org/api-keys',
     )
     await lifecycle(page).getByRole('button', { name: 'here', exact: true }).click()
     await expect(page.getByLabel('Project API key')).toBeFocused()

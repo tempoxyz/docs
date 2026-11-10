@@ -44,6 +44,8 @@ exclude = [
   "^https://hub\\.conduit\\.xyz/tempo-testnet/?$",
   # Temporary upstream error on the published TIP page.
   "^https://tips\\.sh/1066/?$",
+  # Tempo Console, served at tempo.xyz/console once tempoxyz/api#2113 ships; remove after it is live.
+  "^https://tempo\\.xyz/console(/|\\?|$)",
   # Temporary Auto.exchange outage: API root times out (2026-09-24).
   "^https://api\\.auto\\.exchange/?$",
 ]
