@@ -33,7 +33,6 @@ export type SearchResult = {
 
 type SearchIndexes = {
   docs: MiniSearch<SearchResult>
-  blog: MiniSearch<SearchResult>
 }
 
 /**
@@ -84,41 +83,11 @@ const loadOptions: Options<SearchResult> = {
 
 let indexPromise: Promise<SearchIndexes> | null = null
 
-function createBlogIndex(
-  documents: (SearchResult & { searchText: string })[],
-): MiniSearch<SearchResult> {
-  const index = new MiniSearch<SearchResult>({
-    fields: ['title', 'excerpt', 'searchText', 'category'],
-    storeFields,
-    tokenize,
-  })
-  index.addAll(documents)
-  return index
-}
-
 /** Loads (and caches) the MiniSearch index that Vocs built. */
 export function loadSearchIndex(): Promise<SearchIndexes> {
   if (!indexPromise) {
-    indexPromise = Promise.all([
-      getSearchIndex(),
-      import('virtual:blog-search-documents').then(({ documents }) => documents),
-    ])
-      .then(([json, documents]) => ({
-        docs: MiniSearch.loadJSON<SearchResult>(json, loadOptions),
-        blog: createBlogIndex(
-          documents.map((post) => ({
-            id: `blog:${post.slug}`,
-            href: `/blog/${post.slug}`,
-            title: post.title,
-            titles: [],
-            text: post.excerpt,
-            excerpt: post.excerpt,
-            category: 'Blog',
-            type: 'page',
-            searchText: post.searchText,
-          })),
-        ),
-      }))
+    indexPromise = getSearchIndex()
+      .then((json) => ({ docs: MiniSearch.loadJSON<SearchResult>(json, loadOptions) }))
       .catch((error) => {
         // Reset so a later open can retry rather than caching the failure.
         indexPromise = null
@@ -130,16 +99,8 @@ export function loadSearchIndex(): Promise<SearchIndexes> {
 
 export function searchDocs(index: SearchIndexes, query: string): SearchResult[] {
   if (!query.trim()) return []
-  return [
-    ...index.docs.search(query, { ...searchOptions, tokenize }),
-    ...index.blog.search(query, {
-      combineWith: 'OR',
-      fuzzy: 0.1,
-      prefix: false,
-      boost: { title: 5, excerpt: 3, category: 2, searchText: 1 },
-      tokenize,
-    }),
-  ]
+  return index.docs
+    .search(query, { ...searchOptions, tokenize })
     .sort((a, b) => b.score - a.score)
     .slice(0, 20) as unknown as SearchResult[]
 }

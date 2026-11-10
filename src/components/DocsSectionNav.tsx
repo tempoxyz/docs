@@ -265,14 +265,6 @@ export default function DocsSectionNav() {
             </Link>
           ),
         )}
-        <Link
-          to="/blog"
-          className={`docs-section-utility-link ${docsSectionUtilityLink().className}`}
-          unstable_prefetchOnEnter={{}}
-          unstable_prefetchOnView={{}}
-        >
-          Blog
-        </Link>
       </div>
     </div>
   )

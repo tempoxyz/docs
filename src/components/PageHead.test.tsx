@@ -6,7 +6,7 @@ import PageHead from './PageHead'
 
 const mocks = vi.hoisted(() => ({
   config: {} as Record<string, unknown>,
-  path: '/blog/inside-tempo-zones',
+  path: '/docs/zones',
 }))
 
 vi.mock('waku', () => ({
@@ -27,13 +27,13 @@ vi.mock('vocs', async () => {
 })
 
 beforeEach(() => {
-  mocks.path = '/blog/inside-tempo-zones'
+  mocks.path = '/docs/zones'
   mocks.config = {
     basePath: '/',
     colorScheme: 'light dark',
     head: docsStructuredDataHead,
     jsonLd: false,
-    ogImageUrl: `/api/og?title=%title&section=BLOG&v=${OG_IMAGE_VERSION}`,
+    ogImageUrl: `/api/og?title=%title&section=ZONES&v=${OG_IMAGE_VERSION}`,
     renderStrategy: 'dynamic',
     title: 'Tempo',
   }
@@ -50,34 +50,34 @@ function imageMeta(html: string, name: string): string[] {
   })
 }
 
-describe('PageHead blog images', () => {
+describe('PageHead images', () => {
   test.each([
     ['production', 'https://tempo.xyz/developers'],
     ['preview', ''],
   ])('emits one custom OG and X image in %s', (_environment, base) => {
     mocks.config.baseUrl = base || undefined
-    const image = `${base}/blog/inside-tempo-zones-og.png`
+    const image = 'https://tempo.xyz/developers/og-docs.png'
     const html = renderToStaticMarkup(
       <PageHead
-        title="Inside Tempo Zones"
+        title="Tempo Zones"
         description="Private execution environments connected to Tempo Mainnet."
         ogImage={image}
       />,
     )
 
-    expect(imageMeta(html, 'og:type')).toEqual(['article'])
+    expect(imageMeta(html, 'og:type')).toEqual(['website'])
     expect(imageMeta(html, 'og:image')).toEqual([image])
     expect(imageMeta(html, 'twitter:image')).toEqual([image])
   })
 
-  test('retains the generated image for another post without a custom image', () => {
-    mocks.path = '/blog/t7-network-upgrade'
+  test('retains the generated image for another page without a custom image', () => {
+    mocks.path = '/docs/zones/network'
     const html = renderToStaticMarkup(
-      <PageHead title="T7 network upgrade" description="Lower fees on Tempo." />,
+      <PageHead title="Zone network" description="Zone network settings." />,
     )
-    const expected = `/api/og?title=T7%20network%20upgrade&section=BLOG&v=${OG_IMAGE_VERSION}`
+    const expected = `/api/og?title=Zone%20network&section=ZONES&v=${OG_IMAGE_VERSION}`
 
-    expect(imageMeta(html, 'og:type')).toEqual(['article'])
+    expect(imageMeta(html, 'og:type')).toEqual(['website'])
     expect(imageMeta(html, 'og:image')).toEqual([expected])
     expect(imageMeta(html, 'twitter:image')).toEqual([expected])
   })

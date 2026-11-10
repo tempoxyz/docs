@@ -8,7 +8,6 @@ import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
 import { vocsSkipLinkPlugin } from './scripts/vocs-skip-link-plugin'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
-import { blogPostsPlugin } from './src/marketing/blogPlugin'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -32,7 +31,6 @@ export default defineConfig(({ mode }) => {
           'src/snippets/**',
           'src/test/**',
           'src/pages/_api/**',
-          'src/marketing/blogPlugin.ts',
           'scripts/**',
           'e2e/**',
           'search-benchmark/**',
@@ -43,7 +41,6 @@ export default defineConfig(({ mode }) => {
         ],
         script: false,
       }),
-      blogPostsPlugin(),
       developersProxyBasePath(),
       graphiteRelatedDocsPlugin(),
       vocsSkipLinkPlugin(),

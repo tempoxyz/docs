@@ -1,55 +1,13 @@
-# Writing blog posts
+# Archived blog sources
 
-Posts in this folder are rendered at `/blog` (index with category filters) and `/blog/<filename>` (post page). Drop a `.md` file here and it ships — no registration step.
+Create and edit blog posts in [tempoxyz/tempo.xyz](https://github.com/tempoxyz/tempo.xyz), following that repository's guidance.
+The canonical articles live at `https://tempo.xyz/blog/`.
 
-Name post files in kebab-case (`my-post-title.md`). ALL-CAPS `.md` files in this folder (like this one and `DIAGRAMS.md`) are documentation and are excluded from the site.
+This folder preserves the six original post sources for rollback and migration checks.
+The docs application does not render, index, or publish them. Adding a file here does not publish a post.
 
-To keep a post as a draft (written but not published), move it into the `drafts/` subfolder. Only `.md` files directly in `blogs/` are published; anything in a subfolder is ignored. Move it back up to ship it.
+Keep `public/blog/` and archived share images reachable for existing media links.
+Preserve the exact HTML and Markdown redirects in `src/lib/blog-migration.ts` and `vercel.json`.
+Do not redirect the entire `/blog/` subtree; it still serves those assets.
 
-## Frontmatter (required)
-
-```yaml
----
-title: "Tuning Reth for payments: how we hit 21,200 TPS"
-excerpt: "One or two sentences shown on the index and as the post's lede."
-date: 2026-06-02
-category: technical # product-announcements | network-upgrades | events | technical | case-studies
-# Use an inline list when a post belongs to multiple categories:
-# category: [technical, case-studies]
-featured: true # optional — pins the post to the hero card on /blog
-ogImage: /blog/my-post-og.png # optional — overrides the generated social card
-shareImage: /og/2026-q4/my-post.png # optional — social card only; the blog cards keep ogImage
----
-```
-
-`category` must be one of the five slugs above or an inline list of those slugs (the build fails loudly otherwise). At most one post should be `featured`; if none is, the newest post takes the hero card.
-
-## Body
-
-Standard markdown + GFM (tables, strikethrough). Code blocks are syntax-highlighted at build time by Shiki — always tag the language:
-
-````markdown
-```rust
-fn main() {}
-```
-````
-
-## Images
-
-- Assets live in `public/blog/`, referenced root-relative: `![Alt text](/blog/my-asset.svg)`
-- Alt text is required. An italic-only paragraph directly after an image renders as a caption:
-
-```markdown
-![Sustained TPS by release](/blog/reth-tps-benchmark.svg)
-
-*Benchmarked on a live network under continuous load.*
-```
-
-- Prefer SVG for charts and diagrams, photos as compressed JPEG/PNG.
-
-## Diagrams
-
-Charts and diagrams must follow the house diagram style — dark monochrome,
-mono type, single accent. Before drawing one, read
-[`DIAGRAMS.md`](./DIAGRAMS.md) in this folder; it has the full palette,
-typography rules, layout system, and copy-paste templates.
+`DIAGRAMS.md` describes the historical artwork format, not current authoring instructions.

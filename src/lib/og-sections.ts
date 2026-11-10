@@ -19,7 +19,6 @@ export const ogSectionMap: Record<string, string> = {
   accounts: 'ACCOUNTS',
   agents: 'MACHINE PAYMENTS',
   api: 'API',
-  blog: 'BLOG',
   build: 'BUILD',
   cli: 'CLI',
   'developer-tools': 'DEVELOPER TOOLS',

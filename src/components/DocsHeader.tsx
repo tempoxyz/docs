@@ -10,7 +10,7 @@ import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 
 export { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
-import { DOCS_SEARCH_PARAM, docsSearchUrl } from '../lib/docs-search'
+import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
 import { publicAssetPath } from '../lib/public-asset-path'
 import { navActiveSquare } from '../styles/surfaces.styles'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
@@ -24,7 +24,6 @@ import {
   docsHeaderAgentPanel,
   docsHeaderAgentTrigger,
   docsHeaderBrand,
-  docsHeaderDestinations,
   docsHeaderIconButton,
   docsHeaderLoginPrimary,
   docsHeaderLogo,
@@ -42,7 +41,6 @@ import {
   docsHeaderMobileUtilityLink,
   docsHeaderMobileWebsite,
   docsHeaderNav,
-  docsHeaderWordmark,
   docsSiteHeader,
 } from './DocsNavigation.styles'
 import {
@@ -729,8 +727,7 @@ export function SidebarNodes({
   )
 }
 
-export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'blog' }) {
-  const router = useRouter()
+export default function DocsHeader() {
   const pathname = usePathname()
   const activeSection = getActiveDocsSection(pathname)
   const [open, setOpen] = useState(false)
@@ -760,25 +757,12 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   const openSearch = () => {
     mobileDialogRef.current?.close()
     close()
-    if (surface === 'blog') router.push(docsSearchUrl())
-    else requestAnimationFrame(openDocsSearch)
+    requestAnimationFrame(openDocsSearch)
   }
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  useEffect(() => {
-    if (surface !== 'blog') return
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault()
-        router.push(docsSearchUrl())
-      }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [surface, router])
 
   // Close menus after navigation, including browser back/forward.
   useEffect(() => {
@@ -839,7 +823,6 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
 
   // Open search when arriving from the website with ?search=1.
   useEffect(() => {
-    if (surface === 'blog') return
     const params = new URLSearchParams(window.location.search)
     if (!params.has(DOCS_SEARCH_PARAM)) return
     params.delete(DOCS_SEARCH_PARAM)
@@ -850,7 +833,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
       `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`,
     )
     openDocsSearchWhenReady()
-  }, [surface])
+  }, [])
 
   const brand = (
     <div className={`docs-header-brand ${docsHeaderBrand().className}`}>
@@ -865,32 +848,16 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
     </div>
   )
 
-  const destinations = (
-    <div className={`docs-header-destinations ${docsHeaderDestinations().className}`}>
-      <WakuLink
-        to="/blog"
-        onClick={close}
-        aria-current={surface === 'blog' ? 'page' : undefined}
-        className={`docs-header-wordmark ${docsHeaderWordmark().className}`}
-      >
-        Blog
-      </WakuLink>
-    </div>
-  )
-
   return (
     <header className={`docs-site-header ${docsSiteHeader().className}`}>
-      {/* The header is the one chrome shared by docs and blog pages. */}
       <SmoothCorners />
       <HeadingAnchorFeedback />
       <SearchDialogMotion />
       <nav
         className={`docs-header-nav ${docsHeaderNav().className}`}
         aria-label="Developer navigation"
-        data-surface={surface}
       >
         {brand}
-        {destinations}
         <div className={`docs-header-actions ${docsHeaderActions().className}`}>
           <div
             ref={agentMenuRef}
@@ -981,7 +948,6 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
         <div className={`docs-header-mobile-top ${docsHeaderMobileTop().className}`}>
           {brand}
           <div className={`docs-header-mobile-actions ${docsHeaderMobileActions().className}`}>
-            {destinations}
             <button
               type="button"
               ref={mobileCloseRef}
@@ -1054,7 +1020,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
             </summary>
             <AgentsPanel variant="mobile" onNavigate={close} />
           </details>
-          <ThemeSelect surface={surface} />
+          <ThemeSelect />
           <a
             href="https://tempo.xyz/"
             className={`docs-header-mobile-website ${docsHeaderMobileWebsite().className}`}
@@ -1067,7 +1033,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   )
 }
 
-function ThemeSelect({ surface }: { surface: 'docs' | 'blog' }) {
+function ThemeSelect() {
   const [theme, setTheme] = useState('system')
   useEffect(() => {
     const sync = () => setTheme(localStorage.getItem('vocs-theme') ?? 'system')
@@ -1079,20 +1045,6 @@ function ThemeSelect({ surface }: { surface: 'docs' | 'blog' }) {
     })
     return () => observer.disconnect()
   }, [])
-
-  useEffect(() => {
-    if (surface !== 'blog') return
-    const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const apply = () => {
-      const selected = localStorage.getItem('vocs-theme') ?? 'system'
-      const resolved = selected === 'system' ? (media.matches ? 'dark' : 'light') : selected
-      document.documentElement.dataset.vocsTheme = resolved
-      document.documentElement.style.colorScheme = resolved
-    }
-    apply()
-    media.addEventListener('change', apply)
-    return () => media.removeEventListener('change', apply)
-  }, [surface])
 
   return (
     <label className={`docs-header-mobile-theme ${docsHeaderMobileTheme().className}`}>
