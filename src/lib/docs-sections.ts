@@ -7,8 +7,10 @@ export type DocsSection = {
     | 'zones'
     | 'developers'
     | 'machine-payments'
+    | 'operate'
     | 'api'
     | 'tools'
+    | 'resources'
     | 'ecosystem'
   label: string
   href: string
@@ -23,16 +25,10 @@ export const docsSections: DocsSection[] = [
     href: '/get-started',
     matches: [
       '/get-started',
-      '/docs/resources',
       '/docs/quickstart/faucet',
       '/docs/guide/using-tempo-with-ai',
-      '/docs/tools',
       '/docs/developer-tools',
       '/docs/quickstart/developer-tools',
-      '/docs/sdk',
-      '/docs/cli',
-      '/docs/wallet',
-      '/docs/server',
     ],
   },
   {
@@ -69,12 +65,16 @@ export const docsSections: DocsSection[] = [
       '/docs/development',
       '/docs/quickstart',
       '/docs/protocol',
-      '/docs/changelog',
       '/docs/guide/tempo-transaction',
       '/docs/guide/issuance',
       '/docs/guide/stablecoin-dex',
-      '/docs/guide/node',
     ],
+  },
+  {
+    id: 'operate',
+    label: 'Operate',
+    href: '/docs/guide/node',
+    matches: ['/docs/guide/node', '/docs/changelog', '/docs/protocol/upgrades'],
   },
 ]
 
@@ -84,6 +84,18 @@ export const docsUtilitySections: DocsSection[] = [
     label: 'API reference',
     href: '/docs/api',
     matches: ['/docs/api'],
+  },
+  {
+    id: 'tools',
+    label: 'SDKs & CLI',
+    href: '/docs/sdk',
+    matches: ['/docs/tools', '/docs/sdk', '/docs/cli', '/docs/wallet', '/docs/server'],
+  },
+  {
+    id: 'resources',
+    label: 'Guides',
+    href: '/docs/resources/guides',
+    matches: ['/docs/resources'],
   },
   {
     id: 'ecosystem',
@@ -96,6 +108,60 @@ export const docsUtilitySections: DocsSection[] = [
       '/docs/guide/bridge-bungee',
       '/docs/guide/bridge-relay',
     ],
+  },
+]
+
+export type DocsArea = {
+  id: 'get-started' | 'products' | 'evm' | 'operate' | 'reference' | 'resources'
+  label: string
+  href: string
+  description: string
+  sections: DocsSection['id'][]
+}
+
+/** The six areas in the global nav. Each groups one or more sections, which own the sidebars. */
+export const docsAreas: DocsArea[] = [
+  {
+    id: 'get-started',
+    label: 'Get started',
+    href: '/get-started',
+    description: 'Quickstart, testnet funds and AI setup',
+    sections: ['overview'],
+  },
+  {
+    id: 'products',
+    label: 'Products',
+    href: '/docs/accounts',
+    description: 'Accounts, Earn, Routes, Zones and Machine Payments',
+    sections: ['accounts', 'earn', 'routes', 'zones', 'machine-payments'],
+  },
+  {
+    id: 'evm',
+    label: 'Tempo EVM',
+    href: '/docs/development',
+    description: 'Build directly on the chain',
+    sections: ['developers'],
+  },
+  {
+    id: 'operate',
+    label: 'Operate',
+    href: '/docs/guide/node',
+    description: 'Run nodes and track network upgrades',
+    sections: ['operate'],
+  },
+  {
+    id: 'reference',
+    label: 'Reference',
+    href: '/docs/api',
+    description: 'Tempo API, SDKs and CLI',
+    sections: ['api', 'tools'],
+  },
+  {
+    id: 'resources',
+    label: 'Resources',
+    href: '/docs/resources/guides',
+    description: 'Payment guides and partners',
+    sections: ['resources', 'ecosystem'],
   },
 ]
 
@@ -113,4 +179,16 @@ export function getActiveDocsSection(path: string) {
     .flatMap((section) => section.matches.map((prefix) => ({ section, prefix })))
     .filter(({ prefix }) => matchesDocsSectionPath(pathname, prefix))
     .sort((a, b) => b.prefix.length - a.prefix.length)[0]?.section
+}
+
+export function getDocsSectionById(id: DocsSection['id']) {
+  return [...docsSections, ...docsUtilitySections].find((section) => section.id === id)
+}
+
+export function getDocsAreaForSection(id: DocsSection['id'] | undefined) {
+  return id ? docsAreas.find((area) => area.sections.includes(id)) : undefined
+}
+
+export function getActiveDocsArea(path: string) {
+  return getDocsAreaForSection(getActiveDocsSection(path)?.id)
 }

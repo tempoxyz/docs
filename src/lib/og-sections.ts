@@ -41,6 +41,12 @@ export const ogSectionMap: Record<string, string> = {
   zones: 'ZONES',
 }
 
+/** Route prefix → section label, checked before `ogSectionMap`. Operate's pages live under `guide` and `protocol`. */
+export const ogSectionPrefixMap: Record<string, string> = {
+  '/guide/node': 'OPERATE',
+  '/protocol/upgrades': 'OPERATE',
+}
+
 /** Second path segment → subsection label (only applied to 3+ segment routes). */
 export const ogSubsectionMap: Record<string, string> = {
   blockspace: 'BLOCKSPACE',

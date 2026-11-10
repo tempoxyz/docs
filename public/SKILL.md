@@ -16,23 +16,26 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 
 | Section | Start here when the reader wants to… |
 | --- | --- |
-| [Get Started](https://tempo.xyz/developers/get-started.md) | Choose an integration, send a first test payment, get testnet funds, connect a coding agent, or find the SDKs and CLI. |
+| [Get Started](https://tempo.xyz/developers/get-started.md) | Choose an integration, send a first test payment, get testnet funds, or connect a coding agent. |
 | [Accounts](https://tempo.xyz/developers/docs/accounts.md) | Create accounts, set up sign-in, security policies, access keys, and fees, or follow guides for wallet providers, SSO, self-custody, agents, automations, spending, and treasuries. |
 | [Earn](https://tempo.xyz/developers/docs/earn.md) | Choose a vault, deposit stablecoins, read positions, or withdraw. Earn is in beta; check access on the introduction page. |
 | [Routes](https://tempo.xyz/developers/docs/routes.md) | Accept cross-network deposits, quote transfers, or track delivery. Routes is in beta; check access on the introduction page. |
 | [Zones](https://tempo.xyz/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is live on Mainnet; check how to set up a Zone on the introduction page. |
 | [Machine Payments](https://tempo.xyz/developers/docs/agents.md) | Pay for APIs, accept API payments, discover services, or integrate MPP. |
-| [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, send or receive payments and reconcile deposits, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
+| [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, send or receive payments and reconcile deposits, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, or read protocol specifications. |
+| [Operate](https://tempo.xyz/developers/docs/guide/node.md) | Run RPC, standby, or validator nodes, upgrade node software, or follow network upgrades, activation timelines, and node releases. |
 | [API reference](https://tempo.xyz/developers/docs/api.md) | Find Tempo API endpoints by product, authentication, Console management endpoints, JSON-RPC, and the indexer. |
+| [SDKs & CLI](https://tempo.xyz/developers/docs/sdk.md) | Install a Tempo SDK for TypeScript, Rust, Go, Python, or Foundry, use the Tempo API client or server handlers, or run the Tempo CLI. |
+| [Guides](https://tempo.xyz/developers/docs/resources/guides.md) | Plan payment infrastructure and workflows, liquidity and issuance, machine payments, wallets and funding, or compliance controls. |
 | [Partners](https://tempo.xyz/developers/docs/partners.md) | Find third-party wallets, bridges, RPC infrastructure, data services, and integrations. |
 
-Accounts covers account setup and its guides; Tempo EVM covers payments and the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs and the CLI are under Get Started.
+Accounts covers account setup and its guides; Tempo EVM covers payments and the chain capabilities behind them. Routes covers cross-network movement. The API reference supplements product guides with exact endpoints and schemas. SDKs & CLI covers the client libraries and the Tempo CLI.
 
 Choose providers through the task guides for [wallets](https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md), [funding and payouts](https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts.md), [payment screening](https://tempo.xyz/developers/docs/resources/guides/payment-screening.md), and [reconciliation](https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md). Use [node providers](https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md) for hosted RPC access.
 
 For application checkout and returns, use [payment links](https://tempo.xyz/developers/docs/resources/guides/payment-links.md) and [refunds](https://tempo.xyz/developers/docs/resources/guides/refunds.md). These workflows connect trusted request records and amount reservations to the maintained payment primitives.
 
-Within Tempo EVM, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
+Within Operate, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
 
 Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in current Mainnet deployments.
 

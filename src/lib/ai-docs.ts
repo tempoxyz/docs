@@ -11,7 +11,7 @@ export const aiDocsDescription =
 
 const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   overview:
-    'Choose a starting point, send a test payment, get testnet funds, connect a coding agent, find the SDKs and CLI, and use the resource guides to plan payment workflows, liquidity, provider selection, and partner integrations.',
+    'Choose a starting point, send a test payment, get testnet funds, connect a coding agent, and explore stablecoins and use cases on Tempo.',
   accounts:
     'Create accounts, set up signing methods, policies, access keys, key rotation, and fees, and follow guides for users, automations, agents, and teams.',
   earn: 'Choose a vault, deposit stablecoins, read positions, and withdraw. Earn is in beta; see the introduction for access.',
@@ -22,8 +22,14 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   'machine-payments':
     'Pay for APIs, accept API payments, find services, and use MPP (https://mpp.dev).',
   developers:
-    'Build on Tempo EVM: wallets and keys, payments, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.',
+    'Build on Tempo EVM: wallets and keys, payments, transactions and fees, TIP-20 Tokens, contracts, exchange, network details, and protocol specifications.',
+  operate:
+    'Run RPC, standby, and validator nodes, keep them secure and upgraded, and follow network upgrades, activation timelines, and node releases.',
   api: 'Tempo API reference: authentication, conventions, endpoints grouped by product, Console management endpoints, JSON-RPC, and the indexer. An API key authenticates API requests; an account signing key authorizes transactions.',
+  tools:
+    'Use the Tempo SDKs for TypeScript, Rust, Go, Python, and Foundry, the Tempo API client, and server handlers, or the Tempo CLI for API calls, wallets, paid requests, snapshots, and nodes.',
+  resources:
+    'Plan stablecoin payment infrastructure and workflows, liquidity and issuance, machine payment models, wallet and funding providers, and compliance controls.',
   ecosystem:
     'Find wallet providers, bridges, RPC infrastructure, data services, and other third-party integrations.',
 }

@@ -348,10 +348,22 @@ export default defineConfig({
       zones: 'ZONES',
     }
 
+    // Operate owns node and upgrade pages that live under the guide and protocol paths.
+    const sectionPrefixMap: Record<string, string> = {
+      '/guide/node': 'OPERATE',
+      '/protocol/upgrades': 'OPERATE',
+    }
+
     const segments = docsPath.split('/').filter(Boolean)
     const firstSeg = segments[0] || ''
     const secondSeg = segments[1] || ''
-    const section = sectionMap[firstSeg] || firstSeg.toUpperCase().replace(/-/g, ' ')
+    const sectionPrefix = Object.keys(sectionPrefixMap).find(
+      (prefix) => docsPath === prefix || docsPath.startsWith(`${prefix}/`),
+    )
+    const section =
+      (sectionPrefix && sectionPrefixMap[sectionPrefix]) ||
+      sectionMap[firstSeg] ||
+      firstSeg.toUpperCase().replace(/-/g, ' ')
     const subsection =
       segments.length >= 3 && subsectionMap[secondSeg]
         ? subsectionMap[secondSeg]
@@ -382,7 +394,7 @@ export default defineConfig({
         groupItems: {
           'JSON-RPC': [{ text: 'Guide', link: '/docs/api/json-rpc' }],
           Indexer: [{ text: 'Guide', link: '/docs/api/indexer-api' }],
-          'API keys': [{ text: 'Guide', link: '/docs/api/console/api-keys' }],
+          'API keys': [{ text: 'Create and manage API keys', link: '/docs/api/console/api-keys' }],
           Projects: [{ text: 'Guide', link: '/docs/api/console/projects-and-environments' }],
           Team: [{ text: 'Guide', link: '/docs/api/console/team' }],
           'Billing and usage': [{ text: 'Guide', link: '/docs/api/console/usage-and-billing' }],
@@ -457,24 +469,8 @@ export default defineConfig({
           { text: 'Use cases', link: '/get-started/use-cases' },
         ],
       },
-      {
-        text: 'Tempo CLI',
-        items: [
-          { text: 'Overview', link: '/docs/cli' },
-          { text: 'API', link: '/docs/cli/api' },
-          {
-            text: 'Wallet',
-            collapsed: true,
-            items: [
-              { text: 'Overview', link: '/docs/cli/wallet' },
-              { text: 'Recipes', link: '/docs/wallet/recipes' },
-            ],
-          },
-          { text: 'Request', link: '/docs/cli/request' },
-          { text: 'Download', link: '/docs/cli/download' },
-          { text: 'Node', link: '/docs/cli/node' },
-        ],
-      },
+    ]
+    const toolsSidebar = [
       {
         text: 'Tempo SDK',
         items: [
@@ -513,127 +509,142 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Resources',
+        text: 'Tempo CLI',
         items: [
+          { text: 'Overview', link: '/docs/cli' },
+          { text: 'API', link: '/docs/cli/api' },
           {
-            text: 'Guides',
+            text: 'Wallet',
             collapsed: true,
             items: [
-              { text: 'All guides', link: '/docs/resources/guides' },
+              { text: 'Overview', link: '/docs/cli/wallet' },
+              { text: 'Recipes', link: '/docs/wallet/recipes' },
+            ],
+          },
+          { text: 'Request', link: '/docs/cli/request' },
+          { text: 'Download', link: '/docs/cli/download' },
+          { text: 'Node', link: '/docs/cli/node' },
+        ],
+      },
+      { text: 'Explorer', link: 'https://explore.tempo.xyz' },
+    ]
+    const resourcesSidebar = [
+      {
+        text: 'Guides',
+        items: [
+          { text: 'All guides', link: '/docs/resources/guides' },
+          {
+            text: 'Payment infrastructure',
+            collapsed: true,
+            items: [
               {
-                text: 'Payment infrastructure',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Blockchain payment flows',
-                    link: '/docs/resources/guides/blockchain-payments',
-                  },
-                  {
-                    text: 'Stablecoins for business',
-                    link: '/docs/resources/guides/stablecoins-for-business',
-                  },
-                  {
-                    text: 'Plan a payment stack',
-                    link: '/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale',
-                  },
-                  {
-                    text: 'Stablecoin settlement',
-                    link: '/docs/resources/guides/stablecoin-settlement',
-                  },
-                  { text: 'Compare payment rails', link: '/docs/resources/guides/payment-rails' },
-                  { text: 'Estimate payment fees', link: '/docs/resources/guides/stablecoin-fees' },
-                ],
+                text: 'Blockchain payment flows',
+                link: '/docs/resources/guides/blockchain-payments',
               },
               {
-                text: 'Payment workflows',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Accept stablecoin payments',
-                    link: '/docs/resources/guides/how-to-accept-stablecoin-payments',
-                  },
-                  { text: 'Create payment links', link: '/docs/resources/guides/payment-links' },
-                  { text: 'Handle refunds', link: '/docs/resources/guides/refunds' },
-                  {
-                    text: 'Reconcile payments',
-                    link: '/docs/resources/guides/payment-reconciliation',
-                  },
-                  { text: 'Plan batch payments', link: '/docs/resources/guides/batch-payments' },
-                  { text: 'Global payouts', link: '/docs/resources/guides/global-payouts' },
-                  {
-                    text: 'Global payroll',
-                    link: '/docs/resources/guides/stablecoin-payroll-for-global-teams',
-                  },
-                  {
-                    text: 'Cross-border payments',
-                    link: '/docs/resources/guides/cross-border-payments',
-                  },
-                  {
-                    text: 'Latin America payment routes',
-                    link: '/docs/resources/guides/cross-border-payments-latin-america',
-                  },
-                  { text: 'Remittance operations', link: '/docs/resources/guides/remittances' },
-                  {
-                    text: 'Recurring payments',
-                    link: '/docs/resources/guides/subscriptions-on-tempo',
-                  },
-                ],
+                text: 'Stablecoins for business',
+                link: '/docs/resources/guides/stablecoins-for-business',
               },
               {
-                text: 'Liquidity and issuance',
-                collapsed: true,
-                items: [
-                  { text: 'Corporate treasury', link: '/docs/resources/guides/corporate-treasury' },
-                  {
-                    text: 'Nostro and vostro accounts',
-                    link: '/docs/resources/guides/nostro-vostro-accounts',
-                  },
-                  { text: 'Plan prefunding', link: '/docs/resources/guides/prefunding' },
-                  { text: 'FBO accounts', link: '/docs/resources/guides/fbo-accounts' },
-                  { text: 'The GENIUS Act', link: '/docs/resources/guides/genius-act' },
-                ],
+                text: 'Plan a payment stack',
+                link: '/docs/resources/guides/stablecoin-payment-infrastructure-enterprise-scale',
               },
               {
-                text: 'Machine payment models',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'HTTP 402 payment flows',
-                    link: '/docs/resources/guides/402-payment-required',
-                  },
-                  {
-                    text: 'Microtransactions and sessions',
-                    link: '/docs/resources/guides/microtransactions',
-                  },
-                ],
+                text: 'Stablecoin settlement',
+                link: '/docs/resources/guides/stablecoin-settlement',
+              },
+              { text: 'Compare payment rails', link: '/docs/resources/guides/payment-rails' },
+              { text: 'Estimate payment fees', link: '/docs/resources/guides/stablecoin-fees' },
+            ],
+          },
+          {
+            text: 'Payment workflows',
+            collapsed: true,
+            items: [
+              {
+                text: 'Accept stablecoin payments',
+                link: '/docs/resources/guides/how-to-accept-stablecoin-payments',
+              },
+              { text: 'Create payment links', link: '/docs/resources/guides/payment-links' },
+              { text: 'Handle refunds', link: '/docs/resources/guides/refunds' },
+              {
+                text: 'Reconcile payments',
+                link: '/docs/resources/guides/payment-reconciliation',
+              },
+              { text: 'Plan batch payments', link: '/docs/resources/guides/batch-payments' },
+              { text: 'Global payouts', link: '/docs/resources/guides/global-payouts' },
+              {
+                text: 'Global payroll',
+                link: '/docs/resources/guides/stablecoin-payroll-for-global-teams',
               },
               {
-                text: 'Wallets and funding',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Choose embedded wallets',
-                    link: '/docs/resources/guides/embedded-wallets',
-                  },
-                  {
-                    text: 'Choose funding and payouts',
-                    link: '/docs/resources/guides/funding-and-payouts',
-                  },
-                ],
+                text: 'Cross-border payments',
+                link: '/docs/resources/guides/cross-border-payments',
               },
               {
-                text: 'Compliance and security',
-                collapsed: true,
-                items: [
-                  {
-                    text: 'Screen blockchain payments',
-                    link: '/docs/resources/guides/payment-screening',
-                  },
-                  {
-                    text: 'Design payment controls',
-                    link: '/docs/resources/guides/compliance-controls',
-                  },
-                ],
+                text: 'Latin America payment routes',
+                link: '/docs/resources/guides/cross-border-payments-latin-america',
+              },
+              { text: 'Remittance operations', link: '/docs/resources/guides/remittances' },
+              {
+                text: 'Recurring payments',
+                link: '/docs/resources/guides/subscriptions-on-tempo',
+              },
+            ],
+          },
+          {
+            text: 'Liquidity and issuance',
+            collapsed: true,
+            items: [
+              { text: 'Corporate treasury', link: '/docs/resources/guides/corporate-treasury' },
+              {
+                text: 'Nostro and vostro accounts',
+                link: '/docs/resources/guides/nostro-vostro-accounts',
+              },
+              { text: 'Plan prefunding', link: '/docs/resources/guides/prefunding' },
+              { text: 'FBO accounts', link: '/docs/resources/guides/fbo-accounts' },
+              { text: 'The GENIUS Act', link: '/docs/resources/guides/genius-act' },
+            ],
+          },
+          {
+            text: 'Machine payment models',
+            collapsed: true,
+            items: [
+              {
+                text: 'HTTP 402 payment flows',
+                link: '/docs/resources/guides/402-payment-required',
+              },
+              {
+                text: 'Microtransactions and sessions',
+                link: '/docs/resources/guides/microtransactions',
+              },
+            ],
+          },
+          {
+            text: 'Wallets and funding',
+            collapsed: true,
+            items: [
+              {
+                text: 'Choose embedded wallets',
+                link: '/docs/resources/guides/embedded-wallets',
+              },
+              {
+                text: 'Choose funding and payouts',
+                link: '/docs/resources/guides/funding-and-payouts',
+              },
+            ],
+          },
+          {
+            text: 'Compliance and security',
+            collapsed: true,
+            items: [
+              {
+                text: 'Screen blockchain payments',
+                link: '/docs/resources/guides/payment-screening',
+              },
+              {
+                text: 'Design payment controls',
+                link: '/docs/resources/guides/compliance-controls',
               },
             ],
           },
@@ -906,7 +917,16 @@ export default defineConfig({
           { text: 'Wallets', link: '/docs/partners/wallets' },
           { text: 'Smart accounts', link: '/docs/partners/smart-accounts' },
           { text: 'Exchanges', link: '/docs/partners/exchanges' },
-          { text: 'Bridges', link: '/docs/partners/bridges' },
+          {
+            text: 'Bridges',
+            collapsed: false,
+            items: [
+              { text: 'Overview', link: '/docs/partners/bridges' },
+              { text: 'LayerZero', link: '/docs/guide/bridge-layerzero' },
+              { text: 'Relay', link: '/docs/guide/bridge-relay' },
+              { text: 'Bungee', link: '/docs/guide/bridge-bungee' },
+            ],
+          },
           { text: 'Payments & ramps', link: '/docs/partners/payments-and-ramps' },
           { text: 'Cards', link: '/docs/partners/cards' },
           { text: 'Partner with Tempo', link: '/docs/partners/join' },
@@ -924,7 +944,6 @@ export default defineConfig({
     ]
     const nodeSidebar = {
       text: 'Run a node',
-      collapsed: true,
       items: [
         {
           text: 'Overview',
@@ -948,6 +967,7 @@ export default defineConfig({
         },
         {
           text: 'Run a validator',
+          collapsed: true,
           items: [
             {
               text: 'Overview',
@@ -1001,138 +1021,75 @@ export default defineConfig({
         },
       ],
     }
-    const changelogSidebar = [
-      { text: '← Back to Tempo EVM', link: '/docs/development' },
-      {
-        text: 'Changelog',
-        items: [
-          { text: 'Overview', link: '/docs/protocol/upgrades' },
-          {
-            text: 'Network upgrades',
-            collapsed: false,
-            items: [
-              {
-                text: 'T14',
-                badge: { text: 'Planned', variant: 'note' as const },
-                link: '/docs/protocol/upgrades/t14',
-              },
-              {
-                text: 'T13',
-                badge: { text: 'Mainnet', variant: 'info' as const },
-                link: '/docs/protocol/upgrades/t13',
-              },
-              {
-                text: 'T12',
-                link: '/docs/protocol/upgrades/t12',
-              },
-              {
-                text: 'T11',
-                link: '/docs/protocol/upgrades/t11',
-              },
-              {
-                text: 'T10',
-                link: '/docs/protocol/upgrades/t10',
-              },
-              {
-                text: 'T9',
-                link: '/docs/protocol/upgrades/t9',
-              },
-              {
-                text: 'T8',
-                link: '/docs/protocol/upgrades/t8',
-              },
-              {
-                text: 'T7',
-                link: '/docs/protocol/upgrades/t7',
-              },
-              {
-                text: 'T6',
-                link: '/docs/protocol/upgrades/t6',
-              },
-              {
-                text: 'T5',
-                link: '/docs/protocol/upgrades/t5',
-              },
-              {
-                text: 'T4',
-                link: '/docs/protocol/upgrades/t4',
-              },
-              {
-                text: 'T3',
-                link: '/docs/protocol/upgrades/t3',
-              },
-              {
-                text: 'T2',
-                link: '/docs/protocol/upgrades/t2',
-              },
-            ],
-          },
-          { text: 'Node releases', link: '/docs/changelog' },
-          { text: 'Operator updates', link: '/docs/guide/node/network-upgrades' },
-        ],
-      },
-    ]
-    const developerToolsSidebar = [
-      {
-        text: 'SDKs & CLI',
-        items: [
-          {
-            text: 'Overview',
-            link: '/docs/sdk',
-          },
-          {
-            text: 'SDKs',
-            collapsed: false,
-            items: [
-              { text: 'Overview', link: '/docs/sdk' },
-              {
-                text: 'TypeScript',
-                collapsed: false,
-                items: [
-                  { text: 'Overview', link: '/docs/sdk/typescript' },
-                  { text: 'Local testing with Prool', link: '/docs/sdk/typescript/prool/setup' },
-                  { text: 'Viem reference', link: 'https://viem.sh/tempo' },
-                  { text: 'Wagmi reference', link: 'https://wagmi.sh/tempo' },
-                ],
-              },
-              { text: 'Rust', link: '/docs/sdk/rust' },
-              { text: 'Go', link: '/docs/sdk/go' },
-              { text: 'Python', link: '/docs/sdk/python' },
-              {
-                text: 'Foundry',
-                collapsed: false,
-                items: [
-                  { text: 'Overview', link: '/docs/sdk/foundry' },
-                  { text: 'Use MPP with Foundry', link: '/docs/sdk/foundry/mpp' },
-                  { text: 'Signature verification', link: '/docs/sdk/foundry/signature-verifier' },
-                ],
-              },
-            ],
-          },
-          {
-            text: 'CLI',
-            collapsed: false,
-            items: [
-              { text: 'Overview', link: '/docs/cli' },
-              { text: 'Wallet', link: '/docs/cli/wallet' },
-              { text: 'Wallet recipes', link: '/docs/wallet/recipes' },
-              { text: 'Request', link: '/docs/cli/request' },
-              { text: 'Download', link: '/docs/cli/download' },
-              { text: 'Node', link: '/docs/cli/node' },
-            ],
-          },
-          {
-            text: 'Server handlers',
-            collapsed: false,
-            items: [
-              { text: 'Overview', link: '/docs/server' },
-              { text: 'Relay and fee payer handler', link: '/docs/server/relay-handler' },
-            ],
-          },
-          { text: 'Explorer', link: 'https://explore.tempo.xyz' },
-        ],
-      },
-    ]
+    const changelogSidebar = {
+      text: 'Changelog',
+      items: [
+        { text: 'Overview', link: '/docs/protocol/upgrades' },
+        {
+          text: 'Network upgrades',
+          collapsed: false,
+          items: [
+            {
+              text: 'T14',
+              badge: { text: 'Planned', variant: 'note' as const },
+              link: '/docs/protocol/upgrades/t14',
+            },
+            {
+              text: 'T13',
+              badge: { text: 'Mainnet', variant: 'info' as const },
+              link: '/docs/protocol/upgrades/t13',
+            },
+            {
+              text: 'T12',
+              link: '/docs/protocol/upgrades/t12',
+            },
+            {
+              text: 'T11',
+              link: '/docs/protocol/upgrades/t11',
+            },
+            {
+              text: 'T10',
+              link: '/docs/protocol/upgrades/t10',
+            },
+            {
+              text: 'T9',
+              link: '/docs/protocol/upgrades/t9',
+            },
+            {
+              text: 'T8',
+              link: '/docs/protocol/upgrades/t8',
+            },
+            {
+              text: 'T7',
+              link: '/docs/protocol/upgrades/t7',
+            },
+            {
+              text: 'T6',
+              link: '/docs/protocol/upgrades/t6',
+            },
+            {
+              text: 'T5',
+              link: '/docs/protocol/upgrades/t5',
+            },
+            {
+              text: 'T4',
+              link: '/docs/protocol/upgrades/t4',
+            },
+            {
+              text: 'T3',
+              link: '/docs/protocol/upgrades/t3',
+            },
+            {
+              text: 'T2',
+              link: '/docs/protocol/upgrades/t2',
+            },
+          ],
+        },
+        { text: 'Node releases', link: '/docs/changelog' },
+        { text: 'Operator updates', link: '/docs/guide/node/network-upgrades' },
+      ],
+    }
+    const operateSidebar = [nodeSidebar, changelogSidebar]
 
     // Keep guides and specifications in one chapter per topic. Group controls
     // disclose pages; Vocs opens the active chapter without replacing the tree.
@@ -1293,7 +1250,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Introduction', link: '/docs/network' },
-              { text: 'Connection details', link: '/docs/quickstart/connection-details' },
+              { text: 'Network details', link: '/docs/quickstart/connection-details' },
               { text: 'EVM differences', link: '/docs/quickstart/evm-compatibility' },
               { text: 'Integrate an existing app', link: '/docs/quickstart/integrate-tempo' },
               { text: 'JSON-RPC reference', link: '/docs/protocol/rpc' },
@@ -1306,21 +1263,10 @@ export default defineConfig({
               { text: 'TIPs', link: 'https://tips.sh/' },
             ],
           },
-          {
-            text: 'Run a node',
-            collapsed: true,
-            items: nodeSidebar.items.map((item) => ({
-              ...item,
-              ...(item.text === 'Overview' ? { text: 'Introduction' } : {}),
-              ...(item.items ? { collapsed: true } : {}),
-            })),
-          },
           { text: 'All specifications', link: '/docs/protocol' },
-          { ...changelogSidebar[1], collapsed: true },
         ],
       },
     ]
-    const toolsSidebar = developerToolsSidebar
     const partnerResourcesSidebar = [...ecosystemSidebar]
     const productSidebars = {
       overview: getStartedSidebar,
@@ -1330,8 +1276,10 @@ export default defineConfig({
       zones: zonesSidebar,
       developers: developersSidebar,
       'machine-payments': machinePaymentsSidebar,
+      operate: operateSidebar,
       api: [{ text: 'API reference', items: [{ text: 'Introduction', link: '/docs/api' }] }],
       tools: toolsSidebar,
+      resources: resourcesSidebar,
       ecosystem: partnerResourcesSidebar,
     }
 

@@ -17,10 +17,11 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 
 ## Documentation IA and agent exports
 
-- `src/lib/docs-sections.ts` owns the section labels, landing routes, and route ownership; `vocs.config.ts` owns the sidebar within each section.
-- Primary sections: Get Started (`/get-started`), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), and Machine Payments (`/docs/agents`). Get Started also owns the SDK, CLI, wallet CLI, and server handler pages (`/docs/sdk`, `/docs/cli`, `/docs/wallet`, `/docs/server`) as its Tempo CLI and Tempo SDK sections.
-- Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
-- API reference (`/docs/api`) is its own top-nav link, matching Console's "API Docs" link. Partners (`/docs/partners`) contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
+- `src/lib/docs-sections.ts` owns the section labels, landing routes, and route ownership, plus `docsAreas`, the six global-nav areas that group the sections; `vocs.config.ts` owns the sidebar within each section.
+- Global nav areas: Get started, Products (Accounts, Earn, Routes, Zones, Machine Payments), Tempo EVM, Operate, Reference (API reference, SDKs & CLI) and Resources (Guides, Partners). The second header row lists the sections of the current area.
+- Sections: Get Started (`/get-started`, onboarding only), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), Machine Payments (`/docs/agents`), Tempo EVM (`/docs/development`), Operate (`/docs/guide/node`, `/docs/changelog`, `/docs/protocol/upgrades`), API reference (`/docs/api`), SDKs & CLI (`/docs/sdk`, `/docs/cli`, `/docs/wallet`, `/docs/server`), Guides (`/docs/resources`) and Partners (`/docs/partners`).
+- Tempo EVM covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, and protocol specifications. Operate covers running nodes and validators, network upgrades, and node releases.
+- API reference matches Console's "API Docs" link. Partners contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
 - Keep Earn and Routes beta notices and the Zones availability notice (live on Mainnet, set up with Tempo) on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
 - `public/SKILL.md` is the canonical Tempo docs skill, published at `/SKILL.md`. The `tempoxyz/plugins` copy is generated from it by that repo's skill sync, so edit only `public/SKILL.md` here.
 - `src/lib/markdown-output-transform.ts` uses `src/lib/ai-docs.ts` to add section context before Vocs validates and writes Markdown exports. `SKILL.md` links to `public/SKILL.md`, the source Vite serves and copies. Never edit `dist` or `.vercel` copies by hand.

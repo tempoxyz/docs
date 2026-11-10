@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { docsSections } from './docs-sections'
-import { OG_IMAGE_VERSION, ogLandingPaths, ogSectionMap, ogSubsectionMap } from './og-sections'
+import {
+  OG_IMAGE_VERSION,
+  ogLandingPaths,
+  ogSectionMap,
+  ogSectionPrefixMap,
+  ogSubsectionMap,
+} from './og-sections'
 
 // vocs.config.ts's `ogImageUrl` is serialized to source and re-evaluated at
 // runtime, so it cannot import the maps in og-sections.ts — it carries an
@@ -27,7 +33,7 @@ function parseInlineMap(source: string, name: string): Record<string, string> {
   expect(match, `inline ${name} in vocs.config.ts ogImageUrl`).toBeTruthy()
   const map: Record<string, string> = {}
   for (const [, key, value] of (match as RegExpMatchArray)[1].matchAll(
-    /["']?([\w-]+)["']?\s*:\s*["']([^"']*)["']/g,
+    /["']?([\w/-]+)["']?\s*:\s*["']([^"']*)["']/g,
   )) {
     map[key] = value
   }
@@ -43,6 +49,10 @@ describe('vocs.config ogImageUrl stays in sync with src/lib/og-sections', () => 
 
   it('has identical subsection maps (both directions)', () => {
     expect(parseInlineMap(source, 'subsectionMap')).toEqual(ogSubsectionMap)
+  })
+
+  it('has identical section prefix maps (both directions)', () => {
+    expect(parseInlineMap(source, 'sectionPrefixMap')).toEqual(ogSectionPrefixMap)
   })
 
   it('has identical landing paths', () => {
@@ -62,6 +72,11 @@ describe('vocs.config ogImageUrl stays in sync with src/lib/og-sections', () => 
   it.each(Object.entries(ogSectionMap))('maps section %s -> %s', (segment, label) => {
     const url = ogImageUrl(`/${segment}/some-page`)
     expect(param(url, 'section')).toBe(label)
+  })
+
+  it.each(Object.entries(ogSectionPrefixMap))('maps pages under %s -> %s', (prefix, label) => {
+    expect(param(ogImageUrl(`/docs${prefix}`), 'section')).toBe(label)
+    expect(param(ogImageUrl(`/docs${prefix}/some-page`), 'section')).toBe(label)
   })
 
   it.each(docsSections)('uses the current $label product name on its social card', (section) => {
