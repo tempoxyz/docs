@@ -13,7 +13,11 @@ import { CopyButton, type CopyButtonState } from './CopyButton'
 import { CopyIconSwap } from './CopyIconSwap'
 import { usePathname } from './DocsHeader'
 import * as ui from './DocsPageActions.recipes'
-import { docsPageActions, docsPageActionsError } from './DocsPageActions.styles'
+import {
+  docsPageActions,
+  docsPageActionsError,
+  docsPageActionsGroup,
+} from './DocsPageActions.styles'
 
 /** Place page tools after the article introduction, including after client navigation. */
 export default function DocsPageActions({ openApi = false }: { openApi?: boolean }) {
@@ -86,42 +90,44 @@ export default function DocsPageActions({ openApi = false }: { openApi?: boolean
             aria-label="Page tools"
             className={`docs-page-actions ${docsPageActions().className}`}
           >
-            <CopyButton
-              key={pathname}
-              text={loadMarkdown}
-              label="Copy for agent"
-              icon={
-                <CopyIconSwap
-                  copied={state === 'copied'}
-                  copyIcon={<CopyIcon width="14" height="14" />}
-                  checkIcon={<CheckIcon width="14" height="14" />}
-                />
-              }
-              resetAfter={1200}
-              onStateChange={setState}
-            />
-            <a href={markdownPath} target="_blank" rel="noreferrer" title="View Markdown">
-              <ExternalLinkIcon aria-hidden="true" width="14" height="14" />
-              <span className="docs-page-action-label">View Markdown</span>
-            </a>
-            <Link
-              to="/docs/guide/using-tempo-with-ai#install-tempo-plugins"
-              title="Install agent tools"
-            >
-              <DownloadIcon aria-hidden="true" width="14" height="14" />
-              <span className="docs-page-action-label">Install agent tools</span>
-            </Link>
-            {pathname.replace(/\/$/, '') === '/docs/earn' && (
-              <a
-                href="https://github.com/tempoxyz/earn"
-                target="_blank"
-                rel="noreferrer"
-                title="View Earn on GitHub"
-              >
-                <GitHubIcon aria-hidden="true" width="14" height="14" />
-                <span className="docs-page-action-label">GitHub</span>
+            <div className={`docs-page-actions-group ${docsPageActionsGroup().className}`}>
+              <CopyButton
+                key={pathname}
+                text={loadMarkdown}
+                label="Copy for agent"
+                icon={
+                  <CopyIconSwap
+                    copied={state === 'copied'}
+                    copyIcon={<CopyIcon width="14" height="14" />}
+                    checkIcon={<CheckIcon width="14" height="14" />}
+                  />
+                }
+                resetAfter={1200}
+                onStateChange={setState}
+              />
+              <a href={markdownPath} target="_blank" rel="noreferrer" title="View Markdown">
+                <ExternalLinkIcon aria-hidden="true" width="14" height="14" />
+                <span className="docs-page-action-label">View Markdown</span>
               </a>
-            )}
+              <Link
+                to="/docs/guide/using-tempo-with-ai#install-tempo-plugins"
+                title="Install agent tools"
+              >
+                <DownloadIcon aria-hidden="true" width="14" height="14" />
+                <span className="docs-page-action-label">Install agent tools</span>
+              </Link>
+              {pathname.replace(/\/$/, '') === '/docs/earn' && (
+                <a
+                  href="https://github.com/tempoxyz/earn"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="View Earn on GitHub"
+                >
+                  <GitHubIcon aria-hidden="true" width="14" height="14" />
+                  <span className="docs-page-action-label">GitHub</span>
+                </a>
+              )}
+            </div>
             <span
               role="status"
               className={

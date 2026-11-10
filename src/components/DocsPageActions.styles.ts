@@ -22,19 +22,34 @@ export const docsPageActions = style({
   fontFamily: tokens.fontFamily.sansFallback,
   fontSize: tokens.fontSize.compact,
   lineHeight: tokens.lineHeight.normal,
+  '@media (width < 600px)': {
+    marginBottom: tokens.spacing['6'],
+  },
+})
+
+// One quiet control group: a labeled secondary copy action, then icon buttons whose
+// labels stay available to assistive technology and as tooltips.
+export const docsPageActionsGroup = style({
+  display: 'inline-flex',
+  alignItems: 'stretch',
+  borderWidth: tokens.borderWidth.hairline,
+  borderStyle: 'solid',
+  borderColor: tokens.color.hairline,
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
   selectors: {
-    '& :is(a, button)': {
+    '& > :is(a, button)': {
       display: 'inline-flex',
       alignItems: 'center',
+      justifyContent: 'center',
       gap: tokens.spacing['1_5'],
-      minHeight: '32px',
-      paddingBlock: tokens.spacing['1_5'],
-      paddingInline: tokens.spacing['3'],
+      minWidth: '32px',
+      minHeight: '30px',
+      paddingBlock: tokens.spacing['1'],
+      paddingInline: tokens.spacing['2'],
       border: 0,
-      // G8: secondary actions use the Platform gray fill; one radius, smoothed.
-      borderRadius: tokens.radius.md,
-      '--corner-radius': tokens.radius.md,
-      backgroundColor: tokens.color.container,
+      borderRadius: tokens.radius.none,
+      backgroundColor: 'transparent !custom',
 
       color: tokens.color.foreground,
       fontFamily: 'inherit !custom',
@@ -45,44 +60,39 @@ export const docsPageActions = style({
       transitionDuration: 'var(--tempo-exit)',
       transitionTimingFunction: 'var(--tempo-ease)',
     },
-    '& :is(a, button):hover': {
-      backgroundColor: tokens.color.containerStrong,
+    '& > button:first-child': {
+      paddingInline: tokens.spacing['3'],
+    },
+    '& > :is(a, button) + :is(a, button)': {
+      borderInlineStartWidth: tokens.borderWidth.hairline,
+      borderInlineStartStyle: 'solid',
+      borderInlineStartColor: tokens.color.hairline,
+    },
+    '& > :first-child': {
+      borderStartStartRadius: tokens.radius.md,
+      borderEndStartRadius: tokens.radius.md,
+    },
+    '& > :last-child': {
+      borderStartEndRadius: tokens.radius.md,
+      borderEndEndRadius: tokens.radius.md,
+    },
+    '& > :is(a, button):hover': {
+      backgroundColor: tokens.color.containerSubtle,
       transitionDuration: 'var(--tempo-enter)',
     },
-    '& > button:first-child': {
-      backgroundColor: inherited.color.backgroundColorInvert,
-
-      color: inherited.color.textColorInvert,
-    },
-    '& > button:first-child:hover': {
-      backgroundColor: inherited.color.backgroundColorInvert,
-      opacity: 0.9,
+    '& .docs-page-action-label': {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+      clipPath: 'inset(50%)',
+      whiteSpace: 'nowrap',
     },
   },
   '@media (prefers-reduced-motion: reduce)': {
     selectors: {
-      '& :is(a, button)': {
+      '& > :is(a, button)': {
         transition: 'none',
-      },
-    },
-  },
-  '@media (width < 600px)': {
-    marginBottom: tokens.spacing['6'],
-    selectors: {
-      // Three labeled buttons do not fit one phone-width row; keep the primary labeled and
-      // collapse the secondary actions to icons with their labels still exposed to readers.
-      '& > :is(a, button):not(:first-child)': {
-        justifyContent: 'center',
-        minWidth: '32px',
-        paddingInline: tokens.spacing['2'],
-      },
-      '& > :is(a, button):not(:first-child) .docs-page-action-label': {
-        position: 'absolute',
-        width: '1px',
-        height: '1px',
-        overflow: 'hidden',
-        clipPath: 'inset(50%)',
-        whiteSpace: 'nowrap',
       },
     },
   },

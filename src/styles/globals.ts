@@ -367,7 +367,7 @@ global({
 global({
   '@layer utilities': {
     '@media (width >= 1376px)': {
-      '[data-v-sidebar] [data-v-content], [data-v-sidebar] [data-v-footer]': {
+      '[data-v-sidebar] [data-v-content]': {
         marginLeft: 'auto !custom',
         marginRight: 'auto !custom',
       },
@@ -717,41 +717,91 @@ global({
   },
 })
 
+// Ask AI docks in the right rail when the page has one, so it never covers the
+// content column. Elsewhere (below 1376px, the entry page and full-width API
+// reference pages) it is a compact icon button in the bottom-right corner; its
+// visually hidden text stays the button's accessible name. Vocs sizes the
+// trigger with !important utilities, so the container's size bounds it instead.
 global({
   '@layer utilities': {
-    '@media (width < 1376px)': {
-      '[data-v-ask-ai-container]': {
-        display: 'none',
-      },
+    '[data-v-ask-ai-container]': {
+      position: 'fixed',
+      top: 'auto',
+      bottom: '12px',
+      left: 'auto',
+      right: '12px',
+      width: '36px',
+      height: '36px',
+      translate: 0,
+      transform: 'none',
     },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '@media (width >= 1376px)': {
-      '[data-v-ask-ai-container]': {
-        position: 'fixed',
-        top: 'auto',
-        bottom: '24px',
-        left: 'auto',
-        right: 'max(24px, calc((100% - var(--tempo-docs-shell-width)) * 0.5 + 24px))',
-        width: 'calc(var(--tempo-docs-outline-width) - 48px)',
-        translate: 0,
-        transform: 'none',
-      },
+    '[data-v-ask-ai-container] > button': {
+      minWidth: 0,
+      width: '100%',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      justifyContent: 'center',
+      paddingInline: tokens.spacing['0'],
+      borderRadius: tokens.radius.full,
     },
-  },
-})
-
-global({
-  '@layer vocs_utilities': {
+    '[data-v-ask-ai-container] > button > div': {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+      clipPath: 'inset(50%)',
+      whiteSpace: 'nowrap',
+    },
+    '[data-v-ask-ai-container] > button::before': {
+      content: '""',
+      display: 'block',
+      flexShrink: 0,
+      width: '18px',
+      height: '18px',
+      backgroundColor: 'currentColor',
+      maskImage:
+        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4'/%3E%3Ccircle cx='4' cy='20' r='2'/%3E%3C/svg%3E\")",
+      maskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      WebkitMaskImage:
+        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4'/%3E%3Ccircle cx='4' cy='20' r='2'/%3E%3C/svg%3E\")",
+      WebkitMaskSize: 'contain',
+      WebkitMaskRepeat: 'no-repeat',
+      WebkitMaskPosition: 'center',
+    },
+    // The menu otherwise takes the trigger's width, which is 36px when compact.
+    '[role="menu"][data-side]:has([role="menuitem"])': {
+      minWidth: '240px',
+    },
     '@media (width >= 1376px)': {
-      '[data-v-ask-ai-container] > button': {
-        minWidth: 0,
-        width: '100%',
-        maxWidth: '100%',
-      },
+      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container]':
+        {
+          bottom: '24px',
+          right: 'max(24px, calc((100% - var(--tempo-docs-shell-width)) * 0.5 + 24px))',
+          width: 'calc(var(--tempo-docs-outline-width) - 48px)',
+          height: 'auto',
+        },
+      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container] > button':
+        {
+          justifyContent: 'space-between',
+          paddingInlineStart: tokens.spacing['3'],
+          paddingInlineEnd: tokens.spacing['2'],
+          borderRadius: tokens.radius.lg,
+        },
+      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container] > button > div':
+        {
+          position: 'static',
+          width: 'auto',
+          height: 'auto',
+          overflow: 'visible',
+          clipPath: 'none',
+          whiteSpace: 'normal',
+        },
+      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container] > button::before':
+        {
+          display: 'none',
+        },
     },
   },
 })
@@ -1333,10 +1383,17 @@ global({
 
 global({
   '@layer utilities': {
-    '[data-layout]:has(.tempo-docs-home) [data-v-gutter-left], [data-layout]:has(.tempo-docs-home) [data-v-gutter-right], [data-layout]:has(.tempo-docs-home) [data-v-outline-mobile], [data-layout]:has(.tempo-docs-home) [data-v-outline], [data-layout]:has(.tempo-docs-home) [data-v-content-footer], [data-layout]:has(.tempo-docs-home) [data-v-footer]':
+    '[data-layout]:has(.tempo-docs-home) [data-v-gutter-left], [data-layout]:has(.tempo-docs-home) [data-v-gutter-right], [data-layout]:has(.tempo-docs-home) [data-v-outline-mobile], [data-layout]:has(.tempo-docs-home) [data-v-outline], [data-layout]:has(.tempo-docs-home) [data-v-content-footer]':
       {
         display: 'none',
       },
+    // The site footer's columns line up with the entry page's content.
+    '[data-layout]:has(.tempo-docs-home) .docs-footer-inner': {
+      maxWidth: 'calc(var(--tempo-hub-width) + 96px)',
+      marginInline: 'auto !custom',
+      // design-exception: Match the entry page article's responsive inset.
+      paddingInline: 'clamp(24px, 4vw, 48px) !custom',
+    },
   },
 })
 
@@ -1523,18 +1580,19 @@ global({
   },
 })
 
-// G11: callouts follow TDS Platform. Notes and info use Callout (subtle fill, no
-// icon); tip, warning, danger and success use Alert (tone fill, an 8px tone
-// square in place of the icon). Neither has a border, and text stays primary.
+// G11: callouts follow the TDS Platform Alert in four quiet tones: neutral (note,
+// info), tip, warning and negative (danger), plus positive for success. Each has a
+// subtle tinted fill, no border and a leading icon in its tone; text stays primary.
 global({
   '@layer utilities': {
     'aside[data-v][data-v-callout]': {
+      '--tempo-alert-tone': 'var(--foreground-secondary)',
+      position: 'relative',
       marginInline: tokens.spacing['0'],
-      paddingBlock: tokens.spacing['6'],
-      paddingInline: tokens.spacing['8'],
+      padding: tokens.spacing['4'],
       borderWidth: tokens.borderWidth.none,
-      '--corner-radius': tokens.radius.xl,
-      borderRadius: tokens.radius.xl,
+      '--corner-radius': tokens.radius.lg,
+      borderRadius: tokens.radius.lg,
       backgroundColor: tokens.color.containerSubtle,
       color: inherited.color.vocsTextColorPrimary,
       fontSize: tokens.fontSize.sm,
@@ -1544,23 +1602,10 @@ global({
       {
         color: inherited.color.vocsTextColorPrimary,
       },
-    // TDS B2 lines (14/20) inside callouts, so the indicator centers on the first line.
+    // TDS B2 lines (14/20) inside callouts, so the icon centers on the first line.
     'aside[data-v][data-v-callout] :is(p, li)[data-v]': {
       lineHeight: tokens.lineHeight.control,
     },
-    'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
-      display: 'none',
-    },
-    'aside[data-v][data-v-callout][data-v-content] > :not(:is([data-v-callout-icon], [data-v-code-container]))':
-      {
-        paddingInlineStart: tokens.spacing['0'],
-      },
-    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"])':
-      {
-        padding: tokens.spacing['4'],
-        '--corner-radius': tokens.radius.lg,
-        borderRadius: tokens.radius.lg,
-      },
     'aside[data-v][data-v-callout][data-v-context="tip"]': {
       '--tempo-alert-tone': 'var(--info)',
       backgroundColor: tokens.color.infoContainer,
@@ -1577,35 +1622,26 @@ global({
       '--tempo-alert-tone': 'var(--positive)',
       backgroundColor: tokens.color.positiveContainer,
     },
-    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"]) > [data-v-callout-icon]':
-      {
-        display: 'block',
-        width: tokens.spacing['2'],
-        height: tokens.spacing['2'],
-        // design-exception: Centres the 8px square on the 20px first line (20 − 8) / 2.
-        marginTop: '6px !custom',
-        marginInlineStart: tokens.spacing['1'],
-        // The TDS indicator's 2px corner, smoothed.
-        borderRadius: tokens.radius.xs,
-        '--corner-radius': tokens.radius.xs,
-        // design-exception: The tone is set per context above from the status tokens.
-        backgroundColor: 'var(--tempo-alert-tone) !custom',
-      },
-    'aside[data-v][data-v-callout] > [data-v-callout-icon] > svg': {
-      display: 'none',
+    'aside[data-v][data-v-callout] > [data-v-callout-icon]': {
+      position: 'absolute',
+      // Centres the 16px icon on the 20px first line inside the 16px inset.
+      insetBlockStart: '18px',
+      insetInlineStart: '16px',
+      width: '16px',
+      height: '16px',
+      marginTop: tokens.spacing['0'],
+      // design-exception: The tone is set per context above from the status tokens.
+      color: 'var(--tempo-alert-tone) !custom',
     },
-    'aside[data-v][data-v-callout]:is([data-v-context="tip"], [data-v-context="warning"], [data-v-context="danger"], [data-v-context="success"])[data-v-content] > :not(:is([data-v-callout-icon], [data-v-code-container]))':
+    'aside[data-v][data-v-callout] > [data-v-callout-icon] > svg': {
+      display: 'block',
+      width: '16px',
+      height: '16px',
+    },
+    'aside[data-v][data-v-callout][data-v-content] > :not(:is([data-v-callout-icon], [data-v-code-container]))':
       {
         paddingInlineStart: tokens.spacing['7'],
       },
-  },
-  '@media (width < 768px)': {
-    '@layer utilities': {
-      'aside[data-v][data-v-callout]': {
-        paddingBlock: tokens.spacing['5'],
-        paddingInline: tokens.spacing['5'],
-      },
-    },
   },
 })
 
@@ -1638,14 +1674,70 @@ global({
 })
 
 // Body text takes TDS Platform B1's size and tracking (16px, 0.12px) in docs
-// articles. B1's 22px line height is set for UI text; long-form prose keeps the
-// Vocs 26px leading. Card descriptions keep their own 14px size, and callouts
-// keep B2 (utilities layer above). Home keeps its own scale.
+// articles. B1's 22px line height is set for UI text; long-form prose keeps a
+// 26px leading. Card descriptions keep their own 14px size, and callouts keep
+// B2 (utilities layer above). Home keeps its own scale.
 global({
   '@layer vocs_utilities': {
     'article[data-v-content] :is(p, li)[data-v]:not(a *)': {
       fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.relaxed,
       letterSpacing: tokens.letterSpacing.b1,
+    },
+  },
+})
+
+// Prose keeps a readable measure of about 72 characters; code blocks, tables,
+// callouts and cards still use the full content column.
+global({
+  '@layer utilities': {
+    ':is(article[data-v-content]:not(:has(.tempo-docs-home)), [data-v-openapi-intro], [data-v-openapi-guide]) > :is(p, ul, ol, dl, blockquote, hgroup)[data-v]':
+      {
+        maxWidth: '720px',
+      },
+  },
+})
+
+// The site footer is a band under the article. It starts at the sidebar's edge,
+// runs under the right rail to the page edge, and keeps its columns in line with
+// the article. Above 1376px it rises over the fixed outline rail as it scrolls in.
+global({
+  // Vocs caps API landing and guide footers at the content width with !important.
+  '@layer base': {
+    '[data-v-main] > [data-v-footer]': {
+      maxWidth: 'none !important',
+    },
+  },
+  '@layer utilities': {
+    '[data-v-main]:has(> [data-v-footer])': {
+      paddingBottom: tokens.spacing['0'],
+    },
+    '[data-v-main] > [data-v-footer]': {
+      width: 'auto',
+      maxWidth: 'none',
+      marginTop: tokens.spacing.section,
+      paddingInline: tokens.spacing['0'],
+      paddingBottom: tokens.spacing['0'],
+    },
+    '@media (width >= 1376px)': {
+      '[data-v-main] > [data-v-footer]': {
+        position: 'relative',
+        zIndex: tokens.zIndex.overlay,
+      },
+      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-main] > [data-v-footer]':
+        {
+          // design-exception: Extend the band under the outline rail that the main column pads for.
+          marginInlineEnd: 'calc(var(--tempo-docs-outline-width) * -1) !custom',
+        },
+      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-main] > [data-v-footer] > .docs-footer':
+        {
+          // design-exception: Keep the footer columns clear of the outline rail.
+          paddingInlineEnd: 'var(--tempo-docs-outline-width) !custom',
+        },
+    },
+    // The shared focus ring uses the page foreground, which disappears on the black band.
+    'body:has(.docs-section-nav) .docs-footer :is(a, button):focus-visible': {
+      outlineColor: tokens.color.white,
     },
   },
 })
