@@ -2,15 +2,16 @@ import { global } from 'zyzz/web'
 import { inherited } from '../styles/inherited'
 import { vars as tokens } from '../styles/theme'
 
-// Vocs boxes the Previous/Next pagination links below its sm breakpoint. Keep them plain links
-// at every width; this layer follows vocs_utilities so it outranks the max-sm utilities.
+// Vocs boxes the Previous/Next pagination links below its sm breakpoint. Keep them as the same
+// next-step cards at every width; this layer follows vocs_utilities so it outranks max-sm.
 global({
   '@layer utilities': {
     '@media (width < 640px)': {
       '[data-v-pagination] > a': {
-        padding: 0,
+        paddingBlock: tokens.spacing['4'],
+        paddingInline: tokens.spacing['5'],
         border: 0,
-        borderRadius: 0,
+        borderRadius: tokens.radius.xl,
       },
     },
   },

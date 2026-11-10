@@ -1544,9 +1544,20 @@ global({
     'article[data-v-content] > [data-v-content-footer]': {
       marginTop: tokens.spacing.section,
     },
-    // Pager links dim on hover instead of turning accent.
+    // Previous and Next read as next-step cards that fill on hover.
+    '[data-v-pagination]': {
+      gap: tokens.spacing['3'],
+    },
     '[data-v-pagination] > a': {
-      transitionProperty: 'opacity',
+      flexGrow: 1,
+      flexBasis: 0,
+      gap: tokens.spacing['1'],
+      paddingBlock: tokens.spacing['4'],
+      paddingInline: tokens.spacing['5'],
+      borderWidth: tokens.borderWidth.none,
+      borderRadius: tokens.radius.xl,
+      backgroundColor: tokens.color.container,
+      transitionProperty: 'color, background-color, border-color, opacity, transform',
       transitionDuration: 'var(--tempo-exit)',
       transitionTimingFunction: 'var(--tempo-ease)',
     },
@@ -1558,7 +1569,7 @@ global({
     },
     '@media (hover: hover)': {
       '[data-v-pagination] > a:hover': {
-        opacity: 0.56,
+        backgroundColor: tokens.color.containerStrong,
         transitionDuration: 'var(--tempo-enter)',
       },
     },
