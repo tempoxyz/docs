@@ -17,8 +17,8 @@ const recipient = `0x${'2'.repeat(40)}`
 const hash = `0x${'a'.repeat(64)}`
 const route: TestRoute = {
   id: 'route',
-  sourceChain: { id: 'eip155:1', name: 'Ethereum', addressFormat: 'hex' },
-  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' },
+  sourceChain: { id: 'eip155:1', name: 'Ethereum', addressFormat: 'hex', kind: 'evm' },
+  destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex', kind: 'evm' },
   sourceToken: { tokenKey: 'source', symbol: 'USDC', decimals: 6 },
   destinationToken: { tokenKey: 'destination', symbol: 'USDCe', decimals: 6 },
   capabilities: { transfer: { modes: ['exactSource'] }, depositAddress: true },
@@ -116,8 +116,17 @@ it('retains API error bodies, rejects non-Routes paths, and never puts keys in U
     '//other.example',
     '/transfers/../../management',
     '/transfers?id=x',
+    '/v2/transfers',
+    '/v3/deposit-addresses',
   ])
     expect(() => requestUrl({ method: 'GET', path })).toThrow()
+  // Deposit addresses are created on v2; everything else stays on v1.
+  expect(requestUrl({ method: 'POST', path: '/v2/deposit-addresses' })).toBe(
+    'https://api.tempo.xyz/v2/routes/deposit-addresses',
+  )
+  expect(
+    requestUrl({ method: 'GET', path: '/deposits', query: { depositAddressId: 'rda_1' } }),
+  ).toBe('https://api.tempo.xyz/v1/routes/deposits?depositAddressId=rda_1')
   await expect(executeRoutesRequest({ method: 'GET', path: '/transfers' }, '')).rejects.toThrow(
     'API key',
   )
@@ -136,7 +145,7 @@ it('quotes without a key at public pricing, and with one at the organization pri
   expect(fetcher.mock.calls[1][1].headers).toEqual({ 'tempo-api-key': 'key' })
   // Everything past a quote needs the reader's own key.
   await expect(
-    executeRoutesRequest({ method: 'POST', path: '/deposit-addresses', body: {} }, ''),
+    executeRoutesRequest({ method: 'POST', path: '/v2/deposit-addresses', body: {} }, ''),
   ).rejects.toThrow('Add your project API key to continue.')
   expect(fetcher).toHaveBeenCalledTimes(2)
 })
@@ -182,11 +191,11 @@ it('runs deposit quote, creation, paginated discovery and individual status read
     .mockResolvedValue(Response.json({ data: [{ id: 'rdp_one' }], nextCursor: 'next-page' }))
   vi.stubGlobal('fetch', fetcher)
   const result = await executeRoutesRequest(
-    { method: 'GET', path: '/deposits', query: { depositAddress: 'Taddr', cursor: 'next-page' } },
+    { method: 'GET', path: '/deposits', query: { depositAddressId: 'rda_1', cursor: 'next-page' } },
     'key',
   )
   expect(result.data.nextCursor).toBe('next-page')
-  expect(fetcher.mock.calls[0][0]).toContain('depositAddress=Taddr&cursor=next-page')
+  expect(fetcher.mock.calls[0][0]).toContain('depositAddressId=rda_1&cursor=next-page')
 })
 it('loads all directory pages and refuses partial catalogs', async () => {
   const fetcher = vi

@@ -4,6 +4,8 @@ import { developersApiPath } from '../marketing/app/_lib/developersPaths'
 import { directorySchema, routeQuoteRequest, type TestRoute } from './routes-test'
 
 export const routesApi = 'https://api.tempo.xyz/v1/routes'
+/** Deposit addresses are created on v2. Their quotes and deposits stay on v1. */
+export const routesApiV2 = 'https://api.tempo.xyz/v2/routes'
 export type ApiRequest = {
   method: 'GET' | 'POST'
   path: string
@@ -136,9 +138,17 @@ export class SourceRevertedError extends Error {
 }
 export function requestUrl(request: ApiRequest) {
   // Callers cannot send credentials to an arbitrary host or follow redirects.
-  if (!/^\/(?:transfers|deposit-addresses|deposits)(?:\/[A-Za-z0-9_-]+)*$/.test(request.path))
+  if (
+    !/^(?:\/v2\/deposit-addresses|\/(?:transfers|deposit-addresses|deposits))(?:\/[A-Za-z0-9_-]+)*$/.test(
+      request.path,
+    )
+  )
     throw new Error('Invalid Routes API path.')
-  const url = new URL(routesApi + request.path)
+  const url = new URL(
+    request.path.startsWith('/v2/')
+      ? routesApiV2 + request.path.slice('/v2'.length)
+      : routesApi + request.path,
+  )
   for (const [key, value] of Object.entries(request.query ?? {}))
     url.searchParams.set(key, String(value))
   return url.toString()

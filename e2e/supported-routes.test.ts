@@ -1,7 +1,12 @@
 import { expect, test } from '@playwright/test'
 
 const cors = { 'access-control-allow-origin': '*' }
-const chain = (id: string, name: string, addressFormat = 'hex') => ({ id, name, addressFormat })
+const chain = (id: string, name: string, addressFormat = 'hex', kind = 'evm') => ({
+  id,
+  name,
+  addressFormat,
+  kind,
+})
 const token = (tokenKey: string, symbol: string) => ({ tokenKey, symbol, decimals: 6 })
 const tempo = chain('eip155:4217', 'Tempo')
 const routes = [
@@ -18,7 +23,7 @@ const routes = [
     id: 'tempo-usdt0-tron-usdt',
     sourceChain: tempo,
     sourceToken: token('tempo/usdt0', 'USDT0'),
-    destinationChain: chain('tron:0x2b6653dc', 'Tron', 'base58check'),
+    destinationChain: chain('tron:0x2b6653dc', 'Tron', 'base58check', 'tron'),
     destinationToken: token('tron/usdt', 'USDT'),
     capabilities: { transfer: { modes: ['exactSource'] } },
     subsidies: { transfer: false },
