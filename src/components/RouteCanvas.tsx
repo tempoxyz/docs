@@ -1,12 +1,13 @@
 'use client'
 
-import { Badge, Button, Field, Select, Surface } from '@tempoxyz/ds'
+import { Badge, ChoiceGroup, Field, Select, Surface } from '@tempoxyz/ds'
 import type { ReactNode } from 'react'
 import type { TestMethod } from '../lib/routes-test'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
 import * as Demo from './guides/Demo'
 import { ChainLogo, TokenLogo } from './RouteIcons'
+import { popup } from './RoutesControls.styles'
 
 /** Where a route is in its lifecycle, as drawn on the canvas. */
 export type RoutePhase =
@@ -82,7 +83,7 @@ function PickerRow({
           <Select.Value placeholder={loading ? 'Loading…' : `Choose ${label.toLowerCase()}`} />
           <Select.Icon />
         </Select.Trigger>
-        <Select.Popup aria-label={label}>
+        <Select.Popup aria-label={label} {...popup()}>
           {options.map((option) => (
             <Select.Item key={option.value} label={option.label} value={option.value}>
               <Select.ItemPrefix>{badge(option, 20)}</Select.ItemPrefix>
@@ -213,30 +214,33 @@ function RouteConnector({
       <span aria-hidden="true" {...connectorArrow()}>
         ↓
       </span>
-      <fieldset aria-label="Funding method" {...methodToggle()}>
-        {(
-          [
-            ['transfer', 'Transfer'],
-            ['depositAddress', 'Deposit address'],
-          ] as const
-        ).map(([value, label]) => {
-          const available = methods.includes(value)
-          return (
-            <Button
-              key={value}
-              type="button"
-              size="xsmall"
-              variant={method === value ? 'primary' : 'tertiary'}
-              aria-pressed={method === value}
-              disabled={!available || locked}
-              title={available ? undefined : 'Not available for this route'}
-              onClick={() => onMethod(value)}
-            >
-              {label}
-            </Button>
-          )
-        })}
-      </fieldset>
+      <span {...methodTrack()}>
+        <ChoiceGroup.Root
+          aria-label="Funding method"
+          size="small"
+          value={method ?? null}
+          onValueChange={(value) => onMethod(value as TestMethod)}
+        >
+          {(
+            [
+              ['transfer', 'Transfer'],
+              ['depositAddress', 'Deposit address'],
+            ] as const
+          ).map(([value, label]) => {
+            const available = methods.includes(value)
+            return (
+              <ChoiceGroup.Item
+                key={value}
+                value={value}
+                disabled={!available || locked}
+                title={available ? undefined : 'Not available for this route'}
+              >
+                {label}
+              </ChoiceGroup.Item>
+            )
+          })}
+        </ChoiceGroup.Root>
+      </span>
     </div>
   )
 }
@@ -414,6 +418,12 @@ const pickerTrigger = style({
 })
 const pickerLogo = style({ display: 'inline-flex', flexShrink: 0 })
 
+// The segmented track sits on the dotted canvas, so it takes the card fill to keep the grid out.
+const methodTrack = style({
+  display: 'inline-flex',
+  borderRadius: tokens.radius.full,
+  backgroundColor: inherited.color.surfacePanel,
+})
 const connector = style({
   display: 'flex',
   minWidth: 0,
@@ -433,14 +443,4 @@ const connectorPath = style({
 const connectorArrow = style({
   color: tokens.color.gray10,
   '@container (width >= 42rem)': { display: 'none' },
-})
-const methodToggle = style({
-  display: 'inline-flex',
-  borderRadius: tokens.radius.full,
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: tokens.color.lineStrong,
-  backgroundColor: tokens.color.card,
-  gap: tokens.spacing['0_5'],
-  padding: tokens.spacing['0_5'],
 })

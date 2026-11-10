@@ -100,12 +100,7 @@ import * as Demo from './guides/Demo'
 import { RouteCanvas, type RouteProgress } from './RouteCanvas'
 import { ChainLogo } from './RouteIcons'
 import { ApiKeyPill } from './RoutesApiKey'
-import {
-  input as inputStyle,
-  label as labelStyle,
-  note as noteStyle,
-  Select,
-} from './RoutesControls'
+import { Dropdown, note as noteStyle, TextField } from './RoutesControls'
 
 const consoleApiKeysUrl = 'https://console.tempo.xyz/?to=/:org/api-keys'
 const explorers: Record<string, (hash: string) => string> = {
@@ -1180,57 +1175,58 @@ function RouteLifecycle({
         setConnectedAddresses((current) => ({ ...current, [options.id]: address }))
       })
     return (
-      <div {...cx(labelStyle(), options.wide && wideField())}>
-        {/* The connect controls sit beside the label, so the label still names the input. */}
-        <span>
-          <label htmlFor={options.id}>{options.label}</label>
-          {wallets.length > 0 &&
-            (connected ? (
-              ' (Connected)'
-            ) : choosingWallet === options.id ? (
-              <>
-                {' · Connect with '}
-                {wallets.map((wallet, index) => (
-                  <span key={wallet.id}>
-                    {index > 0 && ' · '}
-                    <button
-                      type="button"
-                      disabled={blocked}
-                      onClick={() => void fill(wallet)}
-                      {...connectLink()}
-                    >
-                      {wallet.name}
-                    </button>
-                  </span>
-                ))}
-              </>
-            ) : (
-              <>
-                {' '}
-                <button
-                  type="button"
-                  title={wallets.length === 1 ? `Fill in from ${wallets[0].name}` : undefined}
-                  disabled={blocked}
-                  onClick={() =>
-                    wallets.length === 1 ? void fill(wallets[0]) : setChoosingWallet(options.id)
-                  }
-                  {...connectLink()}
-                >
-                  (Connect)
-                </button>
-              </>
-            ))}
-        </span>
-        <input
-          id={options.id}
-          {...inputStyle()}
-          autoComplete="off"
-          disabled={options.disabled}
-          value={options.value}
-          onChange={(e) => options.onChange(e.target.value)}
-          placeholder={options.placeholder}
-        />
-      </div>
+      <TextField
+        {...(options.wide ? wideField() : {})}
+        id={options.id}
+        label={options.label}
+        autoComplete="off"
+        disabled={options.disabled}
+        value={options.value}
+        onValueChange={options.onChange}
+        placeholder={options.placeholder}
+        labelEnd={
+          // The connect controls sit beside the label, so the label still names the input.
+          wallets.length > 0 && (
+            <span>
+              {connected ? (
+                ' (Connected)'
+              ) : choosingWallet === options.id ? (
+                <>
+                  {' · Connect with '}
+                  {wallets.map((wallet, index) => (
+                    <span key={wallet.id}>
+                      {index > 0 && ' · '}
+                      <button
+                        type="button"
+                        disabled={blocked}
+                        onClick={() => void fill(wallet)}
+                        {...connectLink()}
+                      >
+                        {wallet.name}
+                      </button>
+                    </span>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {' '}
+                  <button
+                    type="button"
+                    title={wallets.length === 1 ? `Fill in from ${wallets[0].name}` : undefined}
+                    disabled={blocked}
+                    onClick={() =>
+                      wallets.length === 1 ? void fill(wallets[0]) : setChoosingWallet(options.id)
+                    }
+                    {...connectLink()}
+                  >
+                    (Connect)
+                  </button>
+                </>
+              )}
+            </span>
+          )
+        }
+      />
     )
   }
   const walletLabel = (chain: { id: string; name: string }, role: string) =>
@@ -1271,26 +1267,18 @@ function RouteLifecycle({
   )
   // A choice only when this browser has more than one wallet for the source network.
   const walletPicker = walletOptions.length > 1 && (
-    <label {...labelStyle()} htmlFor="routes-wallet">
-      Wallet
-      <Select
-        id="routes-wallet"
-        value={
-          family === 'solana'
-            ? solanaWallet?.name
-            : (family === 'tron' ? tronWallet : family === 'stellar' ? stellarWallet : evmWallet)
-                ?.id
-        }
-        disabled={busy || hashes.length > 0}
-        onChange={(e) => setWalletId(e.target.value)}
-      >
-        {walletOptions.map((wallet) => (
-          <option key={wallet.id} value={wallet.id}>
-            {wallet.name}
-          </option>
-        ))}
-      </Select>
-    </label>
+    <Dropdown
+      id="routes-wallet"
+      label="Wallet"
+      value={
+        family === 'solana'
+          ? solanaWallet?.name
+          : (family === 'tron' ? tronWallet : family === 'stellar' ? stellarWallet : evmWallet)?.id
+      }
+      disabled={busy || hashes.length > 0}
+      onValueChange={setWalletId}
+      options={walletOptions.map((wallet) => ({ label: wallet.name, value: wallet.id }))}
+    />
   )
   const signAction = !action.success ? null : shortfall && hashes.length === 0 ? (
     recheck
@@ -1407,33 +1395,27 @@ function RouteLifecycle({
             <div {...stepForm()}>
               <div {...fieldGrid()}>
                 {isTransfer && (route.capabilities.transfer?.modes.length ?? 0) > 1 && (
-                  <label {...cx(labelStyle(), wideField())} htmlFor="routes-amount-mode">
-                    Amount mode
-                    <Select
-                      id="routes-amount-mode"
-                      disabled={frozen}
-                      value={mode}
-                      onChange={(e) => setMode(e.target.value as TestMode)}
-                    >
-                      {route.capabilities.transfer?.modes.map((m) => (
-                        <option key={m} value={m}>
-                          {m === 'exactSource' ? 'Amount sent' : 'Amount received'}
-                        </option>
-                      ))}
-                    </Select>
-                  </label>
-                )}
-                <label {...labelStyle()}>
-                  Amount ({amountToken.symbol})
-                  <input
-                    {...inputStyle()}
-                    inputMode="decimal"
+                  <Dropdown
+                    {...wideField()}
+                    id="routes-amount-mode"
+                    label="Amount mode"
                     disabled={frozen}
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="1.00"
+                    value={mode}
+                    onValueChange={(value) => setMode(value as TestMode)}
+                    options={(route.capabilities.transfer?.modes ?? []).map((m) => ({
+                      label: m === 'exactSource' ? 'Amount sent' : 'Amount received',
+                      value: m,
+                    }))}
                   />
-                </label>
+                )}
+                <TextField
+                  label={`Amount (${amountToken.symbol})`}
+                  inputMode="decimal"
+                  disabled={frozen}
+                  value={amount}
+                  onValueChange={setAmount}
+                  placeholder="1.00"
+                />
                 {isTransfer && (
                   <>
                     {addressField({
@@ -1447,18 +1429,18 @@ function RouteLifecycle({
                     })}
                     {recipientField(frozen, true)}
                     {/* Best price is the API default; speed is an opt-in shown last. */}
-                    <label {...cx(labelStyle(), wideField())} htmlFor="routes-priority">
-                      Priority
-                      <Select
-                        id="routes-priority"
-                        disabled={frozen}
-                        value={priority}
-                        onChange={(e) => setPriority(e.target.value as TestPriority)}
-                      >
-                        <option value="price">Best price</option>
-                        <option value="speed">Speed</option>
-                      </Select>
-                    </label>
+                    <Dropdown
+                      {...wideField()}
+                      id="routes-priority"
+                      label="Priority"
+                      disabled={frozen}
+                      value={priority}
+                      onValueChange={(value) => setPriority(value as TestPriority)}
+                      options={[
+                        { label: 'Best price', value: 'price' },
+                        { label: 'Speed', value: 'speed' },
+                      ]}
+                    />
                   </>
                 )}
                 {!isTransfer && (
@@ -1646,21 +1628,17 @@ function RouteLifecycle({
                   </p>
                 )}
                 {deposits && deposits.length > 1 && (
-                  <label {...labelStyle()} htmlFor="routes-deposit">
-                    Choose the deposit you sent
-                    <Select
-                      id="routes-deposit"
-                      value={depositId}
-                      onChange={(e) => setDepositId(e.target.value)}
-                    >
-                      <option value="">Select a deposit</option>
-                      {deposits.map((d) => (
-                        <option key={String(d.id)} value={String(d.id)}>
-                          {quantity(d.sourceAmount)} {sourceSymbol} · {String(d.status)}
-                        </option>
-                      ))}
-                    </Select>
-                  </label>
+                  <Dropdown
+                    id="routes-deposit"
+                    label="Choose the deposit you sent"
+                    placeholder="Select a deposit"
+                    value={depositId}
+                    onValueChange={setDepositId}
+                    options={deposits.map((d) => ({
+                      label: `${quantity(d.sourceAmount)} ${sourceSymbol} · ${String(d.status)}`,
+                      value: String(d.id),
+                    }))}
+                  />
                 )}
               </div>
             )}
