@@ -20,9 +20,9 @@ export const docsSections: DocsSection[] = [
   {
     id: 'overview',
     label: 'Get Started',
-    href: '/get-started',
+    href: '/docs/get-started',
     matches: [
-      '/get-started',
+      '/docs/get-started',
       '/docs/resources',
       '/docs/quickstart/faucet',
       '/docs/guide/using-tempo-with-ai',

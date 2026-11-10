@@ -462,17 +462,17 @@ No validator P2P or RPC port should be directly accessible from the internet.
 
 Send stablecoins with a test wallet.
 
-<HomeGuideButton href="/get-started/quickstart" guide="Send your first payment" />
+<HomeGuideButton href="/docs/get-started/quickstart" guide="Send your first payment" />
 
 </div>
 
-<ChevronLink href="/get-started" className="tempo-docs-home-guides-more">Find your starting point</ChevronLink>
+<ChevronLink href="/docs/get-started" className="tempo-docs-home-guides-more">Find your starting point</ChevronLink>
 
 - <HomeColorLink href="/docs/sdk/typescript">TypeScript</HomeColorLink>
 `)
     expect(output).toContain('Send stablecoins with a test wallet.')
-    expect(output).toContain('[Send your first payment](/get-started/quickstart)')
-    expect(output).toContain('[Find your starting point](/get-started)')
+    expect(output).toContain('[Send your first payment](/docs/get-started/quickstart)')
+    expect(output).toContain('[Find your starting point](/docs/get-started)')
     expect(output).toContain('[TypeScript](/docs/sdk/typescript)')
     expect(output).not.toMatch(/<(?:a|p|div|HomeGuideButton|HomeColorLink|ChevronLink)\b/)
   })

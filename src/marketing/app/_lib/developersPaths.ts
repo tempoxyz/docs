@@ -14,16 +14,17 @@ export function developersPath(path: string): string {
 }
 
 /**
- * A same-origin path to this site's own API routes. Production serves the site both on
- * developers.tempo.xyz and under tempo.xyz/developers, so the browser uses the mount the current
- * page came from; server rendering falls back to the deployment's mount.
+ * A same-origin path to this site's own API routes. On tempo.xyz they stay under the /developers
+ * mount (docs pages live at /docs, and tempo.xyz owns /api); on the docs origin they are at the root.
+ * Server rendering falls back to the deployment's mount.
  */
 export function developersApiPath(path: string): string {
   const normalized = normalizedPath(path)
   const mounted =
     typeof location === 'undefined'
       ? import.meta.env.VERCEL_ENV === 'production'
-      : location.pathname === DEVELOPERS_BASE_PATH ||
+      : location.hostname === 'tempo.xyz' ||
+        location.pathname === DEVELOPERS_BASE_PATH ||
         location.pathname.startsWith(`${DEVELOPERS_BASE_PATH}/`)
   return mounted ? `${DEVELOPERS_BASE_PATH}${normalized}` : normalized
 }

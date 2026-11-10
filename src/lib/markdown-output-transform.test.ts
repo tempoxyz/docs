@@ -24,8 +24,8 @@ describe('final Markdown transform', () => {
       index: '# Tempo\n\n- [Earn](/docs/earn.md)',
       pages: { '/docs/earn': '# Earn\n\n[Integrate](/docs/earn/integrate)' },
     })
-    expect(result.index).toContain('https://tempo.xyz/developers/docs/earn.md')
-    expect(result.pages['/docs/earn']).toContain('https://tempo.xyz/developers/docs/earn/integrate')
+    expect(result.index).toContain('https://tempo.xyz/docs/earn.md')
+    expect(result.pages['/docs/earn']).toContain('https://tempo.xyz/docs/earn/integrate')
   })
 })
 
@@ -38,7 +38,7 @@ it('keeps canonical production links throughout the full Vocs export', async () 
     rehypePlugins: [],
     transform: transformMarkdownOutput,
   })
-  expect(result.full).toContain('](https://tempo.xyz/developers/docs/earn.md)')
+  expect(result.full).toContain('](https://tempo.xyz/docs/earn.md)')
   expect(result.full).not.toContain('](/docs/')
   expect(result.report.diagnostics).toEqual([])
 })

@@ -7,7 +7,7 @@ const sitemapPath = path.join(vercelStaticDirectory, 'sitemap.xml')
 const [sitemap, contentRouteFiles] = await Promise.all([
   fs.readFile(sitemapPath, 'utf-8'),
   Promise.all(
-    ['docs', 'get-started', 'blog'].map((section) =>
+    ['docs', 'blog'].map((section) =>
       findRouteIndexFiles(path.join(vercelStaticDirectory, section)),
     ),
   ).then((files) => files.flat()),
@@ -17,13 +17,10 @@ if (contentRouteFiles.length === 0) {
   throw new Error(`Could not find generated content routes in ${vercelStaticDirectory}`)
 }
 
-await fs.access(path.join(vercelStaticDirectory, 'index.html'))
-const routes = [
-  '/',
-  ...contentRouteFiles.map((file) =>
-    path.relative(vercelStaticDirectory, path.dirname(file)).split(path.sep).join('/'),
-  ),
-].sort((a, b) => a.localeCompare(b))
+await fs.access(path.join(vercelStaticDirectory, 'docs', 'index.html'))
+const routes = contentRouteFiles
+  .map((file) => path.relative(vercelStaticDirectory, path.dirname(file)).split(path.sep).join('/'))
+  .sort((a, b) => a.localeCompare(b))
 const { urls, missing } = sitemapCoverage(sitemap, routes)
 
 if (missing.length > 0) {

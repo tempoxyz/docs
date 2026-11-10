@@ -855,7 +855,7 @@ export default function DocsHeader({ surface = 'docs' }: { surface?: 'docs' | 'b
   const brand = (
     <div className={`docs-header-brand ${docsHeaderBrand().className}`}>
       <WakuLink
-        to="/"
+        to="/docs"
         onClick={close}
         aria-label="Tempo documentation"
         className={`docs-header-logo ${docsHeaderLogo().className}`}

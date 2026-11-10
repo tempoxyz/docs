@@ -22,19 +22,22 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 </urlset>`
 
 describe('sitemapCoverage', () => {
-  it('validates the new docs home without requiring a /docs index entry', () => {
-    const current = sitemap.replace(
-      '</urlset>',
-      '<url><loc>https://tempo.xyz/developers/</loc></url></urlset>',
+  it('validates docs routes at tempo.xyz/docs and blog routes under /developers', () => {
+    const current = finalizeSitemap(
+      sitemap.replace(
+        '</urlset>',
+        '<url><loc>https://tempo.xyz/developers/docs</loc></url></urlset>',
+      ),
+      [],
     )
-    expect(sitemapCoverage(current, ['/', '/blog', '/docs/api']).missing).toEqual([])
+    expect(sitemapCoverage(current, ['/docs', '/blog', '/docs/api']).missing).toEqual([])
   })
 
   it('detects missing nested getting-started and blog routes', () => {
-    expect(sitemapCoverage(sitemap, ['/get-started/stablecoins', '/blog/t6']).missing).toEqual([
-      'https://tempo.xyz/developers/get-started/stablecoins',
-      'https://tempo.xyz/developers/blog/t6',
-    ])
+    const current = finalizeSitemap(sitemap, [])
+    expect(sitemapCoverage(current, ['/docs/get-started/stablecoins', '/blog/t6']).missing).toEqual(
+      ['https://tempo.xyz/docs/get-started/stablecoins', 'https://tempo.xyz/developers/blog/t6'],
+    )
   })
 
   it('uses the API index if no blog index is available', () => {
@@ -50,13 +53,14 @@ describe('sitemapCoverage', () => {
 })
 
 describe('finalizeSitemap', () => {
-  it('uses the canonical mounted homepage URL without a trailing slash', () => {
+  it('serves the docs home at tempo.xyz/docs without a trailing slash', () => {
     const input = sitemap.replace(
       '</urlset>',
-      '<url><loc>https://tempo.xyz/developers/</loc></url></urlset>',
+      '<url><loc>https://tempo.xyz/developers/</loc></url><url><loc>https://tempo.xyz/developers/docs/</loc></url></urlset>',
     )
     const result = finalizeSitemap(input, [])
-    expect(result).toContain('<loc>https://tempo.xyz/developers</loc>')
+    expect(result).toContain('<loc>https://tempo.xyz/docs</loc>')
+    expect(result).not.toContain('<loc>https://tempo.xyz/developers</loc>')
     expect(result).not.toContain('<loc>https://tempo.xyz/developers/</loc>')
     expect(finalizeSitemap(result, [])).toBe(result)
   })
@@ -67,8 +71,8 @@ describe('finalizeSitemap', () => {
       `${[
         '',
         '/get-started',
-        '/get-started/stablecoins',
-        '/get-started-extra',
+        '/docs/get-started',
+        '/docs/get-started/stablecoins',
         '/docs',
         '/build',
         '/build/tip20-tokens',
@@ -82,17 +86,15 @@ describe('finalizeSitemap', () => {
 
     const locations = [...result.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
     expect(locations).toContain('https://tempo.xyz/developers/blog/t6')
-    expect(locations).toContain('https://tempo.xyz/developers/docs/api')
-    expect(locations).toContain('https://tempo.xyz/developers')
-    expect(locations).toContain('https://tempo.xyz/developers/get-started')
-    expect(locations).toContain('https://tempo.xyz/developers/get-started/stablecoins')
-    expect(locations).not.toContain('https://tempo.xyz/developers/get-started-extra')
-    expect(locations).not.toContain('https://tempo.xyz/developers/docs')
+    expect(locations).toContain('https://tempo.xyz/docs/api')
+    expect(locations).toContain('https://tempo.xyz/docs')
+    expect(locations).toContain('https://tempo.xyz/docs/get-started')
+    expect(locations).toContain('https://tempo.xyz/docs/get-started/stablecoins')
+    expect(locations).not.toContain('https://tempo.xyz/developers')
+    expect(locations).not.toContain('https://tempo.xyz/developers/get-started')
     expect(
       locations.every((location) =>
-        /^https:\/\/tempo\.xyz\/developers(?:\/?$|\/get-started(?:\/|$)|\/(?:docs\/|blog(?:\/|$)))/.test(
-          location,
-        ),
+        /^https:\/\/tempo\.xyz\/(?:docs(?:\/|$)|developers\/blog(?:\/|$))/.test(location),
       ),
     ).toBe(true)
   })
@@ -143,12 +145,12 @@ describe('finalizeSitemap', () => {
       ['billing', 'activities', 'routes/quotes', 'billing'],
     )
 
-    expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/activities</loc>')
-    expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/billing</loc>')
-    expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/routes/quotes</loc>')
+    expect(result).toContain('<loc>https://tempo.xyz/docs/api/activities</loc>')
+    expect(result).toContain('<loc>https://tempo.xyz/docs/api/billing</loc>')
+    expect(result).toContain('<loc>https://tempo.xyz/docs/api/routes/quotes</loc>')
     expect(result.indexOf('/api/activities')).toBeLessThan(result.indexOf('/api/billing'))
     expect(result).not.toMatch(
-      /<loc>https:\/\/tempo\.xyz\/developers\/docs\/api\/(?:activities|billing)<\/loc>\s*<lastmod>/,
+      /<loc>https:\/\/tempo\.xyz\/docs\/api\/(?:activities|billing)<\/loc>\s*<lastmod>/,
     )
   })
 
@@ -156,7 +158,7 @@ describe('finalizeSitemap', () => {
     const result = finalizeSitemap(sitemap, [], ['authentication'])
 
     expect(
-      result.match(/<loc>https:\/\/tempo\.xyz\/developers\/docs\/api\/authentication<\/loc>/g),
+      result.match(/<loc>https:\/\/tempo\.xyz\/docs\/api\/authentication<\/loc>/g),
     ).toHaveLength(1)
   })
 })

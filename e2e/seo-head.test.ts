@@ -56,7 +56,7 @@ const cases: {
     ogImageIncludes: '/og/2026-q4/og_2026-q4_developers_developers_title-f5_v02.png',
   },
   {
-    path: '/get-started',
+    path: '/docs/get-started',
     title: 'Get Started with Tempo | Tempo Docs',
     ogTitle: 'Build on Tempo',
     descriptionIncludes:
@@ -106,7 +106,7 @@ for (const c of cases) {
     expect(metaContent(head, 'og:image')).toContain(c.ogImageIncludes)
     expect(metaContent(head, 'twitter:title')).toBe(c.ogTitle)
 
-    if (c.path === '/' || c.path === '/get-started' || c.path.startsWith('/docs/')) {
+    if (c.path === '/' || c.path === '/docs/get-started' || c.path.startsWith('/docs/')) {
       expect(metaContent(head, 'article:published_time')).toBeUndefined()
       expect(metaContent(head, 'article:modified_time')).toBeUndefined()
       const markdownRoute = c.path === '/' ? '/index' : c.path

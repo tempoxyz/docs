@@ -68,7 +68,7 @@ const candidateGroups = outputArtifacts.flatMap(
 )
 
 const failures = []
-const canonicalApiPrefix = 'https://tempo.xyz/developers/docs/api/'
+const canonicalApiPrefix = 'https://tempo.xyz/docs/api/'
 for (const { label, directory, htmlFiles, rscFiles, markdownFiles } of outputArtifacts) {
   for (const [artifact, files] of [
     ['HTML', htmlFiles],

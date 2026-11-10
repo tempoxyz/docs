@@ -1,23 +1,26 @@
-/** Rewrites public links while preserving Waku's internal route values. */
-export function canonicalizeGeneratedDeveloperLinks(content: string, publicDocsUrl: string) {
-  const siteUrl = publicDocsUrl.replace(/\/docs\/?$/, '')
+/**
+ * Rewrites public links while preserving Waku's internal route values. Docs pages resolve under
+ * `publicDocsUrl` (such as https://tempo.xyz/docs); llms.txt, SKILL.md and Markdown exports
+ * resolve under `publicDevelopersUrl` (such as https://tempo.xyz/developers).
+ */
+export function canonicalizeGeneratedDeveloperLinks(
+  content: string,
+  publicDocsUrl: string,
+  publicDevelopersUrl = `${publicDocsUrl.replace(/\/docs\/?$/, '')}/developers`,
+) {
+  const docsUrl = publicDocsUrl.replace(/\/$/, '')
+  const siteUrl = docsUrl.replace(/\/docs$/, '')
+  const developersUrl = publicDevelopersUrl.replace(/\/$/, '')
   function canonicalUrl(value: string) {
     const [, pathname = '', suffix = ''] = /^([^?#]*)(.*)$/.exec(value) ?? []
     const route = pathname.replace(/^\/developers(?=\/|$)/, '')
     if (['/llms.txt', '/llms-full.txt', '/SKILL.md', '/index.md'].includes(route))
-      return `${siteUrl}${route}${suffix}`
+      return `${developersUrl}${route}${suffix}`
     if (route === '/' || route === '' || route === '/docs') {
       // Empty hrefs and fragment-only links retain their current-page meaning.
-      return pathname ? `${siteUrl}${suffix}` : value
+      return pathname ? `${docsUrl}${suffix}` : value
     }
-    if (
-      route === '/get-started' ||
-      route === '/get-started.md' ||
-      route.startsWith('/get-started/') ||
-      route.startsWith('/docs/')
-    ) {
-      return `${siteUrl}${route}${suffix}`
-    }
+    if (route.startsWith('/docs/')) return `${siteUrl}${route}${suffix}`
     return value
   }
 
