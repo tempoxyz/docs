@@ -1,5 +1,5 @@
 ---
-title: "Documentation"
+title: "Build stablecoin payments on Tempo"
 seoTitle: "Tempo Developer Docs: APIs, SDKs & Guides"
 description: Build with Tempo Accounts, Earn, Routes, and Zones. Try developer walkthroughs, build machine payments, and explore the network and API reference.
 ogImage: /og/2026-q4/og_2026-q4_developers_developers_title-f5_v02.png
@@ -20,17 +20,59 @@ import { DocsHomeProductIcon } from '../components/DocsHomeProductIcon'
 <span id="tempo-developer-documentation" />
 <span id="build-on-tempo" />
 
-# Documentation
+<p className="tempo-docs-home-eyebrow">Documentation</p>
 
-Build financial products with Tempo's APIs, SDKs, and protocol.
+# Build stablecoin payments on Tempo
+
+Guides, API reference, and SDKs for building financial products with Tempo.
+
+<div className="tempo-docs-home-actions">
+<HomeGuideButton href="/get-started/quickstart" guide="Send your first payment" variant="accent" />
+<HomeGuideButton href="/docs/api/console/api-keys" guide="Create an API key" />
+</div>
 
 </div>
 
+<div className="tempo-docs-home-quick-links">
+<div className="tempo-docs-home-quick-link">
+
+<DocsHomeProductIcon product="network" />
+
+<ChevronLink href="/docs/quickstart/connection-details">Network details</ChevronLink>
+
+RPC endpoints, chain IDs, and explorers.
+
+</div>
+<div className="tempo-docs-home-quick-link">
+
+<DocsHomeProductIcon product="faucet" />
+
+<ChevronLink href="/docs/quickstart/faucet">Testnet faucet</ChevronLink>
+
+Get free test stablecoins on testnet.
+
+</div>
+<div className="tempo-docs-home-quick-link">
+
+<DocsHomeProductIcon product="api" />
+
+<ChevronLink href="/docs/api">API reference</ChevronLink>
+
+Endpoints, authentication, and conventions.
+
+</div>
+<div className="tempo-docs-home-quick-link">
+
+<DocsHomeProductIcon product="sdk" />
+
+<ChevronLink href="/docs/sdk">SDKs & CLI</ChevronLink>
+
+TypeScript, Rust, Go, Python, Foundry, and the Tempo CLI.
+
+</div>
+</div>
+
 <span id="start-here" />
-
-<div className="tempo-docs-home-start">
-
-<DocsHomeAgent />
 
 <div className="tempo-docs-home-guides">
 
@@ -49,7 +91,7 @@ Build financial products with Tempo's APIs, SDKs, and protocol.
 
 Send stablecoins with a test wallet.
 
-<HomeGuideButton href="/get-started/quickstart" guide="Send your first payment" />
+<ChevronLink href="/get-started/quickstart" className="tempo-docs-home-guide-action" data-chevron="visible">Run the quickstart</ChevronLink>
 
 </div>
 <div className="tempo-docs-home-guide">
@@ -58,7 +100,7 @@ Send stablecoins with a test wallet.
 
 Choose passkeys, signing keys, or a wallet provider.
 
-<HomeGuideButton href="/docs/accounts/create" guide="Create an account" />
+<ChevronLink href="/docs/accounts/create" className="tempo-docs-home-guide-action" data-chevron="visible">Choose a signing method</ChevronLink>
 
 </div>
 <div className="tempo-docs-home-guide">
@@ -67,12 +109,11 @@ Choose passkeys, signing keys, or a wallet provider.
 
 Find a service and make a paid request with the CLI.
 
-<HomeGuideButton href="/docs/guide/machine-payments/agent" guide="Pay for an API" />
+<ChevronLink href="/docs/guide/machine-payments/agent" className="tempo-docs-home-guide-action" data-chevron="visible">Make a paid request</ChevronLink>
 
 </div>
 </div>
 
-</div>
 </div>
 
 <div className="tempo-docs-home-products">
@@ -248,6 +289,12 @@ Pay for APIs from code or the CLI, and accept payments from agents.
 
 </div>
 </div>
+</div>
+
+<div className="tempo-docs-home-agent">
+
+<DocsHomeAgent />
+
 </div>
 
 </div>

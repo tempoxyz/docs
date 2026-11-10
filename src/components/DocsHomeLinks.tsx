@@ -17,16 +17,20 @@ export function HomeColorLink({ href, children }: { href: string; children: Reac
   )
 }
 
-/** A secondary (gray) "Get started" button under a guide in the home 3-up. The
- * guide's name is the column heading, so the accessible name carries it too. */
-export function HomeGuideButton({ href, guide }: { href: string; guide: string }) {
+/** A Home action button: the accent fill for the page's primary action, the gray fill
+ * for the secondary one. Its label is the action itself, so it carries no extra name. */
+export function HomeGuideButton({
+  href,
+  guide,
+  variant = 'default',
+}: {
+  href: string
+  guide: string
+  variant?: 'accent' | 'default'
+}) {
   return (
-    <Link
-      to={href}
-      aria-label={`Get started: ${guide}`}
-      {...button({ variant: 'default', className: 'tempo-docs-home-guide-button' })}
-    >
-      Get started
+    <Link to={href} {...button({ variant, className: 'tempo-docs-home-action' })}>
+      {guide}
     </Link>
   )
 }

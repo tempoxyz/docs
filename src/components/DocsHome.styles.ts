@@ -15,9 +15,20 @@ export const tempoDocsHome = style({
       display: 'block',
       scrollMarginTop: 'calc(var(--vocs-spacing-topNav) + 32px)',
     },
-    // Every Home section sits one section token (80px, 64px under 768px) below the last.
+    // The hero: eyebrow, title, one line of orientation and the page's two actions.
     '& .tempo-docs-home-heading': {
-      paddingBottom: tokens.spacing.section,
+      paddingBottom: tokens.spacing['12'],
+    },
+    '& .tempo-docs-home-eyebrow': {
+      marginTop: tokens.spacing['0'],
+      marginInlineEnd: tokens.spacing['0'],
+      marginBottom: tokens.spacing['4'],
+      marginInlineStart: tokens.spacing['0'],
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.medium,
+      lineHeight: tokens.lineHeight.normal,
     },
     '& h1[data-v]': {
       // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
@@ -30,6 +41,7 @@ export const tempoDocsHome = style({
       fontWeight: tokens.fontWeight.medium,
       letterSpacing: tokens.letterSpacing.heading,
       lineHeight: tokens.lineHeight.display,
+      textWrap: 'balance',
     },
     '& .tempo-docs-home-heading p[data-v]': {
       margin: 0,
@@ -38,11 +50,12 @@ export const tempoDocsHome = style({
       fontSize: tokens.fontSize.body,
       lineHeight: tokens.lineHeight.relaxed,
     },
-    // Build with your agent, then Start with a guide, stacked a section apart.
-    '& .tempo-docs-home-start': {
-      display: 'grid',
-      gridTemplateColumns: 'minmax(0, 1fr)',
-      rowGap: tokens.spacing.section,
+    // One primary action (accent fill) and one secondary (gray fill).
+    '& .tempo-docs-home-actions': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: tokens.spacing['3'],
+      marginTop: tokens.spacing['8'],
     },
     '& h2[data-v]': {
       margin: 0,
@@ -54,8 +67,81 @@ export const tempoDocsHome = style({
       letterSpacing: tokens.letterSpacing.heading,
       lineHeight: tokens.lineHeight.compact,
     },
-    // Start with a guide: a 3-up of hairline-topped columns, each a description
-    // and a secondary button named for the guide. Buttons align at the column end.
+    // Home's one card family: quick links, guides, products and references share the
+    // docs card fill, radius and padding, with no border.
+    '& :is(.tempo-docs-home-quick-link, .tempo-docs-home-guide, .tempo-docs-home-product-group, .tempo-docs-home-reference-grid > div)':
+      {
+        minWidth: 0,
+        // design-exception: Shares the docs card padding variable with Vocs cards.
+        padding: 'var(--tempo-card-padding) !custom',
+        // design-exception: Shares the docs card radius variable with Vocs cards.
+        borderRadius: 'var(--tempo-card-radius) !custom',
+        '--corner-radius': 'var(--tempo-card-radius)',
+        backgroundColor: inherited.color.homePanel,
+      },
+    // A quick link or guide card has one destination, so its link covers the card. The
+    // card takes the hover fill and the focus ring.
+    '& :is(.tempo-docs-home-quick-link, .tempo-docs-home-guide)': {
+      position: 'relative',
+      transitionProperty: 'color, background-color, border-color, opacity, transform',
+      transitionDuration: 'var(--tempo-exit)',
+      transitionTimingFunction: 'var(--tempo-ease)',
+    },
+    '& :is(.tempo-docs-home-quick-link, .tempo-docs-home-guide) > a::after': {
+      content: '""',
+      position: 'absolute',
+      insetBlock: tokens.spacing['0'],
+      insetInline: tokens.spacing['0'],
+    },
+    '& :is(.tempo-docs-home-quick-link, .tempo-docs-home-guide) > a:focus-visible': {
+      outlineStyle: 'none',
+    },
+    '& :is(.tempo-docs-home-quick-link, .tempo-docs-home-guide):has(> a:focus-visible)': {
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineStyle: 'solid',
+      outlineColor: inherited.color.homeInk,
+      outlineOffset: '4px',
+    },
+    // Quick links: icon and title on one row, the description below.
+    '& .tempo-docs-home-quick-links': {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+      gap: tokens.spacing['5'],
+    },
+    '& .tempo-docs-home-quick-link': {
+      display: 'grid',
+      gridTemplateColumns: 'auto minmax(0, 1fr)',
+      alignContent: 'start',
+      alignItems: 'center',
+      columnGap: tokens.spacing['2_5'],
+      rowGap: tokens.spacing['2'],
+    },
+    '& .tempo-docs-home-quick-link .tempo-docs-home-product-icon': {
+      marginInlineEnd: tokens.spacing['0'],
+      verticalAlign: 'baseline',
+    },
+    '& .tempo-docs-home-quick-link > a': {
+      color: inherited.color.homeInk,
+      fontSize: tokens.fontSize.body,
+      fontWeight: tokens.fontWeight.medium,
+      letterSpacing: tokens.letterSpacing.tight,
+      lineHeight: tokens.lineHeight.snug,
+      textDecoration: 'none',
+    },
+    '& .tempo-docs-home-quick-link p[data-v]': {
+      gridColumn: '1 / -1',
+      margin: 0,
+
+      color: inherited.color.homeMuted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.relaxed,
+      textWrap: 'pretty',
+    },
+    '& .tempo-docs-home-guides': {
+      marginTop: tokens.spacing.section,
+    },
+    // Start with a guide: three cards, each a description and an action named for it.
+    // Actions align at the card end.
     '& .tempo-docs-home-guide-grid': {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
@@ -66,11 +152,7 @@ export const tempoDocsHome = style({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'flex-start',
-      gap: tokens.spacing['4'],
-      paddingTop: tokens.spacing['4'],
-      borderTopWidth: tokens.borderWidth.hairline,
-      borderTopStyle: 'solid',
-      borderTopColor: tokens.color.hairline,
+      gap: tokens.spacing['3'],
     },
     // Start with a guide: the heading row carries Find your starting point at the inline end.
     '& .tempo-docs-home-section-head': {
@@ -81,7 +163,6 @@ export const tempoDocsHome = style({
       columnGap: tokens.spacing['4'],
       rowGap: tokens.spacing['2'],
     },
-    // Each guide's name heads its column; the button below reads "Get started".
     '& .tempo-docs-home-guide h3[data-v]': {
       margin: 0,
       padding: 0,
@@ -103,9 +184,16 @@ export const tempoDocsHome = style({
       lineHeight: tokens.lineHeight.relaxed,
       textWrap: 'pretty',
     },
-    '& .tempo-docs-home-guide-button': {
-      // design-exception: Pushes the button to the column end so the 3-up buttons align.
+    '& .tempo-docs-home-guide-action': {
+      // design-exception: Pushes the action to the card end so the three actions align.
       marginTop: 'auto !custom',
+      paddingTop: tokens.spacing['2'],
+
+      color: inherited.color.homeInk,
+      fontSize: tokens.fontSize.bodySmall,
+      fontWeight: tokens.fontWeight.medium,
+      lineHeight: tokens.lineHeight.relaxed,
+      textDecoration: 'none',
     },
     // Same style as All setup options.
     '& .tempo-docs-home-guides-more': {
@@ -113,6 +201,9 @@ export const tempoDocsHome = style({
       fontSize: tokens.fontSize.compact,
       lineHeight: tokens.lineHeight.relaxed,
       textDecoration: 'none',
+    },
+    '& .tempo-docs-home-agent': {
+      marginTop: tokens.spacing.section,
     },
     '& .tempo-docs-home-products': {
       marginTop: tokens.spacing.section,
@@ -122,15 +213,6 @@ export const tempoDocsHome = style({
       gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
       gap: tokens.spacing['5'],
       marginTop: tokens.spacing['7'],
-    },
-    '& .tempo-docs-home-product-group': {
-      minWidth: 0,
-      // design-exception: Preserve the inherited component/framework scope at the point of use.
-      padding: 'var(--tempo-card-padding) !custom',
-      // design-exception: Preserve the inherited component/framework scope at the point of use.
-      borderRadius: 'var(--tempo-card-radius) !custom',
-      '--corner-radius': 'var(--tempo-card-radius)',
-      backgroundColor: inherited.color.homePanel,
     },
     // The title sits at the start and the outline badge at the inline end. The row
     // keeps the badge's height so tiles with and without a badge align.
@@ -207,7 +289,7 @@ export const tempoDocsHome = style({
     '& .tempo-docs-home-reference-grid': {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-      gap: tokens.spacing['12'],
+      gap: tokens.spacing['5'],
       marginTop: tokens.spacing['7'],
     },
     '& .tempo-docs-home-reference-grid h3[data-v]': {
@@ -236,7 +318,7 @@ export const tempoDocsHome = style({
       gridColumn: '1 / -1',
     },
     // Standalone links get at least a 24px hit area.
-    '& .tempo-docs-home-guides-more, & .tempo-agent-start-footer > a, & .tempo-agent-start-prerequisite, & .tempo-docs-home-product-group :is(h3[data-v], li[data-v]) > a:not(.heading-anchor), & .tempo-docs-home-reference-grid li a':
+    '& .tempo-docs-home-guides-more, & .tempo-docs-home-guide-action, & .tempo-agent-start-footer > a, & .tempo-agent-start-prerequisite, & .tempo-docs-home-product-group :is(h3[data-v], li[data-v]) > a:not(.heading-anchor), & .tempo-docs-home-reference-grid li a':
       {
         display: 'inline-block',
         minHeight: '24px',
@@ -256,9 +338,27 @@ export const tempoDocsHome = style({
       outlineOffset: '-2px',
     },
   },
+  '@media (hover: hover)': {
+    selectors: {
+      '& :is(.tempo-docs-home-quick-link, .tempo-docs-home-guide):has(> a:hover)': {
+        backgroundColor: tokens.color.containerStrong,
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    },
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    selectors: {
+      '& :is(.tempo-docs-home-quick-link, .tempo-docs-home-guide)': {
+        transitionProperty: 'none',
+      },
+    },
+  },
   '@media (width < 1100px)': {
     selectors: {
       '& .tempo-docs-home-product-grid': {
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+      },
+      '& .tempo-docs-home-quick-links': {
         gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
       },
     },
@@ -267,15 +367,16 @@ export const tempoDocsHome = style({
     selectors: {
       '& .tempo-docs-home-reference-grid': {
         gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-        gap: tokens.spacing['8'],
+        gap: tokens.spacing['4'],
       },
     },
   },
-  '@media (width < 768px)': {
+  // Tablet and phone stack the guides; three columns leave their actions wrapping.
+  '@media (width < 900px)': {
     selectors: {
       '& .tempo-docs-home-guide-grid': {
         gridTemplateColumns: 'minmax(0, 1fr)',
-        gap: tokens.spacing['7'],
+        gap: tokens.spacing['4'],
       },
     },
   },
@@ -300,7 +401,16 @@ export const tempoDocsHome = style({
       },
       '& .tempo-docs-home-reference-grid': {
         gridTemplateColumns: 'minmax(0, 1fr)',
-        gap: tokens.spacing['8'],
+        gap: tokens.spacing['4'],
+      },
+      '& .tempo-docs-home-quick-links': {
+        gridTemplateColumns: 'minmax(0, 1fr)',
+        gap: tokens.spacing['3'],
+      },
+      // Both actions take the full width, the primary one first.
+      '& .tempo-docs-home-actions': {
+        flexDirection: 'column',
+        alignItems: 'stretch',
       },
     },
   },
@@ -316,7 +426,7 @@ export const tempoDocsHomeProductIcon = style({
   color: inherited.color.homeInk,
 })
 
-// Build with your agent sits on the page (no tile); its terminal takes the panel fill.
+// Build with your agent: a secondary section at the end of Home, in a Home card.
 export const tempoAgentStart = style({
   minWidth: 0,
   selectors: {
@@ -334,19 +444,15 @@ export const tempoAgentStart = style({
       justifyContent: 'space-between',
       gap: tokens.spacing['4'],
     },
-    // The agent block is an outlined tile, like the setup tiles on Accounts: page
-    // fill and a hairline (G4), the card radius and padding.
+    // The agent block is a Home card: the docs card fill, radius and padding.
     '& .tempo-agent-start-panel': {
       marginTop: tokens.spacing['7'],
-      // design-exception: Shares the Vocs card padding variable with the setup tiles.
+      // design-exception: Shares the docs card padding variable with Vocs cards.
       padding: 'var(--tempo-card-padding) !custom',
-      borderWidth: tokens.borderWidth.hairline,
-      borderStyle: 'solid',
-      borderColor: tokens.color.hairline,
-      // design-exception: Shares the card radius variable with the setup tiles.
+      // design-exception: Shares the docs card radius variable with Vocs cards.
       borderRadius: 'var(--tempo-card-radius) !custom',
       '--corner-radius': 'var(--tempo-card-radius)',
-      backgroundColor: tokens.color.background,
+      backgroundColor: inherited.color.homePanel,
     },
     // Connect Tempo docs, with the agent's install link at the inline end.
     '& .tempo-agent-start-heading': {
@@ -378,12 +484,13 @@ export const tempoAgentStart = style({
       width: '14px',
       height: '14px',
     },
+    // The terminal sits inside the card, so it takes the page fill.
     '& .tempo-agent-start-command': {
       marginTop: tokens.spacing['3'],
       overflow: 'hidden',
       borderRadius: tokens.radius.xl,
       '--corner-radius': tokens.radius.xl,
-      backgroundColor: inherited.color.homePanel,
+      backgroundColor: tokens.color.background,
     },
     '& .tempo-agent-start-destination': {
       display: 'inline-flex',

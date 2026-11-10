@@ -595,7 +595,7 @@ function renderCallout(
 
 function renderLinkButton(node: MarkdownNode): MarkdownNode[] {
   const destination = requiredStringAttribute(node, 'href')
-  // Home guide buttons read "Get started"; the guide's name makes the readable link.
+  // Home guide buttons carry a short action; the guide's name makes the readable link.
   const label = optionalStaticStringAttribute(node, 'guide') ?? plainText(node.children ?? [])
   if (!label) throw new TypeError(`${node.name} requires text content for Markdown output.`)
   const content = link(label, destination)
