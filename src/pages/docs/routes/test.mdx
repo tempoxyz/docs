@@ -13,26 +13,22 @@ import { RoutesTester } from '../../../components/RoutesTester'
 
 # Try a route
 
-Run a route end to end in your browser and watch each Routes API call.
-
-A route moves stablecoins from a source network and token to a destination network and token. The [Routes API](/docs/routes) quotes it, prepares the funding, and tracks delivery. It funds a route in one of two ways:
-
-- **Transfer:** Your wallet signs the source-chain calls that Routes prepares.
-- **Deposit address:** Routes generates an address, and the sender pays into it from any wallet.
-
-Choose a source and destination, and the demo quotes the route. Add a Routes API key to create the transfer or deposit address, fund it from your wallet, and track delivery. The log beside the steps shows each Routes API request and response.
-
-Some routes support subsidies. For an organization Tempo approves, a subsidy guarantees 1:1 delivery, where the recipient receives the amount sent. Without a key, the demo quotes from a demo organization that can quote but not create routes. Its quotes show the subsidized terms an approved organization receives.
-
-:::warning
-This demo moves real funds on live networks. Start with a small amount. Creating a route requires a Routes API key from [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys). Give it the `routes:read` (quotes and status), `routes:write` (create), and `data:read` (route directory) [scopes](/docs/routes/api-setup#routes-api-key-scopes). The key stays in this tab's memory.
-:::
+Run a route end to end in your browser and watch each [Routes API](/docs/routes) call. Pick a suggested route, or choose a source and destination, to get a quote.
 
 <RoutesTester />
+
+## Before you run it
+
+- **Real funds.** The demo moves real funds on live networks. Start with a small amount.
+- **API key.** Creating a route needs a Routes API key from [Tempo Console](https://console.tempo.xyz/?to=/:org/api-keys) with the `routes:read`, `routes:write`, and `data:read` [scopes](/docs/routes/api-setup#routes-api-key-scopes).
+- **Key storage.** The key stays only in this tab's memory.
+- **No key.** Without a key, the demo quotes from a demo organization that can quote but not create routes. Its quotes show the subsidized 1:1 terms an approved organization receives.
 
 To open a specific route, find it in the [supported routes](/docs/routes/networks#available-routes) table and choose **Try** beside it.
 
 ## How each route is funded
+
+Routes funds a route by **transfer**, where your wallet signs the source-chain calls Routes prepares, or by **deposit address**, where the sender pays into an address Routes generates.
 
 | Route | How you fund it |
 | --- | --- |
@@ -42,7 +38,7 @@ To open a specific route, find it in the [supported routes](/docs/routes/network
 | From Stellar | Choose a Stellar wallet, such as Hana Wallet or OneKey, then sign one payment. The sender needs XLM for the network fee. |
 | From Solana, or when you choose **Deposit address** in the demo | Routes generates a deposit address when you create the route. Send the source asset to it with your wallet, or from any wallet. The demo detects the deposit and tracks it. |
 
-With a subsidy, the quote shows the amount Tempo covers to deliver 1:1. When you add your key, the demo quotes again with your organization's pricing. If your organization isn't [approved for subsidies](/docs/routes/quotes#offer-11-delivery), the demo quotes the route without 1:1 delivery and says why. The recipient then receives the amount sent minus the route's fees and deductions.
+With a subsidy, the quote shows the amount Tempo covers to deliver 1:1, where the recipient receives the amount sent. When you add your key, the demo quotes again with your organization's pricing. If your organization isn't [approved for subsidies](/docs/routes/quotes#offer-11-delivery), the demo quotes the route without 1:1 delivery and says why. The recipient then receives the amount sent minus the route's fees and deductions.
 
 Each create request carries an [idempotency key](/docs/routes/api-setup#set-idempotency-keys). Retrying a creation resends the same request and key, so it returns the original route instead of a duplicate. If a wallet may have sent a transaction, check its history before trying again.
 

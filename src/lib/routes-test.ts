@@ -241,3 +241,27 @@ export function routeTestRequest(route: TestRoute, input: RouteInput) {
         refundAddress: address(input.refundAddress, route.sourceChain.addressFormat, 'refund'),
       }
 }
+
+/**
+ * Up to `limit` routes the demo can run, offered as one-click starts: Base USDC to Tempo USDC.e
+ * first, then other routes into Tempo, one per source network where possible.
+ */
+export function quickRoutes(routes: TestRoute[], limit = 3) {
+  const rank = (route: TestRoute) => {
+    if (!isTempo(route.destinationChain.id)) return 2
+    const baseUsdc = route.sourceChain.id === 'eip155:8453' && route.sourceToken.symbol === 'USDC'
+    return baseUsdc && route.destinationToken.symbol === 'USDC.e' ? 0 : 1
+  }
+  const ranked = routes
+    .filter((route) => demoMethods(route).length > 0)
+    .map((route, index) => ({ route, index }))
+    .sort((a, b) => rank(a.route) - rank(b.route) || a.index - b.index)
+    .map(({ route }) => route)
+  const sources = new Set<string>()
+  const varied = ranked.filter((route) => {
+    if (sources.has(route.sourceChain.id)) return false
+    sources.add(route.sourceChain.id)
+    return true
+  })
+  return [...varied, ...ranked.filter((route) => !varied.includes(route))].slice(0, limit)
+}
