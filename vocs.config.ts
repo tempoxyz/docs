@@ -9,6 +9,7 @@ import {
   docsRouteDestination,
   proxiedLegacyDocsRoutes,
 } from './src/lib/docs-routing'
+import { docsSearch } from './src/lib/docs-search'
 import { docsSections, docsUtilitySections } from './src/lib/docs-sections'
 import { docsStructuredDataHead } from './src/lib/docs-structured-data'
 import { createFeedbackAdapter } from './src/lib/feedback-adapter'
@@ -24,8 +25,6 @@ import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 const baseUrl = resolveBaseUrl()
 const openApiSpecUrl = process.env.OPENAPI_SPEC_URL ?? 'https://api.tempo.xyz/openapi.json'
 
-const searchIndexFields = ['title', 'titles', 'subtitle', 'path', 'excerpt']
-const searchBoost = { title: 5, subtitle: 3, titles: 2, path: 3, excerpt: 3 }
 // Page renders, Markdown exports, and builds share one GitHub request per cache window.
 const tempoChangelog = cacheChangelog(
   Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
@@ -69,36 +68,6 @@ const changelog = Changelog.from({
       })
   },
 })
-
-function extractSearchField(document: Record<string, unknown>, fieldName: string) {
-  if (fieldName === 'path') {
-    return String(document.href ?? '')
-      .split('#')[0]
-      .replace(/^\/docs\//, '/')
-      .replaceAll('/', ' ')
-  }
-  if (fieldName === 'excerpt') {
-    return String(document.text ?? '')
-      .trim()
-      .split(/\s+/)
-      .slice(0, 24)
-      .join(' ')
-  }
-  return document[fieldName]
-}
-
-function boostSearchDocument(
-  _documentId: unknown,
-  _term: string,
-  storedFields?: Record<string, unknown>,
-) {
-  const priority = (storedFields?.searchPriority as number | undefined) ?? 1
-  const href = storedFields?.href as string | undefined
-  const segments = href ? href.split('/').filter(Boolean).length : 1
-  const depth = href?.startsWith('/docs/') ? Math.max(segments - 1, 1) : segments
-  const docsBoost = href?.startsWith('/docs/') ? 1.5 : 1
-  return priority * (1 / Math.max(depth, 1)) * docsBoost
-}
 
 // Proposed API reference grouping (IA comp). Product sections are named
 // "<Product> API", chain reads sit in Data API, and the Console section follows
@@ -246,20 +215,7 @@ export default defineConfig({
         })
       : undefined,
   },
-  search: {
-    index: {
-      fields: searchIndexFields,
-      storeFields: ['path', 'excerpt'],
-      extractField: extractSearchField,
-    },
-    query: {
-      combineWith: 'OR',
-      fuzzy: 0.1,
-      prefix: true,
-      boost: searchBoost,
-      boostDocument: boostSearchDocument,
-    },
-  },
+  search: docsSearch,
   sitemap: {
     include: (path) =>
       (path === '/' || /^\/(?:get-started|docs)(?:\/|$)/.test(path)) &&
