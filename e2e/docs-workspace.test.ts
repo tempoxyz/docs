@@ -319,7 +319,7 @@ test('product availability lives in overview callouts, not navigation labels', a
   for (const [path, status] of [
     ['/docs/earn', /beta/i],
     ['/docs/routes', /beta/i],
-    ['/docs/zones', /limited preview/i],
+    ['/docs/zones', /live on Tempo Mainnet/i],
   ] as const) {
     await page.goto(path)
     const article = page.locator('article[data-v-content]')

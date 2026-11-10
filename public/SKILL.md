@@ -20,7 +20,7 @@ All links below use the canonical docs mount at `https://tempo.xyz/developers`.
 | [Accounts](https://tempo.xyz/developers/docs/accounts.md) | Create accounts, set up sign-in, security policies, access keys, and fees, or follow guides for wallet providers, SSO, self-custody, agents, automations, spending, and treasuries. |
 | [Earn](https://tempo.xyz/developers/docs/earn.md) | Choose a vault, deposit stablecoins, read positions, or withdraw. Earn is in beta; check access on the introduction page. |
 | [Routes](https://tempo.xyz/developers/docs/routes.md) | Accept cross-network deposits, quote transfers, or track delivery. Routes is in beta; check access on the introduction page. |
-| [Zones](https://tempo.xyz/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is in limited preview; check access on the introduction page. |
+| [Zones](https://tempo.xyz/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is live on Mainnet; check how to set up a Zone on the introduction page. |
 | [Machine Payments](https://tempo.xyz/developers/docs/agents.md) | Pay for APIs, accept API payments, discover services, or integrate MPP. |
 | [Tempo EVM](https://tempo.xyz/developers/docs/development.md) | Build wallet support, manage signing keys, send or receive payments and reconcile deposits, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
 | [API reference](https://tempo.xyz/developers/docs/api.md) | Find Tempo API endpoints by product, authentication, Console management endpoints, JSON-RPC, and the indexer. |
@@ -34,7 +34,7 @@ For application checkout and returns, use [payment links](https://tempo.xyz/deve
 
 Within Tempo EVM, node operators start at [Run a node](https://tempo.xyz/developers/docs/guide/node.md). For network upgrades and activation timelines, read [Changelog](https://tempo.xyz/developers/docs/protocol/upgrades.md); for node software versions, read [Node releases](https://tempo.xyz/developers/docs/changelog.md).
 
-Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in the limited preview.
+Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox walkthroughs. That sandbox uses a separate integration and does not establish which operations are available in current Mainnet deployments.
 
 ## Find and read the evidence
 
