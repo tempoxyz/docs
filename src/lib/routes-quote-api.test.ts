@@ -68,6 +68,7 @@ describe('Routes quote proxy', () => {
     [{ kind: 'transfers', mode: 'exactSource', subsidize: false }, 'false'],
     [{ kind: 'deposit-addresses', subsidize: false }, 'false'],
     [{ kind: 'transfers', mode: 'exactDestination' }, null],
+    [{ kind: 'transfers', mode: 'exactSource', priority: 'speed' }, null],
   ])('previews 1:1 delivery by default and keeps an explicit choice: %j', async (body, subsidize) => {
     expect((await POST(request(body))).status).toBe(200)
     expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('subsidize')).toBe(

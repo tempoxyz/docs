@@ -82,6 +82,21 @@ describe('route test requests', () => {
     ).toThrow('1:1')
     expect(() => routeTestRequest(route, { ...input, subsidize: true })).toThrow('1:1')
   })
+  it('sends a speed priority on transfers only, without 1:1 delivery', () => {
+    expect(routeTestRequest(route, input)).not.toHaveProperty('priority')
+    expect(routeTestRequest(route, { ...input, priority: 'price' })).not.toHaveProperty('priority')
+    expect(routeQuoteRequest(route, { ...input, priority: 'speed' })).toMatchObject({
+      priority: 'speed',
+      subsidize: false,
+    })
+    const subsidized = { ...route, subsidies: { transfer: true, depositAddress: false } }
+    expect(() =>
+      routeTestRequest(subsidized, { ...input, priority: 'speed', subsidize: true }),
+    ).toThrow('Speed')
+    expect(() =>
+      routeTestRequest(route, { ...input, method: 'depositAddress', priority: 'speed' }),
+    ).toThrow('transfers')
+  })
   it('requires Stellar account addresses on Stellar sources', () => {
     const stellar = { id: 'stellar:pubnet', name: 'Stellar', addressFormat: 'strkey' }
     const fromStellar = { ...route, sourceChain: stellar }
