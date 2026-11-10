@@ -3,41 +3,47 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useRouter } from 'waku'
 import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
+import BookOpenIcon from '~icons/lucide/book-open'
 import BracesIcon from '~icons/lucide/braces'
 import ChevronDownIcon from '~icons/lucide/chevron-down'
-import CodeIcon from '~icons/lucide/code-xml'
 import CompassIcon from '~icons/lucide/compass'
-import ScanSearchIcon from '~icons/lucide/scan-search'
+import HandshakeIcon from '~icons/lucide/handshake'
+import ServerIcon from '~icons/lucide/server'
 import TerminalIcon from '~icons/lucide/terminal'
 import {
+  type DocsArea,
   type DocsSection,
+  docsAreas,
   docsSections,
   docsUtilitySections,
   getActiveDocsSection,
+  getDocsAreaForSection,
+  getDocsSectionById,
 } from '../lib/docs-sections'
 import { docsSectionNav as sectionSurface } from '../styles/surfaces.styles'
 import { docsProductIcons } from './DocsHomeProductIcon'
 import {
-  docsApiMenuItem,
-  docsApiMenuMobile,
+  docsAreaLink,
+  docsAreaMenuItem,
+  docsAreaMenuItemDescription,
+  docsAreaMenuItemLabel,
+  docsAreaMenuPanel,
+  docsAreaNav,
   docsReferenceMenu,
-  docsReferencePanel,
-  docsReferenceTrigger,
   docsResourceLinkLabel,
   docsResourceLinks,
   docsResourceLinkText,
   docsResourceLogo,
   docsSectionIcon,
   docsSectionNav,
+  docsSectionNavDescription,
   docsSectionNavScroll,
-  docsSectionUtilities,
-  docsSectionUtilityLink,
 } from './DocsNavigation.styles'
 import { MercatorLogo, MppLogo, TempoMark } from './ToolLogos'
 
 export { docsSections, docsUtilitySections, getActiveDocsSection }
 
-const sectionIcons: Partial<Record<DocsSection['id'], typeof CompassIcon>> = {
+export const sectionIcons: Partial<Record<DocsSection['id'], typeof CompassIcon>> = {
   overview: CompassIcon,
   accounts: docsProductIcons.accounts,
   earn: docsProductIcons.earn,
@@ -45,6 +51,24 @@ const sectionIcons: Partial<Record<DocsSection['id'], typeof CompassIcon>> = {
   zones: docsProductIcons.zones,
   'machine-payments': docsProductIcons.agents,
   developers: docsProductIcons.network,
+  operate: ServerIcon,
+  api: BracesIcon,
+  tools: TerminalIcon,
+  resources: BookOpenIcon,
+  ecosystem: HandshakeIcon,
+}
+
+/** One line per section in the area menus. */
+export const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
+  accounts: 'Stablecoin accounts with security rules built in',
+  earn: 'Earning balances for stablecoins',
+  routes: 'Deposits and transfers across networks',
+  zones: 'Private zones on Tempo',
+  'machine-payments': 'Charge for APIs and pay for services',
+  api: 'Endpoints, authentication and conventions',
+  tools: 'TypeScript, Rust, Go, Python, Foundry and the CLI',
+  resources: 'Plan payment workflows and integrations',
+  ecosystem: 'Wallets, ramps, bridges and infrastructure',
 }
 
 export const docsExternalTools = [
@@ -53,6 +77,12 @@ export const docsExternalTools = [
   { label: 'Tempo Console', href: 'https://console.tempo.xyz/', logo: TempoMark },
   { label: 'Tempo Wallet', href: 'https://wallet.tempo.xyz/', logo: TempoMark },
 ]
+
+export function areaSections(area: DocsArea) {
+  return area.sections
+    .map((id) => getDocsSectionById(id))
+    .filter((section): section is DocsSection => Boolean(section))
+}
 
 export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -86,14 +116,19 @@ export function DocsResourceLinks({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-export function DocsApiDropdown({
-  active,
-  mobile = false,
-  onNavigate,
+/** A disclosure menu in the global nav: a trigger and a panel of links. */
+export function DocsNavMenu({
+  label,
+  ariaLabel,
+  active = false,
+  align = 'start',
+  children,
 }: {
-  active: boolean
-  mobile?: boolean
-  onNavigate?: () => void
+  label: React.ReactNode
+  ariaLabel?: string
+  active?: boolean
+  align?: 'start' | 'end'
+  children: (close: () => void) => React.ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -118,11 +153,7 @@ export function DocsApiDropdown({
     <div
       ref={ref}
       role="group"
-      className={
-        mobile
-          ? `docs-reference-menu docs-api-menu-mobile ${docsReferenceMenu().className} ${docsApiMenuMobile().className}`
-          : `docs-reference-menu ${docsReferenceMenu().className}`
-      }
+      className={`docs-nav-menu ${docsReferenceMenu().className}`}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
       }}
@@ -138,75 +169,146 @@ export function DocsApiDropdown({
       <button
         ref={buttonRef}
         type="button"
-        className={`docs-reference-trigger ${docsReferenceTrigger().className}`}
+        className={`docs-area-link ${docsAreaLink().className}`}
         aria-expanded={open}
         aria-controls={panelId}
-        aria-current={active ? 'page' : undefined}
+        aria-current={active ? 'true' : undefined}
+        aria-label={ariaLabel}
         onClick={() => setOpen(!open)}
       >
-        SDKs & CLI <ChevronDownIcon aria-hidden="true" width="14" height="14" />
+        {label}
+        <ChevronDownIcon aria-hidden="true" width="14" height="14" />
       </button>
-      <nav
+      <div
         id={panelId}
-        aria-label="SDKs & CLI"
         hidden={!open}
-        className={`docs-reference-panel docs-resource-links ${docsReferencePanel().className} ${docsResourceLinks().className}`}
+        data-align={align}
+        className={`docs-area-menu-panel ${docsAreaMenuPanel().className}`}
       >
-        {[
-          { label: 'Overview', href: '/docs/sdk', icon: CompassIcon },
-          { label: 'SDKs', href: '/docs/sdk', icon: CodeIcon },
-          { label: 'CLI', href: '/docs/cli', icon: TerminalIcon },
-          { label: 'Server handlers', href: '/docs/server', icon: BracesIcon },
-        ].map((item) => (
-          <Link
-            key={item.href}
-            to={item.href}
-            onClick={() => {
-              setOpen(false)
-              onNavigate?.()
-            }}
-          >
-            <span className={`docs-api-menu-item ${docsApiMenuItem().className}`}>
-              <item.icon aria-hidden="true" width="18" height="18" />
-              {item.label}
-            </span>
-          </Link>
-        ))}
-        <a
-          href="https://explore.tempo.xyz"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => {
-            setOpen(false)
-            onNavigate?.()
-          }}
-        >
-          <span className={`docs-api-menu-item ${docsApiMenuItem().className}`}>
-            <ScanSearchIcon aria-hidden="true" width="18" height="18" />
-            Explorer
-            <ArrowUpRightIcon aria-hidden="true" width="14" height="14" />
-          </span>
-        </a>
-      </nav>
+        {children(() => setOpen(false))}
+      </div>
     </div>
   )
 }
 
+function AreaMenuItem({
+  section,
+  active,
+  onNavigate,
+}: {
+  section: DocsSection
+  active: boolean
+  onNavigate: () => void
+}) {
+  const Icon = sectionIcons[section.id]
+  return (
+    <Link
+      to={section.href}
+      onClick={onNavigate}
+      aria-current={active ? 'page' : undefined}
+      className={`docs-area-menu-item ${docsAreaMenuItem().className}`}
+      unstable_prefetchOnEnter={{}}
+    >
+      {Icon && (
+        <Icon
+          className={`docs-section-icon ${docsSectionIcon().className}`}
+          aria-hidden="true"
+          focusable="false"
+          width="18"
+          height="18"
+          strokeWidth="1.75"
+        />
+      )}
+      <span className={docsAreaMenuItemLabel().className}>
+        {section.label}
+        {sectionDescriptions[section.id] && (
+          <span className={docsAreaMenuItemDescription().className}>
+            {sectionDescriptions[section.id]}
+          </span>
+        )}
+      </span>
+    </Link>
+  )
+}
+
+/** The six documentation areas in the global nav. Multi-section areas open a menu. */
+export function DocsAreaNav({ pathname }: { pathname: string }) {
+  const activeSection = getActiveDocsSection(pathname)
+  const activeArea = getDocsAreaForSection(activeSection?.id)
+
+  return (
+    <nav aria-label="Documentation areas" className={`docs-area-nav ${docsAreaNav().className}`}>
+      <ul>
+        {docsAreas.map((area) => {
+          const sections = areaSections(area)
+          const active = activeArea?.id === area.id
+          return (
+            <li key={area.id}>
+              {sections.length > 1 ? (
+                <DocsNavMenu label={area.label} active={active}>
+                  {(close) =>
+                    sections.map((section) => (
+                      <AreaMenuItem
+                        key={section.id}
+                        section={section}
+                        active={activeSection?.id === section.id}
+                        onNavigate={close}
+                      />
+                    ))
+                  }
+                </DocsNavMenu>
+              ) : (
+                <Link
+                  to={area.href}
+                  className={`docs-area-link ${docsAreaLink().className}`}
+                  aria-current={active ? 'page' : undefined}
+                  unstable_prefetchOnEnter={{}}
+                  unstable_prefetchOnView={{}}
+                >
+                  {area.label}
+                </Link>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
+  )
+}
+
+/**
+ * The second row: the sections inside the current area, so readers can move between sibling
+ * sections (Accounts → Earn, Tempo API → SDKs & CLI). Home lists the six areas instead.
+ */
 export default function DocsSectionNav() {
   const { path } = useRouter()
   const navRef = useRef<HTMLElement | null>(null)
   const activeLinkRef = useRef<HTMLAnchorElement | null>(null)
   const activeSection = getActiveDocsSection(path ?? '/')
-  const activeLabel = activeSection?.label ?? null
+  const activeArea = getDocsAreaForSection(activeSection?.id)
+  const items = activeArea
+    ? areaSections(activeArea).map((section) => ({
+        id: section.id,
+        label: section.label,
+        href: section.href,
+        Icon: sectionIcons[section.id],
+        current: activeSection?.id === section.id,
+      }))
+    : docsAreas.map((area) => ({
+        id: area.id,
+        label: area.label,
+        href: area.href,
+        Icon: sectionIcons[area.sections[0] as DocsSection['id']],
+        current: false,
+      }))
 
   useEffect(() => {
-    if (!activeLabel || !docsSections.some((section) => section.id === activeSection?.id)) return
     const nav = navRef.current
     const activeLink = activeLinkRef.current
     if (!nav || !activeLink) return
     const centeredLeft = activeLink.offsetLeft - nav.clientWidth / 2 + activeLink.offsetWidth / 2
     nav.scrollTo({ left: Math.max(0, centeredLeft), behavior: 'instant' })
-  }, [activeLabel, activeSection?.id])
+  }, [activeSection?.id])
 
   return (
     <div
@@ -214,58 +316,42 @@ export default function DocsSectionNav() {
     >
       <nav
         ref={navRef}
-        aria-label="Documentation sections"
+        aria-label={activeArea ? `${activeArea.label} sections` : 'Documentation areas'}
         className={`docs-section-nav-scroll ${docsSectionNavScroll().className}`}
       >
         <ul>
-          {docsSections.map((item) => {
-            const Icon = sectionIcons[item.id]
-            return (
-              <li key={item.id}>
-                <Link
-                  ref={(element) => {
-                    if (activeSection?.id === item.id) activeLinkRef.current = element
-                  }}
-                  to={item.href}
-                  unstable_prefetchOnEnter={{}}
-                  unstable_prefetchOnView={{}}
-                  aria-current={activeSection?.id === item.id ? 'page' : undefined}
-                >
-                  {Icon && (
-                    <Icon
-                      className={`docs-section-icon ${docsSectionIcon().className}`}
-                      aria-hidden="true"
-                      focusable="false"
-                      width="16"
-                      height="16"
-                      strokeWidth="1.75"
-                    />
-                  )}
-                  {item.label}
-                </Link>
-              </li>
-            )
-          })}
+          {items.map((item) => (
+            <li key={item.id}>
+              <Link
+                ref={(element) => {
+                  if (item.current) activeLinkRef.current = element
+                }}
+                to={item.href}
+                unstable_prefetchOnEnter={{}}
+                unstable_prefetchOnView={{}}
+                aria-current={item.current ? 'page' : undefined}
+              >
+                {item.Icon && (
+                  <item.Icon
+                    className={`docs-section-icon ${docsSectionIcon().className}`}
+                    aria-hidden="true"
+                    focusable="false"
+                    width="16"
+                    height="16"
+                    strokeWidth="1.75"
+                  />
+                )}
+                {item.label}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
-      <div className={`docs-section-utilities ${docsSectionUtilities().className}`}>
-        {docsUtilitySections.map((section) =>
-          section.id === 'tools' ? (
-            <DocsApiDropdown key={section.id} active={activeSection?.id === section.id} />
-          ) : (
-            <Link
-              key={section.id}
-              to={section.href}
-              className={`docs-section-utility-link ${docsSectionUtilityLink().className}`}
-              aria-current={activeSection?.id === section.id ? 'page' : undefined}
-              unstable_prefetchOnEnter={{}}
-              unstable_prefetchOnView={{}}
-            >
-              {section.label}
-            </Link>
-          ),
-        )}
-      </div>
+      {activeArea && (
+        <p className={`docs-section-nav-description ${docsSectionNavDescription().className}`}>
+          {activeArea.description}
+        </p>
+      )}
     </div>
   )
 }

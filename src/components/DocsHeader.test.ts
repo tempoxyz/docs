@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { docsSections, getActiveDocsSection } from '../lib/docs-sections'
+import {
+  docsAreas,
+  docsSections,
+  getActiveDocsArea,
+  getActiveDocsSection,
+} from '../lib/docs-sections'
 import { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
 const sidebar = {
@@ -41,7 +46,7 @@ describe('resolveSidebarItems', () => {
 })
 
 describe('getActiveDocsSection', () => {
-  it('presents seven product and developer tabs without availability badges', () => {
+  it('groups the sections into six global nav areas', () => {
     expect(docsSections.map(({ label }) => label)).toEqual([
       'Get Started',
       'Accounts',
@@ -50,7 +55,20 @@ describe('getActiveDocsSection', () => {
       'Zones',
       'Machine Payments',
       'Tempo EVM',
+      'Operate',
     ])
+    expect(docsAreas.map(({ label }) => label)).toEqual([
+      'Get started',
+      'Products',
+      'Tempo EVM',
+      'Operate',
+      'Reference',
+      'Resources',
+    ])
+    expect(getActiveDocsArea('/docs/earn/balances')?.id).toBe('products')
+    expect(getActiveDocsArea('/docs/cli/request')?.id).toBe('reference')
+    expect(getActiveDocsArea('/docs/partners/wallets')?.id).toBe('resources')
+    expect(getActiveDocsArea('/')).toBeUndefined()
   })
 
   it('opens the guide library from Tempo EVM and the MPP introduction from Machine payments', () => {
@@ -61,7 +79,7 @@ describe('getActiveDocsSection', () => {
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
     expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('api')
     expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
-    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('developers')
+    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('operate')
     expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Tempo EVM')
   })
 
@@ -141,21 +159,23 @@ describe('getActiveDocsSection', () => {
     ['/docs/protocol/tip403/spec', 'developers'],
     ['/docs/protocol/exchange/spec', 'developers'],
     ['/docs/protocol/blockspace/payment-lane-specification', 'developers'],
-    ['/docs/guide/node/installation', 'developers'],
-    ['/docs/protocol/upgrades', 'developers'],
-    ['/docs/protocol/upgrades/t11', 'developers'],
-    ['/docs/protocol/upgrades/t12', 'developers'],
-    ['/docs/guide/node/upgrade-cadence', 'developers'],
-    ['/docs/guide/node/network-upgrades', 'developers'],
-    ['/docs/changelog', 'developers'],
+    ['/docs/guide/node/installation', 'operate'],
+    ['/docs/protocol/upgrades', 'operate'],
+    ['/docs/protocol/upgrades/t11', 'operate'],
+    ['/docs/protocol/upgrades/t12', 'operate'],
+    ['/docs/guide/node/upgrade-cadence', 'operate'],
+    ['/docs/guide/node/network-upgrades', 'operate'],
+    ['/docs/changelog', 'operate'],
     ['/docs/api/indexer-api', 'api'],
     ['/docs/protocol/rpc/eth_getBalance', 'developers'],
-    ['/docs/sdk/typescript', 'overview'],
-    ['/docs/cli/request', 'overview'],
-    ['/docs/wallet/recipes', 'overview'],
-    ['/docs/server/relay-handler', 'overview'],
-    ['/docs/tools', 'overview'],
+    ['/docs/sdk/typescript', 'tools'],
+    ['/docs/cli/request', 'tools'],
+    ['/docs/wallet/recipes', 'tools'],
+    ['/docs/server/relay-handler', 'tools'],
+    ['/docs/tools', 'tools'],
     ['/docs/quickstart/developer-tools', 'overview'],
+    ['/docs/resources/guides', 'resources'],
+    ['/docs/resources/guides/payroll', 'resources'],
   ])('assigns %s to the %s section', (pathname, expected) => {
     expect(getActiveDocsSection(pathname)?.id).toBe(expected)
     expect(getActiveDocsSection(`/developers${pathname}/`)?.id).toBe(expected)

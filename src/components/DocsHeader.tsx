@@ -11,6 +11,7 @@ import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 export { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
 import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
+import { docsAreas } from '../lib/docs-sections'
 import { publicAssetPath } from '../lib/public-asset-path'
 import { navActiveSquare } from '../styles/surfaces.styles'
 import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
@@ -18,18 +19,28 @@ import { AgentSetupCommand } from './AgentSetupCommand'
 import { CopyIconSwap } from './CopyIconSwap'
 import * as ui from './DocsHeader.recipes'
 import {
+  docsAreaMenuItem,
+  docsAreaMenuItemDescription,
+  docsAreaMenuItemLabel,
   docsHeaderAccountEmail,
   docsHeaderActions,
   docsHeaderAgentMenu,
   docsHeaderAgentPanel,
   docsHeaderAgentTrigger,
   docsHeaderBrand,
+  docsHeaderDocsLabel,
+  docsHeaderGetKey,
   docsHeaderIconButton,
-  docsHeaderLoginPrimary,
+  docsHeaderKbd,
+  docsHeaderLeft,
+  docsHeaderLoginText,
   docsHeaderLogo,
   docsHeaderMenuButton,
+  docsHeaderMobileAccount,
   docsHeaderMobileActions,
   docsHeaderMobileAgents,
+  docsHeaderMobileAreaGroup,
+  docsHeaderMobileAreaLabel,
   docsHeaderMobileBody,
   docsHeaderMobileDialog,
   docsHeaderMobileLabel,
@@ -38,20 +49,22 @@ import {
   docsHeaderMobileSections,
   docsHeaderMobileTheme,
   docsHeaderMobileTop,
-  docsHeaderMobileUtilityLink,
   docsHeaderMobileWebsite,
   docsHeaderNav,
+  docsHeaderSearchField,
+  docsHeaderSearchLabel,
+  docsHeaderSwitcher,
   docsSiteHeader,
 } from './DocsNavigation.styles'
 import {
-  DocsApiDropdown,
+  areaSections,
+  DocsAreaNav,
+  DocsNavMenu,
   DocsResourceLinks,
-  docsSections,
-  docsUtilitySections,
+  docsExternalTools,
   getActiveDocsSection,
 } from './DocsSectionNav'
 import { HeadingAnchorFeedback } from './HeadingAnchorFeedback'
-import { iconButton } from './IconButton.recipes'
 import { SearchDialogMotion } from './SearchDialogMotion'
 import { SmoothCorners } from './SmoothCorners'
 
@@ -844,6 +857,9 @@ export default function DocsHeader() {
         className={`docs-header-logo ${docsHeaderLogo().className}`}
       >
         <TempoLogo className={ui.tempoLogo().className} />
+        <span aria-hidden="true" className={docsHeaderDocsLabel().className}>
+          Docs
+        </span>
       </WakuLink>
     </div>
   )
@@ -857,8 +873,29 @@ export default function DocsHeader() {
         className={`docs-header-nav ${docsHeaderNav().className}`}
         aria-label="Developer navigation"
       >
-        {brand}
+        <div className={`docs-header-left ${docsHeaderLeft().className}`}>
+          {brand}
+          <div className={`docs-header-switcher ${docsHeaderSwitcher().className}`}>
+            <DocsNavMenu label={null} ariaLabel="Tempo products">
+              {(closeMenu) => <ProductSwitcherLinks onNavigate={closeMenu} />}
+            </DocsNavMenu>
+          </div>
+          <DocsAreaNav pathname={pathname} />
+        </div>
         <div className={`docs-header-actions ${docsHeaderActions().className}`}>
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search documentation"
+            aria-keyshortcuts="Meta+K Control+K"
+            title="Search documentation (⌘K)"
+            disabled={!mounted}
+            className={`docs-header-search ${docsHeaderSearchField().className}`}
+          >
+            <SearchIcon />
+            <span className={docsHeaderSearchLabel().className}>Search docs</span>
+            <kbd className={docsHeaderKbd().className}>⌘K</kbd>
+          </button>
           <div
             ref={agentMenuRef}
             className={`docs-header-agent-menu ${docsHeaderAgentMenu().className}`}
@@ -889,11 +926,7 @@ export default function DocsHeader() {
           {/* Absolute: the docs are also mounted at tempo.xyz/developers, where relative links miss the console. */}
           <a
             href={CONSOLE_URL}
-            className={
-              email
-                ? `docs-header-login ${docsHeaderAgentTrigger().className}`
-                : `docs-header-login ${docsHeaderAgentTrigger().className} ${docsHeaderLoginPrimary().className}`
-            }
+            className={`docs-header-login ${docsHeaderLoginText().className}`}
             {...(email ? { 'aria-label': `Open Tempo Console as ${email}`, title: email } : {})}
           >
             {email ? (
@@ -905,17 +938,11 @@ export default function DocsHeader() {
               'Log in'
             )}
           </a>
-          <button
-            type="button"
-            onClick={openSearch}
-            aria-label="Search documentation"
-            aria-keyshortcuts="Meta+K Control+K"
-            title="Search documentation (⌘K)"
-            disabled={!mounted}
-            className={`docs-header-search ${iconButton().className}`}
-          >
-            <SearchIcon />
-          </button>
+          {!email && (
+            <a href={CONSOLE_URL} className={`docs-header-get-key ${docsHeaderGetKey().className}`}>
+              Get API key
+            </a>
+          )}
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -968,49 +995,46 @@ export default function DocsHeader() {
             <SearchIcon /> Search documentation
           </button>
           <nav
-            aria-label="All documentation sections"
+            aria-label="All documentation areas"
             className={`docs-header-mobile-sections ${docsHeaderMobileSections().className}`}
           >
             <p className={`docs-header-mobile-label ${docsHeaderMobileLabel().className}`}>
               Explore the docs
             </p>
-            {docsSections.map((section) => (
-              <WakuLink
-                key={section.id}
-                to={section.href}
-                onClick={close}
-                aria-current={activeSection?.id === section.id ? 'page' : undefined}
-              >
-                {section.label}
-                <span aria-hidden="true">↗</span>
-              </WakuLink>
-            ))}
+            {docsAreas.map((area) => {
+              const sections = areaSections(area)
+              if (sections.length === 1)
+                return (
+                  <WakuLink
+                    key={area.id}
+                    to={area.href}
+                    onClick={close}
+                    aria-current={activeSection?.id === sections[0]?.id ? 'page' : undefined}
+                  >
+                    {area.label}
+                  </WakuLink>
+                )
+              return (
+                <div key={area.id} className={docsHeaderMobileAreaGroup().className}>
+                  <p className={docsHeaderMobileAreaLabel().className}>{area.label}</p>
+                  {sections.map((section) => (
+                    <WakuLink
+                      key={section.id}
+                      to={section.href}
+                      onClick={close}
+                      aria-current={activeSection?.id === section.id ? 'page' : undefined}
+                    >
+                      {section.label}
+                    </WakuLink>
+                  ))}
+                </div>
+              )
+            })}
           </nav>
           <div className={`docs-header-mobile-resources ${docsHeaderMobileResources().className}`}>
             <p className={`docs-header-mobile-label ${docsHeaderMobileLabel().className}`}>
-              Resources
+              Tempo products
             </p>
-            {docsUtilitySections.map((section) =>
-              section.id === 'tools' ? (
-                <DocsApiDropdown
-                  key={section.id}
-                  active={activeSection?.id === section.id}
-                  mobile
-                  onNavigate={close}
-                />
-              ) : (
-                <WakuLink
-                  key={section.id}
-                  to={section.href}
-                  onClick={close}
-                  className={`docs-header-mobile-utility-link ${docsHeaderMobileUtilityLink().className}`}
-                  aria-current={activeSection?.id === section.id ? 'page' : undefined}
-                >
-                  {section.label}
-                  <span aria-hidden="true">↗</span>
-                </WakuLink>
-              ),
-            )}
             <DocsResourceLinks onNavigate={close} />
           </div>
           <details className={`docs-header-mobile-agents ${docsHeaderMobileAgents().className}`}>
@@ -1027,9 +1051,39 @@ export default function DocsHeader() {
           >
             Back to tempo.xyz <ArrowUpRight className={ui.arrowUpRight3().className} />
           </a>
+          <div className={`docs-header-mobile-account ${docsHeaderMobileAccount().className}`}>
+            <a href={CONSOLE_URL}>{email ? 'Open Console' : 'Log in'}</a>
+            <a href={CONSOLE_URL}>Get API key</a>
+          </div>
         </div>
       </dialog>
     </header>
+  )
+}
+
+/** The product switcher beside the logo: tempo.xyz and the other Tempo products. */
+function ProductSwitcherLinks({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <>
+      {[{ label: 'tempo.xyz', href: 'https://tempo.xyz/' }, ...docsExternalTools].map((item) => (
+        <a
+          key={item.href}
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onNavigate}
+          className={`docs-area-menu-item ${docsAreaMenuItem().className}`}
+        >
+          <span className={docsAreaMenuItemLabel().className}>
+            {item.label}
+            <span className={docsAreaMenuItemDescription().className}>
+              {item.href.replace(/^https:\/\//, '').replace(/\/$/, '')}
+            </span>
+          </span>
+          <ArrowUpRight className={ui.arrowUpRight3().className} />
+        </a>
+      ))}
+    </>
   )
 }
 

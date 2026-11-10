@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useActiveSidebarAnchor, useConfig } from 'vocs'
+import { getActiveDocsSection } from '../lib/docs-sections'
 import { resolveSidebarItems, SidebarNodes, usePathname } from './DocsHeader'
 import * as ui from './DocsSidebarDrawer.recipes'
 
@@ -187,7 +188,7 @@ export default function DocsSidebarDrawer() {
               strokeLinecap="round"
             />
           </svg>
-          <span>Menu</span>
+          <span>{getActiveDocsSection(pathname)?.label ?? 'Docs'} pages</span>
         </button>,
         host,
       )
