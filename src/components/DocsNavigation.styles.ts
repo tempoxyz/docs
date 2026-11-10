@@ -65,6 +65,7 @@ export const docsHeaderLeft = style({
 
 export const docsHeaderBrand = style({
   display: 'flex',
+  flexShrink: 0,
   alignItems: 'center',
   gap: tokens.spacing['1'],
   minWidth: 0,
@@ -89,11 +90,16 @@ export const docsHeaderDocsLabel = style({
   color: tokens.color.foreground,
   fontSize: tokens.fontSize.sm,
   lineHeight: tokens.lineHeight.none,
+  // Between 1080px and 1280px the six areas need the room; the logo still names the site.
+  '@media (width >= 1080px) and (width < 1280px)': {
+    display: 'none',
+  },
 })
 
 /** The chevron beside the logo that opens the Tempo product switcher. */
 export const docsHeaderSwitcher = style({
   display: 'none',
+  flexShrink: 0,
   '@media (width >= 1080px)': {
     display: 'block',
   },
@@ -141,6 +147,9 @@ export const docsAreaLink = style({
   transitionProperty: 'color, background-color, border-color, opacity, transform',
   transitionDuration: 'var(--tempo-exit)',
   transitionTimingFunction: 'var(--tempo-ease)',
+  '@media (width >= 1080px) and (width < 1280px)': {
+    paddingInline: tokens.spacing['1_5'],
+  },
   selectors: {
     '&:is(:hover, [aria-expanded="true"])': {
       color: tokens.color.foreground,
@@ -227,7 +236,7 @@ export const docsAreaMenuItemDescription = style({
   fontSize: tokens.fontSize.compact,
 })
 
-/** Search: an icon below Display widths, a field with its shortcut from 1280px. */
+/** Search: an icon below Display widths, a field with its shortcut from 1376px. */
 export const docsHeaderSearchField = style({
   display: 'grid',
   width: '36px',
@@ -245,7 +254,7 @@ export const docsHeaderSearchField = style({
       backgroundColor: inherited.color.colorMixInSrgbCurrentColor5Transparent,
     },
   },
-  '@media (width >= 1280px)': {
+  '@media (width >= 1376px)': {
     display: 'flex',
     justifyContent: 'flex-start',
     gap: tokens.spacing['2'],
@@ -266,7 +275,7 @@ export const docsHeaderSearchField = style({
 
 export const docsHeaderSearchLabel = style({
   display: 'none',
-  '@media (width >= 1280px)': {
+  '@media (width >= 1376px)': {
     display: 'inline',
     flex: 1,
     textAlign: 'start',
@@ -275,7 +284,7 @@ export const docsHeaderSearchLabel = style({
 
 export const docsHeaderKbd = style({
   display: 'none',
-  '@media (width >= 1280px)': {
+  '@media (width >= 1376px)': {
     display: 'inline-flex',
     paddingInline: tokens.spacing['1_5'],
     borderRadius: tokens.radius.sm,
