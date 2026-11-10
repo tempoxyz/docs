@@ -41,7 +41,7 @@ describe('AI documentation navigation', () => {
     )
     expect(output.indexOf('[Earn]')).toBeLessThan(output.indexOf('[Deposit]'))
     expect(output).toMatch(
-      /## Zones[\s\S]*limited preview[\s\S]*### Earlier testnet sandbox[\s\S]*Legacy swap/,
+      /## Zones[\s\S]*live on Mainnet[\s\S]*### Earlier testnet sandbox[\s\S]*Legacy swap/,
     )
     expect(output).toMatch(/## Tempo EVM[\s\S]*\[Keys\]/)
     expect(output).toMatch(/## API reference[\s\S]*\[API reference\]/)
@@ -100,7 +100,7 @@ describe('AI documentation navigation', () => {
       expect(skill).toContain(`[${label}](https://tempo.xyz/developers${href}.md)`)
     expect(skill).toContain('Earn is in beta')
     expect(skill).toContain('Routes is in beta')
-    expect(skill).toContain('Zones is in limited preview')
+    expect(skill).toContain('Zones is live on Mainnet')
     expect(skill).not.toContain('read_web_page')
     expect(skill).not.toContain('/developers/quickstart/')
   })

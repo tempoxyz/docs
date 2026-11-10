@@ -63,7 +63,7 @@ for (const directory of outputs) {
   assert(
     index.includes('Earn is in beta') &&
       index.includes('Routes is in beta') &&
-      index.includes('Zones is in limited preview'),
+      index.includes('Zones is live on Mainnet'),
     `${directory}: product availability context is missing`,
   )
   assert(
