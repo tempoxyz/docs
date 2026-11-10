@@ -40,7 +40,7 @@ test('desktop sidebar keeps the current task active through nested steps and cli
   await expect(active).toHaveAttribute('href', '/docs/routes')
 
   await page
-    .getByRole('navigation', { name: 'Documentation sections', exact: true })
+    .getByRole('navigation', { name: 'Products sections', exact: true })
     .getByRole('link', { name: 'Accounts', exact: true })
     .click()
   await expect(page).toHaveURL(/\/docs\/accounts\/?$/)
@@ -154,10 +154,12 @@ test('OpenAPI endpoints retain their own active state after client navigation fr
     await expect(sidebar.locator('a[data-active]')).toHaveCount(1)
     await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', href)
   }
-  await page
-    .getByRole('navigation', { name: 'Documentation sections', exact: true })
-    .getByRole('link', { name: 'Routes', exact: true })
-    .click()
+  // The API reference sits in Reference, so Routes opens from the Products menu.
+  const areas = page
+    .getByRole('navigation', { name: 'Developer navigation' })
+    .getByRole('navigation', { name: 'Documentation areas', exact: true })
+  await areas.getByRole('button', { name: 'Products', exact: true }).click()
+  await areas.getByRole('link', { name: /^Routes/ }).click()
   await expect(page).toHaveURL(/\/docs\/routes\/?$/)
   await expect(sidebar.locator('a[data-active]')).toHaveCount(1)
   await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', '/docs/routes')

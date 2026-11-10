@@ -53,7 +53,7 @@ for (const width of [390, 1440]) {
     ).toHaveCount(0)
     await expect(
       page
-        .locator('.docs-section-utilities')
+        .locator('.docs-section-nav')
         .getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
     ).toHaveCount(0)
     await expect(page.locator('#blog, .tempo-blog')).toHaveCount(0)
@@ -64,10 +64,12 @@ for (const width of [390, 1440]) {
       await expect(
         menu.getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
       ).toHaveCount(0)
-      await expect(menu.getByRole('link', { name: 'Get Started', exact: true })).toBeVisible()
+      await expect(menu.getByRole('link', { name: 'Get started', exact: true })).toBeVisible()
     } else {
       await expect(
-        page.getByRole('navigation', { name: 'Documentation sections', exact: true }),
+        page
+          .getByRole('navigation', { name: 'Developer navigation' })
+          .getByRole('navigation', { name: 'Documentation areas', exact: true }),
       ).toBeVisible()
     }
   })

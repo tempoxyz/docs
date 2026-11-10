@@ -15,10 +15,18 @@ test('production navigation preserves the mount through history and page tools',
   const page = await context.newPage()
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto(`${productionDocsUrl}/get-started/quickstart`)
-  const sections = page.getByRole('navigation', { name: 'Documentation sections', exact: true })
+  const sections = page.getByRole('navigation', { name: 'Get started sections', exact: true })
+  const areas = page
+    .getByRole('navigation', { name: 'Developer navigation' })
+    .getByRole('navigation', { name: 'Documentation areas', exact: true })
   const sidebar = page.locator('[data-v-gutter-left] nav[data-v-sidebar]')
   await expect(sections.locator('[aria-current]')).toHaveText('Get Started')
-  await sections.getByRole('link', { name: 'Accounts', exact: true }).click()
+  // The area menus open only once the header hydrates, when search is enabled.
+  await expect(
+    page.getByRole('button', { name: 'Search documentation', exact: true }),
+  ).toBeEnabled()
+  await areas.getByRole('button', { name: 'Products', exact: true }).click()
+  await areas.getByRole('link', { name: /^Accounts/ }).click()
   await expect(page).toHaveURL(`${productionDocsUrl}/docs/accounts`)
   await sidebar.locator('a[href$="/docs/accounts/create"]').click()
   await expect(page).toHaveURL(`${productionDocsUrl}/docs/accounts/create`)
@@ -86,7 +94,7 @@ test('production mobile menus keep the docs mount and current sidebar selection'
   await page.goto(`${productionDocsUrl}/docs/accounts`)
   await page.getByRole('button', { name: 'Open menu', exact: true }).click()
   const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
-  await menu.getByRole('link', { name: 'Get Started', exact: true }).click()
+  await menu.getByRole('link', { name: 'Get started', exact: true }).click()
   await expect(page).toHaveURL(`${productionDocsUrl}/get-started`)
   await expect(menu).toBeHidden()
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')

@@ -16,7 +16,9 @@ test('serves the docs homepage directly at the root URL', async ({ page, request
   expect((await request.get('/', { maxRedirects: 0 })).status()).toBe(200)
   await page.goto('/')
   await expect(page).toHaveURL((url) => url.pathname === '/')
-  await expect(page.getByRole('heading', { level: 1, name: 'Documentation' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Build stablecoin payments on Tempo' }),
+  ).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Developer navigation' })).toBeVisible()
 })
 
@@ -40,7 +42,7 @@ test('serves getting started directly with its overview sidebar', async ({ page,
   ).toBeVisible()
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(sidebar).toBeVisible()
-  await expect(sidebar.getByRole('link', { name: 'Start building', exact: true })).toHaveAttribute(
+  await expect(sidebar.getByRole('link', { name: 'Build on Tempo', exact: true })).toHaveAttribute(
     'href',
     '/get-started',
   )
@@ -84,12 +86,12 @@ for (const entry of ['direct', 'client navigation'] as const) {
     } else {
       await page.goto('/docs/accounts')
       await page
-        .getByRole('navigation', { name: 'Documentation sections' })
-        .getByRole('link', { name: 'Get Started', exact: true })
+        .getByRole('navigation', { name: 'Documentation areas', exact: true })
+        .getByRole('link', { name: 'Get started', exact: true })
         .click()
       await page
         .locator('article[data-v-content]')
-        .getByRole('link', { name: 'interactive quickstart', exact: true })
+        .getByRole('link', { name: 'Send your first payment', exact: true })
         .click()
     }
 
@@ -163,14 +165,17 @@ for (const entry of ['direct', 'client navigation'] as const) {
   }) => {
     await page.setViewportSize({ width: 1440, height: 1000 })
     const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-    const sections = page.getByRole('navigation', { name: 'Documentation sections' })
+    const areas = page
+      .getByRole('navigation', { name: 'Developer navigation' })
+      .getByRole('navigation', { name: 'Documentation areas', exact: true })
+    const sections = page.getByRole('navigation', { name: 'Get started sections', exact: true })
 
     if (entry === 'direct') {
       expect((await request.get('/get-started/quickstart', { maxRedirects: 0 })).status()).toBe(200)
       await page.goto('/get-started/quickstart')
     } else {
       await page.goto('/docs/accounts')
-      await sections.getByRole('link', { name: 'Get Started', exact: true }).click()
+      await areas.getByRole('link', { name: 'Get started', exact: true }).click()
       await sidebar.getByRole('link', { name: 'Quickstart', exact: true }).click()
     }
 
@@ -179,6 +184,10 @@ for (const entry of ['direct', 'client navigation'] as const) {
       page.getByRole('heading', { level: 1, name: 'Quickstart', exact: true }),
     ).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Developer navigation' })).toBeVisible()
+    await expect(areas.getByRole('link', { name: 'Get started', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
     await expect(sections).toBeVisible()
     await expect(sections.locator('[aria-current="page"]')).toHaveText('Get Started')
     await expect(sidebar).toBeVisible()
@@ -187,7 +196,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
       '/get-started/quickstart',
     )
 
-    await sidebar.getByRole('link', { name: 'Start building', exact: true }).click()
+    await sidebar.getByRole('link', { name: 'Build on Tempo', exact: true }).click()
     await expect(page).toHaveURL(/\/get-started\/?$/)
     await expect(sections).toBeVisible()
     await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', '/get-started')

@@ -82,17 +82,15 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
   await page.goto('/docs/quickstart/integrate-tempo', { waitUntil: 'networkidle' })
   await expectSingleTitle(page, 'Integrate Tempo with Apps, Wallets, and Services | Tempo Docs')
 
-  await page
-    .getByRole('navigation', { name: 'Documentation sections', exact: true })
-    .getByRole('link', { name: 'Tempo EVM', exact: true })
-    .click()
+  const areas = page
+    .getByRole('navigation', { name: 'Developer navigation' })
+    .getByRole('navigation', { name: 'Documentation areas', exact: true })
+  await areas.getByRole('link', { name: 'Tempo EVM', exact: true }).click()
   await page.waitForURL(/\/docs\/development\/?$/)
   await expectSingleTitle(page, 'Tempo EVM | Tempo Docs')
 
-  await page
-    .locator('.docs-section-utilities')
-    .getByRole('link', { name: 'API reference', exact: true })
-    .click()
+  await areas.getByRole('button', { name: 'Reference', exact: true }).click()
+  await areas.getByRole('link', { name: /^API reference/ }).click()
   await page.waitForURL(/\/docs\/api\/?$/)
   await expectSingleTitle(page, 'Tempo API: Sponsor Gas Fees and Route Stablecoins | Tempo Docs')
 
