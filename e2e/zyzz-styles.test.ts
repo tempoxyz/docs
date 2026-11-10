@@ -14,7 +14,6 @@ const routes = [
   '/docs/agents',
   '/docs/development',
   '/docs/cli',
-  '/docs/partners',
   '/docs/api',
   '/docs/guide/issuance/create-a-stablecoin',
   '/blog',
@@ -121,23 +120,6 @@ test('component recipes preserve badges and keyboard-accessible docs buttons', a
   await expect(install).toHaveCSS('transition-duration', '0s')
 })
 
-test('scoped partner artwork resolves in both color schemes', async ({ page, request }) => {
-  await page.goto('/docs/partners/wallets')
-  const logo = page.locator('.partner-logo--dfns')
-  for (const theme of ['light', 'dark']) {
-    await page.evaluate((theme) => {
-      document.documentElement.dataset.vocsTheme = theme
-      document.documentElement.style.colorScheme = theme
-    }, theme)
-    const background = await logo.evaluate((element) => getComputedStyle(element).backgroundImage)
-    expect(background).toContain(theme === 'dark' ? 'dfns-dark.svg' : 'dfns.svg')
-    const url = background.match(/url\(["']?(.*?)["']?\)/)?.[1]
-    expect(url).toBeTruthy()
-    expect((await request.get(url ?? '')).ok()).toBeTruthy()
-    await expect(logo).not.toHaveCSS('width', '0px')
-  }
-})
-
 test('dynamic benchmark bars bind compiled CSS variables', async ({ page }) => {
   await page.goto('/docs/protocol/upgrades/t7')
   const section = page
@@ -159,10 +141,15 @@ test('dynamic benchmark bars bind compiled CSS variables', async ({ page }) => {
 })
 
 test('client navigation loads page-owned styles', async ({ page }) => {
-  await page.goto('/docs/partners')
-  await page.locator('main a[href="/docs/partners/wallets"]').first().click()
-  await expect(page).toHaveURL(/\/docs\/partners\/wallets\/?$/)
-  await expect(page.locator('.partner-logo--dfns')).not.toHaveCSS('background-image', 'none')
+  await page.goto('/docs/agents')
+  await page.locator('main a[href="/docs/guide/using-tempo-with-ai"]').first().click()
+  await expect(page).toHaveURL(/\/docs\/guide\/using-tempo-with-ai\/?$/)
+  await selectTab(page.getByRole('tab', { name: 'Cursor', exact: true }))
+  // The page's own recipe removes the button's default top margin.
+  await expect(page.getByRole('link', { name: 'Install in Cursor', exact: true })).toHaveCSS(
+    'margin-top',
+    '0px',
+  )
 })
 
 test('closed mobile navigation stays outside the viewport and restores focus on dismissal', async ({

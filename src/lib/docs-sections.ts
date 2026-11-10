@@ -9,7 +9,6 @@ export type DocsSection = {
     | 'machine-payments'
     | 'api'
     | 'tools'
-    | 'ecosystem'
   label: string
   href: string
   matches: string[]
@@ -65,6 +64,10 @@ export const docsSections: DocsSection[] = [
       '/docs/payments',
       '/docs/guide/payments',
       '/docs/guide/getting-funds',
+      '/docs/guide/ousd',
+      '/docs/guide/bridge-layerzero',
+      '/docs/guide/bridge-bungee',
+      '/docs/guide/bridge-relay',
       '/docs/network',
       '/docs/development',
       '/docs/quickstart',
@@ -84,18 +87,6 @@ export const docsUtilitySections: DocsSection[] = [
     label: 'API reference',
     href: '/docs/api',
     matches: ['/docs/api'],
-  },
-  {
-    id: 'ecosystem',
-    label: 'Partners',
-    href: '/docs/partners',
-    matches: [
-      '/docs/partners',
-      '/docs/guide/ousd',
-      '/docs/guide/bridge-layerzero',
-      '/docs/guide/bridge-bungee',
-      '/docs/guide/bridge-relay',
-    ],
   },
 ]
 

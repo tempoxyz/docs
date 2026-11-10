@@ -33,7 +33,7 @@ The 152 restored, covered, or consolidated article intents are not 155 new pages
 - [Handle stablecoin refunds](https://tempo.xyz/developers/docs/resources/guides/refunds): verified originals, safe return destinations, partial-amount reservations, concurrent requests, and uncertain submissions.
 - [Compare payment rails](https://tempo.xyz/developers/docs/resources/guides/payment-rails#read-settlement-timing-and-netting-terms): RTGS versus net settlement and T+0/T+1/T+2 business-day notation.
 - [Remittance operations](https://tempo.xyz/developers/docs/resources/guides/remittances): corridor definition and a sourced Philippine local-rail example that does not imply Tempo corridor availability.
-- Existing [wallet](https://tempo.xyz/developers/docs/partners/wallets), [bridge](https://tempo.xyz/developers/docs/partners/bridges), and [data](https://tempo.xyz/developers/docs/partners/data-and-oracles) entries: current BitGo, Crossmint, DFNS, Para, Across, Chainlink CCIP, and Zerion implementation distinctions.
+- Existing [wallet](https://tempo.xyz/partners/wallets-and-custody/), [bridge](https://tempo.xyz/partners/onchain-infrastructure/#bridges), and [data](https://tempo.xyz/partners/onchain-infrastructure/#data) entries: current BitGo, Crossmint, DFNS, Para, Across, Chainlink CCIP, and Zerion implementation distinctions.
 
 The pass also removes redundant native DEX approval instructions and demo calls, following the TIP-20 implicit-approval specification. It preserves swap/order operations, slippage controls, balance checks, transfer policies, spending limits, and old heading anchors.
 

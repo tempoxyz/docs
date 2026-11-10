@@ -25,12 +25,8 @@ const generatedApiGroups = new Set([
   '/docs/api/transfers',
   '/docs/api/zones',
 ])
-// Supporting guides remain discoverable through their primary guide or partner category.
+// Supporting guides remain discoverable through their primary guide.
 const supportingPages = new Map([
-  ['/docs/guide/bridge-layerzero', '/docs/partners/bridges'],
-  ['/docs/guide/bridge-bungee', '/docs/partners/bridges'],
-  ['/docs/guide/bridge-relay', '/docs/partners/bridges'],
-  ['/docs/partners/developer-tools', '/docs/partners/explorers-and-debugging'],
   ['/docs/guide/payments/send-a-payment/examples', '/docs/guide/payments/send-a-payment'],
 ])
 const routes = readdirSync(new URL('../pages/', import.meta.url), { recursive: true })
