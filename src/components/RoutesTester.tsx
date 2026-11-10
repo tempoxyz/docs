@@ -207,8 +207,8 @@ export function RoutesTester() {
   })
   const selected = choices.route
   chosen.current = selected
-  // One-click starts until a route is chosen; picking one fills all four fields.
-  const suggestions = selected || loading || locked || error ? [] : quickRoutes(routes)
+  // One-click starts that fill all four fields. The row stays while a route is edited, so the pickers never move.
+  const suggestions = loading || locked || error ? [] : quickRoutes(routes)
   const methods = selected ? demoMethods(selected) : []
   const usable = methods.length > 0
   const activeMethod = method && methods.includes(method) ? method : methods[0]
@@ -262,7 +262,6 @@ export function RoutesTester() {
                       type="button"
                       size="xsmall"
                       variant="secondary"
-                      aria-label={`${route.sourceToken.symbol} on ${route.sourceChain.name} to ${route.destinationToken.symbol} on ${route.destinationChain.name}`}
                       onClick={() => {
                         setNotice('')
                         setPick(pickOf(route))
@@ -276,9 +275,11 @@ export function RoutesTester() {
                       <span>
                         {route.sourceChain.name} {route.sourceToken.symbol}
                       </span>
+                      {/* The arrow is read as "to", so the accessible name starts with the visible text. */}
                       <span aria-hidden="true" {...quickArrow()}>
                         →
                       </span>
+                      <span {...srOnly()}> to </span>
                       <ChainLogo
                         chainId={route.destinationChain.id}
                         name={route.destinationChain.name}
@@ -1916,6 +1917,15 @@ const quickList = style({
   margin: tokens.spacing['0'],
   borderWidth: tokens.borderWidth.none,
   padding: tokens.spacing['0'],
+})
+const srOnly = style({
+  position: 'absolute',
+  width: '1px',
+  height: '1px',
+  overflow: 'hidden',
+  // design-exception: Standard visually hidden clip for screen-reader-only text.
+  clipPath: 'inset(50%) !custom',
+  whiteSpace: 'nowrap',
 })
 const quickArrow = style({ color: tokens.color.gray10 })
 const stepForm = style({
