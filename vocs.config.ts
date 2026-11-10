@@ -417,7 +417,7 @@ export default defineConfig({
       {
         text: 'Get Started',
         items: [
-          { text: 'Start building', link: '/get-started' },
+          { text: 'Build on Tempo', link: '/get-started' },
           { text: 'Quickstart', link: '/get-started/quickstart' },
           { text: 'Testnet faucet', link: '/docs/quickstart/faucet' },
           { text: 'Build with AI', link: '/docs/guide/using-tempo-with-ai' },
