@@ -8,12 +8,13 @@ import { vars as tokens } from './theme'
 // three, and pretty wrapping keeps the last line from being a single word.
 global({
   '@layer utilities': {
-    'article[data-v-content]:has(> [id="get-started"]:is(:first-child, .docs-breadcrumbs + *)) > h1[data-v] + p[data-v]': {
-      maxWidth: '560px',
-      textWrap: 'pretty',
-      marginBottom: tokens.spacing['4'],
-      color: tokens.color.foreground,
-    },
+    'article[data-v-content]:has(> [id="get-started"]:is(:first-child, .docs-breadcrumbs + *)) > h1[data-v] + p[data-v]':
+      {
+        maxWidth: '560px',
+        textWrap: 'pretty',
+        marginBottom: tokens.spacing['4'],
+        color: tokens.color.foreground,
+      },
   },
 })
 
