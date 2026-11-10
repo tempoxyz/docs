@@ -8,7 +8,7 @@ import { vars as tokens } from './theme'
 // three, and pretty wrapping keeps the last line from being a single word.
 global({
   '@layer utilities': {
-    'article[data-v-content]:has(> [id="get-started"]:first-child) > h1[data-v] + p[data-v]': {
+    'article[data-v-content]:has(> [id="get-started"]:is(:first-child, .docs-breadcrumbs + *)) > h1[data-v] + p[data-v]': {
       maxWidth: '560px',
       textWrap: 'pretty',
       marginBottom: tokens.spacing['4'],
@@ -20,7 +20,7 @@ global({
 // The page-actions recipe is unlayered, so this override is too. Without the
 // recipe's bottom padding, its own margin sets the gap to the quickstart line.
 global({
-  'article[data-v-content]:has(> [id="get-started"]:first-child) > .docs-page-actions-host > .docs-page-actions':
+  'article[data-v-content]:has(> [id="get-started"]:is(:first-child, .docs-breadcrumbs + *)) > .docs-page-actions-host > .docs-page-actions':
     {
       paddingBottom: tokens.spacing['0'],
     },

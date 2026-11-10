@@ -1,6 +1,7 @@
-// Documentation pages use their authored links and sidebar for navigation.
+import DocsFooter from '../components/DocsFooter'
+
 export function Footer() {
-  return null
+  return <DocsFooter />
 }
 
 export const OutlineFooter = undefined

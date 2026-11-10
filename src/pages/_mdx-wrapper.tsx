@@ -32,6 +32,7 @@
 
 import { lazy, type ReactNode, Suspense } from 'react'
 import { Layout, MdxPageContext } from 'vocs'
+import DocsBreadcrumbs from '../components/DocsBreadcrumbs'
 import DocsPageActions from '../components/DocsPageActions'
 
 const Providers = lazy(() => import('../components/Providers'))
@@ -44,6 +45,7 @@ export default function MDXWrapper({ children }: { children: ReactNode }) {
   // article's hydration boundary so it cannot change server HTML before React reads it.
   const content = (
     <>
+      <DocsBreadcrumbs />
       {children}
       <DocsPageActions key={String(frontmatter?.filePath ?? '')} />
     </>
