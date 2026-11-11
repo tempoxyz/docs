@@ -505,14 +505,6 @@ export default defineConfig({
               { text: 'Signature verification', link: '/docs/sdk/foundry/signature-verifier' },
             ],
           },
-          {
-            text: 'Server handlers',
-            collapsed: true,
-            items: [
-              { text: 'Overview', link: '/docs/server' },
-              { text: 'Relay and fee payer handler', link: '/docs/server/relay-handler' },
-            ],
-          },
         ],
       },
       {
@@ -1122,14 +1114,6 @@ export default defineConfig({
               { text: 'Request', link: '/docs/cli/request' },
               { text: 'Download', link: '/docs/cli/download' },
               { text: 'Node', link: '/docs/cli/node' },
-            ],
-          },
-          {
-            text: 'Server handlers',
-            collapsed: false,
-            items: [
-              { text: 'Overview', link: '/docs/server' },
-              { text: 'Relay and fee payer handler', link: '/docs/server/relay-handler' },
             ],
           },
           { text: 'Explorer', link: 'https://explore.tempo.xyz' },

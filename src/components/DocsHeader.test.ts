@@ -153,7 +153,6 @@ describe('getActiveDocsSection', () => {
     ['/docs/sdk/typescript', 'overview'],
     ['/docs/cli/request', 'overview'],
     ['/docs/wallet/recipes', 'overview'],
-    ['/docs/server/relay-handler', 'overview'],
     ['/docs/tools', 'overview'],
     ['/docs/quickstart/developer-tools', 'overview'],
   ])('assigns %s to the %s section', (pathname, expected) => {

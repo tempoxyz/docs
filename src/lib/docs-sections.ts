@@ -32,7 +32,6 @@ export const docsSections: DocsSection[] = [
       '/docs/sdk',
       '/docs/cli',
       '/docs/wallet',
-      '/docs/server',
     ],
   },
   {
