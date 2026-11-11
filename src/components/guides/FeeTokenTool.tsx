@@ -1,23 +1,28 @@
 'use client'
 
 import { useQueries } from '@tanstack/react-query'
-import { Button, Field, Select, Surface } from '@tempoxyz/ds'
+import { Button, Field, Select } from '@tempoxyz/ds'
 import * as React from 'react'
-import { type Address, getAddress, isAddress, isAddressEqual } from 'viem'
+import { type Address, encodeFunctionData, getAddress, isAddress, isAddressEqual } from 'viem'
+import { Abis, Addresses } from 'viem/tempo'
 import {
   type Connector,
   useChains,
   useConfig,
-  useConnect,
+  useConnection,
   useConnections,
   useConnectors,
   useDisconnect,
+  useSendCallsSync,
   useSwitchChain,
 } from 'wagmi'
+import { connect as connectWallet } from 'wagmi/actions'
+import { injected } from 'wagmi/connectors'
 import { Actions, Hooks } from 'wagmi/tempo'
 import LucideCheck from '~icons/lucide/check'
 import LucideLink from '~icons/lucide/link'
-import { inherited } from '../../styles/inherited'
+import LucideWalletCards from '~icons/lucide/wallet-cards'
+import { connectEvmAccount, sendEvmCall, waitForEvmCall } from '../../lib/evm-wallets'
 import { style, vars as tokens } from '../../styles/theme'
 import { Container } from '../Container'
 import {
@@ -25,9 +30,10 @@ import {
   isInstalledBrowserWalletConnectorId,
   withoutGenericInjected,
 } from '../lib/wallets'
-import { ChainLogo, TokenLogo } from '../RouteIcons'
+import { TokenLogo } from '../RouteIcons'
 import { TextField } from '../RoutesControls'
 import { popup } from '../RoutesControls.styles'
+import { SegmentedControl } from '../SegmentedControl'
 import * as Demo from './Demo'
 import {
   type FeeTokenNetwork,
@@ -43,10 +49,15 @@ import {
 } from './steps/wallet/fee-token-options'
 
 const CUSTOM = 'custom'
+const TEMPO_WALLET_ID = 'xyz.tempo'
 const EXPLORERS = {
   mainnet: 'https://explore.tempo.xyz',
   testnet: 'https://explore.testnet.tempo.xyz',
 } as const satisfies Record<FeeTokenNetwork, string>
+const NETWORK_ITEMS = [
+  { label: 'Mainnet', value: 'mainnet' },
+  { label: 'Testnet', value: 'testnet' },
+] as const satisfies readonly { label: string; value: FeeTokenNetwork }[]
 
 type Preset = { network: FeeTokenNetwork; token: Address | undefined }
 
@@ -66,7 +77,51 @@ function writePreset(network: FeeTokenNetwork, token: Address | undefined) {
   if (url.href !== window.location.href) window.history.replaceState(window.history.state, '', url)
 }
 
-/** Sets an account's default fee token from a browser wallet, on mainnet or testnet. */
+/** A wallet the tool can set a fee token with: Tempo Wallet or one the reader installed. */
+function isSupportedWallet(connector: Pick<Connector, 'id'>) {
+  return connector.id === TEMPO_WALLET_ID || isInstalledBrowserWalletConnectorId(connector.id)
+}
+
+/**
+ * Tempo Wallet first, then every browser wallet. A wallet that only sets `window.ethereum` and
+ * doesn't announce itself through EIP-6963 gets a generic connector.
+ */
+function useWallets() {
+  const config = useConfig()
+  const connectors = useConnectors()
+  const browser = React.useMemo(
+    () => withoutGenericInjected(filterSupportedInjectedConnectors(connectors)),
+    [connectors],
+  )
+  React.useEffect(() => {
+    const ethereum = (window as { ethereum?: unknown }).ethereum
+    if (
+      !ethereum ||
+      connectors.some((c) => c.type === 'injected' && isInstalledBrowserWalletConnectorId(c.id))
+    )
+      return
+    // EIP-6963 wallets announce right after load, so give them a moment first.
+    const timer = setTimeout(() => {
+      const internal = config._internal.connectors
+      if (
+        config.connectors.some(
+          (c) => c.type === 'injected' && isInstalledBrowserWalletConnectorId(c.id),
+        )
+      )
+        return
+      const connector = internal.setup(injected({ shimDisconnect: true }))
+      internal.setState((current) => [...current, connector])
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [config, connectors])
+  const tempoWallet = connectors.find((c) => c.id === TEMPO_WALLET_ID)
+  return React.useMemo(
+    () => [...(tempoWallet ? [tempoWallet] : []), ...browser],
+    [tempoWallet, browser],
+  )
+}
+
+/** Sets an account's default fee token from any wallet, on mainnet or testnet. */
 export function FeeTokenTool() {
   const hydrated = Demo.useHydrated()
   // A link's choices exist only in the browser, so the tool reads them after hydration.
@@ -75,58 +130,109 @@ export function FeeTokenTool() {
     if (hydrated) setPreset(readPreset(window.location.search))
   }, [hydrated])
   const network = preset?.network ?? 'mainnet'
+  const [copied, copy] = Demo.useCopyToClipboard()
   return (
-    <FeeTokenForm
-      key={preset ? network : 'loading'}
-      ready={Boolean(preset)}
-      network={network}
-      initialToken={preset?.token}
-      onNetwork={(next) => {
-        if (next === network) return
-        setPreset({ network: next, token: undefined })
-        writePreset(next, undefined)
-      }}
-    />
+    <Container
+      headerLeft={<span {...title()}>Set a fee token</span>}
+      headerRight={
+        <div {...headerActions()}>
+          <SegmentedControl
+            aria-label="Network"
+            disabled={!preset}
+            items={NETWORK_ITEMS}
+            value={network}
+            onValueChange={(next) => {
+              if (next === network) return
+              setPreset({ network: next, token: undefined })
+              writePreset(next, undefined)
+            }}
+          />
+          <Button
+            type="button"
+            size="xsmall"
+            variant="secondary"
+            disabled={!preset}
+            onClick={() => copy(window.location.href)}
+          >
+            {copied ? <LucideCheck aria-hidden="true" /> : <LucideLink aria-hidden="true" />}
+            {copied ? 'Copied' : 'Copy link'}
+          </Button>
+        </div>
+      }
+    >
+      <FeeTokenSteps
+        key={preset ? network : 'loading'}
+        loaded={Boolean(preset)}
+        network={network}
+        initialToken={preset?.token}
+      />
+    </Container>
   )
 }
 
-function FeeTokenForm(props: {
-  ready: boolean
+function FeeTokenSteps(props: {
+  loaded: boolean
   network: FeeTokenNetwork
   initialToken: Address | undefined
-  onNetwork: (network: FeeTokenNetwork) => void
 }) {
-  const { ready: loaded, network, initialToken, onNetwork } = props
+  const { loaded, network, initialToken } = props
   const config = useConfig()
   const chains = useChains()
   // The testnet the build configures, such as a devnet in devnet builds.
-  const chainId =
-    chains.find((chain) => feeTokenNetwork(chain.id) === network)?.id ?? NETWORK_CHAIN_IDS[network]
+  const chain =
+    chains.find((c) => feeTokenNetwork(c.id) === network) ??
+    chains.find((c) => c.id === NETWORK_CHAIN_IDS[network])
+  const chainId = chain?.id ?? NETWORK_CHAIN_IDS[network]
   const chainKey = `eip155:${chainId}`
+  const networkName = NETWORK_NAMES[network]
   const choices = feeTokenChoices(network)
 
-  // Wallet
-  const connectors = useConnectors()
-  const wallets = React.useMemo(
-    () => withoutGenericInjected(filterSupportedInjectedConnectors(connectors)),
-    [connectors],
-  )
+  // Wallet: the current connection when the tool supports it, else any supported one.
+  const wallets = useWallets()
+  const current = useConnection()
   const connections = useConnections()
-  const connection = connections.find((c) => isInstalledBrowserWalletConnectorId(c.connector.id))
+  const connection =
+    connections.find(
+      (c) => c.connector.uid === current.connector?.uid && isSupportedWallet(c.connector),
+    ) ?? connections.find((c) => isSupportedWallet(c.connector))
+  const connector = connection?.connector
+  const isTempoWallet = connector?.id === TEMPO_WALLET_ID
   const address = connection?.accounts[0]
   const onChain = connection?.chainId === chainId
-  const connect = useConnect()
   const disconnect = useDisconnect()
   const switchChain = useSwitchChain()
+  const [connecting, setConnecting] = React.useState<string>()
   const [walletError, setWalletError] = React.useState('')
-  const connectWallet = async (connector: Connector) => {
+  const connect = async (wallet: Connector) => {
     setWalletError('')
+    setConnecting(wallet.uid)
     try {
-      await disconnect.disconnectAsync().catch(() => {})
-      await connect.connectAsync({ connector })
-    } catch {
-      setWalletError('The wallet did not connect. Try again.')
+      if (connector) await disconnect.disconnectAsync({ connector }).catch(() => {})
+      if (wallet.id === TEMPO_WALLET_ID) await connectWallet(config, { connector: wallet, chainId })
+      else await connectEvmAccount(config, wallet)
+    } catch (e) {
+      const code = (e as { code?: number }).code
+      setWalletError(
+        code === 4001 ? 'Connection cancelled.' : `${wallet.name} didn't connect. Try again.`,
+      )
+    } finally {
+      setConnecting(undefined)
     }
+  }
+  const switchNetwork = () => {
+    if (!connector) return
+    setWalletError('')
+    switchChain.switchChain(
+      {
+        chainId,
+        connector,
+        addEthereumChainParameter: {
+          nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
+          blockExplorerUrls: [EXPLORERS[network]],
+        },
+      },
+      { onError: () => setWalletError(`Switch your wallet to ${networkName}, then try again.`) },
+    )
   }
 
   // Token choice
@@ -143,8 +249,8 @@ function FeeTokenForm(props: {
     : undefined
   const pickedToken = isCustom ? customAddress : (selection as Address) || undefined
 
-  // Reads
-  const ready = Boolean(address) && onChain
+  // Reads: balances and the fee token come from the network, whatever chain the wallet is on.
+  const ready = Boolean(address)
   const balanceTokens = React.useMemo(() => {
     const list: Address[] = choices.map((choice) => choice.address)
     if (customAddress && !findFeeTokenChoice(network, customAddress)) list.push(customAddress)
@@ -171,198 +277,202 @@ function FeeTokenForm(props: {
     chainId: chainId as never,
     query: { enabled: ready },
   })
-  const current = userToken.data?.address ?? undefined
+  const feeToken = userToken.data?.address ?? undefined
 
   // Without a pick, start on the current fee token, else the first stablecoin the account holds.
   const held = balancesRead
     ? choices.find((choice) => (balanceOf(choice.address)?.amount ?? 0n) > 0n)
     : undefined
   const fallback =
-    (current && findFeeTokenChoice(network, current)?.address) ??
+    (feeToken && findFeeTokenChoice(network, feeToken)?.address) ??
     held?.address ??
     choices[0].address
   const token = selection ? pickedToken : fallback
   const tokenBalance = balanceOf(token)
-  const isCurrent = Boolean(token && current && isAddressEqual(token, current))
+  const isCurrent = Boolean(token && feeToken && isAddressEqual(token, feeToken))
 
   React.useEffect(() => {
     if (loaded) writePreset(network, selection ? pickedToken : undefined)
   }, [loaded, network, selection, pickedToken])
 
   // Write
-  const setUserToken = Hooks.fee.useSetUserTokenSync()
+  const sendCalls = useSendCallsSync()
+  const [pending, setPending] = React.useState(false)
   const [hash, setHash] = React.useState<string>()
+  const [sendError, setSendError] = React.useState('')
   React.useEffect(() => {
     setHash(undefined)
-    setUserToken.reset()
+    setSendError('')
   }, [address, chainId])
-  const submit = () => {
-    if (!token || !address) return
+  const submit = async () => {
+    if (!token || !address || !connector) return
     setHash(undefined)
-    // Browser wallets send a standard transaction. Its top-level `setUserToken` call pays its own
-    // fee in the token it sets, so the account needs no other stablecoin.
-    setUserToken.mutate(
-      { token, chainId: chainId as never, account: address, connector: connection?.connector },
-      {
-        onSuccess: (result) => {
-          setHash(result.receipt.transactionHash)
-          void userToken.refetch()
-        },
-      },
-    )
+    setSendError('')
+    setPending(true)
+    const call = {
+      to: Addresses.feeManager,
+      data: encodeFunctionData({
+        abi: Abis.feeManager,
+        functionName: 'setUserToken',
+        args: [token],
+      }),
+    }
+    try {
+      if (isTempoWallet) {
+        // The docs' wallet config sponsors testnet fees. On mainnet the account pays its own.
+        const result = await sendCalls.mutateAsync({
+          calls: [call],
+          chainId,
+          connector,
+          ...(network === 'mainnet' ? { capabilities: { feePayer: false } } : {}),
+        } as never)
+        const sent = result.receipts?.[0]?.transactionHash
+        if (result.status !== 'success' || !sent) throw new Error('reverted')
+        setHash(sent)
+      } else {
+        // A standard transaction whose top-level call is `setUserToken` pays its own fee in the
+        // token it sets, so the account needs no other stablecoin.
+        const sent = await sendEvmCall(config, {
+          connector,
+          chainId,
+          sender: address,
+          call: { ...call, value: '0x0' },
+          expiresAt: null,
+          onHash: setHash,
+        })
+        await waitForEvmCall(config, chainId, sent)
+        setHash(sent)
+      }
+      void userToken.refetch()
+    } catch (e) {
+      const code = (e as { code?: number }).code
+      setHash(undefined)
+      setSendError(code === 4001 ? 'Transaction cancelled.' : 'The transaction failed. Try again.')
+    } finally {
+      setPending(false)
+    }
   }
 
-  const [copied, copy] = Demo.useCopyToClipboard()
-  const networkName = NETWORK_NAMES[network]
+  const tokenName = token ? feeTokenLabel(network, token) : undefined
   const status = (() => {
-    if (walletError) return walletError
-    if (switchChain.error) return `Switch your wallet to ${networkName}, then try again.`
-    if (setUserToken.error) return 'The transaction did not go through. Try again.'
+    if (sendError) return sendError
     if (!address || !onChain) return undefined
-    if (setUserToken.isPending) return 'Approve the transaction in your wallet.'
-    if (hash) return undefined
-    if (!balancesRead) return undefined
+    if (pending) return 'Approve the transaction in your wallet.'
+    if (hash || !balancesRead) return undefined
     if (isCustom && !customAddress) return 'Enter a USD stablecoin address.'
-    if (isCurrent) return 'Already your fee token.'
+    if (isCurrent) return `${tokenName} is already your fee token.`
     if (!tokenBalance || tokenBalance.amount === 0n)
-      return `Add ${token ? feeTokenLabel(network, token) : 'funds'} to this account first.`
+      return `Add ${tokenName ?? 'funds'} to this account first.`
     return undefined
   })()
+  const canSubmit = Boolean(
+    onChain && token && tokenBalance && tokenBalance.amount > 0n && !isCurrent && !pending,
+  )
 
-  const action = (() => {
-    if (!loaded)
+  const walletActions = (() => {
+    if (!loaded) return null
+    if (address)
       return (
-        <Demo.Button variant="accent" disabled {...wide()}>
-          Set fee token
-        </Demo.Button>
-      )
-    if (!address) {
-      if (wallets.length === 0)
-        return <p {...note()}>Install a browser wallet, such as MetaMask or Rabby.</p>
-      return (
-        <div {...walletList()}>
-          {wallets.map((wallet) => (
-            <Demo.Button
-              key={wallet.id}
-              type="button"
-              variant="accent"
-              disabled={connect.isPending}
-              onClick={() => void connectWallet(wallet)}
-              {...wide()}
-            >
-              {wallet.icon && <img src={wallet.icon} alt="" {...walletIcon()} />}
-              {wallets.length > 1 ? `Connect ${wallet.name}` : 'Connect wallet'}
-            </Demo.Button>
-          ))}
+        <div {...row()}>
+          <Demo.Button type="button" variant="default" static>
+            <LucideWalletCards aria-hidden="true" {...icon()} />
+            {Demo.StringFormatter.truncate(address, { start: 6, end: 4, separator: '⋅⋅⋅' })}
+          </Demo.Button>
+          <Demo.Button
+            type="button"
+            variant="destructive"
+            onClick={() => connector && disconnect.disconnect({ connector })}
+          >
+            Disconnect
+          </Demo.Button>
         </div>
       )
-    }
-    if (!onChain)
-      return (
-        <Demo.Button
-          type="button"
-          variant="accent"
-          disabled={switchChain.isPending}
-          onClick={() =>
-            switchChain.switchChain({
-              chainId,
-              connector: connection?.connector,
-              addEthereumChainParameter: {
-                nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
-                blockExplorerUrls: [EXPLORERS[network]],
-              },
-            })
-          }
-          {...wide()}
-        >
-          Switch to {networkName}
-        </Demo.Button>
-      )
-    const canSubmit = Boolean(
-      token && tokenBalance && tokenBalance.amount > 0n && !isCurrent && !setUserToken.isPending,
-    )
-    return (
-      <Demo.Button
-        type="button"
-        variant="accent"
-        disabled={!canSubmit}
-        onClick={submit}
-        {...wide()}
-      >
-        {setUserToken.isPending ? 'Check your wallet…' : 'Set fee token'}
-      </Demo.Button>
-    )
+    return null
   })()
 
-  const tokenOptions = [
-    ...choices.map((choice) => ({ value: choice.address, label: choice.label })),
-    { value: CUSTOM, label: 'Custom address' },
-  ]
-
   return (
-    <Container
-      headerLeft={<span {...title()}>Set a fee token</span>}
-      headerRight={
-        <Button
-          type="button"
-          size="xsmall"
-          variant="secondary"
-          disabled={!loaded}
-          onClick={() => copy(window.location.href)}
-        >
-          {copied ? <LucideCheck aria-hidden="true" /> : <LucideLink aria-hidden="true" />}
-          {copied ? 'Copied' : 'Copy link'}
-        </Button>
-      }
-      footer={
-        address ? (
-          <div {...footerRow()}>
-            <span {...mono()}>{Demo.StringFormatter.truncate(address, { start: 6, end: 4 })}</span>
-            <Button
-              type="button"
-              size="xsmall"
-              variant="secondary"
-              onClick={() => disconnect.disconnect({ connector: connection?.connector })}
-            >
-              Disconnect
-            </Button>
+    <div {...steps()}>
+      <Demo.Step
+        number={1}
+        title={address && onChain ? `Connected to ${networkName}.` : 'Connect a wallet.'}
+        active={!address || !onChain}
+        completed={Boolean(address && onChain)}
+        actions={walletActions}
+      >
+        {loaded && !address && (
+          <div {...stepBody()}>
+            {wallets.length === 0 ? (
+              <p {...note()}>Install a browser wallet, such as MetaMask or Rabby.</p>
+            ) : (
+              <div {...walletGrid()}>
+                {wallets.map((wallet) => (
+                  <Demo.Button
+                    key={wallet.uid}
+                    type="button"
+                    variant="default"
+                    disabled={Boolean(connecting)}
+                    onClick={() => void connect(wallet)}
+                  >
+                    {wallet.icon ? (
+                      <img src={wallet.icon} alt="" {...walletIcon()} />
+                    ) : (
+                      <LucideWalletCards aria-hidden="true" {...icon()} />
+                    )}
+                    {connecting === wallet.uid ? 'Check your wallet…' : wallet.name}
+                  </Demo.Button>
+                ))}
+              </div>
+            )}
           </div>
-        ) : undefined
-      }
-    >
-      <div {...canvas()}>
-        <Surface {...card()}>
-          <div {...stack()}>
-            <Picker
-              id="fee-token-network"
-              label="Network"
-              value={network}
-              disabled={!loaded || setUserToken.isPending}
-              options={[
-                { value: 'mainnet', label: NETWORK_NAMES.mainnet },
-                { value: 'testnet', label: NETWORK_NAMES.testnet },
-              ]}
-              onValueChange={(value) => onNetwork(value as FeeTokenNetwork)}
-              logo={(option) => (
-                <ChainLogo
-                  chainId={`eip155:${option?.value === 'testnet' ? NETWORK_CHAIN_IDS.testnet : NETWORK_CHAIN_IDS.mainnet}`}
-                  name={option?.label}
-                  size={20}
-                />
-              )}
-            />
+        )}
+        {address && !onChain && (
+          <div {...stepBody()}>
+            <Demo.Button
+              type="button"
+              variant="accent"
+              disabled={switchChain.isPending}
+              onClick={switchNetwork}
+            >
+              Switch to {networkName}
+            </Demo.Button>
+          </div>
+        )}
+        {walletError && <p {...cxNote()}>{walletError}</p>}
+      </Demo.Step>
+      <Demo.Step
+        number={2}
+        title={hash ? `Fee token set to ${tokenName}.` : 'Choose a stablecoin.'}
+        active={Boolean(address && onChain && !hash)}
+        completed={Boolean(hash) && !pending}
+        actions={
+          <Demo.Button
+            type="button"
+            variant="accent"
+            disabled={!canSubmit}
+            onClick={() => void submit()}
+          >
+            {pending ? 'Setting…' : 'Set fee token'}
+          </Demo.Button>
+        }
+      >
+        <div {...stepBody()}>
+          <div {...fields()}>
             <Picker
               id="fee-token-token"
               label="Stablecoin"
               value={isCustom ? CUSTOM : (token ?? '')}
-              disabled={!loaded || setUserToken.isPending}
-              options={tokenOptions}
+              disabled={!loaded || pending}
+              options={[
+                ...choices.map((choice) => ({ value: choice.address, label: choice.label })),
+                { value: CUSTOM, label: 'Custom address' },
+              ]}
               onValueChange={(value) => {
                 setSelection(value)
                 setHash(undefined)
+                setSendError('')
               }}
               logo={(option) =>
-                option && option.value !== CUSTOM ? (
+                option.value === CUSTOM ? null : (
                   <TokenLogo
                     key={option.value}
                     chainId={chainKey}
@@ -370,12 +480,11 @@ function FeeTokenForm(props: {
                     symbol={option.label}
                     size={20}
                   />
-                ) : null
+                )
               }
               suffix={(option) => {
                 if (!ready || option.value === CUSTOM) return null
-                const balance = balanceOf(option.value as Address)
-                return balance ? balance.formatted : null
+                return balanceOf(option.value as Address)?.formatted ?? null
               }}
             />
             {isCustom && (
@@ -384,51 +493,42 @@ function FeeTokenForm(props: {
                 label="Token address"
                 placeholder="0x20c0…"
                 value={custom}
-                disabled={setUserToken.isPending}
+                disabled={pending}
                 onValueChange={setCustom}
               />
             )}
-            {ready && (
-              <dl {...summary()}>
+          </div>
+          {ready && (
+            <dl {...summary()}>
+              <div {...summaryRow()}>
+                <dt>Current fee token</dt>
+                <dd {...summaryValue()}>
+                  {userToken.isSuccess
+                    ? feeToken
+                      ? feeTokenLabel(network, feeToken)
+                      : 'Not set'
+                    : '…'}
+                </dd>
+              </div>
+              {token && tokenBalance && (
                 <div {...summaryRow()}>
-                  <dt>Current fee token</dt>
+                  <dt>Balance</dt>
                   <dd {...summaryValue()}>
-                    {userToken.isSuccess
-                      ? current
-                        ? feeTokenLabel(network, current)
-                        : 'Not set'
-                      : '…'}
+                    {tokenBalance.formatted} {tokenName}
                   </dd>
                 </div>
-                {token && tokenBalance && (
-                  <div {...summaryRow()}>
-                    <dt>Balance</dt>
-                    <dd {...summaryValue()}>
-                      {tokenBalance.formatted} {feeTokenLabel(network, token)}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            )}
-            {action}
-            {hash ? (
-              <p role="status" {...success()}>
-                Fee token set.{' '}
-                <a href={`${EXPLORERS[network]}/tx/${hash}`} target="_blank" rel="noreferrer">
-                  View transaction ↗
-                </a>
-              </p>
-            ) : (
-              status && (
-                <p role="status" {...note()}>
-                  {status}
-                </p>
-              )
-            )}
-          </div>
-        </Surface>
-      </div>
-    </Container>
+              )}
+            </dl>
+          )}
+          {hash && <Demo.ExplorerLink hash={hash} explorerUrl={EXPLORERS[network]} />}
+          {status && (
+            <p role="status" {...note()}>
+              {status}
+            </p>
+          )}
+        </div>
+      </Demo.Step>
+    </div>
   )
 }
 
@@ -441,12 +541,13 @@ function Picker(props: {
   disabled: boolean
   options: readonly Option[]
   onValueChange: (value: string) => void
-  logo: (option: Option | undefined) => React.ReactNode
+  logo: (option: Option) => React.ReactNode
   suffix?: ((option: Option) => React.ReactNode) | undefined
 }) {
   const { id, label, value, disabled, options, onValueChange, logo, suffix } = props
   const items = Object.fromEntries(options.map((option) => [option.value, option.label]))
   const selected = options.find((option) => option.value === value)
+  const selectedLogo = selected ? logo(selected) : null
   return (
     <Field.Root {...field()}>
       <Field.Label>{label}</Field.Label>
@@ -458,18 +559,22 @@ function Picker(props: {
         }}
       >
         <Select.Trigger id={id} disabled={disabled} {...trigger()}>
-          {selected && logo(selected) && <span {...logoBox()}>{logo(selected)}</span>}
+          {selectedLogo && <span {...logoBox()}>{selectedLogo}</span>}
           <Select.Value placeholder="Choose" />
           <Select.Icon />
         </Select.Trigger>
         <Select.Popup aria-label={label} {...popup()}>
-          {options.map((option) => (
-            <Select.Item key={option.value} label={option.label} value={option.value}>
-              {logo(option) && <Select.ItemPrefix>{logo(option)}</Select.ItemPrefix>}
-              <Select.ItemText>{option.label}</Select.ItemText>
-              {suffix?.(option) && <Select.ItemSuffix>{suffix(option)}</Select.ItemSuffix>}
-            </Select.Item>
-          ))}
+          {options.map((option) => {
+            const optionLogo = logo(option)
+            const optionSuffix = suffix?.(option)
+            return (
+              <Select.Item key={option.value} label={option.label} value={option.value}>
+                {optionLogo && <Select.ItemPrefix>{optionLogo}</Select.ItemPrefix>}
+                <Select.ItemText>{option.label}</Select.ItemText>
+                {optionSuffix && <Select.ItemSuffix>{optionSuffix}</Select.ItemSuffix>}
+              </Select.Item>
+            )
+          })}
         </Select.Popup>
       </Select.Root>
     </Field.Root>
@@ -477,34 +582,37 @@ function Picker(props: {
 }
 
 const title = style({ fontSize: tokens.fontSize.sm, fontWeight: tokens.fontWeight.medium })
-const canvas = style({
-  display: 'grid',
-  placeItems: 'center',
-  borderRadius: tokens.radius.xl,
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: tokens.color.line,
-  backgroundColor: inherited.color.surfacePanel,
-  // design-exception: The dotted grid matches the Routes demo canvas.
-  backgroundImage: 'radial-gradient(var(--line) 1px, transparent 1px) !custom',
-  // design-exception: One grid dot every 14px, matching the Routes demo canvas.
-  backgroundSize: '14px 14px !custom',
-  paddingBlock: tokens.spacing['8'],
-  paddingInline: tokens.spacing['3'],
+const headerActions = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: tokens.spacing['2'],
 })
-const card = style({ width: '100%', maxWidth: '26rem' })
-const stack = style({ display: 'grid', gap: tokens.spacing['5'] })
+const steps = style({ display: 'grid', gap: tokens.spacing['6'] })
+const stepBody = style({ marginBlockStart: tokens.spacing['3'] })
+const row = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: tokens.spacing['2'],
+})
+const walletGrid = style({
+  display: 'grid',
+  gap: tokens.spacing['2'],
+  gridTemplateColumns: 'repeat(auto-fill, minmax(11rem, 1fr))',
+})
+const walletIcon = style({ width: '18px', height: '18px', borderRadius: tokens.radius.sm })
+const icon = style({ width: '16px', height: '16px' })
+const fields = style({ display: 'grid', gap: tokens.spacing['3'], maxWidth: '24rem' })
 const field = style({ display: 'grid', minWidth: 0, gap: tokens.spacing['1_5'] })
 const trigger = style({ width: '100%' })
 const logoBox = style({ display: 'inline-flex', flexShrink: 0 })
 const summary = style({
   display: 'grid',
-  gap: tokens.spacing['2'],
-  margin: tokens.spacing['0'],
-  borderTopWidth: tokens.borderWidth.hairline,
-  borderTopStyle: 'solid',
-  borderTopColor: tokens.color.line,
-  paddingBlockStart: tokens.spacing['3'],
+  gap: tokens.spacing['1_5'],
+  maxWidth: '24rem',
+  marginBlock: tokens.spacing['4'],
+  marginInline: tokens.spacing['0'],
   fontSize: tokens.fontSize.compact,
   color: tokens.color.gray10,
 })
@@ -516,28 +624,12 @@ const summaryRow = style({
 const summaryValue = style({
   margin: tokens.spacing['0'],
   textAlign: 'end',
-  color: inherited.color.textColorPrimary,
+  color: tokens.color.gray12,
 })
-const wide = style({ width: '100%', justifyContent: 'center' })
-const walletList = style({ display: 'grid', gap: tokens.spacing['2'] })
-const walletIcon = style({ width: '18px', height: '18px', borderRadius: tokens.radius.sm })
 const note = style({
-  margin: tokens.spacing['0'],
-  textAlign: 'center',
+  marginBlock: tokens.spacing['2'],
+  marginInline: tokens.spacing['0'],
   fontSize: tokens.fontSize.compact,
   color: tokens.color.gray10,
 })
-const success = style({
-  margin: tokens.spacing['0'],
-  textAlign: 'center',
-  fontSize: tokens.fontSize.compact,
-  color: tokens.color.green10,
-})
-const footerRow = style({
-  display: 'flex',
-  width: '100%',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: tokens.spacing['2'],
-})
-const mono = style({ fontFamily: tokens.fontFamily.code, fontSize: tokens.fontSize.xs })
+const cxNote = note
