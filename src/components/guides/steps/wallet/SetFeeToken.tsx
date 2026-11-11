@@ -147,9 +147,10 @@ export function SetFeeToken(props: SetFeeTokenProps) {
     ready && selectedToken && hasSelectedBalance && !isCurrent && !setUserToken.isPending,
   )
 
+  // Only a token the reader or a link picked is reported, so automatic defaults stay out of links.
   React.useEffect(() => {
-    onTokenChange?.(selectedToken)
-  }, [selectedToken, onTokenChange])
+    onTokenChange?.(touched ? selectedToken : undefined)
+  }, [touched, selectedToken, onTokenChange])
 
   // Select the account's current fee token once it loads, unless a token was already picked.
   React.useEffect(() => {

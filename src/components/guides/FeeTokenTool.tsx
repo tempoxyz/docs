@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import type { Address } from 'viem'
+import { useChains } from 'wagmi'
 import LucideCheck from '~icons/lucide/check'
 import LucideLink from '~icons/lucide/link'
 import { SegmentedControl } from '../SegmentedControl'
@@ -10,6 +11,7 @@ import * as ui from './FeeTokenTool.recipes'
 import { ConnectWallet } from './steps/wallet/ConnectWallet'
 import {
   type FeeTokenNetwork,
+  feeTokenNetwork,
   feeTokenParam,
   NETWORK_CHAIN_IDS,
   NETWORK_NAMES,
@@ -53,12 +55,20 @@ export function FeeTokenTool() {
   }, [hydrated])
 
   const network = preset?.network ?? 'mainnet'
+  // Use the testnet the build configures, such as a devnet in devnet builds.
+  const chains = useChains()
+  const chainId =
+    chains.find((chain) => feeTokenNetwork(chain.id) === network)?.id ?? NETWORK_CHAIN_IDS[network]
 
-  const changeNetwork = React.useCallback((value: FeeTokenNetwork) => {
-    // A token belongs to one network, so switching starts the new network without one.
-    setPreset({ network: value, token: undefined })
-    writePreset(value, undefined)
-  }, [])
+  const changeNetwork = React.useCallback(
+    (value: FeeTokenNetwork) => {
+      if (value === preset?.network) return
+      // A token belongs to one network, so switching starts the new network without one.
+      setPreset({ network: value, token: undefined })
+      writePreset(value, undefined)
+    },
+    [preset?.network],
+  )
 
   const changeToken = React.useCallback(
     (token: Address | undefined) => writePreset(network, token),
@@ -108,10 +118,10 @@ export function FeeTokenTool() {
         showBadge={false}
         footerVariant={undefined}
       >
-        <ConnectWallet stepNumber={1} chainId={NETWORK_CHAIN_IDS[network]} browserWalletsOnly />
+        <ConnectWallet stepNumber={1} chainId={chainId} browserWalletsOnly />
         <SetFeeToken
           stepNumber={2}
-          chainId={NETWORK_CHAIN_IDS[network]}
+          chainId={chainId}
           browserWalletsOnly
           initialToken={preset?.token}
           onTokenChange={preset ? changeToken : undefined}
