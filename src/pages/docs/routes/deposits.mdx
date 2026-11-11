@@ -69,6 +69,18 @@ The response lists deposits in `data`, newest first. Pass `nextCursor` as `curso
 
 :::::
 
+## Send from Tempo to another network
+
+Some routes take deposits on Tempo and deliver to another network, such as Tempo USDC.e to USDC on Ethereum. Use them when your custody setup can only send plain token transfers. Check [Supported routes](/docs/routes/networks) for which routes support deposit addresses.
+
+Quote and create the address as above, with:
+
+- `sourceChain` set to `tempo` and `sourceToken` to the Tempo token, such as `USDC.e`.
+- `destinationChain` set to the destination network, such as `ethereum`, with `destinationToken` and a `recipient` on that network.
+- `refundAddresses.evm` set to your Tempo account.
+
+Send the token to the returned address with a plain transfer; no approval or contract call is needed. Each deposit is priced when it's swept, so the quote has no guaranteed minimum (`destinationAmountMin` is `0`). Quote with the same parameters before large transfers. Subsidies don't apply to these routes.
+
 ## Reconcile delivery and refunds
 
 Save the customer, deposit-address ID, and individual deposit IDs together. The same address can receive multiple deposits, so reconcile each deposit's `destinationAmount` and `destinationTransactionHashes` separately. An active address can receive funds; only a completed deposit confirms delivery to Tempo.
