@@ -107,12 +107,18 @@ function useWallets(): readonly Wallet[] {
   // EIP-6963 wallets announce right after load, so wait a moment before offering the fallback.
   const [legacy, setLegacy] = React.useState(false)
   React.useEffect(() => {
-    const timer = setTimeout(
-      () => setLegacy(Boolean((window as { ethereum?: unknown }).ethereum)),
-      500,
-    )
+    const timer = setTimeout(() => {
+      const ethereum = (window as { ethereum?: { isPhantom?: boolean } }).ethereum
+      setLegacy(Boolean(ethereum && !ethereum.isPhantom))
+    }, 500)
     return () => clearTimeout(timer)
   }, [])
+  // Any wallet that announced itself, even one the docs exclude such as Phantom, owns
+  // window.ethereum, so the fallback is only for wallets that never announce.
+  const announced = connectors.some(
+    (c) =>
+      c.type === 'injected' && c.id !== 'injected' && isInstalledBrowserWalletConnectorId(c.id),
+  )
   // Load each wallet's provider ahead of the click. Tempo Wallet opens a popup, and browsers block
   // popups that open after slow work in the click handler.
   React.useEffect(() => {
@@ -125,7 +131,7 @@ function useWallets(): readonly Wallet[] {
       icon: c.icon,
       connector: c,
     }))
-    if (legacy && browser.length === 0)
+    if (legacy && !announced)
       list.push({
         key: 'injected',
         name: 'Browser wallet',
@@ -133,7 +139,7 @@ function useWallets(): readonly Wallet[] {
         connector: injected({ shimDisconnect: true }),
       })
     return list
-  }, [tempoWallet, browser, legacy])
+  }, [tempoWallet, browser, legacy, announced])
 }
 
 /** The wallet's own message under wagmi's and viem's wrapping. */
@@ -240,7 +246,10 @@ function FeeTokenSteps(props: {
   // Called straight from the click, so a wallet popup opens inside the reader's gesture.
   const connectTo = (wallet: Wallet) => {
     setWalletError('')
-    connect.connect({ connector: wallet.connector, chainId })
+    // Browser wallets connect first and switch through switchNetwork, which adds the network with
+    // the parameters wallets accept. Tempo Wallet signs in on the chosen network.
+    const isTempo = 'id' in wallet.connector && wallet.connector.id === TEMPO_WALLET_ID
+    connect.connect({ connector: wallet.connector, ...(isTempo ? { chainId } : {}) })
   }
   const switchNetwork = () => {
     if (!connector) return
