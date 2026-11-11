@@ -415,13 +415,6 @@ function FeeTokenForm(props: {
                 </p>
               )
             )}
-            {network === 'mainnet' ? (
-              <p {...fine()}>Uses real funds. Costs a fraction of a cent.</p>
-            ) : (
-              <p {...fine()}>
-                Need test stablecoins? Use the <a href="/docs/quickstart/faucet">faucet</a>.
-              </p>
-            )}
           </div>
         </Surface>
       </div>
@@ -529,12 +522,6 @@ const success = style({
   textAlign: 'center',
   fontSize: tokens.fontSize.compact,
   color: tokens.color.green10,
-})
-const fine = style({
-  margin: tokens.spacing['0'],
-  textAlign: 'center',
-  fontSize: tokens.fontSize.xs,
-  color: tokens.color.gray9,
 })
 const footerRow = style({
   display: 'flex',
