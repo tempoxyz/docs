@@ -645,6 +645,7 @@ export default defineConfig({
           { text: 'Security', link: '/docs/accounts/security' },
           { text: 'Create an Account', link: '/docs/accounts/create' },
           { text: 'Add Funds', link: '/docs/accounts/fund' },
+          { text: 'Set a Fee Token', link: '/docs/accounts/set-fee-token' },
         ],
       },
       {

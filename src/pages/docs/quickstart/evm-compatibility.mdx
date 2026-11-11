@@ -63,7 +63,7 @@ Importantly, note that the `amount` field in this case is sent in full. So, if t
 
 If neither an account preference nor contract-specific inference applies, the EVM transaction falls back to pathUSD, then [OUSD](/docs/guide/ousd). Since [T13](/docs/protocol/upgrades/t13), Tempo uses the first of the two whose balance covers the maximum fee. Eligible Stablecoin DEX swap calls instead infer their input token.
 
-So, to send transactions to non-TIP-20 contracts, the wallet must hold pathUSD or OUSD, or set an account fee token with `setUserToken` on the FeeManager. A wallet that holds only another stablecoin, such as USDC.e, must set a fee token first. Its `setUserToken` call pays its own fee in the token it sets. Users can [set a fee token from a browser wallet](/docs/accounts/fees/fee-tokens#set-a-fee-token-without-code) with no code.
+So, to send transactions to non-TIP-20 contracts, the wallet must hold pathUSD or OUSD, or set an account fee token with `setUserToken` on the FeeManager. A wallet that holds only another stablecoin, such as USDC.e, must set a fee token first. Its `setUserToken` call pays its own fee in the token it sets. Users can [set a fee token from a browser wallet](/docs/accounts/set-fee-token) with no code.
 
 On the Tempo Testnet, pathUSD is available from the [faucet](/docs/quickstart/faucet).
 

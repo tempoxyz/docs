@@ -36,10 +36,23 @@ export type SetFeeTokenProps = DemoStepProps & {
   chainId?: number | undefined
   /** Act only on a wallet the reader installed, matching \`ConnectWallet\`'s \`browserWalletsOnly\`. */
   browserWalletsOnly?: boolean | undefined
+  /**
+   * A token to start on, such as one a link names. It stays selected even when the account has
+   * another fee token or no balance of it.
+   */
+  initialToken?: Address | undefined
+  /** Called with the selected token, or \`undefined\` while a custom address is incomplete. */
+  onTokenChange?: ((token: Address | undefined) => void) | undefined
 }
 
 export function SetFeeToken(props: SetFeeTokenProps) {
-  const { stepNumber = 1, chainId: requiredChainId, browserWalletsOnly = false } = props
+  const {
+    stepNumber = 1,
+    chainId: requiredChainId,
+    browserWalletsOnly = false,
+    initialToken,
+    onTokenChange,
+  } = props
   const connections = useConnections()
   // The same connection the connect step shows, so both steps act on one account.
   const walletConnection = connections.find((c) =>
@@ -64,10 +77,15 @@ export function SetFeeToken(props: SetFeeTokenProps) {
   const ready = Boolean(address) && onRequiredNetwork
   const choices = feeTokenChoices(network)
 
-  const [selection, setSelection] = React.useState<Selection>(choices[0].address)
-  const [customFeeToken, setCustomFeeToken] = React.useState('')
-  // Whether the reader picked a token, so the step stops choosing one for them.
-  const [touched, setTouched] = React.useState(false)
+  const initialChoice = findFeeTokenChoice(network, initialToken)
+  const [selection, setSelection] = React.useState<Selection>(() =>
+    initialToken ? (initialChoice?.address ?? CUSTOM) : choices[0].address,
+  )
+  const [customFeeToken, setCustomFeeToken] = React.useState(() =>
+    initialToken && !initialChoice ? initialToken : '',
+  )
+  // Whether the reader, or a link, picked a token, so the step stops choosing one for them.
+  const [touched, setTouched] = React.useState(Boolean(initialToken))
   const [confirmed, setConfirmed] = React.useState<{ hash: string } | undefined>()
 
   // A network change keeps a choice only when the new network lists it too.
@@ -129,9 +147,14 @@ export function SetFeeToken(props: SetFeeTokenProps) {
     ready && selectedToken && hasSelectedBalance && !isCurrent && !setUserToken.isPending,
   )
 
-  // Select the account's current fee token once it loads.
+  // Only a token the reader or a link picked is reported, so automatic defaults stay out of links.
   React.useEffect(() => {
-    if (!userTokenAddress) return
+    onTokenChange?.(touched ? selectedToken : undefined)
+  }, [touched, selectedToken, onTokenChange])
+
+  // Select the account's current fee token once it loads, unless a token was already picked.
+  React.useEffect(() => {
+    if (!userTokenAddress || touched) return
     const match = findFeeTokenChoice(network, userTokenAddress)
     if (match) {
       setSelection(match.address)
@@ -140,7 +163,7 @@ export function SetFeeToken(props: SetFeeTokenProps) {
       setSelection(CUSTOM)
       setCustomFeeToken(userTokenAddress)
     }
-  }, [userTokenAddress, network])
+  }, [userTokenAddress, network, touched])
 
   // Without a fee token, start on the first listed stablecoin the account holds.
   React.useEffect(() => {
@@ -155,7 +178,7 @@ export function SetFeeToken(props: SetFeeTokenProps) {
   // A receipt belongs to the account and network that sent it.
   React.useEffect(() => {
     setConfirmed(undefined)
-    setTouched(false)
+    setTouched(Boolean(initialToken))
     setUserToken.reset()
   }, [address, readChainId])
 

@@ -38,7 +38,7 @@ If any check fails, the transaction is invalid and isn't included. Tempo doesn't
 
 ## Set a Default Fee Token
 
-The default covers every transaction the account pays the fee for. That includes ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token order](/docs/accounts/fees#fee-token-precedence). That order falls back to pathUSD, then OUSD. An account that holds neither, such as one with only USDC.e, needs a default before it can approve or swap. Set it in code, as the example shows, or [from a browser wallet](#set-a-fee-token-without-code).
+The default covers every transaction the account pays the fee for. That includes ones it sponsors for other accounts as a [fee payer](/docs/accounts/fees/fee-sponsorship). Without one, Tempo follows the [fee token order](/docs/accounts/fees#fee-token-precedence). That order falls back to pathUSD, then OUSD. An account that holds neither, such as one with only USDC.e, needs a default before it can approve or swap. Set it in code, as the example shows, or on mainnet with the [Set a Fee Token](/docs/accounts/set-fee-token) tool.
 
 In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet until T14. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). The examples pay fees in its faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
 
@@ -74,22 +74,22 @@ The default outranks the token being transferred. With OUSD as the default, a tr
 
 Set the default fee token from a browser wallet, such as MetaMask or Rabby. The demo sends the same `setUserToken` call as [Set a Default Fee Token](#set-a-default-fee-token), with no code.
 
-This demo uses **Tempo Mainnet** and real funds. The transaction costs a fraction of a cent, paid in the stablecoin you choose.
+This demo uses **Tempo Testnet**. Get test stablecoins from the [faucet](/docs/quickstart/faucet) first. To set a fee token on mainnet, use the [Set a Fee Token](/docs/accounts/set-fee-token) tool.
 
 <Demo.Container name="Set a Default Fee Token" showBadge={false}>
-  <ConnectWallet stepNumber={1} chainId={4217} browserWalletsOnly />
-  <SetFeeToken stepNumber={2} chainId={4217} browserWalletsOnly last />
+  <ConnectWallet stepNumber={1} chainId={42431} browserWalletsOnly />
+  <SetFeeToken stepNumber={2} chainId={42431} browserWalletsOnly last />
 </Demo.Container>
 
 :::::steps
 
 ### Connect a Browser Wallet
 
-Connect the wallet that holds the account. If it's on another network, switch it to Tempo Mainnet, chain ID `4217`.
+Connect the wallet that holds the account. If it's on another network, switch it to Tempo Testnet, chain ID `42431`.
 
 ### Choose a Stablecoin
 
-Pick OUSD, USDC.e, pathUSD, or a custom USD TIP-20 address. The list shows the account's balance of each. Use OUSD for most accounts.
+Pick AlphaUSD, BetaUSD, ThetaUSD, OUSD, pathUSD, or a custom USD TIP-20 address. The list shows the account's balance of each.
 
 ### Set the Fee Token
 
@@ -97,7 +97,7 @@ Select **Set fee token** and approve the transaction in your wallet. The demo th
 
 :::::
 
-The account needs a balance only in the stablecoin it sets. A standard transaction whose top-level call is `setUserToken` pays its own fee in the token it sets. So an account that holds only USDC.e can set USDC.e.
+The account needs a balance only in the stablecoin it sets. A standard transaction whose top-level call is `setUserToken` pays its own fee in the token it sets. So a mainnet account that holds only USDC.e can set USDC.e.
 
 <span id="override-the-fee-token-per-transaction" />
 <span id="per-transaction-fee-token" />
@@ -130,6 +130,7 @@ On a transaction sent through a [fee payer server](/docs/accounts/fees/fee-spons
 
 <Cards>
   <Card title="Fee Management" description="Covers who pays each fee and the order Tempo uses to pick the fee token." to="/docs/accounts/fees" />
+  <Card title="Set a Fee Token" description="Use for setting a fee token on mainnet, or sharing a link that opens on a network and stablecoin." to="/docs/accounts/set-fee-token" />
   <Card title="Fee Sponsorship" description="Use for paying your customers' fees with a fee payer." to="/docs/accounts/fees/fee-sponsorship" />
   <Card title="Choose a Fee Token" description="Use for trying a per-transaction fee token in Wagmi, Rust, Python, Go, or Cast." to="/docs/guide/payments/pay-fees-in-any-stablecoin" />
   <Card title="Fee Specification" description="Covers fee token preferences in the protocol." to="/docs/protocol/fees/spec-fee#fee-token-preferences" />

@@ -1,4 +1,4 @@
-import { type Address, isAddress, isAddressEqual } from 'viem'
+import { type Address, getAddress, isAddress, isAddressEqual } from 'viem'
 import { tempo, tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 import { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd, usdce } from '../../tokens'
 
@@ -38,6 +38,12 @@ export const FEE_TOKEN_CHOICES = {
 /** What an account without a default fee token pays in, from T13 on mainnet and testnet. */
 export const FEE_TOKEN_FALLBACK_NOTE = 'Not set: fees fall back to pathUSD, then OUSD'
 
+/** The chain each network's demos use. */
+export const NETWORK_CHAIN_IDS = {
+  mainnet: tempo.id,
+  testnet: tempoModerato.id,
+} as const satisfies Record<FeeTokenNetwork, number>
+
 export const NETWORK_NAMES = {
   mainnet: 'Tempo Mainnet',
   testnet: 'Tempo Testnet',
@@ -69,4 +75,42 @@ export function feeTokenLabel(network: FeeTokenNetwork, address: string): string
   const choice = findFeeTokenChoice(network, address)
   if (choice) return choice.label
   return address.length > 10 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address
+}
+
+/** A link's name for a listed stablecoin, such as \`usdce\` for USDC.e. */
+export function feeTokenSlug(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+/** The network a link's \`network\` parameter names, by name or chain ID. */
+export function parseFeeTokenNetwork(
+  value: string | null | undefined,
+): FeeTokenNetwork | undefined {
+  const normalized = value?.trim().toLowerCase()
+  if (!normalized) return undefined
+  if (normalized === 'mainnet') return 'mainnet'
+  if (normalized === 'testnet' || normalized === 'moderato') return 'testnet'
+  if (/^\d+$/.test(normalized)) return feeTokenNetwork(Number(normalized))
+  return undefined
+}
+
+/**
+ * The token a link's \`token\` parameter names: a listed stablecoin by symbol, such as \`usdce\` or
+ * \`USDC.e\`, or any address in any letter case.
+ */
+export function resolveFeeTokenPreset(
+  network: FeeTokenNetwork,
+  value: string | null | undefined,
+): Address | undefined {
+  const trimmed = value?.trim()
+  if (!trimmed) return undefined
+  if (isAddress(trimmed, { strict: false })) return getAddress(trimmed.toLowerCase())
+  const slug = feeTokenSlug(trimmed)
+  return feeTokenChoices(network).find((choice) => feeTokenSlug(choice.label) === slug)?.address
+}
+
+/** The \`token\` parameter for an address: its symbol when the network lists it, else the address. */
+export function feeTokenParam(network: FeeTokenNetwork, address: Address): string {
+  const choice = findFeeTokenChoice(network, address)
+  return choice ? feeTokenSlug(choice.label) : address
 }
