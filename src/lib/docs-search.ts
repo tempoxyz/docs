@@ -1,7 +1,2 @@
-// Blog search navigates to the docs shell, where DocsHeader opens Vocs search.
+// The website links here with ?search=1 to open Vocs search on arrival.
 export const DOCS_SEARCH_PARAM = 'search'
-
-/** URL that opens the docs search dialog on arrival (handled by DocsHeader). */
-export function docsSearchUrl(): string {
-  return `/?${DOCS_SEARCH_PARAM}=1`
-}

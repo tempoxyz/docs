@@ -42,13 +42,6 @@ const cases: {
   ogImageIncludes: string
 }[] = [
   {
-    path: '/blog',
-    title: 'Blog ⋅ Tempo',
-    ogTitle: 'Blog',
-    descriptionIncludes: 'Product announcements, engineering deep dives',
-    ogImageIncludes: '/og/2026-q4/og_2026-q4_hub_developers-blog_title-f5_v02.png',
-  },
-  {
     path: '/',
     title: 'Tempo Developer Docs: APIs, SDKs &amp; Guides',
     ogTitle: 'Documentation',
@@ -118,10 +111,8 @@ for (const c of cases) {
   })
 }
 
-// Published slugs come from blogs/*.md filenames (all-caps files are repo
-// docs, not posts) — same rule as src/marketing/blogPlugin.ts. Reading the
-// filesystem instead of scraping the blog index means a post can't silently
-// escape coverage because of a markup change.
+// Blog HTML and metadata now belong to tempo.xyz. Retain coverage for the
+// archived share images, which must stay reachable from existing links.
 const blogsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'blogs')
 const blogPosts = readdirSync(blogsDir)
   .filter((f) => f.endsWith('.md') && !/^[A-Z0-9_-]+\.md$/.test(f))
@@ -139,23 +130,10 @@ const blogPosts = readdirSync(blogsDir)
   })
 
 for (const { slug, ogImage } of blogPosts) {
-  test(`prerendered head for blog post /blog/${slug}`, async ({ request }) => {
-    const head = await fetchHead(request, `/blog/${slug}`)
-
-    const ogTitle = metaContent(head, 'og:title')
-    expect(ogTitle).toBeTruthy()
-    expect(ogTitle).not.toBe('Tempo') // generic site fallback means the post head lost the dedupe
-    expect(metaContent(head, 'og:type')).toBe('article')
-    expect(metaContent(head, 'article:published_time')).toMatch(/^\d{4}-\d{2}-\d{2}/)
-    const renderedImage = metaContent(head, 'og:image')
-    if (ogImage) {
-      expect(renderedImage).toBe(ogImage)
-      const image = await request.get(ogImage)
-      expect(image.status(), `${ogImage} should be served`).toBe(200)
-      expect(image.headers()['content-type']).toMatch(/^image\//)
-    } else {
-      expect(renderedImage).toContain('section=BLOG')
-    }
-    expect(metaContent(head, 'twitter:image')).toBe(renderedImage)
+  test(`keeps the archived share image for /blog/${slug} reachable`, async ({ request }) => {
+    expect(ogImage).toMatch(/^\/(?:blog|og)\//)
+    const image = await request.get(ogImage, { maxRedirects: 0 })
+    expect(image.status(), `${ogImage} should be served without redirecting`).toBe(200)
+    expect(image.headers()['content-type']).toMatch(/^image\//)
   })
 }

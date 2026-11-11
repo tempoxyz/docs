@@ -31,6 +31,8 @@ export const directorySchema = z.object({
 export type TestRoute = z.infer<typeof routeSchema>
 export type TestMethod = 'transfer' | 'depositAddress'
 export type TestMode = 'exactSource' | 'exactDestination'
+/** What a transfer quote optimizes for: the best guaranteed amount, or a faster route at near-best terms. */
+export type TestPriority = 'price' | 'speed'
 
 export type RoutePick = {
   sourceChain: string
@@ -173,6 +175,7 @@ type RouteInput = {
   recipient: string
   refundAddress: string
   subsidize?: boolean
+  priority?: TestPriority
 }
 
 /** Fields every quote and creation shares, after checking the route supports the request. */
@@ -180,6 +183,12 @@ function pricing(route: TestRoute, input: RouteInput) {
   const { method, mode } = input
   if (input.subsidize && !canSubsidize(route, method, mode)) {
     throw new Error('This route does not offer 1:1 delivery for that funding method.')
+  }
+  if (input.priority === 'speed' && method !== 'transfer') {
+    throw new Error('Only transfers can prioritize speed.')
+  }
+  if (input.priority === 'speed' && input.subsidize) {
+    throw new Error('Speed priority cannot be combined with 1:1 delivery.')
   }
   if (method === 'depositAddress' && !route.capabilities.depositAddress) {
     throw new Error('This route does not support deposit addresses.')
@@ -223,10 +232,36 @@ export function routeTestRequest(route: TestRoute, input: RouteInput) {
         ...common,
         destinationChain: route.destinationChain.id,
         mode: input.mode,
+        // Price is the API default, so only a speed choice is sent.
+        ...(input.priority === 'speed' && { priority: input.priority }),
         sender: address(input.sender, route.sourceChain.addressFormat, 'sender'),
       }
     : {
         ...common,
         refundAddress: address(input.refundAddress, route.sourceChain.addressFormat, 'refund'),
       }
+}
+
+/**
+ * Up to `limit` routes the demo can run, offered as one-click starts: Base USDC to Tempo USDC.e
+ * first, then other routes into Tempo, one per source network where possible.
+ */
+export function quickRoutes(routes: TestRoute[], limit = 3) {
+  const rank = (route: TestRoute) => {
+    if (!isTempo(route.destinationChain.id)) return 2
+    const baseUsdc = route.sourceChain.id === 'eip155:8453' && route.sourceToken.symbol === 'USDC'
+    return baseUsdc && route.destinationToken.symbol === 'USDC.e' ? 0 : 1
+  }
+  const ranked = routes
+    .filter((route) => demoMethods(route).length > 0)
+    .map((route, index) => ({ route, index }))
+    .sort((a, b) => rank(a.route) - rank(b.route) || a.index - b.index)
+    .map(({ route }) => route)
+  const sources = new Set<string>()
+  const varied = ranked.filter((route) => {
+    if (sources.has(route.sourceChain.id)) return false
+    sources.add(route.sourceChain.id)
+    return true
+  })
+  return [...varied, ...ranked.filter((route) => !varied.includes(route))].slice(0, limit)
 }

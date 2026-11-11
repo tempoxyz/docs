@@ -1,8 +1,6 @@
-import { execFileSync } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { type BlogSitemapEntry, finalizeSitemap } from '../src/lib/sitemap.ts'
-import { getBlogPostSlugs } from '../src/marketing/blogPlugin.ts'
+import { finalizeSitemap } from '../src/lib/sitemap.ts'
 
 const distSitemapPath = path.resolve('dist/public/sitemap.xml')
 const vercelSitemapPath = path.resolve('.vercel/output/static/sitemap.xml')
@@ -22,18 +20,6 @@ async function findMarkdownRouteSlugs(directory: string, root = directory): Prom
   return slugs.flat()
 }
 
-function getGitLastmod(filePath: string): string | undefined {
-  try {
-    const timestamp = execFileSync('git', ['log', '-1', '--format=%cI', '--', filePath], {
-      encoding: 'utf-8',
-    }).trim()
-    const lastmod = timestamp.split('T')[0]
-    return /^\d{4}-\d{2}-\d{2}$/.test(lastmod) ? lastmod : undefined
-  } catch {
-    return undefined
-  }
-}
-
 async function readSitemap(sitemapPath: string): Promise<string | undefined> {
   try {
     return await fs.readFile(sitemapPath, 'utf-8')
@@ -45,23 +31,17 @@ async function readSitemap(sitemapPath: string): Promise<string | undefined> {
 
 async function writeFinalizedSitemap(
   sitemapPath: string,
-  blogPosts: readonly BlogSitemapEntry[],
   openApiRouteSlugs: readonly string[] = [],
 ) {
   const sitemap = await readSitemap(sitemapPath)
   if (!sitemap) return false
 
-  const finalized = finalizeSitemap(sitemap, blogPosts, openApiRouteSlugs)
+  const finalized = finalizeSitemap(sitemap, openApiRouteSlugs)
   if (finalized !== sitemap) {
     await fs.writeFile(sitemapPath, finalized, 'utf-8')
   }
   return true
 }
-
-const blogPosts = getBlogPostSlugs().map((slug) => ({
-  slug,
-  lastmod: getGitLastmod(`blogs/${slug}.md`),
-}))
 
 const openApiRouteSlugs = await findMarkdownRouteSlugs(openApiMarkdownPath).catch(
   (error: NodeJS.ErrnoException) => {
@@ -70,9 +50,9 @@ const openApiRouteSlugs = await findMarkdownRouteSlugs(openApiMarkdownPath).catc
   },
 )
 
-const wroteDistSitemap = await writeFinalizedSitemap(distSitemapPath, blogPosts, openApiRouteSlugs)
+const wroteDistSitemap = await writeFinalizedSitemap(distSitemapPath, openApiRouteSlugs)
 
-await writeFinalizedSitemap(vercelSitemapPath, blogPosts, openApiRouteSlugs)
+await writeFinalizedSitemap(vercelSitemapPath, openApiRouteSlugs)
 
 if (wroteDistSitemap) process.exit(0)
 

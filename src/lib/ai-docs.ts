@@ -18,7 +18,7 @@ const sectionDescriptions: Partial<Record<DocsSection['id'], string>> = {
   routes:
     'Move stablecoins between Tempo and other networks: try a route, set up API access, choose a supported route, quote it, accept deposits or make a transfer, and track delivery. Routes is in beta; see the introduction for access.',
   zones:
-    'Connect to a Zone and work with private balances, deposits, and withdrawals. Zones is in limited preview; see the introduction for access. Earlier testnet sandbox guides describe a separate integration.',
+    'Connect to a Zone and work with private balances, deposits, and withdrawals. Zones is live on Mainnet; see the introduction to set up a Zone. Earlier testnet sandbox guides describe a separate integration.',
   'machine-payments':
     'Pay for APIs, accept API payments, find services, and use MPP (https://mpp.dev).',
   developers:
@@ -108,7 +108,7 @@ export function renderAiIndex(content: string) {
           '',
           '### Earlier testnet sandbox',
           '',
-          'These guides use the earlier Zone A / Zone B sandbox. They do not establish which operations are available in the current limited preview.',
+          'These guides use the earlier Zone A / Zone B sandbox. They do not establish which operations are available in current Mainnet deployments.',
           '',
         )
         append(sandbox)
@@ -137,7 +137,7 @@ export function renderAiPage(content: string, route: string) {
     ? `> Section: [${section.label}](${markdownHref(section.href)}). ${sectionDescription(section)}`
     : '> Read the [documentation index](/llms.txt) to choose a product or integration guide.'
   const sandbox = pageRoute.startsWith('/docs/guide/private-zones')
-    ? '> Earlier testnet sandbox: use [Zones](/docs/zones.md) for the current limited preview.\n'
+    ? '> Earlier testnet sandbox: use [Zones](/docs/zones.md) for current Mainnet deployments.\n'
     : ''
   return `${aiDocsContextMarker}\n> Source: [${pageRoute}](${markdownHref(pageRoute)})\n${context}\n${sandbox}> [Documentation index](/llms.txt) · [Docs skill](/SKILL.md)\n\n${aiDocsNotice()}\n${content}`
 }

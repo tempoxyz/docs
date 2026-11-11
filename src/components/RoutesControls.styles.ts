@@ -34,3 +34,19 @@ export const label = style({
   fontSize: tokens.fontSize.compact,
 })
 export const note = style({ color: tokens.color.gray10, fontSize: tokens.fontSize.compact })
+
+// The TDS popup shares the card's dark fill and keeps a light-mode shadow, so a hairline edge keeps the open list visible.
+export const popup = style({
+  borderWidth: tokens.borderWidth.hairline,
+  borderStyle: 'solid',
+  borderColor: tokens.color.lineStrong,
+})
+export const fieldHeading = style({
+  display: 'flex',
+  minWidth: 0,
+  flexWrap: 'wrap',
+  alignItems: 'baseline',
+  columnGap: tokens.spacing['1'],
+  color: tokens.color.gray10,
+  fontSize: tokens.fontSize.compact,
+})

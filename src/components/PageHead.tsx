@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { Head, MdxPageContextProvider } from 'vocs'
 
 /**
- * Per-page head tags for non-MDX (marketing/blog) pages.
+ * Per-page head tags for non-MDX pages.
  *
  * MDX routes get one route-aware `<Head>` from their layout. This component
  * gives `.tsx` routes the same single per-page owner with their metadata in

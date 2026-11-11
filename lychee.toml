@@ -48,7 +48,25 @@ exclude = [
   "^https://api\\.auto\\.exchange/?$",
 ]
 
+# GitHub answers bursts of github.com/<owner>/<repo>/blob/... page requests from
+# CI runners with 503s, which failed PRs on links that exist. Check the file
+# itself on GitHub's raw CDN instead: it still returns 404 for a missing file or
+# ref, and doesn't throttle. Line anchors (#L10) aren't checked either way.
+# Only paths ending in a file name with an extension are remapped: raw 404s on
+# folders, which github.com redirects from blob/ to tree/.
+remap = [
+  "^https://github\\.com/([^/]+)/([^/]+)/blob/([^#?]+/[^/#?]*\\.[^/#?]+)(?:[?#].*)?$ https://raw.githubusercontent.com/$1/$2/$3",
+]
+
 # Reuse cached results across runs.
 cache = true
 max_cache_age = "1d"
+# Don't cache server errors: a cached 503 kept failing reruns for a day.
+cache_exclude_status = "500.."
 no_progress = true
+
+# Pace the remaining github.com requests (repos, trees, releases) so a full run
+# doesn't trip GitHub's rate limiting.
+[hosts."github.com"]
+concurrency = 4
+request_interval = "250ms"

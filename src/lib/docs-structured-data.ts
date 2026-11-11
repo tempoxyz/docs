@@ -16,7 +16,6 @@ type DocsHeadTags = {
     | { rel: 'help'; type: 'text/plain'; href: string; title: string }
   )[]
   meta: {
-    ogType?: 'article'
     ogImage?: string
     articleModifiedTime?: false
   }
@@ -34,18 +33,6 @@ export function docsStructuredDataHead(
   { frontmatter }: DocsStructuredDataContext,
 ): DocsHeadTags | undefined {
   const pagePath = path.startsWith('/') ? path : `/${path}`
-  // Keep article type in the native head owner: sibling overrides can race
-  // with Vocs' default website tag during streamed prerendering.
-  if (pagePath.startsWith('/blog/')) {
-    return {
-      base: false,
-      meta: {
-        ogType: 'article' as const,
-        ...(frontmatter?.ogImage ? { ogImage: frontmatter.ogImage } : {}),
-      },
-    }
-  }
-
   const developersUrl = 'https://tempo.xyz/developers'
   // Pages set a root-relative share image in frontmatter `ogImage`. Generated
   // API reference pages have no source file, so their images are listed here.

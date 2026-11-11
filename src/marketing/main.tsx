@@ -17,8 +17,6 @@ import TpsTrendChartFrame from './app/performance/_components/TpsTrendChartFrame
 import HomePage from './HomePage'
 import { routeMetadata } from './routeMetadata'
 
-const loadBlogPage = () => import('./app/blog/page')
-const loadBlogPostPage = () => import('./app/blog/[slug]/page')
 const loadFeaturePage = () => import('./FeaturePage')
 const loadPerformancePage = () => import('./PerformancePage')
 
@@ -32,8 +30,6 @@ const GoogleAnalytics = lazy(() => import('../components/GoogleAnalytics'))
 const PostHogSetup = lazy(() => import('../components/PostHogSetup'))
 const PerformancePage = lazy(loadPerformancePage)
 const FeaturePage = lazy(loadFeaturePage)
-const BlogPage = lazy(loadBlogPage)
-const BlogPostPage = lazy(loadBlogPostPage)
 
 function currentRoute() {
   return normalizeRoutePath(window.location.pathname)
@@ -112,7 +108,7 @@ function RouteFallback({ route }: { route: string }) {
 
 function isMarketingRoute(pathname: string) {
   const route = normalizeRoutePath(pathname)
-  return route in routeMetadata || route.startsWith('/blog/')
+  return route in routeMetadata
 }
 
 function preloadRoute(pathname: string) {
@@ -121,10 +117,6 @@ function preloadRoute(pathname: string) {
     void loadFeaturePage()
   } else if (route === '/performance') {
     void loadPerformancePage()
-  } else if (route === '/blog') {
-    void loadBlogPage()
-  } else if (route.startsWith('/blog/')) {
-    void loadBlogPostPage()
   }
 }
 
@@ -138,7 +130,6 @@ function idFromHash(hash: string) {
 
 function metadataForRoute(path: string) {
   if (routeMetadata[path]) return routeMetadata[path]
-  if (path.startsWith('/blog/')) return routeMetadata['/blog']
   return routeMetadata['/']
 }
 
@@ -153,9 +144,6 @@ function renderRoute(path: string): ReactNode {
   if (path === '/build/tempo-transactions') return <FeaturePage params={{ slug: 'transactions' }} />
   if (path === '/build/tip20-tokens') return <FeaturePage params={{ slug: 'tokens' }} />
   if (path === '/performance') return <PerformancePage />
-  if (path === '/blog') return <BlogPage />
-  if (path.startsWith('/blog/'))
-    return <BlogPostPage params={{ slug: path.slice('/blog/'.length) }} />
   return <HomePage />
 }
 

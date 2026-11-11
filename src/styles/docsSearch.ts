@@ -2,7 +2,7 @@ import { global } from 'zyzz/web'
 import { vars as tokens } from './theme'
 
 // The docs search is Vocs' own dialog (vocs/src/react/internal/Search.tsx), portalled
-// by Base UI. The blog opens the same dialog through docsSearchUrl(), so these
+// by Base UI. The website opens the same dialog through ?search=1, so these
 // overrides style the one search the site has.
 
 // S1: the open dialog's input shows no focus ring; the dialog itself is the focus

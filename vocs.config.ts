@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { blogMigrationRedirects } from './src/lib/blog-migration'
 import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
@@ -225,25 +226,28 @@ export default defineConfig({
   head: docsStructuredDataHead,
   jsonLd: false,
   ai: {
-    retriever: process.env.CLOUDFLARE_API_TOKEN
-      ? Retriever.local({
-          embedding: Embedding.cloudflare(),
-          // Production pages are served behind the tempo.xyz `/developers`
-          // proxy; the default origin-relative endpoint escapes the prefix.
-          endpoint:
-            process.env.VERCEL_ENV === 'production'
-              ? 'https://tempo.xyz/developers/api/search'
-              : undefined,
-          hybrid: true,
-          reranker: Reranker.cloudflare(),
-          sources: [
-            { url: 'https://viem.sh/llms.txt', label: 'viem' },
-            { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
-            { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
-            { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
-          ],
-        })
-      : undefined,
+    // Preview deploys skip the AI search index: they don't need it, and a bad
+    // Cloudflare token would otherwise fail every PR preview build.
+    retriever:
+      process.env.CLOUDFLARE_API_TOKEN && process.env.VERCEL_ENV !== 'preview'
+        ? Retriever.local({
+            embedding: Embedding.cloudflare(),
+            // Production pages are served behind the tempo.xyz `/developers`
+            // proxy; the default origin-relative endpoint escapes the prefix.
+            endpoint:
+              process.env.VERCEL_ENV === 'production'
+                ? 'https://tempo.xyz/developers/api/search'
+                : undefined,
+            hybrid: true,
+            reranker: Reranker.cloudflare(),
+            sources: [
+              { url: 'https://viem.sh/llms.txt', label: 'viem' },
+              { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
+              { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
+              { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
+            ],
+          })
+        : undefined,
   },
   search: {
     index: {
@@ -261,7 +265,7 @@ export default defineConfig({
   },
   sitemap: {
     include: (path) =>
-      (path === '/' || /^\/(?:get-started|docs|blog)(?:\/|$)/.test(path)) &&
+      (path === '/' || /^\/(?:get-started|docs)(?:\/|$)/.test(path)) &&
       !/^\/docs\/?$/.test(path) &&
       !path.split('/').some((segment) => /^\[.*\]$/.test(segment)),
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
@@ -299,7 +303,6 @@ export default defineConfig({
       accounts: 'ACCOUNTS',
       agents: 'MACHINE PAYMENTS',
       api: 'API',
-      blog: 'BLOG',
       build: 'BUILD',
       cli: 'CLI',
       'developer-tools': 'DEVELOPER TOOLS',
@@ -365,12 +368,7 @@ export default defineConfig({
       v: '4',
     }).toString()
 
-    // The HBSet display font's mixed-case "Blog" wordmark has awkward
-    // spacing at OG scale. Keep the page title sentence-cased, but use the
-    // cleaner all-caps treatment in the blog index thumbnail.
-    const imageTitle = docsPath === '/blog' ? 'BLOG' : '%title'
-
-    return `${urlBase}/api/og?title=${imageTitle}&${extra}`
+    return `${urlBase}/api/og?title=%title&${extra}`
   },
   openapi: [
     {
@@ -1361,10 +1359,9 @@ export default defineConfig({
       text: 'Docs',
       link: '/',
     },
-
-    { text: 'Blog', link: '/blog' },
   ],
   redirects: [
+    ...blogMigrationRedirects.map((redirect) => ({ ...redirect, status: 301 as const })),
     {
       source: '/docs/resources/partners.md',
       destination: '/docs/resources/guides.md',

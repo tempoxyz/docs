@@ -38,7 +38,6 @@ export const inherited = {
     selectionBg: 'var(--selection-bg) !custom',
     diagramSelectionBg: 'var(--diagram-selection-bg) !custom',
     scrollbarThumb: 'var(--scrollbar-thumb) !custom',
-    blogRule: 'var(--blog-rule) !custom',
     colorMixInSrgbColorForeground14Transparent:
       'color-mix(in srgb, var(--color-foreground) 14%, transparent) !custom',
     colorMixInSrgbColorForeground10Transparent:
@@ -179,8 +178,6 @@ export const inherited = {
       'color-mix(in oklab, var(--foreground) 25%, transparent) !custom',
     colorMixInOklabColorBlack60Transparent:
       'color-mix(in oklab, var(--color-black) 60%, transparent) !custom',
-    blogInk: 'var(--blog-ink) !custom',
-    blogMuted: 'var(--blog-muted) !custom',
     colorMixInOklabSurfaceBlock40Transparent:
       'color-mix(in oklab, var(--surface-block) 40%, transparent) !custom',
     colorMixInOklabIndicatorGreen35Transparent:
