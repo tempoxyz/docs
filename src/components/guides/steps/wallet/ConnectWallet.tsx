@@ -13,11 +13,11 @@ import {
 import LucideCheck from '~icons/lucide/check'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import {
-  DOCS_PASSKEY_PROVIDER_ID,
   filterSupportedFundableWalletConnectors,
   filterSupportedInjectedConnectors,
   isFundableWalletConnector,
   isInstalledBrowserWalletConnectorId,
+  withoutGenericInjected,
 } from '../../../lib/wallets'
 import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from '../../Demo'
 import * as form from '../../form.recipes'
@@ -212,14 +212,4 @@ export function ConnectWallet(props: ConnectWalletProps) {
       {stackConnectors && actions}
     </Step>
   )
-}
-
-/**
- * Keeps the browser wallets a reader installed. Drops the docs' passkey provider, and the generic
- * `window.ethereum` connector when a wallet announced itself by name.
- */
-function withoutGenericInjected(connectors: readonly Connector[]) {
-  const installed = connectors.filter((connector) => connector.id !== DOCS_PASSKEY_PROVIDER_ID)
-  const named = installed.filter((connector) => connector.id !== 'injected')
-  return named.length > 0 ? named : installed
 }

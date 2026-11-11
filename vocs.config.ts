@@ -645,6 +645,7 @@ export default defineConfig({
           { text: 'Security', link: '/docs/accounts/security' },
           { text: 'Create an Account', link: '/docs/accounts/create' },
           { text: 'Add Funds', link: '/docs/accounts/fund' },
+          { text: 'Set a Fee Token', link: '/docs/accounts/set-fee-token' },
         ],
       },
       {
@@ -702,7 +703,6 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Fee Tokens', link: '/docs/accounts/fees/fee-tokens' },
-              { text: 'Set a Fee Token', link: '/docs/accounts/fees/set-fee-token' },
               { text: 'Fee Sponsorship', link: '/docs/accounts/fees/fee-sponsorship' },
             ],
           },
