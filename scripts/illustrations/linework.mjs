@@ -257,7 +257,10 @@ const partners = illustration(
         line(366, 228, 384, 228, ink.black),
       ]),
     ),
-    group('Marks', join([node(200, 132), node(248, 132, 4), node(360, 228, 4), node(392, 228)])),
+    group(
+      'Marks',
+      join([node(200, 132), node(248, 132, 4), node(360, 228, 4), node(392, 228)]),
+    ),
   ]),
 )
 
