@@ -84,7 +84,7 @@ await client.fee.setUserTokenSync({
 
 ::::
 
-Without a default, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence). It can fall back to pathUSD, a stablecoin the user might not hold. Setting a fee token for each transaction needs a Tempo Transaction.
+Without a default, Tempo follows the [fee token precedence](/docs/accounts/fees#fee-token-precedence). It falls back to pathUSD, then OUSD. A user who holds only another stablecoin, such as USDC.e, can't approve or swap until they set a default. Setting a fee token for each transaction needs a Tempo Transaction.
 
 ### Send Tempo Transactions
 
