@@ -13,10 +13,11 @@ import {
 import LucideCheck from '~icons/lucide/check'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import {
+  DOCS_PASSKEY_PROVIDER_ID,
   filterSupportedFundableWalletConnectors,
   filterSupportedInjectedConnectors,
-  isBrowserWalletConnectorId,
   isFundableWalletConnector,
+  isInstalledBrowserWalletConnectorId,
 } from '../../../lib/wallets'
 import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from '../../Demo'
 import * as form from '../../form.recipes'
@@ -53,7 +54,7 @@ export function ConnectWallet(props: ConnectWalletProps) {
 
   const walletConnection = connections.find((c) =>
     browserWalletsOnly
-      ? isBrowserWalletConnectorId(c.connector.id) && c.connector.id !== DOCS_PASSKEY_PROVIDER_ID
+      ? isInstalledBrowserWalletConnectorId(c.connector.id)
       : isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
   )
   const walletAddress = walletConnection?.accounts[0]
@@ -212,9 +213,6 @@ export function ConnectWallet(props: ConnectWalletProps) {
     </Step>
   )
 }
-
-// The docs' own passkey provider announces itself to EIP-6963 under this generic ID.
-const DOCS_PASSKEY_PROVIDER_ID = 'com.injectedwallet'
 
 /**
  * Keeps the browser wallets a reader installed. Drops the docs' passkey provider, and the generic

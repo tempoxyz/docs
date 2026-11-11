@@ -2,11 +2,14 @@
 
 import { useQueries } from '@tanstack/react-query'
 import * as React from 'react'
-import { type Address, isAddress, isAddressEqual } from 'viem'
+import { type Address, getAddress, isAddress, isAddressEqual } from 'viem'
 import { tempo } from 'viem/chains'
 import { useChainId, useConfig, useConnections } from 'wagmi'
 import { Actions, Hooks } from 'wagmi/tempo'
-import { isBrowserWalletConnectorId } from '../../../lib/wallets'
+import {
+  isBrowserWalletConnectorId,
+  isInstalledBrowserWalletConnectorId,
+} from '../../../lib/wallets'
 import { Button, ExplorerLink, Step } from '../../Demo'
 import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
@@ -31,12 +34,19 @@ export type SetFeeTokenProps = DemoStepProps & {
    * step follows the wallet's Tempo network, as on the testnet faucet.
    */
   chainId?: number | undefined
+  /** Act only on a wallet the reader installed, matching \`ConnectWallet\`'s \`browserWalletsOnly\`. */
+  browserWalletsOnly?: boolean | undefined
 }
 
 export function SetFeeToken(props: SetFeeTokenProps) {
-  const { stepNumber = 1, chainId: requiredChainId } = props
+  const { stepNumber = 1, chainId: requiredChainId, browserWalletsOnly = false } = props
   const connections = useConnections()
-  const walletConnection = connections.find((c) => isBrowserWalletConnectorId(c.connector.id))
+  // The same connection the connect step shows, so both steps act on one account.
+  const walletConnection = connections.find((c) =>
+    browserWalletsOnly
+      ? isInstalledBrowserWalletConnectorId(c.connector.id)
+      : isBrowserWalletConnectorId(c.connector.id),
+  )
   const address = walletConnection?.accounts[0]
   const walletChainId = walletConnection?.chainId
   const config = useConfig()
@@ -48,7 +58,9 @@ export function SetFeeToken(props: SetFeeTokenProps) {
   // Read from the required chain, else the wallet's Tempo chain, else the docs' default chain.
   const readChainId =
     requiredChainId ?? (walletNetwork ? walletChainId : (configChainId ?? config.chains[0].id))
-  const onRequiredNetwork = requiredChainId === undefined || walletChainId === requiredChainId
+  // Without a required chain, the wallet must be on a Tempo network.
+  const onRequiredNetwork =
+    requiredChainId === undefined ? walletNetwork !== undefined : walletChainId === requiredChainId
   const ready = Boolean(address) && onRequiredNetwork
   const choices = feeTokenChoices(network)
 
@@ -63,18 +75,16 @@ export function SetFeeToken(props: SetFeeTokenProps) {
     selection === CUSTOM ? undefined : (findFeeTokenChoice(network, selection) ?? choices[0])
   const isCustom = selection === CUSTOM
   const isCustomValid = isAddress(customFeeToken, { strict: false })
-  const selectedToken: Address | undefined = isCustom
-    ? isCustomValid
-      ? (customFeeToken as Address)
-      : undefined
-    : selectedChoice?.address
+  // Accept any letter case, then use the checksummed address for reads and the transaction.
+  const customAddress = isCustomValid ? getAddress(customFeeToken.toLowerCase()) : undefined
+  const selectedToken: Address | undefined = isCustom ? customAddress : selectedChoice?.address
 
   const balanceTokens = React.useMemo(() => {
     const tokens: Address[] = choices.map((choice) => choice.address)
-    if (isCustom && isCustomValid && !findFeeTokenChoice(network, customFeeToken))
-      tokens.push(customFeeToken as Address)
+    if (isCustom && customAddress && !findFeeTokenChoice(network, customAddress))
+      tokens.push(customAddress)
     return tokens
-  }, [choices, isCustom, isCustomValid, customFeeToken, network])
+  }, [choices, isCustom, customAddress, network])
 
   // Same query keys as the demo footer's balances, so its transfer watcher refreshes these too.
   const balanceQueries = useQueries({
@@ -109,6 +119,8 @@ export function SetFeeToken(props: SetFeeTokenProps) {
     return Boolean(balance && balance.amount > 0n)
   })
   const balancesLoaded = ready && balanceQueries.every((query) => !query.isPending)
+  // A failed read says nothing about the account, so only successful reads drive its status.
+  const balancesRead = ready && balanceQueries.every((query) => query.isSuccess)
   const isCurrent = Boolean(
     selectedToken && userTokenAddress && isAddressEqual(selectedToken, userTokenAddress),
   )
@@ -172,7 +184,7 @@ export function SetFeeToken(props: SetFeeTokenProps) {
     if (!address) return undefined
     if (!onRequiredNetwork) return `Switch your wallet to ${networkName} to set a fee token.`
     if (setUserToken.isPending) return 'Approve the transaction in your wallet.'
-    if (!balancesLoaded || confirmed) return undefined
+    if (!balancesRead || confirmed) return undefined
     if (!hasAnyBalance)
       return `This account holds none of these stablecoins on ${networkName}. Add funds, then set a fee token.`
     if (isCustom && !isCustomValid) return 'Enter the address of a USD TIP-20 token.'
@@ -253,7 +265,7 @@ export function SetFeeToken(props: SetFeeTokenProps) {
                 )}
               </div>
             )}
-            {ready && !userToken.isPending && (
+            {ready && userToken.isSuccess && (
               <div {...ui.setFeeTokenLayout5()}>
                 Current fee token:{' '}
                 <span {...ui.setFeeTokenText()}>

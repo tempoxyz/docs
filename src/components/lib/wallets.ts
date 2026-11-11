@@ -8,6 +8,14 @@ export function isBrowserWalletConnectorId(connectorId: string) {
   return !TEMPO_MANAGED_WALLET_IDS.has(connectorId)
 }
 
+/** The docs' own passkey provider announces itself to EIP-6963 under this generic ID. */
+export const DOCS_PASSKEY_PROVIDER_ID = 'com.injectedwallet'
+
+/** A wallet the reader installed, such as MetaMask or Rabby, not one of the docs' own providers. */
+export function isInstalledBrowserWalletConnectorId(connectorId: string) {
+  return isBrowserWalletConnectorId(connectorId) && connectorId !== DOCS_PASSKEY_PROVIDER_ID
+}
+
 function filterSupportedConnectors(
   connectors: readonly Connector[],
   isSupported: (connector: Connector) => boolean,
