@@ -76,7 +76,7 @@ describe('docs structured data', () => {
     expect(node(schema, 'WebAPI')).toMatchObject({
       name: 'Tempo API',
       description: 'Sponsor gas.',
-      url: 'https://api.tempo.xyz/v1',
+      url: 'https://api.tempo.xyz',
       documentation: 'https://tempo.xyz/developers/docs/api',
       provider: { '@id': 'https://tempo.xyz/#organization' },
     })
