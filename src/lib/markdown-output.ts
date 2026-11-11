@@ -108,6 +108,8 @@ const interactiveDescriptions: Record<string, string> = {
     'sign with Tempo Wallet (Tempo sources) or a browser wallet, and track delivery. ' +
     'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
+  FeeTokenTool:
+    'In the interactive web page, choose Tempo Mainnet or Tempo Testnet, connect a browser wallet such as MetaMask or Rabby, pick a stablecoin or a custom USD TIP-20 address, and send the `setUserToken` transaction. The page shows the balance of each stablecoin, the current fee token, and an explorer link for the transaction. Mainnet uses real funds. To open the tool on a network and stablecoin, use `/docs/accounts/fees/set-fee-token?network=mainnet&token=usdce`.',
   GuideDemo:
     "In the interactive web page, a demo runs the steps that follow on the Tempo Accounts devnet with the reader's own signers: a passkey on their device, or keys the page generates. Each step that changes the account sends a devnet transaction and shows its hash, next to what changed in the app and on the account. It runs only where the page can reach Tempo Accounts devnet.",
   T7BenchmarkVisual: 'The benchmark values are listed in the table below.',

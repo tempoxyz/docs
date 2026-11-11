@@ -1,0 +1,47 @@
+---
+title: Set a Fee Token
+seoTitle: Set a Tempo Fee Token From a Browser Wallet | Tempo Docs
+description: Pick the stablecoin an account pays network fees in, on mainnet or testnet, from MetaMask, Rabby, or another browser wallet. Share a link that opens on a network and stablecoin.
+interactive: true
+mipd: true
+accessKey: false
+---
+
+import { Card, Cards } from 'vocs'
+import { FeeTokenTool } from '../../../../components/guides/FeeTokenTool.tsx'
+
+# Set a Fee Token
+
+Sets an account's default fee token from a browser wallet, with no code.
+
+<FeeTokenTool />
+
+## Overview
+
+The tool sends the same `setUserToken` call as [Set a Default Fee Token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token). It works with any browser wallet on Tempo Mainnet or Tempo Testnet.
+
+The account needs a balance only in the stablecoin it sets. The transaction pays its own fee in that stablecoin, so an account that holds only USDC.e can set USDC.e.
+
+## Link to a Network and Stablecoin
+
+The tool opens on the network and stablecoin its link names. The address bar follows your choices, so **Copy link** shares them.
+
+| Parameter | Values |
+| --- | --- |
+| `network` | `mainnet` or `testnet`. Defaults to `mainnet`. |
+| `token` | A listed stablecoin, such as `ousd`, `usdce`, or `pathusd` on mainnet, or a USD TIP-20 address. |
+
+A link opens on its stablecoin even when the account has another fee token. For example, this link opens on USDC.e on mainnet:
+
+```text
+https://tempo.xyz/developers/docs/accounts/fees/set-fee-token?network=mainnet&token=usdce
+```
+
+## Related
+
+<Cards>
+  <Card title="Fee Tokens" description="Covers how an account's default fee token works and how to set it in code." to="/docs/accounts/fees/fee-tokens" />
+  <Card title="Fee Management" description="Covers who pays each fee and the order Tempo uses to pick the fee token." to="/docs/accounts/fees" />
+  <Card title="Get Testnet Funds" description="Use for adding test stablecoins to a wallet before setting a testnet fee token." to="/docs/quickstart/faucet" />
+</Cards>
+

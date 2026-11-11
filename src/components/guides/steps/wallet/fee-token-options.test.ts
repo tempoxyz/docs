@@ -1,3 +1,4 @@
+import { getAddress } from 'viem'
 import { tempo, tempoDevnet, tempoModerato } from 'viem/chains'
 import { describe, expect, it } from 'vitest'
 import { alphaUsd, ousd, pathUsd, usdce } from '../../tokens'
@@ -5,7 +6,11 @@ import {
   feeTokenChoices,
   feeTokenLabel,
   feeTokenNetwork,
+  feeTokenParam,
+  feeTokenSlug,
   findFeeTokenChoice,
+  parseFeeTokenNetwork,
+  resolveFeeTokenPreset,
 } from './fee-token-options'
 
 describe('fee token options', () => {
@@ -47,5 +52,40 @@ describe('fee token options', () => {
     expect(feeTokenLabel('mainnet', '0x20c0000000000000000000000000000000001234')).toBe(
       '0x20c0…1234',
     )
+  })
+})
+
+describe('fee token links', () => {
+  it('reads the network by name or chain ID', () => {
+    expect(parseFeeTokenNetwork('Mainnet')).toBe('mainnet')
+    expect(parseFeeTokenNetwork('testnet')).toBe('testnet')
+    expect(parseFeeTokenNetwork(String(tempo.id))).toBe('mainnet')
+    expect(parseFeeTokenNetwork(String(tempoModerato.id))).toBe('testnet')
+    expect(parseFeeTokenNetwork('1')).toBeUndefined()
+    expect(parseFeeTokenNetwork('base')).toBeUndefined()
+    expect(parseFeeTokenNetwork(null)).toBeUndefined()
+  })
+
+  it('resolves a listed stablecoin by symbol on its network only', () => {
+    expect(resolveFeeTokenPreset('mainnet', 'usdce')).toBe(usdce)
+    expect(resolveFeeTokenPreset('mainnet', 'USDC.e')).toBe(usdce)
+    expect(resolveFeeTokenPreset('mainnet', 'OUSD')).toBe(ousd)
+    expect(resolveFeeTokenPreset('testnet', 'usdce')).toBeUndefined()
+    expect(resolveFeeTokenPreset('testnet', 'alphausd')).toBe(alphaUsd)
+    expect(resolveFeeTokenPreset('mainnet', '')).toBeUndefined()
+  })
+
+  it('accepts an address in any letter case and checksums it', () => {
+    const upper = `0x${usdce.slice(2).toUpperCase()}`
+    expect(resolveFeeTokenPreset('mainnet', upper)).toBe(getAddress(usdce))
+    expect(resolveFeeTokenPreset('mainnet', '0x1234')).toBeUndefined()
+  })
+
+  it('writes a symbol for listed stablecoins and the address otherwise', () => {
+    expect(feeTokenParam('mainnet', usdce)).toBe('usdce')
+    expect(feeTokenParam('mainnet', pathUsd)).toBe('pathusd')
+    const other = '0x20C0000000000000000000000000000000001234'
+    expect(feeTokenParam('mainnet', other)).toBe(other)
+    expect(feeTokenSlug('USDC.e')).toBe('usdce')
   })
 })

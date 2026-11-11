@@ -74,7 +74,7 @@ The default outranks the token being transferred. With OUSD as the default, a tr
 
 Set the default fee token from a browser wallet, such as MetaMask or Rabby. The demo sends the same `setUserToken` call as [Set a Default Fee Token](#set-a-default-fee-token), with no code.
 
-This demo uses **Tempo Mainnet** and real funds. The transaction costs a fraction of a cent, paid in the stablecoin you choose.
+This demo uses **Tempo Mainnet** and real funds. The transaction costs a fraction of a cent, paid in the stablecoin you choose. The standalone [Set a Fee Token](/docs/accounts/fees/set-fee-token) tool also runs on testnet and opens on the stablecoin its link names.
 
 <Demo.Container name="Set a Default Fee Token" showBadge={false}>
   <ConnectWallet stepNumber={1} chainId={4217} browserWalletsOnly />
@@ -130,6 +130,7 @@ On a transaction sent through a [fee payer server](/docs/accounts/fees/fee-spons
 
 <Cards>
   <Card title="Fee Management" description="Covers who pays each fee and the order Tempo uses to pick the fee token." to="/docs/accounts/fees" />
+  <Card title="Set a Fee Token" description="Use for setting a fee token on mainnet or testnet, or sharing a link that opens on one." to="/docs/accounts/fees/set-fee-token" />
   <Card title="Fee Sponsorship" description="Use for paying your customers' fees with a fee payer." to="/docs/accounts/fees/fee-sponsorship" />
   <Card title="Choose a Fee Token" description="Use for trying a per-transaction fee token in Wagmi, Rust, Python, Go, or Cast." to="/docs/guide/payments/pay-fees-in-any-stablecoin" />
   <Card title="Fee Specification" description="Covers fee token preferences in the protocol." to="/docs/protocol/fees/spec-fee#fee-token-preferences" />
