@@ -7,8 +7,10 @@ import { type Address, encodeFunctionData, getAddress, isAddress, isAddressEqual
 import { Abis, Addresses } from 'viem/tempo'
 import {
   type Connector,
+  type CreateConnectorFn,
   useChains,
   useConfig,
+  useConnect,
   useConnection,
   useConnections,
   useConnectors,
@@ -16,13 +18,12 @@ import {
   useSendCallsSync,
   useSwitchChain,
 } from 'wagmi'
-import { connect as connectWallet } from 'wagmi/actions'
 import { injected } from 'wagmi/connectors'
 import { Actions, Hooks } from 'wagmi/tempo'
 import LucideCheck from '~icons/lucide/check'
 import LucideLink from '~icons/lucide/link'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
-import { connectEvmAccount, sendEvmCall, waitForEvmCall } from '../../lib/evm-wallets'
+import { sendEvmCall, waitForEvmCall } from '../../lib/evm-wallets'
 import { style, vars as tokens } from '../../styles/theme'
 import { Container } from '../Container'
 import {
@@ -82,43 +83,68 @@ function isSupportedWallet(connector: Pick<Connector, 'id'>) {
   return connector.id === TEMPO_WALLET_ID || isInstalledBrowserWalletConnectorId(connector.id)
 }
 
+type Wallet = {
+  key: string
+  name: string
+  icon: string | undefined
+  connector: Connector | CreateConnectorFn
+}
+
 /**
- * Tempo Wallet first, then every browser wallet. A wallet that only sets `window.ethereum` and
- * doesn't announce itself through EIP-6963 gets a generic connector.
+ * Tempo Wallet first, then every browser wallet that announces itself through EIP-6963. A wallet
+ * that only sets window.ethereum gets wagmi's injected() connector, which connect sets up.
  */
-function useWallets() {
-  const config = useConfig()
+function useWallets(): readonly Wallet[] {
   const connectors = useConnectors()
+  const tempoWallet = connectors.find((c) => c.id === TEMPO_WALLET_ID)
   const browser = React.useMemo(
-    () => withoutGenericInjected(filterSupportedInjectedConnectors(connectors)),
+    () =>
+      withoutGenericInjected(filterSupportedInjectedConnectors(connectors)).filter((c) =>
+        isInstalledBrowserWalletConnectorId(c.id),
+      ),
     [connectors],
   )
+  // EIP-6963 wallets announce right after load, so wait a moment before offering the fallback.
+  const [legacy, setLegacy] = React.useState(false)
   React.useEffect(() => {
-    const ethereum = (window as { ethereum?: unknown }).ethereum
-    if (
-      !ethereum ||
-      connectors.some((c) => c.type === 'injected' && isInstalledBrowserWalletConnectorId(c.id))
+    const timer = setTimeout(
+      () => setLegacy(Boolean((window as { ethereum?: unknown }).ethereum)),
+      500,
     )
-      return
-    // EIP-6963 wallets announce right after load, so give them a moment first.
-    const timer = setTimeout(() => {
-      const internal = config._internal.connectors
-      if (
-        config.connectors.some(
-          (c) => c.type === 'injected' && isInstalledBrowserWalletConnectorId(c.id),
-        )
-      )
-        return
-      const connector = internal.setup(injected({ shimDisconnect: true }))
-      internal.setState((current) => [...current, connector])
-    }, 600)
     return () => clearTimeout(timer)
-  }, [config, connectors])
-  const tempoWallet = connectors.find((c) => c.id === TEMPO_WALLET_ID)
-  return React.useMemo(
-    () => [...(tempoWallet ? [tempoWallet] : []), ...browser],
-    [tempoWallet, browser],
-  )
+  }, [])
+  // Load each wallet's provider ahead of the click. Tempo Wallet opens a popup, and browsers block
+  // popups that open after slow work in the click handler.
+  React.useEffect(() => {
+    for (const connector of [tempoWallet, ...browser]) void connector?.getProvider().catch(() => {})
+  }, [tempoWallet, browser])
+  return React.useMemo(() => {
+    const list: Wallet[] = [...(tempoWallet ? [tempoWallet] : []), ...browser].map((c) => ({
+      key: c.uid,
+      name: c.name,
+      icon: c.icon,
+      connector: c,
+    }))
+    if (legacy && browser.length === 0)
+      list.push({
+        key: 'injected',
+        name: 'Browser wallet',
+        icon: undefined,
+        connector: injected({ shimDisconnect: true }),
+      })
+    return list
+  }, [tempoWallet, browser, legacy])
+}
+
+/** The wallet's own message under wagmi's and viem's wrapping. */
+function errorMessage(error: unknown) {
+  let inner = error as { shortMessage?: string; message?: string; cause?: unknown; code?: number }
+  if (inner?.code === 4001) return undefined
+  while (inner?.cause && typeof inner.cause === 'object') {
+    inner = inner.cause as typeof inner
+    if (inner.code === 4001) return undefined
+  }
+  return (error as { shortMessage?: string }).shortMessage ?? (error as Error).message
 }
 
 /** Sets an account's default fee token from any wallet, on mainnet or testnet. */
@@ -201,23 +227,20 @@ function FeeTokenSteps(props: {
   const onChain = connection?.chainId === chainId
   const disconnect = useDisconnect()
   const switchChain = useSwitchChain()
-  const [connecting, setConnecting] = React.useState<string>()
   const [walletError, setWalletError] = React.useState('')
-  const connect = async (wallet: Connector) => {
+  const connect = useConnect({
+    mutation: {
+      onError(error) {
+        const message = errorMessage(error)
+        setWalletError(message ? `The wallet didn't connect: ${message}` : 'Connection cancelled.')
+      },
+    },
+  })
+  const connecting = connect.isPending ? connect.variables?.connector : undefined
+  // Called straight from the click, so a wallet popup opens inside the reader's gesture.
+  const connectTo = (wallet: Wallet) => {
     setWalletError('')
-    setConnecting(wallet.uid)
-    try {
-      if (connector) await disconnect.disconnectAsync({ connector }).catch(() => {})
-      if (wallet.id === TEMPO_WALLET_ID) await connectWallet(config, { connector: wallet, chainId })
-      else await connectEvmAccount(config, wallet)
-    } catch (e) {
-      const code = (e as { code?: number }).code
-      setWalletError(
-        code === 4001 ? 'Connection cancelled.' : `${wallet.name} didn't connect. Try again.`,
-      )
-    } finally {
-      setConnecting(undefined)
-    }
+    connect.connect({ connector: wallet.connector, chainId })
   }
   const switchNetwork = () => {
     if (!connector) return
@@ -407,18 +430,18 @@ function FeeTokenSteps(props: {
               <div {...walletGrid()}>
                 {wallets.map((wallet) => (
                   <Demo.Button
-                    key={wallet.uid}
+                    key={wallet.key}
                     type="button"
                     variant="default"
-                    disabled={Boolean(connecting)}
-                    onClick={() => void connect(wallet)}
+                    disabled={connect.isPending}
+                    onClick={() => connectTo(wallet)}
                   >
                     {wallet.icon ? (
                       <img src={wallet.icon} alt="" {...walletIcon()} />
                     ) : (
                       <LucideWalletCards aria-hidden="true" {...icon()} />
                     )}
-                    {connecting === wallet.uid ? 'Check your wallet…' : wallet.name}
+                    {connecting === wallet.connector ? 'Check your wallet…' : wallet.name}
                   </Demo.Button>
                 ))}
               </div>
