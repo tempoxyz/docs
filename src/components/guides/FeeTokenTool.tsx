@@ -202,7 +202,7 @@ function FeeTokenForm(props: {
     // Browser wallets send a standard transaction. Its top-level `setUserToken` call pays its own
     // fee in the token it sets, so the account needs no other stablecoin.
     setUserToken.mutate(
-      { token, chainId: chainId as never, account: address },
+      { token, chainId: chainId as never, account: address, connector: connection?.connector },
       {
         onSuccess: (result) => {
           setHash(result.receipt.transactionHash)
@@ -216,6 +216,7 @@ function FeeTokenForm(props: {
   const networkName = NETWORK_NAMES[network]
   const status = (() => {
     if (walletError) return walletError
+    if (switchChain.error) return `Switch your wallet to ${networkName}, then try again.`
     if (setUserToken.error) return 'The transaction did not go through. Try again.'
     if (!address || !onChain) return undefined
     if (setUserToken.isPending) return 'Approve the transaction in your wallet.'
@@ -262,7 +263,16 @@ function FeeTokenForm(props: {
           type="button"
           variant="accent"
           disabled={switchChain.isPending}
-          onClick={() => switchChain.switchChain({ chainId })}
+          onClick={() =>
+            switchChain.switchChain({
+              chainId,
+              connector: connection?.connector,
+              addEthereumChainParameter: {
+                nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
+                blockExplorerUrls: [EXPLORERS[network]],
+              },
+            })
+          }
           {...wide()}
         >
           Switch to {networkName}
@@ -312,7 +322,7 @@ function FeeTokenForm(props: {
               type="button"
               size="xsmall"
               variant="secondary"
-              onClick={() => disconnect.disconnect()}
+              onClick={() => disconnect.disconnect({ connector: connection?.connector })}
             >
               Disconnect
             </Button>
