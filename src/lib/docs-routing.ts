@@ -5,8 +5,8 @@ export type DocsRouteContract = {
 
 export const canonicalDevelopersOrigin = 'https://tempo.xyz/developers'
 
-// The developer site has two page surfaces: documentation and the engineering
-// blog. Keep the previous marketing entry points useful as permanent redirects.
+// The developer site serves documentation. Retired marketing and blog pages
+// have permanent redirects to their canonical destinations.
 export const developerSurfaceRedirects = [
   { source: '/docs', destination: '/' },
   { source: '/build', destination: '/docs/build' },
@@ -26,7 +26,6 @@ export function docsRouteDestination(destination: string, _environment = process
 export const proxiedLegacyDocsRoutes = [
   { source: '/docs.md', destination: '/index.md' },
   { source: '/assets/md/docs.md', destination: '/assets/md/index.md' },
-  { source: '/blog/inside-tempo-zones', destination: '/blog/privacy-with-tempo-zones' },
   { source: '/docs/developer-tools', destination: '/docs/partners' },
   { source: '/docs/developer-tools/fee-payer', destination: '/docs/api/fee-payer' },
   { source: '/docs/developer-tools/indexer', destination: '/docs/api/indexer-api' },
@@ -57,7 +56,7 @@ export const proxiedLegacyDocsRoutes = [
   },
   {
     source: '/docs/guide/use-accounts/fee-sponsorship',
-    destination: '/docs/guide/payments/sponsor-user-fees',
+    destination: '/docs/api/fee-payer',
   },
   {
     source: '/docs/guide/use-accounts/scheduled-transactions',
@@ -191,7 +190,7 @@ export const legacyDocsHostRoutes = [
   },
   {
     source: '/guide/use-accounts/fee-sponsorship',
-    destination: `${canonicalDevelopersOrigin}/docs/guide/payments/sponsor-user-fees`,
+    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/guide/use-accounts/scheduled-transactions',

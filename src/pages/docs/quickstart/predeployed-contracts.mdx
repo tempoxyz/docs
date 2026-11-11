@@ -7,35 +7,41 @@ ogImage: /og/2026-q4/og_2026-q4_docs_quickstart-predeployed-contracts_title-f5_v
 
 # Predeployed contracts on Tempo
 
-## System Contracts
+Call Tempo's protocol contracts and common Ethereum utilities at fixed addresses, without deploying them.
 
-Core protocol contracts that power Tempo's features.
+Each address links to the Tempo mainnet explorer. [TIP-20 tokens](/docs/protocol/tip20/overview) are Tempo's native token standard for stablecoins, and most system contracts act on them.
+
+## System contracts
+
+These protocol contracts run Tempo's tokens, network fees, stablecoin exchange, and transfer rules.
 
 | Contract | Address | Description |
 |----------|---------|-------------|
 | [**TIP-20 Factory**](/docs/protocol/tip20/overview) | [`0x20fc000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x20fc000000000000000000000000000000000000) | Create new TIP-20 tokens |
-| [**Fee Manager**](/docs/protocol/fees/spec-fee-amm#2-feemanager-contract) | [`0xfeec000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xfeec000000000000000000000000000000000000) | Handle fee payments and conversions |
-| [**Stablecoin DEX**](/docs/protocol/exchange) | [`0xdec0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xdec0000000000000000000000000000000000000) | Enshrined DEX for stablecoin swaps |
-| [**TIP-403 Registry**](/docs/protocol/tip403/spec) | [`0x403c000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x403c000000000000000000000000000000000000) | Transfer policy registry |
-| [**ReceivePolicyGuard**](/docs/protocol/upgrades/t6#account-level-receive-policies) | [`0xB10C000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xB10C000000000000000000000000000000000000) | Holds TIP-20 transfers and mints blocked by account-level receive policies |
-| [**Signature Verifier**](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) | [`0x5165300000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5165300000000000000000000000000000000000) | Verify secp256k1, P256, and WebAuthn signatures onchain |
-| [**Address Registry**](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) | [`0xFDC0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xFDC0000000000000000000000000000000000000) | Resolve virtual TIP-20 deposit addresses to registered master wallets |
-| [**pathUSD**](/docs/protocol/exchange/quote-tokens#pathusd) | [`0x20c0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000) | First stablecoin deployed |
+| [**Fee Manager**](/docs/protocol/fees/spec-fee-amm#2-feemanager-contract) | [`0xfeec000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xfeec000000000000000000000000000000000000) | Collect network fees in the payer's stablecoin and convert them to the validator's preferred token through the [Fee AMM](/docs/protocol/fees/fee-amm) |
+| [**Stablecoin DEX**](/docs/protocol/exchange) | [`0xdec0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xdec0000000000000000000000000000000000000) | Onchain orderbook, built into the protocol, for swapping stablecoins |
+| [**TIP-403 Registry**](/docs/protocol/tip403/spec) | [`0x403c000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x403c000000000000000000000000000000000000) | Stores transfer policies that TIP-20 tokens share to control who can send and receive them |
+| [**ReceivePolicyGuard**](/docs/accounts/policies/receive-policies) | [`0xB10C000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xB10C000000000000000000000000000000000000) | Holds TIP-20 transfers and mints that the recipient's receive policy blocks. A receive policy sets which stablecoins and senders an account accepts. |
+| [**Signature Verifier**](/docs/protocol/tips/tip-1020) | [`0x5165300000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5165300000000000000000000000000000000000) | Verify secp256k1, P256, and WebAuthn signatures onchain |
+| [**Address Registry**](/docs/protocol/tips/tip-1022) | [`0xFDC0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0xFDC0000000000000000000000000000000000000) | Resolve [virtual addresses](/docs/accounts/virtual-addresses), per-customer deposit addresses, to the registered account they pay into |
+| [**pathUSD**](/docs/protocol/exchange/quote-tokens#pathusd) | [`0x20c0000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x20c0000000000000000000000000000000000000) | USD stablecoin that serves as the DEX's root quote token and the fallback fee token. It was the first stablecoin deployed. |
 
 ## Zone contracts
 
-The protocol provides the factory and shared Zone runtimes below. Each Zone has its own portal proxy pointing to the shared implementation. For what the portal verifies today, see the [current settlement verification limits](/docs/protocol/zones/proving).
+A [Zone](/docs/protocol/zones) is a private stablecoin ledger that uses Tempo for deposits, withdrawals, and settlement. Each Zone has a portal (`ZonePortal`), a contract on Tempo that holds the Zone's backing assets. Each portal is a proxy that points to the shared implementation listed here.
+
+Onchain checks of Zone execution proofs aren't fully enforced yet ([settlement verification limits](/docs/protocol/zones/proving#implementation-status)). Confirm a Zone's deployed runtime, verifier, and configuration before integrating.
 
 | Contract | Address | Description |
 |----------|---------|-------------|
-| [ZoneFactory](/docs/protocol/zones/architecture#creating-a-zone) | [`0x5AF2000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5AF2000000000000000000000000000000000000) | Create zones and register their portals |
-| [ZonePortal implementation](/docs/protocol/zones/architecture#contract-architecture) | [`0x5AD1000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5AD1000000000000000000000000000000000000) | Shared bridge logic used by each zone's portal proxy |
-| [Zone verifier](/docs/protocol/zones/architecture#contract-architecture) | [`0x5a56000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5a56000000000000000000000000000000000000) | Protocol-managed verifier used by zone portals |
-| [ZoneMessenger](/docs/protocol/zones/architecture#contract-architecture) | [`0x5A4d000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5A4d000000000000000000000000000000000000) | Shared withdrawal callback handler |
+| [ZoneFactory](/docs/protocol/zones/architecture#creating-a-zone) | [`0x5AF2000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5AF2000000000000000000000000000000000000) | Create Zones and install a portal for each one |
+| [ZonePortal implementation](/docs/protocol/zones/architecture#contract-architecture) | [`0x5AD1000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5AD1000000000000000000000000000000000000) | Shared deposit and withdrawal logic behind each Zone's portal proxy |
+| [Zone verifier](/docs/protocol/zones/architecture#contract-architecture) | [`0x5a56000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5a56000000000000000000000000000000000000) | Protocol-managed verifier that portals use to check Zone batches |
+| [ZoneMessenger](/docs/protocol/zones/architecture#contract-architecture) | [`0x5A4d000000000000000000000000000000000000`](https://explore.tempo.xyz/address/0x5A4d000000000000000000000000000000000000) | Runs withdrawal callbacks, which let a withdrawal call a Tempo contract |
 
-## Standard Utilities
+## Standard utilities
 
-Popular Ethereum contracts deployed for convenience.
+These common Ethereum contracts use the same addresses as on other EVM chains.
 
 | Contract | Address | Description |
 |----------|---------|-------------|
@@ -43,13 +49,13 @@ Popular Ethereum contracts deployed for convenience.
 | [**CreateX**](https://github.com/pcaversaccio/createx) | [`0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed`](https://explore.tempo.xyz/address/0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed) | Deterministic contract deployment |
 | [**Permit2**](https://docs.uniswap.org/contracts/permit2/overview) | [`0x000000000022d473030f116ddee9f6b43ac78ba3`](https://explore.tempo.xyz/address/0x000000000022d473030f116ddee9f6b43ac78ba3) | Token approvals and transfers |
 | [**Arachnid Create2 Factory**](https://github.com/Arachnid/deterministic-deployment-proxy) | [`0x4e59b44847b379578588920cA78FbF26c0B4956C`](https://explore.tempo.xyz/address/0x4e59b44847b379578588920cA78FbF26c0B4956C) | CREATE2 deployment proxy |
-| [**Safe Deployer**](https://github.com/safe-fndn/safe-singleton-factory) | [`0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7`](https://explore.tempo.xyz/address/0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7) | Safe deployer contract |
-| **8004 Identity Registry** | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://explore.tempo.xyz/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | Identity registry |
-| **8004 Reputation Registry** | [`0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`](https://explore.tempo.xyz/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) | Reputation registry |
+| [**Safe Deployer**](https://github.com/safe-fndn/safe-singleton-factory) | [`0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7`](https://explore.tempo.xyz/address/0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7) | CREATE2 factory that Safe uses for deterministic deployments |
+| [**8004 Identity Registry**](https://eips.ethereum.org/EIPS/eip-8004) | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://explore.tempo.xyz/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | ERC-8004 registry of agent identities |
+| [**8004 Reputation Registry**](https://eips.ethereum.org/EIPS/eip-8004) | [`0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`](https://explore.tempo.xyz/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) | ERC-8004 registry of feedback on those agents |
 
 ## Contract ABIs
 
-ABIs for these contracts are available in the SDK:
+Viem's Tempo module, `viem/tempo`, exports the system contract ABIs as `Abis`. `Abis.feeAmm` covers the Fee AMM functions, which the Fee Manager contract implements.
 
 ```typescript
 import { Abis } from 'viem/tempo'

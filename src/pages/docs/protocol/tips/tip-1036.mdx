@@ -13,11 +13,11 @@ ogImage: /og/2026-q4/og_2026-q4_docs_protocol-tips-tip-1036_title-f5_v02.png
 
 ## Abstract
 
-This meta TIP collects audit-driven bug fixes, security hardening, and correctness updates that activate at T2. Each item is small in isolation, but together they define the complete in-scope T2 bug-fix bundle for this TIP, while fixes already specified by other activated TIPs (such as TIP-1017) are intentionally excluded.
+This meta TIP collects audit-driven bug fixes, security hardening, and correctness updates that activate at [T2](/docs/protocol/upgrades/t2), a named Tempo network upgrade (hardfork). A meta TIP bundles small changes that ship together in one upgrade. Together, these items define the complete T2 bug-fix bundle for this TIP. Fixes that another activated TIP already specifies, such as [TIP-1017](/docs/protocol/tips/tip-1017), are excluded.
 
 ## Motivation
 
-Internal and external review uncovered several T2-relevant correctness and security issues across core execution paths. Because these fixes alter state-function behavior at activation boundaries, they need hardfork gating and are grouped here as one coordinated rollout. This meta TIP tracks only fixes that are not already specified by another activated TIP (for example, TIP-1017).
+Internal and external review uncovered several T2-relevant correctness and security issues across core execution paths. Because these fixes change state-transition behavior, they must activate at the same block on every node. So they're gated behind T2 and grouped here as one coordinated rollout.
 
 ---
 
@@ -27,77 +27,86 @@ Internal and external review uncovered several T2-relevant correctness and secur
 
 **PRs**: [#3202](https://github.com/tempoxyz/tempo/pull/3202) · **Author**: @legion2002, [#3250](https://github.com/tempoxyz/tempo/pull/3250) · **Author**: @0xrusowsky
 
-With T2, `authorizeKey`, `revokeKey`, and `updateSpendingLimit` require direct owner calls by enforcing both `transaction_key == Address::ZERO` and `msg_sender == tx_origin`. This blocks indirect contract-call paths from being used to perform key-admin actions with owner-level authority. If `tx_origin` is not seeded, admin ops are rejected (failed-closed).
+The [Account Keychain](/docs/protocol/transactions/AccountKeychain) precompile (`AccountKeychain`) manages an account's access keys. Access keys are secondary signing keys with expiry and spending limits. Its admin operations, `authorizeKey`, `revokeKey`, and `updateSpendingLimit`, add, revoke, and change those keys.
+
+With T2, these operations require a direct call from the account's root key. The precompile enforces two checks:
+
+- `transaction_key == Address::ZERO`: the root key signed the transaction, not an access key.
+- `msg_sender == tx_origin`: the account called the precompile directly, not through another contract.
+
+This blocks a contract from reusing the transaction's root-key status to change keys on the account's behalf. If `tx_origin` isn't set for the call, the precompile rejects admin operations (fail-closed).
 
 ### 2. Reject self-sponsored fee payer signatures
 
 **PR**: [#3200](https://github.com/tempoxyz/tempo/pull/3200) *(merged)* · **Author**: @legion2002
 
-Rejects AA transactions where the `fee_payer_signature` resolves back to the sender, preventing self-sponsored signatures from bypassing fee-payer assumptions. Enforced in both txpool validation and EVM fee-payer resolution.
+A fee payer pays a [Tempo Transaction](/docs/protocol/transactions/spec-tempo-transaction)'s network fee on the sender's behalf by adding `fee_payer_signature`. T2 rejects Tempo Transactions (the account-abstraction, or AA, type) whose fee payer signature recovers to the sender's own address. This stops a sender from acting as its own fee payer and bypassing fee-payer checks. Both txpool validation, before a transaction enters the mempool, and fee-payer resolution during EVM execution enforce it.
 
 ### 3. Check token paused in internal DEX balance swaps
 
 **PR**: [#3204](https://github.com/tempoxyz/tempo/pull/3204) · **Author**: @0xrusowsky
 
-Adds a `check_not_paused()` call in `StablecoinDEX` internal balance transfers gated behind `is_t2()`. Previously, swaps using internal DEX balances could bypass the token pause state.
+The [Stablecoin DEX](/docs/protocol/exchange/spec) (`StablecoinDEX`) keeps internal per-user balances for each token. Once T2 is active (`is_t2()`), transfers between these internal balances call `check_not_paused()`, so they fail while the token is paused. Previously, swaps using internal DEX balances could bypass the token pause state.
 
 ### 4. Correct built-in policy type data for TIP403Registry
 
 **PR**: [#3203](https://github.com/tempoxyz/tempo/pull/3203) *(merged)* · **Author**: @0xrusowsky
 
-Built-in policies (`REJECT_ALL` / `ALLOW_ALL`) are virtual and not stored on-chain. On T2, `policyData()` now returns the correct `PolicyType` (`WHITELIST` / `BLACKLIST` respectively) and `Address::ZERO` admin for these built-in IDs instead of falling through to storage reads.
+`TIP403Registry` is the [TIP-403](/docs/protocol/tip403/spec) policy registry. TIP-20 tokens check its policies to decide who can send and receive them. Policy IDs 0 and 1 are built-in policies: `REJECT_ALL` rejects every transfer, and `ALLOW_ALL` allows every transfer. They're virtual and not stored onchain.
+
+On T2, `policyData()` returns `WHITELIST` as the `PolicyType` for `REJECT_ALL`, which behaves like an empty whitelist. It returns `BLACKLIST` for `ALLOW_ALL`, which behaves like an empty blacklist. Both report an `Address::ZERO` admin. Previously, `policyData()` read storage for these IDs.
 
 ### 5. Reject legacy invalid policy types in compound sub-policies
 
 **PR**: [#3188](https://github.com/tempoxyz/tempo/pull/3188) *(merged)* · **Author**: @howydev
 
-Uses `is_simple()` instead of `!is_compound()` to validate compound policy sub-policies, rejecting legacy type-255 policies that previously passed the negated check.
+A compound policy references separate sub-policies for senders, recipients, and mint recipients, as [TIP-1015](/docs/protocol/tips/tip-1015) defines. Each sub-policy must be a simple whitelist or blacklist, or a built-in policy. T2 validates sub-policies with `is_simple()` instead of `!is_compound()`. The old negated check accepted legacy policies with the invalid type value 255, which are neither simple nor compound.
 
 ### 6. Handle T2 policy errors in DEX
 
 **PR**: [#3015](https://github.com/tempoxyz/tempo/pull/3015) *(merged)* · **Author**: @0xrusowsky
 
-Updates DEX precompiles to handle the new `TIP403RegistryError::InvalidPolicyType` error returned by `policy_type()` post-T2, replacing the old `Panic(UnderOverflow)` sentinel.
+After T2, the registry's `policy_type()` returns `TIP403RegistryError::InvalidPolicyType` for a policy with an invalid type. Before T2, it signaled this with a `Panic(UnderOverflow)` error. The Stablecoin DEX precompile now handles the new error.
 
 ### 7. Return zero remaining limit for revoked keys
 
 **PR**: [#2553](https://github.com/tempoxyz/tempo/pull/2553) *(merged)* · **Author**: @0xrusowsky
 
-`getRemainingLimit()` now returns zero for revoked or non-existent access keys instead of a stale positive value.
+`getRemainingLimit()` returns how much of a token an access key can still spend. It now returns zero for revoked or non-existent access keys instead of a stale positive value.
 
 ### 8. Nonce key gas repricing
 
 **PR**: [#2533](https://github.com/tempoxyz/tempo/pull/2533) *(merged)* · **Author**: @0xrusowsky
 
-Increases intrinsic gas costs for 2D nonce keys on T2 by adding `2 × WARM_SLOAD` to both existing-key and new-key gas to account for extended storage lookups. Base costs differ (`COLD_SLOAD + WARM_SSTORE_RESET` for existing, `COLD_SLOAD + SSTORE_SET` for new), but the T2 delta is the same.
+Tempo Transactions support [2D nonces](/docs/protocol/transactions/spec-tempo-transaction#parallelizable-nonces). A nonce key selects one of several independent nonce sequences for an account. T2 increases intrinsic gas for nonzero nonce keys by adding `2 × WARM_SLOAD` to both existing-key and new-key gas to account for extended storage lookups. An existing key has a used sequence, and a new key is used for the first time. Their base costs differ, using the standard EVM storage gas constants. An existing key costs `COLD_SLOAD + WARM_SSTORE_RESET`, and a new key costs `COLD_SLOAD + SSTORE_SET`. The T2 increase is the same for both.
 
 ### 9. Error with `PolicyNotFound` for non-existent policy IDs
 
 **PR**: [#2618](https://github.com/tempoxyz/tempo/pull/2618) *(merged)* · **Author**: @0xrusowsky
 
-`get_policy_data()` now reverts with `PolicyNotFound` for non-existent policy IDs instead of silently returning default values.
+The registry's internal `get_policy_data()` now reverts with `PolicyNotFound` for non-existent policy IDs instead of silently returning default values.
 
 ### 10. Refund spending limit for unused gas fees
 
 **PR**: [#2528](https://github.com/tempoxyz/tempo/pull/2528) *(merged)* · **Author**: @legion2002
 
-Restores access key spending limits by the refunded gas amount in `transfer_fee_post_tx()`. Previously the full max fee was permanently deducted from the spending limit regardless of actual gas used.
+An access key's spending limit also covers the fees its transactions pay. After execution, `transfer_fee_post_tx()` refunds the fee for unused gas. On T2, it also adds the refunded amount back to the spending limit. Previously, the full maximum fee stayed deducted from the spending limit, regardless of gas used.
 
 ### 11. Tick spacing checks on DEX price conversion functions
 
 **PR**: [#2513](https://github.com/tempoxyz/tempo/pull/2513) *(merged)* · **Author**: @0xKitsune
 
-Adds tick spacing validation to `tick_to_price` and `price_to_tick`, rejecting ticks that don't align with the pool's configured spacing.
+The Stablecoin DEX prices orders in integer ticks, and orders sit only on ticks divisible by `TICK_SPACING` (10), as the [DEX specification](/docs/protocol/exchange/spec) defines. T2 adds the same check to `tick_to_price` and `price_to_tick`, which convert between ticks and prices. They reject ticks that aren't a multiple of `TICK_SPACING`.
 
 ### 12. Reserved liquidity transient storage check
 
 **PR**: [#2496](https://github.com/tempoxyz/tempo/pull/2496) *(merged)* · **Author**: @0xKitsune
 
-Adds a transient storage (`TSTORE`/`TLOAD`) guard to prevent reserved liquidity from being double-spent within the same transaction.
+Before a transaction runs, the fee manager checks that the [Fee AMM](/docs/protocol/fees/spec-fee-amm) pool holds enough validator tokens for the transaction's fee swap. T2 then reserves that amount in transient storage (`TSTORE`/`TLOAD`), which lasts for one transaction. A rebalance swap or liquidity burn in the same transaction reverts if it would leave less than the reserved amount.
 
 ### 13. Reject zero-address ecrecover in permit
 
 **PR**: [#2786](https://github.com/tempoxyz/tempo/pull/2786) *(merged)* · **Author**: @howydev
 
-`permit()` now explicitly rejects `recovered == address(0)` before comparing against `owner`. Previously, a crafted signature recovering to `address(0)` could have been accepted if `owner` was also `address(0)`.
+TIP-20 tokens implement `permit()`, EIP-2612 signed approvals, from [TIP-1004](/docs/protocol/tips/tip-1004). `ecrecover` returns `address(0)` for an invalid signature. `permit()` now rejects `recovered == address(0)` before comparing it against `owner`. Previously, a crafted signature recovering to `address(0)` could have been accepted if `owner` was also `address(0)`.
 

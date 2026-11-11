@@ -46,7 +46,7 @@ export const queries: SearchQueryFixture[] = [
   {
     q: 'sponsor fees',
     label: 'exact',
-    relevant: ['/docs/guide/payments/sponsor-user-fees'],
+    relevant: ['/docs/api/fee-payer'],
   },
   {
     q: 'faucet',
@@ -56,7 +56,7 @@ export const queries: SearchQueryFixture[] = [
   {
     q: 'sponsor fees',
     label: 'concept',
-    relevant: ['/docs/guide/payments/sponsor-user-fees'],
+    relevant: ['/docs/api/fee-payer'],
   },
   {
     q: 'token list',
@@ -88,7 +88,7 @@ export const queries: SearchQueryFixture[] = [
   {
     q: 'sponser fees',
     label: 'typo',
-    relevant: ['/docs/guide/payments/sponsor-user-fees'],
+    relevant: ['/docs/api/fee-payer'],
   },
   {
     q: 'favorite pizza topping',

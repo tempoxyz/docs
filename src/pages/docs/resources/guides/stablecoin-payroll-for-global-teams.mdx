@@ -40,7 +40,7 @@ Choose an atomic batch when the calls must succeed together. Choose [independent
 
 Your application or provider schedules and submits recurring runs. [Transaction validity windows](/docs/protocol/transactions#scheduled-transactions) constrain when a transaction can be included; they don't create a recurring job or guarantee execution.
 
-If you sponsor fees, monitor the sponsor's eligible fee-token balance and the applicable liquidity requirements. [Fee sponsorship](/docs/guide/payments/sponsor-user-fees) changes who pays network fees; the sponsor still has to fund them.
+If you sponsor fees, monitor the sponsor's eligible fee-token balance and the applicable liquidity requirements. [Fee sponsorship](/docs/api/fee-payer) changes who pays network fees; the sponsor still has to fund them.
 
 ## Reconcile each worker payment
 
@@ -60,7 +60,7 @@ Record support ownership and the evidence needed to resolve each exception. Veri
 
 Compare the complete source amount, usable recipient amount, delivery time, prefunded balances, and support burden with the existing process. Stablecoin payroll succeeds when the worker can receive and use the promised funds and finance can reconcile the obligation once.
 
-If you need private balances, review the [Zones privacy model](/docs/zones/privacy) and current [preview capabilities](/docs/zones). The current permissioned runtime disables general TIP-20 transfers, so public-network payroll transfers don't work inside a Zone.
+If you need private balances, review the [Zones privacy model](/docs/zones/privacy) and current [Zone capabilities](/docs/zones). The current permissioned runtime disables general TIP-20 transfers, so public-network payroll transfers don't work inside a Zone.
 
 ## Stablecoin payroll questions
 

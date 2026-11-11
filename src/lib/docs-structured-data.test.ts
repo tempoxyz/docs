@@ -70,6 +70,19 @@ describe('docs structured data', () => {
     })
   })
 
+  test('describes the API reference landing page as a WebAPI', () => {
+    const schema = graph('/docs/api', { title: 'Tempo API', description: 'Sponsor gas.' })
+
+    expect(node(schema, 'WebAPI')).toMatchObject({
+      name: 'Tempo API',
+      description: 'Sponsor gas.',
+      url: 'https://api.tempo.xyz/v1',
+      documentation: 'https://tempo.xyz/developers/docs/api',
+      provider: { '@id': 'https://tempo.xyz/#organization' },
+    })
+    expect(() => node(graph('/docs/api/balances', { title: 'Balances' }), 'WebAPI')).toThrow()
+  })
+
   test('uses the scoped Tempo entity description and verified profiles', () => {
     const schema = graph('/docs/api/authentication', { title: 'Authentication' })
 

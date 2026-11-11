@@ -42,7 +42,7 @@ Use a distinct [payment reference](/docs/guide/payments/transfer-memos) for each
 
 ### Fund principal and fees
 
-Check usable balances and expected fees before signing. Use eligible fee tokens with sufficient Fee AMM liquidity, or configure [fee sponsorship](/docs/guide/payments/sponsor-user-fees). If conversion is required, quote it and check the output amount.
+Check usable balances and expected fees before signing. Use eligible fee tokens with sufficient Fee AMM liquidity, or configure [fee sponsorship](/docs/api/fee-payer). If conversion is required, quote it and check the output amount.
 
 ### Approve and submit
 
@@ -74,7 +74,7 @@ Standard stablecoin transfers on Tempo have sub-cent network fees, but a batch's
 
 Issuer-defined [TIP-403 policies](/docs/protocol/tip403/overview) and application permissions serve different roles. Token policies enforce eligibility rules. Onboarding, screening, payroll approval, and reporting stay in your application.
 
-For private balances, see [Zones](/docs/zones). Zones is in limited preview, and its current runtime disables general TIP-20 transfers, so this batch workflow doesn't run inside a Zone.
+For private balances, see [Zones](/docs/zones). Zones is live on Mainnet, but its current runtime disables general TIP-20 transfers, so this batch workflow doesn't run inside a Zone.
 
 ## Batch payout questions
 

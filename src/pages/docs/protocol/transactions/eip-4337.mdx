@@ -26,7 +26,7 @@ Tempo Transactions natively support sponsorship, batching, and supported alterna
 
 On Ethereum, an EIP-4337 paymaster sponsors operations using its EntryPoint ETH deposit. Applications may use existing paymaster and bundler services.
 
-Tempo Transactions include a `fee_payer_signature` field directly in the transaction. A sponsor signs the transaction to agree to pay fees. The protocol validates both signatures and deducts fees from the sponsor. No paymaster contract or bundler is required; the sponsor still needs a signer and a submission path. See the [fee sponsorship guide](/docs/guide/payments/sponsor-user-fees) for implementation details.
+Tempo Transactions include a `fee_payer_signature` field directly in the transaction. A sponsor signs the transaction to agree to pay fees. The protocol validates both signatures and deducts fees from the sponsor. No paymaster contract or bundler is required; the sponsor still needs a signer and a submission path. See the [fee sponsorship guide](/docs/api/fee-payer) for implementation details.
 
 ### Batched Operations
 

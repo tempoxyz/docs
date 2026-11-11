@@ -5,7 +5,7 @@ description: Query blockchain data on Tempo with indexers, analytics platforms, 
 ogImage: /og/2026-q4/og_2026-q4_docs_partners-data-and-oracles_title-image_v02.jpg
 ---
 
-import { partnerLogo, partnerLogoAllium, partnerLogoArtemis, partnerLogoChainlink, partnerLogoCodex, partnerLogoCoingecko, partnerLogoDune, partnerLogoGoldsky, partnerLogoMoralis, partnerLogoRange, partnerLogoRedstone, partnerLogoSonarx, partnerLogoSqd, partnerLogoZerion } from '../../../components/PartnerLogos.styles'
+import { partnerLogo, partnerLogoAllium, partnerLogoArtemis, partnerLogoChainlink, partnerLogoCodex, partnerLogoCoingecko, partnerLogoDune, partnerLogoEnvio, partnerLogoGoldsky, partnerLogoMoralis, partnerLogoRange, partnerLogoRedstone, partnerLogoSonarx, partnerLogoSqd, partnerLogoZerion } from '../../../components/PartnerLogos.styles'
 
 <span id="data-and-analytics-providers" />
 
@@ -73,6 +73,16 @@ Get started with the [CoinGecko API](https://docs.coingecko.com/reference/introd
 [Dune](https://dune.com) provides SQL-based blockchain analytics, dashboards, and query APIs. Its [data catalog](https://docs.dune.com/data-catalog/overview) lists the available networks and datasets.
 
 Dune [retired the Sim API on August 1, 2026](https://dune.com/blog/sunsetting-sim). For Tempo payment activity, use the [Tempo API](/docs/api) or choose another provider in this directory.
+
+## <span className={`partner-logo partner-logo--envio ${partnerLogo().className + ' ' + partnerLogoEnvio().className}`} aria-hidden="true" />Envio
+
+[Envio](https://envio.dev) builds custom blockchain APIs and analytics, including on Tempo mainnet (chain ID 4217):
+
+- **[HyperIndex](https://docs.envio.dev/docs/HyperIndex/overview):** Choose the contracts and events to track and write TypeScript handlers that shape the data. HyperIndex handles reorgs and serves the result as a GraphQL API. Run it yourself or deploy to Envio Cloud.
+- **[HyperSync](https://docs.envio.dev/docs/HyperSync/overview):** Query logs, transactions and blocks, filtered on the server and returned with only the fields you need, for analytics, backfills and data pipelines.
+- **[HyperRPC](https://docs.envio.dev/docs/HyperRPC/overview-hyperrpc):** A read-only JSON-RPC endpoint built on HyperSync for data-heavy reads such as `eth_getLogs`. Existing tools work without code changes.
+
+Start with the [HyperIndex quickstart](https://docs.envio.dev/docs/HyperIndex/quickstart). Tempo endpoints are on the [HyperSync](https://docs.envio.dev/docs/HyperSync/hypersync-supported-networks) and [HyperRPC](https://docs.envio.dev/docs/HyperRPC/hyperrpc-supported-networks) supported networks pages.
 
 ## <span className={`partner-logo partner-logo--goldsky ${partnerLogo().className + ' ' + partnerLogoGoldsky().className}`} aria-hidden="true" />Goldsky
 

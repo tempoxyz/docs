@@ -310,6 +310,12 @@ function rewriteNode(
   if (node.name === 'Tabs') return renderTabs(node, headingDepth, context)
   if (node.name === 'Tab') return renderTab(node, headingDepth, context)
   if (node.name === 'Demo.Container') return renderDemo(node)
+  // Wraps interactive demos on pages whose layout doesn't load the wallet providers.
+  if (node.name === 'Providers') {
+    const content: MarkdownNode = { type: 'root', children: [...(node.children ?? [])] }
+    rewriteChildren(content, headingDepth, context)
+    return content.children ?? []
+  }
   if (node.name === 'MermaidDiagram' || node.name === 'StaticMermaidDiagram')
     return renderMermaid(node)
   if (node.name === 'EarnStrategyCards')

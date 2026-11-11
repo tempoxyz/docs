@@ -211,7 +211,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
       return <div {...ui.searchDialogLayout()}>Couldn’t load search. Please try again.</div>
     }
     if (!query.trim()) {
-      return <div {...ui.searchDialogLayout()}>Start typing to search docs and blog posts…</div>
+      return <div {...ui.searchDialogLayout()}>Start typing to search documentation…</div>
     }
     if (results.length === 0) {
       return <div {...ui.searchDialogLayout()}>No results found</div>
@@ -256,7 +256,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
             aria-autocomplete="list"
             autoComplete="off"
             spellCheck={false}
-            placeholder="Search docs and blog posts…"
+            placeholder="Search documentation…"
             value={query}
             onChange={(event) => runQuery(event.target.value)}
             {...ui.searchDialogInput()}

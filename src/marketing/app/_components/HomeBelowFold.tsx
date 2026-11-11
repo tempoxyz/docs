@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchPerfRuns } from '../performance/_lib/runs'
-import BlogSection from './BlogSection'
 import Footer from './Footer'
 import * as ui from './HomeBelowFold.recipes'
 import HomeShowcases from './HomeShowcases'
@@ -83,9 +82,6 @@ export default function HomeBelowFold() {
       </div>
       <div id="open-source" {...ui.homeBelowFoldLayout()}>
         <OpenSourceSection />
-      </div>
-      <div id="blog" {...ui.homeBelowFoldLayout()}>
-        <BlogSection />
       </div>
       <Footer />
     </>

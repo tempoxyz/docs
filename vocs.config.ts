@@ -1,6 +1,7 @@
 import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
+import { blogMigrationRedirects } from './src/lib/blog-migration'
 import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
 import {
@@ -225,25 +226,28 @@ export default defineConfig({
   head: docsStructuredDataHead,
   jsonLd: false,
   ai: {
-    retriever: process.env.CLOUDFLARE_API_TOKEN
-      ? Retriever.local({
-          embedding: Embedding.cloudflare(),
-          // Production pages are served behind the tempo.xyz `/developers`
-          // proxy; the default origin-relative endpoint escapes the prefix.
-          endpoint:
-            process.env.VERCEL_ENV === 'production'
-              ? 'https://tempo.xyz/developers/api/search'
-              : undefined,
-          hybrid: true,
-          reranker: Reranker.cloudflare(),
-          sources: [
-            { url: 'https://viem.sh/llms.txt', label: 'viem' },
-            { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
-            { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
-            { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
-          ],
-        })
-      : undefined,
+    // Preview deploys skip the AI search index: they don't need it, and a bad
+    // Cloudflare token would otherwise fail every PR preview build.
+    retriever:
+      process.env.CLOUDFLARE_API_TOKEN && process.env.VERCEL_ENV !== 'preview'
+        ? Retriever.local({
+            embedding: Embedding.cloudflare(),
+            // Production pages are served behind the tempo.xyz `/developers`
+            // proxy; the default origin-relative endpoint escapes the prefix.
+            endpoint:
+              process.env.VERCEL_ENV === 'production'
+                ? 'https://tempo.xyz/developers/api/search'
+                : undefined,
+            hybrid: true,
+            reranker: Reranker.cloudflare(),
+            sources: [
+              { url: 'https://viem.sh/llms.txt', label: 'viem' },
+              { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
+              { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
+              { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
+            ],
+          })
+        : undefined,
   },
   search: {
     index: {
@@ -261,7 +265,7 @@ export default defineConfig({
   },
   sitemap: {
     include: (path) =>
-      (path === '/' || /^\/(?:get-started|docs|blog)(?:\/|$)/.test(path)) &&
+      (path === '/' || /^\/(?:get-started|docs)(?:\/|$)/.test(path)) &&
       !/^\/docs\/?$/.test(path) &&
       !path.split('/').some((segment) => /^\[.*\]$/.test(segment)),
     lastmod: (_path, { filePath, lastmod }) => (/\.mdx?$/.test(filePath) ? lastmod : false),
@@ -299,7 +303,6 @@ export default defineConfig({
       accounts: 'ACCOUNTS',
       agents: 'MACHINE PAYMENTS',
       api: 'API',
-      blog: 'BLOG',
       build: 'BUILD',
       cli: 'CLI',
       'developer-tools': 'DEVELOPER TOOLS',
@@ -365,12 +368,7 @@ export default defineConfig({
       v: '4',
     }).toString()
 
-    // The HBSet display font's mixed-case "Blog" wordmark has awkward
-    // spacing at OG scale. Keep the page title sentence-cased, but use the
-    // cleaner all-caps treatment in the blog index thumbnail.
-    const imageTitle = docsPath === '/blog' ? 'BLOG' : '%title'
-
-    return `${urlBase}/api/og?title=${imageTitle}&${extra}`
+    return `${urlBase}/api/og?title=%title&${extra}`
   },
   openapi: [
     {
@@ -381,13 +379,13 @@ export default defineConfig({
         backLink: false,
         collapsed: true,
         introduction: false,
-        hide: ['MCP'],
+        // Console-internal groups stay in the agent exports but out of the sidebar.
+        hide: ['MCP', 'Apps', 'Routes Access Requests', 'Zone Delegations'],
         // Each guide sits inside the endpoint group it explains.
         groupItems: {
           'JSON-RPC': [{ text: 'Guide', link: '/docs/api/json-rpc' }],
           Indexer: [{ text: 'Guide', link: '/docs/api/indexer-api' }],
           'API keys': [{ text: 'Guide', link: '/docs/api/console/api-keys' }],
-          'Fee payer': [{ text: 'Guide', link: '/docs/api/fee-payer' }],
           Projects: [{ text: 'Guide', link: '/docs/api/console/projects-and-environments' }],
           Team: [{ text: 'Guide', link: '/docs/api/console/team' }],
           'Billing and usage': [{ text: 'Guide', link: '/docs/api/console/usage-and-billing' }],
@@ -396,16 +394,17 @@ export default defineConfig({
           Accounts: [
             { text: 'Transactions and transfers', link: '/docs/api/transactions-and-transfers' },
           ],
-          'Routes API': [{ text: 'API setup', link: '/docs/routes/api-setup' }],
           Console: [{ text: 'About Tempo Console', link: '/docs/api/console' }],
         },
         flatten: apiFlattenedGroups,
         intro: [
           {
             text: 'API reference',
-            collapsed: true,
+            collapsed: false,
             items: [
               { text: 'Overview', link: '/docs/api' },
+              { text: 'Sponsor fees', link: '/docs/api/fee-payer' },
+              { text: 'Set up Routes', link: '/docs/routes/api-setup' },
               { text: 'Authentication', link: '/docs/api/authentication' },
               {
                 text: 'Conventions',
@@ -815,7 +814,7 @@ export default defineConfig({
         items: [
           { text: 'Introduction', link: '/docs/routes' },
           { text: 'Try a route', link: '/docs/routes/test' },
-          { text: 'Set up API access', link: '/docs/routes/api-setup' },
+          { text: 'Set up Routes', link: '/docs/routes/api-setup' },
           { text: 'Supported routes', link: '/docs/routes/networks' },
           { text: 'Quotes and fees', link: '/docs/routes/quotes' },
           { text: 'Accept deposits', link: '/docs/routes/deposits' },
@@ -1014,12 +1013,11 @@ export default defineConfig({
               },
               {
                 text: 'T13',
-                badge: { text: 'Upcoming', variant: 'note' as const },
+                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t13',
               },
               {
                 text: 'T12',
-                badge: { text: 'Mainnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t12',
               },
               {
@@ -1150,7 +1148,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Payment integration', link: '/docs/guide/payments' },
-              { text: 'Sponsor fees', link: '/docs/guide/payments/sponsor-user-fees' },
+              { text: 'Sponsor fees', link: '/docs/api/fee-payer' },
               {
                 text: 'Choose a fee token',
                 link: '/docs/guide/payments/pay-fees-in-any-stablecoin',
@@ -1345,10 +1343,9 @@ export default defineConfig({
       text: 'Docs',
       link: '/',
     },
-
-    { text: 'Blog', link: '/blog' },
   ],
   redirects: [
+    ...blogMigrationRedirects.map((redirect) => ({ ...redirect, status: 301 as const })),
     {
       source: '/docs/resources/partners.md',
       destination: '/docs/resources/guides.md',
@@ -1720,6 +1717,11 @@ export default defineConfig({
       status: 301,
     },
     {
+      source: '/docs/guide/payments/sponsor-user-fees',
+      destination: '/docs/api/fee-payer',
+      status: 301,
+    },
+    {
       source: '/docs/api/typed-client',
       destination: '/docs/sdk/typescript/api-client',
       status: 301,
@@ -2041,7 +2043,7 @@ export default defineConfig({
     },
     {
       source: '/guide/use-accounts/fee-sponsorship',
-      destination: '/docs/guide/payments/sponsor-user-fees',
+      destination: '/docs/api/fee-payer',
       status: 301,
     },
     {

@@ -32,7 +32,7 @@ export const docsHeaderNav = style({
   position: 'relative',
   zIndex: tokens.zIndex.header,
   display: 'grid',
-  gridTemplateColumns: 'minmax(0, 1fr) auto auto',
+  gridTemplateColumns: 'minmax(0, 1fr) auto',
   alignItems: 'center',
   gap: tokens.spacing['2'],
   height: 'var(--tempo-docs-primary-nav-height)',
@@ -40,20 +40,7 @@ export const docsHeaderNav = style({
   '@media (width < 380px)': {
     paddingInline: tokens.spacing['3_5'],
   },
-  // Docs destinations sit with the section utilities once that row is visible.
-  '@media (width >= 800px)': {
-    selectors: {
-      '&[data-surface="docs"]': {
-        gridTemplateColumns: 'minmax(0, 1fr) auto',
-      },
-      '&[data-surface="docs"] > .docs-header-destinations': {
-        display: 'none',
-      },
-    },
-  },
-  // Blog pages keep the centered destination and actions on the inline end.
   '@media (width >= 1080px)': {
-    gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)',
     gap: tokens.spacing['5'],
     paddingInline: tokens.spacing['7'],
   },
@@ -75,46 +62,6 @@ export const docsHeaderLogo = style({
   alignItems: 'center',
   height: '40px',
   color: 'inherit !custom',
-})
-
-export const docsHeaderWordmark = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  minHeight: '40px',
-  paddingInline: tokens.spacing['2'],
-  color: inherited.color.colorMixInSrgbColorForeground60Transparent,
-  fontSize: tokens.fontSize.sm,
-  fontWeight: tokens.fontWeight.medium,
-  textDecoration: 'none',
-  transitionProperty: 'color, background-color, border-color, opacity, transform',
-  transitionDuration: 'var(--tempo-exit)',
-  transitionTimingFunction: 'var(--tempo-ease)',
-  selectors: {
-    '&[aria-current="page"]': {
-      color: tokens.color.foreground,
-      textDecoration: 'underline',
-      textDecorationThickness: '1px',
-      textUnderlineOffset: '7px',
-    },
-    '&:hover': {
-      color: tokens.color.foreground,
-      transitionDuration: 'var(--tempo-enter)',
-    },
-  },
-  '@media (width < 380px)': {
-    paddingInline: tokens.spacing['1_5'],
-    fontSize: tokens.fontSize.compact,
-  },
-  '@media (width >= 1080px)': {
-    paddingInline: tokens.spacing['3'],
-  },
-})
-
-export const docsHeaderDestinations = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: tokens.spacing['1'],
-  whiteSpace: 'nowrap',
 })
 
 export const docsHeaderMobileSearch = style({
@@ -816,6 +763,32 @@ export const docsApiMenuItem = style({
   selectors: {
     '& svg': {
       flexShrink: 0,
+    },
+  },
+})
+
+/** Signed-in email in the header's account link, cut short (and hidden on narrow screens) so the logo keeps its width. */
+export const docsHeaderAccountEmail = style({
+  maxWidth: '24ch',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  // Below the full header the link shows only its icon; its aria-label and title carry the email.
+  '@media (width < 1080px)': {
+    display: 'none',
+  },
+})
+
+/** Signed-out Log in link: the header's one primary action, inverted like Copy for agent. */
+export const docsHeaderLoginPrimary = style({
+  backgroundColor: inherited.color.backgroundColorInvert,
+  color: inherited.color.textColorInvert,
+  '@media (hover: hover)': {
+    selectors: {
+      '&:hover': {
+        backgroundColor: inherited.color.backgroundColorInvert,
+        opacity: 0.9,
+      },
     },
   },
 })

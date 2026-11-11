@@ -22,7 +22,7 @@ import { Cards, Card, Tabs, Tab } from 'vocs'
 
 Choose which stablecoin pays a transaction’s fees, independently of the token being transferred. A fee token must be USD-denominated, use the TIP-20 standard, and have sufficient liquidity in the native Fee AMM. Tempo has no separate gas token.
 
-See [transaction fees](/docs/protocol/fees) for eligibility and conversion rules, or [Sponsor fees](/docs/guide/payments/sponsor-user-fees) to have your application cover the fee.
+See [transaction fees](/docs/protocol/fees) for eligibility and conversion rules, or [Sponsor fees](/docs/api/fee-payer) to have your application cover the fee.
 
 ## Fee-token payment demo
 
@@ -397,7 +397,7 @@ function PayWithFeeToken() {
 ### Next fee-token steps
 
 Now that you have made a payment using a desired fee token, you can:
-- Follow a guide on how to [sponsor user fees](/docs/guide/payments/sponsor-user-fees) to enable gasless transactions
+- Follow a guide on how to [sponsor user fees](/docs/api/fee-payer) to enable gasless transactions
 - Learn more about [transaction fees](/docs/protocol/fees)
 
 :::::

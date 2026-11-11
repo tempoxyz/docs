@@ -234,6 +234,11 @@ export const partnerLogoOpenUsdOusd = style({
   backgroundImage: 'url("/assets/partners/directory/open-usd-ousd.svg")',
 })
 
+export const partnerLogoEnvio = style({
+  width: '84px',
+  backgroundImage: 'url("/assets/partners/directory/envio.svg")',
+})
+
 export const partnerLogoGoldsky = style({
   width: '24px',
   backgroundImage: 'url("/assets/partners/directory/goldsky.svg")',

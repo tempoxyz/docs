@@ -61,7 +61,7 @@ describe('finalizeSitemap', () => {
     expect(finalizeSitemap(result, [])).toBe(result)
   })
 
-  it('excludes redirected marketing surfaces while preserving docs and blog URLs', () => {
+  it('excludes redirected marketing surfaces while preserving docs URLs', () => {
     const previousSite = sitemap.replace(
       '</urlset>',
       `${[
@@ -78,10 +78,10 @@ describe('finalizeSitemap', () => {
         .map((route) => `<url><loc>https://tempo.xyz/developers${route}</loc></url>`)
         .join('\n')}</urlset>`,
     )
-    const result = finalizeSitemap(previousSite, [{ slug: 't6' }])
+    const result = finalizeSitemap(previousSite)
 
     const locations = [...result.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
-    expect(locations).toContain('https://tempo.xyz/developers/blog/t6')
+    expect(locations.some((location) => location.includes('/blog'))).toBe(false)
     expect(locations).toContain('https://tempo.xyz/developers/docs/api')
     expect(locations).toContain('https://tempo.xyz/developers')
     expect(locations).toContain('https://tempo.xyz/developers/get-started')
@@ -90,58 +90,25 @@ describe('finalizeSitemap', () => {
     expect(locations).not.toContain('https://tempo.xyz/developers/docs')
     expect(
       locations.every((location) =>
-        /^https:\/\/tempo\.xyz\/developers(?:\/?$|\/get-started(?:\/|$)|\/(?:docs\/|blog(?:\/|$)))/.test(
-          location,
-        ),
+        /^https:\/\/tempo\.xyz\/developers(?:\/?$|\/get-started(?:\/|$)|\/docs\/)/.test(location),
       ),
     ).toBe(true)
   })
 
-  it('replaces the blog template with canonical post URLs and removes other templates', () => {
-    const result = finalizeSitemap(sitemap, [
-      { slug: 't7-network-upgrade' },
-      { slug: 't6', lastmod: '2026-07-19' },
-    ])
-
-    expect(result).toContain('<loc>https://tempo.xyz/developers/blog/t6</loc>')
-    expect(result).toContain('<loc>https://tempo.xyz/developers/blog/t7-network-upgrade</loc>')
-    expect(result.indexOf('/blog/t6')).toBeLessThan(result.indexOf('/blog/t7-network-upgrade'))
-    expect(result).toMatch(
-      /<loc>https:\/\/tempo\.xyz\/developers\/blog\/t6<\/loc>\s*<lastmod>2026-07-19<\/lastmod>/,
-    )
-    expect(result).not.toMatch(
-      /<loc>https:\/\/tempo\.xyz\/developers\/blog\/t7-network-upgrade<\/loc>\s*<lastmod>/,
-    )
-    expect(result).not.toContain('[slug]')
-    expect(result).not.toContain('[id]')
-  })
-
-  it('does not duplicate a blog URL that the sitemap already contains', () => {
-    const withExistingPost = sitemap.replace(
+  it('removes blog indexes, previously generated posts, and route templates', () => {
+    const previous = sitemap.replace(
       '</urlset>',
-      '  <url>\n    <loc>https://tempo.xyz/developers/blog/t6</loc>\n  </url>\n</urlset>',
+      '<url><loc>https://tempo.xyz/developers/blog/t6</loc><lastmod>2026-07-19</lastmod></url></urlset>',
     )
-    const result = finalizeSitemap(withExistingPost, [{ slug: 't6', lastmod: '2026-07-19' }])
-
-    expect(result.match(/<loc>https:\/\/tempo\.xyz\/developers\/blog\/t6<\/loc>/g)).toHaveLength(1)
-  })
-
-  it('uses the blog index when the framework stops emitting a template route', () => {
-    const withoutBlogTemplate = sitemap.replace(
-      / {2}<url>\n {4}<loc>https:\/\/tempo\.xyz\/developers\/blog\/\[slug\]<\/loc>\n {4}<lastmod>2026-07-18<\/lastmod>\n {2}<\/url>\n/,
-      '',
-    )
-    const result = finalizeSitemap(withoutBlogTemplate, [{ slug: 't6' }])
-
-    expect(result).toContain('<loc>https://tempo.xyz/developers/blog/t6</loc>')
+    const result = finalizeSitemap(previous)
+    expect(result).not.toContain('/blog')
+    expect(result).not.toContain('[id]')
+    expect(result).toContain('/docs/api/authentication')
+    expect(finalizeSitemap(result)).toBe(result)
   })
 
   it('adds generated OpenAPI routes without lastmod in stable order', () => {
-    const result = finalizeSitemap(
-      sitemap,
-      [],
-      ['billing', 'activities', 'routes/quotes', 'billing'],
-    )
+    const result = finalizeSitemap(sitemap, ['billing', 'activities', 'routes/quotes', 'billing'])
 
     expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/activities</loc>')
     expect(result).toContain('<loc>https://tempo.xyz/developers/docs/api/billing</loc>')
@@ -153,7 +120,7 @@ describe('finalizeSitemap', () => {
   })
 
   it('does not duplicate an authored OpenAPI route', () => {
-    const result = finalizeSitemap(sitemap, [], ['authentication'])
+    const result = finalizeSitemap(sitemap, ['authentication'])
 
     expect(
       result.match(/<loc>https:\/\/tempo\.xyz\/developers\/docs\/api\/authentication<\/loc>/g),

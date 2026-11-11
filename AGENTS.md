@@ -21,7 +21,7 @@ Vocs-powered documentation site for Tempo protocol. Use this guidance when creat
 - Primary sections: Get Started (`/get-started`), Accounts (`/docs/accounts`), Earn (`/docs/earn`), Routes (`/docs/routes`), Zones (`/docs/zones`), and Machine Payments (`/docs/agents`). Get Started also owns the SDK, CLI, and wallet CLI pages (`/docs/sdk`, `/docs/cli`, `/docs/wallet`) as its Tempo CLI and Tempo SDK sections.
 - Tempo EVM (`/docs/development`) covers wallets and signing keys, transactions, fees, TIP-20 Tokens, contracts, exchange, network details, nodes, protocol specifications, and changelog.
 - API reference (`/docs/api`) is its own top-nav link, matching Console's "API Docs" link. Partners (`/docs/partners`) contains third-party integrations. The old APIs & SDKs hub (`/docs/tools`) redirects to `/docs/sdk`.
-- Keep Earn and Routes beta notices and the Zones limited-preview notice on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
+- Keep Earn and Routes beta notices and the Zones availability notice (live on Mainnet, set up with Tempo) on their overview pages. The earlier `/docs/guide/private-zones` sandbox is a separate integration.
 - `public/SKILL.md` is the canonical Tempo docs skill, published at `/SKILL.md`. The `tempoxyz/plugins` copy is generated from it by that repo's skill sync, so edit only `public/SKILL.md` here.
 - `src/lib/markdown-output-transform.ts` uses `src/lib/ai-docs.ts` to add section context before Vocs validates and writes Markdown exports. `SKILL.md` links to `public/SKILL.md`, the source Vite serves and copies. Never edit `dist` or `.vercel` copies by hand.
 - After changing navigation or exported components, build and run `pnpm check:markdown` to check content and IA coverage. Keep Markdown exports useful without interactive UI.
@@ -65,7 +65,7 @@ When documenting MPP concepts on Tempo, cross-check the relevant MPP docs or SDK
 Use `pnpm`.
 
 - `pnpm dev` - start development server
-- `pnpm build` - typecheck and build docs plus marketing site
+- `pnpm build` - typecheck and build the documentation site
 - `pnpm check` - run Biome format/lint with fixes
 - `pnpm check:types` - run TypeScript check
 - `pnpm test` - run Vitest tests (`vitest run --dir src`; a bare `vitest run` also picks up the Playwright `e2e/` files and fails)
@@ -100,7 +100,7 @@ Before finishing docs-only changes, run at least `pnpm check:types` when practic
 
 - Import `style`/`variants` from `src/styles/recipes.ts` for layout recipes, `theme.ts` for semantic components, or `scoped.ts` for existing unlayered selectors. Do not import unrestricted helpers from `zyzz` or create component-local configs.
 - Use the shared `vars` exported by `theme.ts`, or configured token names. `contract.ts` owns spacing, typography, radius, border, and stacking scales; `palette.ts` owns colors. Add a token only for a reusable design decision.
-- `inherited.ts` is the reviewed bridge to existing Vocs, blog, terminal, and artwork CSS scopes. Its expressions must resolve on the styled element; do not hoist local CSS variables into root tokens.
+- `inherited.ts` is the reviewed bridge to existing Vocs, terminal, and artwork CSS scopes. Its expressions must resolve on the styled element; do not hoist local CSS variables into root tokens.
 - An intentional one-off uses ` !custom` and a declaration-local `// design-exception: <specific reason>` comment. Native CSS keywords need no explanation. Prefer normalizing incidental values to the scale over adding exceptions.
 - Global styles and keyframes use explicit token references. Use token-based border/background longhands, logical properties, and explicit transition properties. Style interactive state through existing ARIA/data attributes or native `:checked`/`:disabled` selectors. Reserve DOM style writes for scroll locking, theme application, and named CSS-variable bindings for runtime measurements.
 - Linked inline code (for example, a command linked to its page) keeps the code style and shows its link on hover; see the `a[data-v]:has(> code:only-child)` rule in `globals.ts`.
@@ -369,7 +369,8 @@ authors:
 
 ## Blog Notes
 
-Blog-specific instructions live in `blogs/AGENTS.md`. Read that file before editing posts, blog assets, diagrams, or drafts.
+The blog is published by [tempoxyz/tempo.xyz](https://github.com/tempoxyz/tempo.xyz), not this repository.
+Follow its guidance for new posts and edits. `blogs/` contains archived sources only; keep its sources, legacy media, and exact redirects intact.
 
 ## Final Checks
 
