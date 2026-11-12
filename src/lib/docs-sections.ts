@@ -7,7 +7,6 @@ export type DocsSection = {
     | 'zones'
     | 'developers'
     | 'machine-payments'
-    | 'operate'
     | 'api'
     | 'tools'
     | 'resources'
@@ -21,11 +20,12 @@ export type DocsSection = {
 export const docsSections: DocsSection[] = [
   {
     id: 'overview',
-    label: 'Get Started',
+    label: 'Get started',
     href: '/get-started',
     matches: [
       '/get-started',
       '/docs/quickstart/faucet',
+      '/docs/quickstart/connection-details',
       '/docs/guide/using-tempo-with-ai',
       '/docs/developer-tools',
       '/docs/quickstart/developer-tools',
@@ -51,9 +51,11 @@ export const docsSections: DocsSection[] = [
     href: '/docs/agents',
     matches: ['/docs/agents', '/docs/guide/machine-payments', '/docs/guide/mercator'],
   },
+  // Network merges Tempo EVM (building on the chain) and Operate (nodes, upgrades and releases).
+  // It keeps the `developers` id that sidebars, AI exports and tests key on.
   {
     id: 'developers',
-    label: 'Tempo EVM',
+    label: 'Network',
     href: '/docs/development',
     matches: [
       '/docs/accounts/keys',
@@ -68,20 +70,16 @@ export const docsSections: DocsSection[] = [
       '/docs/guide/tempo-transaction',
       '/docs/guide/issuance',
       '/docs/guide/stablecoin-dex',
+      '/docs/guide/node',
+      '/docs/changelog',
     ],
-  },
-  {
-    id: 'operate',
-    label: 'Operate',
-    href: '/docs/guide/node',
-    matches: ['/docs/guide/node', '/docs/changelog', '/docs/protocol/upgrades'],
   },
 ]
 
 export const docsUtilitySections: DocsSection[] = [
   {
     id: 'api',
-    label: 'API reference',
+    label: 'API',
     href: '/docs/api',
     matches: ['/docs/api'],
   },
@@ -112,42 +110,28 @@ export const docsUtilitySections: DocsSection[] = [
 ]
 
 export type DocsArea = {
-  id: 'get-started' | 'products' | 'evm' | 'operate' | 'reference' | 'resources'
+  id: 'home' | 'docs' | 'reference' | 'resources'
   label: string
   href: string
   description: string
   sections: DocsSection['id'][]
 }
 
-/** The six areas in the global nav. Each groups one or more sections, which own the sidebars. */
+/** The four tabs in the top bar. Each groups the sections that own the sidebars; Home has none. */
 export const docsAreas: DocsArea[] = [
   {
-    id: 'get-started',
-    label: 'Get started',
+    id: 'home',
+    label: 'Home',
+    href: '/',
+    description: 'Start here: guides, references and resources',
+    sections: [],
+  },
+  {
+    id: 'docs',
+    label: 'Docs',
     href: '/get-started',
-    description: 'Quickstart, testnet funds and AI setup',
-    sections: ['overview'],
-  },
-  {
-    id: 'products',
-    label: 'Products',
-    href: '/docs/accounts',
-    description: 'Accounts, Earn, Routes, Zones and Machine Payments',
-    sections: ['accounts', 'earn', 'routes', 'zones', 'machine-payments'],
-  },
-  {
-    id: 'evm',
-    label: 'Tempo EVM',
-    href: '/docs/development',
-    description: 'Build directly on the chain',
-    sections: ['developers'],
-  },
-  {
-    id: 'operate',
-    label: 'Operate',
-    href: '/docs/guide/node',
-    description: 'Run nodes and track network upgrades',
-    sections: ['operate'],
+    description: 'Get started, the products and the network',
+    sections: ['overview', 'accounts', 'earn', 'routes', 'zones', 'machine-payments', 'developers'],
   },
   {
     id: 'reference',
@@ -189,6 +173,8 @@ export function getDocsAreaForSection(id: DocsSection['id'] | undefined) {
   return id ? docsAreas.find((area) => area.sections.includes(id)) : undefined
 }
 
+/** The current top-bar tab: Home on the landing page, otherwise the tab that owns the section. */
 export function getActiveDocsArea(path: string) {
+  if (normalizeDocsSectionPath(path) === '/') return docsAreas.find(({ id }) => id === 'home')
   return getDocsAreaForSection(getActiveDocsSection(path)?.id)
 }

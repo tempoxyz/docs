@@ -82,13 +82,44 @@ describe('section sidebars', () => {
     type SidebarNode = { text?: string; items?: SidebarNode[] }
     const sidebar = sidebarFor('/get-started') as SidebarNode[]
     expect(sidebar.map(({ text }) => text)).toEqual(['Get Started'])
+    expect(links(sidebar)).toEqual(
+      expect.arrayContaining([
+        '/docs/quickstart/faucet',
+        '/docs/quickstart/connection-details',
+        '/docs/guide/using-tempo-with-ai',
+      ]),
+    )
+    expect(sidebarFor('/docs/quickstart/connection-details')).toBe(sidebar)
+  })
+
+  it('merges Tempo EVM and Operate into Network: chain groups, then Run a node, then Changelog', () => {
+    type SidebarNode = { text?: string; link?: string; items?: SidebarNode[] }
+    const sidebar = sidebarFor('/docs/development') as SidebarNode[]
+    expect(sidebar.map(({ text }) => text)).toEqual(['Tempo EVM', 'Run a node', 'Changelog'])
+    expect(sidebarFor('/docs/guide/node')).toBe(sidebar)
+    expect(sidebarFor('/docs/changelog')).toBe(sidebar)
+    expect(sidebarFor('/docs/protocol/upgrades/t13')).toBe(sidebar)
+    expect(sidebar[2].items?.map(({ text }) => text)).toEqual([
+      'Overview',
+      'Network upgrades',
+      'Node releases',
+      'Operator updates',
+    ])
   })
 
   it.each([
-    ['/docs/guide/node/validator-keys', 'operate', '/docs/guide/node'],
-    ['/docs/guide/node/network-upgrades', 'operate', '/docs/guide/node'],
-    ['/docs/protocol/upgrades/t11', 'operate', '/docs/guide/node'],
-    ['/docs/changelog', 'operate', '/docs/guide/node'],
+    ['/docs/accounts', 'https://wallet.tempo.xyz'],
+    ['/docs/agents', 'https://mpp.dev'],
+    ['/docs/development', 'https://explore.tempo.xyz'],
+  ])('%s sidebar links %s, which left the header', (landing, href) => {
+    expect(links(sidebarFor(landing))).toContain(href)
+  })
+
+  it.each([
+    ['/docs/guide/node/validator-keys', 'developers', '/docs/development'],
+    ['/docs/guide/node/network-upgrades', 'developers', '/docs/development'],
+    ['/docs/protocol/upgrades/t11', 'developers', '/docs/development'],
+    ['/docs/changelog', 'developers', '/docs/development'],
     ['/docs/cli/api', 'tools', '/docs/sdk'],
     ['/docs/wallet/recipes', 'tools', '/docs/sdk'],
     ['/docs/sdk/typescript/api-client', 'tools', '/docs/sdk'],

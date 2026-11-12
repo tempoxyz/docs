@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   docsAreas,
   docsSections,
+  docsUtilitySections,
   getActiveDocsArea,
   getActiveDocsSection,
 } from '../lib/docs-sections'
@@ -46,32 +47,39 @@ describe('resolveSidebarItems', () => {
 })
 
 describe('getActiveDocsSection', () => {
-  it('groups the sections into six global nav areas', () => {
+  it('groups the sections into the four top-bar tabs', () => {
     expect(docsSections.map(({ label }) => label)).toEqual([
-      'Get Started',
+      'Get started',
       'Accounts',
       'Earn',
       'Routes',
       'Zones',
       'Machine Payments',
-      'Tempo EVM',
-      'Operate',
+      'Network',
     ])
-    expect(docsAreas.map(({ label }) => label)).toEqual([
-      'Get started',
-      'Products',
-      'Tempo EVM',
-      'Operate',
-      'Reference',
-      'Resources',
+    expect(docsAreas.map(({ label }) => label)).toEqual(['Home', 'Docs', 'Reference', 'Resources'])
+    expect(docsAreas.map(({ sections }) => sections)).toEqual([
+      [],
+      ['overview', 'accounts', 'earn', 'routes', 'zones', 'machine-payments', 'developers'],
+      ['api', 'tools'],
+      ['resources', 'ecosystem'],
     ])
-    expect(getActiveDocsArea('/docs/earn/balances')?.id).toBe('products')
+    expect(
+      [...docsSections, ...docsUtilitySections]
+        .filter(({ id }) => ['api', 'tools', 'resources', 'ecosystem'].includes(id))
+        .map(({ label }) => label),
+    ).toEqual(['API', 'SDKs & CLI', 'Guides', 'Partners'])
+    expect(getActiveDocsArea('/docs/earn/balances')?.id).toBe('docs')
+    expect(getActiveDocsArea('/get-started/quickstart')?.id).toBe('docs')
+    expect(getActiveDocsArea('/docs/guide/node/installation')?.id).toBe('docs')
     expect(getActiveDocsArea('/docs/cli/request')?.id).toBe('reference')
     expect(getActiveDocsArea('/docs/partners/wallets')?.id).toBe('resources')
-    expect(getActiveDocsArea('/')).toBeUndefined()
+    expect(getActiveDocsArea('/')?.id).toBe('home')
+    expect(getActiveDocsArea('/developers/')?.id).toBe('home')
+    expect(getActiveDocsArea('/docs/apiary')).toBeUndefined()
   })
 
-  it('opens the guide library from Tempo EVM and the MPP introduction from Machine payments', () => {
+  it('opens Network on the Tempo EVM introduction and Machine Payments on the MPP introduction', () => {
     expect(docsSections.find(({ id }) => id === 'developers')?.href).toBe('/docs/development')
     expect(docsSections.find(({ id }) => id === 'machine-payments')?.href).toBe('/docs/agents')
   })
@@ -79,8 +87,8 @@ describe('getActiveDocsSection', () => {
   it('keeps section navigation active under the developers mount and trailing slashes', () => {
     expect(getActiveDocsSection('/developers/docs/api/transfers/')?.id).toBe('api')
     expect(getActiveDocsSection('/developers/get-started/')?.id).toBe('overview')
-    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('operate')
-    expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Tempo EVM')
+    expect(getActiveDocsSection('/developers/docs/protocol/upgrades/t12/')?.id).toBe('developers')
+    expect(getActiveDocsSection('/developers/docs/protocol/')?.label).toBe('Network')
   })
 
   it.each([
@@ -143,7 +151,7 @@ describe('getActiveDocsSection', () => {
     ['/docs/guide/ousd', 'ecosystem'],
     ['/docs/partners/join', 'ecosystem'],
     ['/docs/quickstart/integrate-tempo', 'developers'],
-    ['/docs/quickstart/connection-details', 'developers'],
+    ['/docs/quickstart/connection-details', 'overview'],
     ['/docs/guide/issuance/create-a-stablecoin', 'developers'],
     ['/docs/guide/issuance/manage-stablecoin', 'developers'],
     ['/docs/guide/issuance/migrate-erc20-to-tip20', 'developers'],
@@ -159,13 +167,13 @@ describe('getActiveDocsSection', () => {
     ['/docs/protocol/tip403/spec', 'developers'],
     ['/docs/protocol/exchange/spec', 'developers'],
     ['/docs/protocol/blockspace/payment-lane-specification', 'developers'],
-    ['/docs/guide/node/installation', 'operate'],
-    ['/docs/protocol/upgrades', 'operate'],
-    ['/docs/protocol/upgrades/t11', 'operate'],
-    ['/docs/protocol/upgrades/t12', 'operate'],
-    ['/docs/guide/node/upgrade-cadence', 'operate'],
-    ['/docs/guide/node/network-upgrades', 'operate'],
-    ['/docs/changelog', 'operate'],
+    ['/docs/guide/node/installation', 'developers'],
+    ['/docs/protocol/upgrades', 'developers'],
+    ['/docs/protocol/upgrades/t11', 'developers'],
+    ['/docs/protocol/upgrades/t12', 'developers'],
+    ['/docs/guide/node/upgrade-cadence', 'developers'],
+    ['/docs/guide/node/network-upgrades', 'developers'],
+    ['/docs/changelog', 'developers'],
     ['/docs/api/indexer-api', 'api'],
     ['/docs/protocol/rpc/eth_getBalance', 'developers'],
     ['/docs/sdk/typescript', 'tools'],

@@ -46,9 +46,9 @@ describe('AI documentation navigation', () => {
     expect(output).toMatch(
       /## Zones[\s\S]*live on Mainnet[\s\S]*### Earlier testnet sandbox[\s\S]*Legacy swap/,
     )
-    expect(output).toMatch(/## Tempo EVM[\s\S]*\[Keys\][\s\S]*## Operate/)
-    expect(output).toMatch(/## Operate[\s\S]*\[Node releases\][\s\S]*## API reference/)
-    expect(output).toMatch(/## API reference[\s\S]*\[API reference\]/)
+    expect(output).toMatch(/## Network[\s\S]*\[Keys\][\s\S]*\[Node releases\][\s\S]*## API\n/)
+    expect(output).not.toMatch(/^## (Tempo EVM|Operate)$/m)
+    expect(output).toMatch(/## API\n[\s\S]*\[API reference\]/)
     expect(output).toMatch(/## SDKs & CLI[\s\S]*\[API client\][\s\S]*## Guides/)
     expect(output).toMatch(/## Guides[\s\S]*\[Payment links\][\s\S]*## Partners/)
     expect(output).toContain('Earn is in beta')
@@ -73,7 +73,7 @@ describe('AI documentation navigation', () => {
     expect(full).toContain('> Section: [Earn](/docs/earn.md)')
     expect(full).toContain('> Source: [/docs/zones/deposit](/docs/zones/deposit.md)')
     expect(full).toContain('> Section: [Zones](/docs/zones.md)')
-    expect(full).toContain('> Section: [Operate](/docs/guide/node.md)')
+    expect(full).toContain('> Section: [Network](/docs/development.md)')
     expect(full).toContain('> Section: [SDKs & CLI](/docs/sdk.md)')
     expect(full).toContain('> Section: [Guides](/docs/resources/guides.md)')
     expect(() => renderAiFull(index, new Map())).toThrow('Missing Markdown export')

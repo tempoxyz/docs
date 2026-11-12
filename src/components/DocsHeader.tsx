@@ -1,76 +1,45 @@
 'use client'
 
-import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRouter, Link as WakuLink } from 'waku'
 import { cx as composeStyles } from 'zyzz'
-import ChevronDownIcon from '~icons/lucide/chevron-down'
-import SquareTerminalIcon from '~icons/lucide/square-terminal'
-import { tempoAgentSetupCommands } from '../lib/ai-install-commands'
 import { normalizeDocsPath, type SidebarNode } from '../lib/docs-sidebar'
 
 export { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
 
 import { DOCS_SEARCH_PARAM } from '../lib/docs-search'
 import { docsAreas } from '../lib/docs-sections'
-import { publicAssetPath } from '../lib/public-asset-path'
 import { navActiveSquare } from '../styles/surfaces.styles'
-import { AmpLogo, ClaudeLogo, CodexLogo } from './AgentLogos'
-import { AgentSetupCommand } from './AgentSetupCommand'
-import { CopyIconSwap } from './CopyIconSwap'
 import * as ui from './DocsHeader.recipes'
+import { DocsLockup } from './DocsLockup'
 import {
-  docsAreaMenuItem,
-  docsAreaMenuItemDescription,
-  docsAreaMenuItemLabel,
-  docsHeaderAccountEmail,
   docsHeaderActions,
-  docsHeaderAgentMenu,
-  docsHeaderAgentPanel,
-  docsHeaderAgentTrigger,
-  docsHeaderBrand,
-  docsHeaderDocsLabel,
   docsHeaderGetKey,
   docsHeaderIconButton,
   docsHeaderKbd,
   docsHeaderLeft,
-  docsHeaderLoginText,
   docsHeaderLogo,
   docsHeaderMenuButton,
-  docsHeaderMobileAccount,
-  docsHeaderMobileActions,
-  docsHeaderMobileAgents,
   docsHeaderMobileAreaGroup,
   docsHeaderMobileAreaLabel,
   docsHeaderMobileBody,
   docsHeaderMobileDialog,
-  docsHeaderMobileLabel,
-  docsHeaderMobileResources,
+  docsHeaderMobileGetKey,
+  docsHeaderMobileLink,
   docsHeaderMobileSearch,
   docsHeaderMobileSections,
   docsHeaderMobileTheme,
   docsHeaderMobileTop,
-  docsHeaderMobileWebsite,
   docsHeaderNav,
   docsHeaderSearchField,
   docsHeaderSearchLabel,
-  docsHeaderSwitcher,
+  docsHeaderWordmark,
   docsSiteHeader,
 } from './DocsNavigation.styles'
-import {
-  areaSections,
-  DocsAreaNav,
-  DocsNavMenu,
-  DocsResourceLinks,
-  docsExternalTools,
-  getActiveDocsSection,
-} from './DocsSectionNav'
+import { areaSections, DocsAreaNav, getActiveDocsSection } from './DocsSectionNav'
 import { HeadingAnchorFeedback } from './HeadingAnchorFeedback'
 import { SearchDialogMotion } from './SearchDialogMotion'
 import { SmoothCorners } from './SmoothCorners'
-
-const DOCS_BASE_PATH = '/docs'
-const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
-const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 
 /** Tempo Console. This host forwards to developers.tempo.xyz/console once the console moves there. */
 const CONSOLE_URL = 'https://console.tempo.xyz'
@@ -153,47 +122,6 @@ function ArrowUpRight({ className }: { className?: string }) {
   )
 }
 
-function TempoLogo({ className }: { className?: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      {...ui.tempoLogoTextAppearance({
-        value0: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
-        value1: `url('${publicAssetPath('/stickers/sticker4/tempo.svg')}')`,
-        className: ` ${ui.tempoLogoText().className} ${className ?? ''}`,
-      })}
-    />
-  )
-}
-
-function Glyph({ children }: { children: ReactNode }) {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {children}
-    </svg>
-  )
-}
-
-function McpIcon() {
-  return (
-    <Glyph>
-      <rect x="7" y="7" width="10" height="10" rx="1.5" />
-      <rect x="10" y="10" width="4" height="4" />
-      <path d="M9 7V4M15 7V4M9 20v-3M15 20v-3M7 9H4M7 15H4M20 9h-3M20 15h-3" />
-    </Glyph>
-  )
-}
-
 function ActiveSquare({ activeKey }: { activeKey: string }) {
   return (
     <svg
@@ -222,8 +150,8 @@ function MenuIcon() {
 function SearchIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="15"
-      height="15"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -317,233 +245,6 @@ function Chevron({ open }: { open: boolean }) {
         strokeLinejoin="round"
       />
     </svg>
-  )
-}
-
-function CopyIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect
-        x="5.25"
-        y="5.25"
-        width="8.5"
-        height="8.5"
-        rx="1.75"
-        stroke="currentColor"
-        strokeWidth="1.3"
-      />
-      <path
-        d="M10.75 3.25V3C10.75 1.9 9.85 1 8.75 1H3C1.9 1 1 1.9 1 3V8.75C1 9.85 1.9 10.75 3 10.75H3.25"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M3 8.5L6.5 12L13 4"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-// One install path per agent: the plugin bundles the MCP server and docs skill where
-// supported; Skills and MCP expose the client-independent setup options.
-const agentCommands = [
-  {
-    label: 'Codex',
-    logo: <CodexLogo aria-hidden="true" className={ui.codexLogo().className} />,
-    command: tempoAgentSetupCommands.codex,
-  },
-  {
-    label: 'Claude Code',
-    logo: <ClaudeLogo aria-hidden="true" className={ui.codexLogo().className} />,
-    command: tempoAgentSetupCommands.claude,
-  },
-  {
-    label: 'Amp',
-    logo: <AmpLogo aria-hidden="true" className={ui.codexLogo().className} />,
-    command: tempoAgentSetupCommands.amp,
-  },
-  {
-    label: 'Skills',
-    logo: null,
-    command: tempoAgentSetupCommands.skills,
-  },
-  {
-    label: 'MCP',
-    logo: null,
-    command: tempoAgentSetupCommands.mcp,
-  },
-]
-
-function CommandTabs({
-  commands,
-  activeIndex,
-  onSelect,
-}: {
-  commands: { label: string; logo: ReactNode }[]
-  activeIndex: number
-  onSelect: (index: number) => void
-}) {
-  return (
-    <div {...ui.commandTabsLayout()}>
-      {commands.map((item, index) => {
-        const active = index === activeIndex
-        return (
-          <button
-            key={item.label}
-            type="button"
-            aria-pressed={active}
-            onClick={() => onSelect(index)}
-            {...composeStyles(
-              ui.commandTabsButton(),
-              !!active && ui.commandTabsButton2(),
-              !active && ui.commandTabsButton3(),
-            )}
-          >
-            {item.logo}
-            <span>{item.label}</span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-function CommandSnippet({
-  command,
-  copyLabel,
-  copied,
-  onCopy,
-  children,
-}: {
-  command: string
-  copyLabel: string
-  copied: boolean
-  onCopy: (command: string) => void
-  children?: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onCopy(command)}
-      aria-label={copyLabel}
-      {...ui.commandSnippetButton({ className: 'group/copy' })}
-    >
-      <code {...ui.code()}>
-        <span aria-hidden="true" {...ui.commandSnippetText()}>
-          $
-        </span>
-        <span {...ui.commandSnippetText2()}>
-          {children ?? <AgentSetupCommand command={command} />}
-        </span>
-      </code>
-      <span
-        {...composeStyles(
-          ui.commandSnippetText3(),
-          !!copied && ui.commandSnippetText4(),
-          !copied && ui.commandSnippetText5(),
-        )}
-      >
-        <CopyIconSwap copied={!!copied} copyIcon={<CopyIcon />} checkIcon={<CheckIcon />} />
-      </span>
-    </button>
-  )
-}
-
-function AgentCommandSection(props: {
-  href: string
-  label: string
-  desc: string
-  icon: ReactNode
-  onClick?: () => void
-  children?: ReactNode
-}) {
-  const { href, label, desc, icon, onClick, children } = props
-  const external = isExternal(href)
-
-  return (
-    <div {...ui.agentCommandSectionLayout({ className: 'group/item' })}>
-      <div {...ui.agentCommandSectionLayout2()}>
-        <span {...ui.agentCommandSectionText()}>{icon}</span>
-        <Anchor href={href} onClick={onClick} className={ui.anchor().className}>
-          {external ? <ArrowUpRight className={ui.arrowUpRight().className} /> : null}
-          <span {...ui.agentCommandSectionText2()}>{label}</span>
-          <span {...ui.agentCommandSectionText3()}>{desc}</span>
-        </Anchor>
-      </div>
-      {children ? <div {...ui.agentCommandSectionLayout3()}>{children}</div> : null}
-    </div>
-  )
-}
-
-function AgentsPanel({
-  variant = 'desktop',
-  onNavigate,
-}: {
-  variant?: 'desktop' | 'mobile'
-  onNavigate?: () => void
-}) {
-  const desktop = variant === 'desktop'
-  const [activeCommandIndex, setActiveCommandIndex] = useState(0)
-  const [copied, setCopied] = useState(false)
-  const activeCommand = agentCommands[activeCommandIndex]
-
-  const copyCommand = async (command: string) => {
-    try {
-      await navigator.clipboard.writeText(command)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch {}
-  }
-
-  return (
-    <div className={desktop ? ui.agentsPanelLayout().className : ui.agentsPanelLayout2().className}>
-      {desktop ? <p {...ui.agentsPanelDescription()}>Connect your coding agent</p> : null}
-      <div {...ui.agentsPanelLayout3()}>
-        <AgentCommandSection
-          href={TEMPO_PLUGIN_URL}
-          label="Tempo Docs"
-          desc="Search and read Tempo documentation from your editor."
-          icon={<McpIcon />}
-          onClick={onNavigate}
-        >
-          <CommandTabs
-            commands={agentCommands}
-            activeIndex={activeCommandIndex}
-            onSelect={(index) => {
-              setActiveCommandIndex(index)
-              setCopied(false)
-            }}
-          />
-          {activeCommand.label === 'MCP' ? (
-            <p {...ui.agentsPanelDescription2()}>
-              Add this URL as an HTTP MCP server in your agent’s settings.
-            </p>
-          ) : null}
-          <CommandSnippet
-            command={activeCommand.command}
-            copyLabel={
-              activeCommand.label === 'MCP'
-                ? 'Copy MCP server URL'
-                : `Copy Tempo install command for ${activeCommand.label}`
-            }
-            copied={copied}
-            onCopy={copyCommand}
-          />
-        </AgentCommandSection>
-      </div>
-    </div>
   )
 }
 
@@ -745,27 +446,14 @@ export default function DocsHeader() {
   const activeSection = getActiveDocsSection(pathname)
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [agentsOpen, setAgentsOpen] = useState(false)
   const email = useConsoleEmail()
-  // Keep the Agent setup panel rendered through its exit fade (G5).
-  const [agentsRendered, setAgentsRendered] = useState(false)
-  useEffect(() => {
-    if (agentsOpen) {
-      setAgentsRendered(true)
-      return
-    }
-    const timer = window.setTimeout(() => setAgentsRendered(false), 150)
-    return () => window.clearTimeout(timer)
-  }, [agentsOpen])
-  const agentMenuRef = useRef<HTMLDivElement | null>(null)
-  const agentTriggerRef = useRef<HTMLButtonElement | null>(null)
   const mobileDialogRef = useRef<HTMLDialogElement | null>(null)
   const mobileCloseRef = useRef<HTMLButtonElement | null>(null)
+  // Get API key opens Console, which signs in; once signed in, the button names Console itself.
+  const consoleLabel = email ? 'Console' : 'Get API key'
+  const consoleTitle = email ? { title: `Signed in as ${email}` } : {}
 
-  const close = () => {
-    setOpen(false)
-    setAgentsOpen(false)
-  }
+  const close = () => setOpen(false)
 
   const openSearch = () => {
     mobileDialogRef.current?.close()
@@ -777,10 +465,9 @@ export default function DocsHeader() {
     setMounted(true)
   }, [])
 
-  // Close menus after navigation, including browser back/forward.
+  // Close the menu after navigation, including browser back/forward.
   useEffect(() => {
     setOpen(false)
-    setAgentsOpen(false)
   }, [pathname])
 
   useEffect(() => {
@@ -807,33 +494,6 @@ export default function DocsHeader() {
     }
   }, [open])
 
-  useEffect(() => {
-    if (!agentsOpen) return
-    const closeWhenOutside = (event: Event) => {
-      if (!agentMenuRef.current?.contains(event.target as Node)) setAgentsOpen(false)
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setAgentsOpen(false)
-        agentTriggerRef.current?.focus()
-      }
-    }
-    const desktop = window.matchMedia('(min-width: 1080px)')
-    const onResize = () => {
-      if (!desktop.matches) setAgentsOpen(false)
-    }
-    document.addEventListener('pointerdown', closeWhenOutside)
-    document.addEventListener('focusin', closeWhenOutside)
-    document.addEventListener('keydown', onKeyDown)
-    desktop.addEventListener('change', onResize)
-    return () => {
-      document.removeEventListener('pointerdown', closeWhenOutside)
-      document.removeEventListener('focusin', closeWhenOutside)
-      document.removeEventListener('keydown', onKeyDown)
-      desktop.removeEventListener('change', onResize)
-    }
-  }, [agentsOpen])
-
   // Open search when arriving from the website with ?search=1.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -849,19 +509,14 @@ export default function DocsHeader() {
   }, [])
 
   const brand = (
-    <div className={`docs-header-brand ${docsHeaderBrand().className}`}>
-      <WakuLink
-        to="/"
-        onClick={close}
-        aria-label="Tempo documentation"
-        className={`docs-header-logo ${docsHeaderLogo().className}`}
-      >
-        <TempoLogo className={ui.tempoLogo().className} />
-        <span aria-hidden="true" className={docsHeaderDocsLabel().className}>
-          Docs
-        </span>
-      </WakuLink>
-    </div>
+    <WakuLink
+      to="/"
+      onClick={close}
+      aria-label="Tempo Developers"
+      className={`docs-header-logo ${docsHeaderLogo().className}`}
+    >
+      <DocsLockup className={docsHeaderWordmark().className} />
+    </WakuLink>
   )
 
   return (
@@ -875,11 +530,6 @@ export default function DocsHeader() {
       >
         <div className={`docs-header-left ${docsHeaderLeft().className}`}>
           {brand}
-          <div className={`docs-header-switcher ${docsHeaderSwitcher().className}`}>
-            <DocsNavMenu label={null} ariaLabel="Tempo products">
-              {(closeMenu) => <ProductSwitcherLinks onNavigate={closeMenu} />}
-            </DocsNavMenu>
-          </div>
           <DocsAreaNav pathname={pathname} />
         </div>
         <div className={`docs-header-actions ${docsHeaderActions().className}`}>
@@ -896,53 +546,14 @@ export default function DocsHeader() {
             <span className={docsHeaderSearchLabel().className}>Search docs</span>
             <kbd className={docsHeaderKbd().className}>⌘K</kbd>
           </button>
-          <div
-            ref={agentMenuRef}
-            className={`docs-header-agent-menu ${docsHeaderAgentMenu().className}`}
-          >
-            <button
-              ref={agentTriggerRef}
-              type="button"
-              aria-expanded={agentsOpen}
-              aria-controls="docs-agent-tools"
-              onClick={() => setAgentsOpen((value) => !value)}
-              className={`docs-header-agent-trigger ${docsHeaderAgentTrigger().className}`}
-              disabled={!mounted}
-            >
-              Agent setup
-              <Chevron open={agentsOpen} />
-            </button>
-            {agentsOpen || agentsRendered ? (
-              <div
-                id="docs-agent-tools"
-                data-state={agentsOpen ? 'open' : 'closed'}
-                inert={!agentsOpen}
-                className={`docs-header-agent-panel ${docsHeaderAgentPanel().className}`}
-              >
-                <AgentsPanel onNavigate={close} />
-              </div>
-            ) : null}
-          </div>
           {/* Absolute: the docs are also mounted at tempo.xyz/developers, where relative links miss the console. */}
           <a
             href={CONSOLE_URL}
-            className={`docs-header-login ${docsHeaderLoginText().className}`}
-            {...(email ? { 'aria-label': `Open Tempo Console as ${email}`, title: email } : {})}
+            className={`docs-header-get-key ${docsHeaderGetKey().className}`}
+            {...consoleTitle}
           >
-            {email ? (
-              <>
-                <SquareTerminalIcon aria-hidden="true" width="16" height="16" />
-                <span className={docsHeaderAccountEmail().className}>{email}</span>
-              </>
-            ) : (
-              'Log in'
-            )}
+            {consoleLabel}
           </a>
-          {!email && (
-            <a href={CONSOLE_URL} className={`docs-header-get-key ${docsHeaderGetKey().className}`}>
-              Get API key
-            </a>
-          )}
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -974,17 +585,15 @@ export default function DocsHeader() {
       >
         <div className={`docs-header-mobile-top ${docsHeaderMobileTop().className}`}>
           {brand}
-          <div className={`docs-header-mobile-actions ${docsHeaderMobileActions().className}`}>
-            <button
-              type="button"
-              ref={mobileCloseRef}
-              onClick={close}
-              aria-label="Close menu"
-              className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
-            >
-              <CloseIcon />
-            </button>
-          </div>
+          <button
+            type="button"
+            ref={mobileCloseRef}
+            onClick={close}
+            aria-label="Close menu"
+            className={`docs-header-icon-button ${docsHeaderIconButton().className}`}
+          >
+            <CloseIcon />
+          </button>
         </div>
         <div className={`docs-header-mobile-body ${docsHeaderMobileBody().className}`}>
           <button
@@ -992,24 +601,22 @@ export default function DocsHeader() {
             onClick={openSearch}
             className={`docs-header-mobile-search ${docsHeaderMobileSearch().className}`}
           >
-            <SearchIcon /> Search documentation
+            <SearchIcon /> Search docs
           </button>
           <nav
             aria-label="All documentation areas"
             className={`docs-header-mobile-sections ${docsHeaderMobileSections().className}`}
           >
-            <p className={`docs-header-mobile-label ${docsHeaderMobileLabel().className}`}>
-              Explore the docs
-            </p>
             {docsAreas.map((area) => {
               const sections = areaSections(area)
-              if (sections.length === 1)
+              if (!sections.length)
                 return (
                   <WakuLink
                     key={area.id}
                     to={area.href}
                     onClick={close}
-                    aria-current={activeSection?.id === sections[0]?.id ? 'page' : undefined}
+                    aria-current={pathname === area.href ? 'page' : undefined}
+                    className={docsHeaderMobileLink().className}
                   >
                     {area.label}
                   </WakuLink>
@@ -1023,6 +630,7 @@ export default function DocsHeader() {
                       to={section.href}
                       onClick={close}
                       aria-current={activeSection?.id === section.id ? 'page' : undefined}
+                      className={docsHeaderMobileLink().className}
                     >
                       {section.label}
                     </WakuLink>
@@ -1031,59 +639,17 @@ export default function DocsHeader() {
               )
             })}
           </nav>
-          <div className={`docs-header-mobile-resources ${docsHeaderMobileResources().className}`}>
-            <p className={`docs-header-mobile-label ${docsHeaderMobileLabel().className}`}>
-              Tempo products
-            </p>
-            <DocsResourceLinks onNavigate={close} />
-          </div>
-          <details className={`docs-header-mobile-agents ${docsHeaderMobileAgents().className}`}>
-            <summary>
-              Agent setup
-              <ChevronDownIcon aria-hidden="true" width="14" height="14" />
-            </summary>
-            <AgentsPanel variant="mobile" onNavigate={close} />
-          </details>
-          <ThemeSelect />
           <a
-            href="https://tempo.xyz/"
-            className={`docs-header-mobile-website ${docsHeaderMobileWebsite().className}`}
+            href={CONSOLE_URL}
+            className={`docs-header-mobile-get-key ${docsHeaderMobileGetKey().className}`}
+            {...consoleTitle}
           >
-            Back to tempo.xyz <ArrowUpRight className={ui.arrowUpRight3().className} />
+            {consoleLabel}
           </a>
-          <div className={`docs-header-mobile-account ${docsHeaderMobileAccount().className}`}>
-            <a href={CONSOLE_URL}>{email ? 'Open Console' : 'Log in'}</a>
-            <a href={CONSOLE_URL}>Get API key</a>
-          </div>
+          <ThemeSelect />
         </div>
       </dialog>
     </header>
-  )
-}
-
-/** The product switcher beside the logo: tempo.xyz and the other Tempo products. */
-function ProductSwitcherLinks({ onNavigate }: { onNavigate: () => void }) {
-  return (
-    <>
-      {[{ label: 'tempo.xyz', href: 'https://tempo.xyz/' }, ...docsExternalTools].map((item) => (
-        <a
-          key={item.href}
-          href={item.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={onNavigate}
-          className={`docs-area-menu-item ${docsAreaMenuItem().className}`}
-        >
-          <span className={docsAreaMenuItemLabel().className}>
-            {item.label}
-            <span className={docsAreaMenuItemDescription().className}>
-              {item.href.replace(/^https:\/\//, '').replace(/\/$/, '')}
-            </span>
-          </span>
-          <ArrowUpRight className={ui.arrowUpRight3().className} />
-        </a>
-      ))}
-    </>
   )
 }
 

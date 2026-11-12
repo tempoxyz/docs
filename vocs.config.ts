@@ -176,7 +176,7 @@ export default defineConfig({
   checkDeadlinks: true,
   editLink: {
     link: 'https://github.com/tempoxyz/docs/edit/main/src/pages/:path',
-    text: 'Suggest changes to this page',
+    text: 'Edit this page',
   },
   title: 'Tempo Docs',
   titleTemplate: (path, { frontmatter, title }) => {
@@ -262,7 +262,7 @@ export default defineConfig({
       build: 'BUILD',
       cli: 'CLI',
       'developer-tools': 'DEVELOPER TOOLS',
-      development: 'TEMPO EVM',
+      development: 'NETWORK',
       earn: 'EARN',
       ecosystem: 'ECOSYSTEM',
       'get-started': 'GET STARTED',
@@ -307,10 +307,10 @@ export default defineConfig({
       zones: 'ZONES',
     }
 
-    // Operate owns node and upgrade pages that live under the guide and protocol paths.
+    // Network owns the node and upgrade pages that live under the guide and protocol paths.
     const sectionPrefixMap: Record<string, string> = {
-      '/guide/node': 'OPERATE',
-      '/protocol/upgrades': 'OPERATE',
+      '/guide/node': 'NETWORK',
+      '/protocol/upgrades': 'NETWORK',
     }
 
     const segments = docsPath.split('/').filter(Boolean)
@@ -423,6 +423,7 @@ export default defineConfig({
           { text: 'Build on Tempo', link: '/get-started' },
           { text: 'Quickstart', link: '/get-started/quickstart' },
           { text: 'Testnet faucet', link: '/docs/quickstart/faucet' },
+          { text: 'Network details', link: '/docs/quickstart/connection-details' },
           { text: 'Build with AI', link: '/docs/guide/using-tempo-with-ai' },
           { text: 'Stablecoins on Tempo', link: '/get-started/stablecoins' },
           { text: 'Use cases', link: '/get-started/use-cases' },
@@ -735,6 +736,8 @@ export default defineConfig({
               },
             ],
           },
+          // The product switcher's Wallet link now lives with the accounts it signs for.
+          { text: 'Tempo Wallet', link: 'https://wallet.tempo.xyz' },
         ],
       },
     ]
@@ -757,6 +760,7 @@ export default defineConfig({
           { text: 'One-time payments', link: '/docs/guide/machine-payments/one-time-payments' },
           { text: 'Payment sessions', link: '/docs/guide/machine-payments/pay-as-you-go' },
           { text: 'Streamed payments', link: '/docs/guide/machine-payments/streamed-payments' },
+          { text: 'MPP spec', link: 'https://mpp.dev' },
         ],
       },
     ]
@@ -1040,7 +1044,6 @@ export default defineConfig({
         { text: 'Operator updates', link: '/docs/guide/node/network-upgrades' },
       ],
     }
-    const operateSidebar = [nodeSidebar, changelogSidebar]
 
     // Keep guides and specifications in one chapter per topic. Group controls
     // disclose pages; Vocs opens the active chapter without replacing the tree.
@@ -1215,9 +1218,12 @@ export default defineConfig({
             ],
           },
           { text: 'All specifications', link: '/docs/protocol' },
+          { text: 'Explorer', link: 'https://explore.tempo.xyz' },
         ],
       },
     ]
+    // Network merges Tempo EVM and Operate: build on the chain, then run a node, then the changelog.
+    const networkSidebar = [...developersSidebar, nodeSidebar, changelogSidebar]
     const partnerResourcesSidebar = [...ecosystemSidebar]
     const productSidebars = {
       overview: getStartedSidebar,
@@ -1225,9 +1231,8 @@ export default defineConfig({
       earn: earnSidebar,
       routes: routesSidebar,
       zones: zonesSidebar,
-      developers: developersSidebar,
+      developers: networkSidebar,
       'machine-payments': machinePaymentsSidebar,
-      operate: operateSidebar,
       api: [{ text: 'API reference', items: [{ text: 'Introduction', link: '/docs/api' }] }],
       tools: toolsSidebar,
       resources: resourcesSidebar,
