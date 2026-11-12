@@ -2,7 +2,7 @@ import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
 import { vars as tokens } from '../styles/theme'
 export const renderCellValueText = style({
-  color: tokens.color.gray9,
+  color: tokens.color.muted,
   fontStyle: 'italic',
 })
 export const renderCellValueLink = style({
@@ -48,11 +48,12 @@ export const indexSupplyQueryLayout3 = style({
   display: 'flex',
   alignItems: 'center',
   gap: tokens.spacing['1_5'],
-  fontSize: tokens.fontSize.compact,
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.control,
   color: tokens.color.gray11,
 })
 export const indexSupplyQueryLink = style({
-  color: tokens.color.gray9,
+  color: tokens.color.muted,
   transitionProperty:
     'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -88,7 +89,8 @@ export const indexSupplyQueryLayout5 = style({
 
   paddingBlock: tokens.spacing['1'],
   fontFamily: tokens.fontFamily.code,
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
+  lineHeight: tokens.lineHeight.caption,
 })
 export const indexSupplyQueryText = style({
   width: tokens.spacing['2'],
@@ -108,7 +110,7 @@ export const indexSupplyQueryText3 = style({
 })
 export const sqlEditor = style({
   width: '100%',
-  borderRadius: tokens.radius.smRem,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray4,
@@ -126,17 +128,15 @@ export const sqlEditor = style({
   },
 })
 export const sqlEditor2 = style({
-  fontSize: tokens.fontSize.caption,
-  lineHeight: tokens.lineHeight.snug,
+  fontSize: tokens.fontSize.xs,
+  lineHeight: tokens.lineHeight.caption,
 })
 export const sqlEditor3 = style({
-  fontSize: tokens.fontSize.compact,
-
+  fontSize: tokens.fontSize.xs,
   lineHeight: inherited.lineHeight.leadingNormal,
 })
 export const indexSupplyQueryLayout6 = style({
-  borderRadius: tokens.radius.smRem,
-
+  borderRadius: tokens.radius.lg,
   backgroundColor: inherited.color.backgroundColorDestructiveTint,
   paddingInline: tokens.spacing['3'],
   paddingBlock: tokens.spacing['2'],
@@ -150,7 +150,7 @@ export const indexSupplyQueryLayout6 = style({
 })
 export const indexSupplyQueryLayout7 = style({
   overflow: 'auto',
-  borderRadius: tokens.radius.smRem,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray4,
@@ -180,7 +180,7 @@ export const indexSupplyQueryLayout8 = style({
 export const td = style({
   paddingBlock: tokens.spacing['4'],
   textAlign: 'center',
-  color: tokens.color.gray9,
+  color: tokens.color.muted,
 })
 export const tr = style({
   borderBottomStyle: 'solid',

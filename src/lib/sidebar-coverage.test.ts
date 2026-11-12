@@ -27,9 +27,6 @@ const generatedApiGroups = new Set([
 ])
 // Supporting guides remain discoverable through their primary guide or partner category.
 const supportingPages = new Map([
-  ['/docs/guide/bridge-layerzero', '/docs/partners/bridges'],
-  ['/docs/guide/bridge-bungee', '/docs/partners/bridges'],
-  ['/docs/guide/bridge-relay', '/docs/partners/bridges'],
   ['/docs/partners/developer-tools', '/docs/partners/explorers-and-debugging'],
   ['/docs/guide/payments/send-a-payment/examples', '/docs/guide/payments/send-a-payment'],
 ])
@@ -74,29 +71,90 @@ describe('documentation sidebar coverage', () => {
   })
 })
 
-describe('resource guide navigation', () => {
-  it('keeps guides in a collapsed submenu below the main onboarding content', () => {
-    type SidebarNode = { text?: string; link?: string; collapsed?: boolean; items?: SidebarNode[] }
-    const sidebar = sidebarFor('/get-started') as SidebarNode[]
-    const resources = sidebar.at(-1)
-    expect(resources?.text).toBe('Resources')
-    expect(resources?.items?.[0]).toMatchObject({ text: 'Guides', collapsed: true })
-    const guides = resources?.items?.[0]
-    expect(resources?.items?.find(({ text }) => text === 'Partner guides')).toBeUndefined()
-    expect(guides?.items?.filter(({ items }) => items).every(({ collapsed }) => collapsed)).toBe(
-      true,
-    )
-    const compliance = guides?.items?.find(({ text }) => text === 'Compliance and security')
-    expect(links(compliance)).toContain('/docs/resources/guides/payment-screening')
-    expect(links(compliance)).toContain('/docs/resources/guides/compliance-controls')
-    expect(links(resources)).toContain('/docs/resources/guides')
-    expect(sidebar[0].items?.some(({ text }) => text === 'Guides')).toBe(false)
+describe('section sidebars', () => {
+  it.each([...docsSections, ...docsUtilitySections])('$label sidebar links its landing page', ({
+    href,
+  }) => {
+    expect(links(sidebarFor(href))).toContain(href)
   })
 
-  it('assigns resource guides to Get Started without a new primary section', () => {
+  it('keeps Get Started to onboarding pages', () => {
+    type SidebarNode = { text?: string; items?: SidebarNode[] }
+    const sidebar = sidebarFor('/get-started') as SidebarNode[]
+    expect(sidebar.map(({ text }) => text)).toEqual(['Get Started'])
+    expect(links(sidebar)).toEqual(
+      expect.arrayContaining([
+        '/docs/quickstart/faucet',
+        '/docs/quickstart/connection-details',
+        '/docs/guide/using-tempo-with-ai',
+      ]),
+    )
+    expect(sidebarFor('/docs/quickstart/connection-details')).toBe(sidebar)
+  })
+
+  it('merges Tempo EVM and Operate into Network: chain groups, then Run a node, then Changelog', () => {
+    type SidebarNode = { text?: string; link?: string; items?: SidebarNode[] }
+    const sidebar = sidebarFor('/docs/development') as SidebarNode[]
+    expect(sidebar.map(({ text }) => text)).toEqual(['Tempo EVM', 'Run a node', 'Changelog'])
+    expect(sidebarFor('/docs/guide/node')).toBe(sidebar)
+    expect(sidebarFor('/docs/changelog')).toBe(sidebar)
+    expect(sidebarFor('/docs/protocol/upgrades/t13')).toBe(sidebar)
+    expect(sidebar[2].items?.map(({ text }) => text)).toEqual([
+      'Overview',
+      'Network upgrades',
+      'Node releases',
+      'Operator updates',
+    ])
+  })
+
+  it.each([
+    ['/docs/accounts', 'https://wallet.tempo.xyz'],
+    ['/docs/agents', 'https://mpp.dev'],
+    ['/docs/development', 'https://explore.tempo.xyz'],
+  ])('%s sidebar links %s, which left the header', (landing, href) => {
+    expect(links(sidebarFor(landing))).toContain(href)
+  })
+
+  it.each([
+    ['/docs/guide/node/validator-keys', 'developers', '/docs/development'],
+    ['/docs/guide/node/network-upgrades', 'developers', '/docs/development'],
+    ['/docs/protocol/upgrades/t11', 'developers', '/docs/development'],
+    ['/docs/changelog', 'developers', '/docs/development'],
+    ['/docs/cli/api', 'tools', '/docs/sdk'],
+    ['/docs/wallet/recipes', 'tools', '/docs/sdk'],
+    ['/docs/sdk/typescript/api-client', 'tools', '/docs/sdk'],
+    ['/docs/resources/guides/payment-links', 'resources', '/docs/resources/guides'],
+    ['/docs/guide/bridge-relay', 'ecosystem', '/docs/partners'],
+  ])('%s appears once, in the %s sidebar', (route, section, landing) => {
+    expect(getActiveDocsSection(route)?.id).toBe(section)
+    expect(sidebarFor(route)).toBe(sidebarFor(landing))
+    const sidebars = [...new Set(Object.values(config.sidebar as Record<string, unknown>))]
+    expect(sidebars.filter((sidebar) => links(sidebar).includes(route))).toEqual([
+      sidebarFor(landing),
+    ])
+    expect(links(sidebarFor(route)).filter((link) => link === route)).toHaveLength(1)
+  })
+})
+
+describe('resource guide navigation', () => {
+  it('lists guides in their own sidebar with collapsed topics', () => {
+    type SidebarNode = { text?: string; link?: string; collapsed?: boolean; items?: SidebarNode[] }
+    const sidebar = sidebarFor('/docs/resources/guides') as SidebarNode[]
+    expect(sidebar.map(({ text }) => text)).toEqual(['Guides'])
+    const guides = sidebar[0]
+    expect(guides.items?.[0]).toEqual({ text: 'All guides', link: '/docs/resources/guides' })
+    expect(guides.items?.filter(({ items }) => items).every(({ collapsed }) => collapsed)).toBe(
+      true,
+    )
+    const compliance = guides.items?.find(({ text }) => text === 'Compliance and security')
+    expect(links(compliance)).toContain('/docs/resources/guides/payment-screening')
+    expect(links(compliance)).toContain('/docs/resources/guides/compliance-controls')
+  })
+
+  it('assigns resource guides to the Guides section', () => {
     for (const route of routes.filter((route) => route.startsWith('/docs/resources/'))) {
-      expect(getActiveDocsSection(route)?.id).toBe('overview')
-      expect(sidebarFor(route)).toBe(sidebarFor('/get-started'))
+      expect(getActiveDocsSection(route)?.id).toBe('resources')
+      expect(sidebarFor(route)).toBe(sidebarFor('/docs/resources/guides'))
     }
   })
 })

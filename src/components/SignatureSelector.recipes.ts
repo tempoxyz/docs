@@ -17,7 +17,7 @@ export const signatureSelectorLayout2 = style({
 })
 export const label = style({
   display: 'block',
-  fontSize: tokens.fontSize.compact,
+  fontSize: tokens.fontSize.sm,
   color: tokens.color.gray11,
 })
 export const signatureSelectorInput = style({
@@ -29,7 +29,7 @@ export const signatureSelectorInput = style({
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray4,
   paddingInline: tokens.spacing['3'],
-  fontSize: tokens.fontSize.compact,
+  fontSize: tokens.fontSize.sm,
   selectors: {
     '&:focus': {
       '--tempo-style-ring-shadow':
@@ -52,8 +52,8 @@ export const signatureSelectorButton = style({
   insetInlineEnd: tokens.spacing['2'],
   '--tempo-style-translate-y': 'calc(calc(1 / 2 * 100%) * -1)',
   translate: 'var(--tempo-style-translate-x) var(--tempo-style-translate-y)',
-  fontSize: tokens.fontSize.caption,
-  color: tokens.color.gray9,
+  fontSize: tokens.fontSize.xs,
+  color: tokens.color.muted,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
@@ -85,8 +85,8 @@ export const signatureSelectorLayout4 = style({
   paddingInline: tokens.spacing['3'],
   paddingBlock: tokens.spacing['4'],
   textAlign: 'center',
-  fontSize: tokens.fontSize.compact,
-  color: tokens.color.gray9,
+  fontSize: tokens.fontSize.sm,
+  color: tokens.color.muted,
 })
 export const signatureSelectorLayout5 = style({
   borderBottomStyle: 'solid',
@@ -107,11 +107,11 @@ export const signatureSelectorLayout6 = style({
   paddingInline: tokens.spacing['3'],
 
   paddingBlock: tokens.spacing['1'],
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
   fontWeight: tokens.fontWeight.medium,
 
   letterSpacing: inherited.letterSpacing.trackingWide,
-  color: tokens.color.gray10,
+  color: tokens.color.muted,
   textTransform: 'uppercase',
 })
 export const signatureSelectorLayout7 = style({
@@ -139,7 +139,7 @@ export const signatureSelectorInput2 = style({
 export const signatureSelectorText = style({
   flexShrink: 0,
   fontFamily: tokens.fontFamily.code,
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
   color: tokens.color.gray12,
 })
 export const signatureSelectorText2 = style({
@@ -148,8 +148,8 @@ export const signatureSelectorText2 = style({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   fontFamily: tokens.fontFamily.code,
-  fontSize: tokens.fontSize.caption,
-  color: tokens.color.gray9,
+  fontSize: tokens.fontSize.xs,
+  color: tokens.color.muted,
 })
 export const signatureSelectorText3 = style({
   marginInlineStart: 'auto !custom',
@@ -191,7 +191,7 @@ export const signatureSelectorLayout9 = style({
       marginBlockEnd: tokens.spacing['2'],
     },
   },
-  borderRadius: tokens.radius.smRem,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.gray4,
@@ -216,12 +216,12 @@ export const code = style({
 
   paddingBlock: tokens.spacing['1'],
   fontFamily: tokens.fontFamily.code,
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
   color: tokens.color.gray11,
 })
 export const signatureSelectorLayout12 = style({
-  fontSize: tokens.fontSize.caption,
-  color: tokens.color.gray10,
+  fontSize: tokens.fontSize.xs,
+  color: tokens.color.muted,
 })
 export const signatureSelectorLink = style({
   color: inherited.color.textColorAccent,
@@ -252,7 +252,7 @@ export const signatureSelectorLayout14 = style({
 
   paddingBlock: tokens.spacing['1'],
   fontFamily: tokens.fontFamily.code,
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
 })
 export const signatureSelectorText5 = style({
   width: tokens.spacing['2'],
@@ -272,7 +272,7 @@ export const signatureSelectorText7 = style({
 })
 export const signatureSelectorButton3 = style({
   lineHeight: tokens.lineHeight.none,
-  color: tokens.color.gray9,
+  color: tokens.color.muted,
   selectors: {
     '&:hover': {
       '@media (hover: hover)': {
@@ -285,7 +285,7 @@ export const signatureSelectorLayout15 = style({
   borderColor: tokens.color.amber6,
   backgroundColor: tokens.color.amber3,
   color: tokens.color.amber11,
-  borderRadius: tokens.radius.smRem,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
   borderWidth: tokens.borderWidth.hairline,
   paddingInline: tokens.spacing['3'],
@@ -304,7 +304,7 @@ export const signatureSelectorLayout16 = style({
       marginBlockEnd: tokens.spacing['2'],
     },
   },
-  borderRadius: tokens.radius.smRem,
+  borderRadius: tokens.radius.lg,
   borderStyle: 'solid',
   borderWidth: tokens.borderWidth.hairline,
   borderColor: tokens.color.blue4,
@@ -312,7 +312,7 @@ export const signatureSelectorLayout16 = style({
   padding: tokens.spacing['3'],
 })
 export const signatureSelectorLayout17 = style({
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
   fontWeight: tokens.fontWeight.medium,
   color: tokens.color.blue11,
 })
@@ -323,11 +323,11 @@ export const code2 = style({
 
   paddingBlock: tokens.spacing['1'],
   fontFamily: tokens.fontFamily.code,
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
   color: tokens.color.blue11,
 })
 export const signatureSelectorLayout18 = style({
-  fontSize: tokens.fontSize.caption,
+  fontSize: tokens.fontSize.xs,
 
   lineHeight: inherited.lineHeight.leadingRelaxed,
   color: tokens.color.blue9,

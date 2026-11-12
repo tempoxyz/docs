@@ -2,6 +2,9 @@ import { inherited } from '../styles/inherited'
 import { style } from '../styles/scoped'
 import { vars as tokens } from '../styles/theme'
 
+// Nav v2 (system-v2): a 56 top bar with a bottom hairline, a 48 section row from Desktop up,
+// 32-high controls with radius 8, 14/20 UI text, and one current state: the container chip.
+
 export const docsSiteHeader = style({
   position: 'fixed',
   zIndex: tokens.zIndex.header,
@@ -16,7 +19,7 @@ export const docsSiteHeader = style({
       outlineWidth: tokens.borderWidth.emphasis,
       outlineStyle: 'solid',
       outlineColor: tokens.color.foreground,
-      outlineOffset: '4px',
+      outlineOffset: '2px',
     },
   },
   '@media (prefers-reduced-motion: reduce)': {
@@ -28,213 +31,227 @@ export const docsSiteHeader = style({
   },
 })
 
+/** The top bar: full width, no pill. Brand and tabs on the left, search and the one CTA on the right. */
 export const docsHeaderNav = style({
   position: 'relative',
   zIndex: tokens.zIndex.header,
-  display: 'grid',
-  gridTemplateColumns: 'minmax(0, 1fr) auto',
+  display: 'flex',
   alignItems: 'center',
+  justifyContent: 'space-between',
   gap: tokens.spacing['2'],
   height: 'var(--tempo-docs-primary-nav-height)',
-  paddingInline: tokens.spacing['5'],
-  '@media (width < 380px)': {
-    paddingInline: tokens.spacing['3_5'],
-  },
-  '@media (width >= 1080px)': {
-    gap: tokens.spacing['5'],
-    paddingInline: tokens.spacing['7'],
+  paddingInline: tokens.spacing['4'],
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderBottomStyle: 'solid',
+  borderBottomColor: tokens.color.line,
+  '@media (width >= 768px)': {
+    paddingInline: tokens.spacing['6'],
   },
 })
 
-export const docsHeaderBrand = style({
+export const docsHeaderLeft = style({
   display: 'flex',
   alignItems: 'center',
-  gap: tokens.spacing['7'],
+  gap: tokens.spacing['8'],
   minWidth: 0,
-  whiteSpace: 'nowrap',
-  '@media (width < 380px)': {
-    gap: tokens.spacing['5'],
-  },
 })
 
+/** TEMPO DEVELOPERS: the wordmark in content/primary, DEVELOPERS in content/secondary. */
 export const docsHeaderLogo = style({
   display: 'flex',
+  flexShrink: 0,
   alignItems: 'center',
-  height: '40px',
-  color: 'inherit !custom',
-})
-
-export const docsHeaderMobileSearch = style({
-  display: 'flex',
-  minWidth: 0,
-  height: '39px',
-  alignItems: 'center',
-  gap: tokens.spacing['2_5'],
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: 'transparent !custom',
-  borderRadius: tokens.radius.md,
-  '--corner-radius': tokens.radius.md,
-  backgroundColor: inherited.color.surfaceInput,
-
-  color: inherited.color.colorMixInSrgbColorForeground65Transparent,
-  paddingInline: tokens.spacing['3_5'],
-  fontSize: tokens.fontSize.sm,
-  cursor: 'pointer',
-  transitionProperty: 'color, background-color, border-color, opacity, transform',
-  transitionDuration: 'var(--tempo-exit)',
-  transitionTimingFunction: 'var(--tempo-ease)',
-  selectors: {
-    '&:hover': {
-      // design-exception: Component artwork uses this optical mix; keep its existing contrast.
-      borderColor: 'color-mix(in srgb, currentColor 25%, transparent) !custom',
-      color: tokens.color.foreground,
-      transitionDuration: 'var(--tempo-enter)',
-    },
-  },
-  width: '100%',
-  marginBottom: tokens.spacing['7'],
-})
-
-export const docsHeaderActions = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: tokens.spacing['1'],
-  '@media (width >= 1080px)': {
-    gap: tokens.spacing['2'],
-  },
-})
-
-export const docsHeaderWebsite = style({
-  display: 'none',
-  alignItems: 'center',
-  gap: tokens.spacing['1'],
-  fontSize: tokens.fontSize.xs,
-
-  color: inherited.color.colorMixInSrgbColorForeground60Transparent,
+  gap: tokens.spacing['1_5'],
+  height: tokens.spacing['8'],
+  color: tokens.color.foreground,
   textDecoration: 'none',
-  selectors: {
-    '&:hover': {
-      color: tokens.color.foreground,
-    },
-  },
-  '@media (width >= 1280px)': {
-    display: 'flex',
-  },
+  whiteSpace: 'nowrap',
 })
 
-export const docsHeaderAgentMenu = style({
-  position: 'relative',
+// The outlined lockup at the Figma size (Tempo Alphabet 18).
+export const docsHeaderWordmark = style({
+  flexShrink: 0,
+  height: '15px',
+  width: '186px',
+})
+
+export const docsHeaderDevelopers = style({
+  fill: tokens.color.muted,
+})
+
+/** Home · Docs · Reference · Resources: plain links from Desktop up. */
+export const docsAreaNav = style({
   display: 'none',
   '@media (width >= 1080px)': {
     display: 'block',
   },
+  selectors: {
+    '& ul': {
+      display: 'flex',
+      alignItems: 'center',
+      gap: tokens.spacing['2'],
+      margin: 0,
+      padding: 0,
+      listStyle: 'none',
+    },
+  },
 })
 
-// TDS Platform Button, secondary, small scale, with the G8 radius.
-export const docsHeaderAgentTrigger = style({
+export const docsAreaLink = style({
   display: 'flex',
-  height: '32px',
   alignItems: 'center',
-  gap: tokens.spacing['1_5'],
-  border: 0,
-  // G8: header controls were 12px; smoothed lg reads a little rounder.
-  borderRadius: tokens.radius.lg,
-  '--corner-radius': tokens.radius.lg,
-  paddingInlineStart: tokens.spacing['4'],
-  paddingInlineEnd: tokens.spacing['3'],
-  color: inherited.color.vocsTextColorPrimary,
-  backgroundColor: tokens.color.container,
+  height: tokens.spacing['8'],
+  paddingInline: tokens.spacing['3'],
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  color: tokens.color.muted,
   fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  lineHeight: tokens.lineHeight.control,
+  textDecoration: 'none',
   whiteSpace: 'nowrap',
+  transitionProperty: 'color, background-color, border-color, opacity, transform',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  selectors: {
+    '&:hover': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.containerSubtle,
+      transitionDuration: 'var(--tempo-enter)',
+    },
+    '&[aria-current="page"]': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.container,
+      fontWeight: tokens.fontWeight.medium,
+    },
+  },
+})
+
+export const docsHeaderActions = style({
+  display: 'flex',
+  flexShrink: 0,
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: tokens.spacing['2'],
+})
+
+/** Search: a 32 icon button below Display widths, a 240 field with its shortcut from 1376px. */
+export const docsHeaderSearchField = style({
+  display: 'grid',
+  width: tokens.spacing['8'],
+  height: tokens.spacing['8'],
+  placeItems: 'center',
+  padding: tokens.spacing['0'],
+  border: 0,
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  background: 'none',
+  color: tokens.color.muted,
+  fontFamily: tokens.fontFamily.sansFallback,
   cursor: 'pointer',
   transitionProperty: 'color, background-color, border-color, opacity, transform',
   transitionDuration: 'var(--tempo-exit)',
   transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
-    '&[aria-expanded="true"]': {
-      backgroundColor: tokens.color.containerStrong,
+    '&:hover': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.containerSubtle,
       transitionDuration: 'var(--tempo-enter)',
     },
-    '&:disabled': {
-      cursor: 'default',
+  },
+  '@media (width >= 1376px)': {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: tokens.spacing['2'],
+    width: '240px',
+    paddingInline: tokens.spacing['3'],
+    backgroundColor: tokens.color.container,
+    fontSize: tokens.fontSize.sm,
+    lineHeight: tokens.lineHeight.control,
+    selectors: {
+      '&:hover': {
+        backgroundColor: tokens.color.containerStrong,
+      },
     },
+  },
+})
+
+export const docsHeaderSearchLabel = style({
+  display: 'none',
+  '@media (width >= 1376px)': {
+    display: 'inline',
+    flex: 1,
+    color: tokens.color.tertiary,
+    textAlign: 'start',
+  },
+})
+
+export const docsHeaderKbd = style({
+  display: 'none',
+  '@media (width >= 1376px)': {
+    display: 'inline-flex',
+    alignItems: 'center',
+    paddingInline: tokens.spacing['1'],
+    borderRadius: tokens.radius.sm,
+    backgroundColor: tokens.color.container,
+    color: tokens.color.tertiary,
+    fontFamily: tokens.fontFamily.sansFallback,
+    fontSize: tokens.fontSize.xs,
+    lineHeight: tokens.lineHeight.caption,
+  },
+})
+
+/** Get API key ("Console" when signed in): the one primary button, inverse fill. Tablet and up. */
+export const docsHeaderGetKey = style({
+  display: 'none',
+  alignItems: 'center',
+  height: tokens.spacing['8'],
+  paddingInline: tokens.spacing['3'],
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  backgroundColor: inherited.color.backgroundColorInvert,
+  color: inherited.color.textColorInvert,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.medium,
+  lineHeight: tokens.lineHeight.control,
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+  transitionProperty: 'opacity',
+  transitionDuration: 'var(--tempo-exit)',
+  transitionTimingFunction: 'var(--tempo-ease)',
+  '@media (width >= 768px)': {
+    display: 'flex',
   },
   '@media (hover: hover)': {
     selectors: {
       '&:hover': {
-        backgroundColor: tokens.color.containerStrong,
+        opacity: 0.9,
         transitionDuration: 'var(--tempo-enter)',
       },
     },
   },
 })
 
-export const docsHeaderAgentPanel = style({
-  position: 'absolute',
-  insetInlineEnd: 0,
-  top: 'calc(100% + 16px)',
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: inherited.color.colorMixInSrgbCurrentColor12Transparent,
-  borderRadius: tokens.radius.lg,
-  '--corner-radius': tokens.radius.lg,
-  backgroundColor: inherited.color.colorSurfacePage,
-  // design-exception: Preserve this surface's layered artwork or focus treatment.
-  boxShadow: '0 8px 24px #0000000d !custom',
-  overflow: 'hidden',
-  // G5: the panel fades and settles in, and fades out before it unmounts.
-  transitionProperty: 'color, background-color, border-color, opacity, transform',
-  transitionDuration: 'var(--tempo-enter)',
-  transitionTimingFunction: 'var(--tempo-ease)',
-  '@starting-style': {
-    opacity: 0,
-    transform: 'translateY(-4px)',
-  },
-  selectors: {
-    '&[data-state="closed"]': {
-      opacity: 0,
-      transform: 'translateY(-4px)',
-      transitionDuration: 'var(--tempo-exit)',
-    },
-  },
-  '@media (prefers-reduced-motion: reduce)': {
-    transitionProperty: 'opacity',
-    transform: 'none',
-  },
-})
-
-export const docsHeaderMobileActions = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: tokens.spacing['0_5'],
-  selectors: {
-    '& .docs-header-destinations': {
-      marginInlineEnd: tokens.spacing['2'],
-    },
-  },
-  '@media (width >= 1080px)': {
-    display: 'none',
-  },
-})
-
 export const docsHeaderIconButton = style({
   display: 'grid',
-  width: '36px',
-  height: '36px',
+  width: tokens.spacing['8'],
+  height: tokens.spacing['8'],
   placeItems: 'center',
-  // G8: header controls were 12px; smoothed lg reads a little rounder.
-  borderRadius: tokens.radius.lg,
-  '--corner-radius': tokens.radius.lg,
-  color: 'inherit !custom',
+  padding: tokens.spacing['0'],
+  border: 0,
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  background: 'none',
+  color: tokens.color.muted,
   cursor: 'pointer',
   transitionProperty: 'color, background-color, border-color, opacity, transform',
   transitionDuration: 'var(--tempo-exit)',
   transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
     '&:hover': {
-      backgroundColor: inherited.color.colorMixInSrgbCurrentColor5Transparent,
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.containerSubtle,
       transitionDuration: 'var(--tempo-enter)',
     },
   },
@@ -246,22 +263,26 @@ export const docsHeaderMenuButton = style({
   },
 })
 
+/** The section tabs: a 48 row under the top bar from Desktop up, with a bottom hairline. */
 export const docsSectionNav = style({
-  selectors: {
-    '& :is(a, button):focus-visible': {
-      outlineWidth: tokens.borderWidth.emphasis,
-      outlineStyle: 'solid',
-      outlineColor: tokens.color.foreground,
-      outlineOffset: '4px',
-    },
-  },
-  display: 'flex',
+  display: 'none',
   alignItems: 'center',
   color: tokens.color.foreground,
   backgroundColor: inherited.color.colorSurfaceShell,
   borderBottomWidth: tokens.borderWidth.hairline,
   borderBottomStyle: 'solid',
-  borderBottomColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
+  borderBottomColor: tokens.color.line,
+  selectors: {
+    '& :is(a, button):focus-visible': {
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineStyle: 'solid',
+      outlineColor: tokens.color.foreground,
+      outlineOffset: '-2px',
+    },
+  },
+  '@media (width >= 1080px)': {
+    display: 'flex',
+  },
   '@media (prefers-reduced-motion: reduce)': {
     selectors: {
       '& *': {
@@ -271,6 +292,65 @@ export const docsSectionNav = style({
   },
 })
 
+export const docsSectionNavScroll = style({
+  flex: 1,
+  minWidth: 0,
+  height: 'var(--tempo-docs-section-nav-height)',
+  overflowX: 'auto',
+  // The first tab's label starts on the 24 gutter: 12 row inset + 12 tab padding.
+  paddingInline: tokens.spacing['3'],
+  scrollbarWidth: 'none',
+  selectors: {
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+    '& ul': {
+      display: 'flex',
+      width: 'max-content',
+      minWidth: '100%',
+      height: '100%',
+      alignItems: 'center',
+      gap: tokens.spacing['1'],
+      margin: 0,
+      padding: 0,
+      listStyle: 'none',
+    },
+    '& a': {
+      display: 'flex',
+      alignItems: 'center',
+      gap: tokens.spacing['2'],
+      height: tokens.spacing['8'],
+      paddingInline: tokens.spacing['3'],
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      lineHeight: tokens.lineHeight.control,
+      textDecoration: 'none',
+      whiteSpace: 'nowrap',
+      transitionProperty: 'color, background-color, border-color, opacity, transform',
+      transitionDuration: 'var(--tempo-exit)',
+      transitionTimingFunction: 'var(--tempo-ease)',
+    },
+    '& a:hover': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.containerSubtle,
+      transitionDuration: 'var(--tempo-enter)',
+    },
+    '& a[aria-current="page"]': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.container,
+      fontWeight: tokens.fontWeight.medium,
+    },
+  },
+})
+
+export const docsSectionIcon = style({
+  flexShrink: 0,
+})
+
+/** The menu below Desktop: a full-screen sheet with the same tabs and sections as the top bar. */
 export const docsHeaderMobileDialog = style({
   position: 'fixed',
   inset: 0,
@@ -283,7 +363,8 @@ export const docsHeaderMobileDialog = style({
   border: 0,
   color: tokens.color.foreground,
   backgroundColor: inherited.color.colorSurfacePage,
-  // G5: the menu fades in on open and out on close; display and overlay switch
+  fontFamily: tokens.fontFamily.sansFallback,
+  // The menu fades in on open and out on close; display and overlay switch
   // discretely at the end so the exit is visible.
   opacity: 0,
   transitionProperty:
@@ -302,8 +383,7 @@ export const docsHeaderMobileDialog = style({
       transitionDuration: 'var(--tempo-enter)',
     },
     '&::backdrop': {
-      // design-exception: Preserve this surface's layered artwork or focus treatment.
-      background: '#0006 !custom',
+      backgroundColor: tokens.color.scrim,
     },
   },
   '@starting-style': {
@@ -324,471 +404,132 @@ export const docsHeaderMobileTop = style({
   justifyContent: 'space-between',
   alignItems: 'center',
   height: 'var(--tempo-docs-primary-nav-height)',
-  paddingInline: tokens.spacing['5'],
+  paddingInline: tokens.spacing['4'],
   borderBottomWidth: tokens.borderWidth.hairline,
   borderBottomStyle: 'solid',
-  borderBottomColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
-  '@media (width < 380px)': {
-    paddingInline: tokens.spacing['3_5'],
+  borderBottomColor: tokens.color.line,
+  '@media (width >= 768px)': {
+    paddingInline: tokens.spacing['6'],
   },
 })
 
+// Item labels sit on the gutter: 4 body inset + 12 item padding (16), or 12 + 12 (24) from Tablet.
 export const docsHeaderMobileBody = style({
-  overflow: 'auto',
-  overscrollBehavior: 'contain',
-
-  paddingTop: tokens.spacing['5'],
-  paddingInlineEnd: tokens.spacing['6'],
-  paddingBottom: tokens.spacing['8'],
-  paddingInlineStart: tokens.spacing['6'],
-})
-
-export const docsHeaderMobileLabel = style({
-  marginBottom: tokens.spacing['4'],
-
-  color: inherited.color.colorMixInSrgbColorForeground55Transparent,
-  fontSize: tokens.fontSize.xs,
-})
-
-export const docsHeaderMobileSidebar = style({
   display: 'flex',
   flexDirection: 'column',
-})
-
-export const docsHeaderMobileSections = style({
-  marginTop: tokens.spacing['6'],
-  paddingTop: tokens.spacing['6'],
-  borderTopWidth: tokens.borderWidth.hairline,
-  borderTopStyle: 'solid',
-  borderTopColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
-  selectors: {
-    '& a': {
-      display: 'flex',
-      justifyContent: 'space-between',
-
-      paddingBlock: tokens.spacing['2'],
-      fontSize: tokens.fontSize.sm,
-      color: 'inherit !custom',
-      textDecoration: 'none',
-    },
-    '& a span': {
-      opacity: 0.4,
-    },
+  gap: tokens.spacing['6'],
+  overflow: 'auto',
+  overscrollBehavior: 'contain',
+  paddingTop: tokens.spacing['4'],
+  paddingBottom: tokens.spacing['8'],
+  paddingInline: tokens.spacing['1'],
+  '@media (width >= 768px)': {
+    paddingInline: tokens.spacing['3'],
   },
 })
 
-export const docsHeaderMobileResources = style({
-  marginTop: tokens.spacing['6'],
-  paddingTop: tokens.spacing['6'],
-  borderTopWidth: tokens.borderWidth.hairline,
-  borderTopStyle: 'solid',
-  borderTopColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
-  selectors: {
-    '& > .docs-resource-links': {
-      gap: tokens.spacing['0'],
-    },
-    '& > .docs-resource-links a': {
-      paddingBlock: tokens.spacing['2'],
-      paddingInline: tokens.spacing['0'],
-    },
-    '& > .docs-resource-links a:hover': {
-      backgroundColor: 'transparent !custom',
-    },
-    '& > .docs-resource-links svg:last-child': {
-      opacity: 0.4,
-    },
-  },
-})
-
-export const docsHeaderMobileAgents = style({
-  marginTop: tokens.spacing['6'],
-  paddingTop: tokens.spacing['6'],
-  borderTopWidth: tokens.borderWidth.hairline,
-  borderTopStyle: 'solid',
-  borderTopColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
-  selectors: {
-    '& summary': {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingBlock: tokens.spacing['2'],
-      color: tokens.color.foreground,
-      fontSize: tokens.fontSize.sm,
-      listStyle: 'none',
-      cursor: 'pointer',
-    },
-    '& summary::-webkit-details-marker': {
-      display: 'none',
-    },
-    '& summary svg': {
-      opacity: 0.4,
-      transition: 'rotate 150ms',
-    },
-    '&[open] summary': {
-      marginBottom: tokens.spacing['4'],
-    },
-    '&[open] summary svg': {
-      rotate: '180deg',
-    },
-  },
-  '@media (prefers-reduced-motion: reduce)': {
-    selectors: {
-      '& summary svg': {
-        transition: 'none',
-      },
-    },
-  },
-})
-
-export const docsHeaderMobileUtilityLink = style({
-  display: 'flex',
-  justifyContent: 'space-between',
-  paddingBlock: tokens.spacing['2'],
-  color: tokens.color.foreground,
-  fontSize: tokens.fontSize.sm,
-  textDecoration: 'none',
-  selectors: {
-    '& span': {
-      opacity: 0.4,
-    },
-  },
-})
-
-export const docsHeaderMobileWebsite = style({
+export const docsHeaderMobileSearch = style({
   display: 'flex',
   alignItems: 'center',
   gap: tokens.spacing['2'],
-  marginTop: tokens.spacing['6'],
-
-  color: inherited.color.colorMixInSrgbColorForeground55Transparent,
-  fontSize: tokens.fontSize.xs,
-  textDecoration: 'none',
-})
-
-export const docsSectionNavScroll = style({
-  flex: 1,
-  minWidth: 0,
-  height: 'var(--tempo-docs-section-nav-height)',
-  overflowX: 'auto',
-  paddingInline: tokens.spacing['5'],
-  scrollbarWidth: 'none',
-  // design-exception: Fade the scroll edges so clipped section tabs read as scrollable instead of cut off.
-  maskImage:
-    'linear-gradient(to right, transparent, black 16px, black calc(100% - 24px), transparent) !custom',
-  selectors: {
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
-    '& ul': {
-      display: 'flex',
-      width: 'max-content',
-      minWidth: '100%',
-      height: '100%',
-      alignItems: 'center',
-      gap: tokens.spacing['1_5'],
-      margin: 0,
-      padding: 0,
-      listStyle: 'none',
-    },
-    '& a': {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-
-      gap: tokens.spacing['2'],
-      height: '34px',
-
-      paddingBlock: tokens.spacing['0'],
-      paddingInline: tokens.spacing['2_5'],
-      border: 0,
-      borderRadius: tokens.radius.lg,
-
-      color: inherited.color.colorMixInSrgbColorForeground65Transparent,
-      fontSize: tokens.fontSize.compact,
-      fontWeight: tokens.fontWeight.medium,
-      textDecoration: 'none',
-      whiteSpace: 'nowrap',
-      transition: 'color 150ms, background-color 150ms',
-    },
-    '& a:hover': {
-      color: tokens.color.foreground,
-      backgroundColor: inherited.color.colorMixInSrgbColorForeground3Transparent,
-    },
-    '& a[aria-current="page"]': {
-      color: tokens.color.foreground,
-      backgroundColor: inherited.color.colorMixInSrgbColorForeground8ColorSurfaceShell,
-    },
-  },
-  '@media (width >= 1080px)': {
-    paddingInline: tokens.spacing['7'],
-  },
-})
-
-export const docsSectionIcon = style({
-  flexShrink: 0,
-})
-
-export const docsSectionUtilities = style({
-  display: 'flex',
-  alignItems: 'center',
-  flexShrink: 0,
-  gap: tokens.spacing['6'],
-  marginInlineStart: tokens.spacing['3'],
-  marginInlineEnd: tokens.spacing['5'],
-  '@media (width < 800px)': {
-    display: 'none',
-  },
-  '@media (width >= 1080px)': {
-    marginInlineEnd: tokens.spacing['7'],
-  },
-})
-
-export const docsReferenceMenu = style({
-  position: 'relative',
-})
-
-export const docsReferenceTrigger = style({
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-  gap: tokens.spacing['1_5'],
-  height: 'var(--tempo-docs-section-nav-height)',
-
-  paddingBlock: tokens.spacing['0'],
-  paddingInline: tokens.spacing['0_5'],
-
-  color: inherited.color.colorMixInSrgbColorForeground65Transparent,
-  fontFamily: tokens.fontFamily.sansFallback,
-  fontSize: tokens.fontSize.compact,
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
-  cursor: 'pointer',
-  selectors: {
-    '&:is(:hover, [aria-expanded="true"], [aria-current="page"])': {
-      color: tokens.color.foreground,
-    },
-    '&[aria-current="page"]::after': {
-      content: '""',
-      position: 'absolute',
-      inset: 'auto 0 0',
-      height: '2px',
-      // design-exception: Preserve this surface's layered artwork or focus treatment.
-      background: 'currentColor !custom',
-    },
-  },
-  background: 'none',
+  width: '100%',
+  height: tokens.spacing['8'],
+  paddingInline: tokens.spacing['3'],
   border: 0,
-})
-
-export const docsSectionUtilityLink = style({
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-  gap: tokens.spacing['1_5'],
-  height: 'var(--tempo-docs-section-nav-height)',
-
-  paddingBlock: tokens.spacing['0'],
-  paddingInline: tokens.spacing['0_5'],
-
-  color: inherited.color.colorMixInSrgbColorForeground65Transparent,
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  backgroundColor: tokens.color.container,
+  color: tokens.color.tertiary,
   fontFamily: tokens.fontFamily.sansFallback,
-  fontSize: tokens.fontSize.compact,
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.control,
   cursor: 'pointer',
   selectors: {
-    '&:is(:hover, [aria-current="page"])': {
-      color: tokens.color.foreground,
-    },
-    '&[aria-current="page"]::after': {
-      content: '""',
-      position: 'absolute',
-      inset: 'auto 0 0',
-      height: '2px',
-      // design-exception: Preserve this surface's layered artwork or focus treatment.
-      background: 'currentColor !custom',
+    '& svg': {
+      color: tokens.color.muted,
     },
   },
 })
 
-export const docsReferencePanel = style({
-  position: 'absolute',
-  top: 'calc(100% + 8px)',
-  insetInlineEnd: 0,
-  width: '280px',
-  padding: tokens.spacing['3'],
-  borderWidth: tokens.borderWidth.hairline,
-  borderStyle: 'solid',
-  borderColor: inherited.color.colorMixInSrgbColorForeground12Transparent,
-  borderRadius: tokens.radius.lg,
-  backgroundColor: inherited.color.colorSurfaceShell,
-  // design-exception: Preserve this surface's layered artwork or focus treatment.
-  boxShadow: '0 8px 24px #0000000d !custom',
-  selectors: {
-    '&[hidden]': {
-      display: 'none',
-    },
-    '& a:focus-visible': {
-      // design-exception: Preserve this surface's layered artwork or focus treatment.
-      outline: '2px solid currentColor !custom',
-      outlineOffset: '-2px',
-    },
-  },
-  zIndex: tokens.zIndex.sectionNav,
-})
-
-export const docsResourceLinks = style({
+export const docsHeaderMobileSections = style({
   display: 'grid',
-  gridTemplateColumns: '1fr',
-  gap: tokens.spacing['1'],
-  fontFamily: tokens.fontFamily.sansFallback,
-  selectors: {
-    '& a': {
-      display: 'block',
-
-      paddingBlock: tokens.spacing['2_5'],
-      paddingInline: tokens.spacing['3'],
-      borderRadius: tokens.radius.md,
-      color: tokens.color.foreground,
-      fontSize: tokens.fontSize.sm,
-      lineHeight: tokens.lineHeight.snug,
-      textDecoration: 'none',
-    },
-    '& a:hover': {
-      backgroundColor: inherited.color.colorSurfaceBlock,
-    },
-  },
+  gap: tokens.spacing['6'],
 })
 
-export const docsResourceLinkLabel = style({
+export const docsHeaderMobileAreaGroup = style({
+  display: 'grid',
+  gap: tokens.spacing['0_5'],
+})
+
+export const docsHeaderMobileAreaLabel = style({
+  marginBlock: tokens.spacing['0'],
+  marginBottom: tokens.spacing['1'],
+  paddingInline: tokens.spacing['3'],
+  color: tokens.color.foreground,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.medium,
+  lineHeight: tokens.lineHeight.control,
+})
+
+export const docsHeaderMobileLink = style({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: tokens.spacing['3'],
+  height: tokens.spacing['8'],
+  paddingInline: tokens.spacing['3'],
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  color: tokens.color.muted,
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.control,
+  textDecoration: 'none',
+  selectors: {
+    '&:hover': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.containerSubtle,
+    },
+    '&[aria-current="page"]': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.container,
+      fontWeight: tokens.fontWeight.medium,
+    },
+  },
 })
 
-export const docsResourceLogo = style({
-  width: '16px',
-  height: '16px',
-  flexShrink: 0,
-})
-
-export const docsResourceLinkText = style({
-  flex: 1,
+/** The full-width Get API key at the foot of the menu. */
+export const docsHeaderMobileGetKey = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: tokens.spacing['8'],
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  backgroundColor: inherited.color.backgroundColorInvert,
+  color: inherited.color.textColorInvert,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.medium,
+  lineHeight: tokens.lineHeight.control,
+  textDecoration: 'none',
 })
 
 export const docsHeaderMobileTheme = style({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  borderTopWidth: tokens.borderWidth.hairline,
-  borderTopStyle: 'solid',
-  borderTopColor: inherited.color.colorMixInSrgbCurrentColor10Transparent,
-  marginTop: tokens.spacing['6'],
-  paddingTop: tokens.spacing['6'],
-  fontSize: tokens.fontSize.compact,
+  paddingInlineStart: tokens.spacing['3'],
+  color: tokens.color.muted,
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.control,
   selectors: {
     '& select': {
+      height: tokens.spacing['8'],
+      paddingInline: tokens.spacing['2'],
       borderWidth: tokens.borderWidth.hairline,
       borderStyle: 'solid',
-      borderColor: inherited.color.colorMixInSrgbCurrentColor16Transparent,
-      borderRadius: tokens.radius.lg,
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      padding: '7px 10px !custom',
+      borderColor: tokens.color.line,
+      borderRadius: tokens.radius.md,
       backgroundColor: inherited.color.colorSurfaceShell,
-      color: 'inherit !custom',
-      font: 'inherit',
-    },
-  },
-})
-
-export const docsApiMenuMobile = style({
-  selectors: {
-    '& .docs-reference-trigger': {
-      justifyContent: 'space-between',
-      width: '100%',
-      height: 'auto',
-
-      paddingBlock: tokens.spacing['2'],
-      paddingInline: tokens.spacing['0'],
       color: tokens.color.foreground,
-      fontSize: tokens.fontSize.sm,
-    },
-    '& .docs-reference-trigger[aria-current="page"]::after': {
-      display: 'none',
-    },
-    '& .docs-reference-trigger svg': {
-      opacity: 0.4,
-      transition: 'rotate 150ms',
-    },
-    '& .docs-reference-trigger[aria-expanded="true"] svg': {
-      rotate: '180deg',
-    },
-    '& .docs-reference-panel': {
-      position: 'static',
-      width: '100%',
-      padding: tokens.spacing['0'],
-      border: 0,
-      backgroundColor: 'transparent !custom',
-      boxShadow: 'none',
-      gap: tokens.spacing['0'],
-      marginBottom: tokens.spacing['2'],
-    },
-    '& .docs-reference-panel a': {
-      paddingBlock: tokens.spacing['2'],
-      paddingInlineStart: tokens.spacing['4'],
-      paddingInlineEnd: tokens.spacing['0'],
-    },
-    '& .docs-reference-panel a:hover': {
-      backgroundColor: 'transparent !custom',
-    },
-    '& .docs-api-menu-item > svg:last-child:not(:first-child)': {
-      marginInlineStart: 'auto !custom',
-      opacity: 0.4,
-    },
-  },
-  '@media (prefers-reduced-motion: reduce)': {
-    selectors: {
-      '& .docs-reference-trigger svg': {
-        transition: 'none',
-      },
-    },
-  },
-})
-
-export const docsApiMenuItem = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: tokens.spacing['3'],
-  selectors: {
-    '& svg': {
-      flexShrink: 0,
-    },
-  },
-})
-
-/** Signed-in email in the header's account link, cut short (and hidden on narrow screens) so the logo keeps its width. */
-export const docsHeaderAccountEmail = style({
-  maxWidth: '24ch',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  // Below the full header the link shows only its icon; its aria-label and title carry the email.
-  '@media (width < 1080px)': {
-    display: 'none',
-  },
-})
-
-/** Signed-out Log in link: the header's one primary action, inverted like Copy for agent. */
-export const docsHeaderLoginPrimary = style({
-  backgroundColor: inherited.color.backgroundColorInvert,
-  color: inherited.color.textColorInvert,
-  '@media (hover: hover)': {
-    selectors: {
-      '&:hover': {
-        backgroundColor: inherited.color.backgroundColorInvert,
-        opacity: 0.9,
-      },
+      font: 'inherit',
     },
   },
 })

@@ -3,7 +3,12 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useActiveSidebarAnchor, useConfig } from 'vocs'
+import { Link } from 'waku'
+import ChevronDownIcon from '~icons/lucide/chevron-down'
+import { getActiveDocsArea, getActiveDocsSection } from '../lib/docs-sections'
+import { normalizeDocsPath } from '../lib/docs-sidebar'
 import { resolveSidebarItems, SidebarNodes, usePathname } from './DocsHeader'
+import { areaSections } from './DocsSectionNav'
 import * as ui from './DocsSidebarDrawer.recipes'
 
 function collectSidebarLinks(nodes: ReturnType<typeof resolveSidebarItems>): string[] {
@@ -13,13 +18,28 @@ function collectSidebarLinks(nodes: ReturnType<typeof resolveSidebarItems>): str
   ])
 }
 
+/** The sidebar label of the current page, for the page bar's "Section / Page". */
+function activePageLabel(
+  nodes: ReturnType<typeof resolveSidebarItems>,
+  pathname: string,
+): string | undefined {
+  for (const node of nodes) {
+    const link = node.link?.split('#')[0]
+    if (link?.startsWith('/') && normalizeDocsPath(link).replace(/\/+$/, '') === pathname)
+      return node.text
+    const child = activePageLabel(node.items ?? [], pathname)
+    if (child) return child
+  }
+}
+
 /**
- * Mobile-only docs sidebar drawer.
+ * The page bar below Desktop and its drawer.
  *
- * Injects a hamburger toggle into the sticky "On this page" outline row (Vocs'
- * `[data-v-outline-mobile]` bar) so the docs sidebar stays reachable while
- * scrolling, then slides the sidebar tree in from the left. Pages without an
- * outline get a standalone menu row in the same position.
+ * Injects a "Section / Page" trigger into the sticky outline row (Vocs'
+ * `[data-v-outline-mobile]` bar), which becomes the page bar: its own
+ * "On this page" button is hidden below Desktop. The trigger opens a drawer with
+ * the current tab's sections, then the section's sidebar. Pages without an
+ * outline get a standalone page bar in the same position.
  */
 export default function DocsSidebarDrawer() {
   const pathname = usePathname()
@@ -41,9 +61,11 @@ export default function DocsSidebarDrawer() {
     let span: HTMLElement | null = null
 
     const attach = () => {
-      const row = document.querySelector('[data-v-outline-mobile] > div')
+      // The row itself, not its inner div: that div holds Vocs' "On this page" button, which the
+      // page bar hides below Desktop.
+      const row = document.querySelector<HTMLElement>('[data-v-outline-mobile]')
       const main = document.querySelector('[data-layout] > [data-v-main]')
-      const target = row ?? (main?.querySelector('.tempo-docs-home') ? null : main)
+      const target = row ?? (main?.querySelector('.tempo-docs-home, .docs-not-found') ? null : main)
       if (span?.isConnected && span.parentElement === target) return
       span?.remove()
       span = null
@@ -52,6 +74,7 @@ export default function DocsSidebarDrawer() {
         return
       }
       span = document.createElement('span')
+      span.className = ui.docsPageBarHost().className
       span.dataset.docsSidebarToggle = ''
       if (!row) span.dataset.docsSidebarFallback = ''
       target.prepend(span)
@@ -166,6 +189,11 @@ export default function DocsSidebarDrawer() {
 
   if (pathname === '/' || items.length === 0) return null
 
+  const section = getActiveDocsSection(pathname)
+  const area = getActiveDocsArea(pathname)
+  const sections = area ? areaSections(area) : []
+  const pageLabel = activePageLabel(items, normalizeDocsPath(pathname).replace(/\/+$/, '') || '/')
+
   const toggle = host
     ? createPortal(
         <button
@@ -178,16 +206,16 @@ export default function DocsSidebarDrawer() {
           aria-haspopup="dialog"
           {...ui.docsSidebarDrawerButton()}
         >
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <title>Docs navigation</title>
-            <path
-              d="M3 5h14M3 10h14M3 15h14"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          <span>Menu</span>
+          <span {...ui.docsPageBarSection()}>{section?.label ?? 'Docs'}</span>
+          {pageLabel ? (
+            <>
+              <span aria-hidden="true" {...ui.docsPageBarSeparator()}>
+                /
+              </span>
+              <span {...ui.docsPageBarPage()}>{pageLabel}</span>
+            </>
+          ) : null}
+          <ChevronDownIcon aria-hidden="true" width="16" height="16" {...ui.docsPageBarChevron()} />
         </button>,
         host,
       )
@@ -213,7 +241,7 @@ export default function DocsSidebarDrawer() {
         >
           <div {...ui.docsSidebarDrawerLayout9()}>
             <span id={titleId} {...ui.docsSidebarDrawerText()}>
-              Documentation
+              {area?.label ?? 'Docs'}
             </span>
             <button
               type="button"
@@ -233,6 +261,21 @@ export default function DocsSidebarDrawer() {
             </button>
           </div>
           <div {...ui.docsSidebarDrawerLayout10()}>
+            {sections.length > 1 ? (
+              <nav aria-label={`${area?.label} sections`} {...ui.docsDrawerSections()}>
+                {sections.map((item) => (
+                  <Link
+                    key={item.id}
+                    to={item.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={item.id === section?.id ? 'page' : undefined}
+                    {...ui.docsDrawerSectionLink()}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
             <SidebarNodes
               nodes={items}
               pathname={pathname}

@@ -13,11 +13,12 @@ export function Badge({
 const badge = variants({
   base: {
     display: 'inline-flex',
-    minHeight: '24px',
+    minHeight: '20px',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.md,
-    paddingInline: tokens.spacing['2'],
+    // Badges (20 high) take radius 4.
+    borderRadius: tokens.radius.sm,
+    paddingInline: tokens.spacing['1_5'],
     textAlign: 'center',
     fontWeight: tokens.fontWeight.medium,
     fontSize: tokens.fontSize.xs,
@@ -52,9 +53,8 @@ const badge = variants({
         minWidth: '80px',
         minHeight: '28px',
         paddingInline: tokens.spacing['2'],
-        // design-exception: TDS Badge small radius (6px), between the 4px and 8px steps.
-        borderRadius: '6px !custom',
-        '--corner-radius': '6px',
+        borderRadius: tokens.radius.sm,
+        '--corner-radius': tokens.radius.sm,
         boxSizing: 'border-box',
         // A real border (not TDS's overlay) so the smooth-corner fallback can stroke it.
         borderWidth: tokens.borderWidth.hairline,

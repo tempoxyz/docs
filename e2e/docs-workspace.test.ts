@@ -1,67 +1,117 @@
-import { expect, type Locator, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 
-const sectionLabels = [
-  'Get Started',
-  'Accounts',
-  'Earn',
-  'Routes',
-  'Zones',
-  'Machine Payments',
-  'Tempo EVM',
-]
-const utilityLabels = ['API reference', 'Partners']
-const externalTools = [
-  ['MPP', 'https://mpp.dev/'],
-  ['Mercator', 'https://mercator.sh/'],
-  ['Tempo Console', 'https://console.tempo.xyz/'],
-  ['Tempo Wallet', 'https://wallet.tempo.xyz/'],
+// The top bar's four tabs are plain links. Every tab but Home owns a row of section tabs.
+const tabLabels = ['Home', 'Docs', 'Reference', 'Resources']
+const tabSections = [
+  ['Docs', ['Get started', 'Accounts', 'Earn', 'Routes', 'Zones', 'Machine Payments', 'Network']],
+  ['Reference', ['API', 'SDKs & CLI']],
+  ['Resources', ['Guides', 'Partners']],
 ] as const
+const tabHrefs: Record<string, string> = {
+  Docs: '/get-started',
+  Reference: '/docs/api',
+  Resources: '/docs/resources/guides',
+}
+const docsSectionLabels = tabSections[0][1]
+// The mobile menu lists Home, then each tab's sections under the tab's label.
+const mobileMenuLinks = ['Home', ...tabSections.flatMap(([, sections]) => sections)]
+// The other Tempo products left the header: the footer links them, Full on Home and Compact on
+// docs pages.
+const footerTools = {
+  full: [
+    ['tempo.xyz', 'https://tempo.xyz'],
+    ['Console', 'https://console.tempo.xyz'],
+    ['Wallet', 'https://wallet.tempo.xyz'],
+    ['Explorer', 'https://explore.tempo.xyz'],
+    ['MPP', 'https://mpp.dev'],
+    ['Mercator', 'https://mercator.sh'],
+    ['GitHub', 'https://github.com/tempoxyz'],
+    ['X', 'https://twitter.com/tempo'],
+  ],
+  compact: [
+    ['tempo.xyz', 'https://tempo.xyz'],
+    ['Console', 'https://console.tempo.xyz'],
+    ['Explorer', 'https://explore.tempo.xyz'],
+    ['GitHub', 'https://github.com/tempoxyz'],
+    ['X', 'https://twitter.com/tempo'],
+  ],
+} as const
 
-const homeAgentSetups = [
-  {
-    label: 'Codex',
-    command:
-      'codex plugin marketplace add tempoxyz/plugins --ref main\ncodex plugin add docs@tempo',
-    instruction: null,
-    install: /^Install Codex CLI/,
-  },
-  {
-    label: 'Claude Code',
-    command: 'claude plugin marketplace add tempoxyz/plugins\nclaude plugin install docs@tempo',
-    instruction: null,
-    install: /^Install Claude Code/,
-  },
-  {
-    label: 'Amp',
-    command: 'amp mcp add tempo https://mcp.tempo.xyz',
-    instruction: /MCP/,
-    install: /^Install Amp/,
-  },
-  {
-    label: 'Skills',
-    command: 'npx skills add tempoxyz/plugins --skill docs',
-    instruction: /skill/i,
-    install: null,
-  },
-  {
-    label: 'MCP',
-    command: 'https://mcp.tempo.xyz',
-    instruction: /HTTP MCP server/i,
-    install: null,
-  },
-] as const
+// The drawer lists the tab's sections above the sidebar; sidebar checks leave that list out.
+const outsideSectionTabs = ':not(nav[aria-label$=" sections"] a)'
+const activeSidebarLink = `a[data-active]${outsideSectionTabs}, a[aria-current="page"]${outsideSectionTabs}`
 
-test('seven sections expose product tasks and expandable developer chapters', async ({ page }) => {
+/** The four tabs in the top bar. */
+function tabNav(page: Page) {
+  return page
+    .getByRole('navigation', { name: 'Developer navigation' })
+    .getByRole('navigation', { name: 'Documentation areas', exact: true })
+}
+
+/** The section tabs under the top bar (Desktop and up): the sections of the current tab. */
+function sectionNav(page: Page, tab: string) {
+  return page
+    .locator('.docs-section-nav')
+    .getByRole('navigation', { name: `${tab} sections`, exact: true })
+}
+
+/** Below Desktop, the page bar reads "Section / Page" and opens the drawer. */
+function pageBar(page: Page) {
+  return page.getByRole('button', { name: 'Open docs navigation', exact: true })
+}
+
+/** The page bar's drawer, named after the current tab. */
+function docsDrawer(page: Page, tab = 'Docs') {
+  return page.getByRole('dialog', { name: tab, exact: true })
+}
+
+function escapeRegExp(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/** The page bar's text: the section, a decorative slash, then the page (any page when omitted). */
+function pageBarText(section: string, pageLabel?: string) {
+  const label = pageLabel ? escapeRegExp(pageLabel) : '\\S.*'
+  return new RegExp(`^${escapeRegExp(section)}\\s*/\\s*${label}$`)
+}
+
+/** The current section: its tab under the top bar at Desktop, the page bar below Desktop. */
+async function expectSection(page: Page, section: string, mobile = false) {
+  if (mobile) {
+    await expect(pageBar(page)).toBeVisible()
+    await expect(pageBar(page)).toHaveText(pageBarText(section))
+    return
+  }
+  const current = page.locator('.docs-section-nav [aria-current="page"]')
+  await expect(current).toBeVisible()
+  await expect(current).toHaveText(section)
+}
+
+test('the top bar has four plain tabs and Docs sections expose product tasks and developer chapters', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto('/')
-  const navigation = page.getByRole('navigation', { name: 'Documentation sections', exact: true })
-  const utilities = page.locator('.docs-section-utilities')
+  const tabs = tabNav(page)
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-  await expect(navigation.getByRole('link')).toHaveText(sectionLabels)
-  await expect(utilities.getByRole('link')).toHaveText(utilityLabels)
+  await expect(tabs.getByRole('link')).toHaveText(tabLabels)
+  // Tabs are plain links, without menus.
+  await expect(tabs.getByRole('button')).toHaveCount(0)
+  await expect(tabs.locator('[aria-current]')).toHaveText('Home')
+  // Home has no section tabs.
+  await expect(page.locator('.docs-section-nav')).toBeHidden()
+  await expect(page.locator('.docs-section-nav a')).toHaveCount(0)
+  for (const [tab, sections] of tabSections) {
+    await tabs.getByRole('link', { name: tab, exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`${tabHrefs[tab]}/?$`))
+    await expect(tabs.locator('[aria-current]')).toHaveText(tab)
+    await expect(sectionNav(page, tab).getByRole('link')).toHaveText(sections)
+    await expect(sectionNav(page, tab).locator('[aria-current="page"]')).toHaveText(sections[0])
+  }
+  await tabs.getByRole('link', { name: 'Docs', exact: true }).click()
   for (const section of [
     {
-      label: 'Get Started',
+      label: 'Get started',
       path: '/get-started',
       links: ['/get-started/quickstart', '/docs/guide/using-tempo-with-ai'],
     },
@@ -129,17 +179,24 @@ test('seven sections expose product tasks and expandable developer chapters', as
       ],
     },
     {
-      label: 'Tempo EVM',
+      // Network merges Tempo EVM and Operate: building on the chain, nodes, upgrades and releases.
+      label: 'Network',
       path: '/docs/development',
-      links: ['/docs/development'],
+      links: [
+        '/docs/development',
+        '/docs/guide/node',
+        '/docs/protocol/upgrades',
+        '/docs/changelog',
+      ],
     },
   ]) {
-    await navigation.getByRole('link', { name: section.label, exact: true }).click()
+    await sectionNav(page, 'Docs').getByRole('link', { name: section.label, exact: true }).click()
     await expect(page).toHaveURL(new RegExp(`${section.path}/?$`))
-    await expect(navigation.locator('[aria-current="page"]')).toHaveText(
-      section.label.replace(/ \(.*\)$/, ''),
+    await expect(sectionNav(page, 'Docs').locator('[aria-current="page"]')).toHaveText(
+      section.label,
     )
-    await expect(utilities.locator('[aria-current]')).toHaveCount(0)
+    // Only the section's own tab is marked current in the top bar.
+    await expect(tabs.locator('[aria-current]')).toHaveText('Docs')
     await expect(page.locator('#related-documentation')).toHaveCount(0)
     for (const href of section.links)
       await expect(sidebar.locator(`a[href="${href}"]`), `${section.label}: ${href}`).toBeVisible()
@@ -150,21 +207,24 @@ test('seven sections expose product tasks and expandable developer chapters', as
   await expect(specifications).toBeVisible()
   await specifications.click()
   await expect(page).toHaveURL(/\/docs\/protocol\/?$/)
-  await expect(navigation.locator('[aria-current="page"]')).toHaveText('Tempo EVM')
+  await expect(sectionNav(page, 'Docs').locator('[aria-current="page"]')).toHaveText('Network')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 })
 
 for (const section of [
   {
-    label: 'Get Started',
+    tab: 'Docs',
+    label: 'Get started',
     overview: '/get-started',
     paths: [
       '/get-started/quickstart',
       '/docs/guide/using-tempo-with-ai',
       '/docs/quickstart/faucet',
+      '/docs/quickstart/connection-details',
     ],
   },
   {
+    tab: 'Docs',
     label: 'Accounts',
     overview: '/docs/accounts',
     paths: [
@@ -177,16 +237,19 @@ for (const section of [
     ],
   },
   {
+    tab: 'Docs',
     label: 'Earn',
     overview: '/docs/earn',
     paths: ['/docs/earn/vaults', '/docs/earn/integrate', '/docs/earn/providers'],
   },
   {
+    tab: 'Docs',
     label: 'Routes',
     overview: '/docs/routes',
     paths: ['/docs/routes/transfers', '/docs/routes/deposits', '/docs/routes/quotes'],
   },
   {
+    tab: 'Docs',
     label: 'Zones',
     overview: '/docs/zones',
     paths: [
@@ -196,7 +259,8 @@ for (const section of [
     ],
   },
   {
-    label: 'Tempo EVM',
+    tab: 'Docs',
+    label: 'Network',
     overview: '/docs/development',
     paths: [
       '/docs/network/transactions',
@@ -205,16 +269,15 @@ for (const section of [
       '/docs/guide/payments/transfer-memos',
       '/docs/guide/payments/send-a-payment/examples',
       '/docs/guide/getting-funds',
-      '/docs/quickstart/connection-details',
       '/docs/quickstart/wallet-developers',
       '/docs/protocol/rpc',
       '/docs/guide/issuance/create-a-stablecoin',
       '/docs/guide/stablecoin-dex/executing-swaps',
       '/docs/guide/issuance/manage-stablecoin',
-      '/docs/guide/node/installation',
     ],
   },
   {
+    tab: 'Docs',
     label: 'Machine Payments',
     overview: '/docs/agents',
     paths: [
@@ -226,11 +289,13 @@ for (const section of [
     ],
   },
   {
-    label: 'Get Started (SDKs and CLI)',
-    overview: '/get-started',
+    tab: 'Reference',
+    label: 'SDKs & CLI',
+    overview: '/docs/sdk',
     paths: ['/docs/sdk', '/docs/cli', '/docs/cli/api', '/docs/sdk/typescript/api-client'],
   },
   {
+    tab: 'Resources',
     label: 'Partners',
     overview: '/docs/partners',
     paths: [
@@ -240,19 +305,29 @@ for (const section of [
     ],
   },
   {
-    label: 'API reference',
+    tab: 'Reference',
+    label: 'API',
     overview: '/docs/api/console',
     paths: ['/docs/api/console', '/docs/api/console/api-keys', '/docs/api/team'],
   },
   {
-    label: 'Tempo EVM (Changelog)',
+    tab: 'Docs',
+    label: 'Network (node operators)',
+    overview: '/docs/guide/node',
+    paths: ['/docs/guide/node/installation'],
+  },
+  {
+    tab: 'Docs',
+    label: 'Network (Changelog)',
     overview: '/docs/protocol/upgrades',
     paths: ['/docs/protocol/upgrades/t11', '/docs/changelog'],
   },
 ]) {
   test(`existing deep links select ${section.label} and retain their sidebar`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 })
-    const navigation = page.locator('.docs-section-nav')
+    const label = section.label.replace(/ \(.*\)$/, '')
+    const current = sectionNav(page, section.tab).locator('[aria-current="page"]')
+    const tab = tabNav(page).locator('[aria-current]')
     const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
     for (const path of section.paths) {
       const [pathname, anchor] = path.split('#')
@@ -262,15 +337,13 @@ for (const section of [
       )
       if (anchor) await expect(page.locator(`[id="${anchor}"]`)).toHaveCount(1)
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-      await expect(navigation.locator('[aria-current="page"]')).toHaveText(
-        section.label.replace(/ \(.*\)$/, ''),
-      )
+      await expect(current).toHaveText(label)
+      await expect(tab).toHaveText(section.tab)
       await expect(sidebar.locator(`a[href="${section.overview}"]`).first()).toBeVisible()
     }
     expect((await page.reload())?.status()).toBe(200)
-    await expect(navigation.locator('[aria-current="page"]')).toHaveText(
-      section.label.replace(/ \(.*\)$/, ''),
-    )
+    await expect(current).toHaveText(label)
+    await expect(tab).toHaveText(section.tab)
   })
 }
 
@@ -280,9 +353,9 @@ test('Get started recommends a test payment and offers build paths and tool link
   await page.goto('/get-started')
   const article = page.locator('article[data-v-content]')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Build on Tempo')
-  const quickstart = article.getByRole('link', { name: 'interactive quickstart', exact: true })
+  const quickstart = article.getByRole('link', { name: 'Send your first payment', exact: true })
   await expect(quickstart).toHaveCount(1)
-  await expect(quickstart).toHaveAccessibleName('interactive quickstart')
+  await expect(quickstart).toHaveAttribute('href', '/get-started/quickstart')
   await expect(quickstart).toBeVisible()
   for (const [label, href] of [
     ['Embed stablecoins in your app', '/docs/accounts'],
@@ -326,15 +399,11 @@ test('product availability lives in overview callouts, not navigation labels', a
     await expect(article.getByRole('heading', { level: 1 })).not.toContainText(/beta|preview/i)
     await expect(article).toContainText(status)
     await expect(article.locator('a[href="https://tempo.xyz/contact"]').first()).toBeVisible()
-    await expect(
-      page
-        .getByRole('navigation', { name: 'Documentation sections', exact: true })
-        .getByRole('link'),
-    ).toHaveText(sectionLabels)
+    await expect(sectionNav(page, 'Docs').getByRole('link')).toHaveText(docsSectionLabels)
   }
 })
 
-test('Earn task pages and API reference remain distinct', async ({ page }) => {
+test('Earn task pages and the API reference remain distinct', async ({ page }) => {
   await page.goto('/docs/earn')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   for (const [label, path] of [
@@ -347,85 +416,98 @@ test('Earn task pages and API reference remain distinct', async ({ page }) => {
     await expect(page).toHaveURL(new RegExp(`${path}/?$`))
     await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', path)
   }
-  await page
-    .locator('.docs-section-utilities')
-    .getByRole('link', { name: 'API reference', exact: true })
-    .click()
+  await tabNav(page).getByRole('link', { name: 'Reference', exact: true }).click()
   await expect(page).toHaveURL(/\/docs\/api\/?$/)
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('API reference')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('API')
 })
 
-test('Changelog lives inside Tempo EVM and retains upgrade URLs', async ({ page }) => {
+test('node guides and the Changelog live in Network and retain upgrade URLs', async ({ page }) => {
   await page.goto('/docs/development')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-  await expect(page.locator('.docs-section-utilities').getByText('Changelog')).toHaveCount(0)
-  const upgrades = sidebar.locator('a[href="/docs/protocol/upgrades"]')
-  // A click before hydration does nothing, so retry until the chapter opens.
-  await expect(async () => {
-    if (!(await upgrades.isVisible()))
-      await sidebar.getByRole('button', { name: 'Changelog', exact: true }).click()
-    await expect(upgrades).toBeVisible({ timeout: 1000 })
-  }).toPass()
-  await upgrades.click()
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
+  const current = page.locator('.docs-section-nav [aria-current="page"]')
+  await expect(tabNav(page).getByText('Changelog')).toHaveCount(0)
+  await expect(sectionNav(page, 'Docs').getByText('Changelog')).toHaveCount(0)
+  // One Network sidebar carries the chain, the node guides and the Changelog.
+  await sidebar.locator('a[href="/docs/guide/node"]').click()
+  await expect(page).toHaveURL(/\/docs\/guide\/node\/?$/)
+  await expect(current).toHaveText('Network')
+  await sidebar.locator('a[href="/docs/protocol/upgrades"]').click()
+  await expect(page).toHaveURL(/\/docs\/protocol\/upgrades\/?$/)
+  await expect(current).toHaveText('Network')
   await sidebar.locator('a[href="/docs/protocol/upgrades/t11"]').click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('T11 Network Upgrade')
   expect((await page.reload())?.status()).toBe(200)
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
+  await expect(current).toHaveText('Network')
   await sidebar.getByRole('link', { name: 'Node releases', exact: true }).click()
   await expect(page).toHaveURL(/\/docs\/changelog\/?$/)
-  await sidebar.locator('a[href="/docs/development"]').click()
+  await expect(current).toHaveText('Network')
+  await sectionNav(page, 'Docs').getByRole('link', { name: 'Network', exact: true }).click()
   await expect(page).toHaveURL(/\/docs\/development\/?$/)
 })
 
-test('API reference is a keyboard-accessible utility and the old tools hub redirects', async ({
-  page,
-}) => {
+test('Reference is a keyboard-accessible tab and the old tools hub redirects', async ({ page }) => {
   await page.goto('/')
-  const api = page
-    .locator('.docs-section-utilities')
-    .getByRole('link', { name: 'API reference', exact: true })
-  await api.focus()
+  // Keys pressed before hydration do nothing; the header search enables once hydrated.
+  await expect(
+    page.getByRole('button', { name: 'Search documentation', exact: true }),
+  ).toBeEnabled()
+  const reference = tabNav(page).getByRole('link', { name: 'Reference', exact: true })
+  await reference.focus()
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/\/docs\/api\/?$/)
-  await expect(api).toHaveAttribute('aria-current', 'page')
+  await expect(reference).toHaveAttribute('aria-current', 'page')
+  await expect(
+    sectionNav(page, 'Reference').getByRole('link', { name: 'API', exact: true }),
+  ).toHaveAttribute('aria-current', 'page')
   await expect(page.locator('#related-documentation')).toHaveCount(0)
   expect((await page.goto('/docs/tools'))?.status()).toBe(200)
   await expect(page).toHaveURL(/\/docs\/sdk\/?$/)
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Get Started')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('SDKs & CLI')
+  await expect(tabNav(page).locator('[aria-current]')).toHaveText('Reference')
 })
 
 for (const path of ['/', '/docs/accounts']) {
-  test(`mobile navigation separates products, utilities, and external tools on ${path}`, async ({
+  test(`mobile menu lists every tab's sections and the footer links the products on ${path}`, async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto(path)
-    await page.getByRole('button', { name: 'Open menu', exact: true }).click()
-    const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
-    const sections = menu.getByRole('navigation', { name: 'All documentation sections' })
-    await expect(sections.getByRole('link')).toHaveCount(sectionLabels.length)
-    for (const label of sectionLabels)
-      await expect(sections.getByRole('link', { name: label, exact: true })).toBeVisible()
-    for (const label of utilityLabels)
-      await expect(menu.getByRole('link', { name: label, exact: true })).toBeVisible()
-    const tools = menu.getByRole('navigation', { name: 'External tools', exact: true })
-    for (const [label, href] of externalTools) {
-      const link = tools.getByRole('link', { name: label, exact: true })
+    const variant = path === '/' ? 'full' : 'compact'
+    const footer = page.locator('.docs-site-footer')
+    await expect(footer).toHaveAttribute('data-variant', variant)
+    for (const [label, href] of footerTools[variant]) {
+      const link = footer.getByRole('link', { name: `${label} (opens in a new tab)`, exact: true })
       await expect(link).toHaveAttribute('href', href)
       await expect(link).toHaveAttribute('target', '_blank')
       await expect(link).toHaveAttribute('rel', /noopener/)
     }
-    await menu.getByRole('link', { name: 'Tempo EVM', exact: true }).click()
+    await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+    const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
+    const areas = menu.getByRole('navigation', { name: 'All documentation areas', exact: true })
+    await expect(areas.getByRole('link')).toHaveText(mobileMenuLinks)
+    for (const label of mobileMenuLinks)
+      await expect(areas.getByRole('link', { name: label, exact: true })).toBeVisible()
+    // Docs, Reference and Resources are labels above their section links, not links.
+    for (const [tab] of tabSections) {
+      await expect(areas.getByText(tab, { exact: true })).toBeVisible()
+      await expect(areas.getByRole('link', { name: tab, exact: true })).toHaveCount(0)
+    }
+    await expect(areas.locator('[aria-current="page"]')).toHaveText(
+      path === '/' ? 'Home' : 'Accounts',
+    )
+    await expect(menu.getByRole('link', { name: 'Get API key', exact: true })).toHaveAttribute(
+      'href',
+      'https://console.tempo.xyz',
+    )
+    await areas.getByRole('link', { name: 'Network', exact: true }).click()
     await expect(page).toHaveURL(/\/docs\/development\/?$/)
     await expect(menu).toBeHidden()
     await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
-    await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
-    const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-    await drawer
-      .locator('summary')
-      .filter({ hasText: /^Changelog$/ })
-      .click()
+    await expect(pageBar(page)).toHaveText(pageBarText('Network', 'Introduction'))
+    await pageBar(page).click()
+    const drawer = docsDrawer(page)
+    // Changelog is an always-open Network chapter, so its upgrades list without a toggle.
+    await expect(drawer.locator('p').filter({ hasText: /^Changelog$/ })).toBeVisible()
     await drawer.locator('a[href="/docs/protocol/upgrades/t12"]').click()
     await expect(page).toHaveURL(/\/docs\/protocol\/upgrades\/t12\/?$/)
     await expect(drawer).toBeHidden()
@@ -434,7 +516,7 @@ for (const path of ['/', '/docs/accounts']) {
 
 for (const path of ['/', '/docs/accounts']) {
   for (const width of [1080, 1440]) {
-    test(`desktop header destinations and agent setup stay usable on ${path} at ${width}px`, async ({
+    test(`desktop top bar tabs, search and Get API key stay usable on ${path} at ${width}px`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 1000 })
@@ -444,127 +526,96 @@ for (const path of ['/', '/docs/accounts']) {
         navigation.getByRole('combobox', { name: 'Color theme', includeHidden: true }),
       ).toHaveCount(0)
       await expect(navigation.getByRole('link', { name: 'Blog', exact: true })).toHaveCount(0)
-      const utilities = page.locator('.docs-section-utilities')
-      await expect(utilities.getByRole('link')).toHaveText(utilityLabels)
-      await expect(utilities.getByRole('link', { name: 'Blog', exact: true })).toHaveCount(0)
+      const tabs = navigation.getByRole('navigation', { name: 'Documentation areas', exact: true })
+      await expect(tabs.getByRole('link')).toHaveText(tabLabels)
+      await expect(tabs.getByRole('button')).toHaveCount(0)
+      await expect(tabs.locator('[aria-current]')).toHaveText(path === '/' ? 'Home' : 'Docs')
+      const sectionRow = page.locator('.docs-section-nav')
+      await expect(sectionRow.getByRole('link', { name: 'Blog', exact: true })).toHaveCount(0)
+      if (path === '/') await expect(sectionRow).toBeHidden()
+      else await expect(sectionNav(page, 'Docs').getByRole('link')).toHaveText(docsSectionLabels)
+      // Get API key is the one primary action; agent setup and Log in left the top bar.
+      await expect(
+        navigation.getByRole('button', { name: 'Agent setup', exact: true }),
+      ).toHaveCount(0)
+      await expect(navigation.getByRole('link', { name: 'Log in', exact: true })).toHaveCount(0)
       const search = navigation.getByRole('button', { name: 'Search documentation', exact: true })
-      const agents = navigation.getByRole('button', { name: 'Agent setup', exact: true })
-      await expect(agents).toBeEnabled()
+      const apiKey = navigation.getByRole('link', { name: 'Get API key', exact: true })
+      await expect(search).toBeEnabled()
+      await expect(apiKey).toHaveAttribute('href', 'https://console.tempo.xyz')
       await page.evaluate(() => document.fonts.ready)
 
+      // The tabs, search and Get API key sit left to right, inside the viewport, without overlap.
       const boxes = await Promise.all(
-        [search, agents].map(async (control) => {
+        [...(await tabs.getByRole('link').all()), search, apiKey].map(async (control) => {
           await expect(control).toBeVisible()
           const box = await control.boundingBox()
           if (!box) throw new Error('Header control has no visible bounds')
           return box
         }),
       )
-      const [searchBox, agentsBox] = boxes
-      expect(searchBox.x).toBeGreaterThan(agentsBox.x + agentsBox.width)
-      expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(width)
-      for (const [index, a] of boxes.entries()) {
-        for (const b of boxes.slice(index + 1)) {
-          expect(a.x + a.width <= b.x || b.x + b.width <= a.x).toBe(true)
-        }
+      expect(boxes).toHaveLength(tabLabels.length + 2)
+      for (const [index, box] of boxes.entries()) {
+        expect(box.x + box.width).toBeLessThanOrEqual(width)
+        const previous = boxes[index - 1]
+        if (previous) expect(box.x).toBeGreaterThanOrEqual(previous.x + previous.width)
       }
-
-      await agents.click()
-      const panel = page.locator('#docs-agent-tools')
-      await expect(panel).toBeVisible()
-      await expect(agents).toHaveAttribute('aria-expanded', 'true')
-      const sections = page.getByRole('navigation', { name: 'Documentation sections', exact: true })
-      await expect(sections).toBeVisible()
-      // Visibility alone does not detect another stacking context covering the panel.
-      const overlap = await panel.evaluate((element) => {
-        const sectionNav = document.querySelector('.docs-section-nav')
-        const panelRect = element.getBoundingClientRect()
-        const navRect = sectionNav?.getBoundingClientRect() ?? panelRect
-        const left = Math.max(panelRect.left, navRect.left)
-        const right = Math.min(panelRect.right, navRect.right)
-        const top = Math.max(panelRect.top, navRect.top)
-        const bottom = Math.min(panelRect.bottom, navRect.bottom)
-        return {
-          width: right - left,
-          height: bottom - top,
-          panelReceivesPointer: element.contains(
-            document.elementFromPoint((left + right) / 2, (top + bottom) / 2),
-          ),
-        }
-      })
-      expect(overlap.width).toBeGreaterThan(0)
-      expect(overlap.height).toBeGreaterThan(0)
-      expect(overlap.panelReceivesPointer).toBe(true)
-
-      await page.keyboard.press('Escape')
-      await expect(panel).toBeHidden()
-      await expect(agents).toBeFocused()
-      await agents.click()
-      await expect(panel).toBeVisible()
-      await page.getByRole('heading', { level: 1 }).click({ position: { x: 4, y: 4 } })
-      await expect(panel).toBeHidden()
-      await expect(agents).toHaveAttribute('aria-expanded', 'false')
     })
   }
 }
 
-test('agent-first entry page offers setup and payment guides', async ({
+test('entry page offers one start button, three guides, the products and reference links', async ({
   page,
-  context,
   request,
 }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Documentation')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Build stablecoin payments on Tempo',
+  )
   await expect(page.locator('[data-v-gutter-left]')).toBeHidden()
-  await expect(page.locator('.tempo-docs-home-product-group')).toHaveCount(6)
+  await expect(page.locator('.docs-section-nav')).toBeHidden()
+  const home = page.locator('.tempo-docs-home')
+  // One button in the hero.
+  const start = home.locator('.tempo-docs-home-actions').getByRole('link')
+  await expect(start).toHaveText(['Send your first payment'])
+  await expect(start).toHaveAttribute('href', '/get-started/quickstart')
+  // Three guides; Build with AI is the way in to agent setup.
+  const guides = home.locator('.tempo-docs-home-guide')
+  await expect(guides.getByRole('heading', { level: 3 })).toHaveText([
+    'Send your first payment',
+    'Create an account',
+    'Build with AI',
+  ])
+  for (const [label, href] of [
+    ['Run the quickstart', '/get-started/quickstart'],
+    ['Choose a signing method', '/docs/accounts/create'],
+    ['Set up your agent', '/docs/guide/using-tempo-with-ai'],
+  ]) {
+    await expect(guides.getByRole('link', { name: label, exact: true })).toHaveAttribute(
+      'href',
+      href,
+    )
+  }
+  await expect(home.locator('.tempo-docs-home-product-group')).toHaveCount(6)
   for (const product of ['accounts', 'earn', 'routes', 'zones', 'agents', 'development']) {
     await expect(
-      page.locator(`.tempo-docs-home-product-group h3 a[href="/docs/${product}"]`),
+      home.locator(`.tempo-docs-home-product-group h3 a[href="/docs/${product}"]`),
     ).toHaveCount(1)
   }
-  const setup = page.locator('.tempo-agent-start')
-  const installStatus = setup.locator('.tempo-agent-start-install').getByRole('status')
-  await expect(setup.getByRole('heading', { level: 3 })).toHaveText('Connect Tempo docs')
-  await expect(setup.getByRole('button', { name: /Copy prompt/ })).toHaveCount(0)
-  await expect(
-    setup.getByRole('link', { name: 'All setup options', exact: false }),
-  ).toHaveAttribute('href', '/docs/guide/using-tempo-with-ai')
-  for (const { label, command, instruction, install } of homeAgentSetups) {
-    const multipleCommands = command.includes('\n')
-    const commandSuccess =
-      label === 'MCP'
-        ? 'URL copied. Add it as an HTTP MCP server in your agent’s settings.'
-        : multipleCommands
-          ? 'Commands copied. Paste them into your terminal and run both commands.'
-          : 'Command copied. Paste it into your terminal and run it.'
-    await setup.getByRole('radio', { name: label, exact: true }).click()
-    await expect(installStatus).toHaveText('')
-    const instructionText = setup.locator(
-      '.tempo-agent-start-install .tempo-agent-start-instruction',
-    )
-    if (instruction) await expect(instructionText).toContainText(instruction)
-    else await expect(instructionText).toHaveCount(0)
-    // The install link sits on the Connect Tempo docs heading row.
-    const installLink = setup.locator('.tempo-agent-start-heading .tempo-agent-start-prerequisite')
-    if (install) await expect(installLink).toContainText(install)
-    else await expect(installLink).toHaveCount(0)
-    await setup
-      .getByRole('button', {
-        name:
-          label === 'MCP'
-            ? 'Copy URL for MCP'
-            : `Copy command${multipleCommands ? 's' : ''} for ${label}`,
-        exact: true,
-      })
-      .click()
-    await expect(installStatus).toHaveText(commandSuccess)
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command)
-  }
-  await setup.getByRole('radio', { name: 'Codex', exact: true }).click()
-  await expect(installStatus).toHaveText('')
-  await expect(page.locator('.tempo-docs-home')).not.toContainText('Bring your existing EVM app')
+  const reference = home.locator('.tempo-docs-home-reference')
+  await expect(reference.getByRole('heading', { level: 2 })).toHaveText('Reference & tools')
+  expect(
+    await reference
+      .locator('.tempo-docs-home-quick-link a')
+      .evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+  ).toEqual([
+    '/docs/quickstart/connection-details',
+    '/docs/quickstart/faucet',
+    '/docs/api',
+    '/docs/sdk',
+  ])
+  await expect(home).not.toContainText('Bring your existing EVM app')
   for (const anchor of [
     'start-here',
     'choose-a-build-path',
@@ -583,19 +634,19 @@ test('agent-first entry page offers setup and payment guides', async ({
     expect((await request.get(destination)).status(), destination).toBe(200)
   }
 
-  await page.getByRole('link', { name: 'Send your first payment', exact: false }).first().click()
+  await start.click()
   await page.waitForURL(/\/get-started\/quickstart\/?$/)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Quickstart')
+  await expect(tabNav(page).getByRole('link', { name: 'Docs', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
   await expect(
-    page
-      .getByRole('navigation', { name: 'Documentation sections' })
-      .getByRole('link', { name: 'Get Started', exact: true }),
+    sectionNav(page, 'Docs').getByRole('link', { name: 'Get started', exact: true }),
   ).toHaveAttribute('aria-current', 'page')
 })
 
-test('agent setup offers manual copy recovery without overflowing a narrow viewport', async ({
-  page,
-}) => {
+test('Copy page offers manual recovery without overflowing a narrow viewport', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 })
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', {
@@ -607,37 +658,18 @@ test('agent setup offers manual copy recovery without overflowing a narrow viewp
       },
     })
   })
-  await page.goto('/')
-  const setup = page.locator('.tempo-agent-start')
-  const installStatus = setup.locator('.tempo-agent-start-install').getByRole('status')
-  const commands = setup.locator('.tempo-agent-start-command code')
-  for (const { label, command } of homeAgentSetups) {
-    const multipleCommands = command.includes('\n')
-    const commandFailure =
-      label === 'MCP'
-        ? 'Copy failed. Select and copy the server URL above.'
-        : multipleCommands
-          ? 'Copy failed. Select and copy both commands above.'
-          : 'Copy failed. Select and copy the command above.'
-    await setup.getByRole('radio', { name: label, exact: true }).click()
-    await expect(installStatus).toHaveText('')
-    await setup
-      .getByRole('button', {
-        name:
-          label === 'MCP'
-            ? 'Copy URL for MCP'
-            : `Copy command${multipleCommands ? 's' : ''} for ${label}`,
-        exact: true,
-      })
-      .click()
-    await expect(installStatus).toHaveText(commandFailure)
-    await expect(commands).toBeVisible()
-    expect(await commands.innerText()).toBe(command)
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-      label,
-    ).toBe(true)
-  }
+  await page.goto('/docs/cli')
+  const actions = page.locator('.docs-page-actions')
+  await actions.getByRole('button', { name: 'Copy page', exact: true }).click()
+  await expect(actions.getByRole('status')).toHaveText(
+    'Could not copy. Open View as Markdown to select the page text.',
+  )
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await actions.getByRole('button', { name: 'More page options', exact: true }).click()
+  const markdown = actions.getByRole('menuitem', { name: 'View as Markdown', exact: true })
+  await expect(markdown).toBeVisible()
+  await expect(markdown).toHaveAttribute('href', '/assets/md/docs/cli.md')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 })
 
 test('mobile documentation menu restores focus and navigates to another section', async ({
@@ -645,7 +677,9 @@ test('mobile documentation menu restores focus and navigates to another section'
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Documentation')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Build stablecoin payments on Tempo',
+  )
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   const trigger = page.getByRole('button', { name: 'Open menu', exact: true })
   await trigger.click()
@@ -659,20 +693,26 @@ test('mobile documentation menu restores focus and navigates to another section'
     ['Earn', '/docs/earn'],
     ['Accounts', '/docs/accounts'],
     ['Machine Payments', '/docs/agents'],
-    ['Tempo EVM', '/docs/development'],
+    ['Network', '/docs/development'],
   ]) {
     await trigger.click()
     await menu
-      .getByRole('navigation', { name: 'All documentation sections' })
+      .getByRole('navigation', { name: 'All documentation areas', exact: true })
       .getByRole('link', { name: label, exact: true })
       .click()
     await expect(page).toHaveURL(new RegExp(`${path}/?$`))
     await expect(menu).toBeHidden()
     await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-    await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
-    const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
-    await expect(drawer.locator(`a[href="${path}"]`)).toBeVisible()
+    await expect(pageBar(page)).toHaveText(pageBarText(label))
+    await pageBar(page).click()
+    const drawer = docsDrawer(page)
+    await expect(
+      drawer
+        .getByRole('navigation', { name: 'Docs sections', exact: true })
+        .locator('[aria-current="page"]'),
+    ).toHaveText(label)
+    await expect(drawer.locator(`a[href="${path}"]${outsideSectionTabs}`)).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(drawer).toBeHidden()
   }
@@ -686,8 +726,8 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
     ['/docs/zones', '/docs/zones/connect'],
   ]) {
     await page.goto(path)
-    await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
-    const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
+    await pageBar(page).click()
+    const drawer = docsDrawer(page)
     await expect(drawer.locator(`a[href="${destination}"]`)).toBeVisible()
     await expect(
       drawer.locator('summary').filter({ hasText: /More about|Earlier testnet/ }),
@@ -695,8 +735,8 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
     await page.keyboard.press('Escape')
   }
   await page.goto('/docs/accounts')
-  await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
-  const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
+  await pageBar(page).click()
+  const drawer = docsDrawer(page)
   for (const href of ['/docs/accounts/create', '/docs/accounts/fund'])
     await expect(drawer.locator(`a[href="${href}"]`)).toBeVisible()
   // Each Features and Build group opens to its own overview page and guides.
@@ -716,7 +756,7 @@ test('mobile sidebars keep useful product guides visible', async ({ page }) => {
   await expect(page).toHaveURL(/\/docs\/accounts\/create\/?$/)
   await expect(drawer).toBeHidden()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Create an Account')
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Accounts')
+  await expect(pageBar(page)).toHaveText(pageBarText('Accounts', 'Create an Account'))
 })
 
 test('sandbox guides stay collapsed under Testnet Sandbox until a sandbox page opens', async ({
@@ -724,22 +764,22 @@ test('sandbox guides stay collapsed under Testnet Sandbox until a sandbox page o
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/docs/zones')
-  await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
-  const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
+  await pageBar(page).click()
+  const drawer = docsDrawer(page)
   const sandbox = drawer.locator('summary').filter({ hasText: /^Testnet Sandbox$/ })
   await expect(sandbox).toBeVisible()
   await expect(drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]')).toBeHidden()
   await sandbox.click()
   await drawer.locator('a[href="/docs/guide/private-zones"]').click()
   await expect(page).toHaveURL(/\/docs\/guide\/private-zones\/?$/)
-  await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+  await pageBar(page).click()
   await expect(drawer.locator('a[href="/docs/zones/privacy"]')).toBeVisible()
   await expect(
     drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]'),
   ).toBeVisible()
   await drawer.locator('a[href="/docs/guide/private-zones/deposit-to-a-zone"]').click()
   await expect(page).toHaveURL(/\/docs\/guide\/private-zones\/deposit-to-a-zone\/?$/)
-  await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+  await pageBar(page).click()
   await expect(
     drawer.locator('a[href="/docs/guide/private-zones/withdraw-from-a-zone"]'),
   ).toBeVisible()
@@ -749,28 +789,44 @@ test('sandbox guides stay collapsed under Testnet Sandbox until a sandbox page o
 test('mobile article drawer traps focus and survives client navigation', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/docs/network')
-  const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
+  // Below Desktop the page bar replaces the outline row's "On this page" button.
+  const outline = page
+    .locator('[data-v-outline-mobile]')
+    .getByRole('button', { name: 'On this page', exact: true, includeHidden: true })
+  await expect(outline).toHaveCount(1)
+  await expect(outline).toBeHidden()
+  const trigger = pageBar(page)
+  await expect(trigger).toHaveText(pageBarText('Network'))
   await trigger.click()
-  const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
+  const drawer = docsDrawer(page)
   const close = drawer.getByRole('button', { name: 'Close docs navigation', exact: true })
   await expect(close).toBeFocused()
-  const specifications = drawer.locator('summary').filter({ hasText: /^Changelog$/ })
+  const lastLink = drawer.getByRole('link', { name: 'Operator updates', exact: true })
   await page.keyboard.press('Shift+Tab')
-  await expect(specifications).toBeFocused()
+  await expect(lastLink).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(close).toBeFocused()
+  // The tab's sections come straight after the close button.
+  await page.keyboard.press('Tab')
+  await expect(
+    drawer
+      .getByRole('navigation', { name: 'Docs sections', exact: true })
+      .getByRole('link', { name: 'Get started', exact: true }),
+  ).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(drawer).toBeHidden()
   await expect(trigger).toBeFocused()
   await page.getByRole('button', { name: 'Open menu', exact: true }).click()
   const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
-  await menu.getByRole('link', { name: 'API reference', exact: true }).click()
+  await menu.getByRole('link', { name: 'API', exact: true }).click()
   await expect(page).toHaveURL(/\/docs\/api\/?$/)
   await expect(menu).toBeHidden()
   await trigger.click()
-  await expect(drawer).toBeVisible()
+  // The drawer takes the current tab's name.
+  const reference = docsDrawer(page, 'Reference')
+  await expect(reference).toBeVisible()
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await expect(drawer).toBeHidden()
+  await expect(reference).toBeHidden()
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
 })
 
@@ -778,11 +834,17 @@ test('mobile pages without an outline still expose the documentation drawer', as
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/docs/sdk')
   await expect(page.locator('article[data-v-content] h2')).toHaveCount(0)
-  const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
+  const trigger = pageBar(page)
   await expect(trigger).toBeVisible()
+  await expect(trigger).toHaveText(pageBarText('SDKs & CLI', 'Overview'))
   await trigger.click()
-  const drawer = page.getByRole('dialog', { name: 'Documentation', exact: true })
+  const drawer = docsDrawer(page, 'Reference')
   await expect(drawer).toBeVisible()
+  await expect(
+    drawer
+      .getByRole('navigation', { name: 'Reference sections', exact: true })
+      .locator('[aria-current="page"]'),
+  ).toHaveText('SDKs & CLI')
   // Tempo SDK is an always-open section, so it renders as a heading above its pages.
   await expect(drawer.locator('p').filter({ hasText: /^Tempo SDK$/ })).toBeVisible()
   await drawer.getByRole('link', { name: 'Python', exact: true }).click()
@@ -792,55 +854,84 @@ test('mobile pages without an outline still expose the documentation drawer', as
   await expect(trigger).toBeVisible()
 })
 
-test('agent setup closes when keyboard focus leaves and when resizing to mobile', async ({
+test('the Copy page menu is keyboard operable, closes on Escape and outside presses, and connects your agent', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto('/docs/accounts')
-  const trigger = page.getByRole('button', { name: 'Agent setup', exact: true })
-  const panel = page.locator('#docs-agent-tools')
+  const actions = page.locator('.docs-page-actions')
+  const trigger = actions.getByRole('button', { name: 'More page options', exact: true })
+  const menu = actions.getByRole('menu', { name: 'Page options', exact: true })
+  const items = menu.getByRole('menuitem')
+  await expect(trigger).toHaveAttribute('aria-haspopup', 'menu')
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await trigger.focus()
+  await page.keyboard.press('Enter')
+  await expect(menu).toBeVisible()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await expect(items).toHaveText(['Copy page', 'View as Markdown', 'Connect your agent'])
+  await expect(
+    menu.getByRole('menuitem', { name: 'View as Markdown', exact: true }),
+  ).toHaveAttribute('href', '/assets/md/docs/accounts.md')
+  await expect(items.nth(0)).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(items.nth(1)).toBeFocused()
+  await page.keyboard.press('End')
+  await expect(items.nth(2)).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(items.nth(0)).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(items.nth(2)).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(items.nth(0)).toBeFocused()
+  // Visibility alone does not detect another stacking context covering the menu.
+  const receivesPointer = await menu.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    return element.contains(
+      document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2),
+    )
+  })
+  expect(receivesPointer).toBe(true)
+
+  await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
+  await expect(trigger).toBeFocused()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
   await trigger.click()
-  await expect(panel).toBeVisible()
-  await panel.locator('a[href], button:not([disabled])').last().focus()
-  await page.keyboard.press('Tab')
-  await expect(panel).toBeHidden()
+  await expect(menu).toBeVisible()
+  await page.getByRole('heading', { level: 1 }).click({ position: { x: 4, y: 4 } })
+  await expect(menu).toBeHidden()
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
 
+  // Agent setup moved from the header into this menu and Get started › Build with AI.
   await trigger.click()
-  await expect(panel).toBeVisible()
-  await page.setViewportSize({ width: 390, height: 844 })
-  // Wait for the menu state to close, beyond CSS hiding the desktop header.
-  await expect(panel).toHaveCount(0)
-  await page.setViewportSize({ width: 1440, height: 1000 })
-  await expect(trigger).toBeVisible()
-  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-  await expect(panel).toBeHidden()
+  await menu.getByRole('menuitem', { name: 'Connect your agent', exact: true }).click()
+  await expect(page).toHaveURL(/\/docs\/guide\/using-tempo-with-ai\/?$/)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Build with AI')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Get started')
 })
 
-test('article tools copy readable Markdown and survive client navigation', async ({
+test('Copy page copies readable Markdown and survives client navigation', async ({
   page,
   context,
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('/docs/cli')
-  const actions = page.getByRole('navigation', { name: 'Page tools' })
-  await actions.getByRole('button', { name: 'Copy for agent' }).click()
+  const actions = page.locator('.docs-page-actions')
+  const options = actions.getByRole('button', { name: 'More page options', exact: true })
+  const markdown = actions.getByRole('menuitem', { name: 'View as Markdown', exact: true })
+  await actions.getByRole('button', { name: 'Copy page', exact: true }).click()
   await expect(actions.getByRole('status')).toHaveText('Page Markdown copied to clipboard.')
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('# Tempo CLI')
-  await expect(actions.getByRole('link', { name: 'View Markdown' })).toHaveAttribute(
-    'href',
-    '/assets/md/docs/cli.md',
-  )
-  await page
-    .locator('.docs-section-utilities')
-    .getByRole('link', { name: 'API reference', exact: true })
-    .click()
+  await options.click()
+  await expect(markdown).toHaveAttribute('href', '/assets/md/docs/cli.md')
+  await page.keyboard.press('Escape')
+  await expect(markdown).toBeHidden()
+  await sectionNav(page, 'Reference').getByRole('link', { name: 'API', exact: true }).click()
   await page.waitForURL(/\/docs\/api\/?$/)
   await expect(actions).toHaveCount(1)
-  await expect(actions.getByRole('link', { name: 'View Markdown' })).toHaveAttribute(
-    'href',
-    '/assets/md/docs/api.md',
-  )
+  await options.click()
+  await expect(markdown).toHaveAttribute('href', '/assets/md/docs/api.md')
 })
 
 test('mobile docs search works and appearance persists through navigation and reload', async ({
@@ -852,7 +943,7 @@ test('mobile docs search works and appearance persists through navigation and re
   await page.getByRole('button', { name: 'Open menu', exact: true }).click()
   await menu.getByRole('combobox', { name: 'Color theme' }).selectOption('dark')
   await expect(page.locator('html')).toHaveAttribute('data-vocs-theme', 'dark')
-  await menu.getByRole('button', { name: 'Search documentation', exact: true }).click()
+  await menu.getByRole('button', { name: 'Search docs', exact: true }).click()
   await expect(menu).toBeHidden()
   const search = page.getByRole('dialog', { name: 'Search documentation', exact: true })
   await expect(search).toBeVisible()
@@ -879,11 +970,11 @@ function developerDisclosure(sidebar: Locator, label: string, mobile: boolean) {
 }
 
 async function expectOnlyActiveLeaf(sidebar: Locator, path: string) {
-  const active = sidebar.locator('a[data-active], a[aria-current="page"]')
+  const active = sidebar.locator(activeSidebarLink)
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', path)
   const hrefs = await sidebar
-    .locator('a[href]')
+    .locator(`a[href]${outsideSectionTabs}`)
     .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
   expect(new Set(hrefs).size, 'A sidebar URL should appear only once').toBe(hrefs.length)
 }
@@ -950,7 +1041,7 @@ for (const mobile of [false, true]) {
   for (const entry of [
     {
       name: 'token introduction',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/network/tokens',
       group: 'TIP-20 Tokens',
       sibling: '/docs/guide/issuance/manage-stablecoin',
@@ -958,7 +1049,7 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'token management',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/guide/issuance/manage-stablecoin',
       group: 'TIP-20 Tokens',
       sibling: '/docs/guide/issuance/mint-stablecoins',
@@ -966,7 +1057,7 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'wallet integration',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/quickstart/wallet-developers',
       group: 'Accounts and keys',
       sibling: '/docs/development/account-keychain',
@@ -974,7 +1065,7 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'transaction specification',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/protocol/transactions/spec-tempo-transaction',
       group: 'Transactions',
       sibling: '/docs/guide/tempo-transaction',
@@ -983,7 +1074,7 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'fee specification',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/protocol/fees/spec-fee',
       group: 'Fees',
       sibling: '/docs/network/fees',
@@ -992,7 +1083,7 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'token specification',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/protocol/tip20/spec',
       group: 'TIP-20 Tokens',
       sibling: '/docs/network/tokens',
@@ -1001,7 +1092,7 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'account keychain reference',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/protocol/transactions/AccountKeychain',
       group: 'Accounts and keys',
       sibling: '/docs/development/account-keychain',
@@ -1010,7 +1101,7 @@ for (const mobile of [false, true]) {
     },
     {
       name: 'receive policy reference',
-      section: 'Tempo EVM',
+      section: 'Network',
       path: '/docs/protocol/tip403/receive-policies',
       group: 'Receive payments',
       sibling: '/docs/guide/payments/transfer-memos',
@@ -1031,13 +1122,10 @@ for (const mobile of [false, true]) {
     }) => {
       await page.setViewportSize(viewport)
       expect((await page.goto(entry.path))?.status()).toBe(200)
-      await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText(
-        entry.section,
-      )
-      if (mobile)
-        await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+      await expectSection(page, entry.section, mobile)
+      if (mobile) await pageBar(page).click()
       const sidebar = mobile
-        ? page.getByRole('dialog', { name: 'Documentation', exact: true })
+        ? docsDrawer(page)
         : page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
       const disclosure = developerDisclosure(sidebar, entry.group, mobile)
       await expect(disclosure).toBeVisible()
@@ -1064,47 +1152,37 @@ for (const mobile of [false, true]) {
       await expect(sibling).toBeVisible()
       if (mobile) await page.keyboard.press('Escape')
       expect((await page.reload())?.status()).toBe(200)
-      if (mobile)
-        await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+      if (mobile) await pageBar(page).click()
       await expect(sidebar.locator(`a[href="${entry.sibling}"]`)).toBeVisible()
       await expectOnlyActiveLeaf(sidebar, entry.path)
       if ('guide' in entry && entry.guide) {
         // Guides and their references keep the same tab and chapter through client navigation.
         await sidebar.locator(`a[href="${entry.guide}"]`).click()
         await expect(page).toHaveURL(new RegExp(`${entry.guide}/?$`))
-        await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText(
-          entry.section,
-        )
-        if (mobile)
-          await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+        await expectSection(page, entry.section, mobile)
+        if (mobile) await pageBar(page).click()
         await expectOnlyActiveLeaf(sidebar, entry.guide)
         await expect(disclosure).toBeVisible()
         await expect(sidebar.locator(`a[href="${entry.path}"]`)).toBeVisible()
         await sidebar.locator(`a[href="${entry.path}"]`).click()
         await expect(page).toHaveURL(new RegExp(`${entry.path}/?$`))
-        await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText(
-          entry.section,
-        )
-        if (mobile)
-          await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+        await expectSection(page, entry.section, mobile)
+        if (mobile) await pageBar(page).click()
         await expectOnlyActiveLeaf(sidebar, entry.path)
         await expect(sidebar.locator(`a[href="${entry.guide}"]`)).toBeVisible()
       }
     })
   }
 
-  test(`${surface} MPP deep links navigate within Machine payments`, async ({ page }) => {
+  test(`${surface} MPP deep links navigate within Machine Payments`, async ({ page }) => {
     await page.setViewportSize(viewport)
     expect((await page.goto('/docs/guide/machine-payments/pay-as-you-go'))?.status()).toBe(200)
-    await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText(
-      'Machine Payments',
-    )
-    if (mobile)
-      await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+    await expectSection(page, 'Machine Payments', mobile)
+    if (mobile) await pageBar(page).click()
     const sidebar = mobile
-      ? page.getByRole('dialog', { name: 'Documentation', exact: true })
+      ? docsDrawer(page)
       : page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
-    const active = sidebar.locator('a[data-active], a[aria-current="page"]')
+    const active = sidebar.locator(activeSidebarLink)
     await expect(active).toHaveCount(1)
     await expect(active).toHaveAttribute('href', '/docs/guide/machine-payments/pay-as-you-go')
     await expect(sidebar.getByRole('link', { name: 'Use Mercator', exact: true })).toBeVisible()
@@ -1113,30 +1191,25 @@ for (const mobile of [false, true]) {
     await expect(page).toHaveURL(/\/docs\/guide\/machine-payments\/server\/?$/)
     if (mobile) await expect(sidebar).toBeHidden()
     expect((await page.reload())?.status()).toBe(200)
-    await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText(
-      'Machine Payments',
-    )
-    if (mobile)
-      await page.getByRole('button', { name: 'Open docs navigation', exact: true }).click()
+    await expectSection(page, 'Machine Payments', mobile)
+    if (mobile) await pageBar(page).click()
     await expect(active).toHaveCount(1)
     await expect(active).toHaveAttribute('href', '/docs/guide/machine-payments/server')
   })
 }
 
-test('the developer guide catalog opens Browser payments in its Tempo EVM home', async ({
-  page,
-}) => {
+test('the developer guide catalog opens Browser payments in its Network home', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto('/docs/development')
   const article = page.locator('article[data-v-content]')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Tempo EVM')
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Network')
   const browserPayments = article.locator('a[href="/docs/guide/payments/send-a-payment/browser"]')
   await expect(browserPayments).toHaveCount(1)
   await expect(browserPayments).toHaveText('Browser payments')
   await browserPayments.click()
   await expect(page).toHaveURL(/\/docs\/guide\/payments\/send-a-payment\/browser\/?$/)
-  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Tempo EVM')
+  await expect(page.locator('.docs-section-nav [aria-current="page"]')).toHaveText('Network')
   await expect(article.getByRole('heading', { level: 1 })).toHaveText('Browser payments')
   const sidebar = page.locator('[data-v-gutter-left] [data-v-sidebar-container]')
   await expect(sidebar.getByRole('link', { name: 'Send payments', exact: true })).toBeVisible()

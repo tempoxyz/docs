@@ -2,15 +2,18 @@ import { global } from 'zyzz/web'
 import { inherited } from '../styles/inherited'
 import { vars as tokens } from '../styles/theme'
 
-// Vocs boxes the Previous/Next pagination links below its sm breakpoint. Keep them plain links
-// at every width; this layer follows vocs_utilities so it outranks the max-sm utilities.
+// Vocs boxes the Previous/Next pagination links below its sm breakpoint. Keep them as the same
+// next-step cards at every width; this layer follows vocs_utilities so it outranks max-sm.
 global({
   '@layer utilities': {
     '@media (width < 640px)': {
       '[data-v-pagination] > a': {
-        padding: 0,
-        border: 0,
-        borderRadius: 0,
+        paddingBlock: tokens.spacing['4'],
+        paddingInline: tokens.spacing['5'],
+        borderWidth: tokens.borderWidth.hairline,
+        borderStyle: 'solid',
+        borderColor: tokens.color.hairline,
+        borderRadius: tokens.radius.lg,
       },
     },
   },
@@ -20,13 +23,9 @@ global({
 // Vocs pagination links share the card markup, so they are excluded explicitly.
 global({
   ':root': {
-    '--tempo-card-radius': tokens.radius.panel,
-    '--tempo-card-padding': '28px',
-  },
-  '@media (width < 700px)': {
-    ':root': {
-      '--tempo-card-padding': '24px',
-    },
+    // Cards are surfaces: radius 12, padding 20 (system-v2).
+    '--tempo-card-radius': tokens.radius.lg,
+    '--tempo-card-padding': '20px',
   },
   'article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )':
     {
@@ -34,16 +33,20 @@ global({
       gridTemplateColumns: 'minmax(0, 1fr)',
       gridTemplateRows: 'auto 1fr',
       alignContent: 'start',
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      gap: '12px 10px !custom',
+      // Title to description 4; the icon column sits 8 from the title.
+      rowGap: tokens.spacing['1'],
+      columnGap: tokens.spacing['2'],
       minWidth: 0,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       padding: 'var(--tempo-card-padding) !custom',
-      border: 0,
+      // Surfaces sit on the page background with a 1px hairline.
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.hairline,
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       borderRadius: 'var(--tempo-card-radius) !custom',
       '--corner-radius': 'var(--tempo-card-radius)',
-      backgroundColor: tokens.color.panel,
+      backgroundColor: tokens.color.background,
 
       color: inherited.color.vocsTextColorPrimary,
       textDecoration: 'none',
@@ -77,11 +80,11 @@ global({
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-heading"]':
     {
       gridRow: 1,
-      fontSize: tokens.fontSize.lead,
+      fontSize: tokens.fontSize.body,
       fontWeight: tokens.fontWeight.medium,
 
-      letterSpacing: tokens.letterSpacing.tight,
-      lineHeight: tokens.lineHeight.snug,
+      letterSpacing: tokens.letterSpacing.normal,
+      lineHeight: tokens.lineHeight.body,
     },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )) > [class~="vocs:text-secondary"]':
     {
@@ -90,7 +93,7 @@ global({
 
       color: inherited.color.vocsTextColorSecondary,
       fontSize: tokens.fontSize.sm,
-      lineHeight: tokens.lineHeight.relaxed,
+      lineHeight: tokens.lineHeight.control,
     },
   ':is(article[data-v-content] a[class~="vocs:flex-col"]:not([data-v-pagination] > a):has(> [class~="vocs:text-heading"]):has( > [class~="vocs:text-secondary"] )):focus-visible':
     {

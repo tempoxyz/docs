@@ -22,7 +22,7 @@ export const ogSectionMap: Record<string, string> = {
   build: 'BUILD',
   cli: 'CLI',
   'developer-tools': 'DEVELOPER TOOLS',
-  development: 'TEMPO EVM',
+  development: 'NETWORK',
   earn: 'EARN',
   ecosystem: 'ECOSYSTEM',
   'get-started': 'GET STARTED',
@@ -39,6 +39,12 @@ export const ogSectionMap: Record<string, string> = {
   tools: 'APIS & SDKS',
   wallet: 'WALLET',
   zones: 'ZONES',
+}
+
+/** Route prefix → section label, checked before `ogSectionMap`. Network's node and upgrade pages live under `guide` and `protocol`. */
+export const ogSectionPrefixMap: Record<string, string> = {
+  '/guide/node': 'NETWORK',
+  '/protocol/upgrades': 'NETWORK',
 }
 
 /** Second path segment → subsection label (only applied to 3+ segment routes). */

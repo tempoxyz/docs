@@ -9,7 +9,7 @@ const iconIn = keyframes({
 })
 
 global({
-  '.tempo-agent-start-copy, .docs-header-agent-panel, .docs-header-mobile-agents': {
+  '.tempo-agent-start-copy': {
     '--tempo-check-color': 'var(--vocs-text-color-primary)',
   },
   '.tempo-icon-swap': {

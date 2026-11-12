@@ -19,7 +19,7 @@ global({
 // width that globals.ts gives docs layouts (--vocs-spacing-content there, 985.7px at
 // 16px Pilat). The dialog is portalled to <body>, outside that layout, so the same
 // expression is repeated here.
-// It takes the smoothed panel radius. G4: the light dialog matches the page and
+// It takes the dialog radius (16). G4: the light dialog matches the page and
 // keeps a hairline; the dark one is lifted to neutral 088 (above the #141414
 // panels it covers) and drops it.
 global({
@@ -27,8 +27,8 @@ global({
     '[data-base-ui-portal] > [role="dialog"]:has(input[role="combobox"])': {
       maxWidth: 'calc(84ch + (var(--vocs-spacing-content-px) * 2))',
       borderColor: tokens.color.hairline,
-      borderRadius: tokens.radius.panel,
-      '--corner-radius': tokens.radius.panel,
+      borderRadius: tokens.radius.xl,
+      '--corner-radius': tokens.radius.xl,
       // design-exception: TDS shadow.primary (shade 008) under the lighter scrim; Vocs used shadow-2xl.
       boxShadow: '0 16px 48px rgb(0 0 0 / 0.08) !custom',
     },

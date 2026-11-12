@@ -1,29 +1,27 @@
 import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
 import { vars as tokens } from '../styles/theme'
+/** "Section / Page" with a chevron: 14/20, the section secondary and the page primary medium. */
 export const docsSidebarDrawerButton = style({
   display: 'flex',
-  minHeight: tokens.spacing['9'],
+  minWidth: 0,
+  maxWidth: '100%',
   alignItems: 'center',
   gap: tokens.spacing['1_5'],
+  padding: tokens.spacing['0'],
+  border: 0,
   borderRadius: tokens.radius.md,
-  fontFamily: tokens.fontFamily.book,
-
-  color: inherited.color.colorMixInOklabForeground70Transparent,
-  transitionProperty:
-    'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tempo-style-gradient-from, --tempo-style-gradient-via, --tempo-style-gradient-to',
-  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  transitionDuration: '150ms',
+  background: 'none',
+  fontFamily: tokens.fontFamily.sansFallback,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
+  lineHeight: tokens.lineHeight.control,
+  cursor: 'pointer',
   selectors: {
-    '&:hover': {
-      '@media (hover: hover)': {
-        color: tokens.color.foreground,
-      },
-    },
     '&:focus-visible': {
       outlineStyle: 'solid',
-      outlineWidth: '2px',
-      outlineOffset: '4px',
+      outlineWidth: tokens.borderWidth.emphasis,
+      outlineOffset: '2px',
     },
   },
   '@media (width >= 1080px)': {
@@ -124,4 +122,70 @@ export const docsSidebarDrawerLayout10 = style({
   overflowY: 'auto',
   paddingInline: tokens.spacing['5'],
   paddingBlock: tokens.spacing['3'],
+})
+
+/** The page bar host inside Vocs' outline row: below Desktop the bar holds only "Section / Page". */
+export const docsPageBarHost = style({
+  minWidth: 0,
+  maxWidth: '100%',
+  '@media (width < 1080px)': {
+    selectors: {
+      // Vocs' "On this page" and "Return to top" buttons follow the prepended host.
+      '& ~ *': {
+        display: 'none',
+      },
+    },
+  },
+})
+export const docsPageBarSection = style({
+  flexShrink: 0,
+  color: tokens.color.muted,
+})
+export const docsPageBarSeparator = style({
+  flexShrink: 0,
+  color: tokens.color.muted,
+})
+export const docsPageBarPage = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  color: tokens.color.foreground,
+  fontWeight: tokens.fontWeight.medium,
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+export const docsPageBarChevron = style({
+  flexShrink: 0,
+  color: tokens.color.muted,
+})
+/** The current tab's sections at the top of the drawer, above the section's sidebar. */
+export const docsDrawerSections = style({
+  display: 'grid',
+  gap: tokens.spacing['0_5'],
+  marginBottom: tokens.spacing['4'],
+  paddingBottom: tokens.spacing['4'],
+  borderBottomWidth: tokens.borderWidth.hairline,
+  borderBottomStyle: 'solid',
+  borderBottomColor: tokens.color.line,
+})
+export const docsDrawerSectionLink = style({
+  display: 'flex',
+  alignItems: 'center',
+  height: tokens.spacing['8'],
+  paddingInline: tokens.spacing['3'],
+  borderRadius: tokens.radius.md,
+  color: tokens.color.muted,
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.control,
+  textDecoration: 'none',
+  selectors: {
+    '&:hover': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.containerSubtle,
+    },
+    '&[aria-current="page"]': {
+      color: tokens.color.foreground,
+      backgroundColor: tokens.color.container,
+      fontWeight: tokens.fontWeight.medium,
+    },
+  },
 })

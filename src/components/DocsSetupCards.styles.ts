@@ -1,4 +1,3 @@
-import { inherited } from '../styles/inherited'
 import { style } from '../styles/scoped'
 import { vars as tokens } from '../styles/theme'
 
@@ -29,27 +28,27 @@ export const docsSetupCard = style({
   backgroundColor: tokens.color.background,
   color: tokens.color.foreground,
   selectors: {
+    // Card title 16 medium, 8 from its icon and 4 above the 14/20 description.
     '& h3': {
       display: 'flex',
       alignItems: 'center',
-      gap: tokens.spacing['2_5'],
+      gap: tokens.spacing['2'],
       margin: 0,
-      fontSize: tokens.fontSize.lead,
+      fontSize: tokens.fontSize.body,
       fontWeight: tokens.fontWeight.medium,
-      lineHeight: tokens.lineHeight.snug,
+      lineHeight: tokens.lineHeight.body,
     },
     '& svg': {
       flexShrink: 0,
     },
     '& p': {
-      marginTop: tokens.spacing['3'],
+      marginTop: tokens.spacing['1'],
       marginInlineEnd: tokens.spacing['0'],
       marginBottom: tokens.spacing['6'],
       marginInlineStart: tokens.spacing['0'],
-
-      color: inherited.color.colorMixInSrgbColorForeground65Transparent,
+      color: tokens.color.muted,
       fontSize: tokens.fontSize.sm,
-      lineHeight: tokens.lineHeight.relaxed,
+      lineHeight: tokens.lineHeight.control,
     },
   },
 })
@@ -75,8 +74,8 @@ export const docsSetupLink = style({
   '--corner-radius': tokens.radius.md,
   backgroundColor: tokens.color.container,
   color: tokens.color.foreground,
-  fontSize: tokens.fontSize.compact,
-  fontWeight: tokens.fontWeight.medium,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: tokens.fontWeight.normal,
   lineHeight: tokens.lineHeight.control,
   textDecoration: 'none',
   whiteSpace: 'nowrap',
