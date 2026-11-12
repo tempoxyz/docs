@@ -66,11 +66,11 @@ for (const width of [390, 1440]) {
       ).toHaveCount(0)
       await expect(menu.getByRole('link', { name: 'Get started', exact: true })).toBeVisible()
     } else {
-      await expect(
-        page
-          .getByRole('navigation', { name: 'Developer navigation' })
-          .getByRole('navigation', { name: 'Documentation areas', exact: true }),
-      ).toBeVisible()
+      const tabs = page
+        .getByRole('navigation', { name: 'Developer navigation' })
+        .getByRole('navigation', { name: 'Documentation areas', exact: true })
+      await expect(tabs).toBeVisible()
+      await expect(tabs.getByRole('link')).toHaveText(['Home', 'Docs', 'Reference', 'Resources'])
     }
   })
 }

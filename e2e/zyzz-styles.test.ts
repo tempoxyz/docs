@@ -61,7 +61,7 @@ for (const width of [390, 1440]) {
                   .trim(),
               ),
             )
-            .toBe('65px')
+            .toBe('56px')
           await expect(page.locator('.docs-site-header')).toHaveCSS('position', 'fixed')
           await expect(page.locator('html')).toHaveCSS('color-scheme', theme)
           await expect
@@ -96,7 +96,8 @@ test('compiled homepage layout responds without losing its brand typography', as
       guides.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length),
     )
     .toBe(1)
-  await expect(page.locator('.tempo-docs-home h1')).toHaveCSS('font-weight', '500')
+  // Headings are regular weight (system-v2).
+  await expect(page.locator('.tempo-docs-home h1')).toHaveCSS('font-weight', '400')
 })
 
 test('component recipes preserve badges and keyboard-accessible docs buttons', async ({ page }) => {
@@ -104,7 +105,8 @@ test('component recipes preserve badges and keyboard-accessible docs buttons', a
   const badge = page.locator('.docs-specification-meta span').first()
   // Inline flex is blockified inside the specification's flex link.
   await expect(badge).toHaveCSS('display', 'flex')
-  await expect(badge).toHaveCSS('border-radius', '8px')
+  // Badges take radius 4 (system-v2).
+  await expect(badge).toHaveCSS('border-radius', '4px')
 
   await page.goto('/docs/guide/using-tempo-with-ai')
   await selectTab(page.getByRole('tab', { name: 'Cursor', exact: true }))
@@ -172,8 +174,9 @@ test('closed mobile navigation stays outside the viewport and restores focus on 
   await page.goto('/docs/guide/issuance/create-a-stablecoin')
   const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
   // Include the closed dialog: an ARIA-hidden element can still cover the page visually.
+  // The drawer is named after the current tab; token guides sit in Docs › Network.
   const panel = page.getByRole('dialog', {
-    name: 'Documentation',
+    name: 'Docs',
     exact: true,
     includeHidden: true,
   })
