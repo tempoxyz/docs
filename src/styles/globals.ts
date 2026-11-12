@@ -683,6 +683,25 @@ global({
   },
 })
 
+// A collapsible group whose own page is current takes the same chip as a current item. The
+// selectors out-rank the nested-header rules above, which reset the header's fill.
+global({
+  '@layer utilities': {
+    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable][data-active]:has(> a[aria-current="page"]), [data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable][data-active]:has(> a[aria-current="page"])':
+      {
+        borderRadius: tokens.radius.md,
+        '--corner-radius': tokens.radius.md,
+        backgroundColor: tokens.color.container,
+        color: tokens.color.foreground,
+        fontWeight: tokens.fontWeight.medium,
+      },
+    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable][data-active]:has(> a[aria-current="page"]):hover, [data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable][data-active]:has(> a[aria-current="page"]):hover':
+      {
+        backgroundColor: tokens.color.container,
+      },
+  },
+})
+
 // SB1: the current page has no hover state; hovering it keeps its fill.
 global({
   '@layer utilities': {

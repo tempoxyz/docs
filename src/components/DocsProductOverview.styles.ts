@@ -5,15 +5,11 @@ import { vars as tokens } from '../styles/theme'
 
 // Document/Vocs integration selectors cannot be attached to owned elements.
 global({
+  // The docs H1 rule sets the size (32, 28 below 768), weight and tracking.
   'article[data-v-content] .docs-product-overview-copy h1[data-v]': {
     margin: 0,
     padding: 0,
     border: 0,
-    // design-exception: Preserve this responsive geometry across viewport sizes.
-    fontSize: 'clamp(32px, 4.5cqi, 42px) !custom',
-    letterSpacing: tokens.letterSpacing.display,
-
-    lineHeight: tokens.lineHeight.display,
   },
   'article[data-v-content] .docs-product-overview-copy p[data-v]': {
     // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
@@ -21,10 +17,13 @@ global({
     fontSize: tokens.fontSize.body,
     lineHeight: tokens.lineHeight.relaxed,
   },
+  // The lead matches every docs page: 18/28 secondary, 12 below the H1.
   'article[data-v-content] .docs-product-overview-copy h1[data-v] + p[data-v]': {
-    color: inherited.color.colorMixInSrgbForeground68Transparent,
-
-    fontSize: tokens.fontSize.body,
+    marginBlockStart: tokens.spacing['3'],
+    color: tokens.color.muted,
+    fontSize: tokens.fontSize.lead,
+    // design-exception: Lead 18/28 (system-v2); contract.ts has no 28px line height.
+    lineHeight: '28px !custom',
   },
   // Generated illustrations (scripts/illustrations) read these tokens; Earn guide figures share them.
   ':where(.dark, [data-vocs-theme="dark"], [style*="color-scheme: dark"]) :is(.docs-product-overview-art, .docs-earn-art)':
@@ -68,8 +67,7 @@ export const docsProductOverviewArt = style({
   margin: 0,
   justifySelf: 'end',
   overflow: 'hidden',
-
-  borderRadius: tokens.radius.xl,
+  borderRadius: tokens.radius.lg,
   selectors: {
     '& svg': {
       display: 'block',

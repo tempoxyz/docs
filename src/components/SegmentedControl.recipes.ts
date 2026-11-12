@@ -1,16 +1,21 @@
-import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
 
-// TDS Platform SegmentedControl (tempoxyz/ds@3fd4cf7), ported by hand. The DS
-// swaps the selected fill instantly; here the fill fades with the shared motion.
+// DS Web SegmentedControl geometry (tempoxyz/ds@3fd4cf7), ported by hand. The selected
+// item takes the docs' one selected look, the container chip with primary medium text,
+// on a page-colored track inside a hairline; the fill fades with the shared motion.
 export const control = style({
   display: 'flex',
   boxSizing: 'border-box',
   maxWidth: '100%',
   padding: tokens.spacing['1'],
-  borderRadius: tokens.radius.lg,
-  '--corner-radius': tokens.radius.lg,
-  backgroundColor: tokens.color.container,
+  // A 32-high track at radius 8; items inset 4 take radius 4 (8 - 4).
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
+  // An inset outline draws the hairline without adding to the 32 height.
+  outlineWidth: tokens.borderWidth.hairline,
+  outlineStyle: 'solid',
+  outlineColor: tokens.color.hairline,
+  outlineOffset: '-1px',
   overflowX: 'auto',
   overscrollBehaviorX: 'contain',
   scrollbarWidth: 'none',
@@ -41,17 +46,17 @@ export const item = style({
   gap: tokens.spacing['1_5'],
   boxSizing: 'border-box',
   minWidth: '80px',
-  height: '40px',
-  paddingBlock: tokens.spacing['1'],
-  paddingInline: tokens.spacing['4'],
+  height: '24px',
+  paddingBlock: tokens.spacing['0'],
+  paddingInline: tokens.spacing['3'],
   border: 0,
-  borderRadius: tokens.radius.md,
-  '--corner-radius': tokens.radius.md,
+  borderRadius: tokens.radius.sm,
+  '--corner-radius': tokens.radius.sm,
   backgroundColor: 'transparent !custom',
-  color: inherited.color.vocsTextColorPrimary,
+  color: tokens.color.muted,
   fontFamily: 'inherit !custom',
-  fontSize: tokens.fontSize.xs,
-  lineHeight: tokens.lineHeight.caption,
+  fontSize: tokens.fontSize.sm,
+  lineHeight: tokens.lineHeight.control,
   whiteSpace: 'nowrap',
   cursor: 'pointer',
   transitionProperty: 'color, background-color, border-color, opacity, transform',
@@ -59,7 +64,9 @@ export const item = style({
   transitionTimingFunction: 'var(--tempo-ease)',
   selectors: {
     '&[data-checked]': {
-      backgroundColor: tokens.color.segmentSelected,
+      color: tokens.color.foreground,
+      fontWeight: tokens.fontWeight.medium,
+      backgroundColor: tokens.color.container,
       transitionDuration: 'var(--tempo-enter)',
     },
     '&:focus-visible': {
@@ -70,5 +77,13 @@ export const item = style({
     },
     '&:disabled': { cursor: 'default' },
     '& > svg': { flexShrink: 0, width: '14px', height: '14px' },
+  },
+  '@media (hover: hover)': {
+    selectors: {
+      '&:not([data-checked]):not(:disabled):hover': {
+        backgroundColor: tokens.color.containerSubtle,
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    },
   },
 })

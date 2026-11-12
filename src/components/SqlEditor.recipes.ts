@@ -16,7 +16,8 @@ export const sqlEditorLayout2 = style({
   padding: tokens.spacing['3'],
   backgroundColor: tokens.color.gray2,
   fontFamily: tokens.fontFamily.code,
-  fontSize: tokens.fontSize.compact,
+  // Matches the 12px Monaco editor that replaces this preview once it loads.
+  fontSize: tokens.fontSize.xs,
   color: tokens.color.gray11,
 })
 export const sqlEditorLayoutAppearance = instanceStyle(
