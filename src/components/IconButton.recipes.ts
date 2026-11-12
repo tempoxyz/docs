@@ -1,8 +1,8 @@
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
 
-// TDS Platform IconButton, secondary, small scale (tempoxyz/ds@3fd4cf7), with the
-// header controls' smoothed lg radius (G8) instead of the DS circle.
+// TDS Platform IconButton, secondary, small scale (tempoxyz/ds@3fd4cf7): 32 x 32
+// at radius 8, like every 32-high control.
 export const iconButton = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -13,8 +13,8 @@ export const iconButton = style({
   height: '32px',
   padding: tokens.spacing['0'],
   border: 0,
-  borderRadius: tokens.radius.lg,
-  '--corner-radius': tokens.radius.lg,
+  borderRadius: tokens.radius.md,
+  '--corner-radius': tokens.radius.md,
   backgroundColor: tokens.color.container,
   color: inherited.color.vocsTextColorPrimary,
   cursor: 'pointer',

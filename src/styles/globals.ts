@@ -112,8 +112,9 @@ global({
   '@layer utilities': {
     ':root': {
       '--tempo-docs-outline-width': '240px',
-      '--tempo-docs-primary-nav-height': '65px',
-      '--tempo-docs-section-nav-height': '44px',
+      '--tempo-docs-primary-nav-height': '56px',
+      // Section tabs only show at ≥ 1080 on pages that have them (see below).
+      '--tempo-docs-section-nav-height': '0px',
       '--tempo-docs-shell-width': '100%',
       '--tempo-docs-sidebar-width': '256px',
       '--tempo-hub-width': '1168px',
@@ -121,6 +122,16 @@ global({
       '--tempo-font-body': 'var(--font-pilat-book)',
       '--vocs-spacing-topNav':
         'calc( var(--tempo-docs-primary-nav-height) + var(--tempo-docs-section-nav-height) )',
+    },
+  },
+})
+
+global({
+  '@layer utilities': {
+    '@media (width >= 1080px)': {
+      ':root:has(.docs-section-nav:not([data-empty]))': {
+        '--tempo-docs-section-nav-height': '48px',
+      },
     },
   },
 })
@@ -281,14 +292,15 @@ global({
       top: 'calc(var(--vocs-spacing-topNav) + var(--vocs-spacing-banner))',
       display: 'flex',
       alignItems: 'center',
-      height: '48px',
+      height: '44px',
       // design-exception: Preserve the inherited component/framework scope at the point of use.
       paddingInline: 'var(--vocs-spacing-content-px) !custom',
       borderBottomWidth: tokens.borderWidth.hairline,
       borderBottomStyle: 'solid',
       borderBottomColor: inherited.color.vocsBorderColorPrimary,
       backgroundColor: inherited.color.vocsBackgroundColorPrimary,
-      fontSize: tokens.fontSize.compact,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.control,
     },
   },
 })
@@ -298,6 +310,23 @@ global({
     '@media (width >= 1080px)': {
       '[data-docs-sidebar-fallback]': {
         display: 'none',
+      },
+    },
+  },
+})
+
+// Page bar below 1080: Vocs' mobile outline row carries the "Section / Page"
+// trigger. One 44-high bar on the gutter, like the other bars (56, 48, 44).
+global({
+  '@layer utilities': {
+    '@media (width < 1080px)': {
+      '[data-v-outline-mobile]': {
+        alignItems: 'center',
+        // design-exception: Vocs sets max-h-12 and py-3 on this row; the page bar is 44 high.
+        height: '44px !custom',
+        // design-exception: Same 44 as the height, over Vocs' max-h-12.
+        maxHeight: '44px !custom',
+        paddingBlock: tokens.spacing['0'],
       },
     },
   },
@@ -439,61 +468,61 @@ global({
 
 global({
   '@layer utilities': {
+    // Groups sit 24 apart (the sidebar gap) with no dividers.
     '[data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section]': {
-      borderTopWidth: tokens.borderWidth.hairline,
-      borderTopStyle: 'solid',
-      borderTopColor: inherited.color.colorMixInSrgbForeground12Transparent,
-      paddingTop: tokens.spacing['6'],
+      borderTopWidth: tokens.borderWidth.none,
+      paddingTop: tokens.spacing['0'],
     },
   },
 })
 
-// SB2: a single-section sidebar's header is its title, set like the right rail's
-// "On this page" label in the secondary color. In multi-section sidebars every
-// header is a group label (for example Accounts, Payments, Fees): entry type and
-// spacing in the secondary color. Collapsible headers are interactive, so they
-// keep the entry (primary) color. Entries use the primary color.
+// SB2: every section header is a group label (for example Accounts, Payments,
+// Fees): 14/20 medium in the primary color, 4 above its first item. Labels start
+// on the gutter with the items (sidebar padding 12 + item padding 12). Collapsible
+// headers are controls, so they keep the 32px item height.
 global({
   '@layer utilities': {
     '[data-v-sidebar] > [data-v-sidebar-section]:only-child > [data-v-sidebar-section-header]': {
       height: 'auto',
       minHeight: 0,
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      margin: '0 -8px 12px !custom',
+      // design-exception: Items bleed 12px into the sidebar padding so labels sit on the gutter.
+      margin: '0 -12px 4px !custom',
 
       paddingBlock: tokens.spacing['0'],
-      paddingInline: tokens.spacing['2'],
+      paddingInline: tokens.spacing['3'],
       backgroundColor: 'transparent !custom',
 
-      color: tokens.color.muted,
-      fontSize: tokens.fontSize.compact,
+      color: tokens.color.foreground,
+      fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.medium,
 
       letterSpacing: tokens.letterSpacing.normal,
-      lineHeight: tokens.lineHeight.normal,
+      lineHeight: tokens.lineHeight.control,
       textTransform: 'none',
     },
     '[data-v-sidebar] > [data-v-sidebar-section]:not(:only-child) > [data-v-sidebar-section-header], [data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]:not([data-collapsable="true"])':
       {
         height: 'auto',
-        minHeight: '34px',
-        // design-exception: Matches the sidebar entries' geometry below.
-        margin: '0 -8px !custom',
+        minHeight: 0,
+        // design-exception: Matches the sidebar entries' 12px bleed below.
+        margin: '0 -12px 4px !custom',
 
-        paddingBlock: tokens.spacing['1_5'],
-        paddingInline: tokens.spacing['2'],
+        paddingBlock: tokens.spacing['0'],
+        paddingInline: tokens.spacing['3'],
         backgroundColor: 'transparent !custom',
 
-        color: tokens.color.muted,
+        color: tokens.color.foreground,
         fontSize: tokens.fontSize.sm,
-        fontWeight: tokens.fontWeight.normal,
+        fontWeight: tokens.fontWeight.medium,
 
         letterSpacing: tokens.letterSpacing.normal,
-        lineHeight: tokens.lineHeight.normal,
+        lineHeight: tokens.lineHeight.control,
         textTransform: 'none',
       },
     '[data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]':
       {
+        minHeight: '32px',
+        paddingBlock: tokens.spacing['1_5'],
         color: tokens.color.foreground,
       },
   },
@@ -522,24 +551,24 @@ global({
 
 global({
   '@layer utilities': {
-    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]': {
-      minHeight: '34px',
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      margin: '0 -8px !custom',
+    '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable="true"]':
+      {
+        minHeight: '32px',
+        // design-exception: Items bleed 12px into the sidebar padding so labels sit on the gutter.
+        margin: '0 -12px !custom',
 
-      paddingBlock: tokens.spacing['1_5'],
-      paddingInline: tokens.spacing['2'],
-      // SB3: one radius step rounder than before, smoothed.
-      borderRadius: tokens.radius.md,
-      '--corner-radius': tokens.radius.md,
-      backgroundColor: 'transparent !custom',
+        paddingBlock: tokens.spacing['1_5'],
+        paddingInline: tokens.spacing['3'],
+        borderRadius: tokens.radius.md,
+        '--corner-radius': tokens.radius.md,
+        backgroundColor: 'transparent !custom',
 
-      color: tokens.color.foreground,
-      fontSize: tokens.fontSize.sm,
-      fontWeight: tokens.fontWeight.normal,
-      letterSpacing: tokens.letterSpacing.normal,
-      lineHeight: tokens.lineHeight.normal,
-    },
+        color: tokens.color.muted,
+        fontSize: tokens.fontSize.sm,
+        fontWeight: tokens.fontWeight.normal,
+        letterSpacing: tokens.letterSpacing.normal,
+        lineHeight: tokens.lineHeight.control,
+      },
   },
 })
 
@@ -547,7 +576,7 @@ global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header][data-collapsable="true"]:hover':
       {
-        backgroundColor: inherited.color.colorMixInSrgbForeground4Transparent,
+        backgroundColor: tokens.color.containerSubtle,
         color: tokens.color.foreground,
       },
   },
@@ -558,41 +587,42 @@ global({
     '[data-v-sidebar] [data-v-sidebar-section-content]': {
       display: 'flex',
       flexDirection: 'column',
-      gap: 0,
+      gap: tokens.spacing['0_5'],
     },
   },
 })
 
 global({
   '@layer utilities': {
+    // Nested items indent 12, with no guide line.
     '[data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-content]': {
       marginTop: tokens.spacing['0_5'],
-      marginBottom: tokens.spacing['0_5'],
-
-      borderLeftColor: inherited.color.colorMixInSrgbForeground10Transparent,
-      gap: 0,
+      marginBottom: tokens.spacing['0'],
+      paddingInlineStart: tokens.spacing['3'],
+      borderLeftWidth: tokens.borderWidth.none,
+      gap: tokens.spacing['0_5'],
     },
   },
 })
 
 global({
   '@layer utilities': {
+    // Items: 32 high, radius 8, label in the secondary color on the gutter.
     '[data-v-sidebar] [data-v-sidebar-item][data-link]': {
-      minHeight: '34px',
-      // design-exception: Preserve this component’s existing geometry; it is not a shared scale step.
-      margin: '0 -8px !custom',
+      minHeight: '32px',
+      // design-exception: Items bleed 12px into the sidebar padding so labels sit on the gutter.
+      margin: '0 -12px !custom',
 
       paddingBlock: tokens.spacing['1_5'],
-      paddingInline: tokens.spacing['2'],
-      // SB3: one radius step rounder than before, smoothed.
+      paddingInline: tokens.spacing['3'],
       borderRadius: tokens.radius.md,
       '--corner-radius': tokens.radius.md,
 
-      color: tokens.color.foreground,
+      color: tokens.color.muted,
       fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.normal,
       letterSpacing: tokens.letterSpacing.normal,
-      lineHeight: tokens.lineHeight.normal,
+      lineHeight: tokens.lineHeight.control,
     },
   },
 })
@@ -619,7 +649,7 @@ global({
       },
     '[data-v-sidebar] > [data-v-sidebar-section] + [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]:hover':
       {
-        backgroundColor: inherited.color.colorMixInSrgbForeground4Transparent,
+        backgroundColor: tokens.color.containerSubtle,
         color: tokens.color.foreground,
       },
     '@media (prefers-reduced-motion: reduce)': {
@@ -633,8 +663,9 @@ global({
 
 global({
   '@layer utilities': {
+    // Hover: the container/subtle chip.
     '[data-v-sidebar] a[data-v-sidebar-item][data-link]:hover': {
-      backgroundColor: inherited.color.colorMixInSrgbForeground4Transparent,
+      backgroundColor: tokens.color.containerSubtle,
       color: tokens.color.foreground,
     },
   },
@@ -642,8 +673,9 @@ global({
 
 global({
   '@layer utilities': {
+    // Current: the container/regular chip, primary and medium (one active state everywhere).
     '[data-v-sidebar] a[data-v-sidebar-item][data-active]': {
-      backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
+      backgroundColor: tokens.color.container,
       color: tokens.color.foreground,
       fontWeight: tokens.fontWeight.medium,
       boxShadow: 'none',
@@ -655,7 +687,7 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] a[data-v-sidebar-item][data-active]:hover': {
-      backgroundColor: inherited.color.colorMixInSrgbForeground5Transparent,
+      backgroundColor: tokens.color.container,
     },
   },
 })
@@ -663,8 +695,8 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-item][data-condensed="true"]': {
-      minHeight: '28px',
-      fontSize: tokens.fontSize.compact,
+      minHeight: '32px',
+      fontSize: tokens.fontSize.sm,
     },
   },
 })
@@ -672,25 +704,16 @@ global({
 global({
   '@layer utilities': {
     '[data-v-sidebar] [data-v-sidebar-section-header] svg': {
-      color: inherited.color.colorMixInSrgbForeground38Transparent,
+      color: tokens.color.muted,
     },
   },
 })
 
 global({
   '@layer utilities': {
-    '[data-v-sidebar-footer-content] [data-v-socials] a[aria-label="GitHub"] svg': {
-      width: '19px',
-      height: '19px',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '[data-v-sidebar-footer-content] [data-v-socials] a[aria-label="X (Twitter)"] svg': {
-      width: '16px',
-      height: '16px',
+    // GitHub and X live in the site footer; the sidebar footer keeps only the theme control.
+    '[data-v-sidebar-footer-content] [data-v-socials]': {
+      display: 'none',
     },
   },
 })
@@ -717,34 +740,56 @@ global({
   },
 })
 
-// Ask AI docks in the right rail when the page has one, so it never covers the
-// content column. Elsewhere (below 1376px, the entry page and full-width API
-// reference pages) it is a compact icon button in the bottom-right corner; its
-// visually hidden text stays the button's accessible name. Vocs sizes the
-// trigger with !important utilities, so the container's size bounds it instead.
+// Ask AI is one floating pill at every breakpoint: 40 high, inverse fill, radius
+// full, Shadow small, bottom-right at the gutter (24, or 16 below 768). Vocs sizes,
+// tints and blurs the trigger with !important utilities in vocs_utilities, so the
+// fill overrides sit in an earlier layer and max-width bounds its fixed width.
 global({
+  '@layer base': {
+    '[data-v-ask-ai-container] > button': {
+      // design-exception: Vocs tints the trigger with !important; the pill takes the inverse fill.
+      backgroundColor: 'var(--background-color-invert) !custom !important',
+      // design-exception: Vocs blurs the trigger with !important; an opaque pill needs no blur.
+      backdropFilter: 'none !custom !important',
+    },
+  },
   '@layer utilities': {
     '[data-v-ask-ai-container]': {
       position: 'fixed',
       top: 'auto',
-      bottom: '12px',
+      bottom: '24px',
       left: 'auto',
-      right: '12px',
-      width: '36px',
-      height: '36px',
-      translate: 0,
+      right: '24px',
+      display: 'flex',
+      justifyContent: 'flex-end',
+      width: 'auto',
+      height: '40px',
+      // Vocs centres the container with its translate utility; zero its x offset.
+      '--tw-translate-x': '0px',
       transform: 'none',
     },
     '[data-v-ask-ai-container] > button': {
+      gap: tokens.spacing['2'],
       minWidth: 0,
-      width: '100%',
-      maxWidth: '100%',
+      // Vocs fixes the trigger at 290px with !important; max-width lets the pill hug its label.
+      maxWidth: 'max-content',
+      height: '40px',
       maxHeight: '100%',
       justifyContent: 'center',
-      paddingInline: tokens.spacing['0'],
+      paddingBlock: tokens.spacing['0'],
+      paddingInline: tokens.spacing['4'],
+      borderWidth: tokens.borderWidth.none,
       borderRadius: tokens.radius.full,
+      color: inherited.color.textColorInvert,
+      // design-exception: DS Shadow small; contract.ts has no shadow scale yet.
+      boxShadow: '0 4px 12px rgb(0 0 0 / 0.12) !custom',
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      lineHeight: tokens.lineHeight.control,
     },
-    '[data-v-ask-ai-container] > button > div': {
+    // The pill reads "Ask AI": the field's placeholder ellipsis and key hints stay out of it.
+    // The trigger's text stays its accessible name.
+    '[data-v-ask-ai-container] > button > div:first-child': {
       position: 'absolute',
       width: '1px',
       height: '1px',
@@ -752,12 +797,19 @@ global({
       clipPath: 'inset(50%)',
       whiteSpace: 'nowrap',
     },
+    '[data-v-ask-ai-container] > button::after': {
+      content: '"Ask AI"',
+      whiteSpace: 'nowrap',
+    },
+    '[data-v-ask-ai-container] > button > div:last-child': {
+      display: 'none',
+    },
     '[data-v-ask-ai-container] > button::before': {
       content: '""',
       display: 'block',
       flexShrink: 0,
-      width: '18px',
-      height: '18px',
+      width: '16px',
+      height: '16px',
       backgroundColor: 'currentColor',
       maskImage:
         "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4'/%3E%3Ccircle cx='4' cy='20' r='2'/%3E%3C/svg%3E\")",
@@ -770,38 +822,21 @@ global({
       WebkitMaskRepeat: 'no-repeat',
       WebkitMaskPosition: 'center',
     },
-    // The menu otherwise takes the trigger's width, which is 36px when compact.
+    // The menu otherwise takes the trigger's width.
     '[role="menu"][data-side]:has([role="menuitem"])': {
       minWidth: '240px',
     },
+    '@media (width < 768px)': {
+      '[data-v-ask-ai-container]': {
+        bottom: '16px',
+        right: '16px',
+      },
+    },
     '@media (width >= 1376px)': {
-      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container]':
-        {
-          bottom: '24px',
-          right: 'max(24px, calc((100% - var(--tempo-docs-shell-width)) * 0.5 + 24px))',
-          width: 'calc(var(--tempo-docs-outline-width) - 48px)',
-          height: 'auto',
-        },
-      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container] > button':
-        {
-          justifyContent: 'space-between',
-          paddingInlineStart: tokens.spacing['3'],
-          paddingInlineEnd: tokens.spacing['2'],
-          borderRadius: tokens.radius.lg,
-        },
-      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container] > button > div':
-        {
-          position: 'static',
-          width: 'auto',
-          height: 'auto',
-          overflow: 'visible',
-          clipPath: 'none',
-          whiteSpace: 'normal',
-        },
-      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-ask-ai-container] > button::before':
-        {
-          display: 'none',
-        },
+      // On wide screens the pill keeps to the shell's gutter, not the window edge.
+      '[data-layout] > [data-v-ask-ai-container]': {
+        right: 'max(24px, calc((100% - var(--tempo-docs-shell-width)) * 0.5 + 24px))',
+      },
     },
   },
 })
@@ -1282,38 +1317,77 @@ global({
 
 global({
   '@layer utilities': {
-    'article[data-v-content] :is(h1, h2, h3)[data-v]': {
+    // Headings: Pilat Book, regular, tight tracking, primary. H2 24, H3 18, H4 16.
+    'article[data-v-content] :is(h1, h2, h3, h4)[data-v]': {
+      color: tokens.color.foreground,
       fontFamily: inherited.fontFamily.tempoFontDisplay,
-      fontWeight: tokens.fontWeight.medium,
+      fontWeight: tokens.fontWeight.normal,
 
-      letterSpacing: tokens.letterSpacing.heading,
+      letterSpacing: tokens.letterSpacing.tight,
       textWrap: 'balance',
     },
-  },
-})
-
-global({
-  '@layer utilities': {
-    'article[data-v-content] > h1[data-v]': {
-      maxWidth: '24ch',
-      border: 0,
-      paddingBottom: 0,
-      // design-exception: Preserve this responsive geometry across viewport sizes.
-      fontSize: 'clamp(32px, 3vw, 42px) !custom',
-      letterSpacing: tokens.letterSpacing.display,
-
-      lineHeight: tokens.lineHeight.display,
+    'article[data-v-content] h2[data-v]': {
+      fontSize: tokens.fontSize.title,
+      lineHeight: tokens.lineHeight.heading,
+    },
+    'article[data-v-content] h3[data-v]': {
+      fontSize: tokens.fontSize.lead,
+      lineHeight: tokens.lineHeight.snug,
+    },
+    'article[data-v-content] h4[data-v]': {
+      fontSize: tokens.fontSize.body,
+      lineHeight: tokens.lineHeight.normal,
     },
   },
 })
 
 global({
   '@layer utilities': {
-    'article[data-v-content] > h1[data-v] + p[data-v]': {
-      color: inherited.color.colorMixInSrgbForeground68Transparent,
+    // H1 32 (28 below 768), with the Copy page control floated on its first line.
+    'article[data-v-content] h1[data-v]': {
+      maxWidth: 'none',
+      border: 0,
+      paddingBottom: 0,
+      fontSize: tokens.fontSize.displaySmall,
+      letterSpacing: tokens.letterSpacing.tight,
 
-      fontSize: tokens.fontSize.body,
-      lineHeight: tokens.lineHeight.prose,
+      lineHeight: tokens.lineHeight.heading,
+    },
+    '@media (width < 768px)': {
+      'article[data-v-content] h1[data-v]': {
+        fontSize: tokens.fontSize.heading,
+      },
+    },
+    // H1 to lead 12; H2 16 below; H3 12 below; H4 8 below.
+    'article[data-v-content] > h1[data-v]:has(+ p[data-v])': {
+      marginBottom: tokens.spacing['3'],
+    },
+    'article[data-v-content] > h2[data-v]': {
+      marginBottom: tokens.spacing['4'],
+    },
+    'article[data-v-content] > h3[data-v]': {
+      marginBottom: tokens.spacing['3'],
+    },
+    'article[data-v-content] > h4[data-v]': {
+      marginBottom: tokens.spacing['2'],
+    },
+    // Lists: 8 between items.
+    'article[data-v-content] :is(ul, ol)[data-v] > li + li': {
+      marginTop: tokens.spacing['2'],
+    },
+  },
+})
+
+global({
+  '@layer utilities': {
+    // Lead 18/28 in the secondary color, 32 above the first content.
+    'article[data-v-content] > h1[data-v] + p[data-v]': {
+      marginBottom: tokens.spacing['8'],
+      color: tokens.color.muted,
+
+      fontSize: tokens.fontSize.lead,
+      // design-exception: Lead 18/28 (system-v2); contract.ts has no 28px line height.
+      lineHeight: '28px !custom',
     },
   },
 })
@@ -1338,16 +1412,44 @@ global({
   },
 })
 
+// The rail holds the outline only: "On this page" 14/20 secondary, items 14/20
+// secondary, the current one primary with a 2px indicator in content/primary on a
+// hairline track. Feedback moves to the page end; Copy page sits on the H1's row.
 global({
   '@layer utilities': {
+    '[data-v-outline]:not([data-v-outline-mobile]) > :not([data-v-outline-nav])': {
+      display: 'none',
+    },
+    '[data-v-outline-nav]': {
+      gap: tokens.spacing['3'],
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.control,
+    },
+    '[data-v-outline-nav] > div:first-child': {
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      lineHeight: tokens.lineHeight.control,
+    },
+    '[data-v-outline-nav] > div:first-child > svg': {
+      display: 'none',
+    },
+    '[data-v-outline-items]': {
+      borderInlineStartColor: tokens.color.hairline,
+      fontSize: tokens.fontSize.sm,
+    },
+    '[data-v-outline-item] a': {
+      paddingBlock: tokens.spacing['1'],
+      color: tokens.color.muted,
+      fontWeight: tokens.fontWeight.normal,
+      lineHeight: tokens.lineHeight.control,
+    },
+    '[data-v-outline-item] a:hover': {
+      color: tokens.color.foreground,
+    },
     '[data-v-outline-indicator]': {
       backgroundColor: tokens.color.foreground,
     },
-  },
-})
-
-global({
-  '@layer utilities': {
     '[data-v-outline-item] a[data-active="true"]': {
       color: tokens.color.foreground,
     },
@@ -1387,23 +1489,27 @@ global({
       {
         display: 'none',
       },
-    // The site footer's columns line up with the entry page's content.
-    '[data-layout]:has(.tempo-docs-home) .docs-footer-inner': {
-      maxWidth: 'calc(var(--tempo-hub-width) + 96px)',
-      marginInline: 'auto !custom',
-      // design-exception: Match the entry page article's responsive inset.
-      paddingInline: 'clamp(24px, 4vw, 48px) !custom',
-    },
   },
 })
 
 global({
   '@layer utilities': {
+    // Home sits on the gutter (16, 24 from 768) with 32 above the hero (48 from 1080).
     'article[data-v-content]:has(.tempo-docs-home)': {
-      maxWidth: 'calc(var(--tempo-hub-width) + 96px)',
+      maxWidth: 'calc(var(--tempo-hub-width) + 48px)',
       marginInline: 'auto !custom',
-      // design-exception: Preserve this responsive geometry across viewport sizes.
-      padding: 'clamp(24px, 4vw, 48px) !custom',
+      paddingBlock: tokens.spacing['8'],
+      paddingInline: tokens.spacing['4'],
+    },
+    '@media (width >= 768px)': {
+      'article[data-v-content]:has(.tempo-docs-home)': {
+        paddingInline: tokens.spacing['6'],
+      },
+    },
+    '@media (width >= 1080px)': {
+      'article[data-v-content]:has(.tempo-docs-home)': {
+        paddingBlock: tokens.spacing['12'],
+      },
     },
   },
 })
@@ -1492,10 +1598,50 @@ global({
       borderWidth: tokens.borderWidth.none,
       backgroundColor: tokens.color.block,
     },
-    // Vocs pulls the active tab's underline over the header border it no longer has;
-    // keep it inside the tab list, which clips vertically.
+    // Code header tabs sit 4 inside the 12px block, so they take radius 8 (12 - 4): 32
+    // high, 14/20, secondary; the current tab is the container/regular chip.
+    '[data-v-code-group-list]': {
+      gap: tokens.spacing['1'],
+      paddingInline: tokens.spacing['1'],
+    },
     '[data-v-code-group-tab]': {
+      height: '32px',
       marginBottom: tokens.spacing['0'],
+      paddingInline: tokens.spacing['3'],
+      borderBottomWidth: tokens.borderWidth.none,
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      letterSpacing: tokens.letterSpacing.normal,
+      lineHeight: tokens.lineHeight.control,
+    },
+    '[data-v-code-group-tab]:hover': {
+      backgroundColor: tokens.color.containerSubtle,
+      color: tokens.color.foreground,
+    },
+    '[data-v-code-group-tab][data-active]': {
+      backgroundColor: tokens.color.container,
+      color: tokens.color.foreground,
+      fontWeight: tokens.fontWeight.medium,
+    },
+    '[data-v-code-title]': {
+      fontSize: tokens.fontSize.sm,
+      fontWeight: tokens.fontWeight.normal,
+      letterSpacing: tokens.letterSpacing.normal,
+      lineHeight: tokens.lineHeight.control,
+    },
+    // Table headers 12/16; kbd 4.
+    'div[data-v-table-wrapper] th': {
+      fontSize: tokens.fontSize.xs,
+      lineHeight: tokens.lineHeight.caption,
+    },
+    'article[data-v-content] kbd': {
+      borderRadius: tokens.radius.sm,
+      '--corner-radius': tokens.radius.sm,
+      fontSize: tokens.fontSize.xs,
+      lineHeight: tokens.lineHeight.caption,
     },
     // The API reference overview pane sits on its own fill.
     '[data-v-openapi-overview]': {
@@ -1517,9 +1663,21 @@ global({
   '@layer base': {
     ':is(article[data-v-content], [data-v-openapi-intro], [data-v-openapi-guide]) > :not(:is(hgroup[data-v], h1[data-v])) + h2:not(:only-child)':
       {
-        // design-exception: Vocs sets this margin !important; the section token replaces it.
-        marginTop: 'var(--tempo-section-space) !custom !important',
+        // design-exception: Vocs sets this margin !important; system-v2 puts 48 above an H2.
+        marginTop: '48px !custom !important',
       },
+    'article[data-v-content] > :not(:is(h1, h2))[data-v] + h3[data-v]': {
+      // design-exception: Vocs pulls prose siblings up 8px with !important; system-v2 puts 32 above an H3.
+      marginTop: '32px !custom !important',
+    },
+    'article[data-v-content] > :not(:is(h1, h2, h3))[data-v] + h4[data-v]': {
+      // design-exception: Vocs pulls prose siblings up 8px with !important; system-v2 puts 24 above an H4.
+      marginTop: '24px !custom !important',
+    },
+    'article[data-v-content] > :is(h3, h4)[data-v] + :is(p, ul, ol)[data-v]': {
+      // design-exception: Vocs pulls prose siblings up 8px with !important; the heading's own margin sets the gap.
+      marginTop: '0px !custom !important',
+    },
   },
   '@layer vocs_utilities': {
     ':is(article[data-v-content], [data-v-openapi-intro], [data-v-openapi-guide]) > :not(:is(hgroup[data-v], h1[data-v])) + h2:not(:only-child)':
@@ -1540,13 +1698,92 @@ global({
       paddingTop: tokens.spacing['0'],
       borderTopWidth: tokens.borderWidth.none,
     },
-    // The page footer (feedback, edit link, pager) starts a section's space below the body.
+    // Page end: 64 above one row with "Was this helpful?" on the left and "Edit this
+    // page" on the right; 16 to the divider; 24 to the Previous / Next pager. Vocs
+    // renders feedback here only below 1376px (the rail has it above) and adds a
+    // Last updated line and a second Copy for AI, which the page header replaces.
     'article[data-v-content] > [data-v-content-footer]': {
-      marginTop: tokens.spacing.section,
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0, 1fr) auto',
+      alignItems: 'center',
+      columnGap: tokens.spacing['4'],
+      rowGap: tokens.spacing['4'],
+      marginTop: tokens.spacing['16'],
     },
-    // Previous and Next read as next-step cards that fill on hover.
+    '[data-v-content-footer] > *': {
+      gridColumn: '1 / -1',
+      marginBlock: tokens.spacing['0'],
+    },
+    '[data-v-content-footer] > :first-child': {
+      display: 'block',
+      gridColumn: 1,
+      gridRow: 1,
+    },
+    '[data-v-content-footer] > :nth-child(2)': {
+      gridColumn: 2,
+      gridRow: 1,
+      flexDirection: 'row',
+    },
+    '[data-v-content-footer] > :first-child:empty, [data-v-content-footer] > :nth-child(2):empty': {
+      display: 'none',
+    },
+    '[data-layout]:has(.docs-page-actions) [data-v-content-footer] > :nth-child(3), [data-v-last-updated]':
+      {
+        display: 'none',
+      },
+    '[data-v-content-footer] > :last-child': {
+      paddingTop: tokens.spacing['6'],
+      borderTopColor: tokens.color.hairline,
+    },
+    '[data-v-content-footer] div[data-v-feedback]': {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: tokens.spacing['2'],
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.control,
+    },
+    '[data-v-content-footer] div[data-v-feedback] > p': {
+      color: tokens.color.muted,
+      fontWeight: tokens.fontWeight.normal,
+    },
+    '[data-v-content-footer] div[data-v-feedback] > div': {
+      gap: tokens.spacing['2'],
+    },
+    '[data-v-content-footer] div[data-v-feedback] button': {
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
+      color: tokens.color.muted,
+    },
+    '[data-v-content-footer] form[data-v-feedback]': {
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.control,
+    },
+    // Edit this page: a tertiary button with a pencil.
+    '[data-v-edit-link]': {
+      gap: tokens.spacing['2'],
+      height: '32px',
+      paddingInline: tokens.spacing['2'],
+      borderRadius: tokens.radius.md,
+      '--corner-radius': tokens.radius.md,
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.sm,
+      lineHeight: tokens.lineHeight.control,
+      textDecoration: 'none',
+    },
+    '@media (hover: hover)': {
+      ':is([data-v-content-footer] div[data-v-feedback] button, [data-v-edit-link]):hover': {
+        backgroundColor: tokens.color.containerSubtle,
+        color: tokens.color.foreground,
+      },
+      '[data-v-pagination] > a:hover': {
+        backgroundColor: tokens.color.containerSubtle,
+        transitionDuration: 'var(--tempo-enter)',
+      },
+    },
+    // Previous and Next are surface cards: radius 12, padding 16 20, title 16, label 12.
     '[data-v-pagination]': {
-      gap: tokens.spacing['3'],
+      gap: tokens.spacing['4'],
     },
     '[data-v-pagination] > a': {
       flexGrow: 1,
@@ -1554,9 +1791,12 @@ global({
       gap: tokens.spacing['1'],
       paddingBlock: tokens.spacing['4'],
       paddingInline: tokens.spacing['5'],
-      borderWidth: tokens.borderWidth.none,
-      borderRadius: tokens.radius.xl,
-      backgroundColor: tokens.color.container,
+      borderWidth: tokens.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: tokens.color.hairline,
+      borderRadius: tokens.radius.lg,
+      '--corner-radius': tokens.radius.lg,
+      backgroundColor: tokens.color.background,
       transitionProperty: 'color, background-color, border-color, opacity, transform',
       transitionDuration: 'var(--tempo-exit)',
       transitionTimingFunction: 'var(--tempo-ease)',
@@ -1564,14 +1804,18 @@ global({
     '[data-v-pagination] > a > span': {
       transitionProperty: 'none',
     },
-    '[data-v-pagination] > a:hover > span:first-child': {
-      color: inherited.color.vocsTextColorHeading,
-    },
-    '@media (hover: hover)': {
-      '[data-v-pagination] > a:hover': {
-        backgroundColor: tokens.color.containerStrong,
-        transitionDuration: 'var(--tempo-enter)',
+    // Vocs puts the page title first and the Previous / Next label second.
+    '[data-v-pagination] > a > span:first-child, [data-v-pagination] > a:hover > span:first-child':
+      {
+        color: tokens.color.foreground,
+        fontSize: tokens.fontSize.body,
+        fontWeight: tokens.fontWeight.medium,
+        lineHeight: tokens.lineHeight.body,
       },
+    '[data-v-pagination] > a > span:last-child': {
+      color: tokens.color.muted,
+      fontSize: tokens.fontSize.xs,
+      lineHeight: tokens.lineHeight.caption,
     },
   },
 })
@@ -1726,7 +1970,8 @@ global({
     '[data-v-main] > [data-v-footer]': {
       width: 'auto',
       maxWidth: 'none',
-      marginTop: tokens.spacing.section,
+      // The article's bottom padding sets the gap; the footer brings its own hairline.
+      marginTop: tokens.spacing['0'],
       paddingInline: tokens.spacing['0'],
       paddingBottom: tokens.spacing['0'],
     },
@@ -1740,15 +1985,11 @@ global({
           // design-exception: Extend the band under the outline rail that the main column pads for.
           marginInlineEnd: 'calc(var(--tempo-docs-outline-width) * -1) !custom',
         },
-      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-main] > [data-v-footer] > .docs-footer':
+      '[data-layout][data-v-sidebar]:not(:has(.tempo-docs-home)):not([data-v-content-width="full"]:has([data-v-openapi]:not([data-v-openapi-landing]))) > [data-v-main] > [data-v-footer] > .docs-site-footer':
         {
           // design-exception: Keep the footer columns clear of the outline rail.
           paddingInlineEnd: 'var(--tempo-docs-outline-width) !custom',
         },
-    },
-    // The shared focus ring uses the page foreground, which disappears on the black band.
-    'body:has(.docs-section-nav) .docs-footer :is(a, button):focus-visible': {
-      outlineColor: tokens.color.white,
     },
   },
 })

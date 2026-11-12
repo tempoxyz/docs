@@ -32,7 +32,6 @@
 
 import { lazy, type ReactNode, Suspense } from 'react'
 import { Layout, MdxPageContext } from 'vocs'
-import DocsBreadcrumbs from '../components/DocsBreadcrumbs'
 import DocsPageActions from '../components/DocsPageActions'
 
 const Providers = lazy(() => import('../components/Providers'))
@@ -41,11 +40,11 @@ export default function MDXWrapper({ children }: { children: ReactNode }) {
   const context = MdxPageContext.use()
   const frontmatter = context.frontmatter as Record<string, unknown> | undefined
   const needsProviders = Boolean(frontmatter?.interactive || frontmatter?.mipd)
-  // The toolbar inserts its portal after the introduction. Mount it inside the
+  // The Copy page control inserts its portal beside the H1. Mount it inside the
   // article's hydration boundary so it cannot change server HTML before React reads it.
+  // Tabs and the sidebar show the location, so pages carry no breadcrumbs.
   const content = (
     <>
-      <DocsBreadcrumbs />
       {children}
       <DocsPageActions key={String(frontmatter?.filePath ?? '')} />
     </>
