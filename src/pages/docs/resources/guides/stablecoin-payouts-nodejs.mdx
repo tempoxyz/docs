@@ -1,0 +1,99 @@
+---
+title: "Send stablecoin payouts with Node.js"
+seoTitle: "Send Stablecoin Payouts with Node.js | Tempo Docs"
+description: "Pay a list of recipients from a CSV file in one Tempo transaction with Viem, with a payment reference on every transfer."
+---
+
+[Guides](/docs/resources/guides) / [Plan global payouts](/docs/resources/guides/global-payouts) / Node.js
+
+# Send stablecoin payouts with Node.js
+
+This guide pays every recipient in a CSV file with one Tempo transaction, using [Viem](/docs/sdk/typescript). Each transfer carries a payment reference, such as a payout ID, so recipients and your ledger can match it. The batch settles onchain in under a second, and if any transfer fails, the whole batch reverts.
+
+The examples use AlphaUSD on Moderato testnet.
+
+::::steps
+
+## Install Viem
+
+```bash [Terminal]
+npm install viem
+```
+
+## Prepare the payout file
+
+Each row has the recipient address, the amount in dollars, and a reference of up to 32 bytes.
+
+```csv [payouts.csv]
+address,amount,reference
+0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb,125.50,PAY-2026-11-001
+0x70997970C51812dc3A010C7d01b50e0d17dc79C8,80,PAY-2026-11-002
+```
+
+## Send the batch
+
+Fund a sender account with AlphaUSD from the [faucet](/docs/quickstart/faucet) and set `TEMPO_PRIVATE_KEY` to its key. The script turns each row into a transfer call and sends all calls in one [Tempo Transaction](/docs/guide/tempo-transaction).
+
+```ts [payouts.ts]
+import { readFileSync } from 'node:fs'
+import { parseUnits, toHex } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { Account, Actions, createClient } from 'viem/tempo'
+
+const privateKey = process.env.TEMPO_PRIVATE_KEY as `0x${string}`
+const token = '0x20c0000000000000000000000000000000000001' // AlphaUSD on Moderato
+
+const client = createClient({
+  account: Account.fromSecp256k1(privateKey),
+  chain: tempoModerato,
+  feeToken: token,
+})
+
+// address,amount,reference
+const rows = readFileSync('payouts.csv', 'utf8').trim().split('\n').slice(1)
+
+const calls = rows.map((row) => {
+  const [to, amount, reference] = row.split(',')
+  if (new TextEncoder().encode(reference).length > 32) {
+    throw new Error(`Reference longer than 32 bytes: ${reference}`)
+  }
+  return Actions.token.transfer.call({
+    token,
+    to: to as `0x${string}`,
+    amount: parseUnits(amount, 6),
+    memo: toHex(reference, { size: 32 }),
+  })
+})
+
+const hash = await client.sendTransaction({ calls })
+const receipt = await client.waitForTransactionReceipt({ hash })
+if (receipt.status !== 'success') throw new Error(`Payout batch failed: ${hash}`)
+
+console.log(`Paid ${calls.length} recipients in ${hash}`)
+```
+
+Run it with `npx tsx payouts.ts`. Look up the hash in the [testnet explorer](https://explore.testnet.tempo.xyz) to see each transfer and its memo.
+
+::::
+
+## Run payouts in production
+
+- Store the transaction hash with each payout ID before you mark payouts as sent.
+- Split large files into batches of a few hundred transfers. A transfer to an address that has never held the token uses more gas than a repeat transfer, and one transaction can't exceed the block gas limit.
+- To send transfers as independent transactions, so one failure doesn't revert the rest, use [parallel transactions](/docs/guide/payments/send-parallel-transactions).
+- For recipients who want local currency in a bank account, use a payout provider. See [Fund accounts and pay out](/docs/resources/guides/funding-and-payouts).
+- On mainnet, change `tempoModerato` to `tempo` and use the stablecoin you hold. Find contract addresses in [Stablecoins on Tempo](/get-started/stablecoins).
+
+## Node.js payout questions
+
+### What does a payout batch cost?
+
+The batch pays one network fee in a stablecoin, and a standard transfer costs less than a cent. See [Understanding transaction fees](/docs/protocol/fees) for the current base fee.
+
+### What happens if one address in the file is wrong?
+
+A malformed address fails before sending. A transfer that reverts onchain, for example because a [receive policy](/docs/accounts/policies/receive-policies) rejects it, reverts the whole batch, and no recipient is paid. Fix the row and send the batch again.
+
+### Can recipients see the payout reference?
+
+Yes. The memo is part of the `TransferWithMemo` event, so wallets, explorers, and the recipient's own reconciliation can read it.

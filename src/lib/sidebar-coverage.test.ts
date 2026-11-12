@@ -32,6 +32,21 @@ const supportingPages = new Map([
   ['/docs/guide/bridge-relay', '/docs/partners/bridges'],
   ['/docs/partners/developer-tools', '/docs/partners/explorers-and-debugging'],
   ['/docs/guide/payments/send-a-payment/examples', '/docs/guide/payments/send-a-payment'],
+  // Framework guides stay out of the sidebar and are linked from their workflow guide.
+  [
+    '/docs/resources/guides/accept-stablecoin-payments-nextjs',
+    '/docs/resources/guides/how-to-accept-stablecoin-payments',
+  ],
+  [
+    '/docs/resources/guides/charge-for-an-api-express',
+    '/docs/resources/guides/402-payment-required',
+  ],
+  [
+    '/docs/resources/guides/charge-for-an-api-nextjs',
+    '/docs/resources/guides/402-payment-required',
+  ],
+  ['/docs/resources/guides/stablecoin-payouts-nodejs', '/docs/resources/guides/global-payouts'],
+  ['/docs/resources/guides/stablecoin-payouts-python', '/docs/resources/guides/global-payouts'],
 ])
 const routes = readdirSync(new URL('../pages/', import.meta.url), { recursive: true })
   .filter(

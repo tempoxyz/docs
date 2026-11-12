@@ -1,0 +1,122 @@
+---
+title: "Charge for an API route with MPP in Next.js"
+seoTitle: "Charge for a Next.js API Route with MPP | Tempo Docs"
+description: "Charge per request for a Next.js App Router route handler with mppx, settle stablecoin payments on Tempo, and test with a paying client."
+---
+
+[Guides](/docs/resources/guides) / [HTTP 402 Payment Required](/docs/resources/guides/402-payment-required) / Next.js
+
+# Charge for an API route with MPP in Next.js
+
+This guide charges $0.01 per request for a Next.js App Router route handler with the [Machine Payments Protocol](/docs/agents) (MPP). `mppx` wraps the handler: unpaid requests get HTTP `402 Payment Required`, and the handler runs once the client's stablecoin payment on Tempo is verified. Clients and agents pay inside the request, with no account signup or API key.
+
+The examples use OUSD on Moderato testnet and require Next.js 16.2.6 or later.
+
+::::steps
+
+## Install mppx
+
+```bash [Terminal]
+npm install mppx viem
+```
+
+## Load mppx outside the bundler
+
+Add `mppx` to `serverExternalPackages`. Without it, Turbopack tries to bundle optional `mppx` integrations and the route fails with `Can't resolve '@modelcontextprotocol/sdk/types.js'`.
+
+```ts [next.config.ts]
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  serverExternalPackages: ['mppx'],
+}
+
+export default nextConfig
+```
+
+## Set the server secret and recipient
+
+Add these to `.env.local` and to your deployment's environment variables. `MPP_SECRET_KEY` signs payment challenges; generate it with `openssl rand -base64 32`. `TEMPO_RECIPIENT` is the address that receives payments.
+
+```bash [.env.local]
+MPP_SECRET_KEY=<YOUR_SECRET>
+TEMPO_RECIPIENT=<YOUR_ADDRESS>
+```
+
+## Create a shared payment handler
+
+```ts [lib/mppx.ts]
+import { Mppx, tempo } from 'mppx/nextjs'
+
+export const mppx = Mppx.create({
+  methods: [
+    tempo({
+      currency: '0x20c0000000000000000000006a37da5c996874be', // OUSD
+      recipient: process.env.TEMPO_RECIPIENT as `0x${string}`,
+      testnet: true, // Moderato testnet. Remove for mainnet.
+    }),
+  ],
+})
+```
+
+## Wrap a route handler
+
+`mppx.charge()` returns a wrapper for the handler. The response carries a `Payment-Receipt` header.
+
+```ts [app/api/forecast/route.ts]
+import { mppx } from '@/lib/mppx'
+
+// $0.01 per request
+export const GET = mppx.charge({ amount: '0.01', description: 'Weather forecast' })(
+  () => Response.json({ city: 'Lisbon', forecast: 'Sunny, 22°C' }),
+)
+```
+
+Start the app with `npm run dev`. `curl -i http://localhost:3000/api/forecast` returns `402 Payment Required` with the payment challenge in the `www-authenticate` header.
+
+## Pay from a client
+
+Fund a payer account with OUSD from the [faucet](/docs/quickstart/faucet) and set `PAYER_PRIVATE_KEY` to its key. Run this script with `npx tsx client.ts`.
+
+```ts [client.ts]
+import { Receipt } from 'mppx'
+import { Mppx, tempo } from 'mppx/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount(process.env.PAYER_PRIVATE_KEY as `0x${string}`)
+
+const mppx = Mppx.create({
+  polyfill: false,
+  methods: [tempo({ account, allowedChainIds: [42431] })], // Moderato testnet
+})
+
+const response = await mppx.fetch('http://localhost:3000/api/forecast')
+console.log(response.status, await response.json())
+// 200 { city: 'Lisbon', forecast: 'Sunny, 22°C' }
+
+const receipt = Receipt.fromResponse(response)
+console.log(receipt.status, receipt.reference)
+// success 0x…
+```
+
+::::
+
+## Go to mainnet
+
+- Remove `testnet: true` from `tempo()`, and set `allowedChainIds: [4217]` on clients.
+- On Vercel, `mppx` uses `VERCEL_URL` as the payment realm. Set `MPP_REALM` to your public domain when you serve the API from a custom domain. See [MPP payment realm](/docs/guide/machine-payments/server#mpp-payment-realm).
+- To pay clients' network fees, pass a `feePayer` account to `tempo()`. See [MPP fee sponsorship](/docs/guide/machine-payments/server#mpp-fee-sponsorship).
+
+## Next.js MPP questions
+
+### Does this work in the Pages Router?
+
+`mppx/nextjs` wraps App Router route handlers, which take a `Request` and return a `Response`. For other handlers, call `mppx/server` directly as shown in [Manual MPP server mode](/docs/guide/machine-payments/server#manual-mpp-server-mode).
+
+### Can different routes charge different prices?
+
+Yes. Pass a different `amount` to each `mppx.charge()` call. You can also override `currency` and `recipient` per route.
+
+### How do I bill high-frequency calls without a transaction per request?
+
+Use a payment session. The client opens a channel once and signs vouchers for each request. See [pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go).
