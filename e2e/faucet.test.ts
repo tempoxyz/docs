@@ -11,12 +11,16 @@ test('fund an address via faucet', async ({ page }) => {
   await expect(tab).toBeVisible({ timeout: 90000 })
   await selectTab(tab)
 
-  // Enter an address
+  // Enter an address. The input renders on the server before React hydrates it, and hydration
+  // resets a value typed earlier, so retry until the step accepts the address.
   const addressInput = page.getByPlaceholder('0x...')
-  await addressInput.fill('0xbeefcafe54750903ac1c8909323af7beb21ea2cb')
+  const addFundsButton = page.getByRole('button', { name: 'Add funds' })
+  await expect(async () => {
+    await addressInput.fill('0xbeefcafe54750903ac1c8909323af7beb21ea2cb')
+    await expect(addFundsButton).toBeEnabled({ timeout: 1000 })
+  }).toPass({ timeout: 30_000 })
 
-  // Click "Add funds" button
-  await page.getByRole('button', { name: 'Add funds' }).click()
+  await addFundsButton.click()
 
   // Confirm the explorer link resolves to the funded account's transfers
   const transfersLink = page.getByRole('link', { name: 'View transfers' })

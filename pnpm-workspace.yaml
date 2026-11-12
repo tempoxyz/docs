@@ -52,6 +52,8 @@ overrides:
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2': patches/@braintree__sanitize-url@7.1.2.patch
   dayjs@1.11.23: patches/dayjs@1.11.23.patch
+  # Sponsored fills now return validBefore; keep it so the fee payer signature matches (fixed upstream in viem 2.57.18).
+  viem@2.57.5: patches/viem@2.57.5.patch
   vocs@2.12.0: patches/vocs@2.12.0.patch
   waku@1.0.0-rc.3: patches/waku@1.0.0-rc.3.patch
 
