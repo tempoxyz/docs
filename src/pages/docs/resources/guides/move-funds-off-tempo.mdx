@@ -1,0 +1,53 @@
+---
+title: Move funds off Tempo
+seoTitle: How to Withdraw From Tempo to a Bank or Another Chain | Tempo Docs
+description: Cash out stablecoins from Tempo through Coinbase or Kraken, bridge them to Base, Ethereum, or Solana, or send them to another wallet.
+---
+
+import { Card, Cards } from 'vocs'
+
+[Guides](/docs/resources/guides) / [Use Tempo](/docs/resources/guides#use-tempo) / Move funds off Tempo
+
+# Move funds off Tempo
+
+Send stablecoins from Tempo to an exchange, another chain, or another wallet.
+
+## Overview
+
+Tempo Wallet doesn't withdraw to a bank account. To cash out, send stablecoins to an exchange or ramp that supports Tempo, then withdraw to your bank there. To use them on another chain, bridge them.
+
+## Cash out through an exchange
+
+:::::steps
+
+### Get a Tempo deposit address
+
+In Coinbase, receive a supported stablecoin and choose Tempo as the network. Kraken accepts USDT0 deposits on Tempo.
+
+### Send from Tempo Wallet
+
+In Tempo Wallet, select **Send**. Paste the exchange's address as the **Recipient**, choose the stablecoin, and enter the amount. Add a **Note** if the exchange asks for a memo. Select **Send**.
+
+### Withdraw to your bank
+
+When the deposit arrives, sell or withdraw it to your bank on the exchange.
+
+:::::
+
+Send only stablecoins the exchange supports on Tempo. Stablecoins sent on the wrong network or in an unsupported token can be lost.
+
+## Bridge to another chain
+
+A bridge moves stablecoins from Tempo to chains such as Base, Ethereum, Arbitrum, and Solana. To use [Relay](https://relay.link/bridge), connect a wallet that holds your Tempo address, such as MetaMask or Rabby. Choose **Tempo** as the source chain and pick the destination. Other bridges are in the [bridge directory](/docs/partners/bridges).
+
+## Use a wallet with a built-in off-ramp
+
+Some wallets that support Tempo sell stablecoins for local currency. [Bridge Wallet by Mt Pelerin](https://www.mtpelerin.com/bridge-wallet) supports cashing out supported assets. Send your stablecoins to its Tempo address first.
+
+## Related
+
+<Cards>
+  <Card title="Get stablecoins on Tempo" description="Move money onto Tempo." to="/docs/resources/guides/get-stablecoins-on-tempo" />
+  <Card title="Bridging with Relay" description="Bridge with the Relay API or app." to="/docs/guide/bridge-relay" />
+  <Card title="Payments and ramps" description="Fiat ramp providers for apps." to="/docs/partners/payments-and-ramps" />
+</Cards>
