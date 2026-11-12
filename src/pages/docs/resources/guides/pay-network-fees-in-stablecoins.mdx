@@ -1,0 +1,49 @@
+---
+title: Pay fees in stablecoins
+seoTitle: How to Pay Gas Fees on Tempo Without a Native Token | Tempo Docs
+description: Tempo charges network fees in USD stablecoins, not a gas token. See which stablecoin pays, why a transaction fails for fees, and how sponsored fees work.
+---
+
+import { Card, Cards } from 'vocs'
+
+[Guides](/docs/resources/guides) / [Use Tempo](/docs/resources/guides#use-tempo) / Pay fees in stablecoins
+
+# Pay fees in stablecoins
+
+Tempo has no gas token. Every network fee is paid in a USD stablecoin.
+
+## Overview
+
+A network fee is what a transaction pays to be included in a block. On Tempo, it's priced in USD and paid in a USD stablecoin you already hold, such as OUSD, USDC.e, or USDT0. You never need to buy ETH or another token to pay it.
+
+## Which stablecoin pays
+
+Tempo picks the fee token in this order:
+
+1. **Your choice for the transaction.** Some apps let you pick it.
+2. **Your account's default.** You set it once.
+3. **The stablecoin you send.** A transfer of USDC.e pays its fee in USDC.e.
+4. **The stablecoin you swap from.** This applies to a single swap.
+5. **pathUSD.** The fallback for every other transaction.
+
+When an app or fee payer covers the fee, its own default applies instead of yours. The fee token must be a USD stablecoin. Tempo rejects a transaction when your account can't cover the maximum fee in that token. It doesn't try another token.
+
+## Fees in Tempo Wallet
+
+Tempo Wallet picks the fee token for you. Each review screen shows a **Fee** row in USD. When an app or Tempo covers the fee, the row says **Sponsored**, and you pay nothing.
+
+## Fees in MetaMask and other wallets
+
+Standard wallets follow the same order. Keep a small balance of the stablecoin you send. Wallets show a large placeholder in place of a native balance. It isn't money you hold.
+
+## When a transaction fails for fees
+
+Check that you hold enough of the fee token. If the fee falls back to pathUSD and you hold none, swap a little into pathUSD. In Tempo Wallet, select **Swap**. Or [set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) you hold.
+
+## Related
+
+<Cards>
+  <Card title="Fee Tokens" description="Set and override an account's fee token in code." to="/docs/accounts/fees/fee-tokens" />
+  <Card title="Fee Sponsorship" description="Pay your users' fees from your app." to="/docs/accounts/fees/fee-sponsorship" />
+  <Card title="Add Tempo to MetaMask" description="Use Tempo in a wallet you already have." to="/docs/resources/guides/add-tempo-to-metamask" />
+</Cards>

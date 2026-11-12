@@ -1,0 +1,68 @@
+---
+title: Set an agent spending limit
+seoTitle: How to Set a Spending Limit for an AI Agent on Tempo | Tempo Docs
+description: Approve an AI agent or app with a daily spending limit and an expiry in Tempo Wallet, lower its permissions before approving, and revoke it at any time.
+---
+
+import { Card, Cards } from 'vocs'
+
+[Guides](/docs/resources/guides) / [Use Tempo](/docs/resources/guides#use-tempo) / Set an agent spending limit
+
+# Set an agent spending limit
+
+Let an agent pay from your account, up to an amount you approve.
+
+## Overview
+
+When an app or agent asks to pay from your Tempo Wallet, you approve an access key for it. Tempo enforces the key's limits on every transaction. The agent can't spend past them, whatever it decides to do.
+
+An access key has three limits:
+
+- **Spending limit.** How much it can spend, such as $20 per day.
+- **Expiry.** When it stops working, such as in 30 days.
+- **Scopes.** Which actions it can take.
+
+## Review the approval screen
+
+The **Authorize App** screen shows what the app will be able to do:
+
+| Line | Meaning |
+| --- | --- |
+| **Spend $X per day** | The most it can spend before the limit resets. |
+| **Spend any amount** | No spending limit. Approve this only for apps you fully trust. |
+| **Pay network fees up to $X** | A separate budget for transaction fees. |
+| **Hold funds for services** | Money set aside for pay-as-you-go services. |
+| **Expires in…** | When the key stops working. |
+| **This app can take other actions** | It can make calls beyond payments. Select **Show** to see them. |
+
+## Lower the limits
+
+:::::steps
+
+### Edit the permissions
+
+Select the pencil icon to open **Edit Permissions**.
+
+### Change the amount or expiry
+
+Lower the **Spend limit**, or pick an expiry: **7 days**, **30 days**, **365 days**, or **No expiry**. You can only reduce what the app asked for.
+
+### Approve
+
+Select **Save changes**, then **Approve**.
+
+:::::
+
+## Raise or revoke a limit
+
+An app can ask for a higher limit later. You see an **Update spend limit** screen and approve or reject it.
+
+To stop an agent, open [wallet.tempo.xyz/apps](https://wallet.tempo.xyz/apps). Expand the app to see each key's remaining limit and expiry. Select **Revoke** on a key, or **Disconnect** to revoke all of the app's keys.
+
+## Related
+
+<Cards>
+  <Card title="Connect Tempo Wallet to an app" description="Sign in to apps and agents." to="/docs/resources/guides/connect-tempo-wallet-to-an-app" />
+  <Card title="Spending limits" description="How Tempo enforces access key limits." to="/docs/accounts/access-keys/spending-limits" />
+  <Card title="Give an agent a wallet" description="Build agent spending limits into your app." to="/docs/accounts/automations/give-an-agent-a-wallet" />
+</Cards>

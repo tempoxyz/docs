@@ -1,0 +1,68 @@
+---
+title: Add Tempo to MetaMask
+seoTitle: How to Add Tempo Network to MetaMask (Chain ID 4217) | Tempo Docs
+description: Add Tempo mainnet to MetaMask, Rabby, or another EVM wallet with chain ID 4217 and the official RPC, then see stablecoin balances and pay fees in stablecoins.
+interactive: true
+mipd: true
+---
+
+import { Card, Cards } from 'vocs'
+import { ConnectWallet } from '../../../../components/ConnectWallet.tsx'
+
+[Guides](/docs/resources/guides) / [Use Tempo](/docs/resources/guides#use-tempo) / Add Tempo to MetaMask
+
+# Add Tempo to MetaMask
+
+Add Tempo mainnet to MetaMask or any EVM wallet in under a minute.
+
+## Overview
+
+Tempo works with EVM wallets, such as MetaMask, Rabby, and Ledger. Your wallet's address is the same on Tempo as on Ethereum. Some wallets, such as Gem Wallet and OKX Wallet, support Tempo already.
+
+## Add Tempo automatically
+
+Connect your browser wallet and approve the network request.
+
+<ConnectWallet network="mainnet" />
+
+## Add Tempo manually
+
+:::::steps
+
+### Open the network settings
+
+In MetaMask, open the network menu and select **Add a custom network**. In Rabby or another wallet, add a custom network from its settings.
+
+### Enter the network details
+
+| Field | Value |
+| --- | --- |
+| Network name | Tempo Mainnet |
+| RPC URL | `https://rpc.tempo.xyz` |
+| Chain ID | `4217` |
+| Currency symbol | `USD` |
+| Block explorer URL | `https://explore.tempo.xyz` |
+
+### Save and switch
+
+Save the network and switch to it.
+
+:::::
+
+For the testnet, use chain ID `42431`, RPC URL `https://rpc.moderato.tempo.xyz`, and explorer `https://explore.testnet.tempo.xyz`.
+
+## Show your stablecoins
+
+Tempo has no native token, so your wallet's native balance is a placeholder. Ignore the large `USD` number it shows. Import each stablecoin you hold by its address from the [token list](/docs/quickstart/tokenlist), such as OUSD or USDC.e.
+
+## Pay fees
+
+Each transaction pays its network fee in a stablecoin. You don't need ETH or any other token. By default, a transfer pays its fee in the stablecoin it sends. Most other transactions fall back to pathUSD. [Pay fees in stablecoins](/docs/resources/guides/pay-network-fees-in-stablecoins) explains the rules.
+
+## Related
+
+<Cards>
+  <Card title="Get stablecoins on Tempo" description="Fund your new Tempo address." to="/docs/resources/guides/get-stablecoins-on-tempo" />
+  <Card title="Pay fees in stablecoins" description="How Tempo charges network fees without a gas token." to="/docs/resources/guides/pay-network-fees-in-stablecoins" />
+  <Card title="Add Tempo to your wallet" description="For wallet teams adding Tempo support." to="/docs/accounts/wallets/add-tempo-to-your-wallet" />
+</Cards>

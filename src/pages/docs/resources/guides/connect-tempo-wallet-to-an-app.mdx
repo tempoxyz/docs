@@ -1,0 +1,73 @@
+---
+title: Connect Tempo Wallet to an app
+seoTitle: How to Connect Tempo Wallet to an App or AI Agent | Tempo Docs
+description: Sign in to an app with Tempo Wallet, connect Claude Code, Codex, Amp, or Cursor to your wallet, and disconnect apps you no longer use.
+---
+
+import { Card, Cards } from 'vocs'
+
+[Guides](/docs/resources/guides) / [Use Tempo](/docs/resources/guides#use-tempo) / Connect Tempo Wallet to an app
+
+# Connect Tempo Wallet to an app
+
+Sign in to apps and agents with your Tempo Wallet, then disconnect them when you're done.
+
+## Overview
+
+[Tempo Wallet](https://wallet.tempo.xyz) is a web wallet you open with your email or a passkey. An app connects to it through a **Sign in with Tempo** window. If the app wants to pay from your account, you approve a spending limit first.
+
+## Connect to an app
+
+:::::steps
+
+### Select Sign in with Tempo
+
+In the app, select **Sign in with Tempo**. A Tempo Wallet window opens.
+
+### Sign in
+
+Enter your email and the 6-digit code it receives, or select **Continue with passkey**. A new email creates a wallet.
+
+### Review the request
+
+If the app asks to spend, the window says it will be authorized to spend from your account. It lists the spending limit, network fees, and expiry. Select **Approve** to connect, or **Reject**.
+
+:::::
+
+[Set a spending limit](/docs/resources/guides/set-an-agent-spending-limit) explains each line on the approval screen.
+
+## Connect an AI agent
+
+:::::steps
+
+### Open Agent payments
+
+In Tempo Wallet, open the account menu and select **Agent payments**.
+
+### Copy the command
+
+Choose your agent: Claude, Codex, Amp, OpenCode, or Cursor. Copy the command and run it in the agent. For Claude Code:
+
+```bash
+claude "Read https://tempo.xyz/SKILL.md and connect to my Tempo wallet"
+```
+
+### Approve in the browser
+
+The agent opens Tempo Wallet. Check that the device code matches your terminal, then approve the spending limit.
+
+:::::
+
+From a terminal, `tempo wallet login` starts the same flow. The [`tempo wallet` reference](/docs/cli/wallet) lists its other commands.
+
+## Disconnect an app
+
+Open [wallet.tempo.xyz/apps](https://wallet.tempo.xyz/apps). It lists connected apps and CLI keys with their spending limits. Select **Disconnect** on an app to revoke its keys. Revoked keys can't spend.
+
+## Related
+
+<Cards>
+  <Card title="Set a spending limit" description="Choose how much an agent can spend and for how long." to="/docs/resources/guides/set-an-agent-spending-limit" />
+  <Card title="Get stablecoins on Tempo" description="Add money to your wallet before you connect." to="/docs/resources/guides/get-stablecoins-on-tempo" />
+  <Card title="Give an agent a wallet" description="For developers building agent payments." to="/docs/accounts/automations/give-an-agent-a-wallet" />
+</Cards>

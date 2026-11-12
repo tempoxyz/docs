@@ -516,6 +516,36 @@ export default defineConfig({
             items: [
               { text: 'All guides', link: '/docs/resources/guides' },
               {
+                text: 'Use Tempo',
+                collapsed: true,
+                items: [
+                  {
+                    text: 'Get stablecoins on Tempo',
+                    link: '/docs/resources/guides/get-stablecoins-on-tempo',
+                  },
+                  {
+                    text: 'Add Tempo to MetaMask',
+                    link: '/docs/resources/guides/add-tempo-to-metamask',
+                  },
+                  {
+                    text: 'Connect Tempo Wallet',
+                    link: '/docs/resources/guides/connect-tempo-wallet-to-an-app',
+                  },
+                  {
+                    text: 'Set an agent spending limit',
+                    link: '/docs/resources/guides/set-an-agent-spending-limit',
+                  },
+                  {
+                    text: 'Pay fees in stablecoins',
+                    link: '/docs/resources/guides/pay-network-fees-in-stablecoins',
+                  },
+                  {
+                    text: 'Move funds off Tempo',
+                    link: '/docs/resources/guides/move-funds-off-tempo',
+                  },
+                ],
+              },
+              {
                 text: 'Payment infrastructure',
                 collapsed: true,
                 items: [

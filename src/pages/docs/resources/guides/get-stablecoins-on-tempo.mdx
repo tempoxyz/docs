@@ -1,0 +1,88 @@
+---
+title: Get stablecoins on Tempo
+seoTitle: How to Get USDC and Stablecoins on Tempo | Tempo Docs
+description: Deposit USDC, USDT, or ETH from Base, Ethereum, Arbitrum, Solana, and other chains into Tempo Wallet, withdraw from Coinbase or Kraken on Tempo, or bridge.
+---
+
+import { Card, Cards } from 'vocs'
+
+[Guides](/docs/resources/guides) / [Use Tempo](/docs/resources/guides#use-tempo) / Get stablecoins on Tempo
+
+# Get stablecoins on Tempo
+
+Move stablecoins onto Tempo from another chain, an exchange, or another Tempo account.
+
+## Overview
+
+Tempo has no native token. Your balance is held in stablecoins, such as OUSD, USDC.e, and USDT0. Anyone can send stablecoins to a Tempo address, with nothing to set up first.
+
+Pick a path by where your money is now:
+
+- **On another chain.** Deposit it into [Tempo Wallet](https://wallet.tempo.xyz), or use a bridge.
+- **On an exchange.** Withdraw it and choose Tempo as the network.
+- **In another Tempo account.** Share your address and receive it.
+
+## Deposit from another chain
+
+Tempo Wallet gives you a deposit address on the chain your funds are on. It converts what you send and adds OUSD to your Tempo balance.
+
+:::::steps
+
+### Open the deposit screen
+
+Sign in at [wallet.tempo.xyz](https://wallet.tempo.xyz) with your email or a passkey. A new email creates a wallet. Select **Deposit**, then **Deposit crypto**.
+
+### Choose the network and token
+
+Pick the **Network** and **Token** you're sending from.
+
+| Network | Tokens |
+| --- | --- |
+| Base | USDC, OUSD, ETH, WETH, cbBTC, SOL, WBTC |
+| Ethereum | USDC, USDT, OUSD, ETH, WETH, WBTC |
+| Arbitrum | USDC, USDT, ETH |
+| Optimism | USDC, USDT, ETH, WETH |
+| Solana | USDC, SOL |
+| Unichain | USDC, ETH |
+| Abstract | USDC, ETH |
+
+### Send to the deposit address
+
+Copy the **Deposit address** or scan its QR code. Send only the token and network you selected. Select **Done**. The wallet shows **Deposit complete** when the OUSD arrives.
+
+:::::
+
+Deposits from other chains go to Tempo mainnet only. [Relay](/docs/guide/bridge-relay) routes them.
+
+<span id="withdraw-from-an-exchange" />
+
+## Withdraw from an exchange
+
+Some exchanges send stablecoins on Tempo directly:
+
+- **Coinbase.** Select Tempo as the network when you send a supported stablecoin.
+- **Kraken.** Withdraw USDT0 on Tempo.
+
+Paste your Tempo address as the destination. Check that the exchange shows Tempo as the network before you confirm.
+
+## Bridge from another chain
+
+A bridge moves stablecoins from another chain to any Tempo address, including one in MetaMask or Rabby. To use [Relay](https://relay.link/bridge), choose your source chain and token, then set **Tempo** as the destination.
+
+Other bridges, such as LayerZero, Bungee, and Across, are in the [bridge directory](/docs/partners/bridges).
+
+## Receive from another Tempo account
+
+In Tempo Wallet, select **Receive**, then copy your **Wallet address** or show its QR code. Only send supported stablecoins on Tempo to it.
+
+## Get test stablecoins
+
+The [Moderato testnet faucet](/docs/quickstart/faucet) gives you free test stablecoins. They have no value and work only on testnet.
+
+## Related
+
+<Cards>
+  <Card title="Add Tempo to MetaMask" description="Use Tempo in a wallet you already have." to="/docs/resources/guides/add-tempo-to-metamask" />
+  <Card title="Move funds off Tempo" description="Send stablecoins to an exchange, another chain, or a bank." to="/docs/resources/guides/move-funds-off-tempo" />
+  <Card title="Fund an account" description="Add funding and deposits to your own app." to="/docs/guide/getting-funds" />
+</Cards>
