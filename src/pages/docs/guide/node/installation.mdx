@@ -144,20 +144,42 @@ G4OIGIHqFwKSCA==
 
 </details>
 
-### Docker Image Signatures (Cosign)
+### Docker Image Provenance
 
-Docker images are signed with [Cosign](https://docs.sigstore.dev/cosign/signing/overview/) using keyless signing via GitHub Actions OIDC.
+Docker images published from `main`, release tags and release-candidate branches carry a [GitHub build provenance attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), stored next to the image in the registry. Each attestation records the repository, workflow and Git ref that built the image.
 
 To verify a Docker image:
 
 ```bash
+# Install the GitHub CLI: https://cli.github.com/
+gh attestation verify oci://ghcr.io/tempoxyz/tempo:<tag> \
+  --repo tempoxyz/tempo
+```
+
+This verifies that the image was built by the official Tempo CI pipeline. Images on Docker Hub (`docker.io/tempoxyz/tempo`) verify the same way.
+
+Images are multi-platform (`linux/amd64` and `linux/arm64`). Both the multi-platform image and each platform image are attested, so you can also verify a pinned digest:
+
+```bash
+gh attestation verify oci://ghcr.io/tempoxyz/tempo@sha256:<digest> \
+  --repo tempoxyz/tempo
+```
+
+<details>
+<summary>Older images signed with Cosign</summary>
+
+Images published before build provenance attestations were signed with [Cosign](https://docs.sigstore.dev/cosign/signing/overview/) using keyless signing via GitHub Actions OIDC. Those signatures still verify:
+
+```bash
 # Install cosign: https://docs.sigstore.dev/cosign/system_config/installation/
-cosign verify ghcr.io/tempoxyz/tempo:latest \
+cosign verify ghcr.io/tempoxyz/tempo:<tag> \
   --certificate-identity-regexp="https://github.com/tempoxyz/tempo/" \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
 ```
 
-This verifies that the image was built and signed by the official Tempo CI pipeline.
+New images may not carry a Cosign signature. Switch to `gh attestation verify`.
+
+</details>
 
 ### SHA256 Checksums
 
