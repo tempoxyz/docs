@@ -1,5 +1,6 @@
 import { inherited } from '../styles/inherited'
 import { style } from '../styles/recipes'
+import { selectChevron } from '../styles/select-chevron'
 import { vars as tokens } from '../styles/theme'
 export const resultViewLayout = style({
   selectors: {
@@ -169,15 +170,13 @@ export const select = style({
     '&:is(select)': {
       appearance: 'none',
       paddingInlineEnd: tokens.spacing['10'],
-      backgroundImage:
-        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23000' d='M11.9804 6.1464C12.1757 5.9514 12.4923 5.95122 12.6875 6.1464C12.8823 6.3416 12.8823 6.65827 12.6875 6.85343L8.82516 10.7157C8.36974 11.1709 7.63132 11.1707 7.17574 10.7157L3.31344 6.85343C3.11818 6.65816 3.11818 6.34166 3.31344 6.1464C3.50871 5.95124 3.82524 5.95117 4.02047 6.1464L7.88277 10.0087C7.94782 10.0731 8.05324 10.0734 8.11813 10.0087L11.9804 6.1464Z'/%3E%3C/svg%3E\")",
+      backgroundImage: selectChevron.light,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'right 16px center',
       backgroundSize: '16px 16px',
     },
     ':root[data-vocs-theme="dark"] &:is(select)': {
-      backgroundImage:
-        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M11.9804 6.1464C12.1757 5.9514 12.4923 5.95122 12.6875 6.1464C12.8823 6.3416 12.8823 6.65827 12.6875 6.85343L8.82516 10.7157C8.36974 11.1709 7.63132 11.1707 7.17574 10.7157L3.31344 6.85343C3.11818 6.65816 3.11818 6.34166 3.31344 6.1464C3.50871 5.95124 3.82524 5.95117 4.02047 6.1464L7.88277 10.0087C7.94782 10.0731 8.05324 10.0734 8.11813 10.0087L11.9804 6.1464Z'/%3E%3C/svg%3E\")",
+      backgroundImage: selectChevron.dark,
     },
     ':dir(rtl) &:is(select)': {
       backgroundPosition: 'left 16px center',

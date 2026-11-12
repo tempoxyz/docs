@@ -1,5 +1,6 @@
 import { inherited } from '../../styles/inherited'
 import { style } from '../../styles/recipes'
+import { selectChevron } from '../../styles/select-chevron'
 import { vars as tokens } from '../../styles/theme'
 export const earnVaultDemoText = style({
   fontSize: tokens.fontSize.sm,
@@ -157,6 +158,22 @@ export const earnVaultDemoStateState = style({
 
   color: inherited.color.textColorPrimary,
   selectors: {
+    // TDS NativeSelect spacing: the 16x16 chevron sits 12px from the inline
+    // end, matching the text inset, and the text keeps 8px clear of it.
+    '&:is(select)': {
+      appearance: 'none',
+      paddingInlineEnd: tokens.spacing['9'],
+      backgroundImage: selectChevron.light,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'right 12px center',
+      backgroundSize: '16px 16px',
+    },
+    ':root[data-vocs-theme="dark"] &:is(select)': {
+      backgroundImage: selectChevron.dark,
+    },
+    ':dir(rtl) &:is(select)': {
+      backgroundPosition: 'left 12px center',
+    },
     '&:focus-visible': {
       '--tempo-style-ring-shadow':
         'var(--tempo-style-ring-inset,) 0 0 0 calc(2px + var(--tempo-style-ring-offset-width)) var(--tempo-style-ring-color, currentcolor)',
