@@ -89,7 +89,7 @@ export const docsUtilitySections: DocsSection[] = [
     id: 'tools',
     label: 'SDKs & CLI',
     href: '/docs/sdk',
-    matches: ['/docs/tools', '/docs/sdk', '/docs/cli', '/docs/wallet', '/docs/server'],
+    matches: ['/docs/tools', '/docs/sdk', '/docs/cli', '/docs/wallet'],
   },
   {
     id: 'resources',

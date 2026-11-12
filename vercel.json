@@ -1631,7 +1631,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/server",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1642,7 +1642,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/server",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1653,7 +1653,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/server/relay-handler#feepayer",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1664,7 +1664,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/server",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1675,7 +1675,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/server/relay-handler#feepayer",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1686,7 +1686,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/server/relay-handler",
+      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -2432,33 +2432,43 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/server",
+      "destination": "/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
+      "source": "/developers/docs/server/relay-handler",
+      "destination": "/developers/docs/api/fee-payer",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/sdk/typescript/server",
-      "destination": "/developers/docs/server",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
       "source": "/developers/docs/sdk/typescript/server/handlers",
-      "destination": "/developers/docs/server",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
       "source": "/developers/docs/sdk/typescript/server/handler.feePayer",
-      "destination": "/developers/docs/server/relay-handler#feepayer",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
       "source": "/developers/accounts/server",
-      "destination": "/developers/docs/server",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
       "source": "/developers/accounts/server/handler.feePayer",
-      "destination": "/developers/docs/server/relay-handler#feepayer",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
       "source": "/developers/accounts/server/handler.relay",
-      "destination": "/developers/docs/server/relay-handler",
+      "destination": "/developers/docs/api/fee-payer",
       "permanent": true
     },
     {

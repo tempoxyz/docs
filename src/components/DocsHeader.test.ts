@@ -171,7 +171,6 @@ describe('getActiveDocsSection', () => {
     ['/docs/sdk/typescript', 'tools'],
     ['/docs/cli/request', 'tools'],
     ['/docs/wallet/recipes', 'tools'],
-    ['/docs/server/relay-handler', 'tools'],
     ['/docs/tools', 'tools'],
     ['/docs/quickstart/developer-tools', 'overview'],
     ['/docs/resources/guides', 'resources'],

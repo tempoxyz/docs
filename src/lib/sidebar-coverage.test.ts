@@ -92,7 +92,6 @@ describe('section sidebars', () => {
     ['/docs/cli/api', 'tools', '/docs/sdk'],
     ['/docs/wallet/recipes', 'tools', '/docs/sdk'],
     ['/docs/sdk/typescript/api-client', 'tools', '/docs/sdk'],
-    ['/docs/server/relay-handler', 'tools', '/docs/sdk'],
     ['/docs/resources/guides/payment-links', 'resources', '/docs/resources/guides'],
     ['/docs/guide/bridge-relay', 'ecosystem', '/docs/partners'],
   ])('%s appears once, in the %s sidebar', (route, section, landing) => {

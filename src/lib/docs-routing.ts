@@ -66,20 +66,22 @@ export const proxiedLegacyDocsRoutes = [
     source: '/docs/guide/use-accounts/webauthn-p256-signatures',
     destination: '/docs/protocol/transactions/spec-tempo-transaction#signature-types',
   },
-  { source: '/docs/sdk/typescript/server', destination: '/docs/server' },
-  { source: '/docs/sdk/typescript/server/handlers', destination: '/docs/server' },
+  { source: '/docs/server', destination: '/docs/api/fee-payer' },
+  { source: '/docs/server/relay-handler', destination: '/docs/api/fee-payer' },
+  { source: '/docs/sdk/typescript/server', destination: '/docs/api/fee-payer' },
+  { source: '/docs/sdk/typescript/server/handlers', destination: '/docs/api/fee-payer' },
   {
     source: '/docs/sdk/typescript/server/handler.feePayer',
-    destination: '/docs/server/relay-handler#feepayer',
+    destination: '/docs/api/fee-payer',
   },
-  { source: '/accounts/server', destination: '/docs/server' },
+  { source: '/accounts/server', destination: '/docs/api/fee-payer' },
   {
     source: '/accounts/server/handler.feePayer',
-    destination: '/docs/server/relay-handler#feepayer',
+    destination: '/docs/api/fee-payer',
   },
   {
     source: '/accounts/server/handler.relay',
-    destination: '/docs/server/relay-handler',
+    destination: '/docs/api/fee-payer',
   },
   {
     source: '/learn/tempo/receive-policies',
@@ -200,24 +202,24 @@ export const legacyDocsHostRoutes = [
   },
   {
     source: '/sdk/typescript/server',
-    destination: `${canonicalDevelopersOrigin}/docs/server`,
+    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/sdk/typescript/server/handlers',
-    destination: `${canonicalDevelopersOrigin}/docs/server`,
+    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/sdk/typescript/server/handler.feePayer',
-    destination: `${canonicalDevelopersOrigin}/docs/server/relay-handler#feepayer`,
+    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
   },
-  { source: '/accounts/server', destination: `${canonicalDevelopersOrigin}/docs/server` },
+  { source: '/accounts/server', destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer` },
   {
     source: '/accounts/server/handler.feePayer',
-    destination: `${canonicalDevelopersOrigin}/docs/server/relay-handler#feepayer`,
+    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/accounts/server/handler.relay',
-    destination: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
+    destination: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
   },
   {
     source: '/learn/tempo/receive-policies',
@@ -287,7 +289,7 @@ export const routingSmokeCases = {
     },
     {
       path: '/developers/accounts/server/handler.relay',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
+      expectedLocation: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
       expectedFinalStatus: 200,
     },
     {
@@ -322,7 +324,7 @@ export const routingSmokeCases = {
     },
     {
       path: '/accounts/server/handler.relay',
-      expectedLocation: `${canonicalDevelopersOrigin}/docs/server/relay-handler`,
+      expectedLocation: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
       expectedFinalStatus: 200,
     },
     {

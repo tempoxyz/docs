@@ -195,25 +195,28 @@ export default defineConfig({
   head: docsStructuredDataHead,
   jsonLd: false,
   ai: {
-    retriever: process.env.CLOUDFLARE_API_TOKEN
-      ? Retriever.local({
-          embedding: Embedding.cloudflare(),
-          // Production pages are served behind the tempo.xyz `/developers`
-          // proxy; the default origin-relative endpoint escapes the prefix.
-          endpoint:
-            process.env.VERCEL_ENV === 'production'
-              ? 'https://tempo.xyz/developers/api/search'
-              : undefined,
-          hybrid: true,
-          reranker: Reranker.cloudflare(),
-          sources: [
-            { url: 'https://viem.sh/llms.txt', label: 'viem' },
-            { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
-            { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
-            { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
-          ],
-        })
-      : undefined,
+    // Preview deploys skip the AI search index: they don't need it, and a bad
+    // Cloudflare token would otherwise fail every PR preview build.
+    retriever:
+      process.env.CLOUDFLARE_API_TOKEN && process.env.VERCEL_ENV !== 'preview'
+        ? Retriever.local({
+            embedding: Embedding.cloudflare(),
+            // Production pages are served behind the tempo.xyz `/developers`
+            // proxy; the default origin-relative endpoint escapes the prefix.
+            endpoint:
+              process.env.VERCEL_ENV === 'production'
+                ? 'https://tempo.xyz/developers/api/search'
+                : undefined,
+            hybrid: true,
+            reranker: Reranker.cloudflare(),
+            sources: [
+              { url: 'https://viem.sh/llms.txt', label: 'viem' },
+              { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
+              { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
+              { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
+            ],
+          })
+        : undefined,
   },
   search: docsSearch,
   sitemap: {
@@ -452,14 +455,6 @@ export default defineConfig({
               { text: 'Overview', link: '/docs/sdk/foundry' },
               { text: 'Use MPP with Foundry', link: '/docs/sdk/foundry/mpp' },
               { text: 'Signature verification', link: '/docs/sdk/foundry/signature-verifier' },
-            ],
-          },
-          {
-            text: 'Server handlers',
-            collapsed: true,
-            items: [
-              { text: 'Overview', link: '/docs/server' },
-              { text: 'Relay and fee payer handler', link: '/docs/server/relay-handler' },
             ],
           },
         ],

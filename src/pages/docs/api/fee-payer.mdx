@@ -111,7 +111,7 @@ export const config = createConfig({
 
 :::
 
-The Wagmi tabs run in the browser, so they use the keyless [public testnet fee payer](#public-testnet-fee-payer). Never put an API key in browser code. For keyed or mainnet sponsorship, point them at your own backend running the [relay and fee payer handler](/docs/server/relay-handler).
+The Wagmi tabs run in the browser, so they use the keyless [public testnet fee payer](#public-testnet-fee-payer). Never put an API key in browser code. For keyed or mainnet sponsorship, call the Fee Payer API from your own backend.
 
 `withRelay` sends every `eth_fillTransaction` request to the relay, including self-paid ones. `withFeePayer` is deprecated.
 
@@ -192,7 +192,7 @@ For demos and testnet development without an API key, use `https://sponsor.moder
 
 ## Fee sponsorship limits
 
-Decide who you sponsor, which contracts and methods you cover, per-user limits, and your total fee budget. To enforce your own policy before signing, run the fee payer yourself with the [relay and fee payer handler](/docs/server/relay-handler).
+Decide who you sponsor, which contracts and methods you cover, per-user limits, and your total fee budget.
 
 Sponsorship covers the network fee only. It doesn't fund the transfer amount, an FX spread, or a receiving provider's charges. Record the sponsored fee against each payment.
 
@@ -201,12 +201,6 @@ Sponsorship covers the network fee only. It doesn't fund the transfer amount, an
 ## Related
 
 <Cards>
-  <Card
-    title="Relay and fee payer handler"
-    description="Use for running your own fee payer with a custom sponsorship policy."
-    to="/docs/server/relay-handler"
-    icon="lucide:server"
-  />
   <Card
     title="Choose a fee token"
     description="Covers paying fees in any supported stablecoin."

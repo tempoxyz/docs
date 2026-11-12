@@ -4,6 +4,7 @@ import {
   demoMethods,
   directorySchema,
   linkedRoute,
+  quickRoutes,
   routeChoices,
   routeDemoHref,
   routeQuoteRequest,
@@ -237,5 +238,34 @@ describe('route test requests', () => {
     ).toBe(odd)
     expect(linkedRoute([route], '?route=missing')).toBeUndefined()
     expect(linkedRoute([route], '')).toBeUndefined()
+  })
+})
+
+describe('quickRoutes', () => {
+  const make = (id: string, source: string, destination: string, symbol = 'USDC'): TestRoute => ({
+    ...route,
+    id,
+    sourceChain: { id: source, name: source, addressFormat: 'hex' },
+    sourceToken: { tokenKey: `${source}/erc20:${symbol}`, symbol, decimals: 6 },
+    destinationChain: { id: destination, name: destination, addressFormat: 'hex' },
+    destinationToken: { tokenKey: `${destination}/erc20:usdce`, symbol: 'USDC.e', decimals: 6 },
+  })
+  it('puts Base USDC to Tempo USDC.e first, then routes into Tempo from other networks', () => {
+    const routes = [
+      make('tempo-to-eth', 'eip155:4217', 'eip155:1'),
+      make('eth-usdt', 'eip155:1', 'eip155:4217', 'USDT'),
+      make('eth-usdc', 'eip155:1', 'eip155:4217'),
+      make('arb', 'eip155:42161', 'eip155:4217'),
+      make('base', 'eip155:8453', 'eip155:4217'),
+    ]
+    expect(quickRoutes(routes).map((r) => r.id)).toEqual(['base', 'eth-usdt', 'arb'])
+  })
+  it('skips routes the demo cannot run and fills from the rest of the directory', () => {
+    const solanaTransferOnly = {
+      ...make('solana', 'solana:mainnet', 'eip155:4217'),
+      capabilities: { transfer: { modes: ['exactSource' as const] } },
+    }
+    const routes = [solanaTransferOnly, make('out', 'eip155:4217', 'eip155:1')]
+    expect(quickRoutes(routes).map((r) => r.id)).toEqual(['out'])
   })
 })

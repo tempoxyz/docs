@@ -561,7 +561,7 @@ async function createStellarTransfer(page: Page) {
   })
   await openDemo(page)
   await chooseRoute(page, ['Stellar', 'USDC'], ['Tempo', 'OUSD'])
-  await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
+  await expect(method(page, 'Transfer')).toHaveAttribute('aria-checked', 'true')
   await page.getByLabel('Amount (USDC)').fill('1')
   await lifecycle(page).getByRole('button', { name: '(Connect)' }).first().click()
   await expect(page.getByLabel('Sender on Stellar')).toHaveValue(stellarSender)
@@ -598,6 +598,8 @@ async function chooseRoute(page: Page, from: [string, string], to: [string, stri
 }
 const lifecycle = (page: Page) => page.locator('.routes-test-lifecycle')
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
+/** A funding method in the Transfer / Deposit address segmented control. */
+const method = (page: Page, name: string) => page.getByRole('radio', { name, exact: true })
 
 async function quoteBaseTransfer(page: Page) {
   await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
@@ -610,7 +612,7 @@ async function quoteBaseTransfer(page: Page) {
 
 async function createBaseDepositAddress(page: Page) {
   await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-  await button(page, 'Deposit address').click()
+  await method(page, 'Deposit address').click()
   await page.getByLabel('Amount (USDC)').fill('1')
   await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
   await page.getByLabel('Refund address on Base').fill(sender)
@@ -640,21 +642,21 @@ test.describe('Routes demo', () => {
       'data-value',
       tempoToTron.destinationToken.tokenKey,
     )
-    await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
-    await expect(button(page, 'Deposit address')).toBeDisabled()
+    await expect(method(page, 'Transfer')).toHaveAttribute('aria-checked', 'true')
+    await expect(method(page, 'Deposit address')).toBeDisabled()
 
     // Non-EVM sources fund a deposit address.
     await pick(fromSelect(page, 'Network'), 'Solana')
-    await expect(button(page, 'Transfer')).toBeDisabled()
-    await expect(button(page, 'Deposit address')).toHaveAttribute('aria-pressed', 'true')
+    await expect(method(page, 'Transfer')).toBeDisabled()
+    await expect(method(page, 'Deposit address')).toHaveAttribute('aria-checked', 'true')
     // Deposit quotes use the recipient and refund address the address is created with.
     await expect(page.getByLabel('Amount (USDC)')).toBeVisible()
     await expect(page.getByLabel('Refund address on Solana')).toBeVisible()
 
     // Both flows, with the subsidy offered.
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-    await expect(button(page, 'Transfer')).toBeEnabled()
-    await expect(button(page, 'Deposit address')).toBeEnabled()
+    await expect(method(page, 'Transfer')).toBeEnabled()
+    await expect(method(page, 'Deposit address')).toBeEnabled()
   })
 
   test('transfers from a browser wallet and tracks delivery', async ({ page }) => {
@@ -759,10 +761,10 @@ test.describe('Routes demo', () => {
     await openDemo(page)
     await quoteBaseTransfer(page)
     await button(page, 'Create').click()
-    // The label wraps the select, so its accessible name includes the chosen wallet.
-    const picker = page.locator('#routes-wallet')
-    await expect(picker.locator('option')).toHaveText(['Rabby', 'MetaMask'])
-    await picker.selectOption({ label: 'MetaMask' })
+    await page.locator('#routes-wallet').click()
+    const wallets = page.getByRole('listbox').getByRole('option')
+    await expect(wallets).toHaveText(['Rabby', 'MetaMask'])
+    await wallets.filter({ hasText: 'MetaMask' }).click()
     await button(page, 'Sign and send').click()
     await expect(lifecycle(page)).toContainText('Delivered 0.9991 USDC.e.')
 
@@ -797,7 +799,7 @@ test.describe('Routes demo', () => {
     })
     await openDemo(page)
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-    await button(page, 'Deposit address').click()
+    await method(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
     // The recipient is on Tempo, where Tempo Wallet can fill it in.
     await expect(lifecycle(page).getByRole('button', { name: '(Connect)' }).first()).toBeEnabled()
@@ -1041,7 +1043,7 @@ test.describe('Routes demo', () => {
     await button(page, 'Retry').click()
     await expect(fromSelect(page, 'Network')).toBeEnabled()
     await fromSelect(page, 'Network').click()
-    await expect(page.getByRole('listbox', { name: 'Network' }).getByRole('option')).toHaveCount(3)
+    await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(3)
   })
 
   test('explains the live Tron failures, and quotes without 1:1 when inventory runs out', async ({
@@ -1067,7 +1069,7 @@ test.describe('Routes demo', () => {
     })
     await openDemo(page)
     await chooseRoute(page, ['Tron', 'USDT'], ['Tempo', 'USDT0'])
-    await expect(button(page, 'Transfer')).toBeDisabled()
+    await expect(method(page, 'Transfer')).toBeDisabled()
     await page.getByLabel('Amount (USDT)').fill('1')
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Tron').fill(tronRecipient)
@@ -1148,6 +1150,7 @@ test.describe('Routes demo wallets', () => {
       page
         .locator('div')
         .filter({ has: page.getByLabel(label) })
+        .filter({ has: page.getByRole('button', { name: '(Connect)' }) })
         .last()
         .getByRole('button', { name: '(Connect)' })
 
@@ -1237,7 +1240,7 @@ test.describe('Routes demo wallets', () => {
     })
     await openDemo(page)
     await chooseRoute(page, ['Tron', 'USDT'], ['Tempo', 'USDT0'])
-    await expect(button(page, 'Transfer')).toHaveAttribute('aria-pressed', 'true')
+    await expect(method(page, 'Transfer')).toHaveAttribute('aria-checked', 'true')
     await page.getByLabel('Amount (USDT)').fill('1')
     await page.getByLabel('Sender on Tron').fill(tronRecipient)
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
@@ -1368,7 +1371,7 @@ test.describe('Routes demo without a key', () => {
     await page.goto(demo)
     await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-    await button(page, 'Deposit address').click()
+    await method(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Base').fill(sender)
@@ -1417,7 +1420,7 @@ test.describe('Routes demo without a key', () => {
     await page.goto(demo)
     await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-    await button(page, 'Deposit address').click()
+    await method(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Base').fill(sender)
@@ -1444,7 +1447,7 @@ test.describe('Routes demo without a key', () => {
     await page.goto(demo)
     await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-    await button(page, 'Deposit address').click()
+    await method(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Base').fill(sender)
@@ -1471,7 +1474,7 @@ test.describe('Routes demo without a key', () => {
     await page.goto(demo)
     await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-    await button(page, 'Deposit address').click()
+    await method(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Base').fill(sender)
@@ -1525,7 +1528,7 @@ test.describe('Routes demo without a key', () => {
     await page.goto(demo)
     await expect(fromSelect(page, 'Network')).toBeEnabled({ timeout: 30_000 })
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
-    await button(page, 'Deposit address').click()
+    await method(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
     await page.getByLabel('Recipient on Tempo').fill(tempoRecipient)
     await page.getByLabel('Refund address on Base').fill(sender)
