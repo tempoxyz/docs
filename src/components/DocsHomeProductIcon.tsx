@@ -16,7 +16,7 @@ import ShieldCheckIcon from '~icons/lucide/shield-check'
 import SquareTerminalIcon from '~icons/lucide/square-terminal'
 import TrendingUpIcon from '~icons/lucide/trending-up'
 import WalletIcon from '~icons/lucide/wallet'
-import { tempoDocsHomeProductIcon } from './DocsHome.styles'
+import { tempoDocsHomeIconTile, tempoDocsHomeProductIcon } from './DocsHome.styles'
 
 export const docsProductIcons = {
   accounts: WalletIcon,
@@ -39,8 +39,21 @@ export const docsProductIcons = {
   sdk: SquareTerminalIcon,
 }
 
-export function DocsHomeProductIcon({ product }: { product: keyof typeof docsProductIcons }) {
+/** A product icon: 20 beside a card title, or 16 in a 32 icon tile (`tile`). */
+export function DocsHomeProductIcon({
+  product,
+  tile = false,
+}: {
+  product: keyof typeof docsProductIcons
+  tile?: boolean
+}) {
   const Icon = docsProductIcons[product]
+  if (tile)
+    return (
+      <span className={`tempo-docs-home-icon-tile ${tempoDocsHomeIconTile().className}`}>
+        <Icon aria-hidden="true" focusable="false" width="16" height="16" strokeWidth="1.75" />
+      </span>
+    )
   return (
     <Icon
       className={`tempo-docs-home-product-icon ${tempoDocsHomeProductIcon().className}`}
