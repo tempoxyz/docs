@@ -717,45 +717,6 @@ global({
   },
 })
 
-global({
-  '@layer utilities': {
-    '@media (width < 1376px)': {
-      '[data-v-ask-ai-container]': {
-        display: 'none',
-      },
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '@media (width >= 1376px)': {
-      '[data-v-ask-ai-container]': {
-        position: 'fixed',
-        top: 'auto',
-        bottom: '24px',
-        left: 'auto',
-        right: 'max(24px, calc((100% - var(--tempo-docs-shell-width)) * 0.5 + 24px))',
-        width: 'calc(var(--tempo-docs-outline-width) - 48px)',
-        translate: 0,
-        transform: 'none',
-      },
-    },
-  },
-})
-
-global({
-  '@layer vocs_utilities': {
-    '@media (width >= 1376px)': {
-      '[data-v-ask-ai-container] > button': {
-        minWidth: 0,
-        width: '100%',
-        maxWidth: '100%',
-      },
-    },
-  },
-})
-
 /* https://github.com/radix-ui/colors */
 
 /* Marketing surface tokens copied from the developers site. They override the
