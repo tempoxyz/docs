@@ -15,6 +15,7 @@ import {
 import { Hooks } from 'wagmi/tempo'
 import { cx, type Props as StyleProps } from 'zyzz'
 import LucideCheck from '~icons/lucide/check'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 import LucideCopy from '~icons/lucide/copy'
 import LucideExternalLink from '~icons/lucide/external-link'
 import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
@@ -28,6 +29,7 @@ import { Container as ParentContainer } from '../Container'
 import { CopyIconSwap } from '../CopyIconSwap'
 import { isFundableWalletConnector } from '../lib/wallets'
 import * as ui from './Demo.recipes'
+import { useStepGroupCollapsed } from './StepGroup'
 import { alphaUsd } from './tokens'
 
 export { alphaUsd, betaUsd, ousd, pathUsd, thetaUsd } from './tokens'
@@ -364,6 +366,11 @@ export function Step(
   props: React.PropsWithChildren<{
     actions?: React.ReactNode | undefined
     active: boolean
+    /**
+     * Fold the step down to its header, where its title opens and closes the body. Inside a demo
+     * container a finished step folds on its own once a later step finishes; set this to override.
+     */
+    collapsed?: boolean | undefined
     completed: boolean
     error?: BaseError | Error | null | undefined
     number: number
@@ -371,24 +378,81 @@ export function Step(
   }>,
 ) {
   const { actions, active, children, completed, error, number, title } = props
+  const body = React.useRef<HTMLDivElement>(null)
+  // A step whose body holds form fields, such as a network picker or an amount, stays open:
+  // readers keep using them after the step finishes.
+  const [interactive, setInteractive] = React.useState(false)
+  // The step's place in its demo. Step numbers restart in demos with several sections, so the
+  // folding rule orders steps by where they sit on the page instead.
+  const root = React.useRef<HTMLDivElement>(null)
+  const [order, setOrder] = React.useState(number)
+  React.useLayoutEffect(() => {
+    const next = Boolean(body.current?.querySelector(formFields))
+    if (next !== interactive) setInteractive(next)
+    const element = root.current
+    const scope = element?.closest('.docs-demo') ?? element?.parentElement
+    const index =
+      element && scope ? Array.from(scope.querySelectorAll(stepSelector)).indexOf(element) : -1
+    if (index >= 0 && index !== order) setOrder(index)
+  })
+  const grouped = useStepGroupCollapsed({
+    completed,
+    failed: Boolean(error),
+    number: order,
+    pinned: interactive,
+  })
+  const collapsed = props.collapsed ?? grouped
+  const [expanded, setExpanded] = React.useState(false)
+  const bodyId = React.useId()
+
+  // Fold again each time the step collapses, so a step opened earlier doesn't stay open.
+  React.useEffect(() => {
+    if (collapsed) setExpanded(false)
+  }, [collapsed])
+
+  const hidden = collapsed && !expanded
+  const heading = (
+    <>
+      <div
+        {...cx(ui.stepLayout2(), !!completed && ui.stepLayout3(), !completed && ui.stepLayout4())}
+      >
+        {completed ? <LucideCheck className={ui.lucideCheck2().className} /> : number}
+      </div>
+      <div {...ui.stepLayout5()}>{title}</div>
+    </>
+  )
+
   return (
-    <div data-active={active} data-completed={completed} className="group">
+    <div
+      ref={root}
+      data-active={active}
+      data-completed={completed}
+      data-collapsed={hidden}
+      className="group"
+    >
       <header {...ui.stepHeader()}>
-        <div {...ui.stepLayout()}>
-          <div
-            {...cx(
-              ui.stepLayout2(),
-              !!completed && ui.stepLayout3(),
-              !completed && ui.stepLayout4(),
-            )}
+        {collapsed ? (
+          <button
+            type="button"
+            aria-controls={bodyId}
+            aria-expanded={!hidden}
+            onClick={() => setExpanded((open) => !open)}
+            {...cx(ui.stepLayout(), ui.stepToggle())}
           >
-            {completed ? <LucideCheck className={ui.lucideCheck2().className} /> : number}
-          </div>
-          <div {...ui.stepLayout5()}>{title}</div>
-        </div>
+            {heading}
+            <LucideChevronDown
+              aria-hidden="true"
+              {...cx(ui.stepChevron(), !hidden && ui.stepChevronOpen())}
+            />
+          </button>
+        ) : (
+          <div {...ui.stepLayout()}>{heading}</div>
+        )}
         <div {...ui.stepLayout6()}>{actions}</div>
       </header>
-      {children}
+      <div id={bodyId} ref={body} hidden={hidden}>
+        {children}
+      </div>
       {error && (
         <>
           <div {...ui.stepLayout7()} />
@@ -400,6 +464,9 @@ export function Step(
     </div>
   )
 }
+
+const stepSelector = '[data-active][data-completed]'
+const formFields = 'input, select, textarea, fieldset, [role="combobox"], [contenteditable="true"]'
 
 export namespace StringFormatter {
   export function truncate(

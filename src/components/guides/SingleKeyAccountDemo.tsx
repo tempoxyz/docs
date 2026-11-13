@@ -177,7 +177,7 @@ export function SingleKeyAccountDemo() {
               disabled={disabled || !account || funded}
               onClick={() => run('fund', fund)}
             >
-              {pending === 'fund' ? 'Funding…' : funded ? 'Funded' : 'Get test funds'}
+              {pending === 'fund' ? 'Funding…' : 'Get test funds'}
             </Button>
           }
         >
