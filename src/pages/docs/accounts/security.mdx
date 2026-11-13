@@ -76,7 +76,7 @@ Revoke the keys the breached party held. On a configurable account, use the rema
 | Breached backend | Use every key the backend holds: access keys within their bounds, and any signer at its weight. If the backend holds a single-key account's key, it can move the whole balance. | Revoke its access keys and authorize new ones. On a configurable account, the other signers [remove the backend's signer](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer). For a single-key account, move the funds to a new account. |
 | Breached wallet provider | On a single-key embedded wallet, sign anything with the account's key and move the whole balance. On a configurable account where the provider's key is [one signer](/docs/accounts/apps/self-custodial-wallets), approve only at that key's weight, which can't reach the threshold alone. | On a configurable account, the customer's passkey and backup remove the provider's signer. On a single-key account, move the funds to a new account once you control signing again. |
 | Your app or wallet provider is down | Nothing new, but customers can't sign through you. | On a configurable account where the customer holds two signers, they [pay or leave without you](/docs/accounts/apps/self-custodial-wallets#if-something-goes-wrong). On a single-key embedded wallet, customers wait until the provider is back. |
-| Lost saved configuration | Nothing. The configuration lists signer addresses and weights, not keys. | Restore it from a backup. After a configuration update, each `MultisigConfigUpdated` event carries the new configuration, so you can rebuild a lost copy from the latest one. For an account that has never been updated, your saved copy is the only record, so back it up. |
+| Lost saved configuration | Nothing. The configuration lists signer addresses and weights, not keys. | Restore it from a backup. Registration and each later configuration update emit a `ConfigurableAccountConfigUpdated` event with the full configuration, so you can rebuild a lost copy from the latest one. For an account that has never transacted, your saved copy is the only record, so back it up. |
 
 On a configurable account, a configuration update leaves the account's access keys in place. After replacing a signer, list every key the account has authorized and [revoke the ones its old holder could use](/docs/accounts/access-keys/revocation#revoke-when-signers-change).
 
@@ -139,7 +139,7 @@ Changing keys protects an account only while its old keys are still safe. An att
 A retired key can also still act outside the account's own rules:
 
 - **On Other Chains:** A secp256k1 key controls the same address on other EVM chains, whatever happens to it on Tempo.
-- **In Contracts That Check Signatures Themselves:** Contracts such as Permit2 verify signatures on their own. They may still accept the original key ([what an upgrade changes](/docs/accounts/account-configuration/account-upgrade#what-an-upgrade-changes)).
+- **In Contracts That Try `ecrecover` First:** Contracts that try `ecrecover` before or instead of ERC-1271 still accept the original key, such as those using OpenZeppelin `SignatureChecker`. Permit2 checks the upgraded account through ERC-1271 only ([what an upgrade changes](/docs/accounts/account-configuration/account-upgrade#what-an-upgrade-changes)).
 
 ## Related
 

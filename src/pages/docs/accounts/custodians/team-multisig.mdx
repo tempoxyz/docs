@@ -112,7 +112,7 @@ await client.token.transferSync({ // [!code hl]
 }) // [!code hl]
 ```
 
-Viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openMultisig` for every action, not once at startup. A [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer) raises the configuration's version and returns the new `config`. Save it, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.
+Viem signs with the attached keys, highest weight first, until they reach the threshold. With only finance's key attached, it throws `Local owners do not meet the threshold.` and sends nothing. Call `openMultisig` for every action, not once at startup. A [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer) raises the configuration's version. Save the new configuration after success, because Tempo rejects approvals built from an older record with `multisig configuration commitment mismatch`.
 
 This example holds two approvers' keys in one process, so that process could pay alone. In production, have each approver check the recipient and amount and sign on their own device. Your app can [collect approvals from separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices). Your own contract can also [verify the multisig's approvals](/docs/accounts/policies/signing-thresholds#verify-approvals).
 
@@ -126,19 +126,23 @@ This example holds two approvers' keys in one process, so that process could pay
 When an approver leaves, swap their signer for their successor's in one configuration update, at the same weight and threshold. The two remaining approvers approve it, so the multisig stays 2 of 3 throughout.
 
 ```ts [multisig.ts]
+import { AccountConfig, Actions } from 'viem/tempo'
+
 const successor = env('NEW_CONTROLLER_PASSKEY_ADDRESS') // the successor's passkey, on their device
 
-const replaced = await client.accounts.updateConfigSync({ // [!code hl]
+const nextConfig = { // [!code hl]
+  owners: saved.config.owners.map((entry) => // [!code hl]
+    isAddressEqual(entry.owner, controller) ? { owner: successor, weight: entry.weight } : entry, // [!code hl]
+  ), // [!code hl]
+  threshold: saved.config.threshold, // [!code hl]
+} // [!code hl]
+await client.writeContractSync({ // [!code hl]
   account: openMultisig([finance, operations]), // [!code hl]
-  nextConfig: { // [!code hl]
-    owners: saved.config.owners.map((entry) => // [!code hl]
-      isAddressEqual(entry.owner, controller) ? { owner: successor, weight: entry.weight } : entry, // [!code hl]
-    ), // [!code hl]
-    threshold: saved.config.threshold, // [!code hl]
-  }, // [!code hl]
+  ...Actions.accounts.updateConfig.call({ currentConfig: saved.config, nextConfig }), // [!code hl]
+  throwOnReceiptRevert: true, // [!code hl]
 }) // [!code hl]
-// Save it with the multisig record.
-saved.config = replaced.config // [!code hl]
+// Save only after the update succeeds.
+saved.config = AccountConfig.update(saved.config, nextConfig) // [!code hl]
 ```
 
 The multisig keeps its address and balance. The departing approver's key can no longer approve anything. A [configuration update](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) also removes a signer without a successor, or rotates the key of an approver who stays.
