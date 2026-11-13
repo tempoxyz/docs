@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 
 test('outline links align headings below the sticky header, including repeated clicks', async ({
   page,
@@ -40,25 +40,40 @@ test('outline links align headings below the sticky header, including repeated c
   }
 })
 
-test('links to a heading on another page align it after client-side navigation', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/docs/accounts')
-  await page.locator('article a[href$="/create#create-a-configurable-account"]').first().click()
-  await expect(page).toHaveURL(/\/docs\/accounts\/create#create-a-configurable-account$/)
-  await expect
-    .poll(
-      async () =>
-        page.evaluate(() => {
-          const heading = document.getElementById('create-a-configurable-account')
-          if (!heading || window.scrollY === 0) return Infinity
-          const padding =
-            Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
-          const margin = Number.parseFloat(getComputedStyle(heading).scrollMarginTop) || 0
-          return Math.abs(heading.getBoundingClientRect().top - padding - margin)
-        }),
-      { timeout: 10_000 },
-    )
-    .toBeLessThan(2)
-})
+const headingOffset = (page: Page, id: string) =>
+  page.evaluate((id) => {
+    const heading = document.getElementById(id)
+    if (!heading || window.scrollY === 0) return Infinity
+    const padding =
+      Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
+    const margin = Number.parseFloat(getComputedStyle(heading).scrollMarginTop) || 0
+    return Math.abs(heading.getBoundingClientRect().top - padding - margin)
+  }, id)
+
+// The router's own hash scroll misses this heading, which streams in after the route commit.
+for (const { from, link, id } of [
+  {
+    from: '/docs/accounts',
+    link: 'article a[href$="/create#create-a-configurable-account"]',
+    id: 'create-a-configurable-account',
+  },
+]) {
+  test(`links from ${from} align #${id} after client-side navigation`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto(from)
+    // Let React hydrate, so the click goes through the router, not a document load.
+    await page.waitForLoadState('networkidle')
+    await page.evaluate(() => {
+      ;(window as Window & { __clientNavigation?: boolean }).__clientNavigation = true
+    })
+    await page.locator(link).first().click()
+    await expect(page).toHaveURL(new RegExp(`#${id}$`))
+    await expect.poll(() => headingOffset(page, id), { timeout: 10_000 }).toBeLessThan(2)
+    // A full page load would pass through the browser's native hash scroll instead.
+    expect(
+      await page.evaluate(
+        () => (window as Window & { __clientNavigation?: boolean }).__clientNavigation,
+      ),
+    ).toBe(true)
+  })
+}

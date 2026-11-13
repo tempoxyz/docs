@@ -5,7 +5,6 @@ import DocsHeader from '../../components/DocsHeader'
 import DocsPageActions from '../../components/DocsPageActions'
 import DocsSectionNav from '../../components/DocsSectionNav'
 import DocsSidebarDrawer from '../../components/DocsSidebarDrawer'
-import { HashScrollOnNavigate } from '../../components/HashScrollOnNavigate'
 import { usePageSettled } from '../../lib/pageSettled'
 import { normalizeRscFetchUrl } from '../../lib/rsc-route-normalization'
 import * as ui from './_layout.recipes'
@@ -62,7 +61,6 @@ export default function DocsLayout(
       <DocsHeader />
       <DocsSectionNav />
       <DocsSidebarDrawer />
-      <HashScrollOnNavigate />
       {props.children}
       <DocsPageActions openApi />
       <Suspense fallback={null}>
