@@ -9,6 +9,10 @@ const defaultPageUrl = 'https://tempo.xyz/developers/'
 
 const schemeUrlPattern = /\b[a-z][a-z0-9+.-]*:\/\/[^\s<>"'`]+/gi
 const bareIpv4Pattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g
+// Hostnames without a scheme, such as example.com/x, which Slack also turns into links.
+const bareHostPattern =
+  /(?<![\w@./:[-])((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,})(?=[:/\s)\],;!?]|\.?$|\.\s)/gi
+const invisibleCategory = /^[\p{Cc}\p{Cf}]$/u
 
 const feedbackInputSchema = z
   .object({
@@ -81,8 +85,8 @@ export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
 
   const data = parsed.data
   const source = data.source ?? (typeof data.helpful === 'boolean' ? 'docs' : 'mcp')
-  const pageUrl = cleanUrl(data.pageUrl)
-  const path = cleanPath(data.path ?? pathFromUrl(pageUrl) ?? rawPathFromUrl(data.pageUrl))
+  const pageUrl = cleanUrl(data.pageUrl) ?? tempoUrlFromPath(rawPathFromUrl(data.pageUrl))
+  const path = cleanPath(data.path ?? pathFromUrl(pageUrl))
   const feedback = {
     id: `fb_${Date.now().toString(36)}_${crypto.randomUUID()}`,
     source,
@@ -152,15 +156,8 @@ function cleanText(value: string | undefined, maxLength: number) {
 function stripInvisible(value: string) {
   let out = ''
   for (const char of value) {
-    const code = char.codePointAt(0) ?? 0
-    const whitespace = code === 0x09 || code === 0x0a || code === 0x0d
-    const control = (code < 0x20 && !whitespace) || (code >= 0x7f && code <= 0x9f)
-    const invisible =
-      (code >= 0x200b && code <= 0x200f) ||
-      (code >= 0x202a && code <= 0x202e) ||
-      (code >= 0x2060 && code <= 0x2069) ||
-      code === 0xfeff
-    if (!control && !invisible) out += char
+    const whitespace = char === '\t' || char === '\n' || char === '\r'
+    if (whitespace || !invisibleCategory.test(char)) out += char
   }
   return out
 }
@@ -185,6 +182,9 @@ export function defangLinks(value: string): string {
   return value
     .replace(schemeUrlPattern, (match) => (allowedUrl(match) ? match : defangUrl(match)))
     .replace(bareIpv4Pattern, (match) => match.replaceAll('.', '[.]'))
+    .replace(bareHostPattern, (host) =>
+      isTempoHost(host.toLowerCase()) ? host : host.replaceAll('.', '[.]'),
+    )
 }
 
 function defangUrl(value: string) {
@@ -228,6 +228,14 @@ function cleanUrl(value: string | undefined) {
 }
 
 /** The path of any http(s) URL, so feedback from preview hosts still names its page. */
+/** The Tempo docs URL for a page path from another host, such as a preview deployment. */
+function tempoUrlFromPath(pathname: string | undefined) {
+  if (!pathname) return undefined
+  const path = pathname.replace(/^\/+/, '/')
+  const full = /^\/developers(?=\/|$)/.test(path) ? path : `/developers${path === '/' ? '/' : path}`
+  return cleanUrl(new URL(full, 'https://tempo.xyz').toString())
+}
+
 function rawPathFromUrl(value: string | undefined) {
   const cleaned = cleanText(value, maxUrlLength)
   if (!cleaned) return undefined

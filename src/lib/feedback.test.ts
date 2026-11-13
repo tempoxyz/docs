@@ -88,21 +88,36 @@ describe('normalizeFeedback', () => {
 })
 
 describe('feedback links', () => {
-  it('drops page URLs outside Tempo but keeps their path', () => {
-    for (const pageUrl of [
-      'http://127.0.0.1:18971/pg-1',
-      'http://169.254.169.254/latest/meta-data/',
-      'https://evil.example/docs/guide/payments',
-      'https://tempo.xyz.evil.example/docs',
-      'http://tempo.xyz/developers/docs',
+  it('rewrites page URLs from other hosts to the Tempo docs URL', () => {
+    for (const [pageUrl, expected] of [
+      [
+        'http://localhost:5173/docs/guide/payments',
+        'https://tempo.xyz/developers/docs/guide/payments',
+      ],
+      [
+        'https://docs-abc.vercel.app/developers/docs/guide',
+        'https://tempo.xyz/developers/docs/guide',
+      ],
+      ['http://tempo.xyz/developers/get-started', 'https://tempo.xyz/developers/get-started'],
+      [
+        'http://169.254.169.254/latest/meta-data/',
+        'https://tempo.xyz/developers/latest/meta-data/',
+      ],
+      ['http://evil.example//evil.example/x', 'https://tempo.xyz/developers/evil.example/x'],
     ]) {
-      const feedback = normalizeFeedback({ helpful: false, pageUrl })
-      expect(feedback.pageUrl).toBeUndefined()
-      expect(feedback.path).toBe(
-        new URL(pageUrl).pathname.replace(/^\/developers/, '').replace(/^\/docs(?=\/|$)/, '') ||
-          '/',
-      )
+      expect(normalizeFeedback({ helpful: false, pageUrl }).pageUrl).toBe(expected)
     }
+  })
+
+  it('links preview-page feedback to the real docs page in Slack', async () => {
+    submitted.length = 0
+    await submitFeedback({
+      helpful: false,
+      pageUrl: 'https://docs-abc.vercel.app/docs/guide/payments',
+    })
+    expect(submitted[0]).toMatchObject({
+      pageUrl: 'https://tempo.xyz/developers/docs/guide/payments',
+    })
   })
 
   it('keeps Tempo page URLs', () => {
@@ -154,6 +169,27 @@ describe('feedback links', () => {
     expect(defangLinks('file:///etc/passwd 38.114.92.214:18971/bare')).toBe(
       'file[://]/etc/passwd 38[.]114[.]92[.]214:18971/bare',
     )
+  })
+
+  it('defangs hostnames without a scheme', () => {
+    expect(
+      defangLinks(
+        'see evil.example/x or www.evil.example, or tempo.xyz/docs and docs.tempo.xyz. Mail a@b.example',
+      ),
+    ).toBe(
+      'see evil[.]example/x or www[.]evil[.]example, or tempo.xyz/docs and docs.tempo.xyz. Mail a@b.example',
+    )
+    expect(defangLinks('https://tempo.xyz/developers/docs/page.md stays')).toBe(
+      'https://tempo.xyz/developers/docs/page.md stays',
+    )
+  })
+
+  it('strips tag characters and other invisible format characters', () => {
+    const feedback = normalizeFeedback({
+      source: 'mcp',
+      message: 'a\u{E0049}\u{E0047}b\u061Cc\u00ADd\u180Ee\uFFF9f',
+    })
+    expect(feedback.message).toBe('abcdef')
   })
 
   it('strips control and bidi characters', () => {
