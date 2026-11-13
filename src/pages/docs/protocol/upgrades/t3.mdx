@@ -59,7 +59,7 @@ Most integrators only needed to upgrade tooling. Existing authorized access keys
 
 ### Virtual addresses for explorers and indexers
 
-Each virtual-address deposit emits two `Transfer` events in one transaction: `Transfer(sender, virtualAddress, amount)` then `Transfer(virtualAddress, masterWallet, amount)`. Collapse these into one logical deposit to the master wallet. The virtual address is for attribution only — `balanceOf(virtualAddress)` is always zero.
+Each virtual-address deposit that the master wallet's receive policy accepts emits two `Transfer` events in one transaction: `Transfer(sender, virtualAddress, amount)` then `Transfer(virtualAddress, masterWallet, amount)`. Collapse these into one logical deposit to the master wallet. The virtual address is for attribution only — `balanceOf(virtualAddress)` is always zero.
 
 See [Virtual addresses for TIP-20 deposits](/docs/protocol/tip20/virtual-addresses) for the full routing model and event sequences.
 

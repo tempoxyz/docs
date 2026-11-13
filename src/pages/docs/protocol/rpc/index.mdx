@@ -104,7 +104,7 @@ Get a finalized block by height or latest.
 |------|------|-------------|
 | `query` | `"latest"` or `{"height": number}` | Which finalization to retrieve |
 
-**Returns:** `CertifiedBlock | null`
+**Returns:** `CertifiedBlock`. If unavailable, the method returns a JSON-RPC error: code `204` when the archive service is not ready, or code `503` when the requested certification, certificate, or block is missing.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -124,7 +124,7 @@ cast rpc consensus_getFinalization '{"height": 1000000}' --rpc-url <VALIDATOR_RP
 
 ### `consensus_getLatest`
 
-Returns the current consensus state snapshot: the latest finalized block and the latest notarized block (if not yet finalized).
+Returns the latest finalized block. The `notarized` field is always `null`.
 
 **Parameters:** None.
 
@@ -133,7 +133,7 @@ Returns the current consensus state snapshot: the latest finalized block and the
 | Field | Type | Description |
 |-------|------|-------------|
 | `finalized` | `CertifiedBlock \| null` | Latest finalized block |
-| `notarized` | `CertifiedBlock \| null` | Latest notarized block (if ahead of finalized) |
+| `notarized` | `CertifiedBlock \| null` | Always `null` |
 
 ```bash
 cast rpc consensus_getLatest --rpc-url <VALIDATOR_RPC>
@@ -141,15 +141,13 @@ cast rpc consensus_getLatest --rpc-url <VALIDATOR_RPC>
 
 ### `consensus_subscribe` / `consensus_unsubscribe`
 
-WebSocket-only subscription to consensus events. Emits events when blocks are notarized, finalized, or views are nullified.
+WebSocket-only subscription to finalized-block consensus events.
 
 **Event types:**
 
 | Type | Fields | Description |
 |------|--------|-------------|
-| `notarized` | `epoch`, `view`, `digest`, `certificate`, `block`, `seen` | A block was notarized |
 | `finalized` | `epoch`, `view`, `digest`, `certificate`, `block`, `seen` | A block was finalized |
-| `nullified` | `epoch`, `view`, `seen` | A view was nullified (no block produced) |
 
 The `seen` field is a Unix timestamp in milliseconds.
 
@@ -203,4 +201,4 @@ Gas estimation accounts for TIP-20 fee token balances instead of native ETH. The
 
 ### `eth_sendRawTransaction`
 
-Accepts both standard EVM transaction types and [Tempo Transactions](/docs/protocol/transactions) (type `0x76`). Transactions targeting a subblock proposer are routed directly to the consensus layer when submitted to the matching validator node; other nodes reject them.
+Accepts both standard EVM transaction types and [Tempo Transactions](/docs/protocol/transactions) (type `0x76`). Tempo Transactions whose nonce key carries the reserved subblock prefix are rejected.

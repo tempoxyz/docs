@@ -88,6 +88,8 @@ Crossed books are permitted; the implementation does not enforce that best bid �
 - Orders must specify ticks within the configured bounds (±2000)
 - Tick spacing is 10: `tick % 10 == 0` for orders and flip orders
 - Withdrawals require sufficient internal balance
+- Placing an order or flip order reverts with `Paused` if either pair token is paused, even when the caller's internal balance funds the whole escrow
+- Swaps revert with `Paused` if any token on the route is paused, including intermediate tokens that move only between books
 
 ### Interface
 
@@ -168,7 +170,7 @@ Returns a user’s internal balance for `token` held on the DEX.
 function withdraw(address token, uint128 amount) external;
 ```
 
-Transfers `amount` of `token` from the caller’s internal balance to the caller. Reverts if insufficient internal balance.
+Transfers `amount` of `token` from the caller’s internal balance to the caller. Reverts if insufficient internal balance. A receiver-policy rejection holds the tokens in ReceivePolicyGuard instead of reverting.
 
 #### Order placement and lifecycle
 
@@ -234,13 +236,13 @@ Simulates an exact‑out swap and returns the required input. Reverts if insuffi
 function swapExactAmountIn(address tokenIn, address tokenOut, uint128 amountIn, uint128 minAmountOut) external returns (uint128 amountOut);
 ```
 
-Executes an exact‑in swap against the active book. Deducts `amountIn` from caller’s internal balance (transferring any shortfall) and transfers output to the caller. Reverts if resulting `amountOut` is below `minAmountOut` or liquidity is insufficient.
+Executes an exact‑in swap against the active book. Deducts `amountIn` from caller’s internal balance (transferring any shortfall) and transfers output to the caller. Reverts if resulting `amountOut` is below `minAmountOut` or liquidity is insufficient. A receiver-policy rejection holds the output in ReceivePolicyGuard instead of reverting.
 
 ```solidity
 function swapExactAmountOut(address tokenIn, address tokenOut, uint128 amountOut, uint128 maxAmountIn) external returns (uint128 amountIn);
 ```
 
-Executes an exact‑out swap. Deducts the actual input from the caller’s internal balance (transferring any shortfall from the user) and transfers `amountOut` to the caller. Reverts if required input exceeds `maxAmountIn` or liquidity is insufficient.
+Executes an exact‑out swap. Deducts the actual input from the caller’s internal balance (transferring any shortfall from the user) and transfers `amountOut` to the caller. Reverts if required input exceeds `maxAmountIn` or liquidity is insufficient. A receiver-policy rejection holds the output in ReceivePolicyGuard instead of reverting.
 
 #### Events
 

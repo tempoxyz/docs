@@ -117,6 +117,8 @@ Burns LP tokens and receives pro-rata share of reserves. Emits `Burn` event.
 
 Burning MUST authorize `msg.sender` as a sender on **both** pool tokens, independently of `to`. Each nonzero underlying payout also checks FeeManager as sender and the resolved payout destination as recipient on that token, with ordinary token-transfer restrictions. An authorized `to` cannot redeem shares on behalf of a policy-blocked LP caller. Issuer-policy failures revert with `PolicyForbids`; subsequent issuer-policy changes can therefore prevent redemption.
 
+Burning reverts with `InsufficientLiquidity` if the pool's remaining validator-token reserve would fall below its pending fee-swap reservation for the current transaction. The protocol reserves converted output amounts before execution: `floor(maxAmount * M / SCALE)` on a direct route, and on a two-hop route `out1 = floor(maxAmount * M / SCALE)` in the first pool and `floor(out1 * M / SCALE)` in the second pool.
+
 ```solidity
 function executeFeeSwap(
     address userToken,
@@ -135,7 +137,7 @@ function checkSufficientLiquidity(
 ) internal view
 ```
 
-Verifies sufficient validator token reserves for the fee swap. Calculates `maxAmountOut = (maxAmount * M) / SCALE`. Reverts if insufficient liquidity.
+Verifies sufficient validator token reserves for the fee swap. Calculates `maxAmountOut = (maxAmount * M) / SCALE`. Reverts if insufficient liquidity. Each selected pool MUST have a nonzero validator-token reserve covering the rounded output, even when that output is zero. This requirement applies to both hops of a two-hop route.
 
 #### 2. FeeManager Contract
 

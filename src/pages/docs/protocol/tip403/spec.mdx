@@ -266,7 +266,7 @@ token.changeTransferPolicyId(policyId);
 
 ### Authorization Logic
 
-For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
+For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. Before any policy lookup, `isAuthorized()`, `isAuthorizedSender()`, `isAuthorizedRecipient()`, and `isAuthorizedMintRecipient()` return `true` for ReceivePolicyGuard (`0xb10c000000000000000000000000000000000000`) under every policy ID, including `0` and nonexistent IDs. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
 
 ```solidity
 if (policyId < 2) {
@@ -299,6 +299,6 @@ The captured authority calls `claim(address to, bytes receipt)` to release the f
 `burnBlockedReceipt(bytes receipt)` requires the token's `BURN_BLOCKED_ROLE` and a denied sender-policy check for the effective owner: the originator in originator-recovery mode, otherwise the resolved receiver. It burns only that receipt's amount and consumes the receipt, rather than burning the pooled guard balance. Token pause and balance checks remain in force.
 
 ## Invariants
-- When policyId = 0, all authorization checks must return false for every address.
+- When policyId = 0, authorization checks MUST return false except for `ReceivePolicyGuard`, which is always authorized.
 - When policyId = 1, all authorization checks must return true for every address.
 - Only the policy’s current admin may update the admin address for that policy.

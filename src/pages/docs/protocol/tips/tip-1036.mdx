@@ -46,7 +46,7 @@ A fee payer pays a [Tempo Transaction](/docs/protocol/transactions/spec-tempo-tr
 
 **PR**: [#3204](https://github.com/tempoxyz/tempo/pull/3204) · **Author**: @0xrusowsky
 
-The [Stablecoin DEX](/docs/protocol/exchange/spec) (`StablecoinDEX`) keeps internal per-user balances for each token. Once T2 is active (`is_t2()`), transfers between these internal balances call `check_not_paused()`, so they fail while the token is paused. Previously, swaps using internal DEX balances could bypass the token pause state.
+The [Stablecoin DEX](/docs/protocol/exchange/spec) (`StablecoinDEX`) keeps internal per-user balances for each token. Once [T3](/docs/protocol/upgrades/t3) is active (`is_t3()`, specified in [TIP-1038](/docs/protocol/tips/tip-1038)), transfers between these internal balances call `check_not_paused()`, so they fail while the token is paused. Previously, swaps using internal DEX balances could bypass the token pause state.
 
 ### 4. Correct built-in policy type data for TIP403Registry
 

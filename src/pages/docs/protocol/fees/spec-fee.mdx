@@ -37,6 +37,8 @@ The effective gas price includes the base fee and the applicable priority fee. A
 
 Tempo uses a bounded dynamic base fee. The base fee can fall when block gas usage is below target and rise back toward the cap when usage increases. The cap is set such that a TIP-20 transfer costs about $0.0006, with a quiet-period floor around $0.00003.
 
+Each block's `base_fee_per_gas` is computed from the parent block's base fee and total `gas_used` across all lanes. Tempo applies EIP-1559's integer update formula with a fixed gas target of 10,000,000 gas (not half the block gas limit) and a max change denominator of 8, then clamps the result to `[6 × 10^8, 1.2 × 10^10]` attodollars per gas.
+
 The bounded base fee combined with USD-denominated payment provides predictable unit economics. Applications can budget for transaction costs without exposure to native token price fluctuations.
 
 Congestion is managed through:
@@ -53,13 +55,13 @@ Before the execution of each transaction, the protocol takes the following steps
 
 * Determine the [`fee_payer`](#fee-payer) of the transaction.
 * Determine the `fee_token` of the transaction, according to the [rules for fee token preferences](#fee-token-preferences). If the fee token cannot be determined, the transaction is invalid.
-* Compute the `max_fee` of the transaction as `gas_limit * gas_price`.
+* Compute the `max_fee` of the transaction as `ceil(gas_limit * gas_price / 10^12)` in token base units, using the effective gas price.
 * Deduct `max_fee` from the `fee_payer`'s balance of `fee_token`. If `fee_payer` does not have sufficient balance in `fee_token`, the transaction is invalid.
 * Reserve `max_fee` of liquidity on the [fee AMM](/docs/protocol/fees/spec-fee-amm) between the `fee_token` and the validator's preferred fee token. If there is insufficient liquidity, the transaction is invalid.
 
 After the execution of each transaction:
 
-* Compute the `refund_amount` as `(gas_limit - gas_used) * gas_price`.
+* Compute the actual fee as `ceil(gas_used * gas_price / 10^12)` in token base units, using the effective gas price. Compute `refund_amount` as `max_fee` minus this rounded actual fee.
 * Credit the `fee_payer`'s address with `refund_amount` of `fee_token`.
 * Log a `Transfer` event from the user to the [fee manager contract](/docs/protocol/fees/spec-fee-amm) for the net amount of the fee payment.
 
@@ -134,13 +136,13 @@ To avoid depending on the pathUSD fallback, set an explicit fee token preference
 
 ### Transaction level
 
-Tempo's [new transaction type](/docs/protocol/transactions/spec-tempo-transaction), allows transactions to specify a `fee_token` on the transaction. This overrides any preferences set at the account, contract, or validator level.
+Tempo's [new transaction type](/docs/protocol/transactions/spec-tempo-transaction), allows transactions to specify a `fee_token` on the transaction. This overrides any preferences set at the account or contract level. It doesn't change the validator's preferred fee token, which the Fee AMM converts the fee into.
 
 For [sponsored transactions](#fee-payer), the `tx.origin` address does not sign over the `fee_token` field (allowing the `fee_payer` to choose the fee token).
 
 ### Account level
 
-An account can specify a fee token preference for all transactions for which it is the `fee_payer` (including both transactions it sponsors as well as non-sponsored transactions for which it is the `tx.origin`). This overrides any preference set at the contract or validator level.
+An account can specify a fee token preference for all transactions for which it is the `fee_payer` (including both transactions it sponsors as well as non-sponsored transactions for which it is the `tx.origin`). This overrides any preference set at the contract level. It doesn't change the validator's preferred fee token.
 
 To set its preference, the account can call the `setUserToken` function on the FeeManager precompile.
 
