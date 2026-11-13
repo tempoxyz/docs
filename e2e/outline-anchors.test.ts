@@ -39,3 +39,26 @@ test('outline links align headings below the sticky header, including repeated c
       .toBeLessThan(2)
   }
 })
+
+test('links to a heading on another page align it after client-side navigation', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/docs/accounts')
+  await page.locator('article a[href$="/create#create-a-configurable-account"]').first().click()
+  await expect(page).toHaveURL(/\/docs\/accounts\/create#create-a-configurable-account$/)
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(() => {
+          const heading = document.getElementById('create-a-configurable-account')
+          if (!heading || window.scrollY === 0) return Infinity
+          const padding =
+            Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
+          const margin = Number.parseFloat(getComputedStyle(heading).scrollMarginTop) || 0
+          return Math.abs(heading.getBoundingClientRect().top - padding - margin)
+        }),
+      { timeout: 10_000 },
+    )
+    .toBeLessThan(2)
+})
