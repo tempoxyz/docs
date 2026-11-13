@@ -294,6 +294,10 @@ function compact<T>(values: Array<T | false | undefined>): T[] {
 function urlFromPath(path: string | undefined) {
   if (!path) return defaultPageUrl
   if (URL.canParse(path)) return allowedUrl(path)?.toString() ?? defaultPageUrl
-  const url = new URL(path.startsWith('/') ? path : `/${path}`, 'https://tempo.xyz/developers')
-  return isTempoHost(url.hostname) ? url.toString() : defaultPageUrl
+  try {
+    const url = new URL(path.startsWith('/') ? path : `/${path}`, 'https://tempo.xyz/developers')
+    return isTempoHost(url.hostname) ? url.toString() : defaultPageUrl
+  } catch {
+    return defaultPageUrl
+  }
 }

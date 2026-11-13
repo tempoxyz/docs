@@ -1,5 +1,22 @@
-import { describe, expect, it } from 'vitest'
-import { defangLinks, FeedbackError, normalizeFeedback, redactSecrets } from './feedback'
+import { describe, expect, it, vi } from 'vitest'
+import {
+  defangLinks,
+  FeedbackError,
+  normalizeFeedback,
+  redactSecrets,
+  submitFeedback,
+} from './feedback'
+
+const submitted: unknown[] = []
+vi.mock('vocs/config', () => ({
+  Feedback: {
+    slack: () => ({
+      submit: async (data: unknown) => {
+        submitted.push(data)
+      },
+    }),
+  },
+}))
 
 describe('redactSecrets', () => {
   it.each([
@@ -121,6 +138,16 @@ describe('feedback links', () => {
       normalizeFeedback({ source: 'mcp', message: 'x', relatedResource: '/docs/guide' })
         .relatedResource,
     ).toBe('/docs/guide')
+  })
+
+  it('still delivers feedback whose resource cannot be resolved as a URL', async () => {
+    submitted.length = 0
+    await submitFeedback({ source: 'mcp', message: 'x', relatedResource: '//192.0.2.1/docs' })
+    expect(submitted).toHaveLength(1)
+    expect(submitted[0]).toMatchObject({
+      pageUrl: 'https://tempo.xyz/developers/',
+      message: 'x\nResource: //192[.]0[.]2[.]1/docs',
+    })
   })
 
   it('defangs bare IP addresses and non-web schemes', () => {
