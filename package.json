@@ -42,7 +42,7 @@
     "@wagmi/core": "3.6.5",
     "abitype": "^1.2.4",
     "accounts": "0.19.1",
-    "hono": "^4.13.14",
+    "hono": "^4.13.16",
     "mermaid": "^11.17.2",
     "minisearch": "7.2.0",
     "monaco-editor": "^0.55.1",
