@@ -51,26 +51,34 @@ for (const width of [390, 1440]) {
     await expect(
       page.locator('header').getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
     ).toHaveCount(0)
-    await expect(
-      page
-        .locator('.docs-section-nav')
-        .getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
-    ).toHaveCount(0)
     await expect(page.locator('#blog, .tempo-blog')).toHaveCount(0)
-    if (width < 1080) {
+    if (width < 1200) {
       await page.getByRole('button', { name: 'Open menu', exact: true }).click()
-      const menu = page.getByRole('dialog', { name: 'Documentation navigation', exact: true })
+      const menu = page.getByRole('dialog', { name: 'Tempo Developers menu', exact: true })
       await expect(menu).toBeVisible()
       await expect(
         menu.getByRole('link', { name: 'Blog', exact: true, includeHidden: true }),
       ).toHaveCount(0)
       await expect(menu.getByRole('link', { name: 'Get started', exact: true })).toBeVisible()
     } else {
-      const tabs = page
-        .getByRole('navigation', { name: 'Developer navigation' })
-        .getByRole('navigation', { name: 'Documentation areas', exact: true })
-      await expect(tabs).toBeVisible()
-      await expect(tabs.getByRole('link')).toHaveText(['Home', 'Docs', 'Reference', 'Resources'])
+      const products = page
+        .locator('header.docs-site-header')
+        .getByRole('navigation', { name: 'Products', exact: true })
+      await expect(products).toBeVisible()
+      await expect(products.getByRole('link')).toHaveText([
+        'Get started',
+        'Accounts',
+        'Earn',
+        'Routes',
+        'Zones',
+        'Machine Payments',
+        'Network',
+      ])
+      // Resources, the bar's only menu, opens outside the header.
+      await products.getByRole('button', { name: 'Resources', exact: true }).click()
+      await expect(
+        page.getByRole('menu', { name: 'Resources', exact: true }).getByRole('menuitem'),
+      ).toHaveText(['Guides', 'Partners', 'SDKs & CLI'])
     }
   })
 }

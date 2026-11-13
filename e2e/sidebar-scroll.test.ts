@@ -2,8 +2,6 @@ import { expect, test } from '@playwright/test'
 
 const transfer = '/docs/routes/transfers'
 const deposits = '/docs/routes/deposits'
-// The drawer lists the tab's sections above the sidebar; sidebar checks leave that list out.
-const outsideSectionTabs = ':not(nav[aria-label$=" sections"] a)'
 
 test('desktop sidebar keeps the current task active through nested steps and client navigation', async ({
   page,
@@ -42,8 +40,8 @@ test('desktop sidebar keeps the current task active through nested steps and cli
   await expect(active).toHaveAttribute('href', '/docs/routes')
 
   await page
-    .locator('.docs-section-nav')
-    .getByRole('navigation', { name: 'Docs sections', exact: true })
+    .locator('header.docs-site-header')
+    .getByRole('navigation', { name: 'Products', exact: true })
     .getByRole('link', { name: 'Accounts', exact: true })
     .click()
   await expect(page).toHaveURL(/\/docs\/accounts\/?$/)
@@ -115,17 +113,18 @@ test('mobile drawer retains the current task after scrolling and follows task na
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`${transfer}#track-destination-delivery`)
-  const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
-  // The drawer is named after the current tab.
-  const drawer = page.getByRole('dialog', { name: 'Docs', exact: true })
-  const sections = drawer.getByRole('navigation', { name: 'Docs sections', exact: true })
-  const active = drawer.locator(`a[aria-current]${outsideSectionTabs}`)
+  const trigger = page.getByRole('button', { name: 'Open menu', exact: true })
+  // The menu drawer lists the products above the current section's pages.
+  const drawer = page.getByRole('dialog', { name: 'Tempo Developers menu', exact: true })
+  const products = drawer.getByRole('navigation', { name: 'Products', exact: true })
+  const pages = drawer.getByRole('navigation', { name: 'Routes pages', exact: true })
+  const active = pages.locator('a[aria-current]')
   await trigger.click()
-  await expect(sections.locator('a[aria-current="page"]')).toHaveText('Routes')
+  await expect(products.locator('a[aria-current="page"]')).toHaveText('Routes')
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', transfer)
   await expect(active).toHaveAttribute('aria-current', 'page')
-  await drawer.locator(`a[href="${deposits}"]`).click()
+  await pages.locator(`a[href="${deposits}"]`).click()
   await expect(drawer).toBeHidden()
   await expect(page).toHaveURL(new RegExp(`${deposits}/?$`))
   await page
@@ -134,7 +133,7 @@ test('mobile drawer retains the current task after scrolling and follows task na
   await trigger.click()
   await expect(active).toHaveCount(1)
   await expect(active).toHaveAttribute('href', deposits)
-  await drawer.locator(`a[href="/docs/routes"]${outsideSectionTabs}`).click()
+  await pages.locator('a[href="/docs/routes"]').click()
   await expect(drawer).toBeHidden()
   await trigger.click()
   await expect(active).toHaveAttribute('href', '/docs/routes')
@@ -161,17 +160,12 @@ test('OpenAPI endpoints retain their own active state after client navigation fr
     await expect(sidebar.locator('a[data-active]')).toHaveCount(1)
     await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', href)
   }
-  // The API reference sits in Reference, so Routes opens from the Docs tab's section row.
-  const tabs = page
-    .getByRole('navigation', { name: 'Developer navigation' })
-    .getByRole('navigation', { name: 'Documentation areas', exact: true })
-  await tabs.getByRole('link', { name: 'Docs', exact: true }).click()
-  await expect(page).toHaveURL(/\/get-started\/?$/)
-  await page
-    .locator('.docs-section-nav')
-    .getByRole('navigation', { name: 'Docs sections', exact: true })
-    .getByRole('link', { name: 'Routes', exact: true })
-    .click()
+  // The API reference has no top-bar entry, so no product is current; Routes opens from the bar.
+  const products = page
+    .locator('header.docs-site-header')
+    .getByRole('navigation', { name: 'Products', exact: true })
+  await expect(products.locator('[aria-current]')).toHaveCount(0)
+  await products.getByRole('link', { name: 'Routes', exact: true }).click()
   await expect(page).toHaveURL(/\/docs\/routes\/?$/)
   await expect(sidebar.locator('a[data-active]')).toHaveCount(1)
   await expect(sidebar.locator('a[data-active]')).toHaveAttribute('href', '/docs/routes')

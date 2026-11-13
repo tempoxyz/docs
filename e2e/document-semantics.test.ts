@@ -82,19 +82,20 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
   await page.goto('/docs/quickstart/integrate-tempo', { waitUntil: 'networkidle' })
   await expectSingleTitle(page, 'Integrate Tempo with Apps, Wallets, and Services | Tempo Docs')
 
-  const tabs = page
-    .getByRole('navigation', { name: 'Developer navigation' })
-    .getByRole('navigation', { name: 'Documentation areas', exact: true })
-  // Tempo EVM is now Docs › Network; its landing page keeps the Tempo EVM title.
-  await page
-    .locator('.docs-section-nav')
-    .getByRole('navigation', { name: 'Docs sections', exact: true })
-    .getByRole('link', { name: 'Network', exact: true })
-    .click()
+  const products = page
+    .locator('header.docs-site-header')
+    .getByRole('navigation', { name: 'Products', exact: true })
+  // Tempo EVM is now the Network product; its landing page keeps the Tempo EVM title.
+  await products.getByRole('link', { name: 'Network', exact: true }).click()
   await page.waitForURL(/\/docs\/development\/?$/)
   await expectSingleTitle(page, 'Tempo EVM | Tempo Docs')
 
-  await tabs.getByRole('link', { name: 'Reference', exact: true }).click()
+  // The API reference has no top-bar entry; Get started's sidebar ends with its overview.
+  await products.getByRole('link', { name: 'Get started', exact: true }).click()
+  await page.waitForURL(/\/get-started\/?$/)
+  await expectSingleTitle(page, 'Get Started with Tempo | Tempo Docs')
+
+  await page.locator('[data-v-gutter-left] a[href="/docs/api"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/?$/)
   await expectSingleTitle(page, 'Tempo API: Sponsor Gas Fees and Route Stablecoins | Tempo Docs')
 

@@ -172,22 +172,22 @@ test('closed mobile navigation stays outside the viewport and restores focus on 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/docs/guide/issuance/create-a-stablecoin')
-  const trigger = page.getByRole('button', { name: 'Open docs navigation', exact: true })
-  // Include the closed dialog: an ARIA-hidden element can still cover the page visually.
-  // The drawer is named after the current tab; token guides sit in Docs › Network.
+  const trigger = page.getByRole('button', { name: 'Open menu', exact: true })
+  // Include a closed dialog: an ARIA-hidden element can still cover the page visually. The
+  // closed menu drawer unmounts, so nothing is left to cover the page.
   const panel = page.getByRole('dialog', {
-    name: 'Docs',
+    name: 'Tempo Developers menu',
     exact: true,
     includeHidden: true,
   })
-  const rightEdge = () => panel.evaluate((element) => element.getBoundingClientRect().right)
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-  await expect.poll(rightEdge).toBeLessThanOrEqual(0)
+  await expect(panel).toHaveCount(0)
   await trigger.click()
   await expect(panel).toBeInViewport()
-  await expect(panel).toHaveAttribute('aria-modal', 'true')
+  // The drawer is modal: it hides the page behind it, top bar included, from assistive technology.
+  await expect(page.locator('header.docs-site-header')).toHaveAttribute('aria-hidden', 'true')
   await page.keyboard.press('Escape')
-  await expect.poll(rightEdge).toBeLessThanOrEqual(0)
+  await expect(panel).toHaveCount(0)
   await expect(trigger).toBeFocused()
 
   // Activation need not focus the button (for example, on touch browsers).
@@ -196,8 +196,8 @@ test('closed mobile navigation stays outside the viewport and restores focus on 
     element.click()
   })
   await expect(panel).toBeInViewport()
-  await panel.getByRole('button', { name: 'Close docs navigation', exact: true }).click()
-  await expect.poll(rightEdge).toBeLessThanOrEqual(0)
+  await panel.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(panel).toHaveCount(0)
   await expect(trigger).toBeFocused()
 })
 
