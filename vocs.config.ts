@@ -853,10 +853,15 @@ export default defineConfig({
         ],
       },
       {
+        text: 'FX',
+        items: [{ text: 'Swap currencies', link: '/docs/routes/fx' }],
+      },
+      {
         text: 'cURL examples',
         items: [
           { text: 'Deposit address example', link: '/docs/routes/examples/deposits' },
           { text: 'Transfer example', link: '/docs/routes/examples/transfers' },
+          { text: 'FX swap example', link: '/docs/routes/examples/fx' },
         ],
       },
     ]

@@ -1,0 +1,101 @@
+---
+title: Swap currencies
+seoTitle: Swap Currencies | Tempo Docs
+description: Swap a stablecoin in one currency for a stablecoin in another on Tempo, such as OUSD for EURC.e, with a Routes transfer.
+---
+
+import { OpenApi } from 'vocs'
+
+# Swap currencies
+
+Swap a stablecoin in one currency for a stablecoin in another on Tempo, such as OUSD for EURC.e.
+
+An FX route is a [Routes](/docs/routes) route with both ends on Tempo and a different currency on each end. You quote it, create a transfer, and sign the returned calls, as in [Make a transfer](/docs/routes/transfers). The source transaction is the swap, so the sender receives the destination stablecoin when it confirms.
+
+:::warning
+FX routes fill swaps only from listed accounts. [Contact Tempo](https://tempo.xyz/contact) to enable a route and list your accounts.
+:::
+
+## How FX routes differ
+
+- **Listed senders.** Each FX route has a list of accounts that can swap. A quote for an unlisted `sender` returns `404`.
+- **Same sender and recipient.** The swap pays the account that sends it. Set `recipient` to the `sender` address.
+- **Short quotes.** A quote expires within seconds. The swap call carries that expiry and reverts after it.
+- **Price in the amounts.** The quoted source and destination amounts include the price. The route adds no separate fee.
+
+## Prepare an FX swap
+
+Before you start, have:
+
+- A Tempo API key with `routes:read`, `routes:write`, and `data:read` from [Set up Routes](/docs/routes/api-setup).
+- An FX route from [Supported routes](/docs/routes/networks), such as OUSD to EURC.e on Tempo.
+- The route's pool address, pair index, and sponsor ID. Tempo provides them when it enables your access.
+- A signer for a listed account that holds the source stablecoin and a fee token.
+
+The [FX swap example](/docs/routes/examples/fx) runs every step from a terminal.
+
+## Swap one stablecoin for another
+
+:::::steps
+
+### Check the account
+
+<OpenApi.Playground operationId="getPropAmmAccountAccess" anchors={false} />
+
+A listed account returns `"member": true` and `"allowed": true`. Otherwise `reason` and `explanation` name what's missing.
+
+### Get a quote
+
+Send the account as both `sender` and `recipient`. Amounts are in base units.
+
+<OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
+
+Show the source amount, the destination amount, and `destinationAmountMin`. Create the transfer before `quote.expiresAt`.
+
+### Create the transfer
+
+Send the same inputs with an [idempotency key](/docs/routes/api-setup#set-idempotency-keys).
+
+<OpenApi.Playground operationId="createRoutesTransfer" anchors={false} />
+
+Save the transfer `id` and its `action`. For an exact-source swap, `action.calls` holds two calls. The first approves the source stablecoin. The second swaps it.
+
+### Sign and submit
+
+Submit both calls from the sender account before the transfer's `quote.expiresAt`. Send them as one [Tempo Transaction](/docs/guide/tempo-transaction) so the approval and the swap land together. [Tempo Wallet](/docs/accounts/wallets#connect-tempo-wallet) does this for you.
+
+If the swap call reverts after the expiry, create a new transfer from a new quote.
+
+### Register the source transaction
+
+<OpenApi.Playground operationId="registerRoutesTransferSourceTransaction" anchors={false} />
+
+The API checks the swap onchain and links it to the transfer.
+
+### Confirm the swap
+
+<OpenApi.Playground operationId="getRoutesTransfer" anchors={false} />
+
+Keep the payment pending until `status` is `completed`. Reconcile `destinationAmount` against the account's balance change.
+
+:::::
+
+## Manage the account list
+
+A list has one admin account. The admin adds or removes up to 50 accounts in one request. The key needs `propamm:write`, which an organization owner issues.
+
+<OpenApi.Playground operationId="preparePropAmmAccess" anchors={false} />
+
+The API checks the change and returns an unsigned `transaction`. The admin account signs and sends it. The API doesn't sign or send it. To remove accounts, send the same request with `"allowed": false`.
+
+## FX quote errors
+
+A refused quote returns `404` with code `quote_not_available`. Its `details` name the field to change.
+
+| `details` path | Cause | Fix |
+| --- | --- | --- |
+| `sender` | The account isn't on the route's list. | Check the account, then ask the list admin to add it. |
+| `recipient` | The recipient differs from the sender. | Set `recipient` to the `sender` address. |
+| `amount` | The pool can't fill that size now. | Lower the amount or retry later. |
+
+Continue with [Track delivery](/docs/routes/delivery) for every transfer status.
