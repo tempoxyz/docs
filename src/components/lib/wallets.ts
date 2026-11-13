@@ -8,6 +8,14 @@ export function isBrowserWalletConnectorId(connectorId: string) {
   return !TEMPO_MANAGED_WALLET_IDS.has(connectorId)
 }
 
+/** The docs' own passkey provider announces itself to EIP-6963 under this generic ID. */
+export const DOCS_PASSKEY_PROVIDER_ID = 'com.injectedwallet'
+
+/** A wallet the reader installed, such as MetaMask or Rabby, not one of the docs' own providers. */
+export function isInstalledBrowserWalletConnectorId(connectorId: string) {
+  return isBrowserWalletConnectorId(connectorId) && connectorId !== DOCS_PASSKEY_PROVIDER_ID
+}
+
 function filterSupportedConnectors(
   connectors: readonly Connector[],
   isSupported: (connector: Connector) => boolean,
@@ -48,4 +56,14 @@ export function isFundableWalletConnector(
 ) {
   if (connector.id === 'webAuthn') return options.includeWebAuthn === true
   return true
+}
+
+/**
+ * Keeps the browser wallets a reader installed. Drops the docs' passkey provider, and the generic
+ * `window.ethereum` connector when a wallet announced itself by name.
+ */
+export function withoutGenericInjected(connectors: readonly Connector[]) {
+  const installed = connectors.filter((connector) => connector.id !== DOCS_PASSKEY_PROVIDER_ID)
+  const named = installed.filter((connector) => connector.id !== 'injected')
+  return named.length > 0 ? named : installed
 }
