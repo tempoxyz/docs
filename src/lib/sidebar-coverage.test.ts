@@ -78,10 +78,10 @@ describe('section sidebars', () => {
     expect(links(sidebarFor(href))).toContain(href)
   })
 
-  it('keeps Get Started to onboarding pages', () => {
+  it('keeps Get Started to onboarding pages, then its API reference', () => {
     type SidebarNode = { text?: string; items?: SidebarNode[] }
     const sidebar = sidebarFor('/get-started') as SidebarNode[]
-    expect(sidebar.map(({ text }) => text)).toEqual(['Get Started'])
+    expect(sidebar.map(({ text }) => text)).toEqual(['Get Started', 'API reference'])
     expect(links(sidebar)).toEqual(
       expect.arrayContaining([
         '/docs/quickstart/faucet',
@@ -95,7 +95,12 @@ describe('section sidebars', () => {
   it('merges Tempo EVM and Operate into Network: chain groups, then Run a node, then Changelog', () => {
     type SidebarNode = { text?: string; link?: string; items?: SidebarNode[] }
     const sidebar = sidebarFor('/docs/development') as SidebarNode[]
-    expect(sidebar.map(({ text }) => text)).toEqual(['Tempo EVM', 'Run a node', 'Changelog'])
+    expect(sidebar.map(({ text }) => text)).toEqual([
+      'Tempo EVM',
+      'Run a node',
+      'Changelog',
+      'API reference',
+    ])
     expect(sidebarFor('/docs/guide/node')).toBe(sidebar)
     expect(sidebarFor('/docs/changelog')).toBe(sidebar)
     expect(sidebarFor('/docs/protocol/upgrades/t13')).toBe(sidebar)

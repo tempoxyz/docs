@@ -1225,14 +1225,60 @@ export default defineConfig({
     // Network merges Tempo EVM and Operate: build on the chain, then run a node, then the changelog.
     const networkSidebar = [...developersSidebar, nodeSidebar, changelogSidebar]
     const partnerResourcesSidebar = [...ecosystemSidebar]
+    // Each product's sidebar ends with its API reference: the pages of its OpenAPI tags (see
+    // `apiTagGroups`). The API reference itself keeps the full sidebar generated from the spec.
+    const apiReference = (items: { text: string; link: string }[]) => ({
+      text: 'API reference',
+      items,
+    })
     const productSidebars = {
-      overview: getStartedSidebar,
-      accounts: accountsSidebar,
-      earn: earnSidebar,
-      routes: routesSidebar,
-      zones: zonesSidebar,
-      developers: networkSidebar,
-      'machine-payments': machinePaymentsSidebar,
+      overview: [
+        ...getStartedSidebar,
+        apiReference([
+          { text: 'Overview', link: '/docs/api' },
+          { text: 'Authentication', link: '/docs/api/authentication' },
+          { text: 'API keys', link: '/docs/api/api-keys' },
+          { text: 'Faucet', link: '/docs/api/faucet' },
+        ]),
+      ],
+      accounts: [
+        ...accountsSidebar,
+        apiReference([
+          { text: 'Balances', link: '/docs/api/balances' },
+          { text: 'Activities', link: '/docs/api/activities' },
+          { text: 'Transactions', link: '/docs/api/transactions' },
+          { text: 'Transfers', link: '/docs/api/transfers' },
+          { text: 'Fee payer', link: '/docs/api/fee-payer-usage' },
+        ]),
+      ],
+      earn: [...earnSidebar, apiReference([{ text: 'Earn API', link: '/docs/api/earn' }])],
+      routes: [
+        ...routesSidebar,
+        apiReference([
+          { text: 'Supported routes', link: '/docs/api/routes/routes' },
+          { text: 'Deposits', link: '/docs/api/routes/deposit-addresses' },
+          { text: 'Transfers', link: '/docs/api/routes/transfers' },
+          { text: 'Exchange', link: '/docs/api/exchange' },
+        ]),
+      ],
+      zones: [...zonesSidebar, apiReference([{ text: 'Zones API', link: '/docs/api/zones' }])],
+      developers: [
+        ...networkSidebar,
+        apiReference([
+          { text: 'JSON-RPC', link: '/docs/api/rpc' },
+          { text: 'Blocks', link: '/docs/api/blocks' },
+          { text: 'Tokens', link: '/docs/api/tokens' },
+          { text: 'Verified tokens', link: '/docs/api/verified-tokens' },
+          { text: 'Indexer', link: '/docs/api/indexer' },
+          { text: 'Webhooks', link: '/docs/api/webhooks' },
+          { text: 'Fee AMM', link: '/docs/api/fee-amm' },
+          { text: 'CoinGecko', link: '/docs/api/coingecko' },
+        ]),
+      ],
+      'machine-payments': [
+        ...machinePaymentsSidebar,
+        apiReference([{ text: 'MPP', link: '/docs/api/mpp' }]),
+      ],
       api: [{ text: 'API reference', items: [{ text: 'Introduction', link: '/docs/api' }] }],
       tools: toolsSidebar,
       resources: resourcesSidebar,
@@ -1240,13 +1286,13 @@ export default defineConfig({
     }
 
     return {
-      '/docs': getStartedSidebar,
+      '/docs': productSidebars.overview,
       ...Object.fromEntries(
         [...docsSections, ...docsUtilitySections].flatMap((section) =>
           section.matches.map((path) => [path, productSidebars[section.id]]),
         ),
       ),
-      '/docs/guide/private-zones': zonesSidebar,
+      '/docs/guide/private-zones': productSidebars.zones,
       '/docs/partners': partnerResourcesSidebar,
       '/docs/partners/join': partnerResourcesSidebar,
       '/docs/guide/ousd': partnerResourcesSidebar,
