@@ -5,6 +5,10 @@ const maxBodyBytes = 16 * 1024
 const maxMessageLength = 4_000
 const maxShortLength = 160
 const maxUrlLength = 2_048
+const defaultPageUrl = 'https://tempo.xyz/developers/'
+
+const schemeUrlPattern = /\b[a-z][a-z0-9+.-]*:\/\/[^\s<>"'`]+/gi
+const bareIpv4Pattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g
 
 const feedbackInputSchema = z
   .object({
@@ -78,21 +82,21 @@ export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
   const data = parsed.data
   const source = data.source ?? (typeof data.helpful === 'boolean' ? 'docs' : 'mcp')
   const pageUrl = cleanUrl(data.pageUrl)
-  const path = cleanPath(data.path ?? pathFromUrl(pageUrl))
+  const path = cleanPath(data.path ?? pathFromUrl(pageUrl) ?? rawPathFromUrl(data.pageUrl))
   const feedback = {
     id: `fb_${Date.now().toString(36)}_${crypto.randomUUID()}`,
     source,
     sentiment: data.sentiment ?? sentimentFromHelpful(data.helpful),
     timestamp: normalizeTimestamp(data.timestamp),
     helpful: data.helpful,
-    category: cleanText(data.category, maxShortLength),
-    message: cleanText(data.message, maxMessageLength),
+    category: cleanFreeText(data.category, maxShortLength),
+    message: cleanFreeText(data.message, maxMessageLength),
     pageUrl,
     path,
-    toolName: cleanText(data.toolName ?? data.relatedTool, maxShortLength),
-    relatedResource: cleanText(data.relatedResource, maxUrlLength),
-    client: cleanText(data.client, maxShortLength),
-    requestId: cleanText(data.requestId, maxShortLength),
+    toolName: cleanFreeText(data.toolName ?? data.relatedTool, maxShortLength),
+    relatedResource: cleanResource(data.relatedResource),
+    client: cleanFreeText(data.client, maxShortLength),
+    requestId: cleanFreeText(data.requestId, maxShortLength),
   } satisfies NormalizedFeedback
 
   if (feedback.source === 'docs' && typeof feedback.helpful !== 'boolean')
@@ -137,8 +141,73 @@ async function sendSlackFeedback(feedback: NormalizedFeedback): Promise<boolean>
 
 function cleanText(value: string | undefined, maxLength: number) {
   if (typeof value !== 'string') return undefined
-  const cleaned = redactSecrets(value.replace(/\s+/g, ' ').trim()).slice(0, maxLength)
+  const cleaned = redactSecrets(stripInvisible(value).replace(/\s+/g, ' ').trim()).slice(
+    0,
+    maxLength,
+  )
   return cleaned || undefined
+}
+
+/** Drops control, zero-width and bidi-override characters that hide or reorder text. */
+function stripInvisible(value: string) {
+  let out = ''
+  for (const char of value) {
+    const code = char.codePointAt(0) ?? 0
+    const whitespace = code === 0x09 || code === 0x0a || code === 0x0d
+    const control = (code < 0x20 && !whitespace) || (code >= 0x7f && code <= 0x9f)
+    const invisible =
+      (code >= 0x200b && code <= 0x200f) ||
+      (code >= 0x202a && code <= 0x202e) ||
+      (code >= 0x2060 && code <= 0x2069) ||
+      code === 0xfeff
+    if (!control && !invisible) out += char
+  }
+  return out
+}
+
+/** Free text shown in Slack: links outside Tempo are defanged so they are not clickable. */
+function cleanFreeText(value: string | undefined, maxLength: number) {
+  const cleaned = cleanText(value, maxLength)
+  return cleaned ? defangLinks(cleaned) : undefined
+}
+
+function cleanResource(value: string | undefined) {
+  const cleaned = cleanText(value, maxUrlLength)
+  if (!cleaned) return undefined
+  if (/^[a-z][a-z0-9+.-]*:/i.test(cleaned) || cleaned.startsWith('//')) {
+    const url = allowedUrl(cleaned)
+    return url ? url.toString() : defangLinks(cleaned)
+  }
+  return defangLinks(cleaned)
+}
+
+export function defangLinks(value: string): string {
+  return value
+    .replace(schemeUrlPattern, (match) => (allowedUrl(match) ? match : defangUrl(match)))
+    .replace(bareIpv4Pattern, (match) => match.replaceAll('.', '[.]'))
+}
+
+function defangUrl(value: string) {
+  const match = /^([a-z][a-z0-9+.-]*):\/\/([^/?#]*)(.*)$/is.exec(value)
+  if (!match) return value
+  const [, scheme = '', host = '', rest = ''] = match
+  const safeScheme = scheme.toLowerCase().replace(/^http/, 'hxxp').replace(/^ftp/, 'fxp')
+  return `${safeScheme}[://]${host.replaceAll('.', '[.]')}${rest}`
+}
+
+export function isTempoHost(hostname: string) {
+  return hostname === 'tempo.xyz' || hostname.endsWith('.tempo.xyz')
+}
+
+function allowedUrl(value: string) {
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:' || !isTempoHost(url.hostname)) return undefined
+    if (url.username || url.password || url.port) return undefined
+    return url
+  } catch {
+    return undefined
+  }
 }
 
 function cleanPath(value: string | undefined) {
@@ -152,11 +221,20 @@ function cleanUrl(value: string | undefined) {
   const cleaned = cleanText(value, maxUrlLength)
   if (!cleaned) return undefined
 
+  const url = allowedUrl(cleaned)
+  if (!url) return undefined
+  url.hash = ''
+  return url.toString()
+}
+
+/** The path of any http(s) URL, so feedback from preview hosts still names its page. */
+function rawPathFromUrl(value: string | undefined) {
+  const cleaned = cleanText(value, maxUrlLength)
+  if (!cleaned) return undefined
   try {
     const url = new URL(cleaned)
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return undefined
-    url.hash = ''
-    return url.toString()
+    return url.pathname
   } catch {
     return undefined
   }
@@ -214,10 +292,8 @@ function compact<T>(values: Array<T | false | undefined>): T[] {
 }
 
 function urlFromPath(path: string | undefined) {
-  if (!path) return 'https://tempo.xyz/developers/'
-  if (URL.canParse(path)) return path
-  return new URL(
-    path.startsWith('/') ? path : `/${path}`,
-    'https://tempo.xyz/developers',
-  ).toString()
+  if (!path) return defaultPageUrl
+  if (URL.canParse(path)) return allowedUrl(path)?.toString() ?? defaultPageUrl
+  const url = new URL(path.startsWith('/') ? path : `/${path}`, 'https://tempo.xyz/developers')
+  return isTempoHost(url.hostname) ? url.toString() : defaultPageUrl
 }
