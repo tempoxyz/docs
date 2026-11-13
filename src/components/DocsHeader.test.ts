@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
-  docsAreas,
+  docsResourceSections,
   docsSections,
   docsUtilitySections,
-  getActiveDocsArea,
   getActiveDocsSection,
 } from '../lib/docs-sections'
 import { normalizeDocsPath, resolveSidebarItems } from '../lib/docs-sidebar'
@@ -47,7 +46,7 @@ describe('resolveSidebarItems', () => {
 })
 
 describe('getActiveDocsSection', () => {
-  it('groups the sections into the four top-bar tabs', () => {
+  it('lists the products in the top bar, then Resources as its only menu', () => {
     expect(docsSections.map(({ label }) => label)).toEqual([
       'Get started',
       'Accounts',
@@ -57,26 +56,21 @@ describe('getActiveDocsSection', () => {
       'Machine Payments',
       'Network',
     ])
-    expect(docsAreas.map(({ label }) => label)).toEqual(['Home', 'Docs', 'Reference', 'Resources'])
-    expect(docsAreas.map(({ sections }) => sections)).toEqual([
-      [],
-      ['overview', 'accounts', 'earn', 'routes', 'zones', 'machine-payments', 'developers'],
-      ['api', 'tools'],
-      ['resources', 'ecosystem'],
+    expect(docsResourceSections.map(({ label }) => label)).toEqual([
+      'Guides',
+      'Partners',
+      'SDKs & CLI',
     ])
     expect(
       [...docsSections, ...docsUtilitySections]
         .filter(({ id }) => ['api', 'tools', 'resources', 'ecosystem'].includes(id))
         .map(({ label }) => label),
     ).toEqual(['API', 'SDKs & CLI', 'Guides', 'Partners'])
-    expect(getActiveDocsArea('/docs/earn/balances')?.id).toBe('docs')
-    expect(getActiveDocsArea('/get-started/quickstart')?.id).toBe('docs')
-    expect(getActiveDocsArea('/docs/guide/node/installation')?.id).toBe('docs')
-    expect(getActiveDocsArea('/docs/cli/request')?.id).toBe('reference')
-    expect(getActiveDocsArea('/docs/partners/wallets')?.id).toBe('resources')
-    expect(getActiveDocsArea('/')?.id).toBe('home')
-    expect(getActiveDocsArea('/developers/')?.id).toBe('home')
-    expect(getActiveDocsArea('/docs/apiary')).toBeUndefined()
+    expect(getActiveDocsSection('/docs/earn/balances')?.id).toBe('earn')
+    expect(getActiveDocsSection('/docs/cli/request')?.id).toBe('tools')
+    expect(getActiveDocsSection('/docs/partners/wallets')?.id).toBe('ecosystem')
+    expect(getActiveDocsSection('/')).toBeUndefined()
+    expect(getActiveDocsSection('/docs/apiary')).toBeUndefined()
   })
 
   it('opens Network on the Tempo EVM introduction and Machine Payments on the MPP introduction', () => {

@@ -3,14 +3,12 @@
 import { MdxPageContext } from 'vocs'
 import { Link, useRouter } from 'waku'
 import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
-import { docsAreas, getDocsSectionById } from '../lib/docs-sections'
+import { docsResourceSections, docsSections } from '../lib/docs-sections'
 import * as ui from './DocsFooter.recipes'
 import { TempoMark } from './ToolLogos'
 
 type FooterLink = { label: string; href: string }
 type FooterColumn = { header: string; links: FooterLink[] }
-
-export type DocsFooterVariant = 'compact' | 'full'
 
 const githubLink: FooterLink = { label: 'GitHub', href: 'https://github.com/tempoxyz' }
 const xLink: FooterLink = { label: 'X', href: 'https://twitter.com/tempo' }
@@ -18,21 +16,22 @@ const tempoLink: FooterLink = { label: 'tempo.xyz', href: 'https://tempo.xyz' }
 const consoleLink: FooterLink = { label: 'Console', href: 'https://console.tempo.xyz' }
 const explorerLink: FooterLink = { label: 'Explorer', href: 'https://explore.tempo.xyz' }
 
-const compactLinks = [tempoLink, consoleLink, explorerLink, githubLink, xLink]
 const socialLinks = [githubLink, xLink]
 
-// The Docs, Reference and Resources columns are the top-bar tabs and their sections, so the
-// footer keeps the nav's labels and landing routes. Home has no sections and no column.
+// Products and Resources repeat the top bar, with its labels and landing routes; the API
+// reference, which has no top-bar entry, closes Resources.
 const columns: FooterColumn[] = [
-  ...docsAreas
-    .filter((area) => area.sections.length > 0)
-    .map((area) => ({
-      header: area.label,
-      links: area.sections.flatMap((id) => {
-        const section = getDocsSectionById(id)
-        return section ? [{ label: section.label, href: section.href }] : []
-      }),
-    })),
+  {
+    header: 'Products',
+    links: docsSections.map((section) => ({ label: section.label, href: section.href })),
+  },
+  {
+    header: 'Resources',
+    links: [
+      ...docsResourceSections.map((section) => ({ label: section.label, href: section.href })),
+      { label: 'API reference', href: '/docs/api' },
+    ],
+  },
   {
     header: 'Tempo',
     links: [
@@ -74,34 +73,25 @@ function LinkList({ links, className }: { links: FooterLink[]; className: string
   )
 }
 
-/** Full on Home and Not found (its frontmatter sets `footer: full`), Compact on docs pages. */
-function useFooterVariant(): DocsFooterVariant {
+/** Home and Not found (its frontmatter sets `footer: full`) have a footer; docs pages end at Previous / Next. */
+function useShowsFooter() {
   const { path } = useRouter()
   const { frontmatter } = MdxPageContext.use()
   const pathname = (path ?? '/').replace(/^\/developers(?=\/|$)/, '').replace(/\/+$/, '') || '/'
-  return pathname === '/' || frontmatter?.footer === 'full' ? 'full' : 'compact'
+  return pathname === '/' || frontmatter?.footer === 'full'
 }
 
-/** The site footer under every page, rendered through the Vocs Footer slot. */
-export default function DocsFooter({ variant }: { variant?: DocsFooterVariant }) {
-  const routeVariant = useFooterVariant()
-  const type = variant ?? routeVariant
+/** The site footer on Home and Not found, rendered through the Vocs Footer slot. */
+export default function DocsFooter() {
+  const showsFooter = useShowsFooter()
+  if (!showsFooter) return null
   const copyright = <span>© {new Date().getFullYear()} Tempo</span>
 
-  if (type === 'compact')
-    return (
-      <div className={`docs-site-footer ${ui.root().className}`} data-variant="compact">
-        <div {...ui.compact()}>
-          {copyright}
-          <nav aria-label="Footer">
-            <LinkList links={compactLinks} className={ui.inlineList().className} />
-          </nav>
-        </div>
-      </div>
-    )
-
   return (
-    <div className={`docs-site-footer ${ui.root().className} ${ui.full().className}`} data-variant="full">
+    <div
+      className={`docs-site-footer ${ui.root().className} ${ui.full().className}`}
+      data-variant="full"
+    >
       <div {...ui.brand()}>
         <TempoMark aria-hidden="true" focusable="false" {...ui.mark()} />
         <p {...ui.tagline()}>Stablecoin payments infrastructure for developers, apps and agents.</p>

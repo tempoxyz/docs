@@ -104,7 +104,7 @@ describe('engineering blog retirement', () => {
     expect(JSON.stringify(vocsConfig.topNav)).not.toMatch(/blog/i)
     for (const file of [
       'src/components/DocsHeader.tsx',
-      'src/components/DocsSectionNav.tsx',
+      'src/components/DocsMenuDrawer.tsx',
       'src/marketing/app/_components/Header.tsx',
       'src/marketing/app/_components/Footer.tsx',
       'src/marketing/app/_components/HomeBelowFold.tsx',

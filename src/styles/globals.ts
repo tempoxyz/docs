@@ -113,25 +113,12 @@ global({
     ':root': {
       '--tempo-docs-outline-width': '240px',
       '--tempo-docs-primary-nav-height': '56px',
-      // Section tabs only show at ≥ 1080 on pages that have them (see below).
-      '--tempo-docs-section-nav-height': '0px',
       '--tempo-docs-shell-width': '100%',
       '--tempo-docs-sidebar-width': '256px',
       '--tempo-hub-width': '1168px',
       '--tempo-font-display': 'var(--font-pilat-book)',
       '--tempo-font-body': 'var(--font-pilat-book)',
-      '--vocs-spacing-topNav':
-        'calc( var(--tempo-docs-primary-nav-height) + var(--tempo-docs-section-nav-height) )',
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '@media (width >= 1080px)': {
-      ':root:has(.docs-section-nav:not([data-empty]))': {
-        '--tempo-docs-section-nav-height': '48px',
-      },
+      '--vocs-spacing-topNav': 'var(--tempo-docs-primary-nav-height)',
     },
   },
 })
@@ -263,71 +250,12 @@ global({
 
 // G11 callouts: see the TDS Callout and Alert treatment at the end of this file.
 
+// The outline is the rail on wide screens only. Below it, the menu drawer holds the section's
+// pages and the page has no outline, so Vocs' mobile row ("Menu", "On this page") stays hidden.
 global({
   '@layer utilities': {
-    '[data-docs-sidebar-toggle]': {
-      display: 'inline-flex',
-    },
-    '[data-docs-sidebar-toggle]:not([data-docs-sidebar-fallback])': {
-      marginInlineEnd: tokens.spacing['2'],
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '@media (width >= 1080px)': {
-      '[data-docs-sidebar-toggle]': {
-        display: 'none',
-      },
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '[data-docs-sidebar-fallback]': {
-      position: 'sticky',
-      zIndex: tokens.zIndex.raised,
-      top: 'calc(var(--vocs-spacing-topNav) + var(--vocs-spacing-banner))',
-      display: 'flex',
-      alignItems: 'center',
-      height: '44px',
-      // design-exception: Preserve the inherited component/framework scope at the point of use.
-      paddingInline: 'var(--vocs-spacing-content-px) !custom',
-      borderBottomWidth: tokens.borderWidth.hairline,
-      borderBottomStyle: 'solid',
-      borderBottomColor: inherited.color.vocsBorderColorPrimary,
-      backgroundColor: inherited.color.vocsBackgroundColorPrimary,
-      fontSize: tokens.fontSize.sm,
-      lineHeight: tokens.lineHeight.control,
-    },
-  },
-})
-
-global({
-  '@layer utilities': {
-    '@media (width >= 1080px)': {
-      '[data-docs-sidebar-fallback]': {
-        display: 'none',
-      },
-    },
-  },
-})
-
-// Page bar below 1080: Vocs' mobile outline row carries the "Section / Page"
-// trigger. One 44-high bar on the gutter, like the other bars (56, 48, 44).
-global({
-  '@layer utilities': {
-    '@media (width < 1080px)': {
-      '[data-v-outline-mobile]': {
-        alignItems: 'center',
-        // design-exception: Vocs sets max-h-12 and py-3 on this row; the page bar is 44 high.
-        height: '44px !custom',
-        // design-exception: Same 44 as the height, over Vocs' max-h-12.
-        maxHeight: '44px !custom',
-        paddingBlock: tokens.spacing['0'],
-      },
+    '[data-v-outline-mobile]': {
+      display: 'none',
     },
   },
 })
@@ -477,9 +405,10 @@ global({
 })
 
 // SB2: every section header is a group label (for example Accounts, Payments,
-// Fees): 14/20 medium in the primary color, 4 above its first item. Labels start
-// on the gutter with the items (sidebar padding 12 + item padding 12). Collapsible
-// headers are controls, so they keep the 32px item height.
+// Fees), quieter than its items like DS SidebarMenu's GroupLabel: 12/16 in the
+// tertiary color, 4 above its first item. Labels start on the gutter with the items
+// (sidebar padding 12 + item padding 12). Collapsible headers are controls, so they
+// keep the 32px item height and the item style.
 global({
   '@layer utilities': {
     '[data-v-sidebar] > [data-v-sidebar-section]:only-child > [data-v-sidebar-section-header]': {
@@ -492,12 +421,13 @@ global({
       paddingInline: tokens.spacing['3'],
       backgroundColor: 'transparent !custom',
 
-      color: tokens.color.foreground,
-      fontSize: tokens.fontSize.sm,
-      fontWeight: tokens.fontWeight.medium,
+      color: tokens.color.tertiary,
+      fontFamily: tokens.fontFamily.ui,
+      fontSize: tokens.fontSize.xs,
+      fontWeight: tokens.fontWeight.normal,
 
       letterSpacing: tokens.letterSpacing.normal,
-      lineHeight: tokens.lineHeight.control,
+      lineHeight: tokens.lineHeight.caption,
       textTransform: 'none',
     },
     '[data-v-sidebar] > [data-v-sidebar-section]:not(:only-child) > [data-v-sidebar-section-header], [data-v-sidebar] [data-v-sidebar-section-content] [data-v-sidebar-section-header]:not([data-collapsable="true"])':
@@ -511,12 +441,13 @@ global({
         paddingInline: tokens.spacing['3'],
         backgroundColor: 'transparent !custom',
 
-        color: tokens.color.foreground,
-        fontSize: tokens.fontSize.sm,
-        fontWeight: tokens.fontWeight.medium,
+        color: tokens.color.tertiary,
+        fontFamily: tokens.fontFamily.ui,
+        fontSize: tokens.fontSize.xs,
+        fontWeight: tokens.fontWeight.normal,
 
         letterSpacing: tokens.letterSpacing.normal,
-        lineHeight: tokens.lineHeight.control,
+        lineHeight: tokens.lineHeight.caption,
         textTransform: 'none',
       },
     '[data-v-sidebar] > [data-v-sidebar-section] > [data-v-sidebar-section-header][data-collapsable="true"]':
@@ -619,10 +550,15 @@ global({
       '--corner-radius': tokens.radius.md,
 
       color: tokens.color.muted,
+      fontFamily: tokens.fontFamily.ui,
       fontSize: tokens.fontSize.sm,
       fontWeight: tokens.fontWeight.normal,
       letterSpacing: tokens.letterSpacing.normal,
       lineHeight: tokens.lineHeight.control,
+    },
+    // Collapsible headers read as items, in the same UI font.
+    '[data-v-sidebar] [data-v-sidebar-section-header][data-collapsable="true"]': {
+      fontFamily: tokens.fontFamily.ui,
     },
   },
 })
@@ -759,103 +695,11 @@ global({
   },
 })
 
-// Ask AI is one floating pill at every breakpoint: 40 high, inverse fill, radius
-// full, Shadow small, bottom-right at the gutter (24, or 16 below 768). Vocs sizes,
-// tints and blurs the trigger with !important utilities in vocs_utilities, so the
-// fill overrides sit in an earlier layer and max-width bounds its fixed width.
+// Ask AI lives in each page's header row (DocsPageActions), which also takes its ⌘I shortcut.
 global({
-  '@layer base': {
-    '[data-v-ask-ai-container] > button': {
-      // design-exception: Vocs tints the trigger with !important; the pill takes the inverse fill.
-      backgroundColor: 'var(--background-color-invert) !custom !important',
-      // design-exception: Vocs blurs the trigger with !important; an opaque pill needs no blur.
-      backdropFilter: 'none !custom !important',
-    },
-  },
   '@layer utilities': {
     '[data-v-ask-ai-container]': {
-      position: 'fixed',
-      top: 'auto',
-      bottom: '24px',
-      left: 'auto',
-      right: '24px',
-      display: 'flex',
-      justifyContent: 'flex-end',
-      width: 'auto',
-      height: '40px',
-      // Vocs centres the container with its translate utility; zero its x offset.
-      '--tw-translate-x': '0px',
-      transform: 'none',
-    },
-    '[data-v-ask-ai-container] > button': {
-      gap: tokens.spacing['2'],
-      minWidth: 0,
-      // Vocs fixes the trigger at 290px with !important; max-width lets the pill hug its label.
-      maxWidth: 'max-content',
-      height: '40px',
-      maxHeight: '100%',
-      justifyContent: 'center',
-      paddingBlock: tokens.spacing['0'],
-      paddingInline: tokens.spacing['4'],
-      borderWidth: tokens.borderWidth.none,
-      borderRadius: tokens.radius.full,
-      color: inherited.color.textColorInvert,
-      // design-exception: DS Shadow small; contract.ts has no shadow scale yet.
-      boxShadow: '0 4px 12px rgb(0 0 0 / 0.12) !custom',
-      fontSize: tokens.fontSize.sm,
-      fontWeight: tokens.fontWeight.normal,
-      lineHeight: tokens.lineHeight.control,
-    },
-    // The pill reads "Ask AI": the field's placeholder ellipsis and key hints stay out of it.
-    // The trigger's text stays its accessible name.
-    '[data-v-ask-ai-container] > button > div:first-child': {
-      position: 'absolute',
-      width: '1px',
-      height: '1px',
-      overflow: 'hidden',
-      clipPath: 'inset(50%)',
-      whiteSpace: 'nowrap',
-    },
-    '[data-v-ask-ai-container] > button::after': {
-      content: '"Ask AI"',
-      whiteSpace: 'nowrap',
-    },
-    '[data-v-ask-ai-container] > button > div:last-child': {
       display: 'none',
-    },
-    '[data-v-ask-ai-container] > button::before': {
-      content: '""',
-      display: 'block',
-      flexShrink: 0,
-      width: '16px',
-      height: '16px',
-      backgroundColor: 'currentColor',
-      maskImage:
-        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4'/%3E%3Ccircle cx='4' cy='20' r='2'/%3E%3C/svg%3E\")",
-      maskSize: 'contain',
-      maskRepeat: 'no-repeat',
-      maskPosition: 'center',
-      WebkitMaskImage:
-        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4'/%3E%3Ccircle cx='4' cy='20' r='2'/%3E%3C/svg%3E\")",
-      WebkitMaskSize: 'contain',
-      WebkitMaskRepeat: 'no-repeat',
-      WebkitMaskPosition: 'center',
-    },
-    // The menu otherwise takes the trigger's width.
-    '[role="menu"][data-side]:has([role="menuitem"])': {
-      minWidth: '240px',
-    },
-    '@media (width < 768px)': {
-      '[data-v-ask-ai-container]': {
-        bottom: '16px',
-        right: '16px',
-      },
-    },
-    '@media (width >= 1376px)': {
-      // On wide screens the pill keeps to the shell's gutter, not the window edge.
-      '[data-layout] > [data-v-ask-ai-container]': {
-        right: 'max(24px, calc((100% - var(--tempo-docs-shell-width)) * 0.5 + 24px))',
-      },
     },
   },
 })
@@ -1127,7 +971,7 @@ global({
 })
 
 global({
-  'html:has(.docs-section-nav), body:has(.docs-section-nav)': {
+  'html:has(.docs-site-header), body:has(.docs-site-header)': {
     backgroundColor: tokens.color.shell,
   },
 })
@@ -1399,14 +1243,11 @@ global({
 
 global({
   '@layer utilities': {
-    // Lead 18/28 in the secondary color, 32 above the first content.
+    // Lead at body size in the secondary color, 32 above the first content.
     'article[data-v-content] > h1[data-v] + p[data-v]': {
       marginBottom: tokens.spacing['8'],
       color: tokens.color.muted,
-
-      fontSize: tokens.fontSize.lead,
-      // design-exception: Lead 18/28 (system-v2); contract.ts has no 28px line height.
-      lineHeight: '28px !custom',
+      fontSize: tokens.fontSize.body,
     },
   },
 })
@@ -1478,7 +1319,7 @@ global({
 global({
   '@layer utilities': {
     // The docs-local SegmentedControl and Tabs keep their own TDS rings (inset for segments).
-    'body:has(.docs-section-nav) :is(a, button, input, summary):not([data-tds-control]):focus-visible':
+    'body:has(.docs-site-header) :is(a, button, input, summary):not([data-tds-control]):focus-visible':
       {
         outlineWidth: tokens.borderWidth.emphasis,
         outlineStyle: 'solid',

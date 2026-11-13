@@ -84,6 +84,9 @@ export const design = extendVars(palette, {
     code: 'var(--font-jetbrains-mono)',
     sansFallback: 'var(--font-pilat-book), sans-serif',
     system: 'var(--font-pilat-book), ui-sans-serif, system-ui, sans-serif',
+    // DS Web UI text (Inter, loaded by @tempoxyz/ds): the chrome around the docs, which DS
+    // components share.
+    ui: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   letterSpacing: {
     normal: '0',

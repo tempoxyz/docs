@@ -109,45 +109,12 @@ export const docsUtilitySections: DocsSection[] = [
   },
 ]
 
-export type DocsArea = {
-  id: 'home' | 'docs' | 'reference' | 'resources'
-  label: string
-  href: string
-  description: string
-  sections: DocsSection['id'][]
-}
-
-/** The four tabs in the top bar. Each groups the sections that own the sidebars; Home has none. */
-export const docsAreas: DocsArea[] = [
-  {
-    id: 'home',
-    label: 'Home',
-    href: '/',
-    description: 'Start here: guides, references and resources',
-    sections: [],
-  },
-  {
-    id: 'docs',
-    label: 'Docs',
-    href: '/get-started',
-    description: 'Get started, the products and the network',
-    sections: ['overview', 'accounts', 'earn', 'routes', 'zones', 'machine-payments', 'developers'],
-  },
-  {
-    id: 'reference',
-    label: 'Reference',
-    href: '/docs/api',
-    description: 'Tempo API, SDKs and CLI',
-    sections: ['api', 'tools'],
-  },
-  {
-    id: 'resources',
-    label: 'Resources',
-    href: '/docs/resources/guides',
-    description: 'Payment guides and partners',
-    sections: ['resources', 'ecosystem'],
-  },
-]
+/**
+ * The Resources menu in the top bar, in menu order: the only menu there. The products
+ * (`docsSections`) are plain links; the API reference has no top-bar entry, since each
+ * product's sidebar ends with its own API reference group.
+ */
+export const docsResourceSectionIds: DocsSection['id'][] = ['resources', 'ecosystem', 'tools']
 
 export function normalizeDocsSectionPath(path: string) {
   return path.replace(/^\/developers(?=\/|$)/, '').replace(/\/+$/, '') || '/'
@@ -169,12 +136,6 @@ export function getDocsSectionById(id: DocsSection['id']) {
   return [...docsSections, ...docsUtilitySections].find((section) => section.id === id)
 }
 
-export function getDocsAreaForSection(id: DocsSection['id'] | undefined) {
-  return id ? docsAreas.find((area) => area.sections.includes(id)) : undefined
-}
-
-/** The current top-bar tab: Home on the landing page, otherwise the tab that owns the section. */
-export function getActiveDocsArea(path: string) {
-  if (normalizeDocsSectionPath(path) === '/') return docsAreas.find(({ id }) => id === 'home')
-  return getDocsAreaForSection(getActiveDocsSection(path)?.id)
-}
+export const docsResourceSections = docsResourceSectionIds
+  .map((id) => getDocsSectionById(id))
+  .filter((section): section is DocsSection => Boolean(section))

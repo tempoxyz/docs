@@ -1,9 +1,8 @@
 import { style } from '../styles/recipes'
 import { vars as tokens } from '../styles/theme'
 
-// Both footers sit on the page background under one top hairline, with their text on the
-// page gutter (24, 16 below Tablet). The fill hides the outline rail where the footer runs
-// under it.
+// The footer (Home and Not found) sits under one top hairline, with its text on the page
+// gutter (24, 16 below Tablet). The fill hides the outline rail where the footer runs under it.
 export const root = style({
   paddingInline: tokens.spacing['4'],
   borderTopWidth: tokens.borderWidth.hairline,
@@ -23,25 +22,6 @@ export const full = style({
   backgroundColor: tokens.color.panel,
 })
 
-// Compact (docs pages): one left-aligned row, the copyright then the links, so the floating
-// Ask AI pill at the bottom-right never covers a link. Below Tablet the links wrap under
-// the copyright and the footer keeps the pill's height (40) plus two gutters clear below.
-export const compact = style({
-  display: 'flex',
-  flexWrap: 'wrap',
-  alignItems: 'center',
-  justifyContent: 'flex-start',
-  columnGap: tokens.spacing['6'],
-  rowGap: tokens.spacing['2'],
-  paddingBlockStart: tokens.spacing['6'],
-  paddingBlockEnd: tokens.spacing['18'],
-  fontSize: tokens.fontSize.sm,
-  lineHeight: tokens.lineHeight.control,
-  '@media (width >= 768px)': {
-    paddingBlockEnd: tokens.spacing['6'],
-  },
-})
-
 export const inlineList = style({
   display: 'flex',
   flexWrap: 'wrap',
@@ -50,7 +30,7 @@ export const inlineList = style({
   rowGap: tokens.spacing['2'],
 })
 
-// Full: the T mark and the tagline, then four columns of 14/20 links, then the 12/16 bottom row.
+// The T mark and the tagline, then three columns of 14/20 links, then the 12/16 bottom row.
 export const brand = style({
   display: 'flex',
   flexDirection: 'column',
@@ -81,7 +61,7 @@ export const columns = style({
   paddingBlockStart: tokens.spacing['8'],
   paddingBlockEnd: tokens.spacing['12'],
   '@media (width >= 768px)': {
-    gridTemplateColumns: 'repeat(4, minmax(0, 160px))',
+    gridTemplateColumns: 'repeat(3, minmax(0, 160px))',
   },
 })
 
@@ -122,7 +102,7 @@ export const bottom = style({
   lineHeight: tokens.lineHeight.caption,
 })
 
-// Links are secondary and turn primary on hover, in both footers.
+// Links are secondary and turn primary on hover.
 export const link = style({
   display: 'inline-flex',
   alignItems: 'center',
