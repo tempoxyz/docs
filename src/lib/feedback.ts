@@ -5,6 +5,14 @@ const maxBodyBytes = 16 * 1024
 const maxMessageLength = 4_000
 const maxShortLength = 160
 const maxUrlLength = 2_048
+const defaultPageUrl = 'https://tempo.xyz/developers/'
+
+const schemeUrlPattern = /\b[a-z][a-z0-9+.-]*:\/\/[^\s<>"'`]+/gi
+const bareIpv4Pattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g
+// Hostnames without a scheme, such as example.com/x, which Slack also turns into links.
+const bareHostPattern =
+  /(?<![\w@./:[-])((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,})(?=[:/\s)\],;!?]|\.?$|\.\s)/gi
+const invisibleCategory = /^[\p{Cc}\p{Cf}]$/u
 
 const feedbackInputSchema = z
   .object({
@@ -77,7 +85,7 @@ export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
 
   const data = parsed.data
   const source = data.source ?? (typeof data.helpful === 'boolean' ? 'docs' : 'mcp')
-  const pageUrl = cleanUrl(data.pageUrl)
+  const pageUrl = cleanUrl(data.pageUrl) ?? tempoUrlFromPath(rawPathFromUrl(data.pageUrl))
   const path = cleanPath(data.path ?? pathFromUrl(pageUrl))
   const feedback = {
     id: `fb_${Date.now().toString(36)}_${crypto.randomUUID()}`,
@@ -85,14 +93,14 @@ export function normalizeFeedback(input: FeedbackInput): NormalizedFeedback {
     sentiment: data.sentiment ?? sentimentFromHelpful(data.helpful),
     timestamp: normalizeTimestamp(data.timestamp),
     helpful: data.helpful,
-    category: cleanText(data.category, maxShortLength),
-    message: cleanText(data.message, maxMessageLength),
+    category: cleanFreeText(data.category, maxShortLength),
+    message: cleanFreeText(data.message, maxMessageLength),
     pageUrl,
     path,
-    toolName: cleanText(data.toolName ?? data.relatedTool, maxShortLength),
-    relatedResource: cleanText(data.relatedResource, maxUrlLength),
-    client: cleanText(data.client, maxShortLength),
-    requestId: cleanText(data.requestId, maxShortLength),
+    toolName: cleanFreeText(data.toolName ?? data.relatedTool, maxShortLength),
+    relatedResource: cleanResource(data.relatedResource),
+    client: cleanFreeText(data.client, maxShortLength),
+    requestId: cleanFreeText(data.requestId, maxShortLength),
   } satisfies NormalizedFeedback
 
   if (feedback.source === 'docs' && typeof feedback.helpful !== 'boolean')
@@ -137,8 +145,73 @@ async function sendSlackFeedback(feedback: NormalizedFeedback): Promise<boolean>
 
 function cleanText(value: string | undefined, maxLength: number) {
   if (typeof value !== 'string') return undefined
-  const cleaned = redactSecrets(value.replace(/\s+/g, ' ').trim()).slice(0, maxLength)
+  const cleaned = redactSecrets(stripInvisible(value).replace(/\s+/g, ' ').trim()).slice(
+    0,
+    maxLength,
+  )
   return cleaned || undefined
+}
+
+/** Drops control, zero-width and bidi-override characters that hide or reorder text. */
+function stripInvisible(value: string) {
+  let out = ''
+  for (const char of value) {
+    const whitespace = char === '\t' || char === '\n' || char === '\r'
+    if (whitespace || !invisibleCategory.test(char)) out += char
+  }
+  return out
+}
+
+/** Free text shown in Slack: links outside Tempo are defanged so they are not clickable. */
+function cleanFreeText(value: string | undefined, maxLength: number) {
+  const cleaned = cleanText(value, maxLength)
+  return cleaned ? defangLinks(cleaned) : undefined
+}
+
+function cleanResource(value: string | undefined) {
+  const cleaned = cleanText(value, maxUrlLength)
+  if (!cleaned) return undefined
+  if (/^[a-z][a-z0-9+.-]*:/i.test(cleaned) || cleaned.startsWith('//')) {
+    const url = allowedUrl(cleaned)
+    return url ? url.toString() : defangLinks(cleaned)
+  }
+  return defangLinks(cleaned)
+}
+
+export function defangLinks(value: string): string {
+  return value
+    .replace(schemeUrlPattern, (match) => (allowedUrl(match) ? match : defangUrl(match)))
+    .replace(bareIpv4Pattern, (match) => match.replaceAll('.', '[.]'))
+    .replace(bareHostPattern, (host) =>
+      isTempoHost(host.toLowerCase()) ? host : host.replaceAll('.', '[.]'),
+    )
+}
+
+function defangUrl(value: string) {
+  const match = /^([a-z][a-z0-9+.-]*):\/\/([^/?#]*)(.*)$/is.exec(value)
+  if (!match) return value
+  const [, scheme = '', host = '', rest = ''] = match
+  const safeScheme = scheme.toLowerCase().replace(/^http/, 'hxxp').replace(/^ftp/, 'fxp')
+  return `${safeScheme}[://]${host.replaceAll('.', '[.]')}${rest}`
+}
+
+export function isTempoHost(hostname: string) {
+  return hostname === 'tempo.xyz' || hostname.endsWith('.tempo.xyz')
+}
+
+function allowedUrl(value: string) {
+  // Check the host as written: URL parsing accepts punctuation and non-ASCII dots in hosts,
+  // such as https://evil.example,.tempo.xyz, where a chat client would link only evil.example.
+  const rawHost = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]*)/i.exec(value)?.[1]
+  if (rawHost === undefined || !/^[a-z0-9-]+(\.[a-z0-9-]+)*$/i.test(rawHost)) return undefined
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:' || !isTempoHost(url.hostname)) return undefined
+    if (url.username || url.password || url.port) return undefined
+    return url
+  } catch {
+    return undefined
+  }
 }
 
 function cleanPath(value: string | undefined) {
@@ -152,11 +225,28 @@ function cleanUrl(value: string | undefined) {
   const cleaned = cleanText(value, maxUrlLength)
   if (!cleaned) return undefined
 
+  const url = allowedUrl(cleaned)
+  if (!url) return undefined
+  url.hash = ''
+  return url.toString()
+}
+
+/** The Tempo docs URL for a page path from another host, such as a preview deployment. */
+function tempoUrlFromPath(pathname: string | undefined) {
+  if (!pathname) return undefined
+  const path = pathname.replace(/^\/+/, '/')
+  const full = /^\/developers(?=\/|$)/.test(path) ? path : `/developers${path === '/' ? '/' : path}`
+  return cleanUrl(new URL(full, 'https://tempo.xyz').toString())
+}
+
+/** The path of any http(s) URL, so feedback from preview hosts still names its page. */
+function rawPathFromUrl(value: string | undefined) {
+  const cleaned = cleanText(value, maxUrlLength)
+  if (!cleaned) return undefined
   try {
     const url = new URL(cleaned)
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return undefined
-    url.hash = ''
-    return url.toString()
+    return url.pathname
   } catch {
     return undefined
   }
@@ -214,10 +304,12 @@ function compact<T>(values: Array<T | false | undefined>): T[] {
 }
 
 function urlFromPath(path: string | undefined) {
-  if (!path) return 'https://tempo.xyz/developers/'
-  if (URL.canParse(path)) return path
-  return new URL(
-    path.startsWith('/') ? path : `/${path}`,
-    'https://tempo.xyz/developers',
-  ).toString()
+  if (!path) return defaultPageUrl
+  if (URL.canParse(path)) return allowedUrl(path)?.toString() ?? defaultPageUrl
+  try {
+    const url = new URL(path.startsWith('/') ? path : `/${path}`, 'https://tempo.xyz/developers')
+    return isTempoHost(url.hostname) ? url.toString() : defaultPageUrl
+  } catch {
+    return defaultPageUrl
+  }
 }
