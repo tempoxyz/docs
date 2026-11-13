@@ -1,0 +1,143 @@
+---
+title: "FX swap example"
+seoTitle: "Routes FX swap example | Tempo Docs"
+description: Run an FX swap on Tempo from a terminal with curl and jq, from the account check to the completed transfer.
+---
+
+# FX swap example
+
+Run every step of [Swap currencies](/docs/routes/fx) from a terminal. That guide explains each step; this page keeps the commands together. You sign the source calls with your own signer.
+
+## Set the FX example variables
+
+Set `TEMPO_API_KEY` to a key with `routes:read`, `routes:write`, and `data:read` from [Set up Routes](/docs/routes/api-setup). Then set:
+
+| Variable | Value |
+| --- | --- |
+| `SOURCE_TOKEN`, `DESTINATION_TOKEN` | Token addresses on Tempo from the [route directory](/docs/routes/networks). OUSD is `0x20c0000000000000000000006a37da5c996874be`. EURC.e is `0x20c0000000000000000000001621e21f71cf12fb`. |
+| `FX_ACCOUNT` | The listed account that sends and receives the swap. |
+| `FX_AMOUNT` | Source amount in base units. `1000000` is 1 OUSD. |
+| `POOL_ADDRESS` | The route's pool. Tempo provides it. |
+
+## Swap OUSD for EURC.e
+
+:::::steps
+
+### Check the account
+
+```bash
+curl --get \
+  "https://api.tempo.xyz/v1/prop-amms/${POOL_ADDRESS}/accounts/${FX_ACCOUNT}/access" \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --data-urlencode "tokens=${SOURCE_TOKEN},${DESTINATION_TOKEN}" \
+  --data-urlencode 'chainId=4217'
+```
+
+Continue when the response has `"allowed": true`. The request checks your organization's saved list. If your organization uses the pool's default list, add `--data-urlencode 'sponsorId=0'`.
+
+### Get a quote
+
+```bash
+curl --get 'https://api.tempo.xyz/v1/routes/transfers/quote' \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --data-urlencode 'sourceChain=tempo' \
+  --data-urlencode "sourceToken=${SOURCE_TOKEN}" \
+  --data-urlencode 'destinationChain=tempo' \
+  --data-urlencode "destinationToken=${DESTINATION_TOKEN}" \
+  --data-urlencode "sender=${FX_ACCOUNT}" \
+  --data-urlencode "recipient=${FX_ACCOUNT}" \
+  --data-urlencode "amount=${FX_AMOUNT}" \
+  --data-urlencode 'mode=exactSource'
+```
+
+The quote expires within seconds. Run the next two steps right after it.
+
+### Create the transfer
+
+Set `ROUTE_REQUEST_KEY` to the [idempotency key](/docs/routes/api-setup#set-idempotency-keys) for this swap.
+
+```bash
+jq -n \
+  --arg sourceToken "$SOURCE_TOKEN" \
+  --arg destinationToken "$DESTINATION_TOKEN" \
+  --arg sender "$FX_ACCOUNT" \
+  --arg recipient "$FX_ACCOUNT" \
+  --arg amount "$FX_AMOUNT" \
+  '$ARGS.named + {sourceChain: "tempo", destinationChain: "tempo", mode: "exactSource"}' \
+  > fx-request.json
+
+curl --fail-with-body 'https://api.tempo.xyz/v1/routes/transfers' \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --header "idempotency-key: ${ROUTE_REQUEST_KEY}" \
+  --header 'Content-Type: application/json' \
+  --data @fx-request.json \
+  --output fx-transfer.json
+
+jq '{id, expiresAt: .quote.expiresAt, calls: .action.calls}' fx-transfer.json
+```
+
+The output lists the transfer `id`, its expiry, and the two calls to sign.
+
+### Sign and submit
+
+Submit both calls from `FX_ACCOUNT` before that expiry, as one Tempo Transaction. Keep the transaction hash.
+
+### Register the source transaction
+
+Set `ROUTE_TRANSFER_ID` to the returned `id` and `SOURCE_TRANSACTION` to the hash.
+
+```bash
+jq -n --arg transactionHash "$SOURCE_TRANSACTION" '$ARGS.named' > fx-source.json
+
+curl --fail-with-body \
+  "https://api.tempo.xyz/v1/routes/transfers/${ROUTE_TRANSFER_ID}/source-transactions" \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --header 'Content-Type: application/json' \
+  --data @fx-source.json
+```
+
+### Confirm the swap
+
+```bash
+curl "https://api.tempo.xyz/v1/routes/transfers/${ROUTE_TRANSFER_ID}" \
+  --header "tempo-api-key: ${TEMPO_API_KEY}"
+```
+
+The swap is done when `status` is `completed`.
+
+:::::
+
+## Add accounts to the list
+
+The list's admin account adds `FX_ACCOUNT` before its first swap. Set `LIST_ADMIN` to the admin account's address. The key also needs `propamm:write`.
+
+:::::steps
+
+### Prepare the change
+
+```bash
+jq -n \
+  --arg sender "$LIST_ADMIN" \
+  --arg account "$FX_ACCOUNT" \
+  --arg sourceToken "$SOURCE_TOKEN" \
+  --arg destinationToken "$DESTINATION_TOKEN" \
+  '{sender: $sender, action: {type: "setMembers", tokens: [$sourceToken, $destinationToken], accounts: [$account], allowed: true}}' \
+  > fx-access.json
+
+curl --fail-with-body \
+  "https://api.tempo.xyz/v1/prop-amms/${POOL_ADDRESS}/access/prepare" \
+  --header "tempo-api-key: ${TEMPO_API_KEY}" \
+  --header 'Content-Type: application/json' \
+  --data @fx-access.json \
+  --output fx-access-change.json
+
+jq '{effect, transaction}' fx-access-change.json
+```
+
+The output states the change and the unsigned transaction. The change applies to your organization's saved list.
+
+### Sign and send the transaction
+
+Send `transaction.data` to `transaction.to` from `LIST_ADMIN`. The API doesn't sign or send it. Run the account check again after the transaction confirms.
+
+:::::
