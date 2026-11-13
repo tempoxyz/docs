@@ -200,6 +200,10 @@ export function isTempoHost(hostname: string) {
 }
 
 function allowedUrl(value: string) {
+  // Check the host as written: URL parsing accepts punctuation and non-ASCII dots in hosts,
+  // such as https://evil.example,.tempo.xyz, where a chat client would link only evil.example.
+  const rawHost = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]*)/i.exec(value)?.[1]
+  if (rawHost === undefined || !/^[a-z0-9-]+(\.[a-z0-9-]+)*$/i.test(rawHost)) return undefined
   try {
     const url = new URL(value)
     if (url.protocol !== 'https:' || !isTempoHost(url.hostname)) return undefined
@@ -227,7 +231,6 @@ function cleanUrl(value: string | undefined) {
   return url.toString()
 }
 
-/** The path of any http(s) URL, so feedback from preview hosts still names its page. */
 /** The Tempo docs URL for a page path from another host, such as a preview deployment. */
 function tempoUrlFromPath(pathname: string | undefined) {
   if (!pathname) return undefined
@@ -236,6 +239,7 @@ function tempoUrlFromPath(pathname: string | undefined) {
   return cleanUrl(new URL(full, 'https://tempo.xyz').toString())
 }
 
+/** The path of any http(s) URL, so feedback from preview hosts still names its page. */
 function rawPathFromUrl(value: string | undefined) {
   const cleaned = cleanText(value, maxUrlLength)
   if (!cleaned) return undefined

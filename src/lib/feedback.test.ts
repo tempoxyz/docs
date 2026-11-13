@@ -171,6 +171,19 @@ describe('feedback links', () => {
     )
   })
 
+  it('defangs links whose written host only looks like a Tempo host', () => {
+    expect(defangLinks('log in at https://evil.example,.tempo.xyz/login')).toBe(
+      'log in at hxxps[://]evil[.]example,[.]tempo[.]xyz/login',
+    )
+    expect(defangLinks('https://evil.example\u3002tempo.xyz/x')).toBe(
+      'hxxps[://]evil[.]example\u3002tempo[.]xyz/x',
+    )
+    expect(
+      normalizeFeedback({ helpful: false, pageUrl: 'https://evil.example).tempo.xyz/docs' })
+        .pageUrl,
+    ).toBe('https://tempo.xyz/developers/docs')
+  })
+
   it('defangs hostnames without a scheme', () => {
     expect(
       defangLinks(
