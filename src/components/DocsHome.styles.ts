@@ -7,7 +7,7 @@ import { vars as tokens } from '../styles/theme'
 // radius 12 and padding 20, 16 apart: title 16 medium, description 14/20 secondary.
 export const tempoDocsHome = style({
   color: tokens.color.foreground,
-  fontFamily: tokens.fontFamily.book,
+  fontFamily: tokens.fontFamily.ui,
   selectors: {
     '& span[id]': {
       display: 'block',
@@ -121,7 +121,7 @@ export const tempoDocsHome = style({
         padding: 0,
 
         color: tokens.color.foreground,
-        fontFamily: tokens.fontFamily.book,
+        fontFamily: tokens.fontFamily.ui,
         fontSize: tokens.fontSize.body,
         fontWeight: tokens.fontWeight.medium,
         letterSpacing: tokens.letterSpacing.normal,

@@ -2068,7 +2068,7 @@ const referenceLink = style({
 })
 const copiedNote = style({
   marginInlineStart: tokens.spacing['2'],
-  fontFamily: tokens.fontFamily.book,
+  fontFamily: tokens.fontFamily.ui,
   color: tokens.color.gray10,
 })
 const quoteSummary = style({

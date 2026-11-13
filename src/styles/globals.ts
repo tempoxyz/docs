@@ -381,7 +381,7 @@ global({
   '@layer utilities': {
     '[data-v-sidebar-container] [data-v-sidebar]': {
       gap: tokens.spacing['6'],
-      fontFamily: tokens.fontFamily.system,
+      fontFamily: tokens.fontFamily.ui,
     },
   },
 })
@@ -987,6 +987,18 @@ global({
   body: {
     userSelect: 'text',
     fontFamily: tokens.fontFamily.book,
+  },
+})
+
+// Docs pages set copy in Inter, like DS Body: Vocs' prose, lists, tables and callouts, and
+// everything that inherits the body font. Titles keep Pilat (--tempo-font-display), code the
+// mono. Scoped to the docs shell, so the marketing pages keep Pilat.
+global({
+  ':root:has(.docs-site-header)': {
+    '--vocs-font-family': tokens.fontFamily.ui,
+  },
+  'body:has(.docs-site-header)': {
+    fontFamily: tokens.fontFamily.ui,
   },
 })
 

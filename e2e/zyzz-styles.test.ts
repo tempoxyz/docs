@@ -47,7 +47,8 @@ for (const width of [390, 1440]) {
             .poll(() =>
               page.locator('body').evaluate((body) => {
                 const style = getComputedStyle(body)
-                return { font: style.fontFamily.includes('Pilat'), margin: style.margin }
+                // Docs pages set copy in Inter (DS Body); titles keep Pilat.
+                return { font: style.fontFamily.includes('Inter'), margin: style.margin }
               }),
             )
             .toEqual({ font: true, margin: '0px' })

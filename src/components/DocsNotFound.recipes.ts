@@ -10,10 +10,11 @@ export const page = style({
   width: '100%',
   maxWidth: '720px',
   marginInline: 'auto !custom',
-  fontFamily: tokens.fontFamily.book,
+  fontFamily: tokens.fontFamily.ui,
 })
 
 export const title = style({
+  fontFamily: tokens.fontFamily.book,
   fontSize: tokens.fontSize.heading,
   fontWeight: tokens.fontWeight.normal,
   lineHeight: tokens.lineHeight.heading,

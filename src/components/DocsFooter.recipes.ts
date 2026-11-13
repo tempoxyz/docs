@@ -9,7 +9,7 @@ export const root = style({
   borderTopStyle: 'solid',
   borderTopColor: tokens.color.hairline,
   backgroundColor: tokens.color.background,
-  fontFamily: tokens.fontFamily.book,
+  fontFamily: tokens.fontFamily.ui,
   letterSpacing: tokens.letterSpacing.normal,
   color: tokens.color.muted,
   '@media (width >= 768px)': {
