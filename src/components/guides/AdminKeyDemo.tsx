@@ -174,7 +174,7 @@ export function AdminKeyDemo() {
   return (
     <Container
       headerLeft={<span {...ui.adminKeyDemoText()}>Try admin keys</span>}
-      headerRight={<span {...ui.adminKeyDemoText2()}>Moderato testnet</span>}
+      headerRight={<span {...ui.adminKeyDemoText2()}>Testnet</span>}
       footer="Uses a separate test account. The generated admin key is discarded; its public ID stays in this browser so you can revoke it."
     >
       <div {...ui.adminKeyDemoLayout()} data-testid="admin-key-demo" aria-busy={pending !== null}>

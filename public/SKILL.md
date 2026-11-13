@@ -58,7 +58,7 @@ For MPP behavior, cross-check [MPP documentation](https://mpp.dev/llms.txt). For
 ## Keep answers grounded
 
 - Check network, availability, authentication, supported operations, and response shapes on the relevant page. A product plan or earlier sandbox example is not evidence of current availability.
-- Tempo Mainnet uses chain ID `4217`. Moderato is Tempo Testnet, with chain ID `42431`. Read RPC and explorer URLs from [Network details](https://tempo.xyz/developers/docs/quickstart/connection-details.md). Use Mainnet for production examples and Testnet only when the reader asks or the workflow requires it; when the network is unclear, name the one you chose.
+- Tempo Mainnet uses chain ID `4217`. Tempo Testnet uses chain ID `42431`. Read RPC and explorer URLs from [Network details](https://tempo.xyz/developers/docs/quickstart/connection-details.md). Use Mainnet for production examples and Testnet only when the reader asks or the workflow requires it; when the network is unclear, name the one you chose.
 - `pathUSD` is live on Tempo Mainnet. Faucet-issued `pathUSD` on Tempo Testnet shares its address but is testnet money; do not confuse it with a mainnet balance or asset.
 - An API key authenticates API requests. Account signing keys and access keys authorize onchain transactions. They are not interchangeable.
 - Keep access-key expiry, spending limits, and call scopes as narrow as the task allows. Access keys cannot sign a top-level contract creation.

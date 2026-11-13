@@ -1,13 +1,13 @@
 ---
 title: "Earn testnet example"
 seoTitle: "Earn testnet example | Tempo Docs"
-description: "Run a complete pathUSD deposit, position read, and redemption against a verified Earn vault on Moderato."
+description: "Run a complete pathUSD deposit, position read, and redemption against a verified Earn vault on testnet."
 ogImage: /og/2026-q4/og_2026-q4_docs_earn-example_title-f5_v02.png
 ---
 
 # Earn testnet example
 
-Use CLI, Viem, or Wagmi to deposit 1 pathUSD into a verified Moderato vault, read the position, and redeem the shares. For the short [Deposit](/docs/earn/integrate) and [Withdraw](/docs/earn/withdraw) snippets, start with your tool’s setup below. All examples use testnet assets and a six-decimal pathUSD vault.
+Use CLI, Viem, or Wagmi to deposit 1 pathUSD into a verified testnet vault, read the position, and redeem the shares. For the short [Deposit](/docs/earn/integrate) and [Withdraw](/docs/earn/withdraw) snippets, start with your tool’s setup below. All examples use testnet assets and a six-decimal pathUSD vault.
 
 ## Set up the CLI
 
@@ -77,7 +77,7 @@ pnpm add viem
 pnpm add -D tsx
 ```
 
-Save the following as `earn.ts`. The vault accepts six-decimal pathUSD on Moderato (`42431`). The script checks its deployed asset and engine, approves only the deposit amount, and simulates before signing with a 0.5% output bound. The deposit and redemption actions each include their required approval.
+Save the following as `earn.ts`. The vault accepts six-decimal pathUSD on testnet (`42431`). The script checks its deployed asset and engine, approves only the deposit amount, and simulates before signing with a 0.5% output bound. The deposit and redemption actions each include their required approval.
 
 ```ts [earn.ts]
 import { generatePrivateKey } from 'viem/accounts'
@@ -151,7 +151,7 @@ const shareToken = '0x20c0000000000000000000006ac30cbdea0747fa'
 const assetAmount = 1_000_000n
 ```
 
-Pass the connected `address` and the shares to redeem into this hook. Mount its component only on Moderato, and remount it when the account changes (for example, with `key={address}`). This resets account-specific approval and quote state.
+Pass the connected `address` and the shares to redeem into this hook. Mount its component only on testnet, and remount it when the account changes (for example, with `key={address}`). This resets account-specific approval and quote state.
 
 ```tsx [Earn.tsx]
 export function useEarn(address: Address, shareAmount: bigint) {

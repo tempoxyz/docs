@@ -36,7 +36,7 @@ Because the key fixes the address, you can't replace the root key: a new key is 
 
 The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. The example sends 10 test stablecoins from the account to `RECIPIENT`. Set `ROOT_KEY` to the account's private key. Its `client.ts` is a Viem client for the Tempo Accounts devnet, whose RPC needs the `TEMPO_DEVNET_RPC_KEY` from [Connect to the devnet](/docs/accounts/create#connect-to-the-devnet).
 
-On mainnet or Moderato, Tempo's testnet, which need no RPC key, use `createClient({ chain: tempo })` or `createClient({ chain: tempoModerato })` instead, with the chain from `viem/chains`, and pay network fees in that network's stablecoins, since Tempo has no native gas token. [Network details](/docs/quickstart/connection-details) lists both networks.
+On mainnet or testnet, which need no RPC key, use `createClient({ chain: tempo })` or `createClient({ chain: tempoModerato })` instead, with the chain from `viem/chains`, and pay network fees in that network's stablecoins, since Tempo has no native gas token. [Network details](/docs/quickstart/connection-details) lists both networks.
 
 ::::code-group
 

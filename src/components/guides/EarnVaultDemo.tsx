@@ -127,7 +127,7 @@ export function EarnVaultDemo() {
                 onChange={(event) => changeNetwork(event.target.value as EarnNetwork)}
                 className={inputClass}
               >
-                <option value="testnet">Moderato testnet</option>
+                <option value="testnet">Tempo testnet</option>
                 <option value="mainnet">Tempo mainnet</option>
               </select>
               {vault && (
@@ -189,7 +189,7 @@ export function EarnVaultDemo() {
                       <span {...ui.earnVaultDemoText4()}>{vault.id}</span>
                     </Field>
                     <Field label="Network">
-                      {network === 'mainnet' ? 'Tempo mainnet' : 'Moderato testnet'}
+                      {network === 'mainnet' ? 'Tempo mainnet' : 'Tempo testnet'}
                     </Field>
                   </dl>
                   <div {...ui.earnVaultDemoLayout6()}>

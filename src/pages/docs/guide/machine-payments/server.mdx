@@ -184,7 +184,7 @@ npx mppx https://your-server.example/resource
 Use `curl -i https://your-server.example/resource` to inspect the `402` Challenge without paying. Run `npx mppx validate https://your-server.example` for an end-to-end server check.
 :::
 
-To test on Moderato, add `testnet: true` to the server's `tempo({ ... })` configuration. The OUSD address above exists on both networks; `testnet: true` selects chain `42431`. Fund the payer with [testnet OUSD](/docs/quickstart/faucet), and connect the client to the same network. For a browser client, select `tempoModerato` instead of `tempoMainnet` in the [Wagmi example](/docs/guide/machine-payments/client#use-mpp-with-wagmi).
+To use testnet, add `testnet: true` to the server's `tempo({ ... })` configuration. The OUSD address above exists on both networks; `testnet: true` selects chain `42431`. Fund the payer with [testnet OUSD](/docs/quickstart/faucet), and connect the client to the same network. For a browser client, select `tempoModerato` instead of `tempoMainnet` in the [Wagmi example](/docs/guide/machine-payments/client#use-mpp-with-wagmi).
 
 ## Next steps for MPP servers
 

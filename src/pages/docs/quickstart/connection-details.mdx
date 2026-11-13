@@ -1,7 +1,7 @@
 ---
 title: Network details
 seoTitle: Tempo Network Details | Tempo Docs
-description: Connect to Tempo mainnet or Moderato testnet with RPC endpoints, chain IDs, explorers, and browser wallets.
+description: Connect to Tempo mainnet or testnet with RPC endpoints, chain IDs, explorers, and browser wallets.
 mipd: true
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_quickstart-connection-details_title-f5_v02.png
@@ -13,7 +13,7 @@ import { ConnectWallet } from '../../../components/ConnectWallet.tsx'
 
 # Network details
 
-Use Tempo Mainnet for production and Moderato testnet for development. Both support EVM tools and SDKs; each has its own RPC endpoint, chain ID, assets, and transaction history.
+Use Tempo Mainnet for production and testnet for development. Both support EVM tools and SDKs; each has its own RPC endpoint, chain ID, assets, and transaction history.
 
 <span id="direct-connection-details" />
 
@@ -36,7 +36,7 @@ For hosted endpoints, compare [RPC providers](/docs/partners/rpc-and-nodes). Use
 
 | Property | Value |
 | --- | --- |
-| Network | Tempo Testnet (Moderato) |
+| Network | Tempo Testnet |
 | Chain ID | `42431` |
 | Currency symbol | `USD` |
 | HTTP RPC | `https://rpc.moderato.tempo.xyz` |
@@ -49,7 +49,7 @@ Use the [faucet](/docs/quickstart/faucet) to get test stablecoins. Testnet funds
 
 ## RPC endpoints and explorers
 
-Read the current block number to check the connection. These examples use Moderato; use `https://rpc.tempo.xyz` (or omit `testnet: true` in Viem) for mainnet. Use the [Network example setup](/docs/network/examples) for the SDK dependencies and Wagmi `config`.
+Read the current block number to check the connection. These examples use testnet; use `https://rpc.tempo.xyz` (or omit `testnet: true` in Viem) for mainnet. Use the [Network example setup](/docs/network/examples) for the SDK dependencies and Wagmi `config`.
 
 ::::code-group
 

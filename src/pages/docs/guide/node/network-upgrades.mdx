@@ -52,7 +52,7 @@ After an identity rotation, this section and the release table below list the ne
 | [tempo/v1.17.0](https://github.com/tempoxyz/tempo/releases/tag/tempo%2Fv1.17.0) | Oct 26, 2026 | Testnet + Mainnet | Required for [T13](/docs/protocol/upgrades/t13). T13 is active on testnet and mainnet: Nitro-backed Zone settlement verification, multi-block Tempo imports for Zones, explicit block system calls, and the OUSD fee-token fallback. From this release, node release tags use the `tempo/vX.Y.Z` format instead of `vX.Y.Z`. | <Badge variant="red">Required</Badge> |
 | [v1.16.1](https://github.com/tempoxyz/tempo/releases/tag/v1.16.1) | Oct 14, 2026 | Mainnet | Updates the built-in mainnet network identity from epoch 2042. Recommended for mainnet RPC nodes. See [network identity rotation](/docs/guide/node/consensus-and-dkg#network-identity-rotation). | <Badge variant="yellow">Recommended</Badge> |
 | [v1.16.0](https://github.com/tempoxyz/tempo/releases/tag/v1.16.0) | Oct 6, 2026 | Testnet + Mainnet | Required for [T12](/docs/protocol/upgrades/t12). Adds configurable expiring nonces, MPP sessions for closed-loop stablecoins, relaxed ABI validation, accurate DEX quotes, and authorized TIP-20 burns. T12 is active on testnet and mainnet. See [integration impact](/docs/protocol/upgrades/t12#integration-impact). | <Badge variant="red">Required</Badge> |
-| [v1.15.1](https://github.com/tempoxyz/tempo/releases/tag/v1.15.1) | Oct 1, 2026 | Testnet | Updates the built-in Moderato network identity from epoch 1747. Recommended for testnet RPC nodes. See [network identity rotation](/docs/guide/node/consensus-and-dkg#network-identity-rotation). | <Badge variant="yellow">Recommended</Badge> |
+| [v1.15.1](https://github.com/tempoxyz/tempo/releases/tag/v1.15.1) | Oct 1, 2026 | Testnet | Updates the built-in testnet network identity from epoch 1747. Recommended for testnet RPC nodes. See [network identity rotation](/docs/guide/node/consensus-and-dkg#network-identity-rotation). | <Badge variant="yellow">Recommended</Badge> |
 | [v1.15.0](https://github.com/tempoxyz/tempo/releases/tag/v1.15.0) | Sep 24, 2026 | Testnet + Mainnet | Maintenance release with Commonware v2026.9.0, validator startup checks for network identity and DKG state, and performance improvements. Adds optional P2P sync via `--consensus.devp2p.finalizations`, disabled by default. Medium priority for validators and RPC nodes. | <Badge variant="yellow">Recommended</Badge> |
 | [v1.14.0](https://github.com/tempoxyz/tempo/releases/tag/v1.14.0) | Sep 7, 2026 | Testnet + Mainnet | Required for [T11](/docs/protocol/upgrades/t11). Extends expiring-nonce validity and changes precompile pricing and ABI validation. | <Badge variant="red">Required</Badge> |
 | [v1.13.2](https://github.com/tempoxyz/tempo/releases/tag/v1.13.2) | Aug 27, 2026 | Testnet + Mainnet | Snapshot download and consensus startup fixes. Superseded by v1.14.0 for T11. | <Badge variant="gray">Superseded</Badge> |
@@ -67,17 +67,17 @@ After an identity rotation, this section and the release table below list the ne
 | [v1.8.2](https://github.com/tempoxyz/tempo/releases/tag/v1.8.2) | Jun 8, 2026 | Testnet + Mainnet | High-priority patch release that fixes a `--minimal` node issue when requesting historical blocks through the commonware marshal interface. | <Badge variant="yellow">Recommended</Badge> |
 | [v1.8.1](https://github.com/tempoxyz/tempo/releases/tag/v1.8.1) | Jun 1, 2026 | Testnet + Mainnet | Required for T5; reverts builder prewarming and execution cache sharing defaults from v1.8.0 to avoid stale-state validation errors while retaining T5 compatibility. | <Badge variant="red">Required</Badge> |
 | [v1.8.0](https://github.com/tempoxyz/tempo/releases/tag/v1.8.0) | May 28, 2026 | Testnet + Mainnet | Required for T5; introduces the enshrined TIP-20 reserve channel precompile, payment lane classification, DEX flip-order improvements, multihop FeeAMM routing, optional on-chain TIP-20 `logoURI`, implicit approvals, and key authorization witnesses. Operators should use v1.8.2 for the latest patch fixes. | <Badge variant="red">Required</Badge> |
-| [v1.7.1](https://github.com/tempoxyz/tempo/releases/tag/v1.7.1) | May 21, 2026 | Moderato + Mainnet | Adds validator migration support for minimal snapshots, trustless RPC certificate checks on Moderato, and automatic pruning for finalized consensus blocks. | <Badge variant="yellow">Recommended</Badge> |
-| [v1.7.0](https://github.com/tempoxyz/tempo/releases/tag/v1.7.0) | Mon, May 11, 2026 | Moderato + Mainnet | Required for T4; embeds consensus context into block headers to unlock deferred verification and bundles T4 bug fixes and security hardening. | <Badge variant="red">Required</Badge> |
-| [v1.6.0](https://github.com/tempoxyz/tempo/releases/tag/v1.6.0) | Apr 16, 2026 | Moderato + Mainnet | Required for T3; implements enhanced access key permissions with periodic limits and call scoping, signature verification, and virtual addresses for TIP-20 deposit forwarding. | <Badge variant="red">Required</Badge> |
-| [v1.5.3](https://github.com/tempoxyz/tempo/releases/tag/v1.5.3) | Apr 9, 2026 | Moderato + Mainnet | Patch release that restores OTLP HTTPS telemetry and fixes an epoch-transition consensus race that could incorrectly block straggling peers. Validators that skipped v1.5.2 should upgrade directly to this release. | <Badge variant="yellow">Recommended</Badge> |
-| [v1.5.2](https://github.com/tempoxyz/tempo/releases/tag/v1.5.2) | Apr 8, 2026 | Moderato + Mainnet | Maintenance release with the latest reth update, payload builder and RPC improvements, plus transaction validation and mempool hardening. | <Badge variant="yellow">Recommended</Badge> |
-| [v1.5.1](https://github.com/tempoxyz/tempo/releases/tag/v1.5.1) | Mar 29, 2026 | Moderato + Mainnet | Security patch for RPC endpoints that accept `stateOverride`, including `eth_call` and `debug_traceCall`. This release is required for RPC providers and other public RPC nodes, and low priority for validators. | <Badge variant="amber">RPC only</Badge> |
-| [v1.5.0](https://github.com/tempoxyz/tempo/releases/tag/v1.5.0) | Mar 26, 2026 | Moderato + Mainnet | Required for T2; implements compound transfer policies, permit support for TIP-20, Validator Config V2, and 14 audit-driven bug fixes. | <Badge variant="red">Required</Badge> |
-| [v1.4.3](https://github.com/tempoxyz/tempo/releases/tag/v1.4.3) | Mar 18, 2026 | Moderato + Mainnet | Fixes gas price oracle poisoning that caused inflated fee estimates for wallet transactions | <Badge variant="yellow">Recommended</Badge> |
-| [v1.4.2](https://github.com/tempoxyz/tempo/releases/tag/v1.4.2) | Mar 16, 2026 | Moderato + Mainnet | Strict payment calldata validation in the transaction pool and block builder, rejecting malformed payment transactions earlier | <Badge variant="yellow">Recommended</Badge> |
-| [v1.4.1](https://github.com/tempoxyz/tempo/releases/tag/v1.4.1) | Mar 12, 2026 | Moderato + Mainnet | Transaction pool DoS-hardening, consensus resilience improvements (DKG recovery), hardfork-aware gas estimation, and payload builder enhancements | <Badge variant="yellow">Recommended</Badge> |
-| [v1.4.0](https://github.com/tempoxyz/tempo/releases/tag/v1.4.0) | Mar 5, 2026 | Moderato + Mainnet | Required for T1C; introduces keychain signature migration so only V2 signatures and hashes are accepted after activation | <Badge variant="red">Required</Badge> |
+| [v1.7.1](https://github.com/tempoxyz/tempo/releases/tag/v1.7.1) | May 21, 2026 | Testnet + Mainnet | Adds validator migration support for minimal snapshots, trustless RPC certificate checks on testnet, and automatic pruning for finalized consensus blocks. | <Badge variant="yellow">Recommended</Badge> |
+| [v1.7.0](https://github.com/tempoxyz/tempo/releases/tag/v1.7.0) | Mon, May 11, 2026 | Testnet + Mainnet | Required for T4; embeds consensus context into block headers to unlock deferred verification and bundles T4 bug fixes and security hardening. | <Badge variant="red">Required</Badge> |
+| [v1.6.0](https://github.com/tempoxyz/tempo/releases/tag/v1.6.0) | Apr 16, 2026 | Testnet + Mainnet | Required for T3; implements enhanced access key permissions with periodic limits and call scoping, signature verification, and virtual addresses for TIP-20 deposit forwarding. | <Badge variant="red">Required</Badge> |
+| [v1.5.3](https://github.com/tempoxyz/tempo/releases/tag/v1.5.3) | Apr 9, 2026 | Testnet + Mainnet | Patch release that restores OTLP HTTPS telemetry and fixes an epoch-transition consensus race that could incorrectly block straggling peers. Validators that skipped v1.5.2 should upgrade directly to this release. | <Badge variant="yellow">Recommended</Badge> |
+| [v1.5.2](https://github.com/tempoxyz/tempo/releases/tag/v1.5.2) | Apr 8, 2026 | Testnet + Mainnet | Maintenance release with the latest reth update, payload builder and RPC improvements, plus transaction validation and mempool hardening. | <Badge variant="yellow">Recommended</Badge> |
+| [v1.5.1](https://github.com/tempoxyz/tempo/releases/tag/v1.5.1) | Mar 29, 2026 | Testnet + Mainnet | Security patch for RPC endpoints that accept `stateOverride`, including `eth_call` and `debug_traceCall`. This release is required for RPC providers and other public RPC nodes, and low priority for validators. | <Badge variant="amber">RPC only</Badge> |
+| [v1.5.0](https://github.com/tempoxyz/tempo/releases/tag/v1.5.0) | Mar 26, 2026 | Testnet + Mainnet | Required for T2; implements compound transfer policies, permit support for TIP-20, Validator Config V2, and 14 audit-driven bug fixes. | <Badge variant="red">Required</Badge> |
+| [v1.4.3](https://github.com/tempoxyz/tempo/releases/tag/v1.4.3) | Mar 18, 2026 | Testnet + Mainnet | Fixes gas price oracle poisoning that caused inflated fee estimates for wallet transactions | <Badge variant="yellow">Recommended</Badge> |
+| [v1.4.2](https://github.com/tempoxyz/tempo/releases/tag/v1.4.2) | Mar 16, 2026 | Testnet + Mainnet | Strict payment calldata validation in the transaction pool and block builder, rejecting malformed payment transactions earlier | <Badge variant="yellow">Recommended</Badge> |
+| [v1.4.1](https://github.com/tempoxyz/tempo/releases/tag/v1.4.1) | Mar 12, 2026 | Testnet + Mainnet | Transaction pool DoS-hardening, consensus resilience improvements (DKG recovery), hardfork-aware gas estimation, and payload builder enhancements | <Badge variant="yellow">Recommended</Badge> |
+| [v1.4.0](https://github.com/tempoxyz/tempo/releases/tag/v1.4.0) | Mar 5, 2026 | Testnet + Mainnet | Required for T1C; introduces keychain signature migration so only V2 signatures and hashes are accepted after activation | <Badge variant="red">Required</Badge> |
 | [v1.3.1](https://github.com/tempoxyz/tempo/releases/tag/v1.3.1) | Feb 22, 2026 | Testnet + Mainnet | Fixes high-load issues and finalizes T1A/T1B hardening for expiring nonce replay protection and keychain precompile gas handling | <Badge variant="red">Required</Badge> |
 | [v1.2.0](https://github.com/tempoxyz/tempo/releases/tag/v1.2.0) | Feb 13, 2026 | Mainnet only | Fixes validation bug rejecting transactions with gas limits above ~16.7M, blocking large contract deployments | <Badge variant="red">Required</Badge> |
 
@@ -241,8 +241,8 @@ Integrators, indexers, wallets, explorers, and SDK maintainers should review the
 | **TIPs** | [Consensus context in block headers](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1031.md), [T4 network upgrade](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1046.md) |
 | **Details** | [T4 network upgrade](/docs/protocol/upgrades/t4) |
 | **Release** | [v1.7.0](https://github.com/tempoxyz/tempo/releases/tag/v1.7.0) |
-| **Testnet** | Moderato: May 14, 2026 16:00 CEST (unix: 1778767200) |
-| **Mainnet** | Presto: May 18, 2026 16:00 CEST (unix: 1779112800) |
+| **Testnet** | May 14, 2026 16:00 CEST (unix: 1778767200) |
+| **Mainnet** | May 18, 2026 16:00 CEST (unix: 1779112800) |
 | **Priority** | <Badge variant="red">Required</Badge> |
 
 ### Who is affected?
@@ -261,8 +261,8 @@ Smart contract developers and integrators are not directly affected by consensus
 | **TIPs** | [Enhanced access key permissions](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1011.md), [Signature verification](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md), [Virtual addresses](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1022.md) |
 | **Details** | [T3 network upgrade](/docs/protocol/upgrades/t3) |
 | **Release** | [v1.6.0](https://github.com/tempoxyz/tempo/releases/tag/v1.6.0) |
-| **Testnet** | Moderato: Apr 21, 2026 16:00 CEST (unix: 1776780000) |
-| **Mainnet** | Presto: Apr 27, 2026 16:00 CEST (unix: 1777298400) |
+| **Testnet** | Apr 21, 2026 16:00 CEST (unix: 1776780000) |
+| **Mainnet** | Apr 27, 2026 16:00 CEST (unix: 1777298400) |
 | **Priority** | <Badge variant="red">Required</Badge> |
 
 See the [T3 network upgrade](/docs/protocol/upgrades/t3) page for breaking changes, migration checklist, and integration guidance.
@@ -276,7 +276,7 @@ See the [T3 network upgrade](/docs/protocol/upgrades/t3) page for breaking chang
 | **Scope** | Compound transfer policies, ValidatorConfig V2, and audit-driven bug fixes |
 | **TIPs** | [Compound transfer policies](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1015.md), [Permit](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1004.md), [Validator Config V2](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1017.md), [T2 network upgrade](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1036.md) |
 | **Release** | v1.5.0 |
-| **Testnet** | Moderato: Mar 26, 2026 16:00 CET (unix: 1774537200) |
+| **Testnet** | Mar 26, 2026 16:00 CET (unix: 1774537200) |
 | **Mainnet** | Mar 31, 2026 16:00 CEST (unix: 1774965600) |
 | **Priority** | <Badge variant="red">Required</Badge> |
 
@@ -288,7 +288,7 @@ See the [T3 network upgrade](/docs/protocol/upgrades/t3) page for breaking chang
 |---|---|
 | **Scope** | Security hardening, includes breaking change on keychain signatures |
 | **Release** | [v1.4.0](https://github.com/tempoxyz/tempo/releases/tag/v1.4.0) |
-| **Testnet** | Moderato: Mar 9, 2026 15:00 UTC (unix: 1773068400) |
+| **Testnet** | Mar 9, 2026 15:00 UTC (unix: 1773068400) |
 | **Mainnet** | Mar 12, 2026 15:00 UTC (unix: 1773327600) |
 | **Priority** | <Badge variant="red">Required</Badge> |
 
