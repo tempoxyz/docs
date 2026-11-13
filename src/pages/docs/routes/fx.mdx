@@ -45,7 +45,7 @@ Before you start, have:
 - The route's pool address. Tempo provides it when it enables your access.
 - A signer for a listed account that holds the source stablecoin and a fee token.
 
-The [FX swap example](/docs/routes/examples/fx) runs every step from a terminal.
+Every step also runs from a terminal with curl and jq, as the [FX swap example](/docs/routes/examples/fx) shows.
 
 ## Swap one stablecoin for another
 
@@ -70,7 +70,11 @@ Without a saved list, the request returns `400` with code `propamm_invalid`. If 
 
 Send the account as both `sender` and `recipient`. Amounts are in base units. Routes quotes under your organization's list, so the request names no pool or list.
 
-<OpenApi.Playground operationId="quoteRoutesTransfer" anchors={false} />
+<OpenApi.Playground
+  operationId="quoteRoutesTransfer"
+  query="sourceChain=tempo&sourceToken=0x20c0000000000000000000006a37da5c996874be&destinationChain=tempo&destinationToken=0x20c0000000000000000000001621e21f71cf12fb&sender=0x2222222222222222222222222222222222222222&recipient=0x2222222222222222222222222222222222222222&amount=1000000&mode=exactSource"
+  anchors={false}
+/>
 
 Show the source amount, the destination amount, and `destinationAmountMin`. Create the transfer before `quote.expiresAt`.
 
@@ -78,7 +82,25 @@ Show the source amount, the destination amount, and `destinationAmountMin`. Crea
 
 Send the same inputs with an [idempotency key](/docs/routes/api-setup#set-idempotency-keys).
 
-<OpenApi.Playground operationId="createRoutesTransfer" anchors={false} />
+```bash [Terminal]
+curl 'https://api.tempo.xyz/v1/routes/transfers' \
+  --request POST \
+  --header "tempo-api-key: $TEMPO_API_KEY" \
+  --header 'idempotency-key: <IDEMPOTENCY_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "sourceChain": "tempo",
+    "sourceToken": "0x20c0000000000000000000006a37da5c996874be",
+    "destinationChain": "tempo",
+    "destinationToken": "0x20c0000000000000000000001621e21f71cf12fb",
+    "sender": "<ACCOUNT_ADDRESS>",
+    "recipient": "<ACCOUNT_ADDRESS>",
+    "amount": "1000000",
+    "mode": "exactSource"
+  }'
+```
+
+This request swaps 1 OUSD for EURC.e from one account to itself.
 
 Save the transfer `id` and its `action`. For an exact-source swap, `action.calls` holds two calls. The first approves the source stablecoin. The second swaps it.
 
@@ -112,19 +134,21 @@ A list has one admin account. The admin adds or removes up to 50 accounts in one
 
 Send the list's admin account as `sender`. Name the pair by its two token addresses, in either order.
 
-```json
-{
-  "sender": "<LIST_ADMIN_ADDRESS>",
-  "action": {
-    "type": "setMembers",
-    "tokens": ["<SOURCE_TOKEN_ADDRESS>", "<DESTINATION_TOKEN_ADDRESS>"],
-    "accounts": ["<ACCOUNT_ADDRESS>"],
-    "allowed": true
-  }
-}
+```bash [Terminal]
+curl 'https://api.tempo.xyz/v1/prop-amms/<POOL_ADDRESS>/access/prepare' \
+  --request POST \
+  --header "tempo-api-key: $TEMPO_API_KEY" \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "sender": "<LIST_ADMIN_ADDRESS>",
+    "action": {
+      "type": "setMembers",
+      "tokens": ["<SOURCE_TOKEN_ADDRESS>", "<DESTINATION_TOKEN_ADDRESS>"],
+      "accounts": ["<ACCOUNT_ADDRESS>"],
+      "allowed": true
+    }
+  }'
 ```
-
-<OpenApi.Playground operationId="preparePropAmmAccess" anchors={false} />
 
 The API applies the change to your organization's saved list. It simulates the change and returns an unsigned `transaction`. `effect` names the resolved pair index and sponsor ID, such as `List 1 account(s) on pair 0 under sponsor 5.`
 
@@ -170,4 +194,4 @@ A refused quote returns `404` with code `quote_not_available`. Its `details` nam
 | `recipient` | The recipient differs from the sender. | Set `recipient` to the `sender` address. |
 | `amount` | The pool can't fill that size now. | Lower the amount or retry later. |
 
-Continue with [Track delivery](/docs/routes/delivery) for every transfer status.
+An FX transfer reports the same [transfer statuses](/docs/routes/delivery) as other Routes transfers, such as `action-required` when it needs attention.
