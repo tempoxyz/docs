@@ -2641,5 +2641,52 @@
       "source": "/v1/auth/:path(.*)",
       "destination": "https://console.tempo.xyz/v1/auth/:path"
     }
+  ],
+  "headers": [
+    {
+      "source": "/:prefix((?:developers/)?(?:assets/md/)?)index.md",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://tempo.xyz/developers>; rel=\"canonical\""
+        }
+      ]
+    },
+    {
+      "source": "/assets/md/:path((?!index\\.md$).+)\\.md",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://tempo.xyz/developers/:path>; rel=\"canonical\""
+        }
+      ]
+    },
+    {
+      "source": "/developers/assets/md/:path((?!index\\.md$).+)\\.md",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://tempo.xyz/developers/:path>; rel=\"canonical\""
+        }
+      ]
+    },
+    {
+      "source": "/developers/:path((?!assets/md/|index\\.md$|SKILL\\.md$).+)\\.md",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://tempo.xyz/developers/:path>; rel=\"canonical\""
+        }
+      ]
+    },
+    {
+      "source": "/:path((?!assets/md/|developers/|index\\.md$|SKILL\\.md$).+)\\.md",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://tempo.xyz/developers/:path>; rel=\"canonical\""
+        }
+      ]
+    }
   ]
 }

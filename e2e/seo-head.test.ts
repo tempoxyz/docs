@@ -43,7 +43,7 @@ const cases: {
 }[] = [
   {
     path: '/',
-    title: 'Tempo Developer Docs: APIs, SDKs &amp; Guides',
+    title: 'Developer Documentation: APIs, SDKs, and Guides | Tempo Docs',
     ogTitle: 'Documentation',
     descriptionIncludes: 'Build with Tempo Accounts, Earn, Routes, and Zones',
     ogImageIncludes: '/og/2026-q4/og_2026-q4_developers_developers_title-f5_v02.png',
@@ -72,14 +72,14 @@ const cases: {
   },
   {
     path: '/docs/api',
-    title: 'Tempo API: Sponsor Gas Fees and Route Stablecoins | Tempo Docs',
+    title: 'Tempo API: Sponsor Fees and Route Stablecoins | Tempo Docs',
     ogTitle: 'Tempo API',
     descriptionIncludes: 'gas with a hosted fee payer, and move stablecoins onto Tempo',
     ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_api_linework-000_v02.png',
   },
   {
     path: '/docs/api/console',
-    title: 'How to Use the Tempo Console | Docs',
+    title: 'How to Use the Tempo Console | Tempo Docs',
     ogTitle: 'Tempo Console',
     descriptionIncludes: 'create projects and API keys',
     ogImageIncludes: '/og/2026-q4/og_2026-q4_docs_api-console_title-f5_v02.png',

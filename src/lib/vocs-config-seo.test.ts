@@ -22,39 +22,39 @@ describe('vocs.config docs SEO controls', () => {
       titleFor(
         '/docs/guide/payments/send-a-payment',
         'How to send a stablecoin payment on Tempo',
-        'Send a Stablecoin Payment on Tempo | Docs',
+        'Send a Stablecoin Payment on Tempo | Tempo Docs',
       ),
-    ).toBe('Send a Stablecoin Payment on Tempo | Docs')
+    ).toBe('Send a Stablecoin Payment on Tempo | Tempo Docs')
     expect(titleFor('/', 'Build on Tempo', 'Tempo Developer Docs: APIs, SDKs & Guides')).toBe(
       'Tempo Developer Docs: APIs, SDKs & Guides',
     )
   })
 
   test('uses Tempo Docs title suffix for docs pages', () => {
-    expect(titleFor('/', 'Documentation')).toBe('Documentation ⋅ Tempo Docs')
+    expect(titleFor('/', 'Documentation')).toBe('Documentation | Tempo Docs')
     expect(titleFor('/docs/guide/payments/send-a-payment', 'Send a Payment')).toBe(
-      'Send a Payment ⋅ Tempo Docs',
+      'Send a Payment | Tempo Docs',
     )
-    expect(titleFor('/docs/api', 'Tempo API')).toBe('Tempo API ⋅ Tempo Docs')
+    expect(titleFor('/docs/api', 'Tempo API')).toBe('Tempo API | Tempo Docs')
     expect(titleFor('/docs/protocol/transactions', 'Tempo Transactions')).toBe(
-      'Tempo Transactions ⋅ Tempo Docs',
+      'Tempo Transactions | Tempo Docs',
     )
-    expect(titleFor('/get-started', 'Get Started')).toBe('Get Started ⋅ Tempo Docs')
-    expect(titleFor('/blog', 'Blog')).toBe('Blog ⋅ Tempo')
+    expect(titleFor('/get-started', 'Get Started')).toBe('Get Started | Tempo Docs')
+    expect(titleFor('/blog', 'Blog')).toBe('Blog | Tempo')
   })
 
   test('formats authored API titles when Vocs supplies routed metadata', () => {
     expect(titleFor('/docs/api/authentication', 'Authentication')).toBe(
-      'Authentication ⋅ Tempo Docs',
+      'Authentication | Tempo Docs',
     )
     expect(titleFor('/docs/api/json-rpc', 'Tempo JSON-RPC API: Endpoints & Methods')).toBe(
-      'Tempo JSON-RPC API: Endpoints & Methods ⋅ Tempo Docs',
+      'Tempo JSON-RPC API: Endpoints & Methods | Tempo Docs',
     )
     expect(
       titleFor('/docs/api/indexer-api', 'Tempo Indexer API: Query Blockchain Data with SQL'),
-    ).toBe('Tempo Indexer API: Query Blockchain Data with SQL ⋅ Tempo Docs')
+    ).toBe('Tempo Indexer API: Query Blockchain Data with SQL | Tempo Docs')
     expect(titleFor('/docs/api/fee-payer', 'Tempo Fee Payer API: Sponsor Transaction Fees')).toBe(
-      'Tempo Fee Payer API: Sponsor Transaction Fees ⋅ Tempo Docs',
+      'Tempo Fee Payer API: Sponsor Transaction Fees | Tempo Docs',
     )
   })
 

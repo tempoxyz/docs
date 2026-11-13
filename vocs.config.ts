@@ -215,10 +215,10 @@ export default defineConfig({
     const seoTitle =
       typeof frontmatter?.seoTitle === 'string' ? frontmatter.seoTitle.trim() : undefined
     if (seoTitle) return seoTitle
-    if (pagePath === '/' || /^\/get-started(?:\/|$)/.test(pagePath)) return '%s ⋅ Tempo Docs'
-    if (pagePath.startsWith('/docs/')) return '%s ⋅ Tempo Docs'
+    if (pagePath === '/' || /^\/get-started(?:\/|$)/.test(pagePath)) return '%s | Tempo Docs'
+    if (pagePath.startsWith('/docs/')) return '%s | Tempo Docs'
     if (title?.includes('Tempo')) return undefined
-    return '%s ⋅ Tempo'
+    return '%s | Tempo'
   },
   description: aiDocsDescription,
   renderStrategy: 'partial-static',
@@ -1209,7 +1209,7 @@ export default defineConfig({
                     text: 'Customer deposit addresses',
                     link: '/docs/guide/payments/virtual-addresses',
                   },
-                  { text: 'Payment references', link: '/docs/guide/payments/transfer-memos' },
+                  { text: 'Transfer memos', link: '/docs/guide/payments/transfer-memos' },
                   {
                     text: 'Verify payments',
                     link: '/docs/guide/payments/accept-a-payment/examples',

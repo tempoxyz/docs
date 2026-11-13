@@ -32,8 +32,13 @@ const migratedOpenApiTitleFiles = [
   'api/versioning-policy.mdx',
 ]
 
-const preservedJxomFiles = [
+// Vocs renders pages under the OpenAPI mount with its own layout, which uses
+// seoTitle or the bare title and skips the site title template. These
+// jxom-authored pages keep their title and H1, and set an seoTitle only so the
+// document title gets the docs suffix that seo-metadata.test.ts enforces.
+const openApiLayoutSeoTitleFiles = [
   'api/authentication.mdx',
+  'api/faq.mdx',
   'api/fee-payer.mdx',
   'api/indexer-api.mdx',
   'api/json-rpc.mdx',
@@ -95,7 +100,11 @@ describe('docs SEO metadata', () => {
       .map((file) => ({ file, source: fs.readFileSync(file, 'utf8') }))
       .filter(
         ({ file, source }) =>
-          /^seoTitle:/m.test(source) && path.relative(docsRoot, file) !== 'api/reference.mdx',
+          /^seoTitle:/m.test(source) &&
+          path.relative(docsRoot, file) !== 'api/reference.mdx' &&
+          !openApiLayoutSeoTitleFiles.includes(path.relative(docsRoot, file)) &&
+          // TIP pages keep the proposal's title and a numbered H1.
+          !path.relative(docsRoot, file).startsWith('protocol/tips/'),
       )
 
     expect(auditedPages.length).toBeGreaterThanOrEqual(115)
@@ -112,10 +121,10 @@ describe('docs SEO metadata', () => {
     }
   })
 
-  test('keeps jxom-authored API metadata outside the audit rewrite', () => {
-    for (const file of preservedJxomFiles) {
+  test('gives jxom-authored OpenAPI pages a suffixed SEO title', () => {
+    for (const file of openApiLayoutSeoTitleFiles) {
       const source = fs.readFileSync(path.join(docsRoot, file), 'utf8')
-      expect(frontmatterString(source, 'seoTitle'), file).toBeUndefined()
+      expect(frontmatterString(source, 'seoTitle'), file).toMatch(/ \| Tempo Docs$/)
     }
   })
 

@@ -80,7 +80,7 @@ for (const route of sampleBySection(publicRoutes)) {
 
 test('keeps one route title through docs and OpenAPI client navigation', async ({ page }) => {
   await page.goto('/docs/quickstart/integrate-tempo', { waitUntil: 'networkidle' })
-  await expectSingleTitle(page, 'Integrate Tempo with Apps, Wallets, and Services | Tempo Docs')
+  await expectSingleTitle(page, 'Integrate Tempo into Apps and Services | Tempo Docs')
 
   await page
     .getByRole('navigation', { name: 'Documentation sections', exact: true })
@@ -94,11 +94,11 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
     .getByRole('link', { name: 'API reference', exact: true })
     .click()
   await page.waitForURL(/\/docs\/api\/?$/)
-  await expectSingleTitle(page, 'Tempo API: Sponsor Gas Fees and Route Stablecoins | Tempo Docs')
+  await expectSingleTitle(page, 'Tempo API: Sponsor Fees and Route Stablecoins | Tempo Docs')
 
   await page.locator('a[href="/docs/api/transactions"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transactions\/?$/)
-  await expectSingleTitle(page, 'Tempo Transactions API Reference | Docs')
+  await expectSingleTitle(page, 'Tempo Transactions API Reference | Tempo Docs')
 
   await page.locator('a[href="/docs/api/transfers"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transfers\/?$/)

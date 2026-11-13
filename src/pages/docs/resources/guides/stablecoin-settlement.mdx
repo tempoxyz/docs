@@ -1,6 +1,6 @@
 ---
 title: "Evaluate stablecoin settlement"
-seoTitle: "Stablecoin Settlement: Finality, Fees, and Delivery | Tempo Docs"
+seoTitle: "Stablecoin Settlement: Finality, Fees, and Delivery | Tempo"
 description: "Compare stablecoin assets, finality signals, delivered transfers, actual fees, liquidity, and reconciliation before selecting a settlement rail."
 ---
 
@@ -76,7 +76,7 @@ The settlement layer doesn't decide who may approve a company payment, manage wa
 
 Tempo's [TIP-403 Policy Registry](/docs/protocol/tip403/overview) lets TIP-20 tokens share access-control policies. Identity checks, screening, and other obligations stay with the application and its providers.
 
-[Payment references](/docs/guide/payments/transfer-memos) connect transfers with business references. Keep the full invoice, customer details, and sensitive records offchain. Use a reference that your internal systems can resolve, and define who can access those records.
+[Transfer memos](/docs/guide/payments/transfer-memos) connect transfers with business references. Keep the full invoice, customer details, and sensitive records offchain. Use a reference that your internal systems can resolve, and define who can access those records.
 
 Record the network, transaction hash, and transfer log index as a unique event key. Connect it to the provider payment ID and invoice, and update the ledger once. Don't fulfill an order on a matching memo or a changed balance. See [payment reconciliation](/docs/resources/guides/payment-reconciliation) for the broader workflow.
 

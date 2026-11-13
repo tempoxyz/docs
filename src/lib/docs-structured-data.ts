@@ -86,9 +86,11 @@ export function docsStructuredDataHead(
     return { base: false, meta: ogImage }
   }
 
-  // The public mount has no trailing slash. Match its redirect policy and the
-  // URLs used by the docs graph instead of Vocs' default baseUrl + "/".
-  const canonical = pagePath === '/' ? { canonical: developersUrl } : {}
+  // Every docs page names its public URL explicitly, so preview and proxy hosts
+  // never become canonical. The public mount has no trailing slash: match its
+  // redirect policy and the sitemap instead of Vocs' default baseUrl + path.
+  const canonicalUrl = `${developersUrl}${pagePath === '/' ? '' : pagePath.replace(/\/+$/, '')}`
+  const canonical = { canonical: canonicalUrl }
   // Advertise the existing generated text without requiring hydration or a
   // reader to discover the page-tools menu. Use the canonical public mount.
   const markdownRoute = pagePath === '/' ? '/index' : pagePath.replace(/\/$/, '')
@@ -120,7 +122,7 @@ export function docsStructuredDataHead(
   const websiteId = 'https://tempo.xyz/#website'
   const entityDescription =
     'Tempo is a payments-first Layer 1 blockchain built for stablecoin payments, global payouts, agentic payments, and enterprise settlement.'
-  const url = `${developersUrl}${pagePath === '/' ? '' : pagePath}`
+  const url = canonicalUrl
   const description = frontmatter?.description?.trim()
   const breadcrumbId = `${url}#breadcrumb`
   const breadcrumbs = [

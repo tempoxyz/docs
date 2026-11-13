@@ -49,7 +49,19 @@ describe('docs structured data', () => {
     expect(docsStructuredDataHead('/', {})).toMatchObject({
       canonical: 'https://tempo.xyz/developers',
     })
-    expect(docsStructuredDataHead('/get-started', {})).not.toHaveProperty('canonical')
+  })
+
+  test.each([
+    ['/get-started', 'https://tempo.xyz/developers/get-started'],
+    ['/get-started/use-cases', 'https://tempo.xyz/developers/get-started/use-cases'],
+    ['/docs/accounts/access-keys', 'https://tempo.xyz/developers/docs/accounts/access-keys'],
+    ['/docs/api/activities', 'https://tempo.xyz/developers/docs/api/activities'],
+    ['/docs/guide/payments/', 'https://tempo.xyz/developers/docs/guide/payments'],
+    ['docs/partners', 'https://tempo.xyz/developers/docs/partners'],
+  ])('emits an explicit no-slash canonical for %s', (route, canonical) => {
+    expect(docsStructuredDataHead(route, {})?.canonical).toBe(canonical)
+    const schema = graph(route, { title: 'Page' })
+    expect(node(schema, 'TechArticle').url).toBe(canonical)
   })
 
   test('uses authored page metadata for TechArticle semantics', () => {
