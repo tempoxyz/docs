@@ -29,7 +29,6 @@ This spec introduces native protocol support for the following features, using T
 Current accounts are limited to secp256k1 signatures and sequential nonces, creating UX and scalability challenges.  
 Users cannot leverage modern authentication methods like passkeys, applications face throughput limitations due to sequential nonces. 
 
-
 ## Specification
 ### Transaction Type
 
@@ -215,7 +214,7 @@ Each authorization in the list:
 **Implementation Note:** Nonces are stored in the storage of a designated precompile at address `0x4E4F4E4345000000000000000000000000000000` (ASCII hex for "NONCE"), as there is currently no clean way to extend account state in Reth.
 
 **Storage Layout at 0x4E4F4E4345:**
-- Storage key: `keccak256(abi.encode(account_address, nonce_key))`
+- Storage slot: `keccak256(nonce_key || keccak256(account_address || 0))`, with each value left-padded to 32 bytes
 - Storage value: `nonce` (uint64)
 
 Note: Protocol Nonce key (0), is directly stored in the account state, just like normal transaction types.
@@ -507,7 +506,7 @@ The verifier splits the payload after the 37-byte authenticator data, parses `cl
 - At least one of User Presence (UP) or User Verification (UV) is set
 - Attested credential data (AT) and extension data (ED) flags are clear
 - `"type":"webauthn.get"` in clientDataJSON
-- Challenge matches tx_hash (Base64URL encoded)
+- Challenge matches the signed digest (unpadded Base64URL): the sender signing hash for a transaction signature, the Keychain V2 hash inside a Keychain signature, `key_authorization_digest` for a key authorization, or the authorization signing hash for an `aa_authorization_list` entry. It is never the transaction hash.
 - P256 signature validity
 
 #### What We Skip
@@ -569,11 +568,16 @@ account = Option<Address> (required when an admin access key signs the authoriza
 
 **Signed Format:**
 
-The signed format (`SignedKeyAuthorization`) includes all fields with the `signature` appended:
+The signed format (`SignedKeyAuthorization`) is a two-item list: the complete `KeyAuthorization` list, nested as one item, followed by the `signature`:
 
 ```
-signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?, signature])
+signed_key_authorization = rlp([
+    [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?],
+    signature
+])
 ```
+
+The fields are not spliced into the outer list. The nested list is exactly the digest preimage above.
 
 The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key or an active admin access key.
 
@@ -883,7 +887,6 @@ const currentKey = await precompile.getTransactionKey();
 // Returns: address (0x0 for Root Key, keyId for Access Key)
 ```
 
-
 ## Rationale
 
 ### Signature Type Detection by Length
@@ -912,13 +915,13 @@ Different signature types incur different base transaction costs to reflect thei
 |----------------|---------------|-------------|-----------|
 | **secp256k1** | 21,000 | Standard | Includes 3,000 gas for ecrecover precompile |
 | **P256** | 26,000 | 21,000 + 5,000 | Base 21k + additional 5k for P256 verification |
-| **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for clientDataJSON) | Base P256 cost plus variable cost for clientDataJSON based on size |
+| **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for webauthn_data) | Base P256 cost plus variable cost for `authenticatorData \|\| clientDataJSON` based on size |
 | **Keychain** | Inner signature + 3,000 | primitive_sig_cost + 3,000 | Inner signature cost + key validation overhead (2,100 SLOAD + 900 buffer) |
 
 **Rationale:**
 - The base 21,000 gas for standard transactions already includes the cost of secp256k1 signature verification via ecrecover (3,000 gas)
 - [EIP 7951](https://eips.ethereum.org/EIPS/eip-7951) sets P256 verification cost at 6,900 gas. We add 1,100 gas to account for the additional 65 bytes of signature size (129 bytes total vs 64 bytes for secp256k1), giving 8,000 gas total. Since the base 21k already includes 3,000 gas for ecrecover (which P256 doesn't use), the net additional cost is 8,000 - 3,000 = **5,000 gas**.
-- WebAuthn signatures require additional computation to parse and validate the clientDataJSON structure. We cap the total signature size at 2kb. The signature is also  charged using the same gas schedule as calldata (16 gas per non-zero byte, 4 gas per zero byte) to prevent the use of this signature space from spam.
+- WebAuthn signatures require additional computation to parse and validate the clientDataJSON structure. We cap the total signature size at 2kb. The whole `webauthn_data` (`authenticatorData || clientDataJSON`) is also charged using the same gas schedule as calldata (16 gas per non-zero byte, 4 gas per zero byte) to prevent the use of this signature space from spam.
 - Keychain signatures wrap a primitive signature and are used by access keys. They add 3,000 gas to cover key validation during transaction validation (cold SLOAD to verify key exists + processing overhead).
 - Individual per-signature-type gas costs allow us to add more advanced verification methods in the future like multisigs, which could have dynamic gas pricing.
 
@@ -945,7 +948,6 @@ The active fork's gas schedule determines nonce and access-key storage costs. Th
 Use `eth_estimateGas` with the complete transaction on the target network. Implementers can use the [canonical intrinsic-gas calculation](https://github.com/tempoxyz/tempo/blob/main/crates/evm/src/handler.rs) together with the [fork-dependent gas parameters](https://github.com/tempoxyz/tempo/blob/main/crates/hardfork/src/gas_params.rs); a fixed per-key formula omits state and fork-dependent charges.
 
 ## Security Considerations
-
 
 ### Mempool DOS Protection
 

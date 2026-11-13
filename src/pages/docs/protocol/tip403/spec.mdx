@@ -38,6 +38,8 @@ Custom policies start with `policyId = 2`. The registry reserves the first two i
 - `policyId = 0` is the `always-reject` policy and rejects all token transfers
 - `policyId = 1` is the `always-allow` policy and allows all token transfers
 
+Every authorization check (`isAuthorized` and its sender, recipient, and mint-recipient variants) returns true for ReceivePolicyGuard (`0xB10C000000000000000000000000000000000000`) under any policy ID, including `0` and IDs that do not exist.
+
 The `policyIdCounter` starts at `2` and increments with each new policy creation.
 
 ### Policy Types
@@ -99,7 +101,7 @@ interface ITIP403Registry {
     /// @param accounts Initial addresses to add to the policy
     /// @return newPolicyId ID of the newly created policy
     /// @dev For whitelist policies: adds accounts as authorized. For blacklist policies: adds accounts as restricted.
-    /// Emits PolicyCreated, PolicyAdminUpdated, and either WhitelistUpdated or BlacklistUpdated events for each account added.
+    /// Emits WhitelistUpdated or BlacklistUpdated for each account added, then PolicyCreated and PolicyAdminUpdated.
     function createPolicyWithAccounts(
         address admin,
         PolicyType policyType,
@@ -151,7 +153,8 @@ interface ITIP403Registry {
     /// @param policyId Policy ID to check against
     /// @param user Address to check
     /// @return True if authorized, false if blocked
-    /// @dev For policyId = 0 (always-reject): Always returns false
+    /// @dev ReceivePolicyGuard is authorized under every policyId; the rules below apply to all other addresses.
+    /// For policyId = 0 (always-reject): Always returns false
     /// For policyId = 1 (always-allow): Always returns true
     /// For whitelist policies: Returns true if address is in the whitelist, false otherwise
     /// For blacklist policies: Returns true if address is NOT in the blacklist, false if it is
@@ -266,7 +269,7 @@ token.changeTransferPolicyId(policyId);
 
 ### Authorization Logic
 
-For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
+For an existing simple policy, `isAuthorized()` implements the logic below. An unknown policy ID reverts with `PolicyNotFound`. ReceivePolicyGuard is authorized before this logic runs. For a compound policy, `isAuthorized()` requires both sender and recipient sub-policies to allow the address; use the role-specific methods when checking transfers or mints.
 
 ```solidity
 if (policyId < 2) {
@@ -292,7 +295,7 @@ The numeric reasons are `NONE = 0`, `TOKEN_FILTER = 1`, and `RECEIVE_POLICY = 2`
 
 For ordinary inbound TIP-20 transfers and mints, receiver rejection holds the amount at ReceivePolicyGuard (`0xb10c000000000000000000000000000000000000`) instead of reverting. The guard emits `TransferBlocked(token, receiver, blockedNonce, amount, receiptVersion, receipt)`. The receipt binds its version, token, recovery authority, originator, addressed recipient, block timestamp, guard nonce, blocked reason, inbound kind, and memo. `balanceOf(bytes receipt)` returns the outstanding receipt amount. The guard MUST NOT accept a direct token transfer or mint as a substitute for a receipt-backed hold.
 
-`recoveryAuthority = address(0)` gives recovery control to the original sender or minter. Setting it to the receiving account gives that account control; another address gives that third party control. Precompile and virtual recovery addresses MUST be rejected with `InvalidRecoveryAuthority`. The authority is captured in the receipt and MUST NOT change when the receiver later changes its configuration.
+`recoveryAuthority = address(0)` gives recovery control to the original sender or minter. Setting it to the receiving account gives that account control; another address gives that third party control. Tempo precompile addresses (any TIP-20-prefixed address and the active Tempo system precompiles, including ReceivePolicyGuard) and virtual recovery addresses MUST be rejected with `InvalidRecoveryAuthority`. Other precompile addresses, such as `0x01`–`0x11`, are accepted. The authority is captured in the receipt and MUST NOT change when the receiver later changes its configuration.
 
 The captured authority calls `claim(address to, bytes receipt)` to release the full outstanding amount. A successful claim consumes the receipt; a failed claim MUST preserve it. Claims MUST enforce the token's pause state and valid-recipient rules. A receiver- or third-party-authorized claim directly to the resolved receiver resumes delivery: it checks issuer recipient authorization but skips the receive policy and sender authorization. All originator-authorized claims, and claims to any other destination, are reroutes: they MUST revalidate issuer sender/recipient authorization and the new destination's receive policy, reverting with `PolicyForbids` on rejection rather than creating another hold. The policy sender is the originator in originator-recovery mode and the resolved receiver otherwise. Applicable access-key spending limits also apply to reroutes.
 
