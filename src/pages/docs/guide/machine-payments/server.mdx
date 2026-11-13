@@ -85,6 +85,10 @@ app.get(
 
 :::
 
+:::warning[Next.js with Turbopack]
+Add `serverExternalPackages: ['mppx']` to `next.config.ts`. Without it, Turbopack tries to bundle optional `mppx` integrations and the route fails with `Can't resolve '@modelcontextprotocol/sdk/types.js'`. `mppx/nextjs` requires Next.js 16.2.6 or later.
+:::
+
 :::tip
 You can override `currency` and `recipient` per call if different routes need different payment configurations.
 
