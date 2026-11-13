@@ -60,7 +60,7 @@ const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 
 /** Tempo Console. This host forwards to developers.tempo.xyz/console once the console moves there. */
-const CONSOLE_URL = 'https://console.tempo.xyz'
+const CONSOLE_URL = 'https://tempo.xyz/console'
 /** Console session lookup, proxied by this host; its cookie is scoped to `/console` so docs pages never see it. */
 const CONSOLE_ME_PATH = '/console/api/v1/me'
 
