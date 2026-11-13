@@ -45,7 +45,7 @@ Before you start, have:
 - The route's pool address. Tempo provides it when it enables your access.
 - A signer for a listed account that holds the source stablecoin and a fee token.
 
-The [FX swap example](/docs/routes/examples/fx) runs every step from a terminal.
+Every step also runs from a terminal with curl and jq, as the [FX swap example](/docs/routes/examples/fx) shows.
 
 ## Swap one stablecoin for another
 
@@ -170,4 +170,4 @@ A refused quote returns `404` with code `quote_not_available`. Its `details` nam
 | `recipient` | The recipient differs from the sender. | Set `recipient` to the `sender` address. |
 | `amount` | The pool can't fill that size now. | Lower the amount or retry later. |
 
-Continue with [Track delivery](/docs/routes/delivery) for every transfer status.
+An FX transfer reports the same [transfer statuses](/docs/routes/delivery) as other Routes transfers, such as `action-required` when it needs attention.
