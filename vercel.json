@@ -523,12 +523,12 @@
     },
     {
       "source": "/login",
-      "destination": "https://console.tempo.xyz",
+      "destination": "https://tempo.xyz/console",
       "permanent": false
     },
     {
       "source": "/developers/login",
-      "destination": "https://console.tempo.xyz",
+      "destination": "https://tempo.xyz/console",
       "permanent": false
     },
     {

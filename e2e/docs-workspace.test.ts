@@ -13,7 +13,7 @@ const utilityLabels = ['API reference', 'Partners']
 const externalTools = [
   ['MPP', 'https://mpp.dev/'],
   ['Mercator', 'https://mercator.sh/'],
-  ['Tempo Console', 'https://console.tempo.xyz/'],
+  ['Tempo Console', 'https://tempo.xyz/console'],
   ['Tempo Wallet', 'https://wallet.tempo.xyz/'],
 ] as const
 
