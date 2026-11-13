@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import DocsEntryLayout from '../components/DocsEntryLayout'
+import { HashScrollOnNavigate } from '../components/HashScrollOnNavigate'
 import '../styles/globals'
 import { normalizeProxiedRscFetch } from '../lib/rsc-route-normalization'
 
@@ -31,6 +32,8 @@ export default function Layout(
       <meta name="twitter:site" content="@tempo" />
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static bootstrap must run before the RSC client bundle. */}
       <script dangerouslySetInnerHTML={{ __html: normalizeProxiedRscFetch }} />
+      {/* Mounted at the root so it stays mounted when a link crosses between site sections. */}
+      <HashScrollOnNavigate />
       <DocsEntryLayout>{props.children}</DocsEntryLayout>
     </>
   )
