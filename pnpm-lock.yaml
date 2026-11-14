@@ -32,7 +32,7 @@ patchedDependencies:
     hash: 87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746
     path: patches/viem@2.57.5.patch
   vocs@2.12.0:
-    hash: c883db3d7a6d6c4d4ebea1ed4885835a5333a35c09050f8cb3a8af29c4b71cfe
+    hash: 46a53be9a3d2e03411e312d8f1e9405e6dac44ea0833fbe6bc35a050201122bb
     path: patches/vocs@2.12.0.patch
   waku@1.0.0-rc.3:
     hash: 70493b32a3f116a94b6fda2de8497a754444b81424d033f2280778110a680e79
@@ -146,7 +146,7 @@ importers:
         version: viem@2.54.6(typescript@6.0.3)(zod@4.6.7)
       vocs:
         specifier: 2.12.0
-        version: 2.12.0(patch_hash=c883db3d7a6d6c4d4ebea1ed4885835a5333a35c09050f8cb3a8af29c4b71cfe)(@cfworker/json-schema@4.1.1)(@types/react@19.2.17)(@vue/compiler-sfc@3.5.44)(change-case@5.4.4)(esbuild@0.28.1)(idb-keyval@6.2.2)(mermaid@11.17.2)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(rolldown@1.2.15)(rollup@4.60.1)(typescript@6.0.3)(vite@8.1.6(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(waku@1.0.0-rc.3(patch_hash=70493b32a3f116a94b6fda2de8497a754444b81424d033f2280778110a680e79)(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1))
+        version: 2.12.0(patch_hash=46a53be9a3d2e03411e312d8f1e9405e6dac44ea0833fbe6bc35a050201122bb)(@cfworker/json-schema@4.1.1)(@types/react@19.2.17)(@vue/compiler-sfc@3.5.44)(change-case@5.4.4)(esbuild@0.28.1)(idb-keyval@6.2.2)(mermaid@11.17.2)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(rolldown@1.2.15)(rollup@4.60.1)(typescript@6.0.3)(vite@8.1.6(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(waku@1.0.0-rc.3(patch_hash=70493b32a3f116a94b6fda2de8497a754444b81424d033f2280778110a680e79)(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1))
       wagmi:
         specifier: 3.7.7
         version: 3.7.7(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.3.1))(@types/react@19.2.17)(accounts@0.19.1)(immer@11.2.9)(react@19.3.1)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7))
@@ -11401,7 +11401,7 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vocs@2.12.0(patch_hash=c883db3d7a6d6c4d4ebea1ed4885835a5333a35c09050f8cb3a8af29c4b71cfe)(@cfworker/json-schema@4.1.1)(@types/react@19.2.17)(@vue/compiler-sfc@3.5.44)(change-case@5.4.4)(esbuild@0.28.1)(idb-keyval@6.2.2)(mermaid@11.17.2)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(rolldown@1.2.15)(rollup@4.60.1)(typescript@6.0.3)(vite@8.1.6(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(waku@1.0.0-rc.3(patch_hash=70493b32a3f116a94b6fda2de8497a754444b81424d033f2280778110a680e79)(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)):
+  vocs@2.12.0(patch_hash=46a53be9a3d2e03411e312d8f1e9405e6dac44ea0833fbe6bc35a050201122bb)(@cfworker/json-schema@4.1.1)(@types/react@19.2.17)(@vue/compiler-sfc@3.5.44)(change-case@5.4.4)(esbuild@0.28.1)(idb-keyval@6.2.2)(mermaid@11.17.2)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(rolldown@1.2.15)(rollup@4.60.1)(typescript@6.0.3)(vite@8.1.6(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(waku@1.0.0-rc.3(patch_hash=70493b32a3f116a94b6fda2de8497a754444b81424d033f2280778110a680e79)(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.104.1(esbuild@0.28.1)):
     dependencies:
       '@base-ui/react': 1.6.0(@types/react@19.2.17)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
