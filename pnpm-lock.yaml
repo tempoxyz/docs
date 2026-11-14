@@ -20,8 +20,6 @@ overrides:
   remark-mdx-frontmatter@5>toml: 5.0.1
   tar: '>=7.5.21'
   undici@>=8.0.0 <8.12.3: 8.12.3
-  hono@<4.13.16: 4.13.16
-  '@hono/node-server@<2.1.6': 2.1.6
 
 patchedDependencies:
   '@braintree/sanitize-url@7.1.2':
@@ -715,7 +713,7 @@ packages:
     resolution: {integrity: sha512-p/KH9MnfNcsm3sR6x4lNgm5j+QN4Et8srKredl9DZfXiyZ1UQ3aQ2YVpFLbqktYN5JI+DB+VZFKM2PqE5hLKjQ==}
     engines: {node: '>=20'}
     peerDependencies:
-      hono: 4.13.16
+      hono: ^4 || ^5.0.0-0
 
   '@iconify-json/lucide@1.2.115':
     resolution: {integrity: sha512-plc4npdX0I2RpsE5FFIdkCjGtL9vG09FU/a2nZ+pJ0fFQV6mTqRlbUgZgUgSPDFswq0kaaNT229nW6AQRj5o9w==}
@@ -4247,7 +4245,7 @@ packages:
       '@x402/next': '>=2.22.0'
       elysia: '>=1'
       express: '>=5'
-      hono: 4.13.16
+      hono: '>=4.12.25'
       next: '>=16.2.6'
       viem: '>=2.57.1'
     peerDependenciesMeta:
@@ -4284,7 +4282,7 @@ packages:
       '@x402/next': '>=2.22.0'
       elysia: '>=1.2.0'
       express: '>=5'
-      hono: 4.13.16
+      hono: '>=4.12.25'
       next: '>=16.2.6'
       viem: '>=2.57.1'
     peerDependenciesMeta:
