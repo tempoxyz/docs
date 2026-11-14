@@ -53,14 +53,14 @@ Every step also runs from a terminal with curl and jq, as the [FX swap example](
 
 ### Check the account
 
-Name the pair by its two token addresses, in either order.
+Send your pool address and listed account in place of the example's `0xbe05…039e` and `0x2222…2222`. Name the pair by its two token addresses, in either order.
 
-```bash
-curl --get \
-  'https://api.tempo.xyz/v1/prop-amms/<POOL_ADDRESS>/accounts/<ACCOUNT_ADDRESS>/access' \
-  --header "tempo-api-key: $TEMPO_API_KEY" \
-  --data-urlencode 'tokens=<SOURCE_TOKEN_ADDRESS>,<DESTINATION_TOKEN_ADDRESS>'
-```
+<OpenApi.Playground
+  operationId="getPropAmmTokensAccountAccess"
+  params="account=0x2222222222222222222222222222222222222222"
+  query="tokens=0x20c0000000000000000000006a37da5c996874be,0x20c0000000000000000000001621e21f71cf12fb"
+  anchors={false}
+/>
 
 The API checks the account against your organization's saved list. A listed account returns `"member": true`, `"allowed": true`, and `"reason": "allowed"`. Routes runs the same check when it quotes. Otherwise `reason` and `explanation` name what's missing, such as `notListed`.
 
@@ -82,23 +82,20 @@ Show the source amount, the destination amount, and `destinationAmountMin`. Crea
 
 Send the same inputs with an [idempotency key](/docs/routes/api-setup#set-idempotency-keys).
 
-```bash [Terminal]
-curl 'https://api.tempo.xyz/v1/routes/transfers' \
-  --request POST \
-  --header "tempo-api-key: $TEMPO_API_KEY" \
-  --header 'idempotency-key: <IDEMPOTENCY_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
+<OpenApi.Playground
+  operationId="createRoutesTransfer"
+  body='{
     "sourceChain": "tempo",
     "sourceToken": "0x20c0000000000000000000006a37da5c996874be",
     "destinationChain": "tempo",
     "destinationToken": "0x20c0000000000000000000001621e21f71cf12fb",
-    "sender": "<ACCOUNT_ADDRESS>",
-    "recipient": "<ACCOUNT_ADDRESS>",
+    "sender": "0x2222222222222222222222222222222222222222",
+    "recipient": "0x2222222222222222222222222222222222222222",
     "amount": "1000000",
     "mode": "exactSource"
   }'
-```
+  anchors={false}
+/>
 
 This request swaps 1 OUSD for EURC.e from one account to itself.
 
@@ -132,23 +129,21 @@ A list has one admin account. The admin adds or removes up to 50 accounts in one
 
 ### Prepare the change
 
-Send the list's admin account as `sender`. Name the pair by its two token addresses, in either order.
+Send the list's admin account as `sender`, in place of the example's `0x1111…1111`. Name the pair by its two token addresses, in either order.
 
-```bash [Terminal]
-curl 'https://api.tempo.xyz/v1/prop-amms/<POOL_ADDRESS>/access/prepare' \
-  --request POST \
-  --header "tempo-api-key: $TEMPO_API_KEY" \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "sender": "<LIST_ADMIN_ADDRESS>",
+<OpenApi.Playground
+  operationId="preparePropAmmAccess"
+  body='{
+    "sender": "0x1111111111111111111111111111111111111111",
     "action": {
       "type": "setMembers",
-      "tokens": ["<SOURCE_TOKEN_ADDRESS>", "<DESTINATION_TOKEN_ADDRESS>"],
-      "accounts": ["<ACCOUNT_ADDRESS>"],
+      "tokens": ["0x20c0000000000000000000006a37da5c996874be", "0x20c0000000000000000000001621e21f71cf12fb"],
+      "accounts": ["0x2222222222222222222222222222222222222222"],
       "allowed": true
     }
   }'
-```
+  anchors={false}
+/>
 
 The API applies the change to your organization's saved list. It simulates the change and returns an unsigned `transaction`. `effect` names the resolved pair index and sponsor ID, such as `List 1 account(s) on pair 0 under sponsor 5.`
 
@@ -171,7 +166,12 @@ Requests that omit `sponsorId` use your organization's saved list. Requests with
 - **Sponsor ID.** Pass `sponsorId` as a decimal string to name a list, such as `"0"` for the pool's default list. The account check takes it as a query parameter. The access change takes it in `action`.
 - **Pair index.** Pass `pairIndex` in place of `tokens` in the access change. Send exactly one of the two. The account check takes the pair index in its path.
 
-<OpenApi.Playground operationId="getPropAmmAccountAccess" anchors={false} />
+<OpenApi.Playground
+  operationId="getPropAmmAccountAccess"
+  params="account=0x2222222222222222222222222222222222222222&pairIndex=0"
+  query="sponsorId=0"
+  anchors={false}
+/>
 
 ## Account list errors
 
