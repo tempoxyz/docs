@@ -375,6 +375,22 @@ No validator P2P or RPC port should be directly accessible from the internet.
     expect(unchanged).not.toContain('currency=')
   })
 
+  test('uses embed path and body presets in Markdown samples', async () => {
+    const balances = await render(
+      '<OpenApi.Playground operationId="getAddressBalances" params="address=0xabc" query="currency=usd" />',
+    )
+    expect(balances).toContain('https://api.tempo.xyz/v1/addresses/0xabc/balances?currency=usd')
+    expect(balances).not.toContain('0x123')
+    expect(balances).not.toContain('chainId=')
+
+    const transfer = await render(
+      `<OpenApi.Playground operationId="createRoutesTransfer" body='{"amount": "1000000", "mode": "exactSource"}' />`,
+    )
+    expect(transfer).toContain('"amount": "1000000"')
+    expect(transfer).toContain("amount: '1000000'")
+    expect(transfer).not.toContain('quote_example')
+  })
+
   test('matches hidden query parameters in the API tool', async () => {
     const output = await render(
       '<OpenApi.Playground operationId="getAddressBalances" hideQueryParams />',
@@ -414,6 +430,27 @@ No validator P2P or RPC port should be directly accessible from the internet.
       '<OpenApi.Playground operationId="getAddressBalances" query={dynamic} />',
       'static query attribute',
     ],
+    [
+      '<OpenApi.Playground operationId="getAddressBalances" body={dynamic} />',
+      'static body attribute',
+    ],
+    [
+      '<OpenApi.Playground operationId="getAddressBalances" params={dynamic} />',
+      'static params attribute',
+    ],
+    [
+      '<OpenApi.Playground operationId="getAddressBalances" params="adress=0xabc" />',
+      'no path parameter `adress`',
+    ],
+    [
+      '<OpenApi.Playground operationId="getAddressBalances" query="curency=usd" />',
+      'no query parameter `curency`',
+    ],
+    [
+      `<OpenApi.Playground operationId="getAddressBalances" body='{"amount": "1"}' />`,
+      'has no request body',
+    ],
+    [`<OpenApi.Playground operationId="createRoutesTransfer" body='{"amount": ' />`, 'JSON'],
   ])('fails instead of silently losing API content: %s', async (source, message) => {
     await expect(render(source)).rejects.toThrow(message)
   })

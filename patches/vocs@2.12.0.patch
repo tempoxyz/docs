@@ -23,10 +23,10 @@ index 0000000000000000000000000000000000000000..71e7b6c96d989ce78589f6d62058ab2d
 +export declare function documentWithQuery(document: Record<string, unknown>, preset?: QueryPreset): Record<string, unknown>;
 diff --git a/dist/internal/openapi/query-presets.js b/dist/internal/openapi/query-presets.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..060dcdbe3d97728bcb710e42a07bea3aff3c6eb6
+index 0000000000000000000000000000000000000000..a1b2c16f87ae455f3a011fe305f6b7de1299cd09
 --- /dev/null
 +++ b/dist/internal/openapi/query-presets.js
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,84 @@
 +function hasPreset(preset) {
 +    return Boolean(preset?.body || preset?.params || preset?.query);
 +}
@@ -54,10 +54,22 @@ index 0000000000000000000000000000000000000000..060dcdbe3d97728bcb710e42a07bea3a
 + * Apply editable path, query, and body examples to one embed without changing its
 + * shared spec. Optional query parameters the preset doesn't name stay out of the sample.
 + */
++// Reject preset names the operation lacks, so a typo or spec rename fails the build.
++function assertKnown(operation, preset, values) {
++    for (const location of ['path', 'query']) {
++        const names = new Set(operation.parameters.filter((parameter) => parameter.in === location).map((parameter) => parameter.name));
++        for (const name of values[location].keys())
++            if (!names.has(name))
++                throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no ${location} parameter \`${name}\`.`);
++    }
++    if (preset.body && !operation.requestBody)
++        throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no request body.`);
++}
 +export function operationWithPreset(operation, preset) {
 +    if (!hasPreset(preset))
 +        return operation;
 +    const values = presetValues(preset);
++    assertKnown(operation, preset, values);
 +    const parameters = presetParameters(operation.parameters, values).filter((parameter) => parameter.in !== 'query' || parameter.required || values.query.has(parameter.name));
 +    const { requestBody } = operation;
 +    if (!preset.body || !requestBody)
@@ -492,10 +504,10 @@ index 0ef0a76d89d887bd13d6e03f23de6a7d313a1576..a95044623fd08f7001018e046e7b56c0
 \ No newline at end of file
 diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..31a913a5737ef01b923f8945f34a0228a7e805aa
+index 0000000000000000000000000000000000000000..e6f2075e910a21847a353e3de0c7b725de256196
 --- /dev/null
 +++ b/src/internal/openapi/query-presets.ts
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,122 @@
 +import type { IrOperation } from './parser.js'
 +
 +/** Editable values for one inline playground. Each string uses URL query syntax. */
@@ -548,6 +560,20 @@ index 0000000000000000000000000000000000000000..31a913a5737ef01b923f8945f34a0228
 +  })
 +}
 +
++// Reject preset names the operation lacks, so a typo or spec rename fails the build.
++function assertKnown(operation: IrOperation, preset: Preset, values: Values) {
++  for (const location of ['path', 'query'] as const) {
++    const names = new Set(
++      operation.parameters.filter((parameter) => parameter.in === location).map((parameter) => parameter.name),
++    )
++    for (const name of values[location].keys())
++      if (!names.has(name))
++        throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no ${location} parameter \`${name}\`.`)
++  }
++  if (preset.body && !operation.requestBody)
++    throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no request body.`)
++}
++
 +/**
 + * Apply editable path, query, and body examples to one embed without changing its
 + * shared spec. Optional query parameters the preset doesn't name stay out of the sample.
@@ -555,6 +581,7 @@ index 0000000000000000000000000000000000000000..31a913a5737ef01b923f8945f34a0228
 +export function operationWithPreset(operation: IrOperation, preset?: Preset): IrOperation {
 +  if (!hasPreset(preset)) return operation
 +  const values = presetValues(preset)
++  assertKnown(operation, preset, values)
 +  const parameters = presetParameters(operation.parameters, values).filter(
 +    (parameter) =>
 +      parameter.in !== 'query' || parameter.required || values.query.has(parameter.name),
