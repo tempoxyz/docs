@@ -146,38 +146,40 @@ G4OIGIHqFwKSCA==
 
 ### Docker Image Provenance
 
-Tempo Docker images are verified one of two ways. If you verify images, trust both: an image is genuine if either check passes.
+Tempo signs Docker images in three ways. Use the check that matches your image. An image is genuine if any one of them passes.
 
-- **GitHub build attestation**: images built by Tempo CI.
-- **Tempo image-signing key**: images signed outside CI with the Cosign key below.
+| Image | Check |
+| --- | --- |
+| Releases up to `1.18.2` | [Cosign signature from GitHub Actions](#cosign-signature-from-github-actions) |
+| Images built by Tempo CI from November 12, 2026 | [GitHub build attestation](#github-build-attestation) |
+| Images Tempo signs outside CI | [Tempo image-signing key](#tempo-image-signing-key) |
+
+These commands use `ghcr.io`. Images on Docker Hub (`docker.io/tempoxyz/tempo`) verify the same way.
+
+#### Cosign signature from GitHub Actions
+
+Install [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/), then run:
+
+```bash
+cosign verify ghcr.io/tempoxyz/tempo:<version> \
+  --certificate-identity-regexp="https://github.com/tempoxyz/tempo/" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+```
 
 #### GitHub build attestation
 
-Docker images published from `main`, release tags and release-candidate branches carry a [GitHub build provenance attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), stored next to the image in the registry. Each attestation records the repository, workflow and Git ref that built the image.
+Install the [GitHub CLI](https://cli.github.com/), then run:
 
 ```bash
-# Install the GitHub CLI: https://cli.github.com/
-gh attestation verify oci://ghcr.io/tempoxyz/tempo:<tag> \
+gh attestation verify oci://ghcr.io/tempoxyz/tempo:<version> \
   --repo tempoxyz/tempo
 ```
 
-Images on Docker Hub (`docker.io/tempoxyz/tempo`) verify the same way. Images are multi-platform (`linux/amd64` and `linux/arm64`). Both the multi-platform image and each platform image are attested, so you can also verify a pinned digest:
-
-```bash
-gh attestation verify oci://ghcr.io/tempoxyz/tempo@sha256:<digest> \
-  --repo tempoxyz/tempo
-```
+The attestation records the repository, workflow and Git ref that built the image. To check a single platform (`linux/amd64` or `linux/arm64`), pass its digest instead of the tag: `oci://ghcr.io/tempoxyz/tempo@sha256:<digest>`.
 
 #### Tempo image-signing key
 
-Save the public key as `tempo-image-signing.pub`, then verify with [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/):
-
-```bash
-cosign verify --key tempo-image-signing.pub --insecure-ignore-tlog=true \
-  ghcr.io/tempoxyz/tempo@sha256:<digest>
-```
-
-These signatures are not published to a transparency log, so `--insecure-ignore-tlog=true` is required.
+Save this public key as `tempo-image-signing.pub`:
 
 ```text [tempo-image-signing.pub]
 -----BEGIN PUBLIC KEY-----
@@ -186,21 +188,14 @@ SoUlK2hNdRAywbesd3sELplDXJ1WwQBQpC250xZlQEyPyfYOxVrpFnHjEw==
 -----END PUBLIC KEY-----
 ```
 
-<details>
-<summary>Older images signed with Cosign</summary>
-
-Images published before build provenance attestations were signed keylessly with [Cosign](https://docs.sigstore.dev/cosign/signing/overview/) via GitHub Actions OIDC. Those signatures still verify:
+Then verify the image with Cosign:
 
 ```bash
-# Install cosign: https://docs.sigstore.dev/cosign/system_config/installation/
-cosign verify ghcr.io/tempoxyz/tempo:<tag> \
-  --certificate-identity-regexp="https://github.com/tempoxyz/tempo/" \
-  --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+cosign verify --key tempo-image-signing.pub --insecure-ignore-tlog=true \
+  ghcr.io/tempoxyz/tempo@sha256:<digest>
 ```
 
-New images may not carry a Cosign signature. Switch to `gh attestation verify`.
-
-</details>
+Tempo doesn't publish these signatures to a public transparency log, so the command needs `--insecure-ignore-tlog=true`.
 
 ### SHA256 Checksums
 
