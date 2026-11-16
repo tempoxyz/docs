@@ -54,9 +54,18 @@ function getExplorerHost() {
   return tempoModerato.blockExplorers.default.url
 }
 
-export function ExplorerLink({ hash, inline = false }: { hash: string; inline?: boolean }) {
+export function ExplorerLink({
+  hash,
+  inline = false,
+  explorerUrl,
+}: {
+  hash: string
+  inline?: boolean
+  /** The explorer of the chain that ran the transaction. Defaults to the testnet explorer. */
+  explorerUrl?: string | undefined
+}) {
   const { trackExternalLinkClick } = usePostHogTracking()
-  const url = `${getExplorerHost()}/tx/${hash}`
+  const url = `${explorerUrl ?? getExplorerHost()}/tx/${hash}`
 
   return (
     <div

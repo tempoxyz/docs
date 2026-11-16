@@ -14,15 +14,25 @@ import LucideCheck from '~icons/lucide/check'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import {
   filterSupportedFundableWalletConnectors,
+  filterSupportedInjectedConnectors,
   isFundableWalletConnector,
+  isInstalledBrowserWalletConnectorId,
+  withoutGenericInjected,
 } from '../../../lib/wallets'
-import { Button, Step, StringFormatter, useCopyToClipboard } from '../../Demo'
+import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from '../../Demo'
 import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
 import * as ui from './ConnectWallet.recipes'
 
-export function ConnectWallet(props: DemoStepProps) {
-  const { stepNumber = 1 } = props
+export type ConnectWalletProps = DemoStepProps & {
+  /** Require this chain, such as Tempo Mainnet. Defaults to the docs' testnet. */
+  chainId?: number | undefined
+  /** Offer only browser wallets, such as MetaMask or Rabby, and not Tempo Wallet. */
+  browserWalletsOnly?: boolean | undefined
+}
+
+export function ConnectWallet(props: ConnectWalletProps) {
+  const { stepNumber = 1, chainId: requiredChainId, browserWalletsOnly = false } = props
   const isE2E = import.meta.env.VITE_E2E === 'true'
   const connections = useConnections()
   const connect = useConnect()
@@ -30,19 +40,31 @@ export function ConnectWallet(props: DemoStepProps) {
   const connectors = useConnectors()
   const [connectError, setConnectError] = React.useState<Error | null>(null)
   const fundableConnectors = React.useMemo(
-    () => filterSupportedFundableWalletConnectors(connectors, { includeWebAuthn: isE2E }),
-    [connectors],
+    () =>
+      browserWalletsOnly
+        ? withoutGenericInjected(filterSupportedInjectedConnectors(connectors))
+        : filterSupportedFundableWalletConnectors(connectors, { includeWebAuthn: isE2E }),
+    [connectors, browserWalletsOnly],
   )
   const switchChain = useSwitchChain()
   const chains = useChains()
   const [copied, copyToClipboard] = useCopyToClipboard()
+  // Browser wallets announce themselves only in the browser, so wait for hydration before listing them.
+  const hydrated = useHydrated()
 
   const walletConnection = connections.find((c) =>
-    isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
+    browserWalletsOnly
+      ? isInstalledBrowserWalletConnectorId(c.connector.id)
+      : isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
   )
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
-  const isSupported = chains.some((c) => c.id === walletConnection?.chainId)
+  const requiredChain = chains.find((c) => c.id === requiredChainId)
+  const targetChain = requiredChain ?? chains[0]
+  const isSupported = requiredChain
+    ? walletConnection?.chainId === requiredChain.id
+    : chains.some((c) => c.id === walletConnection?.chainId)
+  const walletName = walletConnector?.name ?? 'Wallet'
   const hasNonWebAuthnWallet = Boolean(walletAddress)
   const active = !hasNonWebAuthnWallet || !isSupported
   const completed = hasNonWebAuthnWallet && isSupported
@@ -66,8 +88,16 @@ export function ConnectWallet(props: DemoStepProps) {
   )
 
   const actions = React.useMemo(() => {
+    if (!hydrated) return null
+
     if (!fundableConnectors.length) {
-      return <div {...ui.connectWalletLayout()}>No wallets found.</div>
+      return (
+        <div {...ui.connectWalletLayout()}>
+          {browserWalletsOnly
+            ? 'No browser wallet found. Install one, such as MetaMask or Rabby.'
+            : 'No wallets found.'}
+        </div>
+      )
     }
 
     if (!hasNonWebAuthnWallet) {
@@ -121,29 +151,34 @@ export function ConnectWallet(props: DemoStepProps) {
             variant="accent"
             onClick={() =>
               switchChain.switchChain({
-                chainId: chains[0].id,
+                chainId: targetChain.id,
                 addEthereumChainParameter: {
                   nativeCurrency: {
                     name: 'USD',
                     decimals: 18,
                     symbol: 'USD',
                   },
-                  blockExplorerUrls: ['https://explore.tempo.xyz'],
+                  blockExplorerUrls: [
+                    requiredChain?.blockExplorers?.default.url ?? 'https://explore.tempo.xyz',
+                  ],
                 },
               })
             }
           >
-            Add Tempo to {walletConnector?.name ?? 'Wallet'}
+            {requiredChain ? `Switch to ${requiredChain.name}` : `Add Tempo to ${walletName}`}
           </Button>
         )}
-        {switchChain.isSuccess && (
+        {switchChain.isSuccess && isSupported && (
           <div {...ui.connectWalletLayout5()}>
-            Added Tempo to {walletConnector?.name ?? 'Wallet'}!
+            {requiredChain
+              ? `${walletName} is on ${requiredChain.name}.`
+              : `Added Tempo to ${walletName}!`}
           </div>
         )}
       </div>
     )
   }, [
+    hydrated,
     fundableConnectors,
     hasNonWebAuthnWallet,
     walletAddress,
@@ -155,7 +190,10 @@ export function ConnectWallet(props: DemoStepProps) {
     handleConnect,
     isSupported,
     switchChain,
-    chains,
+    targetChain,
+    requiredChain,
+    walletName,
+    browserWalletsOnly,
   ])
 
   const stackConnectors = fundableConnectors.length > 2
@@ -166,7 +204,9 @@ export function ConnectWallet(props: DemoStepProps) {
       completed={completed}
       error={connectError ?? connect.error}
       number={stepNumber}
-      title="Connect your wallet."
+      title={
+        requiredChain ? `Connect your wallet on ${requiredChain.name}.` : 'Connect your wallet.'
+      }
       actions={!stackConnectors && actions}
     >
       {stackConnectors && actions}

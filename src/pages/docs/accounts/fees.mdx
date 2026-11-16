@@ -56,9 +56,9 @@ Tempo uses the first of these that applies:
 2. The fee payer's default fee token.
 3. The token being transferred. This applies when every call is a `transfer` or `transferWithMemo` on the same USD token. The account must also pay its own fee.
 4. The input token of a single Stablecoin DEX swap.
-5. pathUSD, the first stablecoin deployed on Tempo.
+5. pathUSD, then OUSD. Tempo uses the first of the two whose balance covers the maximum fee.
 
-Tempo checks only that first token. If the fee payer can't pay in it, the transaction is invalid, even when a later token would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD. If the fee payer can't pay in pathUSD, the transaction is invalid. [Set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each account that pays fees.
+Tempo checks only the first rule that applies. If the fee payer can't pay in its token, the transaction is invalid, even when a later rule would work. Without a default, a transaction that isn't a transfer or swap falls back to pathUSD, then OUSD. If the fee payer can't pay in either, the transaction is invalid. [Set a default fee token](/docs/accounts/fees/fee-tokens#set-a-default-fee-token) on each account that pays fees.
 
 ## Related
 
