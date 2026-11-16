@@ -73,10 +73,10 @@ The protocol enforces a strict hierarchy at validation time:
 From the [T14 network upgrade](/docs/protocol/upgrades/t14) ([TIP-1137](https://tips.sh/1137)), the admin-key rules on this page apply only to T6 through T13 blocks:
 
 - `authorizeAdminKey` reverts with `UnknownFunctionSelector`, and a `key_authorization` with `is_admin = true` is invalid.
-- Only the Root Key manages access keys. For an account with a configuration commitment, only its owner quorum does. `authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`, and `burnKeyAuthorizationWitness` revert with `UnauthorizedCaller` when an access key signs the transaction.
+- Only the Root Key manages access keys. For an account with a configuration commitment, only enough signers to reach its threshold do. `authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`, and `burnKeyAuthorizationWitness` revert with `UnauthorizedCaller` when an access key signs the transaction.
 - A key stored with `is_admin = true` before T14 acts as a regular access key with no expiry, spending limit, or call scope. It still signs transactions and passes `verifyKeychain`, but manages no keys. The Root Key can restrict it with `updateSpendingLimit` and `setAllowedCalls`, or revoke it with `revokeKey`.
 - `isAdminKey(account, keyId)` returns `true` only when `keyId == account` and the account has no configuration commitment.
-- `isAdminKey` and `verifyKeychainAdmin` keep their selectors, so existing callers do not revert. The `AdminKeyAuthorized` event, the `is_admin` storage byte, and the `is_admin` and `account` fields of `KeyAuthorization` stay for historical logs and encoding compatibility.
+- `isAdminKey` and `verifyKeychainAdmin` keep their selectors, so existing callers don't revert. The `AdminKeyAuthorized` event, the `is_admin` storage byte, and the `is_admin` and `account` fields of `KeyAuthorization` stay for historical logs and encoding compatibility.
 
 ## Storage
 

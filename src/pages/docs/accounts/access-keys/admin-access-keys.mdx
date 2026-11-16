@@ -57,13 +57,14 @@ Protect an admin key like a signer. Keep it in a KMS or HSM, or as a [device key
 
 ## Authorize an Admin Access Key
 
-Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key). Pass `admin: true` to Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). Viem ignores `limits`, `expiry`, and `scopes` on an admin key. Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin).
+Enough signers to reach the threshold, or an existing admin key, authorize it like any [access key](/docs/accounts/access-keys#authorize-an-access-key). Pass `admin: true` to Viem's [`accessKey.authorize`](https://viem.sh/tempo/actions/accessKey.authorize). Viem ignores `limits`, `expiry`, and `scopes` on an admin key. Tempo rejects an admin authorization that carries any of them. Check a key with [`accessKey.isAdmin`](https://viem.sh/tempo/actions/accessKey.isAdmin). From T14, Tempo rejects new admin keys, and `accessKey.isAdmin` returns false for keys stored as admin before T14.
 
 <span id="admin-access-key-limits" />
 
 ## Limits
 
-- Changing an admin key's spending limit or scopes reverts with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid), because it has neither. To bound its holder, revoke it and authorize a new limited key.
+- Before T14, changing an admin key's spending limit or scopes reverts with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid), because it has neither. To bound its holder, revoke it and authorize a new limited key.
+- From T14, a key stored as admin is a regular access key with no expiry, spending limit, or scopes. It can't manage keys, and the signers can limit it with `updateLimit`, scope it with `setAllowedCalls`, or revoke it.
 - Revoking an admin key leaves the keys it authorized in place, so revoke each one separately.
 
 Specification: [Account Keychain admin keys](/docs/protocol/transactions/AccountKeychain#admin-key-authorization).

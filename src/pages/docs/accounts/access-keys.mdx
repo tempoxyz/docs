@@ -99,7 +99,7 @@ The demo authorizes a key with a daily limit and pays with it. Tempo rejects a p
 
 ## Authorize a Key
 
-Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), sign a key authorization. It's a message that names the key and its bounds. Submit it in one of two ways:
+Enough signers to reach the threshold, or, before T14, an [admin key](/docs/accounts/access-keys/admin-access-keys), sign a key authorization. It's a message that names the key and its bounds. Submit it in one of two ways:
 
 - **With the Key's First Payment:** `signAuthorization` returns a `keyAuthorization` that travels with the first transaction the key signs. The key stays authorized even if that transaction's calls revert.
 - **On Its Own:** `authorizeSync` sends the authorization in a separate transaction, before the key pays.

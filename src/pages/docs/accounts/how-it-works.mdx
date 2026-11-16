@@ -70,7 +70,7 @@ In the example, the threshold is 2. The passkey has weight 2, and the backup and
 
 A payout server can't ask for the customer's passkey on every payout. Instead, the signers approve an [access key](/docs/accounts/access-keys) once. From then on, it pays alone within its bounds. Its bounds are a spending limit per stablecoin, an expiry, and scopes. Scopes limit which contracts and functions it calls and whom it pays. Tempo checks those bounds on every transaction. A leaked payout server key can't spend past its daily limit.
 
-An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds and can manage the account's other access keys. Give one only to a party you'd trust with the whole balance. No access key counts toward the threshold, admin or not. Only the signers can change the signers or the threshold.
+An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds and, before T14, can manage the account's other access keys. T14 removes admin keys. Give one only to a party you'd trust with the whole balance. No access key counts toward the threshold, admin or not. Only the signers can change the signers or the threshold.
 
 ## Related
 
