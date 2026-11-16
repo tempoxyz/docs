@@ -146,40 +146,53 @@ G4OIGIHqFwKSCA==
 
 ### Docker Image Provenance
 
-Docker images published from `main`, release tags and release-candidate branches carry a [GitHub build provenance attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), stored next to the image in the registry. Each attestation records the repository, workflow and Git ref that built the image.
+Tempo signs new Docker images in two ways. If you verify images, trust both. An image is genuine if either check passes.
 
-To verify a Docker image:
+- **GitHub build attestation.** Tempo CI attaches it to images it builds.
+- **Tempo image-signing key.** Tempo signs other images with this Cosign key.
+
+Images on Docker Hub (`docker.io/tempoxyz/tempo`) verify the same way as the `ghcr.io` images in these commands.
+
+#### GitHub build attestation
+
+Install the [GitHub CLI](https://cli.github.com/), then run:
 
 ```bash
-# Install the GitHub CLI: https://cli.github.com/
-gh attestation verify oci://ghcr.io/tempoxyz/tempo:<tag> \
+gh attestation verify oci://ghcr.io/tempoxyz/tempo:<version> \
   --repo tempoxyz/tempo
 ```
 
-This verifies that the image was built by the official Tempo CI pipeline. Images on Docker Hub (`docker.io/tempoxyz/tempo`) verify the same way.
+The attestation records the repository, workflow and Git ref that built the image. To check a single platform (`linux/amd64` or `linux/arm64`), pass its digest instead of the tag: `oci://ghcr.io/tempoxyz/tempo@sha256:<digest>`.
 
-Images are multi-platform (`linux/amd64` and `linux/arm64`). Both the multi-platform image and each platform image are attested, so you can also verify a pinned digest:
+#### Tempo image-signing key
 
-```bash
-gh attestation verify oci://ghcr.io/tempoxyz/tempo@sha256:<digest> \
-  --repo tempoxyz/tempo
+Save this public key as `tempo-image-signing.pub`:
+
+```text [tempo-image-signing.pub]
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0DMmIejmygtXN0Da2fBshRXHbb+s
+SoUlK2hNdRAywbesd3sELplDXJ1WwQBQpC250xZlQEyPyfYOxVrpFnHjEw==
+-----END PUBLIC KEY-----
 ```
 
-<details>
-<summary>Older images signed with Cosign</summary>
-
-Images published before build provenance attestations were signed with [Cosign](https://docs.sigstore.dev/cosign/signing/overview/) using keyless signing via GitHub Actions OIDC. Those signatures still verify:
+Then install [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/) and verify the image:
 
 ```bash
-# Install cosign: https://docs.sigstore.dev/cosign/system_config/installation/
-cosign verify ghcr.io/tempoxyz/tempo:<tag> \
+cosign verify --key tempo-image-signing.pub --insecure-ignore-tlog=true \
+  ghcr.io/tempoxyz/tempo@sha256:<digest>
+```
+
+Tempo doesn't publish these signatures to a public transparency log, so the command needs `--insecure-ignore-tlog=true`.
+
+#### Older images
+
+Images released before GitHub build attestations, up to `1.18.2`, carry a Cosign signature from GitHub Actions instead. Verify them with Cosign:
+
+```bash
+cosign verify ghcr.io/tempoxyz/tempo:<version> \
   --certificate-identity-regexp="https://github.com/tempoxyz/tempo/" \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
 ```
-
-New images may not carry a Cosign signature. Switch to `gh attestation verify`.
-
-</details>
 
 ### SHA256 Checksums
 
