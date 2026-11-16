@@ -63,7 +63,7 @@ test('mint stablecoins', async ({ page }) => {
   await grantButton.click()
 
   // Wait for grant receipt
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(1))
+  await expectDemoSuccess(page, grantStep.getByRole('link', { name: 'View receipt' }))
 
   // Step 5: Mint tokens - click "Enter details" then "Mint"
   const mintStep = getDemoStep(page, 'Mint 100 MintTestUSD to yourself.')
@@ -76,7 +76,7 @@ test('mint stablecoins', async ({ page }) => {
   await mintButton.click()
 
   // Wait for mint receipt
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(2))
+  await expectDemoSuccess(page, mintStep.getByRole('link', { name: 'View receipt' }))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

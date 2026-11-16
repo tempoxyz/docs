@@ -60,7 +60,7 @@ test('use stablecoin for fees', async ({ page }) => {
   const grantButton = grantStep.getByRole('button', { name: 'Grant' })
   await grantButton.click()
 
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(1))
+  await expectDemoSuccess(page, grantStep.getByRole('link', { name: 'View receipt' }))
 
   // Step 5: Mint tokens
   const mintStep = getDemoStep(page, 'Mint 100 FeeTestUSD to yourself.')
@@ -71,14 +71,19 @@ test('use stablecoin for fees', async ({ page }) => {
   const mintButton = mintStep.getByRole('button', { name: 'Mint' })
   await mintButton.click()
 
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(2))
+  await expectDemoSuccess(page, mintStep.getByRole('link', { name: 'View receipt' }))
 
   // Step 6: Add fee AMM liquidity
   const addLiquidityButton = page.getByRole('button', { name: 'Add Liquidity' }).first()
   await expect(addLiquidityButton).toBeVisible()
   await addLiquidityButton.click()
 
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(3))
+  await expectDemoSuccess(
+    page,
+    getDemoStep(page, 'Add fee liquidity for FeeTestUSD.').getByRole('link', {
+      name: 'View receipt',
+    }),
+  )
 
   // Step 7: Send payment using token as fee
   const payStep = getDemoStep(page, 'Send 100 AlphaUSD and pay fees in FeeTestUSD.')
@@ -90,7 +95,7 @@ test('use stablecoin for fees', async ({ page }) => {
   await expect(sendButton).toBeVisible()
   await sendButton.click()
 
-  await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(4))
+  await expectDemoSuccess(page, payStep.getByRole('link', { name: 'View receipt' }))
 
   // Clean up
   await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })

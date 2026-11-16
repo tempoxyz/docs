@@ -150,7 +150,7 @@ export function P256KeyDemo() {
               disabled={disabled || Boolean(keyPair)}
               onClick={() => run('create', create)}
             >
-              {pending === 'create' ? 'Creating…' : keyPair ? 'Created' : 'Create key'}
+              {pending === 'create' ? 'Creating…' : 'Create key'}
             </Button>
           }
         >
@@ -175,7 +175,7 @@ export function P256KeyDemo() {
               disabled={disabled || !keyPair || funded}
               onClick={() => run('fund', fund)}
             >
-              {pending === 'fund' ? 'Funding…' : funded ? 'Funded' : 'Get test funds'}
+              {pending === 'fund' ? 'Funding…' : 'Get test funds'}
             </Button>
           }
         >

@@ -4,6 +4,7 @@ import { vars as tokens } from '../styles/theme'
 
 import { docsDemo } from '../styles/surfaces.styles'
 import { style } from '../styles/theme'
+import { StepGroupProvider } from './guides/StepGroup'
 
 export function Container(
   props: React.PropsWithChildren<{
@@ -21,7 +22,9 @@ export function Container(
           {headerRight}
         </header>
       )}
-      <div {...content()}>{children}</div>
+      <div {...content()}>
+        <StepGroupProvider>{children}</StepGroupProvider>
+      </div>
       {footer && <footer {...footerStyle()}>{footer}</footer>}
     </div>
   )
