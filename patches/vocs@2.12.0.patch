@@ -1,25 +1,44 @@
 diff --git a/dist/internal/openapi/query-presets.d.ts b/dist/internal/openapi/query-presets.d.ts
 new file mode 100644
-index 0000000..6198c7f
+index 0000000000000000000000000000000000000000..71e7b6c96d989ce78589f6d62058ab2d0221ed48
 --- /dev/null
 +++ b/dist/internal/openapi/query-presets.d.ts
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,17 @@
 +import type { IrOperation } from './parser.js';
-+export type QueryPreset = { method: string; path: string; query: string };
++/** Editable values for one inline playground. Each string uses URL query syntax. */
++export type QueryPreset = {
++    method: string;
++    path: string;
++    /** JSON request body, such as `{"amount":"1000000"}`. */
++    body?: string | undefined;
++    /** Path values, such as `address=0x…`. */
++    params?: string | undefined;
++    /** Query values, such as `chainId=42431`. */
++    query?: string | undefined;
++};
++/** The editable parts of a preset, without the operation it targets. */
++export type Preset = Omit<QueryPreset, 'method' | 'path'>;
++export declare function operationWithPreset(operation: IrOperation, preset?: Preset): IrOperation;
 +export declare function operationWithQuery(operation: IrOperation, query?: string): IrOperation;
 +export declare function documentWithQuery(document: Record<string, unknown>, preset?: QueryPreset): Record<string, unknown>;
 diff --git a/dist/internal/openapi/query-presets.js b/dist/internal/openapi/query-presets.js
 new file mode 100644
-index 0000000..39cecdb
+index 0000000000000000000000000000000000000000..a1b2c16f87ae455f3a011fe305f6b7de1299cd09
 --- /dev/null
 +++ b/dist/internal/openapi/query-presets.js
-@@ -0,0 +1,39 @@
-+function presetParameters(parameters, query) {
-+    const values = new URLSearchParams(query);
+@@ -0,0 +1,84 @@
++function hasPreset(preset) {
++    return Boolean(preset?.body || preset?.params || preset?.query);
++}
++function presetValues(preset) {
++    return { path: new URLSearchParams(preset.params), query: new URLSearchParams(preset.query) };
++}
++function presetParameters(parameters, values) {
 +    return parameters.map((parameter) => {
-+        if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
++        const source = parameter.in === 'query' ? values.query : parameter.in === 'path' ? values.path : undefined;
++        if (!source || !parameter.name || !source.has(parameter.name))
 +            return parameter;
-+        const raw = values.get(parameter.name);
++        const raw = source.get(parameter.name);
 +        const value = parameter.schema?.type === 'array' ? raw.split(',') : raw;
 +        const { example: _example, ...rest } = parameter;
 +        return {
@@ -31,15 +50,47 @@ index 0000000..39cecdb
 +        };
 +    });
 +}
++/**
++ * Apply editable path, query, and body examples to one embed without changing its
++ * shared spec. Optional query parameters the preset doesn't name stay out of the sample.
++ */
++// Reject preset names the operation lacks, so a typo or spec rename fails the build.
++function assertKnown(operation, preset, values) {
++    for (const location of ['path', 'query']) {
++        const names = new Set(operation.parameters.filter((parameter) => parameter.in === location).map((parameter) => parameter.name));
++        for (const name of values[location].keys())
++            if (!names.has(name))
++                throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no ${location} parameter \`${name}\`.`);
++    }
++    if (preset.body && !operation.requestBody)
++        throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no request body.`);
++}
++export function operationWithPreset(operation, preset) {
++    if (!hasPreset(preset))
++        return operation;
++    const values = presetValues(preset);
++    assertKnown(operation, preset, values);
++    const parameters = presetParameters(operation.parameters, values).filter((parameter) => parameter.in !== 'query' || parameter.required || values.query.has(parameter.name));
++    const { requestBody } = operation;
++    if (!preset.body || !requestBody)
++        return { ...operation, parameters };
++    const example = JSON.parse(preset.body);
++    return {
++        ...operation,
++        parameters,
++        requestBody: {
++            ...requestBody,
++            content: requestBody.content.map((media, index) => (index === 0 ? { ...media, example } : media)),
++        },
++    };
++}
 +/** Apply editable query examples to one embed without changing its shared spec. */
 +export function operationWithQuery(operation, query) {
-+    if (!query)
-+        return operation;
-+    return { ...operation, parameters: presetParameters(operation.parameters, query) };
++    return operationWithPreset(operation, { query });
 +}
 +/** Prepare the isolated Scalar document used by this playground instance. */
 +export function documentWithQuery(document, preset) {
-+    if (!preset?.query)
++    if (!preset || !hasPreset(preset))
 +        return document;
 +    const copy = structuredClone(document);
 +    const paths = copy.paths;
@@ -47,14 +98,58 @@ index 0000000..39cecdb
 +    const operation = path?.[preset.method.toLowerCase()];
 +    if (!operation)
 +        return copy;
++    const values = presetValues(preset);
 +    for (const owner of [path, operation]) {
 +        if (Array.isArray(owner.parameters))
-+            owner.parameters = presetParameters(owner.parameters, preset.query);
++            owner.parameters = presetParameters(owner.parameters, values);
++    }
++    const media = operation.requestBody?.content?.['application/json'];
++    if (preset.body && media) {
++        // Scalar fills the request body from the media example before schema examples.
++        delete media.examples;
++        media.example = JSON.parse(preset.body);
 +    }
 +    return copy;
 +}
+diff --git a/dist/internal/openapi/sample.d.ts b/dist/internal/openapi/sample.d.ts
+index 47cbee00fa592d2069ee742d2307fbeecb218902..61ef38d2d65c9601c79765004b929bca1b38599a 100644
+--- a/dist/internal/openapi/sample.d.ts
++++ b/dist/internal/openapi/sample.d.ts
+@@ -80,6 +80,8 @@ export type CodeSample = {
+ export declare function codeSamples(operation: IrOperation, server?: string, options?: codeSamples.Options): CodeSample[];
+ export declare namespace codeSamples {
+     type Options = {
++        /** Show every query parameter and the whole body, without collapsing. */
++        expand?: boolean | undefined;
+         /** Omit query parameters from the generated request sample. */
+         hideQueryParams?: boolean | undefined;
+     };
+diff --git a/dist/internal/openapi/sample.js b/dist/internal/openapi/sample.js
+index 32283b7e81a921f268ed3f3c011d48b5d436b8b5..b6daf9121ab1b744ce0152185f9ffa212253fc38 100644
+--- a/dist/internal/openapi/sample.js
++++ b/dist/internal/openapi/sample.js
+@@ -29,7 +29,7 @@ export function codeSamples(operation, server, options) {
+     const queryCount = request.queryString?.length ?? 0;
+     // When there are many query params, also prepare a request limited to the
+     // first few so the sample can collapse the rest behind a "Show more" toggle.
+-    const collapsedRequest = queryCount > collapseQueryThreshold
++    const collapsedRequest = !options?.expand && queryCount > collapseQueryThreshold
+         ? { ...request, queryString: (request.queryString ?? []).slice(0, collapseQueryThreshold) }
+         : undefined;
+     const samples = [];
+@@ -62,7 +62,9 @@ export function codeSamples(operation, server, options) {
+             }
+         }
+         const collapsedDisplay = sample.collapsed?.display ?? display;
+-        if (request.postData && collapsedDisplay.split('\n').length > collapseBodyLineThreshold) {
++        if (!options?.expand &&
++            request.postData &&
++            collapsedDisplay.split('\n').length > collapseBodyLineThreshold) {
+             const truncatedDisplay = collapsedDisplay
+                 .split('\n')
+                 .slice(0, collapseBodyLineThreshold)
 diff --git a/dist/react/Head.d.ts b/dist/react/Head.d.ts
-index 808d57f..2b6bf2a 100644
+index 808d57fadd940bd06fdbeacb182a6d55aff67e74..2b6bf2af205ba7bc19df13a16a15acbae4986c9f 100644
 --- a/dist/react/Head.d.ts
 +++ b/dist/react/Head.d.ts
 @@ -3,6 +3,7 @@ export declare function Head(props: Head.Props): import("react").JSX.Element;
@@ -66,7 +161,7 @@ index 808d57f..2b6bf2a 100644
  }
  export declare function resolveTitleTemplate(config: Pick<Config.Config, 'title' | 'titleTemplate'>, path: string, title: string | undefined, frontmatter: Config.Frontmatter | undefined): string | undefined;
 diff --git a/dist/react/Head.js b/dist/react/Head.js
-index 9c74255..b82f9bd 100644
+index 9c7425584c057838cf328fcbff9b64005122268a..b82f9bd0ad8185306542fc8a2a6aafa163104946 100644
 --- a/dist/react/Head.js
 +++ b/dist/react/Head.js
 @@ -6,7 +6,7 @@ import * as JsonLd from './json-ld.js';
@@ -88,7 +183,7 @@ index 9c74255..b82f9bd 100644
                          return (_jsx("meta", { charSet: charSet, httpEquiv: httpEquiv, name: name, property: property, content: content != null ? String(content) : undefined, media: media }, `${name ?? property ?? httpEquiv ?? charSet}-${index}`));
                      }), jsonLd && (_jsx("script", { type: "application/ld+json", 
 diff --git a/dist/react/Layout.d.ts b/dist/react/Layout.d.ts
-index 8f4633b..b3389ce 100644
+index 8f4633bf0e44d8bb388118f6e44c94d968ff531a..b3389ce9814aca91ff86c4b1f94d9cb67326b4c4 100644
 --- a/dist/react/Layout.d.ts
 +++ b/dist/react/Layout.d.ts
 @@ -3,6 +3,7 @@ export declare namespace Layout {
@@ -101,7 +196,7 @@ index 8f4633b..b3389ce 100644
  //# sourceMappingURL=Layout.d.ts.map
 \ No newline at end of file
 diff --git a/dist/react/Layout.js b/dist/react/Layout.js
-index dd8f3a8..faea5cb 100644
+index dd8f3a8162c7c39e4fb39b58cc2cdca86cdfd01b..faea5cb792f26a20dd0b21d4c96b6bd7a45c64c4 100644
 --- a/dist/react/Layout.js
 +++ b/dist/react/Layout.js
 @@ -2,7 +2,7 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
@@ -116,7 +211,7 @@ index dd8f3a8..faea5cb 100644
  //# sourceMappingURL=Layout.js.map
 \ No newline at end of file
 diff --git a/dist/react/Root.js b/dist/react/Root.js
-index 5f3d063..c58b72a 100644
+index 5f3d0637174afade9b86c31602683c04b333ea07..c58b72a183d02bca921fbaea8408077cdacb9b96 100644
 --- a/dist/react/Root.js
 +++ b/dist/react/Root.js
 @@ -3,13 +3,12 @@ import { config } from 'virtual:vocs/config';
@@ -136,7 +231,7 @@ index 5f3d063..c58b72a 100644
  //# sourceMappingURL=Root.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/NotFound.js b/dist/react/internal/NotFound.js
-index b189ea5..f78449c 100644
+index b189ea50873a5ef76bf044003476bf4660e9e245..f78449ca827a2fd0d97dc45d1cc627e527ee6441 100644
 --- a/dist/react/internal/NotFound.js
 +++ b/dist/react/internal/NotFound.js
 @@ -1,8 +1,9 @@
@@ -152,8 +247,82 @@ index b189ea5..f78449c 100644
  }
  //# sourceMappingURL=NotFound.js.map
 \ No newline at end of file
+diff --git a/dist/react/internal/openapi/CodeSample.client.d.ts b/dist/react/internal/openapi/CodeSample.client.d.ts
+index 75e6569f6c16e8db9ea6154463c8f918c075fec2..f49f14190f7db9138d4cc5587427b654abb1a7e1 100644
+--- a/dist/react/internal/openapi/CodeSample.client.d.ts
++++ b/dist/react/internal/openapi/CodeSample.client.d.ts
+@@ -24,6 +24,8 @@ export declare namespace CodeSample {
+          * @default true
+          */
+         anchors?: boolean | undefined;
++        /** Show only this many response lines until the reader expands the response. */
++        responseLines?: number | undefined;
+     };
+ }
+ //# sourceMappingURL=CodeSample.client.d.ts.map
+\ No newline at end of file
+diff --git a/dist/react/internal/openapi/CodeSample.client.js b/dist/react/internal/openapi/CodeSample.client.js
+index 2f799db292a3e76eaac4e3075abe2e13a488b7af..6a60f60ea2ca57ec66bfd9466032fe9d2e36f84d 100644
+--- a/dist/react/internal/openapi/CodeSample.client.js
++++ b/dist/react/internal/openapi/CodeSample.client.js
+@@ -19,13 +19,22 @@ import { registerSampleAnchors, revealAnchor } from './anchor-navigation.client.
+  * `data-v-openapi-sample*` attributes below.
+  */
+ export function CodeSample(props) {
+-    const { samples, responses, action, anchors = true } = props;
++    const { samples, responses, action, anchors = true, responseLines } = props;
+     const [sampleId, setSampleId] = useState(samples[0]?.id);
+     const [status, setStatus] = useState(responses[0]?.status);
+     // Long requests and requests with many query params collapse by default.
+     const [expanded, setExpanded] = useState(false);
+     const sample = samples.find((entry) => entry.id === sampleId) ?? samples[0];
+     const response = responses.find((entry) => entry.status === status) ?? responses[0];
++    // Responses longer than `responseLines` show their first lines until expanded.
++    const [responseExpanded, setResponseExpanded] = useState(false);
++    const responseLineCount = response ? response.code.split('\n').length : 0;
++    const responseHidden = responseLines !== undefined && responseLineCount > responseLines
++        ? responseLineCount - responseLines
++        : 0;
++    const responseView = response && responseHidden > 0 && !responseExpanded
++        ? truncateResponse(response, responseLines)
++        : response;
+     // Map each response to the set of schema anchor ids its example lines target,
+     // so a left-hand "Example" click can switch to the owning response tab before
+     // the matching line is revealed (see `revealResponseLine`).
+@@ -73,6 +82,7 @@ export function CodeSample(props) {
+                 const match = responseAnchors.find((entry) => entry.ids.has(id));
+                 if (match) {
+                     setStatus(match.status);
++                    setResponseExpanded(true);
+                     return;
+                 }
+                 if (requestAnchors.hiddenIds.has(id))
+@@ -81,9 +91,20 @@ export function CodeSample(props) {
+         });
+     }, [anchors, responseAnchors, requestAnchors]);
+     const view = sample?.collapsed && !expanded ? sample.collapsed : sample;
+-    return (_jsxs("div", { "data-v-openapi-sample": true, children: [sample && view && (_jsxs("div", { "data-v-openapi-sample-request": true, children: [_jsxs("div", { "data-v-openapi-sample-header": true, children: [_jsx(LanguageDropdown, { samples: samples, selected: sample, onSelect: (id) => setSampleId(id) }), _jsxs("div", { "data-v-openapi-sample-actions": true, children: [_jsx(CopyButton, { code: sample.code }), action] })] }), _jsx("div", { "data-v-openapi-sample-request-body": true, onClick: anchors ? onAnchorClick : undefined, children: _jsx(CodeToHtml, { code: view.display, lang: sample.lang, shrinkIndent: false, anchorRanges: anchors ? view.anchors : undefined, colorRanges: view.colorRanges, lineAnchors: anchors ? view.lineAnchors : undefined }) }), sample.collapsed && (_jsx("button", { type: "button", "data-v-openapi-sample-more": true, "aria-expanded": expanded, onClick: () => setExpanded((value) => !value), children: expanded ? (_jsxs(_Fragment, { children: [_jsx(LucideChevronUp, { "data-v-openapi-sample-more-icon": true }), sample.truncatedBody ? 'Collapse' : 'Show less'] })) : (_jsxs(_Fragment, { children: [_jsx(LucideChevronDown, { "data-v-openapi-sample-more-icon": true }), sample.truncatedBody ? 'Expand' : `Show ${sample.hiddenQueryCount} more`] })) }))] })), response && (_jsxs("div", { "data-v-openapi-sample-response": true, children: [_jsx("div", { "data-v-openapi-sample-tabs": true, children: responses.map((entry) => (_jsx(Tab, { active: entry.status === response.status, onClick: () => setStatus(entry.status), children: entry.status }, entry.status))) }), _jsx("div", { "data-v-openapi-sample-response-body": true, onClick: anchors ? onAnchorClick : undefined, children: _jsx(CodeToHtml, { code: response.code, lang: response.lang, shrinkIndent: false, dimRanges: response.placeholders, lineAnchors: anchors
+-                                ? response.linePaths.map((path) => path ? schemaPropertyId(response.idBase, path) : undefined)
+-                                : undefined }) })] }))] }));
++    return (_jsxs("div", { "data-v-openapi-sample": true, children: [sample && view && (_jsxs("div", { "data-v-openapi-sample-request": true, children: [_jsxs("div", { "data-v-openapi-sample-header": true, children: [_jsx(LanguageDropdown, { samples: samples, selected: sample, onSelect: (id) => setSampleId(id) }), _jsxs("div", { "data-v-openapi-sample-actions": true, children: [_jsx(CopyButton, { code: sample.code }), action] })] }), _jsx("div", { "data-v-openapi-sample-request-body": true, onClick: anchors ? onAnchorClick : undefined, children: _jsx(CodeToHtml, { code: view.display, lang: sample.lang, shrinkIndent: false, anchorRanges: anchors ? view.anchors : undefined, colorRanges: view.colorRanges, lineAnchors: anchors ? view.lineAnchors : undefined }) }), sample.collapsed && (_jsx("button", { type: "button", "data-v-openapi-sample-more": true, "aria-expanded": expanded, onClick: () => setExpanded((value) => !value), children: expanded ? (_jsxs(_Fragment, { children: [_jsx(LucideChevronUp, { "data-v-openapi-sample-more-icon": true }), sample.truncatedBody ? 'Collapse' : 'Show less'] })) : (_jsxs(_Fragment, { children: [_jsx(LucideChevronDown, { "data-v-openapi-sample-more-icon": true }), sample.truncatedBody ? 'Expand' : `Show ${sample.hiddenQueryCount} more`] })) }))] })), response && responseView && (_jsxs("div", { "data-v-openapi-sample-response": true, children: [_jsx("div", { "data-v-openapi-sample-tabs": true, children: responses.map((entry) => (_jsx(Tab, { active: entry.status === response.status, onClick: () => setStatus(entry.status), children: entry.status }, entry.status))) }), _jsx("div", { "data-v-openapi-sample-response-body": true, onClick: anchors ? onAnchorClick : undefined, children: _jsx(CodeToHtml, { code: responseView.code, lang: response.lang, shrinkIndent: false, dimRanges: responseView.placeholders, lineAnchors: anchors
++                                ? responseView.linePaths.map((path) => path ? schemaPropertyId(response.idBase, path) : undefined)
++                                : undefined }) }), responseHidden > 0 && (_jsx("button", { type: "button", "data-v-openapi-sample-more": true, "aria-expanded": responseExpanded, onClick: () => setResponseExpanded((value) => !value), children: responseExpanded ? (_jsxs(_Fragment, { children: [_jsx(LucideChevronUp, { "data-v-openapi-sample-more-icon": true }), "Collapse"] })) : (_jsxs(_Fragment, { children: [_jsx(LucideChevronDown, { "data-v-openapi-sample-more-icon": true }), `Show ${responseHidden} more lines`] })) }))] }))] }));
++}
++/** Keeps a response sample's first lines with their placeholders and line anchors. */
++function truncateResponse(response, lines) {
++    const code = response.code.split('\n').slice(0, lines).join('\n');
++    return {
++        code,
++        linePaths: response.linePaths.slice(0, lines),
++        placeholders: response.placeholders
++            .filter(([start]) => start < code.length)
++            .map(([start, end]) => [start, Math.min(end, code.length)]),
++    };
+ }
+ /**
+  * Navigates to the schema row matching a clicked element carrying a
 diff --git a/dist/react/internal/openapi/OpenApiPage.js b/dist/react/internal/openapi/OpenApiPage.js
-index 06cc466..b74f6a6 100644
+index 06cc466393643245bf0dfcc0c946e013c717a75c..b74f6a618fbfa9785649de41d8548bc4f4316815 100644
 --- a/dist/react/internal/openapi/OpenApiPage.js
 +++ b/dist/react/internal/openapi/OpenApiPage.js
 @@ -21,7 +21,7 @@ function OpenApiLayout(props) {
@@ -193,7 +362,7 @@ index 06cc466..b74f6a6 100644
  //# sourceMappingURL=OpenApiPage.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/Playground.client.d.ts b/dist/react/internal/openapi/Playground.client.d.ts
-index 1d2726b..c27f2b3 100644
+index 1d2726b6d7b2d7cc897c99dd326140aac83d16a7..c27f2b35470939910680d08f566836fbe828645d 100644
 --- a/dist/react/internal/openapi/Playground.client.d.ts
 +++ b/dist/react/internal/openapi/Playground.client.d.ts
 @@ -1,3 +1,4 @@
@@ -211,7 +380,7 @@ index 1d2726b..c27f2b3 100644
  }
  /**
 diff --git a/dist/react/internal/openapi/Playground.client.js b/dist/react/internal/openapi/Playground.client.js
-index 8b2cf49..08c4971 100644
+index 8b2cf490518a950cabc306795792e8268b0f41e2..08c49715b64adb33d39479317b9c07b671f14117 100644
 --- a/dist/react/internal/openapi/Playground.client.js
 +++ b/dist/react/internal/openapi/Playground.client.js
 @@ -3,6 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
@@ -274,73 +443,113 @@ index 8b2cf49..08c4971 100644
 -//# sourceMappingURL=Playground.client.js.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/PlaygroundStandalone.d.ts b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
-index fbec302..6fb0a3a 100644
+index fbec302a0515baeb6437e9119047a94eaf9d3bb8..4d98e1d4a24df13f9e050d3afe0944ab7faccfdd 100644
 --- a/dist/react/internal/openapi/PlaygroundStandalone.d.ts
 +++ b/dist/react/internal/openapi/PlaygroundStandalone.d.ts
-@@ -50,6 +50,8 @@ export declare namespace Playground {
+@@ -50,6 +50,12 @@ export declare namespace Playground {
           * @default false
           */
          hideQueryParams?: boolean | undefined;
-+        /** Editable query values for this embed, e.g. `chainId=42431`. */
++        /** Editable JSON request body for this embed. */
++        body?: string | undefined;
++        /** Editable path values for this embed, e.g. `address=0x…`. */
++        params?: string | undefined;
++        /** Editable query values for this embed, e.g. `chainId=42431`. Unnamed optional query parameters stay out of the sample. */
 +        query?: string | undefined;
      };
  }
  //# sourceMappingURL=PlaygroundStandalone.d.ts.map
 \ No newline at end of file
 diff --git a/dist/react/internal/openapi/PlaygroundStandalone.js b/dist/react/internal/openapi/PlaygroundStandalone.js
-index 0ef0a76..f63270c 100644
+index 0ef0a76d89d887bd13d6e03f23de6a7d313a1576..a95044623fd08f7001018e046e7b56c0bcafad2a 100644
 --- a/dist/react/internal/openapi/PlaygroundStandalone.js
 +++ b/dist/react/internal/openapi/PlaygroundStandalone.js
-@@ -1,5 +1,6 @@
+@@ -1,9 +1,12 @@
  import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  import { specs } from 'virtual:vocs/openapi';
-+import { operationWithQuery } from '../../../internal/openapi/query-presets.js';
++import { operationWithPreset } from '../../../internal/openapi/query-presets.js';
  import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js';
  import { CodeSample } from './CodeSample.client.js';
  import { findOperation } from './find-operation.js';
-@@ -35,7 +36,8 @@ export function Playground(props) {
+ import { PlaygroundProvider, TestRequestButton } from './Playground.client.js';
++/** Embedded responses show this many lines until the reader expands them. */
++const responseLines = 12;
+ /**
+  * Renders just the interactive request/response code sample for a single
+  * OpenAPI operation — the bordered "playground" box (the cURL/response viewer
+@@ -35,15 +38,20 @@ export function Playground(props) {
      const ir = specs[mount];
      if (!ir)
          return _jsxs("p", { children: ["No OpenAPI spec is mounted at ", mount, "."] });
 -    const operation = findOperation(ir, props);
 +    const found = findOperation(ir, props);
-+    const operation = found && operationWithQuery(found, props.query);
++    const preset = { body: props.body, params: props.params, query: props.query };
++    const operation = found && operationWithPreset(found, preset);
      if (!operation)
          return (_jsxs("p", { children: ["No matching operation found in the API mounted at ", mount, ". Pass an ", _jsx("code", { children: "operationId" }), ", or a ", _jsx("code", { children: "method" }), " and ", _jsx("code", { children: "path" }), "."] }));
      const samples = codeSamples(operation, ir.servers[0]?.url, {
-@@ -44,6 +46,5 @@ export function Playground(props) {
++        // Embeds show the whole request; only the response collapses.
++        expand: true,
+         hideQueryParams: props.hideQueryParams,
+     });
      if (samples.length === 0)
          return null;
      const responses = responseSamples(operation);
 -    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
-+    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, queryPreset: props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
++    return (_jsx("div", { "data-v-openapi": true, children: _jsx(PlaygroundProvider, { mount: ir.path, queryPreset: props.body || props.params || props.query
++                ? { ...preset, method: operation.method, path: operation.path }
++                : undefined, children: _jsx(CodeSample, { samples: samples, responses: responses, anchors: props.anchors, responseLines: responseLines, action: _jsx(TestRequestButton, { method: operation.method, path: operation.path, example: operation.rpcExample }) }) }) }));
  }
 -//# sourceMappingURL=PlaygroundStandalone.js.map
 \ No newline at end of file
 diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
 new file mode 100644
-index 0000000..6ee138e
+index 0000000000000000000000000000000000000000..e6f2075e910a21847a353e3de0c7b725de256196
 --- /dev/null
 +++ b/src/internal/openapi/query-presets.ts
-@@ -0,0 +1,53 @@
+@@ -0,0 +1,122 @@
 +import type { IrOperation } from './parser.js'
 +
-+export type QueryPreset = { method: string; path: string; query: string }
++/** Editable values for one inline playground. Each string uses URL query syntax. */
++export type QueryPreset = {
++  method: string
++  path: string
++  /** JSON request body, such as `{"amount":"1000000"}`. */
++  body?: string | undefined
++  /** Path values, such as `address=0x…`. */
++  params?: string | undefined
++  /** Query values, such as `chainId=42431`. */
++  query?: string | undefined
++}
++
++/** The editable parts of a preset, without the operation it targets. */
++export type Preset = Omit<QueryPreset, 'method' | 'path'>
 +
 +type Parameter = {
 +  name?: string
 +  in?: string
++  required?: boolean
 +  schema?: Record<string, unknown>
 +}
 +
-+function presetParameters<T extends Parameter>(parameters: T[], query: string): T[] {
-+  const values = new URLSearchParams(query)
++type Values = { path: URLSearchParams; query: URLSearchParams }
++
++function hasPreset(preset?: Preset): preset is Preset {
++  return Boolean(preset?.body || preset?.params || preset?.query)
++}
++
++function presetValues(preset: Preset): Values {
++  return { path: new URLSearchParams(preset.params), query: new URLSearchParams(preset.query) }
++}
++
++function presetParameters<T extends Parameter>(parameters: T[], values: Values): T[] {
 +  return parameters.map((parameter) => {
-+    if (parameter.in !== 'query' || !parameter.name || !values.has(parameter.name))
-+      return parameter
-+    const raw = values.get(parameter.name)!
++    const source =
++      parameter.in === 'query' ? values.query : parameter.in === 'path' ? values.path : undefined
++    if (!source || !parameter.name || !source.has(parameter.name)) return parameter
++    const raw = source.get(parameter.name)!
 +    const value = parameter.schema?.type === 'array' ? raw.split(',') : raw
-+    const { example: _example, ...rest } = parameter
++    const { example: _example, ...rest } = parameter as T & { example?: unknown }
 +    return {
 +      ...rest,
 +      // Scalar reads parameter examples and needs optional rows explicitly enabled.
@@ -351,10 +560,48 @@ index 0000000..6ee138e
 +  })
 +}
 +
++// Reject preset names the operation lacks, so a typo or spec rename fails the build.
++function assertKnown(operation: IrOperation, preset: Preset, values: Values) {
++  for (const location of ['path', 'query'] as const) {
++    const names = new Set(
++      operation.parameters.filter((parameter) => parameter.in === location).map((parameter) => parameter.name),
++    )
++    for (const name of values[location].keys())
++      if (!names.has(name))
++        throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no ${location} parameter \`${name}\`.`)
++  }
++  if (preset.body && !operation.requestBody)
++    throw new Error(`OpenAPI operation ${operation.method} ${operation.path} has no request body.`)
++}
++
++/**
++ * Apply editable path, query, and body examples to one embed without changing its
++ * shared spec. Optional query parameters the preset doesn't name stay out of the sample.
++ */
++export function operationWithPreset(operation: IrOperation, preset?: Preset): IrOperation {
++  if (!hasPreset(preset)) return operation
++  const values = presetValues(preset)
++  assertKnown(operation, preset, values)
++  const parameters = presetParameters(operation.parameters, values).filter(
++    (parameter) =>
++      parameter.in !== 'query' || parameter.required || values.query.has(parameter.name),
++  )
++  const { requestBody } = operation
++  if (!preset.body || !requestBody) return { ...operation, parameters }
++  const example = JSON.parse(preset.body) as unknown
++  return {
++    ...operation,
++    parameters,
++    requestBody: {
++      ...requestBody,
++      content: requestBody.content.map((media, index) => (index === 0 ? { ...media, example } : media)),
++    },
++  }
++}
++
 +/** Apply editable query examples to one embed without changing its shared spec. */
 +export function operationWithQuery(operation: IrOperation, query?: string): IrOperation {
-+  if (!query) return operation
-+  return { ...operation, parameters: presetParameters(operation.parameters, query) }
++  return operationWithPreset(operation, { query })
 +}
 +
 +/** Prepare the isolated Scalar document used by this playground instance. */
@@ -362,22 +609,64 @@ index 0000000..6ee138e
 +  document: Record<string, unknown>,
 +  preset?: QueryPreset,
 +): Record<string, unknown> {
-+  if (!preset?.query) return document
++  if (!preset || !hasPreset(preset)) return document
 +  const copy = structuredClone(document)
 +  const paths = copy.paths as Record<string, Record<string, unknown>> | undefined
 +  const path = paths?.[preset.path]
-+  const operation = path?.[preset.method.toLowerCase()] as
-+    | Record<string, unknown>
-+    | undefined
++  const operation = path?.[preset.method.toLowerCase()] as Record<string, unknown> | undefined
 +  if (!operation) return copy
++  const values = presetValues(preset)
 +  for (const owner of [path!, operation]) {
 +    if (Array.isArray(owner.parameters))
-+      owner.parameters = presetParameters(owner.parameters, preset.query)
++      owner.parameters = presetParameters(owner.parameters, values)
++  }
++  const content = (operation.requestBody as { content?: Record<string, Record<string, unknown>> } | undefined)
++    ?.content
++  const media = content?.['application/json']
++  if (preset.body && media) {
++    // Scalar fills the request body from the media example before schema examples.
++    delete media.examples
++    media.example = JSON.parse(preset.body)
 +  }
 +  return copy
 +}
+diff --git a/src/internal/openapi/sample.ts b/src/internal/openapi/sample.ts
+index 19d5fd064bb7bfce43b34a10a6040f166e14503a..786cf42b1bf7d635155d45a85c6706dd7923afed 100644
+--- a/src/internal/openapi/sample.ts
++++ b/src/internal/openapi/sample.ts
+@@ -98,7 +98,7 @@ export function codeSamples(
+   // When there are many query params, also prepare a request limited to the
+   // first few so the sample can collapse the rest behind a "Show more" toggle.
+   const collapsedRequest =
+-    queryCount > collapseQueryThreshold
++    !options?.expand && queryCount > collapseQueryThreshold
+       ? { ...request, queryString: (request.queryString ?? []).slice(0, collapseQueryThreshold) }
+       : undefined
+ 
+@@ -131,7 +131,11 @@ export function codeSamples(
+       }
+     }
+     const collapsedDisplay = sample.collapsed?.display ?? display
+-    if (request.postData && collapsedDisplay.split('\n').length > collapseBodyLineThreshold) {
++    if (
++      !options?.expand &&
++      request.postData &&
++      collapsedDisplay.split('\n').length > collapseBodyLineThreshold
++    ) {
+       const truncatedDisplay = collapsedDisplay
+         .split('\n')
+         .slice(0, collapseBodyLineThreshold)
+@@ -151,6 +155,8 @@ export function codeSamples(
+ 
+ export declare namespace codeSamples {
+   type Options = {
++    /** Show every query parameter and the whole body, without collapsing. */
++    expand?: boolean | undefined
+     /** Omit query parameters from the generated request sample. */
+     hideQueryParams?: boolean | undefined
+   }
 diff --git a/src/react/Head.tsx b/src/react/Head.tsx
-index e7b51ed..004c472 100644
+index e7b51ed6d9642a903399dc0d18253a0f3cc955e8..004c4722f97ab7a9db4f0c876ca19b3fa9b97eab 100644
 --- a/src/react/Head.tsx
 +++ b/src/react/Head.tsx
 @@ -9,7 +9,7 @@ import * as MdxPageContext from './MdxPageContext.js'
@@ -407,7 +696,7 @@ index e7b51ed..004c472 100644
  }
  
 diff --git a/src/react/Layout.tsx b/src/react/Layout.tsx
-index ca77c7a..4c8fbb9 100644
+index ca77c7aeca381f65af6d7a73f6a79d61890adcb3..4c8fbb9d3ef6566c4c1f7ff1f80cf8d8705ed7d7 100644
 --- a/src/react/Layout.tsx
 +++ b/src/react/Layout.tsx
 @@ -2,10 +2,10 @@ import { Head } from './Head.js'
@@ -431,7 +720,7 @@ index ca77c7a..4c8fbb9 100644
    }
  }
 diff --git a/src/react/Root.tsx b/src/react/Root.tsx
-index 77180d1..495ce44 100644
+index 77180d1409e79039d1dcc0e65c218021224b596b..495ce44c4fd6b413e7439efa8b606fa1bc8a8a34 100644
 --- a/src/react/Root.tsx
 +++ b/src/react/Root.tsx
 @@ -2,7 +2,6 @@ import { config } from 'virtual:vocs/config'
@@ -451,7 +740,7 @@ index 77180d1..495ce44 100644
        <body data-version="1.0">
          <Root_client>{children}</Root_client>
 diff --git a/src/react/internal/NotFound.tsx b/src/react/internal/NotFound.tsx
-index ccbf3ac..409c67c 100644
+index ccbf3ac5dbb4218fb4d6943a87e8bbb5f2a2c3e3..409c67cd99bf6e16588a1fbe5e0ed82a5cc4dd60 100644
 --- a/src/react/internal/NotFound.tsx
 +++ b/src/react/internal/NotFound.tsx
 @@ -1,43 +1,48 @@
@@ -476,51 +765,40 @@ index ccbf3ac..409c67c 100644
 +        data-v-not-found
        >
 -        <LucideFileQuestion className="vocs:size-10" />
+-      </div>
 +        <div
 +          className="vocs:flex vocs:items-center vocs:justify-center vocs:size-20 vocs:rounded-full vocs:bg-surface vocs:border vocs:border-primary vocs:text-secondary vocs:mb-6"
 +          data-v-not-found-icon
 +        >
 +          <LucideFileQuestion className="vocs:size-10" />
 +        </div>
-+
-+        <h1
-+          className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
-+          data-v-not-found-title
-+        >
-+          Page not found
-+        </h1>
-+
-+        <p
-+          className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
-+          data-v-not-found-description
-+        >
-+          The page you're looking for doesn't exist or has been moved.
-+        </p>
-+
-+        <Link
-+          className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
-+          data-v-not-found-link
-+          to="/"
-+        >
-+          <LucideHome className="vocs:size-4 vocs:text-secondary" />
-+          Back to home
-+        </Link>
-       </div>
--
+ 
 -      <h1
 -        className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
 -        data-v-not-found-title
 -      >
 -        Page not found
 -      </h1>
--
++        <h1
++          className="vocs:text-heading vocs:text-h1 vocs:font-medium vocs:tracking-[-0.04em] vocs:leading-h1 vocs:mb-3"
++          data-v-not-found-title
++        >
++          Page not found
++        </h1>
+ 
 -      <p
 -        className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
 -        data-v-not-found-description
 -      >
 -        The page you're looking for doesn't exist or has been moved.
 -      </p>
--
++        <p
++          className="vocs:text-secondary vocs:leading-p vocs:tracking-normal vocs:max-w-md vocs:mb-8"
++          data-v-not-found-description
++        >
++          The page you're looking for doesn't exist or has been moved.
++        </p>
+ 
 -      <Link
 -        className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
 -        data-v-not-found-link
@@ -530,12 +808,138 @@ index ccbf3ac..409c67c 100644
 -        Back to home
 -      </Link>
 -    </div>
++        <Link
++          className="vocs:inline-flex vocs:items-center vocs:gap-2 vocs:px-5 vocs:py-2.5 vocs:rounded-lg vocs:bg-surface vocs:border vocs:border-primary vocs:text-heading vocs:font-medium vocs:transition-colors vocs:duration-150 vocs:hover:bg-surfaceMuted"
++          data-v-not-found-link
++          to="/"
++        >
++          <LucideHome className="vocs:size-4 vocs:text-secondary" />
++          Back to home
++        </Link>
++      </div>
 +    </>
    )
  }
  
+diff --git a/src/react/internal/openapi/CodeSample.client.tsx b/src/react/internal/openapi/CodeSample.client.tsx
+index b89a337e46af1e0835977020baebecb56f701ca7..0f36048ff1670824a8ea4420ae62f44b594a0753 100644
+--- a/src/react/internal/openapi/CodeSample.client.tsx
++++ b/src/react/internal/openapi/CodeSample.client.tsx
+@@ -21,7 +21,7 @@ import { registerSampleAnchors, revealAnchor } from './anchor-navigation.client.
+  * `data-v-openapi-sample*` attributes below.
+  */
+ export function CodeSample(props: CodeSample.Props) {
+-  const { samples, responses, action, anchors = true } = props
++  const { samples, responses, action, anchors = true, responseLines } = props
+   const [sampleId, setSampleId] = useState(samples[0]?.id)
+   const [status, setStatus] = useState(responses[0]?.status)
+   // Long requests and requests with many query params collapse by default.
+@@ -29,6 +29,17 @@ export function CodeSample(props: CodeSample.Props) {
+ 
+   const sample = samples.find((entry) => entry.id === sampleId) ?? samples[0]
+   const response = responses.find((entry) => entry.status === status) ?? responses[0]
++  // Responses longer than `responseLines` show their first lines until expanded.
++  const [responseExpanded, setResponseExpanded] = useState(false)
++  const responseLineCount = response ? response.code.split('\n').length : 0
++  const responseHidden =
++    responseLines !== undefined && responseLineCount > responseLines
++      ? responseLineCount - responseLines
++      : 0
++  const responseView =
++    response && responseHidden > 0 && !responseExpanded
++      ? truncateResponse(response, responseLines!)
++      : response
+ 
+   // Map each response to the set of schema anchor ids its example lines target,
+   // so a left-hand "Example" click can switch to the owning response tab before
+@@ -78,6 +89,7 @@ export function CodeSample(props: CodeSample.Props) {
+         const match = responseAnchors.find((entry) => entry.ids.has(id))
+         if (match) {
+           setStatus(match.status)
++          setResponseExpanded(true)
+           return
+         }
+         if (requestAnchors.hiddenIds.has(id)) setExpanded(true)
+@@ -137,7 +149,7 @@ export function CodeSample(props: CodeSample.Props) {
+         </div>
+       )}
+ 
+-      {response && (
++      {response && responseView && (
+         <div data-v-openapi-sample-response>
+           <div data-v-openapi-sample-tabs>
+             {responses.map((entry) => (
+@@ -154,25 +166,57 @@ export function CodeSample(props: CodeSample.Props) {
+           {/* biome-ignore lint/a11y/noStaticElementInteractions: progressive enhancement over already-linkable property anchors */}
+           <div data-v-openapi-sample-response-body onClick={anchors ? onAnchorClick : undefined}>
+             <CodeToHtml
+-              code={response.code}
++              code={responseView.code}
+               lang={response.lang}
+               shrinkIndent={false}
+-              dimRanges={response.placeholders}
++              dimRanges={responseView.placeholders}
+               lineAnchors={
+                 anchors
+-                  ? response.linePaths.map((path) =>
++                  ? responseView.linePaths.map((path) =>
+                       path ? schemaPropertyId(response.idBase, path) : undefined,
+                     )
+                   : undefined
+               }
+             />
+           </div>
++          {responseHidden > 0 && (
++            <button
++              type="button"
++              data-v-openapi-sample-more
++              aria-expanded={responseExpanded}
++              onClick={() => setResponseExpanded((value) => !value)}
++            >
++              {responseExpanded ? (
++                <>
++                  <LucideChevronUp data-v-openapi-sample-more-icon />
++                  Collapse
++                </>
++              ) : (
++                <>
++                  <LucideChevronDown data-v-openapi-sample-more-icon />
++                  {`Show ${responseHidden} more lines`}
++                </>
++              )}
++            </button>
++          )}
+         </div>
+       )}
+     </div>
+   )
+ }
+ 
++/** Keeps a response sample's first lines with their placeholders and line anchors. */
++function truncateResponse(response: OpenApi.ResponseSample, lines: number) {
++  const code = response.code.split('\n').slice(0, lines).join('\n')
++  return {
++    code,
++    linePaths: response.linePaths.slice(0, lines),
++    placeholders: response.placeholders
++      .filter(([start]) => start < code.length)
++      .map(([start, end]): [number, number] => [start, Math.min(end, code.length)]),
++  }
++}
++
+ /**
+  * Navigates to the schema row matching a clicked element carrying a
+  * `data-anchor` id. Used for both response example lines (per-line anchors) and
+@@ -300,5 +344,7 @@ export declare namespace CodeSample {
+      * @default true
+      */
+     anchors?: boolean | undefined
++    /** Show only this many response lines until the reader expands the response. */
++    responseLines?: number | undefined
+   }
+ }
 diff --git a/src/react/internal/openapi/OpenApiPage.tsx b/src/react/internal/openapi/OpenApiPage.tsx
-index 939c937..8207ef5 100644
+index 939c937581ec434975aee43e7284c6c2d48add93..8207ef51b7f1adef71f1910f5b82880961c1416f 100644
 --- a/src/react/internal/openapi/OpenApiPage.tsx
 +++ b/src/react/internal/openapi/OpenApiPage.tsx
 @@ -20,6 +20,7 @@ import { Prose, ReferenceGroup, ReferenceOverview } from './Reference.js'
@@ -613,7 +1017,7 @@ index 939c937..8207ef5 100644
    type Props = {
      /** Mount path identifying which spec to render (e.g. `/api`). */
 diff --git a/src/react/internal/openapi/Playground.client.tsx b/src/react/internal/openapi/Playground.client.tsx
-index ff2d824..921f3a9 100644
+index ff2d82408520da58b67b7168a4c3ebac5ff1b869..921f3a9ded9be3acac16be2680f332d319b9d5c2 100644
 --- a/src/react/internal/openapi/Playground.client.tsx
 +++ b/src/react/internal/openapi/Playground.client.tsx
 @@ -3,6 +3,7 @@
@@ -678,42 +1082,73 @@ index ff2d824..921f3a9 100644
  }
  
 diff --git a/src/react/internal/openapi/PlaygroundStandalone.tsx b/src/react/internal/openapi/PlaygroundStandalone.tsx
-index db348a0..f35e4d8 100644
+index db348a0cae5b33c5ac89a417a27ec6b0942234d2..d5783c3cd63c20689789d924ad04be4bf6214834 100644
 --- a/src/react/internal/openapi/PlaygroundStandalone.tsx
 +++ b/src/react/internal/openapi/PlaygroundStandalone.tsx
-@@ -1,4 +1,5 @@
+@@ -1,9 +1,13 @@
  import { specs } from 'virtual:vocs/openapi'
-+import { operationWithQuery } from '../../../internal/openapi/query-presets.js'
++import { operationWithPreset } from '../../../internal/openapi/query-presets.js'
  import { codeSamples, responseSamples } from '../../../internal/openapi/sample.js'
  import { CodeSample } from './CodeSample.client.js'
  import { findOperation } from './find-operation.js'
-@@ -41,7 +42,8 @@ export function Playground(props: Playground.Props) {
+ import { PlaygroundProvider, TestRequestButton } from './Playground.client.js'
+ 
++/** Embedded responses show this many lines until the reader expands them. */
++const responseLines = 12
++
+ /**
+  * Renders just the interactive request/response code sample for a single
+  * OpenAPI operation — the bordered "playground" box (the cURL/response viewer
+@@ -41,7 +45,9 @@ export function Playground(props: Playground.Props) {
    const ir = specs[mount]
    if (!ir) return <p>No OpenAPI spec is mounted at {mount}.</p>
  
 -  const operation = findOperation(ir, props)
 +  const found = findOperation(ir, props)
-+  const operation = found && operationWithQuery(found, props.query)
++  const preset = { body: props.body, params: props.params, query: props.query }
++  const operation = found && operationWithPreset(found, preset)
    if (!operation)
      return (
        <p>
-@@ -58,7 +60,10 @@ export function Playground(props: Playground.Props) {
+@@ -51,6 +57,8 @@ export function Playground(props: Playground.Props) {
+     )
+ 
+   const samples = codeSamples(operation, ir.servers[0]?.url, {
++    // Embeds show the whole request; only the response collapses.
++    expand: true,
+     hideQueryParams: props.hideQueryParams,
+   })
+   if (samples.length === 0) return null
+@@ -58,11 +66,19 @@ export function Playground(props: Playground.Props) {
  
    return (
      <div data-v-openapi>
 -      <PlaygroundProvider mount={ir.path}>
 +      <PlaygroundProvider
 +        mount={ir.path}
-+        queryPreset={props.query ? { method: operation.method, path: operation.path, query: props.query } : undefined}
++        queryPreset={
++          props.body || props.params || props.query
++            ? { ...preset, method: operation.method, path: operation.path }
++            : undefined
++        }
 +      >
          <CodeSample
            samples={samples}
            responses={responses}
-@@ -107,5 +112,7 @@ export declare namespace Playground {
+           anchors={props.anchors}
++          responseLines={responseLines}
+           action={
+             <TestRequestButton
+               method={operation.method}
+@@ -107,5 +123,11 @@ export declare namespace Playground {
       * @default false
       */
      hideQueryParams?: boolean | undefined
-+    /** Editable query values for this embed, e.g. `chainId=42431`. */
++    /** Editable JSON request body for this embed. */
++    body?: string | undefined
++    /** Editable path values for this embed, e.g. `address=0x…`. */
++    params?: string | undefined
++    /** Editable query values for this embed, e.g. `chainId=42431`. Unnamed optional query parameters stay out of the sample. */
 +    query?: string | undefined
    }
  }

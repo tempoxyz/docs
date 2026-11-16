@@ -8,7 +8,7 @@ import {
   type IrOperation,
   parse,
 } from '../../node_modules/vocs/dist/internal/openapi/parser.js'
-import { operationWithQuery } from '../../node_modules/vocs/dist/internal/openapi/query-presets.js'
+import { operationWithPreset } from '../../node_modules/vocs/dist/internal/openapi/query-presets.js'
 import { groupPath } from '../../node_modules/vocs/dist/internal/openapi/route.js'
 import { codeSamples } from '../../node_modules/vocs/dist/internal/openapi/sample.js'
 import { tempoAgentSetupCommands } from './ai-install-commands'
@@ -625,8 +625,13 @@ function renderOpenApi(
       throw new TypeError(`Unknown OpenAPI operation for Markdown output: ${operationId}`)
     const href = `${mount}/${groupPath(group)}#${operation.id}`
     const query = optionalStaticStringAttribute(node, 'query')
+    const preset = {
+      body: optionalStaticStringAttribute(node, 'body'),
+      params: optionalStaticStringAttribute(node, 'params'),
+      query,
+    }
     const { sampleOperation, authentication } = apiAuthentication(
-      initialRequest(operationWithQuery(operation, query), query),
+      initialRequest(operationWithPreset(operation, preset), query),
       ir,
     )
     const samples = codeSamples(sampleOperation, ir.servers[0]?.url, {
