@@ -112,7 +112,7 @@ The SPF can replay an open Zone tip without withdrawal finalization. Settlement 
 
 ### Validation Deployment Modes
 
-On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HOST:PORT`. The sequencer waits for the remote prover's successful batch result and nonempty Nitro attestation before submission. It collects the settlement certificate in parallel.
+On a sequencer, `--sequencer.enable-prover` requires a prover address for the active Tempo hardfork, currently `--sequencer.prover-address T13=HOST:PORT`. The sequencer waits for the remote prover's successful batch result and nonempty Nitro attestation before submission. It collects the settlement certificate in parallel.
 
 `--sequencer.enable-prover` requires a sequencer and is rejected on `rpc_only` followers. The unconfigured sequencer compatibility path submits empty proof bytes. It can't satisfy an enforcing verifier.
 
