@@ -8,10 +8,13 @@ interactive: true
 import { Card, Cards } from 'vocs'
 
 import { TidxQuery } from '../../../../components/TidxQuery'
+import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
 
 # Spending Limits
 
 Caps how much of one TIP-20 token an access key can spend, such as 500 OUSD a day.
+
+<AdminAccessKeysT14 />
 
 ## Overview
 
@@ -83,7 +86,7 @@ LIMIT 10`}
 
 ## Change a Limit
 
-Enough signers to reach the threshold, or, before T14, an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's limit without revoking it. Set the new limit with Viem's [`accessKey.updateLimit`](https://viem.sh/tempo/actions/accessKey.updateLimit).
+Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's limit without revoking it. Set the new limit with Viem's [`accessKey.updateLimit`](https://viem.sh/tempo/actions/accessKey.updateLimit).
 
 The update sets both the limit and what's left of it to the new value. Later periods renew to the new value. For example, a key has spent 400 of its 500 OUSD today. Updating it to `parseUnits('600', 6)` lets it spend 600 more today, not 100. It then spends 600 a day after that. The period and the current period's end stay the same. On a key with no limits, the update turns limits on.
 
@@ -92,7 +95,7 @@ The update sets both the limit and what's left of it to the new value. Later per
 ## Limits
 
 - A limited access key can't change limits, including its own.
-- `updateLimit` reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)) or an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)). Before T14, it also reverts on an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits. From T14, a key stored as admin is a regular access key, so `updateLimit` can limit it.
+- `updateLimit` reverts on a revoked key ([`KeyAlreadyRevoked`](/docs/protocol/transactions/AccountKeychain#error-keyalreadyrevoked)) or an expired key ([`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired)). It also reverts on an admin key ([`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid)), since admin keys have no limits.
 
 Specification: [Account Keychain spending limits](/docs/protocol/transactions/AccountKeychain#spending-limit-enforcement).
 

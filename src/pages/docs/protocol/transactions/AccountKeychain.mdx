@@ -23,7 +23,7 @@ import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
 
 The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) and admin access keys to provision secondary keys. Limited access keys can have expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
 
-`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management until T14, which removes admin keys ([details](#t14-admin-access-keys-removed)). Access keys cannot submit transaction-level contract-creation calls (`to` omitted). Calls to permitted factory contracts can still create contracts internally.
+`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access keys cannot submit transaction-level contract-creation calls (`to` omitted). Calls to permitted factory contracts can still create contracts internally.
 
 See [gas parameters](/docs/protocol/fees/spec-fee#gas-parameters) for calldata requirements and gas charges.
 
@@ -67,16 +67,6 @@ The protocol enforces a strict hierarchy at validation time:
    - Subject to call-scope checks during execution
    - Cannot submit transaction-level creation calls
    - Can have expiry timestamps
-
-### T14: Admin Access Keys Removed
-
-From the [T14 network upgrade](/docs/protocol/upgrades/t14) ([TIP-1137](https://tips.sh/1137)), the admin-key rules on this page apply only to T6 through T13 blocks:
-
-- `authorizeAdminKey` reverts with `UnknownFunctionSelector`, and a `key_authorization` with `is_admin = true` is invalid.
-- Only the Root Key manages access keys. For an account with a configuration commitment, only enough signers to reach its threshold do. `authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`, and `burnKeyAuthorizationWitness` revert with `UnauthorizedCaller` when an access key signs the transaction.
-- A key stored with `is_admin = true` before T14 acts as a regular access key with no expiry, spending limit, or call scope. It still signs transactions and passes `verifyKeychain`, but manages no keys. The Root Key can restrict it with `updateSpendingLimit` and `setAllowedCalls`, or revoke it with `revokeKey`.
-- `isAdminKey(account, keyId)` returns `true` only when `keyId == account` and the account has no configuration commitment.
-- `isAdminKey` and `verifyKeychainAdmin` keep their selectors, so existing callers don't revert. The `AdminKeyAuthorized` event, the `is_admin` storage byte, and the `is_admin` and `account` fields of `KeyAuthorization` stay for historical logs and encoding compatibility.
 
 ## Storage
 
@@ -279,8 +269,6 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 
 ### Admin Key Authorization
 
-Applies before T14 only. From T14, `authorizeAdminKey` reverts with `UnknownFunctionSelector` ([details](#t14-admin-access-keys-removed)).
-
 - Creates a new key entry with `is_admin = true`.
 - Emits the existing `KeyAuthorized` event and the additional `AdminKeyAuthorized` event.
 - Checks that the account has not burned the provided `witness` and emits `KeyAuthorizationWitness`. `bytes32(0)` is valid. Successful authorization MUST NOT burn the witness; it remains usable for other authorizations until explicitly burned.
@@ -344,7 +332,7 @@ Burning a witness does not revoke keys already authorized with it; use `revokeKe
 - `getKey(...)` returns key metadata.
 - `getRemainingLimitWithPeriod(...)` returns the effective `remaining` amount and current `periodEnd` for a key-token pair, accounting for periodic rollover.
 - `getAllowedCalls(...)` returns `(isScoped, scopes)`. Unrestricted keys return `isScoped = false`. Scoped keys return `isScoped = true` with their `CallScope[]`. Missing, revoked, or expired access keys return `isScoped = true, scopes = []` (scoped deny-all).
-- `isAdminKey(...)` returns `true` for the Root Key and for active, non-revoked, non-expired admin access keys. From T14, it returns `true` only for the Root Key of an account without a configuration commitment.
+- `isAdminKey(...)` returns `true` for the Root Key and for active, non-revoked, non-expired admin access keys.
 - `getTransactionKey()` returns the key used in the current transaction. `address(0)` means the Root Key.
 - Missing, revoked, or expired keys return zeroed limit values.
 

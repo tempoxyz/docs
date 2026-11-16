@@ -6,10 +6,13 @@ description: Give each signer a weight and set the total weight a transaction ne
 
 import { Card, Cards } from 'vocs'
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
+import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
 
 # Signing Thresholds
 
 Sets the total signer weight a transaction needs before a configurable account can pay.
+
+<AdminAccessKeysT14 />
 
 ## Overview
 
@@ -44,7 +47,7 @@ The passkey approves alone. The backup and recovery keys approve together. Eithe
 
 Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, configuration updates, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it. Each pays alone within its limits.
 
-An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits. Once the signers authorize one, it can pay and authorize other access keys without reaching the threshold. Authorize one only if you'd let that single key act for the whole account. From T14, Tempo rejects new admin keys, and existing ones can't manage keys.
+An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits. Once the signers authorize one, it can pay and authorize other access keys without reaching the threshold. Authorize one only if you'd let that single key act for the whole account.
 
 To change signers or the threshold, send a [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer), approved at the current threshold.
 

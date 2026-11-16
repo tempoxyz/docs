@@ -584,8 +584,6 @@ Note: `expiry`, `limits`, `allowed_calls`, `witness`, `is_admin`, and `account` 
 
 When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` must be omitted or empty because admin keys are only for key management. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
 
-From T14 ([TIP-1137](https://tips.sh/1137)), a `key_authorization` with `is_admin = true` is invalid, and only the target account's root key may sign a `key_authorization`. For an account with a configuration commitment, only enough signers to reach its threshold may. A signature by any access key is invalid. If `account` is present, it must equal the target account. The `is_admin` and `account` fields keep their encodings.
-
 :::warning[Expiry encoding]
 For `key_authorization`, the canonical non-expiring encoding omits `expiry` (`None`).
 
@@ -643,8 +641,7 @@ The protocol enforces a strict three-role hierarchy:
 - No spending limits
 - Can authorize, revoke, and update access keys
 
-**Admin Access Keys** (keyId != address(0), `is_admin = true`, before T14 only):
-- From T14, Tempo rejects new admin keys, and a key stored as admin acts as a regular access key with no expiry, spending limit, or call scope. It can't manage keys ([TIP-1137](https://tips.sh/1137)).
+**Admin Access Keys** (keyId != address(0), `is_admin = true`):
 - Secondary keys authorized by the Root Key or another active admin access key
 - Can call key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Cannot carry spending limits, call scopes, or expiry

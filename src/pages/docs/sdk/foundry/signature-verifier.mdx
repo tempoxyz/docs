@@ -4,9 +4,13 @@ description: Verify secp256k1, P256, and WebAuthn signatures in smart contracts 
 ogImage: /og/2026-q4/og_2026-q4_docs_sdk-foundry-signature-verifier_title-f5_v02.png
 ---
 
+import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
+
 # Signature Verification with Foundry
 
 The [`SignatureVerifier` precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) is available on Tempo. It provides signature verification for secp256k1, P256, and WebAuthn through a single interface — no custom verifier contracts needed.
+
+<AdminAccessKeysT14 />
 
 The Foundry project template for Tempo ships with a working example that demonstrates signature verification in a relayed mail contract. Initialize it with:
 
@@ -28,7 +32,7 @@ Relayed mode uses the `SignatureVerifier` precompile to verify the sender's sign
 - Maintains forward compatibility with future Tempo account types
 
 :::info[T6 keychain verification]
-On T6 networks, `verifyKeychain(account, digest, signature)` checks an active access-key signature. `verifyKeychainAdmin(account, digest, signature)` checks a root-key or admin-key signature. From T14, it returns `true` only when the signer is the account's own root key and the account has no configuration commitment ([TIP-1137](https://tips.sh/1137)). Both require the V2 keychain signature encoding; neither checks token budgets or call scopes. Include chain ID, contract address, and account address in the digest you ask users or keys to sign.
+On T6 networks, `verifyKeychain(account, digest, signature)` checks an active access-key signature. `verifyKeychainAdmin(account, digest, signature)` checks a root-key or admin-key signature. Both require the V2 keychain signature encoding; neither checks token budgets or call scopes. Include chain ID, contract address, and account address in the digest you ask users or keys to sign.
 :::
 
 ## Contract example
