@@ -4,6 +4,8 @@ description: Partner-focused overview and integration notes for the T6 network u
 ogImage: /og/2026-q4/og_2026-q4_docs_protocol-upgrades-t6_linework-000_v02.png
 ---
 
+import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
+
 # T6 Network Upgrade
 
 T6 gives partners more control over account safety and user key management. It adds account-level receive policies so users can choose which TIP-20 deposits their account accepts; transfers outside the receive policy go to a recoverable hold, and it adds admin access keys so users and apps can manage passkeys and delegated keys without relying on the root wallet for every change.
@@ -60,6 +62,8 @@ Try the [receive policies demo](https://tempo.xyz/receive-policies) to see the c
 Read the [technical specification](https://tips.sh/1028).
 
 ### Admin access keys
+
+<AdminAccessKeysT14 />
 
 Admin access keys let an account delegate key management without requiring the root wallet for every key-management action. This helps partners build smoother passkey and delegated-access flows while keeping key management tied to the user's account.
 
