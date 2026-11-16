@@ -548,6 +548,22 @@ export const partnerLogoHastra = style({
   backgroundImage: 'url("/assets/partners/directory/hastra.ico")',
 })
 
+export const partnerLogoTenbin = style({
+  backgroundImage: 'url("/assets/partners/directory/tenbin.svg")',
+})
+
+export const partnerLogoSecuritize = style({
+  backgroundImage: 'url("/assets/partners/directory/securitize.svg")',
+})
+
+export const partnerLogoMaple = style({
+  backgroundImage: 'url("/assets/partners/directory/maple.svg")',
+})
+
+export const partnerLogoEthena = style({
+  backgroundImage: 'url("/assets/partners/directory/ethena.svg")',
+})
+
 export const partnerLogoDwellir = style({
   width: '84px',
   backgroundImage: 'url("/assets/partners/directory/dwellir.svg")',
