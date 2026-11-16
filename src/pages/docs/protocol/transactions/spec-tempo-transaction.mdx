@@ -644,7 +644,7 @@ The protocol enforces a strict three-role hierarchy:
 - Can authorize, revoke, and update access keys
 
 **Admin Access Keys** (keyId != address(0), `is_admin = true`, before T14 only):
-- From T14, Tempo rejects new admin keys, and a key stored as admin acts as a limited access key with no expiry, spending limit, or call scope. It can't manage keys ([TIP-1137](https://tips.sh/1137)).
+- From T14, Tempo rejects new admin keys, and a key stored as admin acts as a regular access key with no expiry, spending limit, or call scope. It can't manage keys ([TIP-1137](https://tips.sh/1137)).
 - Secondary keys authorized by the Root Key or another active admin access key
 - Can call key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Cannot carry spending limits, call scopes, or expiry
