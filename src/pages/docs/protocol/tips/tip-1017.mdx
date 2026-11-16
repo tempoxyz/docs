@@ -186,7 +186,7 @@ interface IValidatorConfigV2 {
 
     /// @notice Get next epoch configured for a fresh DKG ceremony.
     /// @return epoch Epoch number, or `0` if none is scheduled.
-    function getNextFullDkgCeremony() external view returns (uint64);
+    function getNextNetworkIdentityRotationEpoch() external view returns (uint64);
 
     /// @notice Add a new validator (owner only)
     /// @dev Requires Ed25519 signature over a unique digest generated from inputs. 
@@ -255,7 +255,7 @@ interface IValidatorConfigV2 {
 
     /// @notice Set next fresh DKG ceremony epoch (owner only).
     /// @param epoch Epoch where ceremony runs (`epoch + 1` uses new polynomial).
-    function setNextFullDkgCeremony(uint64 epoch) external;
+    function setNetworkIdentityRotationEpoch(uint64 epoch) external;
 
     /// @notice Migrate one validator by V1 index (owner only).
     /// @param idx V1 validator index.
@@ -478,5 +478,5 @@ Unit tests should cover all control-flow branches in added functions, including 
 2. **Initialized once**: The `initialized` flag can only transition from `false` to `true`, never back.
 3. **Migration completion gate**: Each V1 index must be processed exactly once (migrated or skipped), and `initializeIfMigrated()` stays blocked until all indices are processed.
 4. **Skipped-index counter monotonicity**: `migrationSkippedCount` is monotonically non-decreasing and may only change during `migrateValidator`.
-5. **DKG continuity at initialization**: On successful `initializeIfMigrated`, `getNextFullDkgCeremony()` in V2 equals the value read from V1 at that moment.
+5. **DKG continuity at initialization**: On successful `initializeIfMigrated`, `getNextNetworkIdentityRotationEpoch()` in V2 equals the value read from V1 at that moment.
 6. **Owner bootstrap during migration**: If V2 owner is unset on first migration call, owner is copied from V1 exactly once and then used for all migration authorization checks.
