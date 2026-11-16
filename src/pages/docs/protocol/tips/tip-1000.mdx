@@ -117,7 +117,7 @@ This applies to all storage slot writes that transition from zero to non-zero, i
 A transaction is invalid if the minimal costs of a (reverting) transaction can't be covered by caller's balance. Those checks are done in the transaction pool as a DOS prevention measure as well as when a transaction is first executed as part of a block.
 
 * Transaction with `nonce == 0` require an additional 250,000 gas
-* Tempo transactions with any `nonce_key` and `nonce == 0` require an additional 250,000 gas
+* Tempo transactions with `nonce == 0` require an additional 250,000 gas for protocol or sequential 2D nonce keys. [Expiring nonces](/docs/protocol/tips/tip-1009) use a 13,000-gas replay-protection charge instead.
 * Changes to EIP-7702 authorization lists:
    * The base cost per authorization is reduced to 12,500 gas
    * EIP-7702 authorisation list entries with `auth_list.nonce == 0` require an additional 250,000 gas (account creation for the nonce field)
