@@ -45,6 +45,10 @@ These units provide precise economic accounting while maintaining human-readable
 
 ## Specification
 
+:::info[Activated storage accounting update]
+[TIP-1060](https://tips.sh/1060) (T7) supersedes the storage-creation and storage-clearing rules below. Clean storage creation has a 5,000-gas residual and a 245,000-gas creditable component, plus access and bookkeeping gas. Storage credits can cover the creditable component; eligible occupied-slot clearing mints a storage credit instead of a gas-clearing refund.
+:::
+
 ### Gas Cost Changes
 
 #### New State Element Creation
