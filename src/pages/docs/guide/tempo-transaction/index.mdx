@@ -42,4 +42,8 @@ For a complete payment flow, start with [Send a payment](/docs/guide/payments/se
 | Maintain separate ordered transaction streams | [2D nonces](#2d-nonces) |
 | Bound when a transaction may be included | [Validity windows](#validity-windows) |
 
+:::note[From T14]
+A fee payer signs with secp256k1. A [configurable account](/docs/development/configurable-accounts) can be sponsored but can't sponsor others, and neither can an account upgraded to one. Tempo also accepts no new [admin access keys](/docs/accounts/access-keys/admin-access-keys): existing ones become regular access keys with no limits that can't manage keys, and only the account's own key or its signers manage access keys. A configurable account can grant access keys and be another account's access key, and changing its signers or upgrading an account doesn't revoke existing grants. See [T14](/docs/protocol/upgrades/t14).
+:::
+
 <TempoTxProperties />

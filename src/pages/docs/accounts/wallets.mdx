@@ -89,7 +89,7 @@ For accounts you create for your users, prefer a [passkey or device key](/docs/a
 
 ### Upgrade in Place
 
-To keep the address instead, [upgrade the account in place](/docs/accounts/account-configuration/account-upgrade). The upgrade adds signers, such as backup signers, at the same address. Until T14, upgrades run only on the devnet. The original key signs it as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions.
+To keep the address instead, [upgrade the account in place](/docs/accounts/account-configuration/account-upgrade). The upgrade replaces the original key with a list of signers, such as a passkey and backup signers, at the same address. Tempo retires the original key, so it keeps approving only if you list it as a signer. Until [T14](/docs/protocol/upgrades/t14), upgrades run only on the devnet. The original key signs it as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions.
 
 <span id="let-the-provider-run-login-services" />
 <span id="integrate-accounts" />

@@ -34,9 +34,9 @@ Until T14, the upgrade transaction does nothing on mainnet or testnet. It succee
 
 The upgrade gives the account a list of signers, each with a weight. It also sets a threshold, the total weight an approval needs. From then on, signers whose weights reach the threshold approve for the account. The original key approves only if you list it, at its weight. The address, balances, token approvals, nonce, contract storage, and access keys with their limits stay the same.
 
-Any single-key account can upgrade, whether its key is a standard secp256k1 key, a P-256 key, or a passkey. The upgrade costs 250,000 gas, which a [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor.
+Any single-key account can upgrade, whether its key is a standard secp256k1 key, a P-256 key, or a passkey. The upgrade costs 250,000 gas for the configuration write, plus ordinary call and event costs ([gas costs](/docs/development/configurable-accounts#configurable-account-gas-costs)). A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it.
 
-Tempo retires the original key. It can no longer sign transactions, TIP-20 permits, or fee sponsorships for the account, even ones it signed before the upgrade. The upgrade installs a one-byte code marker, so Permit2 and other contracts that check for code route signatures to the account's [ERC-1271 check](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). Contracts that try `ecrecover` before or instead of ERC-1271, such as OpenZeppelin `SignatureChecker`, still accept the original key. It also still controls the address on other EVM chains.
+Tempo retires the original key. It can no longer sign transactions or TIP-20 permits for the account, even ones it signed before the upgrade, and the address can no longer sponsor other accounts' fees. The upgrade installs a one-byte code marker, so Permit2 and other contracts that check for code route signatures to the account's [ERC-1271 check](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). Only applications that call `ecrecover` without checking for code still accept the original key. It also still controls the address on other EVM chains, and on each [zone](/docs/zones) until that zone imports the Tempo block with the upgrade.
 
 <span id="choose-signers-and-threshold" />
 
@@ -51,7 +51,7 @@ List the original key and at least one backup signer. A backup can be a passkey 
 
 In any setup, the signers left after losing any one must still reach the threshold ([Plan for Recovery](/docs/accounts/account-configuration#plan-for-recovery)).
 
-[Revoke](/docs/accounts/access-keys/revocation) any access key you don't want before you upgrade.
+[Revoke](/docs/accounts/access-keys/revocation) any access key you don't want before you upgrade. If the original key may be compromised, revoke unwanted access keys and token allowances in calls before `upgradeAccount` in the same transaction, since an attacker holding the key can race the upgrade. A revocation that reverts aborts the upgrade, so simulate first. After the upgrade, list the account's access keys again with the new signers, on Tempo and on each zone once it imports the upgrade.
 
 ## Send the Upgrade
 
@@ -124,8 +124,10 @@ Viem signs with the attached keys until their weights reach the threshold. If th
 - The upgrade must be a top-level call, with no EIP-7702 authorization list. It can sit anywhere in a batch. Calls before it run under the original key, and calls after it see the new signers.
 - Accounts with contract code, an EIP-7702 delegation, or existing signers can't upgrade.
 - Afterward, a direct signature from the original key fails with `RootKeyRetired` (`primitive root key retired`). Sign with the account rebuilt from the saved configuration instead.
+- If the upgrade or any other call in its batch fails, the upgrade rolls back and the original key stays in control. A `key_authorization` in that transaction still takes effect.
+- Upgrade only on Tempo. On a zone, `upgradeAccount` reverts with `UnsupportedOnZone()`.
 - An account can upgrade only once. Later changes are [configuration updates](/docs/accounts/account-configuration/configuration-updates).
-- Access keys survive the upgrade, including admin keys authorized before T14. [Revoke](/docs/accounts/access-keys/revocation) any you don't want.
+- Access keys survive the upgrade, including [admin keys](/docs/accounts/access-keys/admin-access-keys) authorized before T14, which keep spending without limit. [Revoke](/docs/accounts/access-keys/revocation) any you don't want.
 
 ## Related
 

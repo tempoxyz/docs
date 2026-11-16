@@ -139,7 +139,7 @@ To stop payouts, have the signers [revoke the key](/docs/accounts/access-keys/re
 ## Production Checklist
 
 - **Concurrent Payouts:** An account's transactions share one nonce, a counter that orders them, so payouts confirm one at a time by default. To send them concurrently, use [expiring nonces or nonce keys](/docs/guide/payments/send-parallel-transactions).
-- **New Payees:** To add a payee, the signers or an [admin key](/docs/accounts/access-keys/admin-access-keys) update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls).
+- **New Payees:** To add a payee, the signers update the key's [scopes](/docs/accounts/access-keys/scopes#change-allowed-calls). Before T14, an [admin key](/docs/accounts/access-keys/admin-access-keys) can too.
 - **Expiry:** An expiry can't be extended. [Authorize a replacement key](/docs/accounts/access-keys/expiry#renew-an-expiring-key) before it passes.
 
 ## Move Idle Funds Into Earn

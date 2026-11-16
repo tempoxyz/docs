@@ -32,7 +32,8 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 - **Zone support:** these accounts work on Zones with the same signers and threshold.
 - **Admin access keys removed:** Tempo rejects new admin access keys, and only an account's own key or its signers manage its access keys.
 - **Validator and consensus rules:** blocks must pay the proposer's registered fee recipient, endpoint formats are stricter, and consensus defaults to deferred verification.
-- **Paused Zone Portals:** a paused Zone Portal rejects refund claims and batch settlement.
+- **Paused Zone Portals:** a paused Zone Portal also rejects refund claims. Batch settlement continues.
+- **Batch call gas:** each call in a batch pays the cold access cost only for a target no earlier call reached.
 
 <span id="features" />
 
@@ -46,20 +47,20 @@ T14 extends the Account Keychain so one address can be controlled by up to 48 si
 
 - **Mixed signing methods:** signers can be passkeys, P-256 keys, or standard Ethereum keys, so a user's passkey and a provider's key can approve together.
 - **Rotation and recovery at the same address:** the current signers replace the signer list and threshold in one transaction. The address and balances stay the same, so anyone paying the account needs no update.
-- **In-place upgrades:** an existing single-key account adds signers at the same address, and its original key is retired.
+- **In-place upgrades:** an existing single-key account adds signers at the same address, and Tempo retires its original key. The key still controls the address on other chains, on a Zone until it imports the upgrade, and in apps that call `ecrecover` without checking for code.
 - **Team approval for access keys:** an account with multiple signers can be another account's [access key](/docs/accounts/access-keys) and approves with its own signers.
 
 Read the specifications for [multiple signers](https://tips.sh/1107), [in-place upgrades](https://tips.sh/1113), and [access keys](https://tips.sh/1111), and the [Tempo EVM reference](/docs/development/configurable-accounts).
 
 ### Multiple signers on Zones
 
-Zones read each account's signer configuration from Tempo, so an account uses the same signers and threshold on a Zone as on Tempo.
+Zones read each account's signer configuration from Tempo, so an account uses the same address, signers, and threshold on a Zone as on Tempo. Register, change signers, and upgrade accounts on Tempo: on a Zone, `updateConfig` and `upgradeAccount` revert with `UnsupportedOnZone()`, and a Zone applies a change only after it imports the Tempo block that contains it. Access keys stay per Zone, so revoke unwanted grants on each Zone.
 
 Read the [specification](https://tips.sh/1154).
 
 ### Admin access key removal
 
-From T14, Tempo rejects new admin access keys, and only an account's own key or its signers authorize, change, or revoke access keys. An admin key authorized before T14 keeps spending as an access key without limits until you revoke it. To let a second device manage keys, [add it as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer).
+From T14, Tempo rejects new admin access keys, and only an account's own key or its signers authorize, change, or revoke access keys. An admin key authorized before T14 becomes a regular access key with no expiry, limits, or scope, and can't manage keys. The account's own key or its signers can restrict it with `updateSpendingLimit` or `setAllowedCalls`, or revoke it. To let a second device manage keys, [add it as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer).
 
 Read the [specification](https://tips.sh/1137).
 
@@ -73,7 +74,13 @@ Read the [specification](https://tips.sh/1152).
 
 ### Paused Zone Portals
 
-From T14, a paused Zone Portal rejects refund claims and batch settlement. The sequencer stops preparing and submitting batches until the portal resumes.
+From T14, a paused Zone Portal rejects refund claims, along with deposits and withdrawal processing. Batch settlement continues while the portal is paused.
+
+Read the [specification](https://tips.sh/1152).
+
+### Batch call gas
+
+From T14, each call after the first in a Tempo transaction pays the cold account access cost (2,600 gas) only when no earlier call targeted the same address and the target isn't already warm: the sender, the first call's target, precompiles, and access-list addresses. Every other call pays the warm cost (100 gas). Before T14, every call after the first paid 2,600 gas. Batches that repeat a target, such as several transfers of one token, cost less.
 
 Read the [specification](https://tips.sh/1152).
 
@@ -81,7 +88,7 @@ Read the [specification](https://tips.sh/1152).
 
 - **Existing accounts:** single-key accounts and limited access keys keep working unchanged. Adding signers to an account is optional.
 - **Admin access keys:** Tempo rejects new [admin access keys](/docs/accounts/access-keys/admin-access-keys), and only an account's own key or its signers authorize, change, or revoke its access keys. Admin keys authorized before T14 keep paying as access keys without limits. If you use an admin key to manage a user's other keys, [add that device as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) instead, revoke admin keys you no longer need, and [contact us](https://tempo.xyz/contact) to plan the change before T14.
-- **Account upgrades:** until T14 activates on a network, an account upgrade transaction there charges its fee and changes nothing. Send upgrades only after activation.
+- **Account upgrades:** until T14 activates on a network, an account upgrade transaction there charges its fee and changes nothing. Send upgrades only after activation. Upgrades and signer changes don't revoke access keys, so revoke unwanted keys separately, on Tempo and on each Zone.
 - **Signature parsing:** accounts with multiple signers sign with the [`0x05` multisig signature](/docs/development/configurable-accounts#multisig-signature-format). Viem builds and reads it. If you parse or verify Tempo transaction signatures yourself, handle this type. It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
 - **Contracts that check signatures:** a registered account answers ERC-1271 `isValidSignature`, so Permit2 and similar verifiers work unchanged. Contracts can also call `verifyConfigurableAccount` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract).
 - **Contracts that check for code:** a registered or upgraded account carries a one-byte code marker. Contracts that reject callers or recipients with code reject it, and ERC-1155 safe transfers to it revert.

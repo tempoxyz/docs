@@ -14,7 +14,7 @@ Pays each Tempo transaction's network fee in a USD stablecoin, with no separate 
 
 Fee management decides who pays each transaction's network fee and which stablecoin pays it. Every Tempo transaction pays its fee in a USD stablecoin, so accounts need no separate gas token.
 
-Fee tokens and fee sponsorship work on mainnet and testnet. The same fee rules apply to configurable accounts, which run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) until T14.
+Fee tokens and fee sponsorship work on mainnet and testnet. [Configurable accounts](/docs/development/configurable-accounts), which run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet) until T14, pay their own fees or are sponsored under the same rules. They can't act as fee payers for other accounts, and neither can an account upgraded to one.
 
 <span id="sponsor-an-accounts-fees" />
 <span id="sponsor-fees-with-a-fee-payer" />

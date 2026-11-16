@@ -35,7 +35,7 @@ Access keys work on mainnet and testnet with a [single-key account](/docs/accoun
 An access key isn't a signer:
 
 - **No Threshold Weight:** It never counts toward the [signing threshold](/docs/accounts/policies/signing-thresholds), so it can't change the account's signers.
-- **Survives Signer Changes:** Changing a configurable account's signers leaves every access key in place.
+- **Survives Signer Changes:** Changing a configurable account's signers, or [upgrading](/docs/accounts/account-configuration/account-upgrade) a single-key account, leaves every access key in place. Revoke keys you no longer trust, on Tempo and on each [zone](/docs/zones), since each zone keeps its own keys.
 
 <span id="access-key-controls" />
 <span id="controls" />
@@ -52,14 +52,14 @@ An access key isn't a signer:
 
 ## Bounds
 
-Each key carries up to three bounds: a spending limit, scopes, and an expiry. Every bound is optional. Leaving one out removes that check. A key without scopes can call any contract, so give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three. An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds. Give one only to a party you'd trust with the whole balance.
+Each key carries up to three bounds: a spending limit, scopes, and an expiry. Every bound is optional. Leaving one out removes that check. A key without scopes can call any contract, so give a backend, agent, or [card program](/docs/accounts/automations/pay-from-an-embedded-wallet) key all three. An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds. From T14, Tempo authorizes no new ones, and one authorized earlier keeps paying without bounds until the signers revoke or restrict it.
 
 <Cards>
   <Card title="Spending Limits" description="Cap how much of each stablecoin the key can spend, in total or per period." to="/docs/accounts/access-keys/spending-limits" />
   <Card title="Scopes" description="Limit which contracts and functions the key can call, and whom it can pay." to="/docs/accounts/access-keys/scopes" />
   <Card title="Expiry" description="Set when the key stops working. You can replace a key, not extend it." to="/docs/accounts/access-keys/expiry" />
   <Card title="Revocation" description="Stop a key immediately, and clean up what it left behind." to="/docs/accounts/access-keys/revocation" />
-  <Card title="Admin Access Keys" description="A key with no bounds that can authorize, change, or revoke other keys." to="/docs/accounts/access-keys/admin-access-keys" />
+  <Card title="Admin Access Keys" description="A key with no bounds that could manage other keys before T14, and how to clean it up." to="/docs/accounts/access-keys/admin-access-keys" />
 </Cards>
 
 <span id="access-key-types" />
@@ -99,7 +99,7 @@ The demo authorizes a key with a daily limit and pays with it. Tempo rejects a p
 
 ## Authorize a Key
 
-Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), sign a key authorization. It's a message that names the key and its bounds. Submit it in one of two ways:
+Enough signers to reach the threshold sign a key authorization. Before T14, an [admin key](/docs/accounts/access-keys/admin-access-keys) can too. It's a message that names the key and its bounds. Submit it in one of two ways:
 
 - **With the Key's First Payment:** `signAuthorization` returns a `keyAuthorization` that travels with the first transaction the key signs. The key stays authorized even if that transaction's calls revert.
 - **On Its Own:** `authorizeSync` sends the authorization in a separate transaction, before the key pays.

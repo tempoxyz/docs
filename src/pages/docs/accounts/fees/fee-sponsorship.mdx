@@ -26,6 +26,8 @@ A fee payer is an account that you run or Tempo hosts. It adds its signature to 
 
 Tempo rejects the transaction if either signature fails or the fee payer can't cover the fee. The worst a fee payer can do is refuse or delay sponsorship. The account can then pay its own fee if it holds a fee token.
 
+The fee payer signs with secp256k1, so it must be a single-key account with a secp256k1 key. A [configurable account](/docs/development/configurable-accounts) can be sponsored but can't be a fee payer. An account upgraded to a configurable account can't sponsor either: Tempo rejects its fee payer signature with `RootKeyRetired`.
+
 ## Run Your Own Fee Payer
 
 Your own fee payer is an account funded with stablecoins. Its key stays on your backend. How you use it depends on where the customer's transaction is signed:

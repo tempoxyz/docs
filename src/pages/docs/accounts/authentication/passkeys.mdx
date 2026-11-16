@@ -55,7 +55,7 @@ const passkey = Account.fromWebAuthnP256(credential) // [!code hl]
 const account = Account.fromConfig({ address: 'infer', owners: [passkey] }) // [!code hl]
 ```
 
-`account.address` receives stablecoins right away. The account's first transaction registers it onchain. Next, [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) so a lost passkey doesn't lock the customer out. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts and treasuries.
+`account.address` receives stablecoins right away. The account's first transaction registers it onchain. Until that transaction, keep deposits small: an unregistered address is safe only for small amounts ([why](/docs/development/configurable-accounts#configurable-account-address)). Next, [add a recovery signer](/docs/accounts/apps/self-custodial-wallets) so a lost passkey doesn't lock the customer out. [Recommended signer setups](/docs/accounts/policies/signing-thresholds#recommended-signer-setups) gives the weights for customer accounts and treasuries.
 
 <span id="passkey-limits" />
 

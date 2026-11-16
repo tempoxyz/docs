@@ -29,14 +29,14 @@ Revocation doesn't undo what the key did while it was active:
 
 - **Transactions Stay Final:** A payment racing the revocation goes through only if it lands first. Once the revocation lands, Tempo rejects the rest.
 - **Token Approvals Stay:** A spender the key approved still pulls tokens up to the allowance. Set each allowance to zero from the account.
-- **Authorized Keys Stay:** If it was an admin key, the keys it authorized stay authorized. Revoke each one.
+- **Authorized Keys Stay:** If it was an admin key, the keys it authorized before T14 stay authorized. Revoke each one.
 
 <span id="key-revocation-by-situation" />
 <span id="revoke-an-access-key" />
 
 ## Revoke a Key
 
-Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. In Viem, call [`accessKey.revoke`](https://viem.sh/tempo/actions/accessKey.revoke) with the account and the key's address.
+Enough of the account's signers to meet its threshold approve the revocation. Before T14, an [admin key](/docs/accounts/access-keys/admin-access-keys) can too. From T14, a revocation signed by any access key reverts with [`UnauthorizedCaller`](/docs/protocol/transactions/AccountKeychain#error-unauthorizedcaller). In Viem, call [`accessKey.revoke`](https://viem.sh/tempo/actions/accessKey.revoke) with the account and the key's address.
 
 When you authorize a key, save its address next to the device or service that holds it. That record tells you which address to revoke. Show a key as removed only after the revocation confirms.
 
@@ -49,7 +49,7 @@ When you authorize a key, save its address next to the device or service that ho
 
 <ConfigurableAccountsT14 />
 
-Changing a configurable account's signers doesn't touch its access keys. Revoke them yourself after a recovery and before a hand-off.
+Changing a configurable account's signers, or [upgrading](/docs/accounts/account-configuration/account-upgrade) a single-key account, doesn't touch its access keys. Revoke them yourself after a recovery and before a hand-off. Each [zone](/docs/zones) keeps its own access keys, so revoke them on every zone the account uses too.
 
 After you [replace a lost or compromised signer](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer), revoke every key that signer's holder could use. That includes any key an attacker authorized. You won't have those addresses saved, so list every key the account has authorized from its `KeyAuthorized` events. Read the events in pages, because the devnet RPC searches at most 100,000 blocks per request.
 

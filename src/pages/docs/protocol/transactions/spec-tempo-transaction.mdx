@@ -23,7 +23,8 @@ This spec introduces native protocol support for the following features, using T
 * Gas sponsorship - allows apps to pay for their users' transactions
 * Call Batching - allows users to multicall efficiently and atomically
 * Validity windows - specify the earliest and latest times a transaction may be included
-* Access Keys - allow a sender's key to provision scoped access keys with spending limits or admin access keys for key management
+* Access Keys - allow a sender's key to provision access keys with expiry, spending limits, and call scopes. Admin access keys for key management exist only before T14 ([TIP-1137](https://tips.sh/1137))
+* Configurable accounts (from T14) - weighted owners and a threshold that can change at the same address, signing with the `0x05` signature type ([configurable accounts](#configurable-accounts))
 
 ## Motivation
 Current accounts are limited to secp256k1 signatures and sequential nonces, creating UX and scalability challenges.  
@@ -69,20 +70,20 @@ pub struct Call {
 // RLP encoding: [chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]
 pub struct KeyAuthorization {
     chain_id: u64,                              // Chain ID for replay protection (must match the executing chain)
-    key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), or WebAuthn (2)
-    key_id: Address,                            // Key identifier (address derived from public key)
+    key_type: SignatureType,                    // Type of key: Secp256k1 (0), P256 (1), WebAuthn (2), or ConfigurableAccount (3, from T14)
+    key_id: Address,                            // Key identifier (address derived from public key; the delegate account's address for ConfigurableAccount)
     expiry: Option<NonZeroU64>,                 // Unix timestamp when key expires (omit / None for never expires)
     limits: Option<Vec<TokenLimit>>,            // TIP20 spending limits (None = unlimited spending)
     allowed_calls: Option<Vec<CallScope>>,      // Call-scope allowlist (None = unrestricted; Some(empty) = scoped deny-all)
     witness: Option<B256>,                      // App-defined witness digest for replay protection
-    is_admin: Option<bool>,                     // true to provision an admin access key
-    account: Option<Address>,                   // Target account for admin-signed authorizations
+    is_admin: Option<bool>,                     // Before T14: true provisions an admin access key. From T14: true makes the authorization invalid
+    account: Option<Address>,                   // Target account; when present it must equal the account being modified
 }
 
-// Signed key authorization (authorization + root/admin key signature)
+// Signed key authorization (authorization + the account's signature)
 pub struct SignedKeyAuthorization {
     authorization: KeyAuthorization,
-    signature: PrimitiveSignature,              // Root/admin key's signature over keccak256(rlp(authorization))
+    signature: PrimitiveSignature,              // Root key's signature over keccak256(rlp(authorization)); from T14 a configurable account's owners sign with 0x05
 }
 
 // TIP20 spending limit for access keys
@@ -107,7 +108,7 @@ pub struct SelectorRule {
 
 ### Signature Types
 
-Four signature schemes are supported. The signature type is determined by length and type identifier:
+Four signature schemes are supported, plus the configurable-account signature from T14. The signature type is determined by length and type identifier:
 
 #### secp256k1 (65 bytes)
 ```rust
@@ -158,7 +159,19 @@ pub struct KeychainSignature {
 }
 ```
 **Format**: Type identifier `0x04` + user_address (20 bytes) + inner signature. The inner signature signs `keccak256(0x04 || transaction_signature_hash || user_address)`, binding it to the root account. The legacy `0x03` format is rejected from T1C onward. Use the SDK encoder rather than wrapping an ordinary transaction signature.
-**Purpose**: Allows an access key to sign on behalf of a root account. The handler validates that `user_address` has authorized the access key in the AccountKeychain precompile.
+**Purpose**: Allows an access key to sign on behalf of a root account. The handler validates that `user_address` has authorized the access key in the AccountKeychain precompile. From T14, the inner signature can be a configurable delegate's `0x05` signature.
+
+<span id="configurable-account-signature" />
+
+#### Configurable account (Variable length, from T14)
+```
+signature = 0x05 || rlp([account, config, approvals])
+config    = [salt, version, threshold, owners]
+owner     = [address, weight]
+```
+**Format**: Type identifier `0x05` + canonical RLP list. `approvals` holds 1 to 8 primitive signatures (secp256k1, P256, or WebAuthn, each at most 2,049 bytes), ordered by strictly ascending signer address. Each owner signs `keccak256("tempo:configurable-account:signature" || inner_digest || account || uint64(version))`, where `inner_digest` is the transaction's signing hash.
+**Validation**: Every signer is an owner, the approval weights reach the threshold, and the total minus the smallest approval weight is below the threshold. The configuration must hash to the account's stored commitment or, for an unregistered account, derive its address at version 0.
+**Purpose**: Lets a [configurable account](/docs/development/configurable-accounts)'s owners sign together. It is valid as the transaction signature, as a `key_authorization` signature, and inside a keychain signature. It is invalid as a fee payer signature and in `aa_authorization_list`, and rejected in every context before T14.
 
 ### Address Derivation
 
@@ -201,6 +214,8 @@ Each authorization in the list:
 #### Validation
 - Cannot have `Create` calls when `aa_authorization_list` is non-empty (follows EIP-7702 semantics)
 - Authority address is recovered from the signature and matched against the authorization
+- An entry signed with a `0x05` configurable-account signature, directly or inside an access-key envelope, makes the transaction invalid
+- From T14, an entry whose authority has a nonzero configuration commitment (a registered or upgraded configurable account) is skipped
 
 ### Parallelizable Nonces
 
@@ -274,12 +289,16 @@ Existing nonce streams and new nonce streams have different costs. New streams c
    - First byte `0x01` + 129 bytes = P256 (total 130 bytes)
    - First byte `0x02` + variable data = WebAuthn (total 129-2049 bytes)
    - First byte `0x04` + 20 bytes + inner signature = Keychain V2 (legacy `0x03` is rejected from T1C)
+   - First byte `0x05` + RLP list = configurable account (from T14; rejected before T14)
    - Otherwise invalid
 2. Apply appropriate verification:
    - secp256k1: Standard `ecrecover`
    - P256: P256 curve verification with provided public key (sha256 pre-hash if flag set)
    - WebAuthn: Parse clientDataJSON, verify challenge and type, then P256 verify
    - Keychain: Verify inner signature, then validate access key authorization via AccountKeychain precompile
+   - Configurable account: Verify the owner quorum, then check the configuration against the account's commitment ([details](#configurable-account-signature))
+
+From T14, an ordinary (secp256k1, P256, or WebAuthn) signature from an address with a nonzero configuration commitment, such as an account upgraded under [TIP-1113](https://tips.sh/1113), is rejected with `RootKeyRetired`. This applies to the sender, the `key_authorization` signer, and the fee payer.
 
 Optional `valid_before`, `valid_after`, and key-authorization `expiry` values MUST be nonzero when present. JSON-RPC requests with an explicit zero timestamp MUST be rejected during deserialization. An absent transaction bound is unconstrained on that side; an absent key expiry means non-expiring. The transaction timestamp MUST be strictly less than `valid_before` and greater than or equal to `valid_after` when those bounds are present.
 
@@ -293,10 +312,11 @@ Validation MUST branch on `nonce_key`:
 Expiring replay protection uses `keccak256(encode_for_signing(transaction) || sender)`, recorded in the nonce manager's replay set. A replay hash already in the set MUST be rejected. Changing only the fee-payer signature MUST NOT bypass replay protection. Successful validation records the replay hash with its expiry; the bounded ring evicts expired entries. This state persists even if application execution reverts, just as a consumed sequential nonce does.
 
 #### Fee Payer Validation (if present)
-1. Verify fee payer signature (K1 only initially)
+1. Verify fee payer signature (secp256k1 only)
 2. Recover payer address via `ecrecover`
 3. Reject the transaction if the recovered payer equals the transaction sender
-4. Deduct fees from payer instead of sender
+4. From T14, reject the transaction with `RootKeyRetired` if the payer has a nonzero configuration commitment (a configurable account can't sponsor others, including an account upgraded to one)
+5. Deduct fees from payer instead of sender
 
 ### Fee Payer Signature Details
 
@@ -398,6 +418,7 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
   - MUST be recoverable via secp256k1 (only secp256k1 supported for fee payers)
   - Recovery MUST succeed, otherwise transaction is invalid
   - The recovered payer MUST differ from the transaction sender, even when the signature is valid and the account has sufficient balance
+  - From T14, the recovered payer MUST have no configuration commitment, otherwise the transaction is rejected with `RootKeyRetired`
 - If `fee_payer_signature` absent:
   - Fee payer defaults to sender address (self-paid transaction)
 
@@ -424,6 +445,7 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
 #### Error Cases
 
 - `fee_payer_signature` present but unrecoverable → invalid transaction
+- Fee payer with a nonzero configuration commitment (from T14) → invalid (`RootKeyRetired`)
 - Fee payer balance insufficient for `gas_limit * max_fee_per_gas` in fee token → invalid
 - Any sender signature failure → invalid
 - Malformed RLP → invalid
@@ -531,12 +553,12 @@ More information about Access Keys can be found in the [Account Keychain Specifi
 
 A sender can authorize a key by signing over a "key authorization" item that contains the following information:
 - **Chain ID** for replay protection (MUST equal the executing chain ID; zero is not a wildcard)
-- **Key type** (Secp256k1, P256, or WebAuthn)
-- **Key ID** (address derived from the public key)
+- **Key type** (Secp256k1, P256, WebAuthn, or, from T14, ConfigurableAccount for a configurable account acting as the access key)
+- **Key ID** (address derived from the public key, or the configurable delegate's address)
 - **Expiration** timestamp of when the key should expire (optional - None means never expires)
 - TIP20 token **spending limits** for the key (optional - None means unlimited spending):
   - Each limit carries a `period` (0 = one-time, non-zero = recurring in seconds). Recurring limits roll over to `max` when `current_timestamp >= periodEnd`.
-  - Root keys and active admin access keys can update limits via `updateSpendingLimit()` without revoking the key. Updates reset `remaining` and `max` to `newLimit` while preserving `period` and `periodEnd`.
+  - The root key (or a configurable account's owner quorum) can update limits via `updateSpendingLimit()` without revoking the key. Before T14, active admin access keys could too. Updates reset `remaining` and `max` to `newLimit` while preserving `period` and `periodEnd`.
   - Note: Spending limits only apply to TIP20 token transfers, not ETH or other asset transfers
 - **Call scopes** for the key (optional - None means unrestricted):
   - Each entry pins a `target` contract and a list of allowed selector rules. An empty selector list on a target means any selector is allowed on that target.
@@ -551,20 +573,20 @@ Access-key-signed transactions cannot include a transaction-level creation call 
 
 **Unsigned Format:**
 
-The root key or an active admin access key signs over the keccak256 hash of the RLP encoded `KeyAuthorization`:
+The account's root key signs over the keccak256 hash of the RLP encoded `KeyAuthorization`. From T14, a configurable account's owner quorum signs instead, with a `0x05` signature over `configurable_account_digest(key_authorization_digest, account, version)`. Before T14, an active admin access key could also sign:
 
 ```
 key_authorization_digest = keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))
 
 chain_id = u64 (MUST equal the executing chain ID; zero is not a wildcard)
-key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
-key_id = Address (derived from the public key)
+key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn) | 3 (ConfigurableAccount, from T14)
+key_id = Address (derived from the public key; the delegate account's address for ConfigurableAccount)
 expiry = Option<NonZeroU64> (nonzero unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
 limits = Option<Vec<[token, limit, period]>> (None = unlimited spending; period = 0 means one-time)
 allowed_calls = Option<Vec<[target, [[selector, [recipient, ...]], ...]]>> (None = unrestricted; Some([]) = scoped deny-all)
 witness = Option<bytes32> (app-defined witness digest)
-is_admin = Option<bool> (true provisions an admin access key)
-account = Option<Address> (required when an admin access key signs the authorization)
+is_admin = Option<bool> (before T14, true provisions an admin access key; from T14, true makes the authorization invalid)
+account = Option<Address> (must equal the account being modified when present; before T14, required when an admin access key signs)
 ```
 
 **Signed Format:**
@@ -575,11 +597,11 @@ The signed format (`SignedKeyAuthorization`) includes all fields with the `signa
 signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?, signature])
 ```
 
-The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key or an active admin access key.
+The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key, or from T14 a configurable account's `0x05` signature. An access-key (`0x04`) signature is invalid. Before T14, an active admin access key could also sign.
 
 Note: `expiry`, `limits`, `allowed_calls`, `witness`, `is_admin`, and `account` use RLP trailing field semantics — they can be omitted entirely when None.
 
-When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` must be omitted or empty because admin keys are only for key management. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
+Before T14, when `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` must be omitted or empty because admin keys are only for key management, and when an admin access key signs the authorization, `account` must be present and must equal the account being modified. From T14, an authorization with `is_admin = true` is invalid. See [admin access keys](/docs/accounts/access-keys/admin-access-keys).
 
 :::warning[Expiry encoding]
 For `key_authorization`, the canonical non-expiring encoding omits `expiry` (`None`).
@@ -593,7 +615,7 @@ Intrinsic gas for `key_authorization` accounts for the storage written for perio
 
 #### Keychain Precompile
 
-The Account Keychain precompile (deployed at address `0xAAAAAAAA00000000000000000000000000000000`) manages authorized access keys for accounts. It enables root keys and admin access keys to provision scoped access keys with expiry timestamps and per-TIP20 token spending limits, or admin access keys for key management.
+The Account Keychain precompile (deployed at address `0xAAAAAAAA00000000000000000000000000000000`) manages authorized access keys for accounts. It lets the root key, or a configurable account's owner quorum, provision access keys with expiry timestamps, per-TIP20 token spending limits, and call scopes. Before T14, root keys and admin access keys could also provision admin access keys for key management; from T14, `authorizeAdminKey` reverts with `UnknownFunctionSelector`.
 
 **See the [Account Keychain Specification](./AccountKeychain) for complete interface details, storage layout, and implementation.**
 
@@ -611,9 +633,10 @@ When a TempoTransaction is received, the protocol:
 
 2. **Validates KeyAuthorization** (if present in transaction)
    - The `key_authorization` field in `TempoTransaction` provisions a NEW Access Key
-   - The Root Key or an active admin access key MUST sign:
+   - The Root Key MUST sign (from T14, a configurable account's owner quorum signs with `0x05` instead):
      - The `key_authorization` digest: `keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))`
-   - If an admin access key signs the authorization, the `account` field must be present and must equal the account being modified
+   - If `account` is present, it must equal the account being modified
+   - Before T14, an active admin access key could also sign, with `account` present. From T14, an access-key signature or `is_admin = true` makes the transaction invalid
    - Access Key (being authorized) CAN sign the same tx which it is authorized in.
    - This enables "authorize and use" in a single transaction
 
@@ -630,22 +653,25 @@ When a TempoTransaction is received, the protocol:
 
 ##### Authorization Hierarchy Enforcement
 
-The protocol enforces a strict three-role hierarchy:
+Before T14, the protocol enforces a three-role hierarchy: root key, admin access keys, and limited access keys. From T14 ([TIP-1137](https://tips.sh/1137)), there are two roles: the root key, or a configurable account's owner quorum, and access keys. Every keychain mutator (`authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`, `burnKeyAuthorizationWitness`) reverts with `UnauthorizedCaller` when an access key signs the transaction. `isAdminKey(account, keyId)` returns true only when `keyId == account` and the account has no configuration commitment.
 
 **Root Key** (keyId = address(0)):
 - The account's primary key (address matches account address)
 - Can call ALL precompile functions
 - No spending limits
 - Can authorize, revoke, and update access keys
+- From T14, a configurable account's root key is retired; its owner quorum, signing the transaction directly, has this role instead
 
-**Admin Access Keys** (keyId != address(0), `is_admin = true`):
-- Secondary keys authorized by the Root Key or another active admin access key
+**Admin Access Keys** (before T14 only; keyId != address(0), `is_admin = true`):
+- From T14, no key can become an admin key. A key stored as admin before T14 acts as an access key with no expiry, spending limit, or call scope, and cannot manage keys. The root key or owner quorum can restrict it with `updateSpendingLimit` and `setAllowedCalls`, or revoke it
+- Before T14: secondary keys authorized by the Root Key or another active admin access key
 - Can call key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Cannot carry spending limits, call scopes, or expiry
 - Cannot include a transaction-level creation call; internal factory creation remains possible
 
 **Limited Access Keys** (keyId != address(0), `is_admin = false`):
-- Secondary keys authorized by the Root Key or an active admin access key
+- Secondary keys authorized by the Root Key (from T14, or a configurable account's owner quorum; before T14, also an active admin access key)
+- From T14, a configurable account can itself be an access key (`key_type = 3`, `key_id` = its address); its owner quorum signs inside the keychain envelope
 - CANNOT call mutable precompile functions (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
 - Subject to per-TIP20 token spending limits and call-scope checks during execution
 - Cannot include a transaction-level creation call; internal factory creation remains possible
@@ -653,7 +679,7 @@ The protocol enforces a strict three-role hierarchy:
 
 When a limited Access Key attempts to call any mutable keychain function:
 1. Transaction executes normally until the precompile call
-2. Precompile checks `getTransactionKey()` and confirms the key is not the Root Key or an active admin access key
+2. Precompile checks `getTransactionKey()` and confirms the key is not the Root Key (before T14, or an active admin access key)
 3. Call reverts with `UnauthorizedCaller` error
 4. Entire transaction is reverted
 
@@ -684,7 +710,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 
 **Limit Updates:**
 - Limits deplete as tokens are spent
-- Root Key or an active admin access key can call `updateSpendingLimit(keyId, token, newLimit)` to set new limits
+- The Root Key (from T14, or a configurable account's owner quorum; before T14, also an active admin access key) can call `updateSpendingLimit(keyId, token, newLimit)` to set new limits
 - Setting a new limit REPLACES both `remaining` and `max` with `newLimit`. The configured `period` and current `periodEnd` are preserved.
 
 ##### Call Scope Enforcement
@@ -822,7 +848,7 @@ const finalSignature = {
 **Revoking an Access Key:**
 
 ```typescript
-// Must be signed by the Root Key or an active admin key
+// Must be signed by the Root Key or, from T14, a configurable account's owner quorum
 const tx = {
   chain_id: 42431, // Moderato testnet
   nonce: await getNonce(account),
@@ -831,14 +857,14 @@ const tx = {
     value: 0,
     input: encodeCall("revokeKey", [keyId])
   }],
-  // ... sign with the Root Key or an active admin key
+  // ... sign with the Root Key or the owner quorum (not an access key)
 };
 ```
 
 **Updating Spending Limits:**
 
 ```typescript
-// Must be signed by the Root Key or an active admin key
+// Must be signed by the Root Key or, from T14, a configurable account's owner quorum
 const tx = {
   chain_id: 42431, // Moderato testnet
   nonce: await getNonce(account),
@@ -851,7 +877,7 @@ const tx = {
       2000000000  // New limit: 2000 USDG
     ])
   }],
-  // ... sign with the Root Key or an active admin key
+  // ... sign with the Root Key or the owner quorum (not an access key)
 };
 ```
 
@@ -882,6 +908,15 @@ const { isScoped, scopes } = await precompile.getAllowedCalls(account, keyId);
 const currentKey = await precompile.getTransactionKey();
 // Returns: address (0x0 for Root Key, keyId for Access Key)
 ```
+
+### Configurable Accounts
+
+From T14 ([TIP-1107](https://tips.sh/1107), [TIP-1111](https://tips.sh/1111), [TIP-1113](https://tips.sh/1113)), an account can be controlled by weighted owners and a threshold that sign with the [`0x05` signature](#configurable-account-signature). See [Configurable accounts](/docs/development/configurable-accounts) for integration.
+
+- **Registration:** an unregistered configurable account is registered in its first included transaction that it signs, after validation and fee collection and before any call runs. Registration writes the configuration commitment and persists even if the calls revert. Funds sent to an unregistered address are safe only in small amounts, because whoever chose the salt can search for a colliding key in roughly 2^80 work.
+- **Owner updates and upgrades:** the configurable-account precompile at `0xAACC000000000000000000000000000000000000` exposes `updateConfig` and `upgradeAccount`. Each must be a top-level call with `msg.sender == tx.origin`, in a transaction signed directly by the current quorum (or, for `upgradeAccount`, the original key). Access-key signatures can't authorize either. Neither revokes access keys.
+- **Fees:** a configurable account can pay its own fees or be sponsored, but can't be a fee payer.
+- **Zones:** a configurable account has the same address on a Zone. `updateConfig` and `upgradeAccount` revert with `UnsupportedOnZone()` there, and a Zone recognizes registration, owner updates, and upgrades only after importing the Tempo block that contains them. Access keys are separate on each Zone.
 
 
 ## Rationale

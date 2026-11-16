@@ -23,7 +23,7 @@ Pay fees with a supported USD-denominated TIP-20 token. When the fee payer's tok
 
 ### Fee sponsorship
 
-A separate fee payer can cover a transaction's fees while the sender authorizes its calls. See [Sponsor fees](/docs/api/fee-payer).
+A separate fee payer can cover a transaction's fees while the sender authorizes its calls. The fee payer signs with secp256k1. From T14, a configurable account can be sponsored but can't sponsor others, and neither can an account upgraded to one. See [Sponsor fees](/docs/api/fee-payer).
 
 ### Batch calls
 
@@ -31,7 +31,11 @@ One transaction can contain several calls that execute atomically: either all ca
 
 ### Access keys
 
-Authorize another key to sign for the same account. Limited access keys have spending and call restrictions; admin keys delegate key management. See [Access keys](/docs/accounts/access-keys) for integration and [Account Keychain](/docs/protocol/transactions/AccountKeychain) for precompile behavior.
+Authorize another key to sign for the same account, with optional expiry, spending limits, and call scopes. From [T14](/docs/protocol/upgrades/t14), only the account's own key, or a configurable account's signers, manage its access keys: Tempo accepts no new [admin access keys](/docs/accounts/access-keys/admin-access-keys), and existing ones can no longer manage keys. See [Access keys](/docs/accounts/access-keys) for integration and [Account Keychain](/docs/protocol/transactions/AccountKeychain) for precompile behavior.
+
+### Configurable accounts
+
+From [T14](/docs/protocol/upgrades/t14), an account can have several weighted signers and a threshold, and change them at the same address. Its signers approve together with the `0x05` signature type. See [Configurable accounts](/docs/development/configurable-accounts).
 
 ### Concurrent transactions
 

@@ -39,7 +39,7 @@ Each access key has a signature type, the `signatureType` value you pass when yo
 | Expiry | A Unix timestamp. The key stops working at that second. Omit it for no expiry; a direct [`authorizeKey`](#authorize-an-access-key) call passes `type(uint64).max` instead. |
 | Scopes | Any call, or an allowlist of `(target, selector, recipients)`: the contracts, functions, and payees the key can use. An empty allowlist denies every call; a target with no selector rules allows any function. Only the calls the key signs directly are checked, not calls those contracts make in turn. |
 | Contract creation | A key can't deploy a contract directly, but it can call a permitted factory that does. |
-| Key management | Limited keys can't authorize, change, or revoke keys, including themselves. Admin access keys can. |
+| Key management | Limited keys can't authorize, change, or revoke keys, including themselves. Before T14, admin access keys can. From T14, no access key can. |
 
 Tempo rejects an expired key with [`KeyExpired`](/docs/protocol/transactions/AccountKeychain#error-keyexpired), a transaction over a limit with [`SpendingLimitExceeded`](/docs/protocol/transactions/AccountKeychain#error-spendinglimitexceeded), and a call outside the scopes with [`CallNotAllowed`](/docs/protocol/transactions/AccountKeychain#error-callnotallowed).
 
@@ -80,29 +80,29 @@ The access key signs `inner_digest`; a configurable account acting as an access 
 
 ## Revoke an access key
 
-`revokeKey(keyId)` is permanent: that key ID can never be authorized again for the account. Configuration updates (owner changes), [account upgrades](/docs/development/single-key-accounts#upgrade-to-a-configurable-account), and revoking an admin key leave every other key in place, so revoke each key separately.
+`revokeKey(keyId)` is permanent: that key ID can never be authorized again for the account. Configuration updates (owner changes), [account upgrades](/docs/development/single-key-accounts#upgrade-to-a-configurable-account), and revoking an admin key leave every other key in place, so revoke each key separately. Each [zone](/docs/zones) keeps its own access keys, so revoke a key on every zone where the account authorized it.
 
 <span id="admin-access-keys" />
 
 ## Admin access keys
 
-An admin access key ([TIP-1049](https://tips.sh/1049), live since the [T6 upgrade](/docs/protocol/upgrades/t6#admin-access-keys)) has no limits, expiry, or scopes. It can authorize and revoke keys, including admin keys, and change a limited key's limits and scopes, but it can't change a configurable account's owners. Its holder can spend the whole balance, so store it as carefully as a root or owner key.
+An admin access key ([TIP-1049](https://tips.sh/1049), live since the [T6 upgrade](/docs/protocol/upgrades/t6#admin-access-keys)) has no limits, expiry, or scopes. Before T14, it can authorize and revoke keys, including admin keys, and change a limited key's limits and scopes, but it can't change a configurable account's owners. Its holder can spend the whole balance, so store it as carefully as a root or owner key.
 
-From [T14](/docs/protocol/upgrades/t14), Tempo rejects new admin keys ([TIP-1137](https://tips.sh/1137)), and only the account's own key or its owners authorize, change, or revoke access keys. An admin key authorized before T14 keeps paying as an access key without limits.
+From [T14](/docs/protocol/upgrades/t14), Tempo rejects new admin keys ([TIP-1137](https://tips.sh/1137)), and only the account's own key or its owners authorize, change, or revoke access keys. An admin key authorized before T14 keeps paying as an access key without limits, including after an account upgrade, and can no longer manage keys. The root key or owners restrict it with `updateSpendingLimit` and `setAllowedCalls`, or revoke it. Tempo doesn't do this for you. From T14, a key-management call signed by any access key reverts with [`UnauthorizedCaller`](/docs/protocol/transactions/AccountKeychain#error-unauthorizedcaller).
 
 ## Account Keychain functions
 
 | Function | Purpose | Viem action |
 | --- | --- | --- |
 | `authorizeKey` | Authorize a limited key | `client.accessKey.authorize` |
-| `authorizeAdminKey` | Authorize an admin key | `client.accessKey.authorize` with `admin: true` |
+| `authorizeAdminKey` | Authorize an admin key before T14. From T14, reverts with `UnknownFunctionSelector` | `client.accessKey.authorize` with `admin: true` |
 | `revokeKey` | Revoke a key | `client.accessKey.revoke` |
 | `updateSpendingLimit` | Set one token's limit; resets the remaining amount to the new limit and keeps the period | `client.accessKey.updateLimit` |
 | `setAllowedCalls`, `removeAllowedCalls` | Replace or remove a target's scope | `writeContract` |
 | `getKey` | Read a key's type, expiry, and status | `client.accessKey.getMetadata` |
 | `getRemainingLimitWithPeriod` | Read the remaining limit and period end | `client.accessKey.getRemainingLimit` |
 | `getAllowedCalls` | Read a key's scopes | `readContract` |
-| `isAdminKey` | Check whether a key is the root key or an active admin key | `client.accessKey.isAdmin` |
+| `isAdminKey` | Check whether a key can manage keys: the root key or an active admin key before T14. From T14, true only when the key ID is the account itself and the account has no owners | `client.accessKey.isAdmin` |
 | `getTransactionKey` | Read the key signing the current transaction; `address(0)` means the root key | None; call it from a contract |
 
 For `writeContract` and `readContract`, pass `Abis.accountKeychain` and `Addresses.accountKeychain` from `viem/tempo`. Functions that change keys must be called directly by the account's transaction (`msg.sender == tx.origin`). The [specification](/docs/protocol/transactions/AccountKeychain) lists every function, event, and error.

@@ -19,7 +19,7 @@ An account's configuration is its signers, their weights, and its threshold. A s
 
 <ConfigurableAccountsT14 />
 
-A [configuration update](/docs/accounts/account-configuration/configuration-updates) replaces the account's whole signer list and its [threshold](/docs/accounts/policies/signing-thresholds) in one transaction. Signers whose weights reach the current threshold approve it, the same way they approve a payment. Only the current signers can approve a change. Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
+A [configuration update](/docs/accounts/account-configuration/configuration-updates) replaces the account's whole signer list and its [threshold](/docs/accounts/policies/signing-thresholds) in one transaction. Signers whose weights reach the current threshold approve it, the same way they approve a payment. Only the current signers can approve a change, and only on Tempo: [zones](/docs/zones) apply it once they import that Tempo block. Tempo has no override, so [plan for recovery](#plan-for-recovery) before you need it.
 
 A single-key account (EOA) has no signer list to change. [Upgrade it](/docs/accounts/account-configuration/account-upgrade) to a configurable account first.
 
@@ -47,7 +47,7 @@ The situations differ in who approves:
 <span id="revoke-a-key" />
 <span id="revoke-access-keys" />
 
-A configuration update doesn't touch access keys or token approvals. A device key on a lost phone keeps paying within its limits until you [revoke it](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change).
+A configuration update doesn't touch access keys or token approvals. A device key on a lost phone keeps paying within its limits until you [revoke it](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change), on Tempo and on each zone. An [admin key](/docs/accounts/access-keys/admin-access-keys) authorized before T14 has no limits at all.
 
 <span id="watch-signer-changes" />
 
@@ -102,7 +102,7 @@ The account has the same address on other EVM chains. A sender can pay it on the
 
 To keep a way to recover them, create the account from a fresh secp256k1 key instead ([TIP-1113](https://tips.sh/1113)). Before you share or fund its address, have that key [upgrade the account](/docs/accounts/account-configuration/account-upgrade) to its real signers, without listing itself. A fee payer can sponsor the upgrade. Tempo then retires the key, but it still controls the address on other chains.
 
-Keep that key offline and use it only to move mistaken transfers out. Contracts that try `ecrecover` before or instead of ERC-1271, such as OpenZeppelin `SignatureChecker`, still accept it, so don't sign anything else with it.
+Keep that key offline and use it only to move mistaken transfers out. Applications that call `ecrecover` without checking for code still accept it, and so does each zone until it imports the upgrade, so don't sign anything else with it.
 
 <span id="changes" />
 

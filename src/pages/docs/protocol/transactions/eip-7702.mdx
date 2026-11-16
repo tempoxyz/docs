@@ -25,7 +25,9 @@ Tempo Transactions support EIP-7702 style delegation through the `aa_authorizati
 
 EIP-7702 on Ethereum only supports secp256k1 signatures for the authorization.
 
-Tempo extends this to support all Tempo signature types. Authorizations can be signed with secp256k1, P256, or WebAuthn. This enables delegation from passkey-based accounts.
+Tempo extends this to support secp256k1, P256, and WebAuthn signatures, which enables delegation from passkey-based accounts.
+
+An authorization signed with a [configurable account's `0x05` signature](/docs/development/configurable-accounts#multisig-signature-format) makes the whole transaction invalid. From T14, Tempo skips an entry whose authority is a registered or upgraded configurable account, so it never sets or clears that account's delegation.
 
 ### Native Features Beyond Delegation
 

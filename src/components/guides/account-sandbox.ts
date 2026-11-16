@@ -2,13 +2,14 @@ import { thisDevice, thisDevicePasskey } from './this-device'
 /**
  * Rules engine for the account sandbox. Pure functions only: no React and no network.
  *
- * The rules follow the configurable-account TIPs that run on the Tempo Accounts devnet:
- * - TIP-1114: 1–48 owners, weights 1–255, total weight at most 255, threshold 1–255 and
- *   reachable with at most eight owner signatures. Signatures stop at the threshold.
- * - TIP-1107 and TIP-1109: updates increment the version, keep the address, and keep access keys.
+ * The rules follow the configurable-account TIPs, which run on the Tempo Accounts devnet until T14:
+ * - TIP-1107: 1–48 owners, weights 1–255, total weight at most 255, threshold 1–255 and
+ *   reachable with at most eight owner signatures. Every signature must be needed: the total
+ *   minus the smallest signer's weight stays below the threshold.
+ * - TIP-1107: updates increment the version, keep the address, and keep access keys.
  * - TIP-1111: access keys never count toward the threshold and can't change signers. A
  *   configurable account can be another account's access key. The sandbox doesn't model admin
- *   access keys (TIP-1049).
+ *   access keys (TIP-1049), which T14 stops authorizing (TIP-1137).
  *
  * `AccountSandboxAdapter.submit` is the boundary a devnet adapter replaces.
  * `account-sandbox-devnet.ts` sends the same actions as real transactions.
@@ -144,8 +145,7 @@ export type ApprovalSetOptions = {
 
 /**
  * Every minimal set of `signers` that reaches `weight`: at most eight signatures, and no signer
- * can be dropped without falling below `weight`. Minimal sets also satisfy TIP-1114's rule that
- * no signature may follow the one that reaches the threshold.
+ * can be dropped without falling below `weight`. TIP-1107 accepts only such minimal sets.
  * Sorted by size, then total weight (highest first), then list order.
  */
 export function approvalSets(
@@ -533,8 +533,9 @@ function addLog(account: SandboxAccount, entry: Omit<LogEntry, 'id'>): SandboxAc
 // Address
 
 /**
- * A deterministic stand-in for TIP-1110's CREATE2 derivation from the version-zero
- * configuration. FNV-1a, not a real address.
+ * A deterministic stand-in for TIP-1107's address derivation from the version-zero
+ * configuration (the last 20 bytes of keccak256 over a domain tag, the salt, threshold, and
+ * owners). FNV-1a, not a real address.
  */
 export function deriveAddress(
   salt: string,
@@ -1334,7 +1335,7 @@ function createAccount(account: SandboxAccount, first: Signer): SandboxAccount {
     byte.toString(16).padStart(2, '0'),
   ).join('')
   const genesis = { threshold: 1, owners: [{ id: signer.id, weight: 1 }], nonce }
-  // This address stands in for TIP-1110's derivation, so it varies with the signer and the
+  // This address stands in for TIP-1107's derivation, so it varies with the signer and the
   // account. Devnet derives the real one from the signer's real key.
   const address = deriveAddress(
     `${account.presetId}:${signer.kind}:${signer.subject ?? ''}:${nonce}`,

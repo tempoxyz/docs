@@ -18,11 +18,24 @@ import { Badge } from '../../../../components/Badge'
 
 ## Account Keychain overview
 
-The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys) and admin access keys to provision secondary keys. Limited access keys can have expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
+The Account Keychain precompile manages authorized Access Keys for accounts, enabling Root Keys (e.g., passkeys), the owner quorum of a [configurable account](/docs/development/configurable-accounts) from T14, and admin access keys before T14 to provision secondary keys. Limited access keys can have expiry timestamps, recurring or one-time per-TIP20 token spending limits, and explicit call scopes that restrict which targets, selectors, and recipients an Access Key may invoke.
 
-`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. `authorizeAdminKey(...)` provisions an admin key for account key management. Access keys cannot submit transaction-level contract-creation calls (`to` omitted). Calls to permitted factory contracts can still create contracts internally.
+`authorizeKey(...)` takes a `KeyRestrictions` tuple that bundles expiry, spending limits, and call scopes. Before T14, `authorizeAdminKey(...)` provisions an admin key for account key management. Access keys cannot submit transaction-level contract-creation calls (`to` omitted). Calls to permitted factory contracts can still create contracts internally.
 
 See [gas parameters](/docs/protocol/fees/spec-fee#gas-parameters) for calldata requirements and gas charges.
+
+<span id="t14-changes" />
+
+## T14 changes
+
+From the [T14 network upgrade](/docs/protocol/upgrades/t14), these rules replace the pre-T14 behavior described below where they conflict. Until T14, configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+
+- **No admin keys** ([TIP-1137](https://tips.sh/1137)): `authorizeAdminKey` reverts with `UnknownFunctionSelector`, and a `key_authorization` with `is_admin = true`, or signed by any access key, is invalid. Keys stored as admin before T14 aren't migrated or revoked: each acts as a regular access key with no expiry, spending limit, or call scope, keeps signing, and has no management authority. The account can restrict one with `updateSpendingLimit` and `setAllowedCalls`, or revoke it.
+- **Management**: only the Root Key of an account without a configuration commitment, or the owner quorum of a configurable account, may call `authorizeKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`, or `burnKeyAuthorizationWitness`, or sign a `key_authorization`. A call from a transaction signed by an access key reverts with `UnauthorizedCaller`.
+- **`isAdminKey`**: returns `true` only when `keyId == account` and the account has no configuration commitment.
+- **Configurable accounts as granter and key** ([TIP-1111](https://tips.sh/1111)): a configurable account's owner quorum grants and revokes its access keys, and a configurable account can be another account's access key with `SignatureType.ConfigurableAccount = 3`, stored under the delegate's address as `keyId`. Owner updates and migrations never add, change, or revoke grants, in either direction.
+- **Original-key retirement** ([TIP-1113](https://tips.sh/1113)): once an account has a configuration commitment, through registration or an [account upgrade](/docs/accounts/account-configuration/account-upgrade), its original key is retired. Transactions and `key_authorization` signatures from it are rejected with `RootKeyRetired(account)`, and `isAdminKey`, `verifyKeychain`, and `verifyKeychainAdmin` return `false` for it. Grants the account made before, including admin keys, stay in place.
+- **Zones** ([TIP-1154](https://tips.sh/1154)): access keys are per zone. A zone checks configurable-account signatures against Tempo's commitment at the zone's anchor, so owner updates and migrations apply there only after the zone imports that Tempo block. Revoke a key on each zone where it was authorized.
 
 ## Motivation
 
@@ -32,28 +45,28 @@ The Tempo Transaction type adds new signature schemes, including WebAuthn (Passk
 
 ### Access Keys
 
-Access Keys are secondary signing keys authorized by an account's Root Key or an admin key. Limited access keys can sign transactions on behalf of the account with the following restrictions:
+Access Keys are secondary signing keys authorized by an account's Root Key, a configurable account's owner quorum from T14, or, before T14, an admin key. Limited access keys can sign transactions on behalf of the account with the following restrictions:
 
 - **Expiry**: Unix timestamp when the key becomes invalid. A non-expiring `key_authorization` omits `expiry` at the transaction RLP layer; the protocol translates that omission to `u64::MAX` before calling the precompile. Direct precompile callers should pass `u64::MAX` for a non-expiring key. Literal `0` is treated as past expiry and rejected.
 - **Spending Limits**: Per-TIP20 token limits that deplete as tokens are spent
   - Limits are one-time (`period = 0`) or recurring (`period > 0`, in seconds). Recurring limits roll over to `max` when `current_timestamp >= periodEnd`.
-  - Limits can be updated by the Root Key or an active admin access key via `updateSpendingLimit()`. An update resets `remaining` and `max` to `newLimit` but preserves the configured `period` and current `periodEnd`.
+  - Limits can be updated by the Root Key (or, from T14, a configurable account's owner quorum) via `updateSpendingLimit()`. Before T14, an active admin access key can too. An update resets `remaining` and `max` to `newLimit` but preserves the configured `period` and current `periodEnd`.
   - Spending limits cover direct TIP-20 transfers, increases in approvals, fee payments by the account, and token pulls by approved protocol precompiles. T12 also charges `burnAt` when it burns the transaction originator's tokens.
   - Direct token-call enforcement applies when `msg.sender == tx.origin`; protocol fee and implicit-approval paths enforce their own checks against the account.
   - Native value transfers and `transferFrom()` are NOT limited
 - **Call Scopes**: An Access Key is either unrestricted (`allowAnyCalls = true`) or restricted to an explicit allowlist of `(target, selector, recipients)` tuples. An empty allowlist with `allowAnyCalls = false` means scoped deny-all.
 - **No transaction-level creation**: An access-key transaction cannot include a creation call (`TxKind::Create`). This does not prohibit `CREATE` or `CREATE2` inside a permitted factory call.
-- **Privilege Restrictions**: Limited access keys cannot authorize new keys or modify their own limits or scopes. Admin access keys can manage keys, but cannot carry spending limits, call scopes, or expiry.
+- **Privilege Restrictions**: Limited access keys cannot authorize new keys or modify their own limits or scopes. Before T14, admin access keys can manage keys, but cannot carry spending limits, call scopes, or expiry. From T14, no access key can manage keys.
 
 ### Authorization Hierarchy
 
-The protocol enforces a strict hierarchy at validation time:
+Before T14, the protocol enforces a strict hierarchy at validation time. From T14, the admin tier is removed: the Root Key, or a configurable account's owner quorum, is the only management authority, and keys stored as admin follow the limited-key rules with no restrictions ([T14 changes](#t14-changes)).
 
 1. **Root Key**: The account's original signing authority; its public key determines the account address
    - Can call all precompile functions, including the key-management mutators (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`)
    - Has no spending limits or call-scope restrictions
 
-2. **Admin Access Keys**: Secondary authorized keys for account administration
+2. **Admin Access Keys** (before T14): Secondary authorized keys for account administration
    - Can call key-management mutators, including `authorizeKey`, `authorizeAdminKey`, and `revokeKey`
    - Cannot carry spending limits, call scopes, or expiry
    - Cannot submit transaction-level creation calls
@@ -92,7 +105,8 @@ interface IAccountKeychain {
     enum SignatureType {
         Secp256k1,
         P256,
-        WebAuthn
+        WebAuthn,
+        ConfigurableAccount // T14: a configurable account as access key; keyId is its address
     }
 
     struct TokenLimit {
@@ -172,6 +186,7 @@ interface IAccountKeychain {
 
     function revokeKey(address keyId) external;
 
+    // Before T14 only. From T14, reverts with UnknownFunctionSelector.
     function authorizeAdminKey(
         address keyId,
         SignatureType signatureType,
@@ -216,7 +231,7 @@ Each error links to where the precompile raises it.
 
 | Error | Tempo returns it when |
 | --- | --- |
-| <span id="error-unauthorizedcaller" />[`UnauthorizedCaller`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L1114) | A key-management call (authorize, revoke, change a limit or scopes) is signed by a limited access key, or doesn't come directly from the account as the transaction's sender. |
+| <span id="error-unauthorizedcaller" />[`UnauthorizedCaller`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L1114) | A key-management call (authorize, revoke, change a limit or scopes) is signed by a limited access key (from T14, by any access key), or doesn't come directly from the account as the transaction's sender. |
 | <span id="error-zeropublickey" />[`ZeroPublicKey`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L269) | The key's address is the zero address. |
 | <span id="error-expiryinpast" />[`ExpiryInPast`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L280) | An authorization sets an expiry at or before the current block time. |
 | <span id="error-keyalreadyexists" />[`KeyAlreadyExists`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L287) | The account already has an access key at this address. |
@@ -227,7 +242,7 @@ Each error links to where the precompile raises it.
 | <span id="error-invalidspendinglimit" />[`InvalidSpendingLimit`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L303) | An authorization lists the same token twice, or sets a limit above the maximum. |
 | <span id="error-callnotallowed" />[`CallNotAllowed`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L817) | A call the key signs matches none of its scopes: another contract, another function, a recipient that isn't listed, or a contract deployment. |
 | <span id="error-invalidcallscope" />[`InvalidCallScope`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L587) | A scope update is empty or malformed, or an authorization passes scopes while allowing every call. |
-| <span id="error-invalidkeyid" />[`InvalidKeyId`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L470) | The request changes an admin key's limit or scopes, which it doesn't have, or makes the account's own address an admin key. |
+| <span id="error-invalidkeyid" />[`InvalidKeyId`](https://github.com/tempoxyz/tempo/blob/7d4fd03fc0/crates/precompiles/src/account_keychain/mod.rs#L470) | Before T14, the request changes an admin key's limit or scopes, which it doesn't have, or makes the account's own address an admin key. |
 
 ## Behavior
 
@@ -242,7 +257,7 @@ The [T6 network upgrade](/docs/protocol/upgrades/t6) added [admin access keys](/
 rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?])
 ```
 
-SDK encoders/decoders and hardware-wallet firmware that strictly check field count MUST handle the new optionals on T6 networks. The packed `AuthorizedKey` slot also gains an `is_admin` byte at offset 11. The existing `KeyAuthorized` event is **unchanged**; an additional `AdminKeyAuthorized` event is emitted alongside it when `is_admin == true`, so existing indexers continue to work without changes. Provisioning admin keys uses `authorizeAdminKey(keyId, signatureType, witness)`. See the [admin access keys section of the T6 page](/docs/protocol/upgrades/t6#admin-access-keys) for the full surface.
+SDK encoders/decoders and hardware-wallet firmware that strictly check field count MUST handle the new optionals on T6 networks. The fields stay in the encoding from T14, but a `key_authorization` with `is_admin = true` is invalid. The packed `AuthorizedKey` slot also gains an `is_admin` byte at offset 11. The existing `KeyAuthorized` event is **unchanged**; an additional `AdminKeyAuthorized` event is emitted alongside it when `is_admin == true`, so existing indexers continue to work without changes. Provisioning admin keys uses `authorizeAdminKey(keyId, signatureType, witness)`. See the [admin access keys section of the T6 page](/docs/protocol/upgrades/t6#admin-access-keys) for the full surface.
 :::
 
 - Creates a new key entry with the specified `signatureType`, `config.expiry`, `config.enforceLimits`, and `isRevoked` set to `false`
@@ -252,12 +267,12 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - Emits `KeyAuthorized` event
 
 **Requirements:**
-- MUST be called by the Root Key or an active admin access key
+- MUST be called by the Root Key or, before T14, an active admin access key. From T14, a configurable account's owner quorum calls it instead of the retired Root Key, and an access-key-signed call reverts with `UnauthorizedCaller`
 - MUST use one of the two `authorizeKey` overloads above: `(address,uint8,KeyRestrictions)` or `(address,uint8,KeyRestrictions,bytes32)`. The first has selector `0x980a6025`; the second additionally checks and emits the supplied witness. Both use the same `KeyRestrictions` tuple and authorization requirements.
 - `keyId` MUST NOT be `address(0)` (reverts with `ZeroPublicKey`)
 - `keyId` MUST NOT already be authorized with `expiry > 0` (reverts with `KeyAlreadyExists`)
 - `keyId` MUST NOT have been previously revoked (reverts with `KeyAlreadyRevoked` - prevents replay attacks)
-- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn) (reverts with `InvalidSignatureType`)
+- `signatureType` MUST be `0` (Secp256k1), `1` (P256), or `2` (WebAuthn), or from T14 `3` (ConfigurableAccount) with `keyId` set to the delegate account's address (reverts with `InvalidSignatureType`)
 - `config.expiry` MUST be strictly greater than the current block timestamp (reverts with `ExpiryInPast`)
 - To authorize a non-expiring key, omit `key_authorization.expiry` in the transaction RLP or pass `u64::MAX` when calling the precompile ABI directly. Do not pass `0`.
 - `enforceLimits` determines whether spending limits are enforced for this key
@@ -265,6 +280,8 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 - Invalid call-scope shapes (zero targets, duplicate targets, duplicate selectors, duplicate recipients, malformed recipient-bound rules) revert with `InvalidCallScope`.
 
 ### Admin Key Authorization
+
+This section applies before T14 only. From T14, `authorizeAdminKey` reverts with `UnknownFunctionSelector` and no transaction or call sets `is_admin = true` ([T14 changes](#t14-changes)).
 
 - Creates a new key entry with `is_admin = true`.
 - Emits the existing `KeyAuthorized` event and the additional `AdminKeyAuthorized` event.
@@ -281,7 +298,7 @@ SDK encoders/decoders and hardware-wallet firmware that strictly check field cou
 
 ### Witness revocation
 
-The Root Key or an active admin access key can call `burnKeyAuthorizationWitness(witness)` to permanently invalidate future key authorizations carrying that witness for the account. The call requires `msg.sender == tx.origin` and emits `KeyAuthorizationWitnessBurned`. `isKeyAuthorizationWitnessBurned(account, witness)` queries this state. Witness-bearing access-key and admin-key authorization MUST revert with `KeyAuthorizationWitnessAlreadyBurned` when that account/witness pair is burned.
+The Root Key, a configurable account's owner quorum from T14, or, before T14, an active admin access key can call `burnKeyAuthorizationWitness(witness)` to permanently invalidate future key authorizations carrying that witness for the account. The call requires `msg.sender == tx.origin` and emits `KeyAuthorizationWitnessBurned`. `isKeyAuthorizationWitnessBurned(account, witness)` queries this state. Witness-bearing access-key and admin-key authorization MUST revert with `KeyAuthorizationWitnessAlreadyBurned` when that account/witness pair is burned.
 
 Burning a witness does not revoke keys already authorized with it; use `revokeKey` to revoke those keys. Successful authorization emits `KeyAuthorizationWitness` without changing the burned-witness set.
 
@@ -294,23 +311,23 @@ Burning a witness does not revoke keys already authorized with it; use `revokeKe
 - Emits `KeyRevoked` event
 
 **Requirements:**
-- MUST be called by the Root Key or an active admin access key
+- MUST be called by the Root Key or, before T14, an active admin access key. From T14, a configurable account's owner quorum calls it instead of the retired Root Key, and an access-key-signed call reverts with `UnauthorizedCaller`
 - `keyId` MUST exist (key with `expiry > 0`) (reverts with `KeyNotFound` if not found)
 
 ### Spending Limit Update
 
 - Updates the spending limit for a specific token on an authorized key
-- Allows the Root Key or an active admin access key to modify limits without revoking and re-authorizing the key
+- Allows the Root Key (or, before T14, an active admin access key) to modify limits without revoking and re-authorizing the key
 - If the key had unlimited spending (`enforceLimits == false`), enables limits
 - Sets both `remaining` and `max` to `newLimit`. The configured `period` and current `periodEnd` are preserved.
 - `newLimit` MUST fit within TIP20's `u128` supply range.
 - Emits `SpendingLimitUpdated` event
 
 **Requirements:**
-- MUST be called by the Root Key or an active admin access key
+- MUST be called by the Root Key or, before T14, an active admin access key. From T14, a configurable account's owner quorum calls it instead of the retired Root Key, and an access-key-signed call reverts with `UnauthorizedCaller`
 - `keyId` MUST exist and not be revoked (reverts with `KeyNotFound` or `KeyAlreadyRevoked`)
 - `keyId` MUST not be expired (reverts with `KeyExpired`)
-- `keyId` MUST not be an admin access key, because admin keys do not carry spending limits (reverts with `InvalidKeyId`)
+- Before T14, `keyId` MUST not be an admin access key, because admin keys do not carry spending limits (reverts with `InvalidKeyId`). From T14, a key stored as admin can be given limits.
 
 ### Allowed Call Updates
 
@@ -320,16 +337,16 @@ Burning a witness does not revoke keys already authorized with it; use `revokeKe
 - `setAllowedCalls(...)` rejects an empty scope batch, zero targets, duplicate targets, duplicate selectors, duplicate recipients, and invalid recipient-constrained rules (reverts with `InvalidCallScope`).
 
 **Requirements:**
-- MUST be called by the Root Key or an active admin access key
+- MUST be called by the Root Key or, before T14, an active admin access key. From T14, a configurable account's owner quorum calls it instead of the retired Root Key, and an access-key-signed call reverts with `UnauthorizedCaller`
 - `keyId` MUST exist and not be revoked
-- `keyId` MUST not be an admin access key, because admin keys do not carry call scopes (reverts with `InvalidKeyId`)
+- Before T14, `keyId` MUST not be an admin access key, because admin keys do not carry call scopes (reverts with `InvalidKeyId`). From T14, a key stored as admin can be scoped.
 
 ### View Behavior
 
 - `getKey(...)` returns key metadata.
 - `getRemainingLimitWithPeriod(...)` returns the effective `remaining` amount and current `periodEnd` for a key-token pair, accounting for periodic rollover.
 - `getAllowedCalls(...)` returns `(isScoped, scopes)`. Unrestricted keys return `isScoped = false`. Scoped keys return `isScoped = true` with their `CallScope[]`. Missing, revoked, or expired access keys return `isScoped = true, scopes = []` (scoped deny-all).
-- `isAdminKey(...)` returns `true` for the Root Key and for active, non-revoked, non-expired admin access keys.
+- `isAdminKey(...)` returns `true` for the Root Key and, before T14, for active, non-revoked, non-expired admin access keys. From T14, it returns `true` only when `keyId == account` and the account has no configuration commitment, so it returns `false` for keys stored as admin and for the retired Root Key of a configurable account.
 - `getTransactionKey()` returns the key used in the current transaction. `address(0)` means the Root Key.
 - Missing, revoked, or expired keys return zeroed limit values.
 
@@ -346,11 +363,11 @@ Access Keys should be securely stored to prevent unauthorized access. Call scope
 ### Privilege Escalation Prevention
 
 Limited access keys cannot escalate their own privileges because:
-1. Management functions (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`) are restricted to Root Key or active admin-key transactions
+1. Management functions (`authorizeKey`, `authorizeAdminKey`, `revokeKey`, `updateSpendingLimit`, `setAllowedCalls`, `removeAllowedCalls`) are restricted to Root Key transactions (from T14, also a configurable account's owner quorum; before T14, also active admin-key transactions)
 2. The protocol sets `transactionKey[account]` during transaction validation to indicate which key signed the transaction
-3. These management functions check that the caller is the Root Key or an active admin key before executing
+3. These management functions check that the caller is the Root Key (from T14, or the owner quorum), or before T14 an active admin key, before executing
 4. Mutable precompile calls also require `msg.sender == tx.origin`, which prevents contract-mediated confused-deputy patterns
-5. Limited access keys cannot bypass these checks - transactions will revert with `UnauthorizedCaller`
+5. Limited access keys, and from T14 every access key, cannot bypass these checks - transactions will revert with `UnauthorizedCaller`
 
 ### Spending Limit Enforcement
 
@@ -398,6 +415,6 @@ Limited access keys cannot escalate their own privileges because:
 
 ### Root Key or Admin Key Revoking or Updating an Access Key
 
-1. User signs with the Root Key or an active admin key → signs transaction calling `revokeKey(keyId)`, `updateSpendingLimit(...)`, `setAllowedCalls(...)`, or `removeAllowedCalls(...)`
+1. User signs with the Root Key (from T14, a configurable account's owners; before T14, also an active admin key) → signs transaction calling `revokeKey(keyId)`, `updateSpendingLimit(...)`, `setAllowedCalls(...)`, or `removeAllowedCalls(...)`
 2. Transaction executes, marking the Access Key as inactive or updating its restrictions
 3. Future transactions signed by that Access Key are rejected (after revocation) or evaluated against the updated restrictions

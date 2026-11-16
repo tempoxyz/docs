@@ -30,13 +30,15 @@ Build each update from the address and configuration your app saved for the acco
 1. Rebuild the account with the approving signers' keys attached, as in [Signing Thresholds](/docs/accounts/policies/signing-thresholds#collect-approvals).
 2. Build the call with `Actions.accounts.updateConfig.call` and send it with `writeContractSync`. Viem signs with the attached keys, highest weight first, until their weights reach the current threshold.
 
+The update must be a top-level call in a transaction the current signers sign directly. An access key, a contract, or a fee payer can't send it: Tempo reverts with `UnauthorizedConfigurableAccountCaller`.
+
 Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices).
 
 Each update raises the configuration's version by one. After the transaction succeeds, save `AccountConfig.update(config, nextConfig)` with the account record. Rebuild from the latest saved record before every payment or update. An account built from the old configuration no longer matches the hash Tempo stores, so its next transaction fails.
 
 These examples avoid Viem 2.57.5's `updateConfigSync`, which still expects the old event name and throws after a successful devnet update.
 
-Once the update lands, a removed signer can't approve anything. Approvals collected under the old signer list stop counting.
+Once the update lands, a removed signer can't approve anything on Tempo. Approvals collected under the old signer list stop counting. Send updates on Tempo only: on a [zone](/docs/zones), `updateConfig` reverts with `UnsupportedOnZone()`, and each zone applies the update once it imports that Tempo block. Until then, the old signers still approve there.
 
 <span id="what-adding-a-signer-does" />
 <span id="choose-the-new-signers-weight" />
@@ -148,7 +150,7 @@ writeFileSync('account.json', JSON.stringify({ address: account.address, config:
 
 If the remaining weights fall short of the threshold, lower `threshold` in the same update. Or [replace the signer](#replace-a-signer-in-one-update) instead. Lowering the threshold to 1 lets any one remaining signer pay and change signers alone. A 2-of-3 multisig that drops to two signers at threshold 1 no longer needs two approvals. For a team multisig, [replace an approver](/docs/accounts/custodians/team-multisig#replace-an-approver).
 
-[Access keys](/docs/accounts/access-keys) keep working after the update. A device key or agent key the removed signer authorized keeps paying within its limits. [Revoke every key](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) its holder could reach, including any an attacker added.
+[Access keys](/docs/accounts/access-keys) keep working after the update. A device key or agent key the removed signer authorized keeps paying within its limits. [Revoke every key](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) its holder could reach, including any an attacker added, on Tempo and on each zone.
 
 <span id="rotate-a-signer-at-the-same-weight" />
 <span id="rotate-a-key-by-replacing-it-in-one-update" />

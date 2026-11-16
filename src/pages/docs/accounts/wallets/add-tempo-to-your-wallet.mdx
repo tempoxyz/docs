@@ -12,7 +12,7 @@ Support Tempo in your wallet, from network settings to Tempo Transactions.
 
 ## Overview
 
-Any wallet, such as a browser extension, mobile wallet, or hardware wallet, already signs standard Ethereum transactions on Tempo. Tempo has no native gas token, so [balance checks and fee quotes need changes](/docs/quickstart/wallet-developers). [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet.
+Any wallet, such as a browser extension, mobile wallet, or hardware wallet, already signs standard Ethereum transactions on Tempo. Tempo has no native gas token, so [balance checks and fee quotes need changes](/docs/quickstart/wallet-developers). [Tempo Transactions](/docs/guide/tempo-transaction) give your users stablecoin fee selection, sponsored fees, batched calls, and access keys. Everything on this page is live on mainnet and testnet, except [account upgrades](#add-backup-signers), which arrive with [T14](/docs/protocol/upgrades/t14).
 
 ## Setup
 
@@ -92,7 +92,7 @@ Replace your EIP-1559 (type 2) envelope with the Tempo Transaction envelope (typ
 
 - [Batch calls](/docs/guide/tempo-transaction#batch-calls) that succeed or fail together, such as an approval and a swap.
 - Accept [sponsored fees](/docs/accounts/fees/fee-sponsorship), so an app pays the fee for your user.
-- Authorize [access keys](/docs/accounts/access-keys) that let an app or agent pay from the user's account. Each key has a spending limit, scopes, and an expiry.
+- Authorize [access keys](/docs/accounts/access-keys) that let an app or agent pay from the user's account. Each key can have a spending limit, scopes, and an expiry. Show keys without bounds, such as [admin keys](/docs/accounts/access-keys/admin-access-keys) authorized before T14, as able to spend the whole balance.
 - Sign with a [passkey](/docs/accounts/authentication/passkeys), and send [concurrent transactions](/docs/guide/payments/send-parallel-transactions) or [expiring nonces](/docs/guide/tempo-transaction#expiring-nonces) without tracking one nonce sequence.
 
 If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Transactions [include both in the protocol](/docs/protocol/transactions/eip-7702#feature-comparison).
@@ -104,7 +104,7 @@ If you already use EIP-7702 or EIP-4337 for batching or sponsorship, Tempo Trans
 
 ## Add Backup Signers
 
-Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. A user adds backup signers at the same address through an [account upgrade](/docs/accounts/account-configuration/account-upgrade). The wallet signs it as a Tempo Transaction. Until [T14](/docs/protocol/upgrades/t14), upgrades run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
+Your users hold [single-key accounts](/docs/development/single-key-accounts), so a lost key still loses the account. A user moves to several signers at the same address through an [account upgrade](/docs/accounts/account-configuration/account-upgrade). The upgrade retires the user's key, which keeps approving only if the new signer list includes it. Your wallet signs the upgrade with that key directly, as a Tempo Transaction with a top-level `upgradeAccount` call and no authorization list. An access key can't sign it. Access keys survive the upgrade, so show them and let the user revoke any they don't want. Upgrades run on testnet from November 24, 2026 and on mainnet from December 8, 2026 ([T14](/docs/protocol/upgrades/t14)). Until then they run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet).
 
 ## List Your Wallet
 

@@ -96,7 +96,7 @@ export const account = Account.fromConfig({
 
 ::::
 
-Creating the account sends nothing. The address receives stablecoins right away, and its first transaction registers it onchain.
+Creating the account sends nothing. The address receives stablecoins right away, and its first transaction registers it onchain. Keep deposits small until then: an unregistered address is safe only for small amounts ([why](/docs/development/configurable-accounts#configurable-account-address)).
 
 Save these with the user's record, and rebuild the account from them each time ([keep the current configuration](/docs/development/configurable-accounts#keep-the-current-configuration)):
 
@@ -122,7 +122,7 @@ await client.faucet.fundSync({ account: account.address }) // devnet test stable
 await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token }) // [!code hl]
 ```
 
-The provider signs only the transaction's hash, so its policy engine can't read the payment. Build each transaction in your backend and check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)).
+The provider signs only a hash, the [multisig digest](/docs/development/configurable-accounts#multisig-signature-format) of the transaction, so its policy engine can't read the payment. Build each transaction in your backend and check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)).
 
 To skip the passkey prompt on small payments, authorize a [device key](/docs/accounts/authentication/device-keys) with a spending limit. The passkey and provider sign that authorization.
 
@@ -144,7 +144,7 @@ Without the passkey and backup, the user depends on your provider. If the provid
 | Your app or the provider is down or breached | The passkey and the backup | Pay as usual, or [remove the provider's key](/docs/accounts/account-configuration/configuration-updates#remove-a-lost-or-compromised-signer) |
 | The user wants to leave | The passkey and the backup | [Remove the provider's key](/docs/accounts/account-configuration/configuration-updates#remove-a-signer), or swap it for another signer the user holds ([replace a signer](/docs/accounts/account-configuration/configuration-updates#replace-a-signer-in-one-update)), at the same address |
 
-A configuration update keeps the account's address, balances, and [Earn](/docs/earn) positions. Save the new configuration each update returns.
+A configuration update keeps the account's address, balances, and [Earn](/docs/earn) positions. Save the new configuration each update returns. Removing the provider's key doesn't revoke access keys the account authorized, so [revoke](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change) any the user no longer wants. Updates run on Tempo, and each [zone](/docs/zones) applies them once it imports that Tempo block.
 
 <span id="get-funds-out-without-your-app" />
 

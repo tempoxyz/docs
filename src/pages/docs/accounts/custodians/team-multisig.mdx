@@ -147,7 +147,7 @@ saved.config = AccountConfig.update(saved.config, nextConfig) // [!code hl]
 
 The multisig keeps its address and balance. The departing approver's key can no longer approve anything. A [configuration update](/docs/accounts/account-configuration/configuration-updates#remove-a-signer) also removes a signer without a successor, or rotates the key of an approver who stays.
 
-Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). [List the keys the multisig has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change). Revoke every access key the departing approver held or managed with `client.accessKey.revokeSync`. Set to zero any token allowance one of those keys approved. If the key was an [admin access key](/docs/accounts/access-keys/admin-access-keys), revoke the keys it authorized too.
+Removing a signer doesn't revoke [access keys](/docs/accounts/access-keys). [List the keys the multisig has authorized](/docs/accounts/access-keys/revocation#revoke-after-a-signer-change). Revoke every access key the departing approver held or managed with `client.accessKey.revokeSync`. Set to zero any token allowance one of those keys approved. If the key was an [admin access key](/docs/accounts/access-keys/admin-access-keys), revoke the keys it authorized before T14 too. Access keys on a [zone](/docs/zones) are separate, so revoke them on each zone.
 
 <span id="treasury-limits" />
 <span id="give-a-team-a-budget" />

@@ -56,6 +56,8 @@ If your users already have wallets with Privy or another provider, you don't cre
 
 Fee tokens, batched calls, and access keys need the provider's Tempo integration, which sends [Tempo Transactions](/docs/guide/tempo-transaction). Privy's Tempo-specific React hook supports `sponsor: true`. Its [Tempo transaction guide](https://docs.privy.io/wallets/using-wallets/tempo/send-a-transaction) lists the SDK and project requirements. To operate your own sponsorship service, use a [fee payer](/docs/accounts/fees/fee-sponsorship).
 
+To move an existing wallet to the [recommended setup](#recommended-app-setup) at the same address, have its provider key sign an [account upgrade](/docs/accounts/account-configuration/account-upgrade) from [T14](/docs/protocol/upgrades/t14). Tempo then retires that key, so list a new provider key among the signers. Access keys the wallet authorized survive the upgrade, and [zones](/docs/zones) apply it once they import that Tempo block.
+
 <span id="which-tempo-features-does-my-setup-support" />
 <span id="what-tempo-adds" />
 

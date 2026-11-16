@@ -36,7 +36,7 @@ The provider's key and the backup approve a new passkey from the user's new phon
 
 ## Recovery Requirements
 
-Replacing a lost signer needs a configurable account. Tempo can't override an account's signers, so recovery works only if the remaining signers reach the threshold. Run this check for every signer before the user funds the account.
+Replacing a lost signer needs a configurable account. Tempo can't override an account's signers, so recovery works only if the remaining signers reach the threshold. Run this check for every signer before the user funds the account. Before large deposits, also [register the account](/docs/development/configurable-accounts#account-registration) with one transaction, since an unregistered address is safe only for small amounts.
 
 ```ts [check.ts]
 const total = saved.config.owners.reduce((sum, { weight }) => sum + weight, 0)
@@ -134,7 +134,7 @@ saved.config = AccountConfig.update(saved.config, nextConfig) // [!code hl]
 
 ::::
 
-As with every payment, build the update in your backend. Check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). Once the update lands, the lost passkey can't approve anything.
+As with every payment, build the update in your backend. Check it before the provider signs ([route raw signing through one backend](/docs/accounts/apps#route-raw-signing-through-one-backend)). Once the update lands, the lost passkey can't approve anything on Tempo. Each [zone](/docs/zones) applies the update once it imports that Tempo block, and the lost passkey still counts there until then.
 
 If the attached keys don't reach the threshold, Viem throws `Local owners do not meet the threshold.` and sends nothing. Approvals can also come from [separate devices](/docs/accounts/policies/signing-thresholds#approvers-on-separate-devices), such as the backup on the user's laptop.
 
@@ -154,7 +154,7 @@ await client.accessKey.revokeSync({ // [!code hl]
 }) // [!code hl]
 ```
 
-If you didn't save the lost key's address, [list the keys the account has authorized](/docs/accounts/access-keys/revocation#revoke-when-signers-change). A revoked key can't be authorized again, so authorize a new [device key](/docs/accounts/authentication/device-keys) for the new phone.
+If you didn't save the lost key's address, [list the keys the account has authorized](/docs/accounts/access-keys/revocation#revoke-when-signers-change), including any [admin key](/docs/accounts/access-keys/admin-access-keys) from before T14, which pays without limits. Access keys are per zone, so revoke them on each zone the user's account uses too. A revoked key can't be authorized again, so authorize a new [device key](/docs/accounts/authentication/device-keys) for the new phone.
 
 :::::
 
@@ -164,7 +164,7 @@ If you didn't save the lost key's address, [list the keys the account has author
 
 The passkey and the provider replace a lost backup the same way. Attach `passkey` and `providerAccount` to `openAccount`, and swap the lost backup's address for the new backup's. Have the user sign a test message or approve one small payment with the new backup before relying on it.
 
-The provider's key can't approve alone. Tempo has no timelock or delay on recovery: an update applies as soon as signers reach the threshold. Run identity checks before your recovery signer approves. If the user loses both the passkey and the backup, the account stays locked. It recovers only if it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
+The provider's key can't approve alone. Tempo has no timelock or delay on recovery: an update applies on Tempo as soon as signers reach the threshold. Run identity checks before your recovery signer approves. If the user loses both the passkey and the backup, the account stays locked. It recovers only if it has a fourth signer, such as a [recovery service](/docs/accounts/apps/self-custodial-wallets#add-a-recovery-service).
 
 ## Related
 

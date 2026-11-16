@@ -87,7 +87,9 @@ The address is the same on other EVM chains, but nothing controls it there, so f
 
 ### Account registration
 
-The account's first transaction registers it: Tempo stores the version-0 hash before running any call. Registration sticks even if the calls revert, and an invalid transaction registers nothing. It adds 250,000 gas to that transaction, as for creating any new account.
+The account's first transaction registers it: Tempo stores the version-0 hash before running any call. Registration sticks even if the calls revert, and an invalid transaction registers nothing. It adds 250,000 gas to that transaction, as for creating any new account, plus the registration event's log cost ([gas costs](#configurable-account-gas-costs)).
+
+Registration retires the colliding standard key on Tempo from then on. Access keys and token allowances that key created before registration survive it. Zones apply the registration only after they import that Tempo block.
 
 Registration also installs a one-byte `0xef` code marker at the address. Only Tempo can install it. From then on, contracts see the account as having code: `EXTCODESIZE` returns 1, and signature checks such as Permit2 call the account's [ERC-1271 `isValidSignature`](#verify-owner-approvals-in-a-contract). Contracts that reject callers or recipients with code reject the account, and ERC-1155 safe transfers to it revert. An existing single-key account skips this step: it [upgrades in place](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) and starts at version 1.
 
@@ -95,7 +97,7 @@ Registration also installs a one-byte `0xef` code marker at the address. Only Te
 
 Owners approve a whole transaction, including every call in a batch. The transaction comes from the account's address, which pays the fees unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
-An approval carries 1–8 owner signatures, sorted by owner address, whose weights must reach the threshold. Tempo rejects any signature after the threshold is reached. Each signature covers the account and the configuration version, so it can't be reused on another account or after an update. Access keys never count toward the threshold.
+An approval carries 1–8 owner signatures, in strictly ascending owner address order, whose weights must reach the threshold. Every signature must be needed: Tempo rejects the approval if the total minus the smallest signer's weight still reaches the threshold. Each signature covers the account and the configuration version, so it can't be reused on another account or after an update. Access keys never count toward the threshold.
 
 In Viem, a payment is an ordinary action with this account, such as `client.token.transferSync({ account, amount, to, token })`. Viem signs with the local owners, highest weight first, until their weights reach the threshold, so `finance` and `operations` approve it. If the local owners can't reach the threshold, the action throws `Local owners do not meet the threshold.` and sends nothing.
 
@@ -118,17 +120,20 @@ Each owner signs `digest`. For a transaction, `inner_digest` is the transaction'
 
 The `0x05` signature also approves [access-key grants](/docs/development/account-keychain#access-keys-on-each-account-type). It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists. A configurable account can pay its own fees or be sponsored, but it can't sponsor other accounts.
 
+On [zones](/docs/zones), the account has the same address and owners, and Tempo checks `0x05` signatures against its configuration in the latest Tempo block the zone has imported ([TIP-1154](https://tips.sh/1154)). An update or upgrade on Tempo reaches a zone only once the zone imports that block. Access keys are per zone.
+
 There's no `0x05` form of TIP-20 `permit` or of payment-channel vouchers. To approve a spender, the signers approve an `approve` call. To open a payment channel, name an ordinary `authorizedSigner` for its vouchers.
 
 ## Configuration updates
 
-`updateConfig` ([TIP-1107](https://tips.sh/1107)) replaces the owners and threshold. The address, salt, balances, and access keys stay the same. An update doesn't revoke access keys, so [revoke](/docs/development/account-keychain#revoke-an-access-key) any you no longer want.
+`updateConfig` ([TIP-1107](https://tips.sh/1107)) replaces the owners and threshold. The address, salt, balances, and access keys stay the same. An update doesn't revoke access keys, including [admin keys](/docs/accounts/access-keys/admin-access-keys) authorized before T14, which keep spending without limit. [Revoke](/docs/development/account-keychain#revoke-an-access-key) any you no longer want, on Tempo and on each zone.
 
 | Property | Rule |
 | --- | --- |
-| Called by | The account, in a transaction its owners approve at the current threshold. Access keys and contracts can't call it. |
+| Called by | A top-level call (`msg.sender == tx.origin`) in a transaction signed directly by the current quorum. Access keys, contracts, and fee payers can't call it, and get `UnauthorizedConfigurableAccountCaller`. |
 | Version | Increments by 1, which invalidates approvals collected for the old version |
-| Batches | Several updates in one transaction must form consecutive versions |
+| Batches | Several updates in one transaction must form consecutive versions. If any call in the batch reverts, every update rolls back. |
+| Zones | Reverts with `UnsupportedOnZone()`. Update on Tempo, and each zone applies it once it imports that block. |
 | Event | `ConfigurableAccountConfigUpdated(account, salt, version, threshold, owners)`, also emitted at registration with version 0 |
 
 ```ts [update.ts]
@@ -246,18 +251,20 @@ The network fee depends on which owners approve and with which key type ([TIP-11
 | Each secp256k1 approval | 3,000 |
 | Each P-256 or WebAuthn approval | 8,000 |
 | Configuration hashing and calldata | Grows with the owner count |
-| Registration or upgrade | 250,000, once per account |
+| Registration | 250,000, once per account, plus the event's 2,405 + 512 × owner count, plus the new-account cost if the address is empty |
+| Upgrade | 250,000 for the configuration write, plus ordinary call and event costs, and the new-account cost if the address is empty |
 | Configuration update | 5,000 for the write |
+| Each separate fee payer, key-authorization signer, or access key | 2,600 cold or 100 warm, for its account access |
 
-An ordinary transaction already includes 3,000 gas for one signature, which Tempo subtracts once. For example, two passkey approvals add about 13,000 gas plus hashing and calldata. Estimate gas with the configuration and the owners who'll actually approve.
+An ordinary transaction already includes 3,000 gas for one signature, which Tempo subtracts once. For example, two passkey approvals add about 13,000 gas plus hashing and calldata. Estimate gas with the configuration and the owners who'll actually approve. On zones, each cold account access costs 12,600 instead of 2,600, because the zone reads the account's configuration from Tempo.
 
 ## Native multisig precompile
 
-The native multisig precompile is at `0xAACC000000000000000000000000000000000000` on the devnet. Viem's `Actions.accounts.updateConfig.call` builds calls to it, and `getConfigCommitment` reads its stored configuration hash.
+The native multisig precompile is at `0xAACC000000000000000000000000000000000000` from [T14](/docs/protocol/upgrades/t14), which activates on testnet on November 24, 2026 and on mainnet on December 8, 2026, at 15:00 UTC. Until then it runs on the devnet. Viem's `Actions.accounts.updateConfig.call` builds calls to it, and `getConfigCommitment` reads its stored configuration hash.
 
 | Function | Purpose |
 | --- | --- |
 | `deriveAccount(salt, threshold, owners)` | Returns the address for a version-0 configuration |
 | `getConfigCommitment(account)` | Returns the stored hash, or zero before registration |
-| `updateConfig(current, threshold, owners)` | Replaces the owners and threshold |
-| `upgradeAccount(threshold, owners)` | [Upgrades a single-key account](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) |
+| `updateConfig(current, threshold, owners)` | Replaces the owners and threshold. Reverts `UnsupportedOnZone()` on zones. |
+| `upgradeAccount(threshold, owners)` | [Upgrades a single-key account](/docs/development/single-key-accounts#upgrade-to-a-configurable-account) and retires its original key. Reverts `UnsupportedOnZone()` on zones. |

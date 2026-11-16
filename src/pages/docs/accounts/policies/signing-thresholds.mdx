@@ -44,7 +44,7 @@ The passkey approves alone. The backup and recovery keys approve together. Eithe
 
 Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, configuration updates, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it. Each pays alone within its limits.
 
-An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits. Once the signers authorize one, it can pay and authorize other access keys without reaching the threshold. Authorize one only if you'd let that single key act for the whole account.
+An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits, and Tempo creates no new ones from [T14](/docs/protocol/upgrades/t14). One authorized before T14, including on an account later [upgraded](/docs/accounts/account-configuration/account-upgrade), still pays without reaching the threshold, though it can no longer manage keys. Revoke it, or give it a spending limit and scopes.
 
 To change signers or the threshold, send a [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer), approved at the current threshold.
 
@@ -150,7 +150,7 @@ const receipt = await client.sendTransactionSync({ ...request, signatures: [back
 
 For a configurable account, `signTransaction` returns the signer's approval rather than a signed transaction. An approval covers the exact transaction, the account, and the configuration version. Show each approver what they're approving, such as the recipient and amount. Send every approver the same `request`. Submit the request unchanged. The request contains bigints, so move it between devices in an encoding that keeps them.
 
-Approvals can arrive in any order. Viem sorts them by signer address when it combines them. Submit only the approvals the threshold needs. For this account, that's the passkey's approval alone, or the backup and recovery approvals together. Tempo adds up approvals in signer-address order. It rejects the transaction with `excess multisig owner signatures` if any approval comes after the total reaches the threshold. Too few fail with `multisig signature weight below threshold`.
+Approvals can arrive in any order. Viem sorts them by signer address when it combines them, because Tempo requires 1 to 8 approvals in strictly ascending signer-address order. Submit only the approvals the threshold needs. For this account, that's the passkey's approval alone, or the backup and recovery approvals together. Tempo rejects the transaction with `excess multisig owner signatures` if the total still reaches the threshold without the lowest-weight approval, so every approval must be needed. Too few fail with `multisig signature weight below threshold`.
 
 An approval also covers the transaction's nonce, its place in the account's sequence of transactions. If another transaction from the account lands first, submitting fails with `nonce too low`, so prepare again and collect new approvals. To keep slow approvals valid while the account keeps paying, pass `prepareTransactionRequest` its own `nonceKey`. Use a random `bigint` from `1n` to `2n ** 256n - 2n`, which starts a [separate sequence](/docs/guide/tempo-transaction#concurrent-transactions) for this transaction. The maximum `uint256` selects an [expiring nonce](/docs/guide/tempo-transaction#expiring-nonces) instead.
 
@@ -185,7 +185,7 @@ contract ApprovalCheck {
 
 `verifyConfigurableAccount` checks the account's signers at call time, so approvals from removed signers fail. An account that hasn't sent a transaction yet verifies against its first signers. The call returns `false` when the signers don't match the account. It reverts with `InvalidSignature()` when approvals fall short. Include your chain ID, contract address, and the account in `hash`, so an approval can't be replayed elsewhere.
 
-To check a single access key's signature instead, call `verifyKeychain`. It also works on mainnet and testnet. It accepts only access keys that sign with one key. A call for a configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`.
+To check a single access key's signature instead, call `verifyKeychain`. It also works on mainnet and testnet. Before T14, it accepts only access keys that sign with one key, and a call for a configurable account signing as an access key, such as a team budget, reverts with `InvalidFormat()`. From T14, it accepts the team's approvals: it returns `false` when they don't match the team's current configuration or the key's grant, and reverts with `InvalidSignature()` when they fall short. `verifyKeychainAdmin` still reverts with `InvalidFormat()` for them.
 
 <span id="security-policy-limits" />
 <span id="approval-limits" />
@@ -207,7 +207,7 @@ To check a single access key's signature instead, call `verifyKeychain`. It also
 <Cards>
   <Card title="Account Policies" description="Covers how signing thresholds and receive policies work together." to="/docs/accounts/policies" />
   <Card title="Configuration Updates" description="Use for changing signers, weights, or the threshold." to="/docs/accounts/account-configuration/configuration-updates#add-a-signer" />
-  <Card title="Admin Access Keys" description="Covers access keys with no limits." to="/docs/accounts/access-keys/admin-access-keys" />
+  <Card title="Admin Access Keys" description="Covers access keys with no limits authorized before T14, and how to clean them up." to="/docs/accounts/access-keys/admin-access-keys" />
   <Card title="Set Up a Self-Custodial Wallet With a Provider" description="Use for building customer accounts with a wallet provider and a backup key." to="/docs/accounts/apps/self-custodial-wallets" />
   <Card title="Set Up a Team Multisig" description="Use for a team account and team budgets." to="/docs/accounts/custodians/team-multisig" />
 </Cards>
