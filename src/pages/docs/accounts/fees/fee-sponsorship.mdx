@@ -35,7 +35,7 @@ Your own fee payer is an account funded with stablecoins. Its key stays on your 
 
 ### When Your Backend Signs
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). It's the only network that runs configurable accounts until T14, so these examples can sponsor either kind of account. The fee payer itself must sign with a secp256k1 key: a configurable account, or an account upgraded to one, can't sponsor others. To sponsor single-key accounts on mainnet or testnet, connect `client` to that network instead.
+`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). It's the only network that runs configurable accounts until T14, so these examples can sponsor either kind of account. To sponsor single-key accounts on mainnet or testnet, connect `client` to that network instead.
 
 In `sponsored-transfer.ts`, `account` is the paying account with the keys that approve the payment attached. It can be the account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key) or an [access key](/docs/accounts/access-keys) your backend holds for it. `recipient` is the payee's address. Fund the fee payer's address from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first, so it can pay fees:
 
