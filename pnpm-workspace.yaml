@@ -40,7 +40,7 @@ overrides:
   # mermaid 11 still requests katex ^0.16; only 0.18.2+ fixes its trust-check advisory (0.18.11 is deprecated).
   'mermaid>katex': 0.18.10
   # wata 0.4 (via accounts) still requests @hono/node-server 1; it only uses getRequestListener, which 2.x keeps.
-  'wata>@hono/node-server': 2.1.5
+  'wata>@hono/node-server': 2.1.6
   'js-yaml@>=4.0.0 <4.3.2': 4.3.2
   'nanoid@>=3.0.0 <3.3.18': 3.3.18
   protobufjs: '>=7.5.5'

@@ -13,7 +13,7 @@ overrides:
   fast-uri@>=3.0.0 <3.1.9: 3.1.9
   fflate@>=0.4.5 <0.4.9: 0.4.9
   mermaid>katex: 0.18.10
-  wata>@hono/node-server: 2.1.5
+  wata>@hono/node-server: 2.1.6
   js-yaml@>=4.0.0 <4.3.2: 4.3.2
   nanoid@>=3.0.0 <3.3.18: 3.3.18
   protobufjs: '>=7.5.5'
@@ -82,8 +82,8 @@ importers:
         specifier: 0.19.1
         version: 0.19.1(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(@types/react@19.2.17)(@wagmi/core@3.6.5)(express@5.2.1)(immer@11.2.9)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.7.0(react@19.3.1))(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7))(wagmi@3.7.7)
       hono:
-        specifier: ^4.13.14
-        version: 4.13.14
+        specifier: ^4.13.16
+        version: 4.13.18
       mermaid:
         specifier: ^11.17.2
         version: 11.17.2
@@ -192,7 +192,7 @@ importers:
         version: 2.0.0
       mppx:
         specifier: 0.13.3
-        version: 0.13.3(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.14)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7))
+        version: 0.13.3(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.18)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7))
       node:
         specifier: runtime:24.22.3
         version: runtime:24.22.3
@@ -709,8 +709,8 @@ packages:
     peerDependencies:
       vue: ^3.2.0
 
-  '@hono/node-server@2.1.5':
-    resolution: {integrity: sha512-MgP/I06GdvsilDspMk/qmRzpk8LOUStP6jFAbSRi40W09DhoyUn+Mj7eyKICPqeYKybOjVFLVIAQzvu1bfIa7Q==}
+  '@hono/node-server@2.1.6':
+    resolution: {integrity: sha512-p/KH9MnfNcsm3sR6x4lNgm5j+QN4Et8srKredl9DZfXiyZ1UQ3aQ2YVpFLbqktYN5JI+DB+VZFKM2PqE5hLKjQ==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4 || ^5.0.0-0
@@ -3576,8 +3576,12 @@ packages:
     resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
     engines: {node: '>=12.0.0'}
 
-  hono@4.13.14:
-    resolution: {integrity: sha512-yhRLQ21U6qa9Hsu2N7Qcbh8tE+WKEcoErjIo56LeSGiGXGp9sA7UpE86Ui9uexb61KakiGwuHMn2QdV7w6i6kQ==}
+  hono@4.13.16:
+    resolution: {integrity: sha512-AOLOEhvrV+iH92xXCnFr/5+3KjPKcI3xP63XJtX5spAnkznPdHijlIsUTpi7/9EhWqrTCekw5c5zh1K+YsVw7A==}
+    engines: {node: '>=16.9.0'}
+
+  hono@4.13.18:
+    resolution: {integrity: sha512-H9q/E1XizaWstJxUW881dmLxEj+t/TrGGnyxINkm4+sK0qUwsMtFdo2BWI9Vs3cIS19MU6b6iCijoUoEf4f3DA==}
     engines: {node: '>=16.9.0'}
 
   hookable@6.1.1:
@@ -6345,9 +6349,9 @@ snapshots:
       '@tanstack/vue-virtual': 3.13.29(vue@3.5.44(typescript@6.0.3))
       vue: 3.5.44(typescript@6.0.3)
 
-  '@hono/node-server@2.1.5(hono@4.13.14)':
+  '@hono/node-server@2.1.6(hono@4.13.16)':
     dependencies:
-      hono: 4.13.14
+      hono: 4.13.16
 
   '@iconify-json/lucide@1.2.115':
     dependencies:
@@ -6513,7 +6517,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7)':
     dependencies:
-      '@hono/node-server': 2.1.5(hono@4.13.14)
+      '@hono/node-server': 2.1.6(hono@4.13.16)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -6523,7 +6527,7 @@ snapshots:
       eventsource-parser: 3.1.1
       express: 5.2.1
       express-rate-limit: 8.5.2(express@5.2.1)
-      hono: 4.13.14
+      hono: 4.13.16
       jose: 6.2.3
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -8142,11 +8146,11 @@ snapshots:
 
   accounts@0.19.1(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(@types/react@19.2.17)(@wagmi/core@3.6.5)(express@5.2.1)(immer@11.2.9)(react@19.3.1)(typescript@6.0.3)(use-sync-external-store@1.7.0(react@19.3.1))(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7))(wagmi@3.7.7):
     dependencies:
-      hono: 4.13.14
+      hono: 4.13.16
       idb-keyval: 6.2.2
       jose: 6.2.3
       mipd: 0.0.7(typescript@6.0.3)
-      mppx: 0.12.0(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.14)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7))
+      mppx: 0.12.0(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.16)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7))
       ox: 0.14.54(typescript@6.0.3)(zod@4.6.7)
       wata: 0.4.2(react@19.3.1)(typescript@6.0.3)
       webauthx: 0.1.2(typescript@6.0.3)(zod@4.6.7)
@@ -9176,7 +9180,9 @@ snapshots:
 
   highlight.js@11.11.1: {}
 
-  hono@4.13.14: {}
+  hono@4.13.16: {}
+
+  hono@4.13.18: {}
 
   hookable@6.1.1: {}
 
@@ -10037,7 +10043,7 @@ snapshots:
 
   moo@0.5.3: {}
 
-  mppx@0.12.0(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.14)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7)):
+  mppx@0.12.0(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.16)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7)):
     dependencies:
       '@stripe/stripe-js': 9.13.0
       eventsource-parser: 3.1.1
@@ -10048,11 +10054,11 @@ snapshots:
     optionalDependencies:
       '@modelcontextprotocol/sdk': 1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7)
       express: 5.2.1
-      hono: 4.13.14
+      hono: 4.13.16
     transitivePeerDependencies:
       - typescript
 
-  mppx@0.13.3(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.14)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7)):
+  mppx@0.13.3(@modelcontextprotocol/sdk@1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7))(express@5.2.1)(hono@4.13.18)(typescript@6.0.3)(viem@2.57.5(patch_hash=87401abb79dc9c032239b9b0820ca230c6d91b4e34d7b5ca7c8605a2d771e746)(typescript@6.0.3)(zod@4.6.7)):
     dependencies:
       '@stripe/stripe-js': 9.17.0
       eventsource-parser: 4.1.1
@@ -10063,7 +10069,7 @@ snapshots:
     optionalDependencies:
       '@modelcontextprotocol/sdk': 1.32.2(@cfworker/json-schema@4.1.1)(zod@4.6.7)
       express: 5.2.1
-      hono: 4.13.14
+      hono: 4.13.18
     transitivePeerDependencies:
       - typescript
 
@@ -11016,7 +11022,7 @@ snapshots:
 
   tapimo@0.22.0:
     dependencies:
-      hono: 4.13.14
+      hono: 4.13.16
 
   tar@7.5.22:
     dependencies:
@@ -11405,7 +11411,7 @@ snapshots:
     dependencies:
       '@base-ui/react': 1.6.0(@types/react@19.2.17)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@hono/node-server': 2.1.5(hono@4.13.14)
+      '@hono/node-server': 2.1.6(hono@4.13.16)
       '@iconify-json/lucide': 1.2.115
       '@iconify-json/ri': 1.2.10
       '@iconify-json/simple-icons': 1.2.88
@@ -11443,7 +11449,7 @@ snapshots:
       extend: 3.0.2
       github-slugger: 2.0.0
       hast-util-to-jsx-runtime: 2.3.6
-      hono: 4.13.14
+      hono: 4.13.16
       image-size: 2.0.4
       lz-string: 1.5.0
       magic-string: 0.30.21
@@ -11575,11 +11581,11 @@ snapshots:
 
   waku@1.0.0-rc.3(patch_hash=70493b32a3f116a94b6fda2de8497a754444b81424d033f2280778110a680e79)(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
-      '@hono/node-server': 2.1.5(hono@4.13.14)
+      '@hono/node-server': 2.1.6(hono@4.13.16)
       '@vitejs/plugin-react': 6.0.3(vite@8.1.6(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))
       '@vitejs/plugin-rsc': 0.5.37(react-dom@19.3.1(react@19.3.1))(react-server-dom-webpack@19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.104.1(esbuild@0.28.1)))(react@19.3.1)(vite@8.1.6(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))
       dotenv: 18.0.7
-      hono: 4.13.14
+      hono: 4.13.16
       magic-string: 1.4.3
       picocolors: 1.1.1
       react: 19.3.1
@@ -11605,10 +11611,10 @@ snapshots:
 
   wata@0.4.2(react@19.3.1)(typescript@6.0.3):
     dependencies:
-      '@hono/node-server': 2.1.5(hono@4.13.14)
+      '@hono/node-server': 2.1.6(hono@4.13.16)
       '@noble/ciphers': 2.2.0
       '@noble/hashes': 2.2.0
-      hono: 4.13.14
+      hono: 4.13.16
       ox: 0.14.54(typescript@6.0.3)(zod@4.6.7)
       zod: 4.6.7
     optionalDependencies:
