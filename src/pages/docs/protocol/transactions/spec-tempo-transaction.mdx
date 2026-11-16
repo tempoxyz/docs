@@ -917,7 +917,7 @@ Different signature types incur different base transaction costs to reflect thei
 |----------------|---------------|-------------|-----------|
 | **secp256k1** | 21,000 | Standard | Includes 3,000 gas for ecrecover precompile |
 | **P256** | 26,000 | 21,000 + 5,000 | Base 21k + additional 5k for P256 verification |
-| **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for clientDataJSON) | Base P256 cost plus variable cost for clientDataJSON based on size |
+| **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for `authenticatorData || clientDataJSON`) | Base P256 cost plus variable cost for the concatenated WebAuthn data |
 | **Keychain** | Inner signature + 3,000 | primitive_sig_cost + 3,000 | Inner signature cost + key validation overhead (2,100 SLOAD + 900 buffer) |
 
 **Rationale:**
