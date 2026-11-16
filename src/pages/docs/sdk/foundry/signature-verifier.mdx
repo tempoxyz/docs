@@ -4,9 +4,13 @@ description: Verify secp256k1, P256, and WebAuthn signatures in smart contracts 
 ogImage: /og/2026-q4/og_2026-q4_docs_sdk-foundry-signature-verifier_title-f5_v02.png
 ---
 
+import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
+
 # Signature Verification with Foundry
 
 The [`SignatureVerifier` precompile](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1020.md) is available on Tempo. It provides signature verification for secp256k1, P256, and WebAuthn through a single interface — no custom verifier contracts needed.
+
+<AdminAccessKeysT14 />
 
 The Foundry project template for Tempo ships with a working example that demonstrates signature verification in a relayed mail contract. Initialize it with:
 
