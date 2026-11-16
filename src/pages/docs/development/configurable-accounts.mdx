@@ -84,7 +84,7 @@ The account's first transaction registers it: Tempo stores the version-0 hash be
 
 Owners approve a whole transaction, including every call in a batch. The transaction comes from the account's address, which pays the fees unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
-An approval carries 1–8 owner signatures, sorted by owner address, whose weights must reach the threshold. Tempo rejects any signature after the threshold is reached. Each signature covers the account and the configuration version, so it can't be reused on another account or after an update. Access keys never count toward the threshold.
+An approval carries 1–8 owner signatures, sorted by owner address, whose weights must reach the threshold. Tempo rejects an approval that includes a signature the threshold doesn't need. Each signature covers the account and the configuration version, so it can't be reused on another account or after an update. Access keys never count toward the threshold.
 
 In Viem, a payment is an ordinary action with this account, such as `client.token.transferSync({ account, amount, to, token })`. Viem signs with the local owners, highest weight first, until their weights reach the threshold, so `finance` and `operations` approve it. If the local owners can't reach the threshold, the action throws `Local owners do not meet the threshold.` and sends nothing.
 
