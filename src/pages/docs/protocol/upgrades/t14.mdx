@@ -30,9 +30,10 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 - **Existing accounts upgrade in place:** a single-key account gains signers and a threshold and keeps its address and balances.
 - **Team approval for access keys:** a team's account can act as another account's access key, approving with its own signers.
 - **Zone support:** these accounts work on Zones with the same signers and threshold.
-- **Admin access keys removed:** Tempo rejects new admin access keys, and only an account's own key or its signers manage its access keys.
+- **Admin access keys removed:** Tempo rejects new admin access keys.
 - **Validator and consensus rules:** blocks must pay the proposer's registered fee recipient, endpoint formats are stricter, and consensus defaults to deferred verification.
 - **Paused Zone Portals:** a paused Zone Portal also rejects refund claims. Batch settlement continues.
+- **Cheaper batches:** a batch call pays cold access only for a target no earlier call reached.
 
 <span id="features" />
 
@@ -53,7 +54,7 @@ Read the specifications for [multiple signers](https://tips.sh/1107), [in-place 
 
 ### Multiple signers on Zones
 
-Zones read each account's signer configuration from Tempo, so an account uses the same signers and threshold on a Zone as on Tempo.
+Zones read each account's signer configuration from Tempo, so an account uses the same signers and threshold on a Zone as on Tempo. A signer change applies on a Zone once it imports that Tempo block. Configuration updates and upgrades revert on a Zone with `UnsupportedOnZone()`.
 
 Read the [specification](https://tips.sh/1154).
 
@@ -77,11 +78,17 @@ From T14, a paused Zone Portal also rejects refund claims. Batch settlement cont
 
 Read the [specification](https://tips.sh/1152).
 
+### Batch call gas
+
+From T14, each call after the first in a Tempo transaction pays the 2,600-gas cold access cost only when no earlier call targeted it and validation hasn't already loaded it, such as the sender, a fee payer, or the access key. Other calls pay 100 gas. Before T14, every call after the first paid 2,600 gas.
+
+Read the [specification](https://tips.sh/1152).
+
 ## Integration impact
 
 - **Existing accounts:** single-key accounts and limited access keys keep working unchanged. Adding signers to an account is optional.
-- **Admin access keys:** Tempo rejects new [admin access keys](/docs/accounts/access-keys/admin-access-keys), and only an account's own key or its signers authorize, change, or revoke its access keys. Admin keys authorized before T14 keep paying as access keys without limits. If you use an admin key to manage a user's other keys, [add that device as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) instead, revoke admin keys you no longer need, and [contact us](https://tempo.xyz/contact) to plan the change before T14.
+- **Admin access keys:** if you use an admin key to manage a user's other keys, [add that device as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) instead and revoke admin keys you no longer need before T14 ([details](#admin-access-key-removal)).
 - **Account upgrades:** until T14 activates on a network, an account upgrade transaction there charges its fee and changes nothing. Send upgrades only after activation.
 - **Signature parsing:** accounts with multiple signers sign with the [`0x05` multisig signature](/docs/development/configurable-accounts#multisig-signature-format). Viem builds and reads it. If you parse or verify Tempo transaction signatures yourself, handle this type. It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
-- **Contracts that check signatures:** a registered account answers ERC-1271 `isValidSignature`, so Permit2 and similar verifiers work unchanged. Contracts can also call `verifyConfigurableAccount` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract).
-- **Validators:** block execution rejects a block whose beneficiary differs from the proposer's registered fee recipient, or whose proposer has no registered fee recipient. Validator endpoints over 255 bytes or written as IPv4-mapped IPv6 addresses revert; use the IPv4 form.
+- **Contracts that check signatures:** a registered account answers ERC-1271 `isValidSignature`, so Permit2 and similar verifiers work unchanged. After an upgrade, contracts using OpenZeppelin `SignatureChecker` before v5.1 still accept the retired original key. Contracts can also call `verifyConfigurableAccount` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract).
+- **Validators:** check your fee recipient and endpoint formats against the [validator and consensus changes](#validator-and-consensus-changes).
