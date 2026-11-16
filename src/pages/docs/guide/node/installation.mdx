@@ -146,25 +146,12 @@ G4OIGIHqFwKSCA==
 
 ### Docker Image Provenance
 
-Tempo signs Docker images in three ways. Use the check that matches your image. An image is genuine if any one of them passes.
+Tempo signs Docker images in two ways. If you verify images, trust both. An image is genuine if either check passes.
 
-| Image | Check |
-| --- | --- |
-| Releases up to `1.18.2` | [Cosign signature from GitHub Actions](#cosign-signature-from-github-actions) |
-| Images built by Tempo CI from November 12, 2026 | [GitHub build attestation](#github-build-attestation) |
-| Images Tempo signs outside CI | [Tempo image-signing key](#tempo-image-signing-key) |
+- **GitHub build attestation.** Tempo CI attaches it to images it builds.
+- **Tempo image-signing key.** Tempo signs other images with this Cosign key.
 
-These commands use `ghcr.io`. Images on Docker Hub (`docker.io/tempoxyz/tempo`) verify the same way.
-
-#### Cosign signature from GitHub Actions
-
-Install [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/), then run:
-
-```bash
-cosign verify ghcr.io/tempoxyz/tempo:<version> \
-  --certificate-identity-regexp="https://github.com/tempoxyz/tempo/" \
-  --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
-```
+Images on Docker Hub (`docker.io/tempoxyz/tempo`) verify the same way as the `ghcr.io` images in these commands.
 
 #### GitHub build attestation
 
@@ -188,7 +175,7 @@ SoUlK2hNdRAywbesd3sELplDXJ1WwQBQpC250xZlQEyPyfYOxVrpFnHjEw==
 -----END PUBLIC KEY-----
 ```
 
-Then verify the image with Cosign:
+Then install [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/) and verify the image:
 
 ```bash
 cosign verify --key tempo-image-signing.pub --insecure-ignore-tlog=true \
