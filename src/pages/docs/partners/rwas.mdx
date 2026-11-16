@@ -5,11 +5,11 @@ description: Find tokenized Treasuries and yield-bearing assets on Tempo, with i
 ogImage: /og/2026-q4/og_2026-q4_docs_partners-rwas_title-image_v02.jpg
 ---
 
-import { partnerLogo, partnerLogoOndo, partnerLogoFigure, partnerLogoHastra, partnerLogoTenbin } from '../../../components/PartnerLogos.styles'
+import { partnerLogo, partnerLogoOndo, partnerLogoFigure, partnerLogoHastra, partnerLogoTenbin, partnerLogoSecuritize, partnerLogoMaple, partnerLogoEthena } from '../../../components/PartnerLogos.styles'
 
 # RWAs
 
-Find real-world assets (RWAs), including tokenized Treasuries and yield-bearing assets, on Tempo. For stablecoins used for balances and payments, see [Stablecoins](/docs/partners/stablecoins).
+Find real-world assets (RWAs), including tokenized Treasuries, funds, credit, and yield-bearing assets, on Tempo. For stablecoins used for balances and payments, see [Stablecoins](/docs/partners/stablecoins).
 
 ## <span className={`partner-logo partner-logo--ondo ${partnerLogo().className + ' ' + partnerLogoOndo().className}`} aria-hidden="true" />Ondo
 
@@ -22,6 +22,18 @@ Find real-world assets (RWAs), including tokenized Treasuries and yield-bearing 
 ## <span className={`partner-logo partner-logo--hastra ${partnerLogo().className + ' ' + partnerLogoHastra().className}`} aria-hidden="true" />Hastra
 
 [Hastra](https://help.hastra.io/about-us/understanding-wylds-and-prime%3A-hastra%27s-ecosystem) offers wYLDS, a receipt token backed by YLDS, and PRIME, its staked position token. Follow Hastra's documentation for how each token accrues and realizes yield.
+
+## <span className={`partner-logo partner-logo--securitize ${partnerLogo().className + ' ' + partnerLogoSecuritize().className}`} aria-hidden="true" />Securitize
+
+[Securitize](https://securitize.io/) issues [BlackRock's BUIDL](https://tempo.xyz/blog/tempo-expands-onchain-yield-offering-with-blackrocks-buidl-fund/) on Tempo, a tokenized fund that holds U.S. Treasuries. BUIDL is available only to eligible investors; Securitize, its SEC-registered transfer agent, handles onboarding, subscriptions, and redemptions.
+
+## <span className={`partner-logo partner-logo--maple ${partnerLogo().className + ' ' + partnerLogoMaple().className}`} aria-hidden="true" />Maple
+
+[Maple's syrupUSDC](https://maple.finance/) gives holders access to Maple's institutional lending pools, which earn a return from overcollateralized loans. Follow Maple's documentation for deposits, withdrawals, and eligibility.
+
+## <span className={`partner-logo partner-logo--ethena ${partnerLogo().className + ' ' + partnerLogoEthena().className}`} aria-hidden="true" />Ethena
+
+[Ethena's sUSDe](https://ethena.fi/) is staked USDe, a synthetic dollar backed by crypto assets and short futures positions. sUSDe earns a return from funding rates and reserve income. Follow Ethena's documentation for staking, unstaking, and eligibility.
 
 ## <span className={`partner-logo partner-logo--tenbin ${partnerLogo().className + ' ' + partnerLogoTenbin().className}`} aria-hidden="true" />Tenbin
 
@@ -37,5 +49,7 @@ These tokens appear in the [Tempo mainnet token registry](https://tokenlist.temp
 | YLDS | [`0x20c0000000000000000000003337951a5a9d94b2`](https://explore.tempo.xyz/address/0x20c0000000000000000000003337951a5a9d94b2) |
 | wYLDS | [`0x20c00000000000000000000030fdd4a919e93fcf`](https://explore.tempo.xyz/address/0x20c00000000000000000000030fdd4a919e93fcf) |
 | PRIME | [`0x20c00000000000000000000058d0b8b2cfdb358c`](https://explore.tempo.xyz/address/0x20c00000000000000000000058d0b8b2cfdb358c) |
+| syrupUSDC | [`0x20c0000000000000000000008191667423f70e67`](https://explore.tempo.xyz/address/0x20c0000000000000000000008191667423f70e67) |
+| sUSDe | [`0x20c000000000000000000000bd95bfb69fbe6ce3`](https://explore.tempo.xyz/address/0x20c000000000000000000000bd95bfb69fbe6ce3) |
 
 Identify each asset by its contract address; the issuer sets eligibility, transfer rules, and redemption. Use the [token list API](/docs/quickstart/tokenlist) to read metadata, or [Earn](/docs/earn) to explore vault integrations.
