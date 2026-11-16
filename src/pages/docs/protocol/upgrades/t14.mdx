@@ -32,7 +32,7 @@ T14 is scheduled to activate on testnet on November 24, 2026 and on mainnet on D
 - **Zone support:** these accounts work on Zones with the same signers and threshold.
 - **Admin access keys removed:** Tempo rejects new admin access keys, and only an account's own key or its signers manage its access keys.
 - **Validator and consensus rules:** blocks must pay the proposer's registered fee recipient, endpoint formats are stricter, and consensus defaults to deferred verification.
-- **Paused Zone Portals:** a paused Zone Portal rejects refund claims and batch settlement.
+- **Paused Zone Portals:** a paused Zone Portal also rejects refund claims. Batch settlement continues.
 
 <span id="features" />
 
@@ -73,7 +73,7 @@ Read the [specification](https://tips.sh/1152).
 
 ### Paused Zone Portals
 
-From T14, a paused Zone Portal rejects refund claims and batch settlement. The sequencer stops preparing and submitting batches until the portal resumes.
+From T14, a paused Zone Portal rejects refund claims, alongside deposits and withdrawal processing. Batch settlement continues while the portal is paused.
 
 Read the [specification](https://tips.sh/1152).
 
