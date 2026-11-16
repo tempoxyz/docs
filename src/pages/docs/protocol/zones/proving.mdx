@@ -114,7 +114,7 @@ The SPF can replay an open Zone tip without withdrawal finalization. Settlement 
 
 On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HOST:PORT`. The sequencer waits for the remote prover's successful batch result and nonempty Nitro attestation before submission. It collects the settlement certificate in parallel.
 
-On an `rpc_only` follower, the same flag enables observational validation. Without a remote address, this runs in-process. A follower's observational results don't control settlement. The unconfigured sequencer compatibility path submits empty proof bytes. It can't satisfy an enforcing verifier.
+`--sequencer.enable-prover` requires a sequencer and is rejected on `rpc_only` followers. The unconfigured sequencer compatibility path submits empty proof bytes. It can't satisfy an enforcing verifier.
 
 The remote service runs inside AWS Nitro Enclaves over AF_VSOCK. After replay, it places the canonical batch digest in a Nitro attestation document's `user_data`. It returns `BatchOutput` with a proof bundle. The bundle sets `verifierConfig = 0x01` and the raw COSE/CBOR document as `proof`.
 
