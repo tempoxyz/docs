@@ -30,8 +30,9 @@ onlyBuiltDependencies:
 overrides:
   # Keep transitive vocs on the same patched release as the root.
   vocs: 2.12.0
-  # Configurable account hash domains matching the t14-checkpoint devnet (wevm/ox#519).
-  'viem@2.57.5>ox': https://pkg.pr.new/ox@bf010ee
+  # Configurable account encoding matching the stack-mdtgf devnet (Tempo main). viem 2.57.18+
+  # drops admin access keys, which the Moderato admin key demo needs until T14 activates there.
+  'viem@2.57.5>ox': 0.14.67
   'baseline-browser-mapping@<2.11.0': 2.11.0
   'browserslist@<4.28.7': 4.28.7
   dompurify: '>=3.4.17'
