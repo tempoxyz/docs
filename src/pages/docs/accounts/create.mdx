@@ -25,13 +25,13 @@ A single-key Tempo account's address comes from the key that approves its paymen
 
 On mainnet and testnet today, an account is a [single-key account](/docs/development/single-key-accounts) (EOA). One key, such as a passkey, approves its payments and authorizes its [access keys](/docs/accounts/access-keys).
 
-Create one on Moderato testnet from a passkey, a device key, or a private key.
+Create one on testnet from a passkey, a device key, or a private key.
 
 <span id="try-a-passkey-account" />
 
 <SingleKeyAccountDemo />
 
-In code, create a passkey account on Moderato testnet and fund it from the testnet faucet.
+In code, create a passkey account on testnet and fund it from the testnet faucet.
 
 ```ts [passkey-account.ts]
 import { tempoModerato } from 'viem/chains'
@@ -115,7 +115,7 @@ await client.faucet.fundSync({ account: account.address }) // [!code hl]
 
 ::::
 
-On Moderato testnet, the [testnet faucet](/docs/accounts/fund#get-test-funds) sends test funds. In production, [onramps and other chains](/docs/accounts/fund) fund the address.
+On testnet, the [testnet faucet](/docs/accounts/fund#get-test-funds) sends test funds. In production, [onramps and other chains](/docs/accounts/fund) fund the address.
 
 ## Next Steps
 

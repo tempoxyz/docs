@@ -18,7 +18,7 @@ import { PayWithIssuedToken } from '../../../../components/guides/steps/payments
 
 # Use your stablecoin for fees
 
-Provide fee-pool liquidity so users can pay transaction fees in your USD-denominated TIP-20 token. The examples use Moderato testnet; see [transaction fees](/docs/protocol/fees) for eligibility and conversion rules.
+Provide fee-pool liquidity so users can pay transaction fees in your USD-denominated TIP-20 token. The examples use testnet; see [transaction fees](/docs/protocol/fees) for eligibility and conversion rules.
 
 ## Fee-token stablecoin demo
 
@@ -46,7 +46,7 @@ Before users can pay fees with your token, you need to provide liquidity in the 
 
 To determine which validator tokens are needed, sample recent blocks and query `validatorTokens(block.miner)` on the FeeManager contract. An unset preference resolves to pathUSD. Preferences can change; do not assume all validators accept the same payout token.
 
-Add liquidity to your token's fee pool with the [backend Viem client](/docs/guide/payments/send-a-payment#send-from-your-backend). Set `TEMPO_TOKEN` to the token you issued on Moderato:
+Add liquidity to your token's fee pool with the [backend Viem client](/docs/guide/payments/send-a-payment#send-from-your-backend). Set `TEMPO_TOKEN` to the token you issued on testnet:
 
 :::code-group
 

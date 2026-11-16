@@ -717,7 +717,7 @@ The following is encoding pseudocode, not a runnable SDK example. Helper names s
    ```typescript
    // Define key parameters
    const keyAuth = {
-     chain_id: 42431, // Moderato testnet
+     chain_id: 42431, // testnet
      key_type: SignatureType.P256,      // 1
      key_id: keyId,                     // address derived from public key
      expiry: timestamp + 86400,         // 24 hours from now; omit this field for a non-expiring key authorization
@@ -752,7 +752,7 @@ The following is encoding pseudocode, not a runnable SDK example. Helper names s
 4. **Build TempoTransaction**
    ```typescript
    const tx = {
-     chain_id: 42431, // Moderato testnet
+     chain_id: 42431, // testnet
      nonce: await getNonce(account),
      nonce_key: 0,
      calls: [{ to: recipient, value: 0, input: "0x" }],
@@ -795,7 +795,7 @@ The following is encoding pseudocode, not a runnable SDK example. Helper names s
 ```typescript
 // Access Key is already authorized, just sign transactions directly
 const tx = {
-  chain_id: 42431, // Moderato testnet
+  chain_id: 42431, // testnet
   nonce: await getNonce(account),
   calls: [{ to: recipient, value: 0, input: calldata }],
   key_authorization: null,  // No authorization needed
@@ -824,7 +824,7 @@ const finalSignature = {
 ```typescript
 // Must be signed by the Root Key or an active admin key
 const tx = {
-  chain_id: 42431, // Moderato testnet
+  chain_id: 42431, // testnet
   nonce: await getNonce(account),
   calls: [{
     to: ACCOUNT_KEYCHAIN_ADDRESS,
@@ -840,7 +840,7 @@ const tx = {
 ```typescript
 // Must be signed by the Root Key or an active admin key
 const tx = {
-  chain_id: 42431, // Moderato testnet
+  chain_id: 42431, // testnet
   nonce: await getNonce(account),
   calls: [{
     to: ACCOUNT_KEYCHAIN_ADDRESS,

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 
 const canonicalSpecUrl = 'https://api.tempo.xyz/openapi.json'
-// The verified Moderato deployment also used by the interactive Earn deposit demo.
+// The verified testnet deployment also used by the interactive Earn deposit demo.
 const earnVaultExample = '0x20147491b5701dea880263241c335caca9be326d'
 const earnReadPaths = new Set([
   '/v1/earn/vaults/{vaultId}',
@@ -46,7 +46,7 @@ function rewriteSchemaExamples(value: unknown, field?: string) {
 }
 
 function prepareEarnRequestExamples(pathname: string, path: Record<string, unknown>) {
-  // Transaction status reads require a destination Zone chain ID, not Moderato.
+  // Transaction status reads require a destination Zone chain ID, not testnet.
   if (!earnReadPaths.has(pathname) || !isObject(path.get)) return
   const operation = path.get
   if (!Array.isArray(operation.parameters)) return

@@ -24,7 +24,7 @@ export async function installAuthenticatedRpc(
     }
 
     try {
-      // The Tempo API proxies keyed RPC to Moderato as an authenticated client,
+      // The Tempo API proxies keyed RPC to testnet as an authenticated client,
       // which the per-IP connection limit on anonymous traffic does not apply to.
       const response = await fetch(`https://api.tempo.xyz/rpc/${tempoModerato.id}`, {
         method: 'POST',

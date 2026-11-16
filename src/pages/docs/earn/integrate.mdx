@@ -25,17 +25,17 @@ A [vault](/docs/earn/how-it-works) is a contract that accepts one stablecoin and
 
 ## Try a deposit
 
-Create a passkey test account, get faucet funds, and deposit into a pathUSD test vault on [Moderato](/docs/quickstart/connection-details), Tempo's testnet. [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) is a Tempo stablecoin, and the vault is verified, meaning it's in Tempo's curated Earn registry. The amount starts at 1 pathUSD. The demo checks that the vault supports deposits and redemptions before enabling them. You can withdraw the test position afterward.
+Create a passkey test account, get faucet funds, and deposit into a pathUSD test vault on [testnet](/docs/quickstart/connection-details). [pathUSD](/docs/protocol/exchange/quote-tokens#pathusd) is a Tempo stablecoin, and the vault is verified, meaning it's in Tempo's curated Earn registry. The amount starts at 1 pathUSD. The demo checks that the vault supports deposits and redemptions before enabling them. You can withdraw the test position afterward.
 
 <EarnDepositDemo />
 
 ## Deposit into a vault
 
-Each tab deposits 1 pathUSD (`1000000` base units) into the Moderato test vault. The tabs use values defined in the [Earn testnet example](/docs/earn/example), which sets up each tool:
+Each tab deposits 1 pathUSD (`1000000` base units) into the testnet vault. The tabs use values defined in the [Earn testnet example](/docs/earn/example), which sets up each tool:
 
 - **CLI (Cast).** Shell variables for the keystore (`KEYSTORE`), RPC URL (`TEMPO_RPC_URL`), `VAULT`, `ASSET_TOKEN`, `ASSET_AMOUNT`, and `ACCOUNT`, funded from the faucet.
 - **Viem.** A `client` created with `createClient` from `viem/tempo` on `tempoModerato`, with a funded account, plus `vault`, `assetToken`, and `assetAmount`.
-- **Wagmi.** A React component connected to a funded Moderato account (`address`), with the same constants and hook imports from `wagmi` and `wagmi/tempo`.
+- **Wagmi.** A React component connected to a funded testnet account (`address`), with the same constants and hook imports from `wagmi` and `wagmi/tempo`.
 
 Keep the signer and vault on the same network.
 
@@ -173,7 +173,7 @@ Confirm the receipt succeeded. Save its transaction hash, the deposited amount, 
 
 ### Confirm your position
 
-Read the position with the Earn API `GET /v1/earn/vaults/{vaultId}/positions/{address}` endpoint. The request builder starts with the Moderato test vault as `vaultId` and `chainId` set to `testnet`. Set the `address` path parameter to your test account’s address; use a matching vault and network for other deposits. Use **Try** to read the position, or switch the request’s code language to copy an example.
+Read the position with the Earn API `GET /v1/earn/vaults/{vaultId}/positions/{address}` endpoint. The request builder starts with the testnet vault as `vaultId` and `chainId` set to `testnet`. Set the `address` path parameter to your test account’s address; use a matching vault and network for other deposits. Use **Try** to read the position, or switch the request’s code language to copy an example.
 
 <OpenApi.Playground operationId="getEarnVaultPosition" anchors={false} />
 

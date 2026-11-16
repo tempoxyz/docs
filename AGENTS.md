@@ -313,7 +313,7 @@ Use one term for one concept. Adapted from the [Design System word list](https:/
 | swap | trade, exchange (as a verb) | Through the Stablecoin DEX. |
 | sign in | log in, login | "Sign-in" as a noun or adjective. |
 | onchain, offchain | on-chain, on chain | |
-| mainnet, testnet, devnet | Mainnet, Testnet (mid-sentence) | Name the Tempo Accounts devnet where configurable accounts run until T14. |
+| mainnet, testnet, devnet | Mainnet, Testnet (mid-sentence); Moderato, Presto | Name the Tempo Accounts devnet where configurable accounts run until T14. Never call the networks Moderato or Presto in prose; code names such as `tempoModerato`, `--chain moderato` and `rpc.moderato.tempo.xyz` stay. |
 | Zone | zone, private chain, rollup | Capitalized, as in "Tempo Zones" and "Zone A". |
 | Tempo (the public chain) | public chain, L1, parent chain (in prose) | Say "public Tempo" only to contrast with a Zone's private ledger. Write "Tempo Mainnet" only for mainnet itself. |
 | Zone RPC, authorization token | zone endpoint, auth header, API key | The authenticated endpoint and the signed credential it requires (`X-Authorization-Token`). |

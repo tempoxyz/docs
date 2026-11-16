@@ -9,7 +9,7 @@ import { Tabs, Tab } from 'vocs'
 
 # Payment examples
 
-Use these examples to send AlphaUSD on Moderato testnet. Start with [Send payments](/docs/guide/payments/send-a-payment) for the integration flow, or [Browser payments](/docs/guide/payments/send-a-payment/browser) for a complete React walkthrough.
+Use these examples to send AlphaUSD on testnet. Start with [Send payments](/docs/guide/payments/send-a-payment) for the integration flow, or [Browser payments](/docs/guide/payments/send-a-payment/browser) for a complete React walkthrough.
 
 Fund a test account with the [faucet](/docs/quickstart/faucet) and replace the example recipients with accounts you control. Set `RPC_URL` or `TEMPO_RPC_URL` to `https://rpc.moderato.tempo.xyz` for command-line examples. Use the [SDK guides](/docs/sdk) to install and configure your language's tooling. Cast examples use `TEMPO_PRIVATE_KEY` from the [CLI setup](#cli-client); all token amounts are in base units.
 
@@ -842,11 +842,11 @@ Check the receipt and transfer events before recording delivery. See [Confirm de
 
 ## Payment client setup
 
-Configure a client for creating accounts, reading balances, and sending payments. These setups supply the shared configuration used in the payment guides. API examples use Moderato with `chainId=42431`.
+Configure a client for creating accounts, reading balances, and sending payments. These setups supply the shared configuration used in the payment guides. API examples use testnet with `chainId=42431`.
 
 ### Choose your tools
 
-The examples on this page and in the payment guides use AlphaUSD on Moderato. Choose one signing environment for each workflow: a CLI/private-key signer, a Viem client, or a wallet connected through Wagmi. Read-only examples need no private key.
+The examples on this page and in the payment guides use AlphaUSD on testnet. Choose one signing environment for each workflow: a CLI/private-key signer, a Viem client, or a wallet connected through Wagmi. Read-only examples need no private key.
 
 - [CLI](#cli-client): install the current Foundry release with Tempo support.
 - [Viem](#viem-client): use a local script or backend signer.
@@ -867,7 +867,7 @@ export TEMPO_PRIVATE_KEY=your_test_account_private_key
 
 Replace the last three values with your own test inputs. `cast wallet new` creates a local key and address. Keep the private key in your signing environment. A read-only balance query only needs the RPC URL, token, and address. Set `PAYMENT_TX_HASH` to a returned transaction hash when inspecting its receipt.
 
-`cast erc20 transfer` and token amounts in `cast send` or `cast batch-send` use base units: `1000000` is one AlphaUSD. `cast erc20 balance` also returns base units. `cast logs --subscribe` uses the Moderato WebSocket endpoint; stop it with Ctrl+C.
+`cast erc20 transfer` and token amounts in `cast send` or `cast batch-send` use base units: `1000000` is one AlphaUSD. `cast erc20 balance` also returns base units. `cast logs --subscribe` uses the testnet WebSocket endpoint; stop it with Ctrl+C.
 
 ### Wagmi client
 
@@ -903,7 +903,7 @@ export function App() {
 
 `Payments` is your React component. Keep imports at module scope and put the short hook examples in its body. Call write handlers such as `sendPayment`, `getTestFunds`, `grantAccess`, and `revokeAccess` only from user actions. Disable buttons while pending or disconnected and display errors. The [complete browser form](/docs/guide/payments/send-a-payment/browser) shows validation, connection, and receipt states.
 
-Set `alphaUsd` to `0x20c0000000000000000000000000000000000001` and `recipient` to your intended address. Read examples take `account` as an address. The configured connector uses Moderato; keep the connected account on that network.
+Set `alphaUsd` to `0x20c0000000000000000000000000000000000001` and `recipient` to your intended address. Read examples take `account` as an address. The configured connector uses testnet; keep the connected account on that network.
 
 #### Access-key restrictions
 
@@ -1000,7 +1000,7 @@ alpha_usd = "0x20c0000000000000000000000000000000000001"
 def transaction_options():
     chain_id = w3.eth.chain_id
     if chain_id != 42431:
-        raise ValueError("Expected Moderato testnet")
+        raise ValueError("Expected testnet")
     gas_price = w3.eth.gas_price
     return {
         "chain_id": chain_id,

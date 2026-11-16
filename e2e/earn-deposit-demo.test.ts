@@ -152,7 +152,7 @@ test('keeps the failure message and retry controls usable on a narrow screen', a
   await page.goto(depositPage)
   const demo = page.getByTestId('earn-deposit-demo')
   await expect(demo.getByRole('alert')).toBeVisible()
-  await expect(demo).toContainText('Moderato testnet')
+  await expect(demo).toContainText('Testnet')
   await expect(demo).toContainText('Test tokens only')
   await expectActionsDisabled(demo)
   await demo.getByRole('button', { name: 'Check again', exact: true }).click()

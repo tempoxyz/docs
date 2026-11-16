@@ -9,7 +9,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_network-examples_title-f5_v02.png
 
 Set up the clients used by the Network guides: [Send a transaction](/docs/network/transactions), [Pay fees](/docs/network/fees), [TIP-20 tokens](/docs/network/tokens), and [Deploy a contract](/docs/network/contracts).
 
-The examples run on Moderato, Tempo's testnet ([chain ID `42431`, RPC `https://rpc.moderato.tempo.xyz`](/docs/accounts/wallets/add-tempo-to-your-wallet)). They pay network fees in AlphaUSD, a test stablecoin at `0x20c0000000000000000000000000000000000001`. BetaUSD, at `0x20c0000000000000000000000000000000000002`, is a second test stablecoin for swap examples. Both are [TIP-20 tokens](/docs/protocol/tip20/overview), Tempo's stablecoin token standard, with 6 decimals: 1,000,000 base units is one AlphaUSD.
+The examples run on testnet ([chain ID `42431`, RPC `https://rpc.moderato.tempo.xyz`](/docs/accounts/wallets/add-tempo-to-your-wallet)). They pay network fees in AlphaUSD, a test stablecoin at `0x20c0000000000000000000000000000000000001`. BetaUSD, at `0x20c0000000000000000000000000000000000002`, is a second test stablecoin for swap examples. Both are [TIP-20 tokens](/docs/protocol/tip20/overview), Tempo's stablecoin token standard, with 6 decimals: 1,000,000 base units is one AlphaUSD.
 
 Each setup reads the same three environment variables. Keep private keys on your server.
 
@@ -23,7 +23,7 @@ Fund the sender with the [faucet](/docs/quickstart/faucet).
 
 ## Viem setup
 
-Use an ESM project (`"type": "module"` in `package.json`). Install `viem` and a TypeScript runner with `pnpm add viem` and `pnpm add -D tsx`. Save this file as `network.config.ts` beside the example you run. It requires `TEMPO_PRIVATE_KEY` and `TEMPO_RECIPIENT`, and exports `alphaUsd`, `betaUsd`, `recipient`, and a Moderato `client` that signs with your key and pays fees in AlphaUSD:
+Use an ESM project (`"type": "module"` in `package.json`). Install `viem` and a TypeScript runner with `pnpm add viem` and `pnpm add -D tsx`. Save this file as `network.config.ts` beside the example you run. It requires `TEMPO_PRIVATE_KEY` and `TEMPO_RECIPIENT`, and exports `alphaUsd`, `betaUsd`, `recipient`, and a testnet `client` that signs with your key and pays fees in AlphaUSD:
 
 ```ts [network.config.ts]
 // [!include ~/snippets/network.config.ts:setup]
@@ -39,7 +39,7 @@ Each guide's snippets import `client`, `alphaUsd`, `betaUsd`, and `recipient` fr
 
 ### Sponsored transactions
 
-A sponsor, or fee payer, pays a transaction's network fee for the sender. Moderato runs a public test sponsor at `https://sponsor.moderato.tempo.xyz`. Import `createClient`, `http`, and `withRelay` from `viem/tempo`, then create a `sponsored` client. Its `withRelay` transport sends transactions marked `feePayer: true` to the sponsor:
+A sponsor, or fee payer, pays a transaction's network fee for the sender. Testnet runs a public test sponsor at `https://sponsor.moderato.tempo.xyz`. Import `createClient`, `http`, and `withRelay` from `viem/tempo`, then create a `sponsored` client. Its `withRelay` transport sends transactions marked `feePayer: true` to the sponsor:
 
 ```ts
 // [!include ~/snippets/network-fees.ts:sponsor-config]
@@ -49,7 +49,7 @@ The [fee examples](/docs/network/fees#sponsor-fees) use this `sponsored` client.
 
 ## Wagmi setup
 
-Use Wagmi actions inside a browser application where the user connects Tempo Wallet, which signs for their account. Install `wagmi`, `viem`, and `@tanstack/react-query`. Save this configuration as `network.wagmi.config.ts`. It exports `alphaUsd`, `betaUsd`, and a `config` that selects Moderato with AlphaUSD fees. Its Tempo Wallet connector sends actions that pass `feePayer: true` to the test sponsor:
+Use Wagmi actions inside a browser application where the user connects Tempo Wallet, which signs for their account. Install `wagmi`, `viem`, and `@tanstack/react-query`. Save this configuration as `network.wagmi.config.ts`. It exports `alphaUsd`, `betaUsd`, and a `config` that selects testnet with AlphaUSD fees. Its Tempo Wallet connector sends actions that pass `feePayer: true` to the test sponsor:
 
 ```ts [network.wagmi.config.ts]
 // [!include ~/snippets/network.wagmi.config.ts:setup]
@@ -74,13 +74,13 @@ import { alphaUsd, betaUsd, config } from './network.wagmi.config'
 
 Machine payments let a client pay for an API inside the HTTP request, using the [Machine Payments Protocol](/docs/agents) (MPP). Install `mppx` with `viem`. The client creates an `Mppx` instance with the `tempo` payment method, both from `mppx/client`, and calls `mppx.fetch(paidUrl)`.
 
-The machine payment example has Viem and Wagmi tabs. The Viem tab pays from a Viem `account`, created on your server with `privateKeyToAccount(process.env.PRIVATE_KEY)` as in the [MPP client guide](/docs/guide/machine-payments/client#define-the-mpp-payer-account). The Wagmi tab pays from a connected wallet on Tempo Mainnet, not Moderato. It imports `getConnectorClient` from `wagmi/actions` and uses this mainnet configuration, separate from `network.wagmi.config.ts`:
+The machine payment example has Viem and Wagmi tabs. The Viem tab pays from a Viem `account`, created on your server with `privateKeyToAccount(process.env.PRIVATE_KEY)` as in the [MPP client guide](/docs/guide/machine-payments/client#define-the-mpp-payer-account). The Wagmi tab pays from a connected wallet on Tempo Mainnet, not testnet. It imports `getConnectorClient` from `wagmi/actions` and uses this mainnet configuration, separate from `network.wagmi.config.ts`:
 
 ```ts
 // [!include ~/snippets/network-mpp.ts:wallet-config]
 ```
 
-Use `mppConfig` for that app's `WagmiProvider` and connect flow. Mainnet service payments require mainnet funds. For a testnet service, select Moderato instead, and keep the wallet and service on the same network. `paidUrl` is the URL of the paid service you call in the [machine payment example](/docs/agents#pay-for-an-api).
+Use `mppConfig` for that app's `WagmiProvider` and connect flow. Mainnet service payments require mainnet funds. For a testnet service, select testnet instead, and keep the wallet and service on the same network. `paidUrl` is the URL of the paid service you call in the [machine payment example](/docs/agents#pay-for-an-api).
 
 ## CLI setup
 
@@ -103,7 +103,7 @@ The [token creation example](/docs/network/tokens) stores its new token's addres
 
 Install `pytempo` with `pip install pytempo`. Save these blocks, in order, as `network_config.py` beside your script. The examples use pytempo 0.6.1 and web3.py 7.
 
-The first block connects web3.py to Moderato. It creates `account` from `TEMPO_PRIVATE_KEY` and `recipient` from `TEMPO_RECIPIENT`, and imports `ALPHA_USD`, `BETA_USD`, and `TIP20` from pytempo:
+The first block connects web3.py to testnet. It creates `account` from `TEMPO_PRIVATE_KEY` and `recipient` from `TEMPO_RECIPIENT`, and imports `ALPHA_USD`, `BETA_USD`, and `TIP20` from pytempo:
 
 ```python [network_config.py]
 // [!include ~/snippets/network_config.py:setup]
@@ -125,7 +125,7 @@ Use each guide's Python imports, or import the shared names you need from `netwo
 
 ## HTTP requests
 
-JSON-RPC reads use the Moderato RPC endpoint, `https://rpc.moderato.tempo.xyz`, without an API key.
+JSON-RPC reads use the testnet RPC endpoint, `https://rpc.moderato.tempo.xyz`, without an API key.
 
 Gas estimation (`eth_estimateGas`) needs the sender address and calldata. Run this block. It reads `TEMPO_SENDER_ADDRESS` and `TEMPO_RECIPIENT` and uses [Cast](/docs/sdk/foundry) to encode a one-AlphaUSD transfer as `CALL_DATA`:
 

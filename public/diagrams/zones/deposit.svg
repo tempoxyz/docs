@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="292" viewBox="0 88 960 292" fill="none" font-family="Pilat, ui-sans-serif, system-ui, sans-serif" style="color: var(--foreground, #111)">
 <title>Deposit to Zone A</title>
-<desc>Legacy Moderato sandbox · plaintext or encrypted deposits. A public transaction receipt comes before the Zone balance update.</desc>
+<desc>Legacy testnet sandbox · plaintext or encrypted deposits. A public transaction receipt comes before the Zone balance update.</desc>
 <text x="32" y="126" font-size="15" font-weight="500" text-anchor="start" fill="var(--foreground-secondary, #666)">1 · SIGN</text>
 <rect x="32" y="148" width="260" height="212" rx="10" fill="var(--diagram-box, #f6f6f6)" stroke="var(--diagram-box-border, #d4d4d4)" stroke-width="1.5"/>
 <g transform="translate(162 197)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">

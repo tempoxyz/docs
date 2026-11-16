@@ -9,7 +9,7 @@ describe('mainnet guidance', () => {
 
     expect(docsSkill).toContain('Tempo Mainnet')
     expect(docsSkill).toContain('pathUSD')
-    expect(docsSkill).toContain('Moderato is Tempo Testnet')
+    expect(docsSkill).toContain('Tempo Testnet uses chain ID `42431`')
   })
 
   it('distinguishes production pathUSD from testnet faucet tokens', () => {

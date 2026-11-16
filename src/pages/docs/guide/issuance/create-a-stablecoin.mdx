@@ -14,7 +14,7 @@ import { CreateToken } from '../../../../components/guides/steps/issuance/Create
 
 # How to create a TIP-20 stablecoin
 
-Create a stablecoin using [TIP-20 Tokens](/docs/protocol/tip20/overview). Set its name and symbol, and choose the administrator that manages its roles and supply. The examples use Moderato testnet.
+Create a stablecoin using [TIP-20 Tokens](/docs/protocol/tip20/overview). Set its name and symbol, and choose the administrator that manages its roles and supply. The examples use testnet.
 
 ## Create a token from your backend
 
@@ -36,7 +36,7 @@ Creation deploys the token; follow [Mint stablecoins](/docs/guide/issuance/mint-
 
 ## Stablecoin creation demo
 
-Connect a test account and deploy a token on Moderato.
+Connect a test account and deploy a token on testnet.
 
 <Demo.Container name="Create a Stablecoin" footerVariant="source" src="tempoxyz/examples/tree/main/examples/issuance">
   <Connect stepNumber={1} />
@@ -60,7 +60,7 @@ Ensure that you have set up your project with Wagmi, a Tempo chain config, and a
 
 ### Fund the test account
 
-Use the [Moderato faucet](/docs/quickstart/faucet) to add AlphaUSD for transaction fees. For mainnet, [fund your account](/docs/guide/getting-funds) through a supported deposit path.
+Use the [testnet faucet](/docs/quickstart/faucet) to add AlphaUSD for transaction fees. For mainnet, [fund your account](/docs/guide/getting-funds) through a supported deposit path.
 
 <Demo.Container name="Add Funds" footerVariant="balances" showBadge={false}>
   <AddFunds stepNumber={1} last />

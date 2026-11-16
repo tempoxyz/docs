@@ -43,7 +43,7 @@ Ensure that you have set up your client by following the [guide](/docs/sdk/types
 
 ### Check the order's funding
 
-The examples place orders on the `AlphaUSD` / `pathUSD` pair on Moderato testnet. Buying `AlphaUSD` spends its quote token, `pathUSD`; selling `AlphaUSD` spends `AlphaUSD`.
+The examples place orders on the `AlphaUSD` / `pathUSD` pair on testnet. Buying `AlphaUSD` spends its quote token, `pathUSD`; selling `AlphaUSD` spends `AlphaUSD`.
 
 The DEX uses available [DEX balances](/docs/protocol/exchange/exchange-balance) first and pulls any required TIP-20 shortfall from your account through [implicit approval](/docs/protocol/tip20/spec#implicit-approvals-for-listed-precompiles). No separate token approval is required. Balance checks, token transfer policies, and access-key spending limits still apply. Fund network fees separately from the order amount.
 

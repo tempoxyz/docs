@@ -16,7 +16,7 @@ This guide gives your backend an [access key](/docs/accounts/access-keys) that p
 
 The provider keeps the account key and signs the key's authorization once. After that, your backend signs each payment with its own key. It stays within the limit, recipients, and expiry the user approved.
 
-The example funds a card program. Your card backend gets a key that sends up to 100 OUSD a day for 30 days. It pays only the card program's funding address from your [card issuing partner](/docs/partners/cards). The code runs on Moderato testnet, whose stablecoins have no value, and works the same on mainnet.
+The example funds a card program. Your card backend gets a key that sends up to 100 OUSD a day for 30 days. It pays only the card program's funding address from your [card issuing partner](/docs/partners/cards). The code runs on testnet, whose stablecoins have no value, and works the same on mainnet.
 
 <span id="who-holds-which-key" />
 
@@ -75,7 +75,7 @@ if (!isAddressEqual(providerAccount.address, walletAddress)) throw new Error('Wr
 
 ::::
 
-`providerAccount.address` is the user's account address. To fund it on Moderato, call `client.faucet.fundSync({ account: providerAccount.address })`.
+`providerAccount.address` is the user's account address. To fund it on testnet, call `client.faucet.fundSync({ account: providerAccount.address })`.
 
 <span id="have-the-holder-create-its-key" />
 

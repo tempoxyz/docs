@@ -87,7 +87,7 @@ export async function verifyEarnDemoVault(operation: 'inspect' | 'deposit' | 're
 }
 
 export function verifyEarnDemoNetwork(chainId: number) {
-  if (chainId !== tempoModerato.id) throw new Error('This demo only supports Moderato testnet.')
+  if (chainId !== tempoModerato.id) throw new Error('This demo only supports testnet.')
 }
 
 export function minimumEarnDemoShares(quotedShares: bigint) {

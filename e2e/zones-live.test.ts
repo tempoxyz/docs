@@ -2,7 +2,7 @@ import { getDemoStep } from './helpers'
 import { expect, type Page, test } from './live'
 
 // Opt in explicitly: these checks create a fresh passkey and spend only faucet-funded testnet assets.
-test.skip(process.env.ZONES_LIVE_E2E !== 'true', 'Requires the live Moderato Zones sandbox')
+test.skip(process.env.ZONES_LIVE_E2E !== 'true', 'Requires the live testnet Zones sandbox')
 
 test('Zones demos complete using an isolated faucet-funded passkey', async ({ page }) => {
   page.setDefaultTimeout(30_000)

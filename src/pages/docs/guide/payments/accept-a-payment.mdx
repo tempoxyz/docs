@@ -28,7 +28,7 @@ Share an account address you control with the sender. For customer-specific addr
 
 Show the network and token alongside the receiving address, then read incoming transfer events to confirm delivery. To accept only specific tokens or senders, [configure an address-level receive policy](/docs/accounts/policies/receive-policies) before sharing the address.
 
-This demo funds a test account and displays its token balances. The examples below use AlphaUSD on Moderato testnet. Configure your client or `RPC_URL` / `TEMPO_RPC_URL` for `https://rpc.moderato.tempo.xyz`; use an account you control as the recipient.
+This demo funds a test account and displays its token balances. The examples below use AlphaUSD on testnet. Configure your client or `RPC_URL` / `TEMPO_RPC_URL` for `https://rpc.moderato.tempo.xyz`; use an account you control as the recipient.
 
 <Demo.Container name="Receive a Payment" footerVariant="balances" tokens={[Token.alphaUsd, Token.betaUsd, Token.thetaUsd]} src="tempoxyz/examples/tree/main/examples/payments">
   <Connect stepNumber={1} />
@@ -52,7 +52,7 @@ For balance snapshots and display formatting, see [Read balances](#read-balances
 <span id="watch-for-changes" />
 <span id="listen-for-tip-20-transfer-events" />
 
-Enter the receiving account as both `address` and `recipient`; the example uses the same sample address for both. Set `chainId` to `42431` and `type` to `transfer` to read incoming payments on Moderato:
+Enter the receiving account as both `address` and `recipient`; the example uses the same sample address for both. Set `chainId` to `42431` and `type` to `transfer` to read incoming payments on testnet:
 
 <OpenApi.Playground operationId="getAddressActivities" query="chainId=42431&type=transfer&recipient=0xbe058e1c4df8a4366a387bf595b284246a93039e" anchors={false} />
 
@@ -93,7 +93,7 @@ Use [webhooks](/docs/api/webhooks) for backend callbacks. Read historical activi
 
 ## Read balances
 
-Read indexed token balances with the Tempo API. Enter the account address, choose Moderato (`chainId=42431`), and click **Try**. It needs no wallet connection or signing key.
+Read indexed token balances with the Tempo API. Enter the account address, choose testnet (`chainId=42431`), and click **Try**. It needs no wallet connection or signing key.
 
 <OpenApi.Playground operationId="getAddressBalances" query="chainId=42431" anchors={false} />
 

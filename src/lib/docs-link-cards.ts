@@ -5,7 +5,7 @@ export const docsLinkCards = {
   funding: [
     {
       title: 'Get testnet funds',
-      description: 'Use test stablecoins on Moderato to try payments and build your integration.',
+      description: 'Use test stablecoins on testnet to try payments and build your integration.',
       icon: 'code',
       links: [
         ['Testnet faucet', '/docs/quickstart/faucet'],
@@ -96,7 +96,7 @@ export const docsLinkCards = {
     },
     {
       title: 'Create and exchange tokens',
-      description: 'Create a test stablecoin, then try a swap on Moderato.',
+      description: 'Create a test stablecoin, then try a swap on testnet.',
       icon: 'tokens',
       links: [
         ['Create a TIP-20 token', '/docs/guide/issuance/create-a-stablecoin'],

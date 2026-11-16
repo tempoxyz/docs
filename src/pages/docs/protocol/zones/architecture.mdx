@@ -92,7 +92,7 @@ Each Zone has a unique EIP-155 chain ID derived deterministically from its oncha
 chain_id = 421700000 + zone_id
 ```
 
-This is the mainnet formula. Moderato Zones instead use `1424310000 + zone_id`. Local networks use `(parent_chain_id << 32) | zone_id`. Read `eth_chainId` from your Zone RPC rather than applying the mainnet formula to testnet. These separate ranges prevent replay between Zones and the Tempo networks they connect to.
+This is the mainnet formula. Testnet Zones instead use `1424310000 + zone_id`. Local networks use `(parent_chain_id << 32) | zone_id`. Read `eth_chainId` from your Zone RPC rather than applying the mainnet formula to testnet. These separate ranges prevent replay between Zones and the Tempo networks they connect to.
 
 <span id="sequencer-transfer" />
 

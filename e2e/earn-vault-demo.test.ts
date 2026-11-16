@@ -36,7 +36,7 @@ for (const width of [1296, 390]) {
     const network = demo.getByLabel('Network', { exact: true })
     const dropdown = demo.getByLabel('Vault', { exact: true })
     await expect(network).toHaveValue('mainnet')
-    await expect(network.locator('option')).toHaveText(['Moderato testnet', 'Tempo mainnet'])
+    await expect(network.locator('option')).toHaveText(['Tempo testnet', 'Tempo mainnet'])
     await expect(dropdown).toHaveValue(sentoraPathUsdVault)
     await expect(dropdown.locator('option')).toHaveText(['Sentora pathUSD (Earn)'])
     await demo.getByRole('button', { name: 'Refresh vault', exact: true }).click()

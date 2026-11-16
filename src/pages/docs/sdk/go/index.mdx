@@ -82,7 +82,7 @@ func main() {
 
 ## Send a Tempo transaction with Go
 
-These examples use Moderato testnet (`42431`). Fund a test account with the [faucet](/docs/quickstart/faucet) and use its private key. The displayed Anvil key is public and must not hold real funds. Estimate gas for your actual calls; the limits below are example caps.
+These examples use testnet (`42431`). Fund a test account with the [faucet](/docs/quickstart/faucet) and use its private key. The displayed Anvil key is public and must not hold real funds. Estimate gas for your actual calls; the limits below are example caps.
 
 Build and send a transaction using the builder pattern:
 
@@ -110,7 +110,7 @@ func main() {
     recipient := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 
     // [!code hl:10]
-    tx := transaction.NewBuilder(big.NewInt(42431)). // Moderato testnet
+    tx := transaction.NewBuilder(big.NewInt(42431)). // testnet
         SetNonce(nonce).
         SetGas(100000).
         SetMaxFeePerGas(big.NewInt(20000000000)). // Example maximum fee per gas
