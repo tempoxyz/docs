@@ -26,7 +26,8 @@ const subsidyHints: Record<string, string> = {
 const addKey = 'Add your project API key to quote this route.'
 /** Quotes without a reader key use the docs key, whose policy and limits are not the reader's. */
 const docsKeyGuides: Record<string, string> = {
-  quote_proxy_unavailable: 'Add your project API key to quote.',
+  quote_proxy_unavailable:
+    'The docs demo quote service is unavailable. Add your project API key to quote.',
   routes_not_allowed: `The docs demo key cannot quote this route. ${addKey}`,
   routes_subsidy_not_allowed: `The docs demo key cannot quote 1:1 delivery here. ${addKey}`,
   routes_subsidy_not_enabled: `The docs demo key cannot quote 1:1 delivery here. ${addKey}`,
@@ -88,7 +89,10 @@ export class RoutesApiError extends Error {
     { docsKey = false } = {},
   ) {
     const error = result.data.error as ApiErrorBody | undefined
-    const code = error?.code ?? (result.status === 429 ? 'rate_limited' : undefined)
+    // The docs proxy relays API errors as JSON, so a docs-key failure without one is the proxy's own.
+    const code =
+      error?.code ??
+      (result.status === 429 ? 'rate_limited' : docsKey ? 'quote_proxy_unavailable' : undefined)
     const requestId = typeof result.data.requestId === 'string' ? result.data.requestId : ''
     // The code and request ID are what support needs to trace a failure.
     const reference = [code, requestId && `request ${requestId}`].filter(Boolean).join(' · ')
