@@ -6,13 +6,11 @@ description: Give each signer a weight and set the total weight a transaction ne
 
 import { Card, Cards } from 'vocs'
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
-import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
 
 # Signing Thresholds
 
 Sets the total signer weight a transaction needs before a configurable account can pay.
 
-<AdminAccessKeysT14 />
 
 ## Overview
 
@@ -46,8 +44,6 @@ const account = Account.fromConfig({
 The passkey approves alone. The backup and recovery keys approve together. Either of those alone reaches 1 of 2 and can't pay.
 
 Signers approve a whole transaction at once, including every call in a batch. The same threshold covers payments, configuration updates, and new [access keys](/docs/accounts/access-keys). Access keys don't count toward it. Each pays alone within its limits.
-
-An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no limits. Once the signers authorize one, it can pay and authorize other access keys without reaching the threshold. Authorize one only if you'd let that single key act for the whole account.
 
 To change signers or the threshold, send a [configuration update](/docs/accounts/account-configuration/configuration-updates#add-a-signer), approved at the current threshold.
 
@@ -210,7 +206,6 @@ To check a single access key's signature instead, call `verifyKeychain`. It also
 <Cards>
   <Card title="Account Policies" description="Covers how signing thresholds and receive policies work together." to="/docs/accounts/policies" />
   <Card title="Configuration Updates" description="Use for changing signers, weights, or the threshold." to="/docs/accounts/account-configuration/configuration-updates#add-a-signer" />
-  <Card title="Admin Access Keys" description="Covers access keys with no limits." to="/docs/accounts/access-keys/admin-access-keys" />
   <Card title="Set Up a Self-Custodial Wallet With a Provider" description="Use for building customer accounts with a wallet provider and a backup key." to="/docs/accounts/apps/self-custodial-wallets" />
   <Card title="Set Up a Team Multisig" description="Use for a team account and team budgets." to="/docs/accounts/custodians/team-multisig" />
 </Cards>

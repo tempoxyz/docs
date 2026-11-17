@@ -5,9 +5,9 @@ import type { Hex } from 'viem'
 import { Account, WebAuthnP256 } from 'viem/tempo'
 import { webAuthnRpId } from '../../wagmi.config'
 import { Container } from '../Container'
-import { adminKeyDemoEnvironment as passkeyEnvironment } from './admin-key-demo'
 import { Button, useCopyToClipboard } from './Demo'
 import * as ui from './PasskeyAccountDemo.recipes'
+import { passkeyDemoEnvironment as passkeyEnvironment } from './passkey-demo'
 
 /** Where the demo keeps the passkey's ID and public key, which WebAuthn returns only at creation. */
 const savedCredentialKey = 'tempo-docs-passkey-account'

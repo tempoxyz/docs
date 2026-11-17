@@ -7,13 +7,11 @@ description: Only a Tempo account's own keys can move its stablecoins. Signers a
 import { Card, Cards } from 'vocs'
 import { AccountDiagram } from '../../../components/AccountDiagram'
 import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
-import AdminAccessKeysT14 from '../../../snippets/admin-access-keys-t14.mdx'
 
 # How It Works
 
 A Tempo account holds stablecoins, and only the account's own keys can move them.
 
-<AdminAccessKeysT14 />
 
 ## Overview
 
@@ -68,12 +66,12 @@ In the example, the threshold is 2. The passkey has weight 2, and the backup and
 
 <AccountDiagram
   name="access-keys"
-  alt="An access key has a key type (passkey, P-256, or secp256k1), spending limits per TIP-20 token that apply once or per period, an expiry, and scopes over contracts, functions, and recipients. An admin access key has no limits and manages other access keys."
+  alt="An access key has a key type (passkey, P-256, or secp256k1), spending limits per TIP-20 token that apply once or per period, an expiry, and scopes over contracts, functions, and recipients."
 />
 
 A payout server can't ask for the customer's passkey on every payout. Instead, the signers approve an [access key](/docs/accounts/access-keys) once. From then on, it pays alone within its bounds. Its bounds are a spending limit per stablecoin, an expiry, and scopes. Scopes limit which contracts and functions it calls and whom it pays. Tempo checks those bounds on every transaction. A leaked payout server key can't spend past its daily limit.
 
-An [admin access key](/docs/accounts/access-keys/admin-access-keys) has no bounds and can manage the account's other access keys. Give one only to a party you'd trust with the whole balance. No access key counts toward the threshold, admin or not. Only the signers can change the signers or the threshold.
+No access key counts toward the threshold. Only the signers can change the signers or the threshold.
 
 ## Related
 

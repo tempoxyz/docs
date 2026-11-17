@@ -226,9 +226,6 @@ function AccessKeyBounds() {
       <Panel icon="accessKey" title="Access key">
         <Tags items={['Spending limit', 'Expiry', 'Scopes']} />
       </Panel>
-      <Panel icon="crown" title="Admin access key" tone="quiet">
-        <Tags items={['No limits']} />
-      </Panel>
     </div>
   )
 }

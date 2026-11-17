@@ -75,7 +75,9 @@ export function SellSwap({ onSuccess }: { onSuccess?: () => void }) {
           {sendTransaction.isPending ? 'Selling...' : 'Sell'}
         </Button>
       </div>
-      {sendTransaction.error && <div {...ui.sellSwapLayout3()}>{sendTransaction.error.message}</div>}
+      {sendTransaction.error && (
+        <div {...ui.sellSwapLayout3()}>{sendTransaction.error.message}</div>
+      )}
       {quote && address && (
         <div {...ui.sellSwapLayout4()}>
           <div {...ui.sellSwapLayout5()}>
