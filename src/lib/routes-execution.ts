@@ -415,7 +415,7 @@ export async function submitTempoCalls(
 ) {
   assertUnexpired(options.expiresAt)
   if (options.connected?.toLowerCase() !== options.sender.toLowerCase())
-    throw new Error('Sign in with Tempo ID as the sender entered in step 1.')
+    throw new Error('Sign in with Tempo as the sender entered in step 1.')
   const { amount: required, ...token } = options.required
   assertSufficientBalance({ balance: await options.readBalance(), required, ...token })
   const calls = options.calls.map(({ to, data, value }) => ({
@@ -435,7 +435,7 @@ export async function submitTempoCalls(
   const hash = result.receipts?.[0]?.transactionHash
   if (!hash || !/^0x[\da-fA-F]{64}$/.test(hash))
     throw new Error(
-      'Tempo ID returned no transaction hash. Check the account history before submitting again.',
+      'Tempo returned no transaction hash. Check the account history before submitting again.',
     )
   options.onHash(hash)
   if (result.status !== 'success') throw new SourceRevertedError()

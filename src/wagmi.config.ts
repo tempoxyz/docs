@@ -1,7 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { funding, viem } from 'accounts/plugins'
 import { tempoId } from 'accounts/wagmi'
-import { Storage } from 'accounts-v0'
 import * as React from 'react'
 import {
   base,
@@ -27,7 +26,7 @@ import {
 } from 'wagmi'
 import { demoWalletAuthorization } from './lib/demo-wallet-authorization'
 import { passkey } from './lib/passkeyConnector'
-import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
+import { e2eDialog, e2eSessionStore } from './lib/tempo-id'
 
 const feeToken = '0x20c0000000000000000000000000000000000001' as const
 
@@ -62,9 +61,12 @@ export const tempoChainIds: ReadonlySet<number> = new Set([chain.id, tempo.id])
 
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false, accessKey = true } = options
+  const e2e = import.meta.env.VITE_E2E === 'true'
   const wallet = tempoId({
     // In a browser, the page's origin is the client ID. Prerendering has no page, and never signs in.
     ...(typeof window === 'undefined' ? { clientId: 'https://docs.tempo.xyz' } : {}),
+    // E2E tests can't sign in with Tempo ID's dialog, so they seed a session in this store.
+    ...(e2e ? { store: e2eSessionStore() } : {}),
     // The guides request a bounded access key at sign-in. Pages that move real funds request a
     // short-lived access key that only sends mainnet stablecoins, up to 100 of each: its limits
     // scope each token's transfer and transferWithMemo. The Routes tester requests an access key
@@ -82,13 +84,10 @@ export function getConfig(options: getConfig.Options = {}) {
       // The public sponsor pays testnet fees. Other chains pay their own.
       viem({ chain: tempoModerato, relay: 'https://sponsor.moderato.tempo.xyz' }),
       funding(),
+      // E2E tests sign in with a seeded session, since they can't use Tempo ID's dialog.
+      ...(e2e ? [e2eDialog()] : []),
     ],
   })
-  // The passkey connector keeps its own accounts v0 store, apart from Tempo ID's session.
-  const passkeyStorage =
-    typeof window === 'undefined'
-      ? Storage.memory({ key: 'tempo-docs-passkey' })
-      : Storage.idb({ key: 'tempo-docs-passkey' })
   return createConfig({
     // Demo balance watchers do not need to poll at the chain's subsecond default.
     pollingInterval: { [tempoModerato.id]: 2_000 },
@@ -100,10 +99,9 @@ export function getConfig(options: getConfig.Options = {}) {
     chains: accessKey
       ? [chain, tempo, ...routesSourceChains]
       : [tempo, chain, ...routesSourceChains],
-    connectors:
-      import.meta.env.VITE_E2E === 'true'
-        ? [passkey({ storage: passkeyStorage }), wallet]
-        : [wallet, passkey({ ceremony: WebAuthnCeremony.keys({ rpId }), storage: passkeyStorage })],
+    // The private Zone guides sign Zone transactions with a passkey account's root key, which
+    // Tempo's access keys can't do, so they use a passkey connector.
+    connectors: [wallet, passkey({ rpId })],
     multiInjectedProviderDiscovery,
     storage: createStorage<Record<string, unknown>>({
       // Pages that move real funds keep wallet connections, and the addresses in them, for the
@@ -172,6 +170,7 @@ export function useTempoIdConnector() {
   )
 }
 
+/** The private Zone guides' passkey connector. */
 export function useWebAuthnConnector() {
   const connectors = useConnectors()
   return React.useMemo(

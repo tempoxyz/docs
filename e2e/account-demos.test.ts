@@ -66,9 +66,7 @@ test('creates and reconnects the same passkey account without funding or sending
 
   // A passkey connection must not be mistaken for a Tempo ID session.
   await page.locator('[data-v-gutter-left] a[href="/docs/accounts/wallets"]').click()
-  await expect(
-    page.getByRole('button', { name: 'Sign in with Tempo ID', exact: true }),
-  ).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Sign in with Tempo', exact: true })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toHaveCount(0)
   expect(writes).toEqual([])
   expect(errors).toEqual([])
@@ -90,17 +88,17 @@ test('recovers from a cancelled passkey request', async ({ page, baseURL }) => {
   await expect(demo.getByTestId('passkey-account-address')).toHaveCount(0)
 })
 
-test('requests a testnet access key from Tempo ID', async ({ page, context }) => {
+test('requests a testnet access key from Tempo', async ({ page, context }) => {
   const signIns: string[] = []
   await context.route('https://id.tempo.xyz/**', (route) => {
     signIns.push(route.request().url())
     return route.fulfill({
       contentType: 'text/html',
-      body: '<!doctype html><title>Tempo ID</title>',
+      body: '<!doctype html><title>Tempo</title>',
     })
   })
   await page.goto('/docs/accounts/wallets#connect-a-wallet-to-your-app')
-  const connect = page.getByRole('button', { name: 'Sign in with Tempo ID', exact: true })
+  const connect = page.getByRole('button', { name: 'Sign in with Tempo', exact: true })
   await expect(connect).toBeEnabled()
   await connect.click()
   // Over HTTP, the sign-in opens in a popup. Over HTTPS, it frames Tempo ID's embed page.
@@ -120,8 +118,6 @@ test('keeps account demos usable on a narrow screen', async ({ page, baseURL }) 
   await expect(demo.getByRole('button', { name: 'Use an existing passkey' })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.goto('/docs/accounts/wallets#connect-a-wallet-to-your-app')
-  await expect(
-    page.getByRole('button', { name: 'Sign in with Tempo ID', exact: true }),
-  ).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Sign in with Tempo', exact: true })).toBeEnabled()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 })

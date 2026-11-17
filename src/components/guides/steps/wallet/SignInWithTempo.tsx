@@ -48,13 +48,13 @@ export function SignInWithTempo(props: DemoStepProps) {
             type="button"
           >
             <TempoMarkBoxed className={ui.tempoMarkBoxed().className} />
-            Sign in with Tempo ID
+            Sign in with Tempo
           </Button>
         )
       }
       error={connect.error || switchConnection.error}
       number={stepNumber}
-      title="Sign in with Tempo ID."
+      title="Sign in with Tempo."
     />
   )
 }

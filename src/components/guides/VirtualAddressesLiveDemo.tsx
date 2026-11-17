@@ -20,7 +20,7 @@ import { tempoDevnet, tempoLocalnet, tempoModerato } from 'viem/chains'
 import { Abis, Actions, tempoActions, withFeePayer } from 'viem/tempo'
 import { useClient, useConnect, useConnection, useDisconnect, useWriteContract } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
-import { useWebAuthnConnector } from '../../wagmi.config'
+import { useTempoIdConnector } from '../../wagmi.config'
 import { Button, ExplorerAccountLink, ExplorerLink, Logout, Step, StringFormatter } from './Demo'
 import { alphaUsd, ousd, pathUsd } from './tokens'
 import * as ui from './VirtualAddressesLiveDemo.recipes'
@@ -98,8 +98,7 @@ function isAbortError(error: unknown): boolean {
 function PasskeyLogin() {
   const connect = useConnect()
   const disconnect = useDisconnect()
-  const connector = useWebAuthnConnector()
-  const isE2E = import.meta.env.VITE_E2E === 'true'
+  const connector = useTempoIdConnector()
 
   return connect.isPending ? (
     <Button disabled variant="default" type="button">
@@ -110,30 +109,14 @@ function PasskeyLogin() {
       <Button
         variant="accent"
         className={ui.passkeyLoginButton().className}
+        disabled={!connector}
         onClick={async () => {
           await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({
-            connector,
-            ...(isE2E ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } } : {}),
-          })
+          connect.connect({ connector })
         }}
         type="button"
       >
-        Sign in
-      </Button>
-      <Button
-        variant="default"
-        className={ui.passkeyLoginButton().className}
-        onClick={async () => {
-          await disconnect.disconnectAsync().catch(() => {})
-          connect.connect({
-            connector,
-            ...(isE2E ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } } : {}),
-          })
-        }}
-        type="button"
-      >
-        Sign up
+        Sign in with Tempo
       </Button>
     </div>
   )
@@ -508,7 +491,7 @@ export function VirtualAddressesLiveDemo() {
         ? minerState.status === 'mining'
           ? 'Mining salt…'
           : minerState.status === 'found'
-            ? 'Confirm passkey…'
+            ? 'Check Tempo…'
             : 'Registering…'
         : 'Register master id'}
     </Button>
@@ -528,7 +511,7 @@ export function VirtualAddressesLiveDemo() {
         {address && (
           <div {...ui.virtualAddressesLiveDemoLayout2()}>
             <div {...ui.virtualAddressesLiveDemoLayout3()}>
-              <span {...ui.virtualAddressesLiveDemoText()}>Connected passkey account</span>
+              <span {...ui.virtualAddressesLiveDemoText()}>Connected Tempo Account</span>
               <code {...ui.code()}>{address}</code>
               <span>
                 The demo auto-funds the passkey account, uses `VirtualMaster.mineSaltAsync` to mine

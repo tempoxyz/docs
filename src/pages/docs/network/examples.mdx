@@ -72,7 +72,7 @@ import { alphaUsd, betaUsd, config } from './network.wagmi.config'
 
 ### Machine payment clients
 
-Machine payments let a client pay for an API inside the HTTP request, using the [Machine Payments Protocol](/docs/agents) (MPP). Install `mppx` with `viem`. The Wagmi tab also needs `wagmi` and `accounts@alpha`, whose `tempoId` connector signs in with Tempo ID. The client creates an `Mppx` instance with the `tempo` payment method, both from `mppx/client`, and calls `mppx.fetch(paidUrl)`.
+Machine payments let a client pay for an API inside the HTTP request, using the [Machine Payments Protocol](/docs/agents) (MPP). Install `mppx` with `viem`. The Wagmi tab also needs `wagmi` and `accounts@alpha`, whose `tempoId` connector signs in with Tempo. The client creates an `Mppx` instance with the `tempo` payment method, both from `mppx/client`, and calls `mppx.fetch(paidUrl)`.
 
 The machine payment example has Viem and Wagmi tabs. The Viem tab pays from a Viem `account`, created on your server with `privateKeyToAccount(process.env.PRIVATE_KEY)` as in the [MPP client guide](/docs/guide/machine-payments/client#define-the-mpp-payer-account). The Wagmi tab pays from a connected wallet on Tempo Mainnet, not Moderato. It imports `getConnectorClient` from `wagmi/actions` and uses this mainnet configuration, separate from `network.wagmi.config.ts`:
 

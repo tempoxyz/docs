@@ -202,7 +202,7 @@ it('loads all directory pages and refuses partial catalogs', async () => {
   await expect(loadRoutes(new AbortController().signal)).rejects.toThrow('complete')
 })
 
-describe('Tempo ID source submission', () => {
+describe('Tempo source submission', () => {
   const options = (overrides: Partial<Parameters<typeof submitTempoCalls>[1]> = {}) => ({
     chainId: 4217,
     sender,

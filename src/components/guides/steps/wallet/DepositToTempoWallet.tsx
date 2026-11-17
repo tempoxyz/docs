@@ -3,6 +3,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { tempo } from 'viem/chains'
 import { useConnection } from 'wagmi'
+import { getTempoIdInstance } from '../../../../lib/tempo-id'
 import { useTempoIdConnector } from '../../../../wagmi.config'
 import { Button, Step } from '../../Demo'
 import * as form from '../../form.recipes'
@@ -18,14 +19,8 @@ export function DepositToTempoWallet(props: DemoStepProps) {
 
   const deposit = useMutation({
     async mutationFn() {
-      if (!isTempoId || !connector) throw new Error('Sign in with Tempo ID before adding funds.')
-      const instance = await (
-        connector as unknown as {
-          getInstance(): Promise<{
-            funding: { open(p: { chainId: number }): Promise<unknown> }
-          }>
-        }
-      ).getInstance()
+      if (!isTempoId || !connector) throw new Error('Sign in with Tempo before adding funds.')
+      const instance = await getTempoIdInstance(connector)
       // The guides run on testnet, so open the deposit page for mainnet funds.
       await instance.funding.open({ chainId: tempo.id })
     },

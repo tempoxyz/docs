@@ -60,7 +60,7 @@ codex exec "Read https://tempo.xyz/skills/wallet/SKILL.md and fund my Tempo Wall
 
 ## Open funding with the Accounts SDK
 
-Use the [Accounts SDK](https://accounts.tehq.dev) to open Tempo ID's funding page from an **Add funds** button. Tempo ID handles the funding flow; your application signs the user in and calls `accounts.funding.open`.
+Use the [Accounts SDK](https://accounts.tempo.xyz) to open Tempo's funding page from an **Add funds** button. Tempo handles the funding flow; your application signs the user in and calls `accounts.funding.open`.
 
 :::::steps
 
@@ -72,19 +72,19 @@ pnpm add accounts@alpha viem
 
 ### Add a funding button
 
-This React example signs the user in with Tempo ID and opens funding for their Tempo Account on mainnet:
+This React example signs the user in with Tempo and opens funding for their Tempo Account on mainnet:
 
 ```tsx [AddFundsButton.tsx]
 import { Accounts } from 'accounts'
 import { useState } from 'react'
 
-const accounts = Accounts.create({ chain: 'mainnet' })
+const accounts = Accounts.create()
 
 export function AddFundsButton() {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string>()
 
-  // Each click opens one Tempo ID page, since a second popup has no user gesture left.
+  // Each click opens one Tempo page, since a second popup has no user gesture left.
   async function addFunds() {
     setPending(true)
     setError(undefined)
@@ -108,7 +108,7 @@ export function AddFundsButton() {
   return (
     <div>
       <button type="button" disabled={pending} onClick={addFunds}>
-        {pending ? 'Check Tempo ID…' : 'Add funds'}
+        {pending ? 'Check Tempo…' : 'Add funds'}
       </button>
       {error && <p role="alert">{error}</p>}
     </div>
@@ -116,7 +116,7 @@ export function AddFundsButton() {
 }
 ```
 
-Call `funding.open` from the click handler, since the browser blocks a popup opened outside a user gesture. You can prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol, such as `'USDC.e'`. The user reviews and confirms the funding request on Tempo ID's funding page.
+Call `funding.open` from the click handler, since the browser blocks a popup opened outside a user gesture. You can prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol, such as `'USDC.e'`. The user reviews and confirms the funding request on Tempo's funding page.
 
 ### Confirm funds have arrived
 

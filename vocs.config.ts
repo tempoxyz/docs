@@ -244,7 +244,7 @@ export default defineConfig({
               { url: 'https://viem.sh/llms.txt', label: 'viem' },
               { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
               { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
-              { url: 'https://accounts.tehq.dev/llms.txt', label: 'accounts' },
+              { url: 'https://accounts.tempo.xyz/llms.txt', label: 'accounts' },
             ],
           })
         : undefined,

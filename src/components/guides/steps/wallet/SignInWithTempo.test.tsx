@@ -107,7 +107,7 @@ async function clickConnect() {
   await state.operation
 }
 
-describe('Tempo ID connection across account demos', () => {
+describe('Tempo connection across account demos', () => {
   test('reactivates a retained wallet after creating a passkey account', async () => {
     const config = testConfig()
     const [wallet, passkey] = config.connectors

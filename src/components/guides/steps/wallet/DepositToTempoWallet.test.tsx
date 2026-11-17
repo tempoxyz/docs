@@ -45,7 +45,7 @@ function renderStep() {
   }
 }
 
-test('opens Tempo ID funding for mainnet', async () => {
+test('opens Tempo funding for mainnet', async () => {
   const step = renderStep()
   expect(step.actions.props.disabled).toBe(false)
   step.actions.props.onClick()
@@ -63,7 +63,7 @@ test.each([
   const step = renderStep()
   expect(step.actions.props.disabled).toBe(true)
   step.actions.props.onClick()
-  await expect(state.operation).rejects.toThrow('Sign in with Tempo ID')
+  await expect(state.operation).rejects.toThrow('Sign in with Tempo')
   expect(state.open).not.toHaveBeenCalled()
 })
 
@@ -72,6 +72,6 @@ test('does not fund a different active wallet', async () => {
   const step = renderStep()
   expect(step.actions.props.disabled).toBe(true)
   step.actions.props.onClick()
-  await expect(state.operation).rejects.toThrow('Sign in with Tempo ID')
+  await expect(state.operation).rejects.toThrow('Sign in with Tempo')
   expect(state.open).not.toHaveBeenCalled()
 })

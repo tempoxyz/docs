@@ -1,21 +1,12 @@
 import { expectDemoSuccess, getDemoStep } from './helpers'
 import { expect, test } from './live'
+import { seedTempoIdSession } from './tempo-id'
 
 test('use stablecoin for fees', async ({ page }) => {
   test.setTimeout(240000)
 
-  // Set up virtual authenticator via CDP
-  const client = await page.context().newCDPSession(page)
-  await client.send('WebAuthn.enable')
-  const { authenticatorId } = await client.send('WebAuthn.addVirtualAuthenticator', {
-    options: {
-      protocol: 'ctap2',
-      transport: 'internal',
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-    },
-  })
+  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
+  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
 
   await page.goto('/docs/guide/issuance/use-for-fees')
 
@@ -91,7 +82,4 @@ test('use stablecoin for fees', async ({ page }) => {
   await sendButton.click()
 
   await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(4))
-
-  // Clean up
-  await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
 })

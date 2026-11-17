@@ -1,26 +1,43 @@
 'use client'
 
 import * as React from 'react'
-import { useConnect, useConnections, useDisconnect } from 'wagmi'
-import { useWebAuthnConnector } from '../../wagmi.config'
+import type { Hex } from 'viem'
+import { Account, WebAuthnP256 } from 'viem/tempo'
+import { webAuthnRpId } from '../../wagmi.config'
 import { Container } from '../Container'
 import { adminKeyDemoEnvironment as passkeyEnvironment } from './admin-key-demo'
 import { Button, useCopyToClipboard } from './Demo'
 import * as ui from './PasskeyAccountDemo.recipes'
 
+/** Where the demo keeps the passkey's ID and public key, which WebAuthn returns only at creation. */
+const savedCredentialKey = 'tempo-docs-passkey-account'
+
+type SavedCredential = { id: string; publicKey: Hex; connected?: boolean }
+
+function readSavedCredential(): SavedCredential | undefined {
+  try {
+    const value = JSON.parse(localStorage.getItem(savedCredentialKey) ?? 'null')
+    return value?.id && value?.publicKey ? value : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Creates a passkey, or reuses the saved one, and shows the single-key account it signs for. */
 export function PasskeyAccountDemo() {
-  const connector = useWebAuthnConnector()
-  const connections = useConnections()
-  const connect = useConnect()
-  const disconnect = useDisconnect()
   const [ready, setReady] = React.useState(false)
   const [environment, setEnvironment] = React.useState<ReturnType<typeof passkeyEnvironment>>(null)
-  const [pending, setPending] = React.useState<'create' | 'connect' | 'disconnect' | null>(null)
+  const [pending, setPending] = React.useState<'create' | 'connect' | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const [copied, copyAddress] = useCopyToClipboard()
   const busy = React.useRef(false)
-  const connection = connections.find((item) => item.connector.id === 'webAuthn')
-  const address = connection?.accounts[0]
+  const [address, setAddress] = React.useState<Hex>()
+  // Reconnect the saved passkey after a reload, as a wallet connection would.
+  React.useEffect(() => {
+    const saved = readSavedCredential()
+    if (saved?.connected)
+      setAddress(Account.fromWebAuthnP256(saved, { rpId: webAuthnRpId }).address)
+  }, [])
 
   React.useEffect(() => {
     setEnvironment(
@@ -34,15 +51,23 @@ export function PasskeyAccountDemo() {
   }, [])
 
   async function connectPasskey(create: boolean) {
-    if (!connector || !ready || environment || busy.current) return
+    if (!ready || environment || busy.current) return
     busy.current = true
     setPending(create ? 'create' : 'connect')
     setError(null)
     try {
-      await connect.connectAsync({
-        connector,
-        ...(create ? { capabilities: { method: 'register', name: 'Tempo Docs' } as never } : {}),
-      })
+      const credential = create
+        ? await WebAuthnP256.createCredential({ label: 'Tempo Docs', rpId: webAuthnRpId })
+        : readSavedCredential()
+      if (!credential) {
+        setError('This browser has no passkey from this demo yet. Create one first.')
+        return
+      }
+      localStorage.setItem(
+        savedCredentialKey,
+        JSON.stringify({ id: credential.id, publicKey: credential.publicKey, connected: true }),
+      )
+      setAddress(Account.fromWebAuthnP256(credential, { rpId: webAuthnRpId }).address)
     } catch (cause) {
       setError(passkeyError(cause))
     } finally {
@@ -51,19 +76,12 @@ export function PasskeyAccountDemo() {
     }
   }
 
-  async function disconnectPasskey() {
-    if (!connection || busy.current) return
-    busy.current = true
-    setPending('disconnect')
+  function disconnectPasskey() {
+    const saved = readSavedCredential()
+    if (saved)
+      localStorage.setItem(savedCredentialKey, JSON.stringify({ ...saved, connected: false }))
+    setAddress(undefined)
     setError(null)
-    try {
-      await disconnect.disconnectAsync({ connector: connection.connector })
-    } catch {
-      setError('Could not disconnect this account. Try again.')
-    } finally {
-      busy.current = false
-      setPending(null)
-    }
   }
 
   return (
@@ -96,9 +114,9 @@ export function PasskeyAccountDemo() {
                   type="button"
                   variant="default"
                   disabled={Boolean(pending)}
-                  onClick={() => void disconnectPasskey()}
+                  onClick={disconnectPasskey}
                 >
-                  {pending === 'disconnect' ? 'Disconnecting…' : 'Disconnect passkey account'}
+                  Disconnect passkey account
                 </Button>
               </div>
               <p {...ui.passkeyAccountDemoDescription2()}>
@@ -119,14 +137,14 @@ export function PasskeyAccountDemo() {
               <Button
                 type="button"
                 variant="accent"
-                disabled={!connector || Boolean(pending)}
+                disabled={Boolean(pending)}
                 onClick={() => void connectPasskey(true)}
               >
                 {pending === 'create' ? 'Check the passkey prompt…' : 'Create a passkey account'}
               </Button>
               <Button
                 type="button"
-                disabled={!connector || Boolean(pending)}
+                disabled={Boolean(pending)}
                 onClick={() => void connectPasskey(false)}
               >
                 {pending === 'connect' ? 'Check the passkey prompt…' : 'Use an existing passkey'}

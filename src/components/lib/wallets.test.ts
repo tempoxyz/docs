@@ -11,7 +11,7 @@ const connectors = [
   { id: 'injected', name: 'Injected Wallet' },
   { id: 'io.metamask', name: 'MetaMask' },
   { id: 'webAuthn', name: 'Passkey' },
-  { id: 'tempoId', name: 'Tempo ID' },
+  { id: 'tempoId', name: 'Tempo' },
   { id: 'app.phantom', name: 'Phantom' },
   { id: 'injected', name: 'Injected Wallet Duplicate' },
 ] as Connector[]

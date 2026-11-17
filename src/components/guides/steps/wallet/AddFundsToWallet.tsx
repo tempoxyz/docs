@@ -16,11 +16,8 @@ import type { DemoStepProps } from '../types'
 
 export function AddFundsToWallet(props: DemoStepProps) {
   const { stepNumber = 2, last = false } = props
-  const isE2E = import.meta.env.VITE_E2E === 'true'
   const connections = useConnections()
-  const walletConnection = connections.find((c) =>
-    isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
-  )
+  const walletConnection = connections.find((c) => isFundableWalletConnector(c.connector))
   const address = walletConnection?.accounts[0]
   const hasNonWebAuthnWallet = Boolean(address)
   const queryClient = useQueryClient()

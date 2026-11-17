@@ -1903,12 +1903,12 @@
     },
     {
       "source": "/accounts",
-      "destination": "https://accounts.tehq.dev",
+      "destination": "https://accounts.tempo.xyz",
       "permanent": true
     },
     {
       "source": "/accounts/:path*",
-      "destination": "https://accounts.tehq.dev/:path*",
+      "destination": "https://accounts.tempo.xyz/:path*",
       "permanent": true
     },
     {
@@ -2138,7 +2138,7 @@
     },
     {
       "source": "/developers/docs/guide/use-accounts/embed-passkeys",
-      "destination": "/developers/docs/accounts/authentication",
+      "destination": "https://accounts.tempo.xyz/docs/adapters/webauthn",
       "permanent": true
     },
     {

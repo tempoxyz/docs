@@ -105,7 +105,7 @@ const interactiveDescriptions: Record<string, string> = {
     'Open the interactive Routes demo (Try a route) at /docs/routes/test. Choose source and destination assets, ' +
     'get a quote (without a key, routes that support subsidies preview 1:1 delivery from a quote-only demo organization), ' +
     'add an API key to create the transfer or deposit address, ' +
-    'sign with Tempo ID (Tempo sources) or a browser wallet, and track delivery. ' +
+    'sign with Tempo (Tempo sources) or a browser wallet, and track delivery. ' +
     'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   GuideDemo:
@@ -164,7 +164,7 @@ const demoStepLabels: Record<string, string> = {
   SendTokensWithinZone: 'Send tokens within zone',
   SetFeeToken: 'Set fee token',
   SetSupplyCap: 'Set supply cap',
-  SignInWithTempo: 'Sign in with Tempo ID',
+  SignInWithTempo: 'Sign in with Tempo',
   SwapAcrossZones: 'Swap across zones',
   VirtualAddressesFastDemo: 'Virtual addresses fast demo',
   VirtualAddressesLiveDemo: 'Virtual addresses live demo',

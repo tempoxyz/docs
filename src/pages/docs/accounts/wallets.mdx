@@ -103,7 +103,7 @@ To keep the address instead, [upgrade the account in place](/docs/accounts/accou
 
 ## Connect a User's Wallet
 
-If a user already has a Tempo Account, sign them in with Tempo ID through the [Accounts SDK](https://accounts.tehq.dev). Tempo ID holds the account's keys, and your app receives the user's address and an access key that signs within the limits the user approves. Tempo ID sends transactions through its own RPC endpoint, not your devnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
+If a user already has a Tempo Account, sign them in with Tempo through the [Accounts SDK](https://accounts.tempo.xyz). Tempo holds the account's keys, and your app receives the user's address and an access key that signs within the limits the user approves. Tempo sends transactions through its own RPC endpoint, not your devnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
 
 <Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
   <SignInWithTempo stepNumber={1} />
@@ -135,7 +135,7 @@ export async function connect() {
 }
 ```
 
-Call `connect` from a click handler, since the popup fallback of `dialog.signIn` opens only within a user gesture. Track the Tempo ID session separately from your app's own signed-in session. In `accounts.session.subscribe`, update the address, or clear it when the user signs out. In `accounts.chain.subscribe`, refresh network-dependent state before you enable transactions. To send payments, use `accounts.viem`, the Viem client the `viem` plugin adds, as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). You can also connect other [wallet partners](/docs/partners/wallets).
+Call `connect` from a click handler, since the popup fallback of `dialog.signIn` opens only within a user gesture. Track the Tempo session separately from your app's own signed-in session. In `accounts.session.subscribe`, update the address, or clear it when the user signs out. In `accounts.chain.subscribe`, refresh network-dependent state before you enable transactions. To send payments, use `accounts.viem`, the Viem client the `viem` plugin adds, as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). You can also connect other [wallet partners](/docs/partners/wallets).
 
 <span id="wallet-guides" />
 

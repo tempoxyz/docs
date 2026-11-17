@@ -1,8 +1,6 @@
 'use client'
 
 import { Button } from '@tempoxyz/ds'
-// Parses Viem's execution errors. accounts v1 has no such helper.
-import { ExecutionError } from 'accounts-v0'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import {
   BaseError,
@@ -85,6 +83,7 @@ import {
   useStellarWallets,
   waitForStellarTransaction,
 } from '../lib/stellar-wallets'
+import { getTempoIdInstance, hasUnrestrictedAccessKey } from '../lib/tempo-id'
 import {
   connectTronAccount,
   sendTronCall,
@@ -489,7 +488,7 @@ function RouteLifecycle({
             : []
   const walletName =
     family === 'tempo'
-      ? 'Tempo ID'
+      ? 'Tempo'
       : family === 'evm'
         ? evmWallet?.name
         : family === 'tron'
@@ -813,7 +812,7 @@ function RouteLifecycle({
             simulate: (batch) =>
               estimateGas(rpc, { account: sender as `0x${string}`, calls: batch }).catch(
                 (e: Error) => {
-                  throw new Error(`${ExecutionError.parse(e).message} Nothing was sent.`)
+                  throw new Error(`${executionErrorMessage(e)} Nothing was sent.`)
                 },
               ),
             // Tempo ID's access key can call only the contracts it names, and the Routes API picks
@@ -821,13 +820,9 @@ function RouteLifecycle({
             // anything is sent.
             authorize: async (batch) => {
               if (tempoWallet?.id !== tempoIdConnectorId || !sourceTokenAddress) return
-              const instance = await (
-                tempoWallet as unknown as {
-                  getInstance(): Promise<{
-                    dialog: { signIn(p: { accessKey: unknown }): Promise<unknown> }
-                  }>
-                }
-              ).getInstance()
+              const instance = await getTempoIdInstance(tempoWallet)
+              // An E2E build's seeded access key can already make any call.
+              if (await hasUnrestrictedAccessKey(instance)) return
               await instance.dialog.signIn({
                 accessKey: routesAccessKey({
                   chainId,
@@ -1140,7 +1135,7 @@ function RouteLifecycle({
         ? [
             {
               id: tempoWallet.id,
-              name: 'Tempo ID',
+              name: 'Tempo',
               connect: async () =>
                 tempoAccount ??
                 (await connect.connectAsync({ connector: tempoWallet, chainId: tempoChain.id }))
@@ -2124,3 +2119,14 @@ const summaryValue = style({
   color: inherited.color.textColorPrimary,
   fontVariantNumeric: 'tabular-nums',
 })
+
+/** The revert reason or short message of a failed simulation, from Viem's error chain. */
+function executionErrorMessage(error: unknown) {
+  if (error instanceof BaseError) {
+    const reverted = error.walk(
+      (cause) => cause instanceof BaseError && 'reason' in cause && Boolean(cause.reason),
+    ) as (BaseError & { reason?: string }) | null
+    return reverted?.reason ?? error.shortMessage
+  }
+  return error instanceof Error ? error.message : String(error)
+}
