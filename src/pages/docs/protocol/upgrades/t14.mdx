@@ -90,39 +90,40 @@ Read the [specification](https://tips.sh/1152).
 - **Admin access keys:** if you use an admin key to manage a user's other keys, [add that device as a signer](/docs/accounts/account-configuration/configuration-updates#add-a-signer) instead and revoke admin keys you no longer need before T14 ([details](#admin-access-key-removal)).
 - **Account upgrades:** the upgrade call only exists once T14 activates on a network. Sent earlier, the transaction still pays its fee but leaves the account unchanged, so send upgrades only after activation.
 - **Signature parsing:** accounts with multiple signers sign with the [`0x05` multisig signature](/docs/development/configurable-accounts#multisig-signature-format). Viem builds and reads it. If you parse or verify Tempo transaction signatures yourself, handle this type. It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
-- **Contracts that check signatures from configurable accounts:** single-key accounts are unchanged. A registered or upgraded account answers ERC-1271 `isValidSignature`, so Permit2 and similar verifiers work unchanged. After an upgrade, contracts using OpenZeppelin `SignatureChecker` before v5.1 still accept the retired original key. Contracts can also call `verifyConfigurableAccount` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract).
+- **New configurable accounts:** an address derived for a new configurable account exists only on Tempo and its Zones. Funds sent to it on another chain are lost, so don't send to it outside Tempo, and warn users before they share it for other chains.
+- **Contracts that check signatures from configurable accounts:** single-key accounts are unchanged. A registered or upgraded account answers ERC-1271 `isValidSignature`, and contracts can also call `verifyConfigurableAccount` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). For what changes after an upgrade, see [Upgrading from a single-key account](#upgrade-impact).
 - **Validators:** check your fee recipient and endpoint formats against the [validator and consensus changes](#validator-and-consensus-changes).
 
 <span id="upgrade-impact" />
 
 ## Upgrading from a single-key account
 
-An [account upgrade](/docs/accounts/account-configuration/account-upgrade) is optional and opt-in. Accounts that don't upgrade work exactly as before.
+An [account upgrade](/docs/accounts/account-configuration/account-upgrade) is optional, opt-in, and permanent. Accounts that don't upgrade work exactly as before.
 
 ### What stays the same
 
 An upgraded account keeps:
 
 - Its address, balances, and the token allowances it already granted, including Permit2 allowances.
-- Its access keys, with their expiry, limits, and scopes.
+- Its access keys, with their expiry, limits, and scopes. Admin access keys granted before T14 also carry over and keep spending without limits until revoked.
 - Deposits in payment channels it already funded.
-- The original key as a signer, if you list it among the new signers.
+- The original key as one of the signers, if you list it. It then approves only at its weight, as part of the threshold.
 
 What changes is who signs: transactions from the account now need enough [signers](/docs/development/configurable-accounts) to reach the threshold.
 
 ### Who's affected
 
-Most integrations need no change. These do:
+Accounts that don't upgrade need no change. For upgraded accounts, check these:
 
 | Integration | What to do |
 |---|---|
-| Wallets that upgrade accounts | Show the new signers, the threshold, and the access keys that carry over before the user confirms. Send the upgrade after T14 activates on the network. Treat `RootKeyRetired` as "this key was upgraded", not as an invalid signature. |
+| Wallets that upgrade accounts | Only an account with no code, no EIP-7702 delegation, and no existing configuration can upgrade. Before the user confirms, show the new signers, the threshold, and the access keys that carry over, including unlimited admin keys granted before T14, and tell them the original key still controls the address on other EVM chains. Send the upgrade after T14 activates on the network. The upgrade transaction itself can be sponsored. Treat `RootKeyRetired` as "this key was upgraded", not as an invalid signature, and rebuild the account from its saved configuration. |
 | Fee sponsors | An upgraded account can still be sponsored, but it can't sponsor others. Keep a single-key account as your fee payer. |
-| Apps that use `permit` | Upgraded accounts can't sign TIP-20 `permit`. Batch an `approve` with your call instead. Permit2 keeps working. |
-| Apps that verify signatures | Contracts that check for code, including Permit2, verify the account through ERC-1271 and need no change. Apps that only call `ecrecover`, such as OpenZeppelin `SignatureChecker` before v5.1, still accept the original key and should check for code first. |
-| Payment channels | Existing channels keep working. Open new ones or top up with a signer other than the original key. |
-| Zones | An upgrade reaches a Zone once it imports that Tempo block. Revoke access keys on each Zone separately. |
+| Apps that use `permit` | Upgraded accounts can't sign TIP-20 `permit`. Permits signed before the upgrade also fail, because the check runs at call time, which affects relayers holding queued permits. Batch an `approve` with your call instead. Permit2 keeps working, and Permit2 allowances already granted stay usable. |
+| Apps that verify signatures | Verifiers that check for code first, including Permit2 and OpenZeppelin `SignatureChecker` v5.1+, use ERC-1271 and need no change. Code that tries `ecrecover` first or only still accepts the original key. This includes `SignatureChecker` before v5.1, sign-in checks (SIWE, TIP-1053) and signed-order verifiers. Check for code, or call `getConfigCommitment`, before trusting a recovered address. ERC-2612 permits on non-TIP-20 tokens also still accept the original key. |
+| Payment channels and MPP sessions | Channels funded before the upgrade still settle, but can't be topped up, so close open channels before upgrading. Under T14, an upgraded account can't sign its own vouchers. Set a separate single-key `authorizedSigner` when opening a channel. Configurable-account voucher signers are planned for T15 ([TIP-1166](https://tips.sh/1166)). |
+| Zones | The original key keeps full authority on a Zone until that Zone imports the Tempo block with the upgrade. Revoke access keys on each Zone separately. |
 
-If the original key may be compromised, revoke unwanted access keys and allowances in the same transaction as the upgrade. The [account upgrade guide](/docs/accounts/account-configuration/account-upgrade) has the full checklist.
+If the original key may be compromised, revoke unwanted access keys and allowances in the same transaction as the upgrade. If a revocation reverts, the whole upgrade fails. An upgrade only protects an account whose key is still trusted: a compromised key can race it with its own signers or add access keys first. The [account upgrade guide](/docs/accounts/account-configuration/account-upgrade) has the full checklist.
 
 Read the [specification](https://tips.sh/1113).
