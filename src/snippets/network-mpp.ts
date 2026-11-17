@@ -1,10 +1,10 @@
 // @ts-nocheck
 // Type-checked against accounts@alpha. Pages that include it say to install accounts@alpha.
-
-// [!region wallet-config]
-import { tempoId } from 'accounts/wagmi'
+// biome-ignore-all assist/source/organizeImports: each region publishes its own imports
 import { Mppx, tempo } from 'mppx/client'
 import type { Account } from 'viem'
+// [!region wallet-config]
+import { tempoId } from 'accounts/wagmi'
 import { tempo as tempoMainnet } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { getConnectorClient } from 'wagmi/actions'
