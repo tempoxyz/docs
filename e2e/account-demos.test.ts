@@ -7,6 +7,9 @@ function signInChainId(url: string) {
   return Number(chainId)
 }
 
+// CI always tests the E2E build; set VITE_E2E=true to test one locally.
+const e2eBuild = Boolean(process.env.CI) || process.env.VITE_E2E === 'true'
+
 function accountPage(baseURL: string | undefined, hostname = 'localhost') {
   const url = new URL('/docs/accounts/authentication/passkeys#try-a-passkey-account', baseURL)
   url.hostname = hostname
@@ -101,6 +104,12 @@ test('requests a testnet access key from Tempo', async ({ page, context }) => {
   const connect = page.getByRole('button', { name: 'Sign in with Tempo', exact: true })
   await expect(connect).toBeEnabled()
   await connect.click()
+  if (e2eBuild) {
+    // The E2E build signs in with `accounts/test`, which sends no request to Tempo ID.
+    await expect(page.getByRole('button', { name: 'Disconnect', exact: true })).toBeVisible()
+    expect(signIns).toEqual([])
+    return
+  }
   // Over HTTP, the sign-in opens in a popup. Over HTTPS, it frames Tempo ID's embed page.
   await expect.poll(() => signIns.length).toBeGreaterThan(0)
   const authorize = signIns.find((url) => new URL(url).pathname === '/oauth2/authorize')
