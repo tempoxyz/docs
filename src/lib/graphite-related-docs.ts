@@ -3,8 +3,9 @@ export const GRAPHITE_RELATED_DOCS_ENDPOINT =
 export const PUBLIC_DEVELOPERS_PREFIX = '/developers'
 export const PUBLIC_DOCS_PREFIX = `${PUBLIC_DEVELOPERS_PREFIX}/docs`
 export const TEMPO_ORIGIN = 'https://tempo.com'
+export const LEGACY_TEMPO_ORIGIN = 'https://tempo.xyz'
 // Graphite may still report pages under the pre-move origin; accept both.
-const TEMPO_ORIGINS = new Set([TEMPO_ORIGIN, 'https://tempo.xyz'])
+const TEMPO_ORIGINS = new Set([TEMPO_ORIGIN, LEGACY_TEMPO_ORIGIN])
 const MAX_LINKS = 32
 const MAX_TITLE_CHARS = 240
 const MAX_DESCRIPTION_CHARS = 500
