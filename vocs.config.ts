@@ -405,6 +405,7 @@ export default defineConfig({
           Accounts: [
             { text: 'Transactions and transfers', link: '/docs/api/transactions-and-transfers' },
           ],
+          'Routes API': [{ text: 'Overview', link: '/docs/api/routes' }],
           Console: [{ text: 'About Tempo Console', link: '/docs/api/console' }],
         },
         flatten: apiFlattenedGroups,
