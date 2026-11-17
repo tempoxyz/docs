@@ -177,22 +177,6 @@ Read the account's transfer history.
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 
-  test('describes the admin key demo and preserves the following instructions', async () => {
-    const output = await render(`
-<AdminKeyDemo />
-
-## Revoke an admin key
-
-Use your root key to revoke the admin key.
-`)
-
-    expect(output).toContain('create or connect a testnet passkey account')
-    expect(output).toContain('authorize an admin key, inspect its onchain status, and revoke it')
-    expect(output).toContain('## Revoke an admin key')
-    expect(output).toContain('Use your root key to revoke the admin key.')
-    expect(output).not.toContain('<AdminKeyDemo')
-  })
-
   test('describes the testnet Earn deposit flow for agent readers', async () => {
     const output = await render('<EarnDepositDemo />')
     expect(output).toContain('create a testnet passkey account')

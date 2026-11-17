@@ -103,28 +103,39 @@ To keep the address instead, [upgrade the account in place](/docs/accounts/accou
 
 ## Connect a User's Wallet
 
-If a user already has a self-custodial wallet, such as Tempo Wallet, connect it with the [Accounts SDK](https://accounts.tempo.xyz/docs). The wallet holds the keys and signs. Your app uses the address the user selects. Tempo Wallet sends transactions through its own RPC endpoint, not your devnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
+If a user already has a Tempo Account, sign them in with Tempo through the [Accounts SDK](https://accounts.tempo.xyz). Tempo holds the account's keys, and your app receives the user's address and an access key that signs within the limits the user approves. Tempo sends transactions through its own RPC endpoint, not your devnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
 
 <Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
   <SignInWithTempo stepNumber={1} />
 </Demo.Container>
 
 ```bash [Terminal]
-pnpm add --save-exact accounts@0.18.4 viem
+pnpm add accounts@alpha viem
 ```
 
 <span id="connect-tempo-wallet-from-your-application" />
 
 ```ts [connect.ts]
-import { Provider } from 'accounts'
-import { tempoModerato } from 'viem/chains'
+import { Accounts } from 'accounts'
+import { viem } from 'accounts/plugins'
 
-const provider = Provider.create({ chains: [tempoModerato], testnet: true }) // [!code hl]
-const [address] = await provider.request({ method: 'eth_requestAccounts' }) // [!code hl]
-if (!address) throw new Error('No account was selected')
+export const accounts = Accounts.create({
+  // Each sign-in requests an access key that sends up to 100 AlphaUSD for a day.
+  accessKey: () => ({ expiry: '1d', limits: [{ limit: '100', token: 'alphaUSD' }] }),
+  chain: 'testnet',
+  plugins: [viem()],
+})
+
+// Call from a click handler, such as a Sign in button's.
+export async function connect() {
+  const session = await accounts.dialog.signIn() // [!code hl]
+  const address = session.accessKey?.account // [!code hl]
+  if (!address) throw new Error('No account was selected')
+  return address
+}
 ```
 
-Track the wallet connection separately from your app's signed-in session. On `accountsChanged`, update the selected address, or clear it when the wallet disconnects. On `chainChanged`, refresh network-dependent state before you enable transactions. To send payments, create wallet and public clients from this provider as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). You can also connect other [wallet partners](/docs/partners/wallets).
+Call `connect` from a click handler, since the popup fallback of `dialog.signIn` opens only within a user gesture. Track the Tempo session separately from your app's own signed-in session. In `accounts.session.subscribe`, update the address, or clear it when the user signs out. In `accounts.chain.subscribe`, refresh network-dependent state before you enable transactions. To send payments, use `accounts.viem`, the Viem client the `viem` plugin adds, as in the [browser wallet setup](/docs/guide/payments/send-a-payment/examples#browser-wallet-setup). You can also connect other [wallet partners](/docs/partners/wallets).
 
 <span id="wallet-guides" />
 

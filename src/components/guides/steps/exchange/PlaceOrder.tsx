@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { type Log, parseUnits } from 'viem'
 import { Actions } from 'viem/tempo'
-import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
+import { useConnection, useConnectionEffect, useSendTransactionSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Step } from '../../Demo'
@@ -22,29 +22,29 @@ export function PlaceOrder(props: DemoStepProps) {
     token: alphaUsd,
   })
 
-  const sendCalls = useSendCallsSync()
+  const sendTransaction = useSendTransactionSync()
 
   useConnectionEffect({
     onDisconnect() {
-      sendCalls.reset()
+      sendTransaction.reset()
       clearData('orderId')
     },
   })
 
   // Extract and store orderId after successful order placement
   React.useEffect(() => {
-    if (sendCalls.isSuccess && sendCalls.data?.receipts?.[0]) {
+    if (sendTransaction.isSuccess && sendTransaction.data) {
       try {
         const {
           args: { orderId },
-        } = Actions.dex.place.extractEvent(sendCalls.data.receipts[0].logs as Log[])
+        } = Actions.dex.place.extractEvent(sendTransaction.data.logs as Log[])
         console.log('orderId', orderId)
         setData('orderId', orderId)
       } catch (error) {
         console.error('Failed to extract orderId:', error)
       }
     }
-  }, [sendCalls.isSuccess, sendCalls.data, setData])
+  }, [sendTransaction.isSuccess, sendTransaction.data, setData])
 
   const amount = parseUnits('100', metadata?.decimals || 6)
 
@@ -63,30 +63,30 @@ export function PlaceOrder(props: DemoStepProps) {
 
   return (
     <Step
-      active={active && (last ? true : !sendCalls.isSuccess)}
-      completed={sendCalls.isSuccess || !!orderId}
+      active={active && (last ? true : !sendTransaction.isSuccess)}
+      completed={sendTransaction.isSuccess || !!orderId}
       actions={
         <Button
-          variant={active ? (sendCalls.isSuccess ? 'default' : 'accent') : 'default'}
+          variant={active ? (sendTransaction.isSuccess ? 'default' : 'accent') : 'default'}
           disabled={!active}
           onClick={() => {
-            sendCalls.sendCallsSync({
+            sendTransaction.sendTransactionSync({
               calls,
             })
           }}
           type="button"
           className={form.actionButton().className}
         >
-          {sendCalls.isPending ? 'Placing Order...' : 'Place Order'}
+          {sendTransaction.isPending ? 'Placing Order...' : 'Place Order'}
         </Button>
       }
       number={stepNumber}
       title="Place buy order for 100 AlphaUSD"
     >
-      {sendCalls.isSuccess && sendCalls.data && (
+      {sendTransaction.isSuccess && sendTransaction.data && (
         <div {...form.stepBody()}>
           <div {...form.stepRail()}>
-            <ExplorerLink hash={sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`} />
+            <ExplorerLink hash={sendTransaction.data.transactionHash} />
           </div>
         </div>
       )}

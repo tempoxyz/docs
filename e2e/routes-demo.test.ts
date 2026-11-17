@@ -52,7 +52,7 @@ const baseToTempo = {
   capabilities: { depositAddress: true, transfer: { modes: ['exactSource'] } },
   subsidies: { depositAddress: true, transfer: true },
 }
-// Transfer only, Tempo source (Tempo Wallet signing), no subsidy.
+// Transfer only, Tempo source (Tempo ID signing), no subsidy.
 const tempoToTron = {
   id: 'tempo-usdt0-tron-usdt',
   sourceChain: chains.tempo,
@@ -801,7 +801,7 @@ test.describe('Routes demo', () => {
     await chooseRoute(page, ['Base', 'USDC'], ['Tempo', 'USDC.e'])
     await method(page, 'Deposit address').click()
     await page.getByLabel('Amount (USDC)').fill('1')
-    // The recipient is on Tempo, where Tempo Wallet can fill it in.
+    // The recipient is on Tempo, where Tempo ID can fill it in.
     await expect(lifecycle(page).getByRole('button', { name: '(Connect)' }).first()).toBeEnabled()
     await expect(page.getByLabel('Recipient on Tempo')).toHaveAttribute(
       'placeholder',

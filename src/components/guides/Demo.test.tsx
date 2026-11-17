@@ -40,7 +40,7 @@ vi.mock('@tanstack/react-query', () => ({
 }))
 
 vi.mock('../../wagmi.config', () => ({
-  useTempoWalletConnector: () => undefined,
+  useTempoIdConnector: () => undefined,
   useWebAuthnConnector: () => undefined,
 }))
 

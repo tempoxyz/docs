@@ -1,5 +1,6 @@
 import { expectDemoSuccess, getDemoStep, selectTab } from './helpers'
 import { expect, test } from './live'
+import { seedTempoIdSession } from './tempo-id'
 
 test('fund an address via faucet', async ({ page }) => {
   test.setTimeout(120000)
@@ -16,6 +17,8 @@ test('fund an address via faucet', async ({ page }) => {
   const addressInput = page.getByPlaceholder('0x...')
   const addFundsButton = page.getByRole('button', { name: 'Add funds' })
   await expect(async () => {
+    // Clear it first: a fill with the value the input already shows fires no change for React.
+    await addressInput.fill('')
     await addressInput.fill('0xbeefcafe54750903ac1c8909323af7beb21ea2cb')
     await expect(addFundsButton).toBeEnabled({ timeout: 1000 })
   }).toPass({ timeout: 30_000 })
@@ -34,54 +37,41 @@ test('fund an address via faucet', async ({ page }) => {
 test('fund a connected passkey wallet via faucet', async ({ page }) => {
   test.setTimeout(240000)
 
-  const client = await page.context().newCDPSession(page)
-  await client.send('WebAuthn.enable')
-  const { authenticatorId } = await client.send('WebAuthn.addVirtualAuthenticator', {
-    options: {
-      protocol: 'ctap2',
-      transport: 'internal',
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-    },
+  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
+  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
+
+  await page.goto('/docs/quickstart/faucet')
+
+  const tab = page.getByRole('tab', { name: 'Fund your wallet' })
+  await expect(tab).toBeVisible({ timeout: 90000 })
+  await selectTab(tab)
+
+  const connectStep = getDemoStep(page, 'Connect your wallet.')
+  const connectButton = connectStep.getByRole('button').first()
+  await expect(connectButton).toBeVisible({ timeout: 30000 })
+  await expect(connectButton).toBeEnabled()
+  await connectButton.click()
+
+  await expect(connectStep.getByRole('button', { name: 'Disconnect' })).toBeVisible({
+    timeout: 30000,
   })
 
-  try {
-    await page.goto('/docs/quickstart/faucet')
+  // Request funds once the demo's initial balance reads finish, as a reader would, so the
+  // faucet call doesn't compete with them for the public RPC's per-client rate limit.
+  const balances = page.getByText('Personal balances', { exact: true }).locator('..')
+  for (const symbol of ['OUSD', 'PathUSD', 'AlphaUSD', 'BetaUSD', 'ThetaUSD'])
+    await expect(balances).toContainText(symbol, { timeout: 30000 })
 
-    const tab = page.getByRole('tab', { name: 'Fund your wallet' })
-    await expect(tab).toBeVisible({ timeout: 90000 })
-    await selectTab(tab)
+  const addFundsStep = getDemoStep(page, 'Add testnet funds to your wallet.')
+  const addFundsButton = addFundsStep.getByRole('button', { name: 'Add funds' })
+  await expect(addFundsButton).toBeVisible({ timeout: 30000 })
+  await expect(addFundsButton).toBeEnabled()
+  await addFundsButton.click()
 
-    const connectStep = getDemoStep(page, 'Connect your wallet.')
-    const connectButton = connectStep.getByRole('button').first()
-    await expect(connectButton).toBeVisible({ timeout: 30000 })
-    await expect(connectButton).toBeEnabled()
-    await connectButton.click()
-
-    await expect(connectStep.getByRole('button', { name: 'Disconnect' })).toBeVisible({
-      timeout: 30000,
-    })
-
-    // Request funds once the demo's initial balance reads finish, as a reader would, so the
-    // faucet call doesn't compete with them for the public RPC's per-client rate limit.
-    const balances = page.getByText('Personal balances', { exact: true }).locator('..')
-    for (const symbol of ['OUSD', 'PathUSD', 'AlphaUSD', 'BetaUSD', 'ThetaUSD'])
-      await expect(balances).toContainText(symbol, { timeout: 30000 })
-
-    const addFundsStep = getDemoStep(page, 'Add testnet funds to your wallet.')
-    const addFundsButton = addFundsStep.getByRole('button', { name: 'Add funds' })
-    await expect(addFundsButton).toBeVisible({ timeout: 30000 })
-    await expect(addFundsButton).toBeEnabled()
-    await addFundsButton.click()
-
-    // A faucet or RPC failure shows in the step; report it instead of waiting out the timeout.
-    await expectDemoSuccess(
-      page,
-      addFundsStep.getByRole('button', { name: 'Add more funds' }),
-      120000,
-    )
-  } finally {
-    await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId }).catch(() => {})
-  }
+  // A faucet or RPC failure shows in the step; report it instead of waiting out the timeout.
+  await expectDemoSuccess(
+    page,
+    addFundsStep.getByRole('button', { name: 'Add more funds' }),
+    120000,
+  )
 })

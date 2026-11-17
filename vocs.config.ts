@@ -708,7 +708,6 @@ export default defineConfig({
               { text: 'Scopes', link: '/docs/accounts/access-keys/scopes' },
               { text: 'Expiry', link: '/docs/accounts/access-keys/expiry' },
               { text: 'Revocation', link: '/docs/accounts/access-keys/revocation' },
-              { text: 'Admin Access Keys', link: '/docs/accounts/access-keys/admin-access-keys' },
             ],
           },
           {
@@ -1828,6 +1827,11 @@ export default defineConfig({
     },
     {
       source: '/docs/accounts/admin-keys',
+      destination: '/docs/accounts/access-keys',
+      status: 301,
+    },
+    {
+      source: '/docs/accounts/access-keys/admin-access-keys',
       destination: '/docs/accounts/access-keys',
       status: 301,
     },

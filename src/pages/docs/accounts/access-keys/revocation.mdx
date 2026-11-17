@@ -7,13 +7,11 @@ description: Shut off an access key for good when a device is lost, a backend ke
 import { Card, Cards } from 'vocs'
 
 import ConfigurableAccountsT14 from '../../../../snippets/configurable-accounts-t14.mdx'
-import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
 
 # Revocation
 
 Shuts off an access key for good.
 
-<AdminAccessKeysT14 />
 
 <span id="key-revocation" />
 <span id="what-revocation-stops" />
@@ -32,14 +30,13 @@ Revocation doesn't undo what the key did while it was active:
 
 - **Transactions Stay Final:** A payment racing the revocation goes through only if it lands first. Once the revocation lands, Tempo rejects the rest.
 - **Token Approvals Stay:** A spender the key approved still pulls tokens up to the allowance. Set each allowance to zero from the account.
-- **Authorized Keys Stay:** If it was an admin key, the keys it authorized stay authorized. Revoke each one.
 
 <span id="key-revocation-by-situation" />
 <span id="revoke-an-access-key" />
 
 ## Revoke a Key
 
-Enough of the account's signers to meet its threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), approve the revocation. In Viem, call [`accessKey.revoke`](https://viem.sh/tempo/actions/accessKey.revoke) with the account and the key's address.
+Enough of the account's signers to meet its threshold approve the revocation. In Viem, call [`accessKey.revoke`](https://viem.sh/tempo/actions/accessKey.revoke) with the account and the key's address.
 
 When you authorize a key, save its address next to the device or service that holds it. That record tells you which address to revoke. Show a key as removed only after the revocation confirms.
 

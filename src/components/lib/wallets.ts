@@ -2,7 +2,7 @@ import type { Connector } from 'wagmi'
 
 const UNSUPPORTED_WALLET_IDS = new Set(['app.phantom'])
 const UNSUPPORTED_WALLET_NAMES = new Set(['Phantom'])
-const TEMPO_MANAGED_WALLET_IDS = new Set(['webAuthn', 'xyz.tempo'])
+const TEMPO_MANAGED_WALLET_IDS = new Set(['webAuthn', 'tempoId'])
 
 export function isBrowserWalletConnectorId(connectorId: string) {
   return !TEMPO_MANAGED_WALLET_IDS.has(connectorId)

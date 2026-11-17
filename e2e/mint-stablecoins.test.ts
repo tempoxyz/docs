@@ -1,21 +1,12 @@
 import { expectDemoSuccess, getDemoStep } from './helpers'
 import { expect, test } from './live'
+import { seedTempoIdSession } from './tempo-id'
 
 test('mint stablecoins', async ({ page }) => {
   test.setTimeout(180000)
 
-  // Set up virtual authenticator via CDP
-  const client = await page.context().newCDPSession(page)
-  await client.send('WebAuthn.enable')
-  const { authenticatorId } = await client.send('WebAuthn.addVirtualAuthenticator', {
-    options: {
-      protocol: 'ctap2',
-      transport: 'internal',
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-    },
-  })
+  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
+  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
 
   await page.goto('/docs/guide/issuance/mint-stablecoins')
 
@@ -77,7 +68,4 @@ test('mint stablecoins', async ({ page }) => {
 
   // Wait for mint receipt
   await expectDemoSuccess(page, page.getByRole('link', { name: 'View receipt' }).nth(2))
-
-  // Clean up
-  await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId })
 })

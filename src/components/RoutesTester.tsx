@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@tempoxyz/ds'
-import { ExecutionError } from 'accounts'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import {
   BaseError,
@@ -21,7 +20,7 @@ import {
   useConnection,
   useDisconnect,
   useReadContract,
-  useSendCallsSync,
+  useSendTransactionSync,
 } from 'wagmi'
 import { cx } from 'zyzz'
 import {
@@ -45,6 +44,8 @@ import {
   RoutesApiError,
   requestUrl,
   retryOn,
+  routesAccessKey,
+  routesFeeTokens,
   SourceRevertedError,
   sourceActionSchema,
   submitTempoCalls,
@@ -82,6 +83,7 @@ import {
   useStellarWallets,
   waitForStellarTransaction,
 } from '../lib/stellar-wallets'
+import { getTempoIdInstance, hasUnrestrictedAccessKey } from '../lib/tempo-id'
 import {
   connectTronAccount,
   sendTronCall,
@@ -93,7 +95,7 @@ import {
 } from '../lib/tron-wallets'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
-import { tempoChainIds, useTempoWalletConnector } from '../wagmi.config'
+import { tempoChainIds, tempoIdConnectorId, useTempoIdConnector } from '../wagmi.config'
 import { type ApiCall, ApiLog, CopyButton } from './ApiLog'
 import { Container } from './Container'
 import * as Demo from './guides/Demo'
@@ -438,7 +440,7 @@ function RouteLifecycle({
   const quoteReady = useRef(false)
   const inFlight = useRef(false)
   const sourceChainId = /^eip155:(\d+)$/.exec(route.sourceChain.id)?.[1]
-  // Tempo sources sign with Tempo Wallet; the other configured EVM networks use browser wallets.
+  // Tempo sources sign with Tempo ID; the other configured EVM networks use browser wallets.
   const chains = useChains()
   const tempoChainId = chains.find(
     (c) => tempoChainIds.has(c.id) && c.id === Number(sourceChainId),
@@ -447,10 +449,26 @@ function RouteLifecycle({
   const connection = useConnection()
   const connect = useConnect()
   const disconnect = useDisconnect()
-  const tempoWallet = useTempoWalletConnector()
-  const sendCalls = useSendCallsSync()
+  const tempoWallet = useTempoIdConnector()
+  // Tempo runs a batch's calls atomically in one transaction, which the Tempo account's access key
+  // signs. Its wallet has no `wallet_sendCalls`, so the batch goes through `sendTransaction`.
+  const sendTransaction = useSendTransactionSync()
+  const sendCalls = {
+    // Fee sponsorship applies only on testnet, so a Routes source pays its own fees.
+    async mutateAsync(parameters: {
+      calls: { to: `0x${string}`; data?: `0x${string}`; value?: bigint }[]
+      chainId: number
+      capabilities?: { feePayer: false }
+    }) {
+      const receipt = await sendTransaction.mutateAsync({
+        calls: parameters.calls,
+        chainId: parameters.chainId as typeof tempo.id,
+      })
+      return { status: receipt.status, receipts: [receipt] }
+    },
+  }
   const tempoClient = useClient({ chainId: tempoChainId })
-  // Each source network signs with its own kind of wallet: Tempo Wallet (the Tempo accounts SDK)
+  // Each source network signs with its own kind of wallet: Tempo ID (the Tempo accounts SDK)
   // on Tempo, and the reader's choice of browser wallet everywhere else.
   const family = tempoChainId
     ? 'tempo'
@@ -486,7 +504,7 @@ function RouteLifecycle({
             : []
   const walletName =
     family === 'tempo'
-      ? 'Tempo Wallet'
+      ? 'Tempo'
       : family === 'evm'
         ? evmWallet?.name
         : family === 'tron'
@@ -810,9 +828,27 @@ function RouteLifecycle({
             simulate: (batch) =>
               estimateGas(rpc, { account: sender as `0x${string}`, calls: batch }).catch(
                 (e: Error) => {
-                  throw new Error(`${ExecutionError.parse(e).message} Nothing was sent.`)
+                  throw new Error(`${executionErrorMessage(e)} Nothing was sent.`)
                 },
               ),
+            // Tempo ID's access key can call only the contracts it names, and the Routes API picks
+            // this batch's contracts. So the reader approves an access key for this batch before
+            // anything is sent.
+            authorize: async (batch) => {
+              if (tempoWallet?.id !== tempoIdConnectorId || !sourceTokenAddress) return
+              const instance = await getTempoIdInstance(tempoWallet)
+              // An E2E build's seeded access key can already make any call.
+              if (await hasUnrestrictedAccessKey(instance)) return
+              await instance.dialog.signIn({
+                accessKey: routesAccessKey({
+                  chainId,
+                  calls: batch,
+                  token: sourceTokenAddress,
+                  amount: requiredSource,
+                  feeTokens: routesFeeTokens(chainId),
+                }),
+              })
+            },
             onBroadcast: () => setUncertain(true),
             onHash: (submitted) => {
               setHashes([submitted])
@@ -1099,7 +1135,7 @@ function RouteLifecycle({
   )
   const amountToken =
     isTransfer && mode === 'exactDestination' ? route.destinationToken : route.sourceToken
-  // Every address field can be filled from a wallet on its network: Tempo Wallet (the Tempo
+  // Every address field can be filled from a wallet on its network: Tempo ID (the Tempo
   // accounts SDK) on Tempo, wagmi's browser wallets on other EVM networks, and Tron, Solana, and
   // Stellar wallets on theirs. Connecting only shares an address; nothing is signed.
   const [connectedAddresses, setConnectedAddresses] = useState<Record<string, string>>({})
@@ -1115,7 +1151,7 @@ function RouteLifecycle({
         ? [
             {
               id: tempoWallet.id,
-              name: 'Tempo Wallet',
+              name: 'Tempo',
               connect: async () =>
                 tempoAccount ??
                 (await connect.connectAsync({ connector: tempoWallet, chainId: tempoChain.id }))
@@ -2099,3 +2135,14 @@ const summaryValue = style({
   color: inherited.color.textColorPrimary,
   fontVariantNumeric: 'tabular-nums',
 })
+
+/** The revert reason or short message of a failed simulation, from Viem's error chain. */
+function executionErrorMessage(error: unknown) {
+  if (error instanceof BaseError) {
+    const reverted = error.walk(
+      (cause) => cause instanceof BaseError && 'reason' in cause && Boolean(cause.reason),
+    ) as (BaseError & { reason?: string }) | null
+    return reverted?.reason ?? error.shortMessage
+  }
+  return error instanceof Error ? error.message : String(error)
+}
