@@ -11,6 +11,8 @@ const contracts = [
   Addresses.feeManager,
   Addresses.tip20Factory,
   Addresses.tip403Registry,
+  // The virtual addresses demo registers a virtual master.
+  Addresses.addressRegistry,
 ] as const
 
 /**

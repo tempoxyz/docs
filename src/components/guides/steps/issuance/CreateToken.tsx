@@ -21,11 +21,21 @@ export function CreateToken(props: DemoStepProps) {
   })
   const create = Hooks.token.useCreateSync({
     mutation: {
-      async onSettled(data) {
+      async onSettled(data): Promise<void> {
         balanceRefetch()
         if (data) {
-          // Add the new token to Tempo's access key, which the next steps sign with.
-          if (connector) await allowTokens(connector, [data.token]).catch(() => {})
+          // Add the new token to Tempo's access key, which the next steps sign with. Without it the
+          // next steps can't call the token, so a refusal resets the step to create another.
+          const allowed = connector
+            ? await allowTokens(connector, [data.token]).then(
+                () => true,
+                () => false,
+              )
+            : true
+          if (!allowed) {
+            create.reset()
+            return
+          }
           setData('tokenAddress', data.token)
           setData('tokenReceipt', data.receipt)
         }
