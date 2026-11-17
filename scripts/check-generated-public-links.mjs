@@ -55,7 +55,8 @@ const candidateGroups = outputArtifacts.flatMap(
       patterns: [
         {
           label: 'absolute browser navigation',
-          pattern: /(?:<a\b[^>]*href=|\\?"href\\?":)\\?"https:\/\/tempo\.(?:com|xyz)\/developers([^"\\]*)/g,
+          pattern:
+            /(?:<a\b[^>]*href=|\\?"href\\?":)\\?"https:\/\/tempo\.(?:com|xyz)\/developers([^"\\]*)/g,
         },
         { label: 'absolute base URL', pattern: /<base\b[^>]*https:\/\/tempo\.(?:com|xyz)/g },
       ],
