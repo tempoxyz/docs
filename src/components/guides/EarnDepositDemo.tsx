@@ -4,6 +4,7 @@ import * as React from 'react'
 import { formatUnits, type Hex } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { Actions, WebAuthnP256 } from 'viem/tempo'
+import { publicAssetPath } from '../../lib/public-asset-path'
 import { Container } from '../Container'
 import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from './Demo'
 import * as ui from './EarnDepositDemo.recipes'
@@ -417,7 +418,10 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
               )}
               {(!position || position.shareBalance === 0n) && !withdrawHash && (
                 <p>
-                  <a href="/docs/earn/integrate#try-a-deposit" {...ui.earnDepositDemoLink()}>
+                  <a
+                    href={publicAssetPath('/docs/earn/integrate#try-a-deposit')}
+                    {...ui.earnDepositDemoLink()}
+                  >
                     Make a test deposit
                   </a>{' '}
                   first. This demo restores that account and selects all its shares for withdrawal.

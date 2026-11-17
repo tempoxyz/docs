@@ -1,3 +1,4 @@
+import { Link } from 'waku'
 import BotIcon from '~icons/lucide/bot'
 import BracesIcon from '~icons/lucide/braces'
 import CodeIcon from '~icons/lucide/code-xml'
@@ -38,7 +39,7 @@ export function DocsLinkCards({ collection }: { collection: keyof typeof docsLin
             <p>{description}</p>
             <div className={`docs-setup-links ${docsSetupLinks().className}`}>
               {links.map(([label, href]) => (
-                <a key={href} href={href} className={docsSetupLink().className}>
+                <Link key={href} to={href} className={docsSetupLink().className}>
                   {label}
                   <svg
                     viewBox="0 0 30.45 53"
@@ -53,7 +54,7 @@ export function DocsLinkCards({ collection }: { collection: keyof typeof docsLin
                       strokeLinejoin="round"
                     />
                   </svg>
-                </a>
+                </Link>
               ))}
             </div>
           </section>

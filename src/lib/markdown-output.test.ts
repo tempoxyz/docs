@@ -27,6 +27,18 @@ Token rules.
     expect(output).not.toContain('<Badge')
   })
 
+  test('renders a router link as a plain Markdown link', async () => {
+    const output = await render(`
+<div className="docs-specification-meta">
+  <Link to="/docs/protocol"><Badge>Specification</Badge></Link>
+</div>
+
+# Tokens
+`)
+    expect(output).toContain('# Tokens\n\n[**Specification**](/docs/protocol)')
+    expect(output).not.toMatch(/<Link\b/)
+  })
+
   test('lists every route from the directory in the supported routes export', async () => {
     const route = (id: string, source: string, sourceChain: string, subsidized: boolean) => ({
       id,

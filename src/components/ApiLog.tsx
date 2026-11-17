@@ -1,6 +1,7 @@
 'use client'
 
 import { type ReactNode, useState } from 'react'
+import { publicAssetPath } from '../lib/public-asset-path'
 import { type ApiRequest, type ApiResult, requestUrl } from '../lib/routes-execution'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens, variants } from '../styles/theme'
@@ -96,7 +97,12 @@ export function ApiLog({
           API calls
           {calls.length > 0 && <span {...callCount()}>{calls.length}</span>}
         </span>
-        <a href={referenceHref} target="_blank" rel="noreferrer" {...referenceLink()}>
+        <a
+          href={publicAssetPath(referenceHref)}
+          target="_blank"
+          rel="noreferrer"
+          {...referenceLink()}
+        >
           API reference ↗
         </a>
       </header>
