@@ -14,6 +14,8 @@ const savedCredentialKey = 'tempo-docs-passkey-account'
 
 type SavedCredential = { id: string; publicKey: Hex; connected?: boolean }
 
+const noSavedPasskey = 'This browser has no passkey from this demo yet. Create one first.'
+
 function readSavedCredential(): SavedCredential | undefined {
   try {
     const value = JSON.parse(localStorage.getItem(savedCredentialKey) ?? 'null')
@@ -58,11 +60,15 @@ export function PasskeyAccountDemo() {
     try {
       const credential = create
         ? await WebAuthnP256.createCredential({ label: 'Tempo Docs', rpId: webAuthnRpId })
-        : readSavedCredential()
-      if (!credential) {
-        setError('This browser has no passkey from this demo yet. Create one first.')
-        return
-      }
+        : await WebAuthnP256.getCredential({
+            rpId: webAuthnRpId,
+            // WebAuthn returns a passkey's public key only at creation, so the demo saved it then.
+            async getPublicKey(raw) {
+              const saved = readSavedCredential()
+              if (saved?.id !== raw.id) throw new Error(noSavedPasskey)
+              return saved.publicKey
+            },
+          })
       localStorage.setItem(
         savedCredentialKey,
         JSON.stringify({ id: credential.id, publicKey: credential.publicKey, connected: true }),
@@ -166,6 +172,7 @@ function passkeyError(cause: unknown) {
   const seen = new Set<unknown>()
   while (cause instanceof Error && !seen.has(cause)) {
     seen.add(cause)
+    if (cause.message === noSavedPasskey) return noSavedPasskey
     if (cause.name === 'NotAllowedError' || cause.name === 'UserRejectedRequestError')
       return 'The passkey request was cancelled or timed out. Try again when you are ready.'
     if (cause.name === 'SecurityError')

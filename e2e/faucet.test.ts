@@ -17,6 +17,8 @@ test('fund an address via faucet', async ({ page }) => {
   const addressInput = page.getByPlaceholder('0x...')
   const addFundsButton = page.getByRole('button', { name: 'Add funds' })
   await expect(async () => {
+    // Clear it first: a fill with the value the input already shows fires no change for React.
+    await addressInput.fill('')
     await addressInput.fill('0xbeefcafe54750903ac1c8909323af7beb21ea2cb')
     await expect(addFundsButton).toBeEnabled({ timeout: 1000 })
   }).toPass({ timeout: 30_000 })

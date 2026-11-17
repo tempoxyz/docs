@@ -52,16 +52,15 @@ export async function seedTempoIdSession(
     },
     version: 0,
   })
-  // Write the session when the test clicks a Sign in button, not at page load, so the connector
-  // doesn't reconnect with it before the test signs in. A capture listener on the window runs
-  // before React's handler.
+  // Write the session on the test's first click, not at page load, so the connector doesn't
+  // reconnect with it before the test signs in. Sign-in buttons have several labels, such as a
+  // connector's name, so any button click counts, but not a link's. A capture listener runs before React's handler.
   await context.addInitScript(
     ([key, value]) => {
       window.addEventListener(
         'click',
         (event) => {
-          const button = (event.target as Element | null)?.closest?.('button')
-          if (button && /^Sign in/.test(button.textContent?.trim() ?? ''))
+          if ((event.target as Element | null)?.closest?.('button'))
             localStorage.setItem(key, value)
         },
         true,
