@@ -206,8 +206,10 @@ async function buildRelatedDocsManifest(rootDirectory: string): Promise<RelatedD
     let result = await fetchRelatedDocs(sourceUrl)
     // Graphite may still index docs under the pre-move origin: retry there before accepting no links.
     if (result.ok && result.links.length === 0) {
+      await waitForStart()
       const legacyResult = await fetchRelatedDocs(legacyDocsUrl(sourceUrl))
-      if (legacyResult.ok && legacyResult.links.length > 0) result = legacyResult
+      // A throttled or failed legacy lookup counts as a failure, so the empty result is never cached.
+      if (legacyResult.retryableFailure || legacyResult.links.length > 0) result = legacyResult
     }
     if (result.ok) successfulRequests += 1
     if (result.retryableFailure) {
