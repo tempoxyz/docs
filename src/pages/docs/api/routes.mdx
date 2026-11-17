@@ -43,21 +43,19 @@ Routes is in beta. [Contact Tempo](https://tempo.com/contact) to discuss access 
 
 ## Choose a flow
 
-| Flow | Use when | Endpoints |
-| --- | --- | --- |
-| [Transfer](/docs/routes/transfers) | Your user's wallet signs the source transaction. | `GET /v1/routes/transfers/quote`, `POST /v1/routes/transfers`, `GET /v1/routes/transfers/{id}` |
-| [Deposit address](/docs/routes/deposits) | The sender pays from any wallet or exchange. | `GET /v1/routes/deposit-addresses/quote`, `POST /v2/routes/deposit-addresses`, `GET /v1/routes/deposits` |
+<Cards>
+  <Card
+    title="Transfer"
+    description="Your user's wallet signs the source transaction. Quote, create, then track the transfer."
+    to="/docs/routes/transfers"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="Deposit address"
+    description="The sender pays from any wallet or exchange. Create a reusable address and track its deposits."
+    to="/docs/routes/deposits"
+    icon="lucide:qr-code"
+  />
+</Cards>
 
-Create requests require an `idempotency-key` header. [Set up Routes](/docs/routes/api-setup) walks through your first quote and create call.
-
-## Authentication
-
-Send an API key in the `tempo-api-key` header from your backend. See [Authentication](/docs/api/authentication) for the other supported credentials.
-
-| Scope | Allows |
-| --- | --- |
-| `routes:read` | Quotes, and transfer and deposit status reads |
-| `routes:write` | Creating transfers and deposit addresses, and registering source transactions |
-| `data:read` | Reading the route directory with your key, which applies your organization's access policy |
-
-`routes:write` requires approval for your organization. Request access from Routes in [Tempo Console](https://tempo.com/console).
+[Set up Routes](/docs/routes/api-setup) walks through your first quote and create call.
