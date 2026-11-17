@@ -60,7 +60,7 @@ codex exec "Read https://tempo.xyz/skills/wallet/SKILL.md and fund my Tempo Wall
 
 ## Open funding with the Accounts SDK
 
-Use the [Accounts SDK](https://accounts.tehq.dev) to open Tempo ID's deposit page from an **Add funds** button. Tempo ID handles the funding flow; your application signs the user in and calls `accounts.funding.open`.
+Use the [Accounts SDK](https://accounts.tehq.dev) to open Tempo ID's funding page from an **Add funds** button. Tempo ID handles the funding flow; your application signs the user in and calls `accounts.funding.open`.
 
 :::::steps
 
@@ -84,15 +84,19 @@ export function AddFundsButton() {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string>()
 
+  // Each click opens one Tempo ID page, since a second popup has no user gesture left.
   async function addFunds() {
     setPending(true)
     setError(undefined)
     try {
-      // The deposit page needs a session: sign in first if there is none.
-      if (!(await accounts.session.get())) await accounts.dialog.signIn()
+      // The funding page needs a session. Without one, this click signs in, and the next adds funds.
+      if (!(await accounts.session.get())) {
+        await accounts.dialog.signIn()
+        return
+      }
       const result = await accounts.funding.open()
       if (result?.status === 'received') {
-        // Refresh balances, then confirm the funds arrived (below).
+        // Refresh balances. See "Confirm funds have arrived".
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not open funding.')
@@ -112,11 +116,11 @@ export function AddFundsButton() {
 }
 ```
 
-Call `funding.open` from the click handler, since the browser blocks a popup opened outside a user gesture. You can prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol, such as `'USDC.e'`. The user reviews and confirms the funding request on Tempo ID's deposit page.
+Call `funding.open` from the click handler, since the browser blocks a popup opened outside a user gesture. You can prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol, such as `'USDC.e'`. The user reviews and confirms the funding request on Tempo ID's funding page.
 
 ### Confirm funds have arrived
 
-A resolved `funding.open` call doesn't mean the account is funded. Fiat funding can complete asynchronously, after the deposit page closes. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
+A resolved `funding.open` call doesn't mean the account is funded. Fiat funding can complete asynchronously, after the funding page closes. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
 
 :::::
 

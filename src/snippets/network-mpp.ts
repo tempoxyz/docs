@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Type-checked against accounts@alpha, which the site's own demos don't use yet.
+// Type-checked against accounts@alpha. Pages that include it say to install accounts@alpha.
 import { Mppx, tempo } from 'mppx/client'
 import type { Account } from 'viem'
 // [!region wallet-config]
