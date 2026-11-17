@@ -3,7 +3,7 @@ export type DocsRouteContract = {
   destination: string
 }
 
-export const canonicalDevelopersOrigin = 'https://tempo.xyz/developers'
+export const canonicalDevelopersOrigin = 'https://tempo.com/developers'
 
 // The developer site serves documentation. Retired marketing and blog pages
 // have permanent redirects to their canonical destinations.
@@ -93,31 +93,31 @@ export const proxiedLegacyDocsRoutes = [
   },
   {
     source: '/learn/use-cases/agentic-commerce',
-    destination: 'https://tempo.xyz/learn/blockchain-payments/',
+    destination: 'https://tempo.com/learn/blockchain-payments/',
   },
   {
     source: '/learn/use-cases/embedded-finance',
-    destination: 'https://tempo.xyz/learn/stablecoin-payments/',
+    destination: 'https://tempo.com/learn/stablecoin-payments/',
   },
   {
     source: '/learn/use-cases/global-payouts',
-    destination: 'https://tempo.xyz/learn/global-payouts/',
+    destination: 'https://tempo.com/learn/global-payouts/',
   },
   {
     source: '/learn/use-cases/microtransactions',
-    destination: 'https://tempo.xyz/learn/microtransactions/',
+    destination: 'https://tempo.com/learn/microtransactions/',
   },
   {
     source: '/learn/use-cases/payroll',
-    destination: 'https://tempo.xyz/learn/stablecoin-payroll/',
+    destination: 'https://tempo.com/learn/stablecoin-payroll/',
   },
   {
     source: '/learn/use-cases/remittances',
-    destination: 'https://tempo.xyz/learn/cross-border-payments/',
+    destination: 'https://tempo.com/learn/cross-border-payments/',
   },
   {
     source: '/learn/use-cases/tokenized-deposits',
-    destination: 'https://tempo.xyz/learn/tokenized-deposits/',
+    destination: 'https://tempo.com/learn/tokenized-deposits/',
   },
   {
     source: '/docs/protocol/tips',
@@ -231,31 +231,31 @@ export const legacyDocsHostRoutes = [
   },
   {
     source: '/learn/use-cases/agentic-commerce',
-    destination: 'https://tempo.xyz/learn/blockchain-payments/',
+    destination: 'https://tempo.com/learn/blockchain-payments/',
   },
   {
     source: '/learn/use-cases/embedded-finance',
-    destination: 'https://tempo.xyz/learn/stablecoin-payments/',
+    destination: 'https://tempo.com/learn/stablecoin-payments/',
   },
   {
     source: '/learn/use-cases/global-payouts',
-    destination: 'https://tempo.xyz/learn/global-payouts/',
+    destination: 'https://tempo.com/learn/global-payouts/',
   },
   {
     source: '/learn/use-cases/microtransactions',
-    destination: 'https://tempo.xyz/learn/microtransactions/',
+    destination: 'https://tempo.com/learn/microtransactions/',
   },
   {
     source: '/learn/use-cases/payroll',
-    destination: 'https://tempo.xyz/learn/stablecoin-payroll/',
+    destination: 'https://tempo.com/learn/stablecoin-payroll/',
   },
   {
     source: '/learn/use-cases/remittances',
-    destination: 'https://tempo.xyz/learn/cross-border-payments/',
+    destination: 'https://tempo.com/learn/cross-border-payments/',
   },
   {
     source: '/learn/use-cases/tokenized-deposits',
-    destination: 'https://tempo.xyz/learn/tokenized-deposits/',
+    destination: 'https://tempo.com/learn/tokenized-deposits/',
   },
   {
     source: '/protocol/tips/tip-1028',
@@ -294,7 +294,7 @@ export const routingSmokeCases = {
     },
     {
       path: '/developers/learn/use-cases/payroll',
-      expectedLocation: 'https://tempo.xyz/learn/stablecoin-payroll/',
+      expectedLocation: 'https://tempo.com/learn/stablecoin-payroll/',
       expectedFinalStatus: 200,
     },
     { path: '/developers/api/og', expectedNonRedirect: true },
@@ -329,7 +329,7 @@ export const routingSmokeCases = {
     },
     {
       path: '/learn/use-cases/payroll',
-      expectedLocation: 'https://tempo.xyz/learn/stablecoin-payroll/',
+      expectedLocation: 'https://tempo.com/learn/stablecoin-payroll/',
       expectedFinalStatus: 200,
     },
   ],

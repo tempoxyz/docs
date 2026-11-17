@@ -1,7 +1,7 @@
 import { readdir } from 'node:fs/promises'
 import type { BrowserContext } from '@playwright/test'
 
-export const productionDocsUrl = 'https://tempo.xyz/developers'
+export const productionDocsUrl = 'https://tempo.com/developers'
 
 /** Exercise production URLs locally without contacting or mutating the live site. */
 export async function proxyProductionMount(context: BrowserContext, upstream: string) {
@@ -23,13 +23,13 @@ export async function proxyProductionMount(context: BrowserContext, upstream: st
   context.on('page', (page) => {
     page.on('pageerror', (error) => errors.push(error.message))
     page.on('response', (response) => {
-      if (response.url().startsWith('https://tempo.xyz/') && response.status() >= 400) {
+      if (response.url().startsWith('https://tempo.com/') && response.status() >= 400) {
         failedRequests.push(`${response.status()} ${response.url()}`)
       }
     })
   })
 
-  await context.route('https://tempo.xyz/**', async (route) => {
+  await context.route('https://tempo.com/**', async (route) => {
     const publicUrl = new URL(route.request().url())
     if (!/^\/developers(?:\/|$)/.test(publicUrl.pathname) && !rootAssets.has(publicUrl.pathname)) {
       await route.fulfill({ status: 404, body: 'Request escaped the /developers mount.' })

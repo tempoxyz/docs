@@ -8,28 +8,28 @@ describe('normalizeRscFetchUrl', () => {
   it.each([
     [
       'keeps cross-origin RSC requests on the current origin',
-      'https://tempo.xyz/RSC/R/docs/guide/payments.txt?query=',
+      'https://tempo.com/RSC/R/docs/guide/payments.txt?query=',
       'https://docs.tempo.xyz/RSC/R/docs/guide/payments.txt?query=',
     ],
     [
       'normalizes proxied developers route payloads',
-      'https://tempo.xyz/RSC/R/developers/docs/tools.txt?query=',
+      'https://tempo.com/RSC/R/developers/docs/tools.txt?query=',
       'https://docs.tempo.xyz/RSC/R/docs/tools.txt?query=',
     ],
     [
       'normalizes the proxied developers root payload',
-      'https://tempo.xyz/RSC/R/developers.txt?query=',
+      'https://tempo.com/RSC/R/developers.txt?query=',
       'https://docs.tempo.xyz/RSC/R/_root.txt?query=',
     ],
     [
       'preserves search and hash fragments',
-      'https://tempo.xyz/RSC/R/docs/tools.txt?query=abc#flight',
+      'https://tempo.com/RSC/R/docs/tools.txt?query=abc#flight',
       'https://docs.tempo.xyz/RSC/R/docs/tools.txt?query=abc#flight',
     ],
     [
       'leaves non-RSC asset requests alone',
-      'https://tempo.xyz/assets/index.js',
-      'https://tempo.xyz/assets/index.js',
+      'https://tempo.com/assets/index.js',
+      'https://tempo.com/assets/index.js',
     ],
     ['leaves relative non-RSC requests alone', '/api/og?title=Tools', '/api/og?title=Tools'],
   ])('%s', (_name, input, expected) => {
@@ -48,9 +48,9 @@ describe('normalizeProxiedRscFetch', () => {
         history: { replaceState, state: { key: 'value' } },
         location: {
           hash: '#start',
-          hostname: 'tempo.xyz',
-          href: 'https://tempo.xyz/developers?tab=docs#start',
-          origin: 'https://tempo.xyz',
+          hostname: 'tempo.com',
+          href: 'https://tempo.com/developers?tab=docs#start',
+          origin: 'https://tempo.com',
           pathname: '/developers',
           search: '?tab=docs',
         },
@@ -68,18 +68,18 @@ describe('normalizeProxiedRscFetch', () => {
   it.each([
     [
       'rewrites cross-origin RSC requests to the current origin',
-      'https://tempo.xyz/RSC/R/docs/tools.txt?query=',
+      'https://tempo.com/RSC/R/docs/tools.txt?query=',
       'https://docs.tempo.xyz/RSC/R/docs/tools.txt?query=',
     ],
     [
       'rewrites proxied developers RSC requests',
-      'https://tempo.xyz/RSC/R/developers/docs/tools.txt?query=',
+      'https://tempo.com/RSC/R/developers/docs/tools.txt?query=',
       'https://docs.tempo.xyz/RSC/R/docs/tools.txt?query=',
     ],
     [
       'leaves non-RSC requests unchanged',
-      'https://tempo.xyz/assets/index.js',
-      'https://tempo.xyz/assets/index.js',
+      'https://tempo.com/assets/index.js',
+      'https://tempo.com/assets/index.js',
     ],
   ])('%s', async (_name, input, expected) => {
     const requests: unknown[] = []

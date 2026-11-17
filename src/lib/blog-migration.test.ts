@@ -27,7 +27,7 @@ describe('engineering blog retirement', () => {
       const index = vercel.redirects.indexOf(matches[0])
       const firstHostRedirect = vercel.redirects.findIndex(({ has }) => has?.length)
       expect(index).toBeLessThan(firstHostRedirect)
-      expect(new URL(route.destination).origin).toBe('https://tempo.xyz')
+      expect(new URL(route.destination).origin).toBe('https://tempo.com')
       expect(new URL(route.destination).pathname).not.toMatch(/^\/developers(?:\/|$)/)
       expect(new URL(route.destination).pathname.endsWith('.md')).toBe(
         /\.md\/?$/.test(route.source),
@@ -53,7 +53,7 @@ describe('engineering blog retirement', () => {
     ),
   )('preserves Markdown for the legacy index %s', (source) => {
     expect(blogMigrationRedirects.find((redirect) => redirect.source === source)?.destination).toBe(
-      'https://tempo.xyz/blog.md',
+      'https://tempo.com/blog.md',
     )
   })
 
@@ -66,13 +66,13 @@ describe('engineering blog retirement', () => {
         blogMigrationRedirects.find(
           (redirect) => redirect.source === `/blog/${sourceSlug}${suffix}`,
         )?.destination,
-      ).toBe(`https://tempo.xyz/blog/${destinationSlug}/`)
+      ).toBe(`https://tempo.com/blog/${destinationSlug}/`)
       for (const prefix of ['/blog', '/assets/md/blog']) {
         expect(
           blogMigrationRedirects.find(
             (redirect) => redirect.source === `${prefix}/${sourceSlug}.md${suffix}`,
           )?.destination,
-        ).toBe(`https://tempo.xyz/blog/${destinationSlug}.md`)
+        ).toBe(`https://tempo.com/blog/${destinationSlug}.md`)
       }
     }
   })

@@ -89,13 +89,13 @@ function developersProxyBasePath(): Plugin {
     },
     configEnvironment(name) {
       if (process.env.VERCEL_ENV !== 'production') return
-      // tempo.xyz strips /developers before requests reach Waku.
-      // Vercel serves at root. Only the browser on tempo.xyz uses the external mount.
+      // tempo.com (and the legacy tempo.xyz host) strips /developers before requests reach Waku.
+      // Vercel serves at root. Only the browser on those hosts uses the external mount.
       return {
         define: {
           'import.meta.env.WAKU_CONFIG_BASE_PATH':
             name === 'client'
-              ? "(window.location.hostname === 'tempo.xyz' ? '/developers/' : '/')"
+              ? "(['tempo.com', 'tempo.xyz'].includes(window.location.hostname) ? '/developers/' : '/')"
               : JSON.stringify('/'),
         },
       }

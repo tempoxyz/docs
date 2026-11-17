@@ -18,7 +18,7 @@ type FooterColumn = { header: string; links: FooterLink[] }
 
 const footerLinkClassName = ui.footerStateState().className
 
-const CONTACT_URL = 'https://tempo.xyz/contact'
+const CONTACT_URL = 'https://tempo.com/contact'
 const GITHUB_URL = 'https://github.com/tempoxyz'
 const X_URL = 'https://twitter.com/tempo'
 
@@ -114,8 +114,8 @@ export default function Footer() {
               <Link href="/" className={ui.link2().className}>
                 © {new Date().getFullYear()} Tempo
               </Link>
-              <a href="https://tempo.xyz" target="_blank" rel="noopener noreferrer" {...ui.link2()}>
-                tempo.xyz
+              <a href="https://tempo.com" target="_blank" rel="noopener noreferrer" {...ui.link2()}>
+                tempo.com
               </a>
             </div>
             <div {...ui.footerLayout4()}>

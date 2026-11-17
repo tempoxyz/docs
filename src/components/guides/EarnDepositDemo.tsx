@@ -468,7 +468,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
             <p {...ui.earnDepositDemoText2()}>
               {mode === 'deposit' ? 'Deposits' : 'Withdrawals'} stay disabled until the live vault
               configuration and deployed contract match.{' '}
-              <a href="https://tempo.xyz/contact" {...ui.earnDepositDemoLink2()}>
+              <a href="https://tempo.com/contact" {...ui.earnDepositDemoLink2()}>
                 Contact Tempo
               </a>{' '}
               for access.

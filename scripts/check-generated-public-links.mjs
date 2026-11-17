@@ -55,9 +55,9 @@ const candidateGroups = outputArtifacts.flatMap(
       patterns: [
         {
           label: 'absolute browser navigation',
-          pattern: /(?:<a\b[^>]*href=|\\?"href\\?":)\\?"https:\/\/tempo\.xyz\/developers([^"\\]*)/g,
+          pattern: /(?:<a\b[^>]*href=|\\?"href\\?":)\\?"https:\/\/tempo\.com\/developers([^"\\]*)/g,
         },
-        { label: 'absolute base URL', pattern: /<base\b[^>]*https:\/\/tempo\.xyz/g },
+        { label: 'absolute base URL', pattern: /<base\b[^>]*https:\/\/tempo\.com/g },
       ],
     },
     {
@@ -68,7 +68,7 @@ const candidateGroups = outputArtifacts.flatMap(
 )
 
 const failures = []
-const canonicalApiPrefix = 'https://tempo.xyz/developers/docs/api/'
+const canonicalApiPrefix = 'https://tempo.com/developers/docs/api/'
 for (const { label, directory, htmlFiles, rscFiles, markdownFiles } of outputArtifacts) {
   for (const [artifact, files] of [
     ['HTML', htmlFiles],

@@ -5,7 +5,7 @@ const maxBodyBytes = 16 * 1024
 const maxMessageLength = 4_000
 const maxShortLength = 160
 const maxUrlLength = 2_048
-const defaultPageUrl = 'https://tempo.xyz/developers/'
+const defaultPageUrl = 'https://tempo.com/developers/'
 
 const schemeUrlPattern = /\b[a-z][a-z0-9+.-]*:\/\/[^\s<>"'`]+/gi
 const bareIpv4Pattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g
@@ -196,7 +196,12 @@ function defangUrl(value: string) {
 }
 
 export function isTempoHost(hostname: string) {
-  return hostname === 'tempo.xyz' || hostname.endsWith('.tempo.xyz')
+  return (
+    hostname === 'tempo.com' ||
+    hostname.endsWith('.tempo.com') ||
+    hostname === 'tempo.xyz' ||
+    hostname.endsWith('.tempo.xyz')
+  )
 }
 
 function allowedUrl(value: string) {
@@ -236,7 +241,7 @@ function tempoUrlFromPath(pathname: string | undefined) {
   if (!pathname) return undefined
   const path = pathname.replace(/^\/+/, '/')
   const full = /^\/developers(?=\/|$)/.test(path) ? path : `/developers${path === '/' ? '/' : path}`
-  return cleanUrl(new URL(full, 'https://tempo.xyz').toString())
+  return cleanUrl(new URL(full, 'https://tempo.com').toString())
 }
 
 /** The path of any http(s) URL, so feedback from preview hosts still names its page. */
@@ -307,7 +312,7 @@ function urlFromPath(path: string | undefined) {
   if (!path) return defaultPageUrl
   if (URL.canParse(path)) return allowedUrl(path)?.toString() ?? defaultPageUrl
   try {
-    const url = new URL(path.startsWith('/') ? path : `/${path}`, 'https://tempo.xyz/developers')
+    const url = new URL(path.startsWith('/') ? path : `/${path}`, 'https://tempo.com/developers')
     return isTempoHost(url.hostname) ? url.toString() : defaultPageUrl
   } catch {
     return defaultPageUrl

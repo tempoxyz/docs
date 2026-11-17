@@ -199,7 +199,7 @@ export default defineConfig({
   // banner: {
   //   dismissable: false,
   //   backgroundColor: '#5B4CDB',
-  //   content: 'Your announcement here. [Learn more.](https://tempo.xyz) →',
+  //   content: 'Your announcement here. [Learn more.](https://tempo.com) →',
   //   height: '40px',
   //   textColor: 'white',
   // },
@@ -232,11 +232,11 @@ export default defineConfig({
       process.env.CLOUDFLARE_API_TOKEN && process.env.VERCEL_ENV !== 'preview'
         ? Retriever.local({
             embedding: Embedding.cloudflare(),
-            // Production pages are served behind the tempo.xyz `/developers`
+            // Production pages are served behind the tempo.com `/developers`
             // proxy; the default origin-relative endpoint escapes the prefix.
             endpoint:
               process.env.VERCEL_ENV === 'production'
-                ? 'https://tempo.xyz/developers/api/search'
+                ? 'https://tempo.com/developers/api/search'
                 : undefined,
             hybrid: true,
             reranker: Reranker.cloudflare(),
@@ -295,7 +295,7 @@ export default defineConfig({
     const urlBase = options.baseUrl?.replace(/\/$/, '') ?? ''
     const docsPath = String(path ?? '').replace(/^\/docs(?=\/|$)/, '') || '/'
     if (docsPath === '/routes/networks')
-      return 'https://tempo.xyz/images/opengraph/tempo-opengraph.png'
+      return 'https://tempo.com/images/opengraph/tempo-opengraph.png'
     const landingPaths = ['/', '/changelog']
     if (landingPaths.includes(docsPath)) return `${urlBase}/og-docs.png?v=4`
 

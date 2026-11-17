@@ -19,14 +19,14 @@ describe('external link source', () => {
     const source = [
       '[Docs](/docs/guide)',
       '[GitHub](https://github.com/tempoxyz/docs)',
-      '<a href="https://tempo.xyz">Tempo</a>',
+      '<a href="https://tempo.com">Tempo</a>',
       'Bare URL: https://example.net/path',
     ].join('\n')
 
     const filtered = externalLinkSource(source)
 
     expect(filtered).toContain('[GitHub](https://github.com/tempoxyz/docs)')
-    expect(filtered).toContain('<a href="https://tempo.xyz">Tempo</a>')
+    expect(filtered).toContain('<a href="https://tempo.com">Tempo</a>')
     expect(filtered).toContain('Bare URL: https://example.net/path')
     expect(filtered.split('\n')).toHaveLength(source.split('\n').length)
   })

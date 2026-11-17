@@ -3,532 +3,532 @@
   "redirects": [
     {
       "source": "/blog",
-      "destination": "https://tempo.xyz/blog/?channel=engineering",
+      "destination": "https://tempo.com/blog/?channel=engineering",
       "permanent": true
     },
     {
       "source": "/developers/blog",
-      "destination": "https://tempo.xyz/blog/?channel=engineering",
+      "destination": "https://tempo.com/blog/?channel=engineering",
       "permanent": true
     },
     {
       "source": "/blog/",
-      "destination": "https://tempo.xyz/blog/?channel=engineering",
+      "destination": "https://tempo.com/blog/?channel=engineering",
       "permanent": true
     },
     {
       "source": "/developers/blog/",
-      "destination": "https://tempo.xyz/blog/?channel=engineering",
+      "destination": "https://tempo.com/blog/?channel=engineering",
       "permanent": true
     },
     {
       "source": "/blog.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/blog.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/blog.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/blog.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/blog/index.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/index.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/blog/index.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/index.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/index.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/index.md",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/index.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/index.md/",
-      "destination": "https://tempo.xyz/blog.md",
+      "destination": "https://tempo.com/blog.md",
       "permanent": true
     },
     {
       "source": "/blog/human-authorization-in-agentic-workflows",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows/",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows/",
       "permanent": true
     },
     {
       "source": "/developers/blog/human-authorization-in-agentic-workflows",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows/",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows/",
       "permanent": true
     },
     {
       "source": "/blog/human-authorization-in-agentic-workflows/",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows/",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows/",
       "permanent": true
     },
     {
       "source": "/developers/blog/human-authorization-in-agentic-workflows/",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows/",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows/",
       "permanent": true
     },
     {
       "source": "/blog/human-authorization-in-agentic-workflows.md",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/human-authorization-in-agentic-workflows.md",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/blog/human-authorization-in-agentic-workflows.md/",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/human-authorization-in-agentic-workflows.md/",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/human-authorization-in-agentic-workflows.md",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/human-authorization-in-agentic-workflows.md",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/human-authorization-in-agentic-workflows.md/",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/human-authorization-in-agentic-workflows.md/",
-      "destination": "https://tempo.xyz/blog/human-authorization-in-agentic-workflows.md",
+      "destination": "https://tempo.com/blog/human-authorization-in-agentic-workflows.md",
       "permanent": true
     },
     {
       "source": "/blog/introducing-mercator",
-      "destination": "https://tempo.xyz/blog/introducing-mercator/",
+      "destination": "https://tempo.com/blog/introducing-mercator/",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-mercator",
-      "destination": "https://tempo.xyz/blog/introducing-mercator/",
+      "destination": "https://tempo.com/blog/introducing-mercator/",
       "permanent": true
     },
     {
       "source": "/blog/introducing-mercator/",
-      "destination": "https://tempo.xyz/blog/introducing-mercator/",
+      "destination": "https://tempo.com/blog/introducing-mercator/",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-mercator/",
-      "destination": "https://tempo.xyz/blog/introducing-mercator/",
+      "destination": "https://tempo.com/blog/introducing-mercator/",
       "permanent": true
     },
     {
       "source": "/blog/introducing-mercator.md",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-mercator.md",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/blog/introducing-mercator.md/",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-mercator.md/",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/introducing-mercator.md",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/introducing-mercator.md",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/introducing-mercator.md/",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/introducing-mercator.md/",
-      "destination": "https://tempo.xyz/blog/introducing-mercator.md",
+      "destination": "https://tempo.com/blog/introducing-mercator.md",
       "permanent": true
     },
     {
       "source": "/blog/introducing-stable-bench-v1",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1/",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1/",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-stable-bench-v1",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1/",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1/",
       "permanent": true
     },
     {
       "source": "/blog/introducing-stable-bench-v1/",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1/",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1/",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-stable-bench-v1/",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1/",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1/",
       "permanent": true
     },
     {
       "source": "/blog/introducing-stable-bench-v1.md",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-stable-bench-v1.md",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/blog/introducing-stable-bench-v1.md/",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/introducing-stable-bench-v1.md/",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/introducing-stable-bench-v1.md",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/introducing-stable-bench-v1.md",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/introducing-stable-bench-v1.md/",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/introducing-stable-bench-v1.md/",
-      "destination": "https://tempo.xyz/blog/introducing-stable-bench-v1.md",
+      "destination": "https://tempo.com/blog/introducing-stable-bench-v1.md",
       "permanent": true
     },
     {
       "source": "/blog/privacy-with-tempo-zones",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/developers/blog/privacy-with-tempo-zones",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/blog/privacy-with-tempo-zones/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/developers/blog/privacy-with-tempo-zones/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/blog/privacy-with-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/privacy-with-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/blog/privacy-with-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/privacy-with-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/privacy-with-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/privacy-with-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/privacy-with-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/privacy-with-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/blog/t6",
-      "destination": "https://tempo.xyz/blog/t6/",
+      "destination": "https://tempo.com/blog/t6/",
       "permanent": true
     },
     {
       "source": "/developers/blog/t6",
-      "destination": "https://tempo.xyz/blog/t6/",
+      "destination": "https://tempo.com/blog/t6/",
       "permanent": true
     },
     {
       "source": "/blog/t6/",
-      "destination": "https://tempo.xyz/blog/t6/",
+      "destination": "https://tempo.com/blog/t6/",
       "permanent": true
     },
     {
       "source": "/developers/blog/t6/",
-      "destination": "https://tempo.xyz/blog/t6/",
+      "destination": "https://tempo.com/blog/t6/",
       "permanent": true
     },
     {
       "source": "/blog/t6.md",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/t6.md",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/blog/t6.md/",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/t6.md/",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/t6.md",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/t6.md",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/t6.md/",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/t6.md/",
-      "destination": "https://tempo.xyz/blog/t6.md",
+      "destination": "https://tempo.com/blog/t6.md",
       "permanent": true
     },
     {
       "source": "/blog/t7-network-upgrade",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade/",
+      "destination": "https://tempo.com/blog/t7-network-upgrade/",
       "permanent": true
     },
     {
       "source": "/developers/blog/t7-network-upgrade",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade/",
+      "destination": "https://tempo.com/blog/t7-network-upgrade/",
       "permanent": true
     },
     {
       "source": "/blog/t7-network-upgrade/",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade/",
+      "destination": "https://tempo.com/blog/t7-network-upgrade/",
       "permanent": true
     },
     {
       "source": "/developers/blog/t7-network-upgrade/",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade/",
+      "destination": "https://tempo.com/blog/t7-network-upgrade/",
       "permanent": true
     },
     {
       "source": "/blog/t7-network-upgrade.md",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/t7-network-upgrade.md",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/blog/t7-network-upgrade.md/",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/t7-network-upgrade.md/",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/t7-network-upgrade.md",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/t7-network-upgrade.md",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/t7-network-upgrade.md/",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/t7-network-upgrade.md/",
-      "destination": "https://tempo.xyz/blog/t7-network-upgrade.md",
+      "destination": "https://tempo.com/blog/t7-network-upgrade.md",
       "permanent": true
     },
     {
       "source": "/blog/inside-tempo-zones",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/developers/blog/inside-tempo-zones",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/blog/inside-tempo-zones/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/developers/blog/inside-tempo-zones/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones/",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones/",
       "permanent": true
     },
     {
       "source": "/blog/inside-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/inside-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/blog/inside-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/blog/inside-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/inside-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/inside-tempo-zones.md",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/assets/md/blog/inside-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/developers/assets/md/blog/inside-tempo-zones.md/",
-      "destination": "https://tempo.xyz/blog/privacy-with-tempo-zones.md",
+      "destination": "https://tempo.com/blog/privacy-with-tempo-zones.md",
       "permanent": true
     },
     {
       "source": "/login",
-      "destination": "https://tempo.xyz/console",
+      "destination": "https://tempo.com/console",
       "permanent": false
     },
     {
       "source": "/developers/login",
-      "destination": "https://tempo.xyz/console",
+      "destination": "https://tempo.com/console",
       "permanent": false
     },
     {
@@ -543,7 +543,7 @@
     },
     {
       "source": "/docs/resources/partners.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides.md",
+      "destination": "https://tempo.com/developers/docs/resources/guides.md",
       "permanent": true
     },
     {
@@ -553,7 +553,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides.md",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides.md",
       "permanent": true
     },
     {
@@ -563,7 +563,7 @@
     },
     {
       "source": "/docs/resources/partners/privy.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#privy",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets.md#privy",
       "permanent": true
     },
     {
@@ -573,7 +573,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/privy.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#privy",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/embedded-wallets.md#privy",
       "permanent": true
     },
     {
@@ -583,7 +583,7 @@
     },
     {
       "source": "/docs/resources/partners/dynamic.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#dynamic",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets.md#dynamic",
       "permanent": true
     },
     {
@@ -593,7 +593,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/dynamic.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/embedded-wallets.md#dynamic",
       "permanent": true
     },
     {
@@ -603,7 +603,7 @@
     },
     {
       "source": "/docs/resources/partners/turnkey.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#turnkey",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets.md#turnkey",
       "permanent": true
     },
     {
@@ -613,7 +613,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/turnkey.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/embedded-wallets.md#turnkey",
       "permanent": true
     },
     {
@@ -623,7 +623,7 @@
     },
     {
       "source": "/docs/resources/partners/fireblocks.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets.md#fireblocks",
       "permanent": true
     },
     {
@@ -633,7 +633,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/fireblocks.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/embedded-wallets.md#fireblocks",
       "permanent": true
     },
     {
@@ -643,7 +643,7 @@
     },
     {
       "source": "/docs/resources/partners/bridge.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts.md#bridge",
+      "destination": "https://tempo.com/developers/docs/resources/guides/funding-and-payouts.md#bridge",
       "permanent": true
     },
     {
@@ -653,7 +653,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/bridge.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/funding-and-payouts.md#bridge",
       "permanent": true
     },
     {
@@ -663,7 +663,7 @@
     },
     {
       "source": "/docs/resources/partners/alchemy.md",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.com/developers/docs/partners/rpc-and-nodes.md#alchemy",
       "permanent": true
     },
     {
@@ -673,7 +673,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/alchemy.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
+      "destination": "https://tempo.com/developers/assets/md/docs/partners/rpc-and-nodes.md#alchemy",
       "permanent": true
     },
     {
@@ -683,7 +683,7 @@
     },
     {
       "source": "/docs/resources/partners/quicknode.md",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.com/developers/docs/partners/rpc-and-nodes.md#quicknode",
       "permanent": true
     },
     {
@@ -693,7 +693,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/quicknode.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
+      "destination": "https://tempo.com/developers/assets/md/docs/partners/rpc-and-nodes.md#quicknode",
       "permanent": true
     },
     {
@@ -703,7 +703,7 @@
     },
     {
       "source": "/docs/resources/partners/allium.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md#allium",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-reconciliation.md#allium",
       "permanent": true
     },
     {
@@ -713,7 +713,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/allium.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/payment-reconciliation.md#allium",
       "permanent": true
     },
     {
@@ -723,7 +723,7 @@
     },
     {
       "source": "/docs/resources/partners/goldsky.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-reconciliation.md#goldsky",
       "permanent": true
     },
     {
@@ -733,7 +733,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/goldsky.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/payment-reconciliation.md#goldsky",
       "permanent": true
     },
     {
@@ -743,7 +743,7 @@
     },
     {
       "source": "/docs/resources/partners/trm.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#trm",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening.md#trm",
       "permanent": true
     },
     {
@@ -753,7 +753,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/trm.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#trm",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/payment-screening.md#trm",
       "permanent": true
     },
     {
@@ -763,7 +763,7 @@
     },
     {
       "source": "/docs/resources/partners/chainalysis.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#chainalysis",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening.md#chainalysis",
       "permanent": true
     },
     {
@@ -773,7 +773,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/chainalysis.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/payment-screening.md#chainalysis",
       "permanent": true
     },
     {
@@ -783,7 +783,7 @@
     },
     {
       "source": "/docs/resources/partners/elliptic.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#elliptic",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening.md#elliptic",
       "permanent": true
     },
     {
@@ -793,7 +793,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/elliptic.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#elliptic",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/payment-screening.md#elliptic",
       "permanent": true
     },
     {
@@ -803,7 +803,7 @@
     },
     {
       "source": "/docs/resources/partners/blockaid.md",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening.md#blockaid",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening.md#blockaid",
       "permanent": true
     },
     {
@@ -813,7 +813,7 @@
     },
     {
       "source": "/assets/md/docs/resources/partners/blockaid.md",
-      "destination": "https://tempo.xyz/developers/assets/md/docs/resources/guides/payment-screening.md#blockaid",
+      "destination": "https://tempo.com/developers/assets/md/docs/resources/guides/payment-screening.md#blockaid",
       "permanent": true
     },
     {
@@ -823,7 +823,7 @@
     },
     {
       "source": "/docs/resources/partners",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides",
+      "destination": "https://tempo.com/developers/docs/resources/guides",
       "permanent": true
     },
     {
@@ -833,7 +833,7 @@
     },
     {
       "source": "/docs/resources/partners/privy",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#privy",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets#privy",
       "permanent": true
     },
     {
@@ -843,7 +843,7 @@
     },
     {
       "source": "/docs/resources/partners/dynamic",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#dynamic",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets#dynamic",
       "permanent": true
     },
     {
@@ -853,7 +853,7 @@
     },
     {
       "source": "/docs/resources/partners/turnkey",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#turnkey",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets#turnkey",
       "permanent": true
     },
     {
@@ -863,7 +863,7 @@
     },
     {
       "source": "/docs/resources/partners/fireblocks",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/embedded-wallets#fireblocks",
+      "destination": "https://tempo.com/developers/docs/resources/guides/embedded-wallets#fireblocks",
       "permanent": true
     },
     {
@@ -873,7 +873,7 @@
     },
     {
       "source": "/docs/resources/partners/bridge",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/funding-and-payouts#bridge",
+      "destination": "https://tempo.com/developers/docs/resources/guides/funding-and-payouts#bridge",
       "permanent": true
     },
     {
@@ -883,7 +883,7 @@
     },
     {
       "source": "/docs/resources/partners/alchemy",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#alchemy",
+      "destination": "https://tempo.com/developers/docs/partners/rpc-and-nodes#alchemy",
       "permanent": true
     },
     {
@@ -893,7 +893,7 @@
     },
     {
       "source": "/docs/resources/partners/quicknode",
-      "destination": "https://tempo.xyz/developers/docs/partners/rpc-and-nodes#quicknode",
+      "destination": "https://tempo.com/developers/docs/partners/rpc-and-nodes#quicknode",
       "permanent": true
     },
     {
@@ -903,7 +903,7 @@
     },
     {
       "source": "/docs/resources/partners/allium",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation#allium",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-reconciliation#allium",
       "permanent": true
     },
     {
@@ -913,7 +913,7 @@
     },
     {
       "source": "/docs/resources/partners/goldsky",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-reconciliation#goldsky",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-reconciliation#goldsky",
       "permanent": true
     },
     {
@@ -923,7 +923,7 @@
     },
     {
       "source": "/docs/resources/partners/trm",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#trm",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening#trm",
       "permanent": true
     },
     {
@@ -933,7 +933,7 @@
     },
     {
       "source": "/docs/resources/partners/chainalysis",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#chainalysis",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening#chainalysis",
       "permanent": true
     },
     {
@@ -943,7 +943,7 @@
     },
     {
       "source": "/docs/resources/partners/elliptic",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#elliptic",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening#elliptic",
       "permanent": true
     },
     {
@@ -953,7 +953,7 @@
     },
     {
       "source": "/docs/resources/partners/blockaid",
-      "destination": "https://tempo.xyz/developers/docs/resources/guides/payment-screening#blockaid",
+      "destination": "https://tempo.com/developers/docs/resources/guides/payment-screening#blockaid",
       "permanent": true
     },
     {
@@ -1319,7 +1319,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/assets/md/index.md",
+      "destination": "https://tempo.com/developers/assets/md/index.md",
       "permanent": true
     },
     {
@@ -1330,7 +1330,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/index.md",
+      "destination": "https://tempo.com/developers/index.md",
       "permanent": true
     },
     {
@@ -1356,7 +1356,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers",
+      "destination": "https://tempo.com/developers",
       "permanent": true
     },
     {
@@ -1367,7 +1367,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers",
+      "destination": "https://tempo.com/developers",
       "permanent": true
     },
     {
@@ -1378,7 +1378,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers",
+      "destination": "https://tempo.com/developers",
       "permanent": true
     },
     {
@@ -1389,7 +1389,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers",
+      "destination": "https://tempo.com/developers",
       "permanent": true
     },
     {
@@ -1400,7 +1400,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/:path*",
+      "destination": "https://tempo.com/developers/:path*",
       "permanent": true
     },
     {
@@ -1411,7 +1411,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/bridge-layerzero",
+      "destination": "https://tempo.com/developers/docs/guide/bridge-layerzero",
       "permanent": true
     },
     {
@@ -1422,7 +1422,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/bridge-relay",
+      "destination": "https://tempo.com/developers/docs/guide/bridge-relay",
       "permanent": true
     },
     {
@@ -1433,7 +1433,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/node/network-upgrades",
+      "destination": "https://tempo.com/developers/docs/guide/node/network-upgrades",
       "permanent": true
     },
     {
@@ -1444,7 +1444,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/protocol/transactions/AccountKeychain",
+      "destination": "https://tempo.com/developers/docs/protocol/transactions/AccountKeychain",
       "permanent": true
     },
     {
@@ -1455,7 +1455,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners",
+      "destination": "https://tempo.com/developers/docs/partners",
       "permanent": true
     },
     {
@@ -1466,7 +1466,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1477,7 +1477,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/indexer-api",
+      "destination": "https://tempo.com/developers/docs/api/indexer-api",
       "permanent": true
     },
     {
@@ -1488,7 +1488,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.com/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -1499,7 +1499,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.com/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -1510,7 +1510,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.com/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -1521,7 +1521,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/partners/join",
+      "destination": "https://tempo.com/developers/docs/partners/join",
       "permanent": true
     },
     {
@@ -1532,7 +1532,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/node/network-upgrades",
+      "destination": "https://tempo.com/developers/docs/guide/node/network-upgrades",
       "permanent": true
     },
     {
@@ -1543,7 +1543,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api",
+      "destination": "https://tempo.com/developers/docs/api",
       "permanent": true
     },
     {
@@ -1554,7 +1554,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api",
+      "destination": "https://tempo.com/developers/docs/api",
       "permanent": true
     },
     {
@@ -1565,7 +1565,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
+      "destination": "https://tempo.com/developers/docs/guide/getting-funds",
       "permanent": true
     },
     {
@@ -1576,7 +1576,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/tempo-transaction#access-keys",
+      "destination": "https://tempo.com/developers/docs/guide/tempo-transaction#access-keys",
       "permanent": true
     },
     {
@@ -1587,7 +1587,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/tempo-transaction#batch-calls",
+      "destination": "https://tempo.com/developers/docs/guide/tempo-transaction#batch-calls",
       "permanent": true
     },
     {
@@ -1598,7 +1598,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1609,7 +1609,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/tempo-transaction#scheduled-transactions",
+      "destination": "https://tempo.com/developers/docs/guide/tempo-transaction#scheduled-transactions",
       "permanent": true
     },
     {
@@ -1620,7 +1620,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/protocol/transactions/spec-tempo-transaction#signature-types",
+      "destination": "https://tempo.com/developers/docs/protocol/transactions/spec-tempo-transaction#signature-types",
       "permanent": true
     },
     {
@@ -1631,7 +1631,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1642,7 +1642,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1653,7 +1653,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1664,7 +1664,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1675,7 +1675,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1686,7 +1686,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/api/fee-payer",
+      "destination": "https://tempo.com/developers/docs/api/fee-payer",
       "permanent": true
     },
     {
@@ -1697,7 +1697,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
+      "destination": "https://tempo.com/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -1708,7 +1708,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/accounts/policies/receive-policies",
+      "destination": "https://tempo.com/developers/docs/accounts/policies/receive-policies",
       "permanent": true
     },
     {
@@ -1719,7 +1719,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/learn/blockchain-payments/",
+      "destination": "https://tempo.com/learn/blockchain-payments/",
       "permanent": true
     },
     {
@@ -1730,7 +1730,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/learn/stablecoin-payments/",
+      "destination": "https://tempo.com/learn/stablecoin-payments/",
       "permanent": true
     },
     {
@@ -1741,7 +1741,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/learn/global-payouts/",
+      "destination": "https://tempo.com/learn/global-payouts/",
       "permanent": true
     },
     {
@@ -1752,7 +1752,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/learn/microtransactions/",
+      "destination": "https://tempo.com/learn/microtransactions/",
       "permanent": true
     },
     {
@@ -1763,7 +1763,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/learn/stablecoin-payroll/",
+      "destination": "https://tempo.com/learn/stablecoin-payroll/",
       "permanent": true
     },
     {
@@ -1774,7 +1774,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/learn/cross-border-payments/",
+      "destination": "https://tempo.com/learn/cross-border-payments/",
       "permanent": true
     },
     {
@@ -1785,7 +1785,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/learn/tokenized-deposits/",
+      "destination": "https://tempo.com/learn/tokenized-deposits/",
       "permanent": true
     },
     {
@@ -1807,7 +1807,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/:section",
+      "destination": "https://tempo.com/developers/docs/:section",
       "permanent": true
     },
     {
@@ -1818,7 +1818,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/:section/:path*",
+      "destination": "https://tempo.com/developers/docs/:section/:path*",
       "permanent": true
     },
     {
@@ -1829,7 +1829,7 @@
           "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
         }
       ],
-      "destination": "https://tempo.xyz/developers/:path*",
+      "destination": "https://tempo.com/developers/:path*",
       "permanent": true
     },
     {
@@ -1840,7 +1840,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/quickstart/faucet",
+      "destination": "https://tempo.com/developers/docs/quickstart/faucet",
       "permanent": false
     },
     {
@@ -1851,7 +1851,7 @@
           "value": "faucet.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/quickstart/faucet",
+      "destination": "https://tempo.com/developers/docs/quickstart/faucet",
       "permanent": false
     },
     {
@@ -1862,7 +1862,7 @@
           "value": "bridge.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
+      "destination": "https://tempo.com/developers/docs/guide/getting-funds",
       "permanent": false
     },
     {
@@ -1873,7 +1873,7 @@
           "value": "bridge.tempo.xyz"
         }
       ],
-      "destination": "https://tempo.xyz/developers/docs/guide/getting-funds",
+      "destination": "https://tempo.com/developers/docs/guide/getting-funds",
       "permanent": false
     },
     {
@@ -2488,37 +2488,37 @@
     },
     {
       "source": "/developers/learn/use-cases/agentic-commerce",
-      "destination": "https://tempo.xyz/learn/blockchain-payments/",
+      "destination": "https://tempo.com/learn/blockchain-payments/",
       "permanent": true
     },
     {
       "source": "/developers/learn/use-cases/embedded-finance",
-      "destination": "https://tempo.xyz/learn/stablecoin-payments/",
+      "destination": "https://tempo.com/learn/stablecoin-payments/",
       "permanent": true
     },
     {
       "source": "/developers/learn/use-cases/global-payouts",
-      "destination": "https://tempo.xyz/learn/global-payouts/",
+      "destination": "https://tempo.com/learn/global-payouts/",
       "permanent": true
     },
     {
       "source": "/developers/learn/use-cases/microtransactions",
-      "destination": "https://tempo.xyz/learn/microtransactions/",
+      "destination": "https://tempo.com/learn/microtransactions/",
       "permanent": true
     },
     {
       "source": "/developers/learn/use-cases/payroll",
-      "destination": "https://tempo.xyz/learn/stablecoin-payroll/",
+      "destination": "https://tempo.com/learn/stablecoin-payroll/",
       "permanent": true
     },
     {
       "source": "/developers/learn/use-cases/remittances",
-      "destination": "https://tempo.xyz/learn/cross-border-payments/",
+      "destination": "https://tempo.com/learn/cross-border-payments/",
       "permanent": true
     },
     {
       "source": "/developers/learn/use-cases/tokenized-deposits",
-      "destination": "https://tempo.xyz/learn/tokenized-deposits/",
+      "destination": "https://tempo.com/learn/tokenized-deposits/",
       "permanent": true
     },
     {

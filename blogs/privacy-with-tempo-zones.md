@@ -100,7 +100,7 @@ We’re working closely with our first customer to bring privacy to real-world p
 
 ### When can we start using Zones?
 
-Zones are still in closed access for the next few months. The first Zone will go live in October for one of our customers. [Get in touch](https://tempo.xyz/contact/) if you’re interested in deploying one.
+Zones are still in closed access for the next few months. The first Zone will go live in October for one of our customers. [Get in touch](https://tempo.com/contact/) if you’re interested in deploying one.
 
 ### Who runs the Zone? Can we run our own?
 

@@ -37,7 +37,7 @@ describe('faucet API', () => {
 
   it('rejects invalid JSON', async () => {
     const response = await POST(
-      new Request('https://tempo.xyz/developers/api/faucet', {
+      new Request('https://tempo.com/developers/api/faucet', {
         method: 'POST',
         body: '{',
       }),
@@ -70,11 +70,11 @@ describe('faucet API', () => {
   })
 
   it('allows docs and Vercel origins for CORS', async () => {
-    const tempoResponse = await OPTIONS(requestWithOrigin('https://tempo.xyz'))
+    const tempoResponse = await OPTIONS(requestWithOrigin('https://tempo.com'))
     const docsResponse = await OPTIONS(requestWithOrigin('https://docs.tempo.xyz'))
     const vercelResponse = await OPTIONS(requestWithOrigin('https://docs-git-branch.vercel.app'))
 
-    expect(tempoResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://tempo.xyz')
+    expect(tempoResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://tempo.com')
     expect(docsResponse.headers.get('Access-Control-Allow-Origin')).toBe('https://docs.tempo.xyz')
     expect(vercelResponse.headers.get('Access-Control-Allow-Origin')).toBe(
       'https://docs-git-branch.vercel.app',
@@ -91,18 +91,18 @@ describe('faucet API', () => {
 })
 
 function jsonRequest(body: unknown) {
-  return new Request('https://tempo.xyz/developers/api/faucet', {
+  return new Request('https://tempo.com/developers/api/faucet', {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
       'content-type': 'application/json',
-      origin: 'https://tempo.xyz',
+      origin: 'https://tempo.com',
     },
   })
 }
 
 function requestWithOrigin(origin: string) {
-  return new Request('https://tempo.xyz/developers/api/faucet', {
+  return new Request('https://tempo.com/developers/api/faucet', {
     method: 'OPTIONS',
     headers: { origin },
   })

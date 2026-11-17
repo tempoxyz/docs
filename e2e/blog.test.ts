@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { expect, test } from '@playwright/test'
 import { migratedBlogSlugs } from '../src/lib/blog-migration'
 
-const engineeringBlogUrl = 'https://tempo.xyz/blog/?channel=engineering'
+const engineeringBlogUrl = 'https://tempo.com/blog/?channel=engineering'
 const posts = [
   ...migratedBlogSlugs.map((slug) => [slug, slug] as const),
   ['inside-tempo-zones', 'privacy-with-tempo-zones'],
@@ -35,7 +35,7 @@ for (const suffix of ['', '/']) {
       })
       expect(response.status()).toBe(301)
       expect(response.headers().location).toBe(
-        `https://tempo.xyz/blog/${destination}/?utm_source=docs`,
+        `https://tempo.com/blog/${destination}/?utm_source=docs`,
       )
     })
   }

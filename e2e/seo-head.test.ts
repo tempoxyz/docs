@@ -105,8 +105,8 @@ for (const c of cases) {
       const markdownRoute = c.path === '/' ? '/index' : c.path
       expect(head).toContain('rel="alternate"')
       expect(head).toContain('type="text/markdown"')
-      expect(head).toContain(`href="https://tempo.xyz/developers/assets/md${markdownRoute}.md"`)
-      expect(head).toContain('href="https://tempo.xyz/developers/llms.txt"')
+      expect(head).toContain(`href="https://tempo.com/developers/assets/md${markdownRoute}.md"`)
+      expect(head).toContain('href="https://tempo.com/developers/llms.txt"')
     }
   })
 }

@@ -19,7 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PUBLISHED = {"restored", "covered", "consolidated"}
 STATUSES = PUBLISHED | {"withheld", "navigation", "support_note"}
-PUBLIC_DOCS = "https://tempo.xyz/developers"
+PUBLIC_DOCS = "https://tempo.com/developers"
 
 
 class Page(HTMLParser):

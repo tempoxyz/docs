@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { canonicalizeGeneratedDeveloperLinks } from './canonical-developer-links'
 
-const publicDevelopersUrl = 'https://tempo.xyz/developers/docs'
+const publicDevelopersUrl = 'https://tempo.com/developers/docs'
 
 describe('canonicalizeGeneratedDeveloperLinks', () => {
   test('uses canonical public URLs for generated HTML hrefs', () => {
@@ -11,7 +11,7 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
         publicDevelopersUrl,
       ),
     ).toBe(
-      '<a href="https://tempo.xyz/developers">Docs</a><a href="https://tempo.xyz/developers/docs/api#authentication">API</a>',
+      '<a href="https://tempo.com/developers">Docs</a><a href="https://tempo.com/developers/docs/api#authentication">API</a>',
     )
   })
 
@@ -22,7 +22,7 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
         publicDevelopersUrl,
       ),
     ).toBe(
-      '{"href":"https://tempo.xyz/developers/docs/api","to":"/docs/api"} {\\"href\\":\\"https://tempo.xyz/developers/docs/api\\",\\"to\\":\\"/docs/api\\"}',
+      '{"href":"https://tempo.com/developers/docs/api","to":"/docs/api"} {\\"href\\":\\"https://tempo.com/developers/docs/api\\",\\"to\\":\\"/docs/api\\"}',
     )
   })
 
@@ -39,10 +39,10 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
       ),
     ).toBe(
       [
-        '- [Docs](https://tempo.xyz/developers)',
-        '- [API](https://tempo.xyz/developers/docs/api)',
-        '- [Authentication](https://tempo.xyz/developers/docs/api#authentication)',
-        '<Card title="API" to="https://tempo.xyz/developers/docs/api" />',
+        '- [Docs](https://tempo.com/developers)',
+        '- [API](https://tempo.com/developers/docs/api)',
+        '- [Authentication](https://tempo.com/developers/docs/api#authentication)',
+        '<Card title="API" to="https://tempo.com/developers/docs/api" />',
       ].join('\n'),
     )
   })
@@ -54,7 +54,7 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
         publicDevelopersUrl,
       ),
     ).toBe(
-      '<a href="https://tempo.xyz/developers/docs/api">API</a> [API](https://tempo.xyz/developers/docs/api)',
+      '<a href="https://tempo.com/developers/docs/api">API</a> [API](https://tempo.com/developers/docs/api)',
     )
   })
 
@@ -74,7 +74,7 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
         publicDevelopersUrl,
       ),
     ).toBe(
-      '<a href="https://tempo.xyz/developers">Docs</a> [Start](https://tempo.xyz/developers/get-started?ref=nav#payment) <a href="https://tempo.xyz/developers">Home</a> <a href="https://tempo.xyz/developers#start-here">Legacy</a>',
+      '<a href="https://tempo.com/developers">Docs</a> [Start](https://tempo.com/developers/get-started?ref=nav#payment) <a href="https://tempo.com/developers">Home</a> <a href="https://tempo.com/developers#start-here">Legacy</a>',
     )
   })
 
@@ -99,7 +99,7 @@ describe('canonicalizeGeneratedDeveloperLinks', () => {
         publicDevelopersUrl,
       ),
     ).toBe(
-      '<a href="https://tempo.xyz/developers/get-started/stablecoins?ref=nav#token-amounts">Tokens</a> [Tokens](https://tempo.xyz/developers/get-started/stablecoins#token-amounts)',
+      '<a href="https://tempo.com/developers/get-started/stablecoins?ref=nav#token-amounts">Tokens</a> [Tokens](https://tempo.com/developers/get-started/stablecoins#token-amounts)',
     )
   })
 })

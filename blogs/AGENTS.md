@@ -1,7 +1,7 @@
 # Archived blog sources
 
 Create and edit blog posts in [tempoxyz/tempo.xyz](https://github.com/tempoxyz/tempo.xyz), following that repository's guidance.
-The canonical articles live at `https://tempo.xyz/blog/`.
+The canonical articles live at `https://tempo.com/blog/`.
 
 This folder preserves the six original post sources for rollback and migration checks.
 The docs application does not render, index, or publish them. Adding a file here does not publish a post.

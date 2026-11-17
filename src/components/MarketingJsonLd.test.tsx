@@ -3,8 +3,8 @@ import { createMarketingJsonLdSchema } from './MarketingJsonLd'
 
 describe('MarketingJsonLd', () => {
   it.each([
-    ['/', 'https://tempo.xyz/developers/'],
-    ['/build', 'https://tempo.xyz/developers/build'],
+    ['/', 'https://tempo.com/developers/'],
+    ['/build', 'https://tempo.com/developers/build'],
   ])('uses the canonical developer URL for %s', (route, url) => {
     const schema = createMarketingJsonLdSchema({
       route,
@@ -20,9 +20,9 @@ describe('MarketingJsonLd', () => {
       url,
       name: 'Tempo developers',
       description: 'Developer resources for Tempo.',
-      isPartOf: { '@id': 'https://tempo.xyz/#website' },
-      about: { '@id': 'https://tempo.xyz/#organization' },
-      publisher: { '@id': 'https://tempo.xyz/#organization' },
+      isPartOf: { '@id': 'https://tempo.com/#website' },
+      about: { '@id': 'https://tempo.com/#organization' },
+      publisher: { '@id': 'https://tempo.com/#organization' },
     })
     expect(website).not.toHaveProperty('alternateName')
     expect(organization).not.toHaveProperty('alternateName')

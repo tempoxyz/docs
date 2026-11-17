@@ -41,6 +41,7 @@ function isAllowedOrigin(origin: string | undefined) {
     const { hostname, protocol } = new URL(origin)
     if (protocol !== 'https:') return false
     return (
+      hostname === 'tempo.com' ||
       hostname === 'tempo.xyz' ||
       hostname.endsWith('.tempo.xyz') ||
       hostname.endsWith('.vercel.app')

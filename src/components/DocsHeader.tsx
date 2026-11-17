@@ -60,7 +60,7 @@ const TEMPO_AI_GUIDE_URL = `${DOCS_BASE_PATH}/guide/using-tempo-with-ai`
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
 
 /** Tempo Console. This host forwards to developers.tempo.xyz/console once the console moves there. */
-const CONSOLE_URL = 'https://tempo.xyz/console'
+const CONSOLE_URL = 'https://tempo.com/console'
 /** Console session lookup, proxied by this host; its cookie is scoped to `/console` so docs pages never see it. */
 const CONSOLE_ME_PATH = '/console/api/v1/me'
 
@@ -68,8 +68,8 @@ const CONSOLE_ME_PATH = '/console/api/v1/me'
 function useConsoleEmail() {
   const [email, setEmail] = useState<string | undefined>()
   useEffect(() => {
-    // The tempo.xyz/developers mount is a different origin from the console, so it never has a session.
-    if (window.location.hostname === 'tempo.xyz') return
+    // The tempo.com/developers mount is a different origin from the console, so it never has a session.
+    if (['tempo.com', 'tempo.xyz'].includes(window.location.hostname)) return
     const controller = new AbortController()
     fetch(CONSOLE_ME_PATH, { credentials: 'same-origin', signal: controller.signal })
       .then((response) => (response.ok ? response.json() : undefined))
@@ -886,7 +886,7 @@ export default function DocsHeader() {
               </div>
             ) : null}
           </div>
-          {/* Absolute: the docs are also mounted at tempo.xyz/developers, where relative links miss the console. */}
+          {/* Absolute: the docs are also mounted at tempo.com/developers, where relative links miss the console. */}
           <a
             href={CONSOLE_URL}
             className={
@@ -1022,10 +1022,10 @@ export default function DocsHeader() {
           </details>
           <ThemeSelect />
           <a
-            href="https://tempo.xyz/"
+            href="https://tempo.com/"
             className={`docs-header-mobile-website ${docsHeaderMobileWebsite().className}`}
           >
-            Back to tempo.xyz <ArrowUpRight className={ui.arrowUpRight3().className} />
+            Back to tempo.com <ArrowUpRight className={ui.arrowUpRight3().className} />
           </a>
         </div>
       </dialog>

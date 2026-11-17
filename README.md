@@ -2,7 +2,7 @@
 <br>
 
 <p align="center">
-  <a href="https://tempo.xyz">
+  <a href="https://tempo.com">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="/public/lockup-dark.svg">
       <img alt="tempo lockup" src="/public/lockup-light.svg" width="auto" height="80">
@@ -17,7 +17,7 @@
 
 This repository contains documentation for the Tempo blockchain, including the Protocol Specifications, Litepaper, and Getting Started guides.
 
-[tempo.xyz/developers](https://tempo.xyz/developers)
+[tempo.xyz/developers](https://tempo.com/developers)
 
 ## Usage
 
@@ -56,7 +56,7 @@ CI uploads the same gallery as `og-image-goldens`. See the
 
 ## Routing and redirects
 
-The canonical public documentation URL is [`https://tempo.xyz/developers`](https://tempo.xyz/developers). This repository serves the docs application, while the Tempo web application proxies that public mount to this deployment.
+The canonical public documentation URL is [`https://tempo.com/developers`](https://tempo.com/developers). This repository serves the docs application, while the Tempo web application proxies that public mount to this deployment.
 
 ```mermaid
 flowchart LR

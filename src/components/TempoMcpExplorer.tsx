@@ -362,7 +362,7 @@ export function TempoMcpExplorer() {
               <input
                 value={state.url}
                 onChange={(event) => updateState('url', event.target.value)}
-                placeholder="https://tempo.xyz/developers/..."
+                placeholder="https://tempo.com/developers/..."
                 {...ui.tempoMcpExplorerInput()}
               />
             </label>
