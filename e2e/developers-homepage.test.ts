@@ -1,7 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { developerSurfaceRedirects } from '../src/lib/docs-routing'
 import { getDemoStep } from './helpers'
-import { seedTempoIdSession } from './tempo-id'
 
 for (const { source, destination } of developerSurfaceRedirects) {
   test(`redirects the former ${source} entry point to documentation`, async ({ request }) => {
@@ -63,10 +62,8 @@ for (const entry of ['direct', 'client navigation'] as const) {
     page.on('pageerror', (error) => pageErrors.push(error.message))
     await page.setViewportSize({ width: 1440, height: 1000 })
 
-    // An E2E build signs in with a seeded session. Otherwise exercise the real Tempo ID connector
+    // An E2E build signs in with `accounts/test`. Otherwise exercise the real Tempo ID connector
     // without authenticating a real account.
-    if (e2eBuild)
-      await seedTempoIdSession(context, { baseURL: test.info().project.use.baseURL ?? '' })
     const signIns: string[] = []
     await context.route('https://id.tempo.xyz/**', (route) => {
       signIns.push(route.request().url())
@@ -117,7 +114,7 @@ for (const entry of ['direct', 'client navigation'] as const) {
     ).toBeDisabled()
 
     if (e2eBuild) {
-      // The E2E build signs in to Tempo ID with a seeded session, since a test can't use its dialog.
+      // The E2E build signs in with `accounts/test`, since a test can't use Tempo ID's dialog.
       await signIn.click()
       await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible()
       await expect(addFunds).toBeEnabled()

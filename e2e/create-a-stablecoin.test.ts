@@ -1,12 +1,8 @@
 import { expectDemoSuccess } from './helpers'
 import { expect, test } from './live'
-import { seedTempoIdSession } from './tempo-id'
 
 test('create a stablecoin', async ({ page }) => {
   test.setTimeout(120000)
-
-  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
-  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
 
   await page.goto('/docs/guide/issuance/create-a-stablecoin')
 

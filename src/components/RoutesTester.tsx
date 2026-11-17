@@ -837,7 +837,7 @@ function RouteLifecycle({
             authorize: async (batch) => {
               if (tempoWallet?.id !== tempoIdConnectorId || !sourceTokenAddress) return
               const instance = await getTempoIdInstance(tempoWallet)
-              // An E2E build's seeded access key can already make any call.
+              // An E2E build's access key, from `accounts/test`, can already make any call.
               if (await hasUnrestrictedAccessKey(instance)) return
               await instance.dialog.signIn({
                 accessKey: routesAccessKey({

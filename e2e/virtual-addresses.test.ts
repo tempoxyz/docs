@@ -1,6 +1,5 @@
 import { selectTab } from './helpers'
 import { expect, type Locator, type Page, test } from './live'
-import { seedTempoIdSession } from './tempo-id'
 
 async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
   let lastError: unknown
@@ -31,9 +30,6 @@ async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
 
 test('virtual addresses guide signs in and starts master registration', async ({ page }) => {
   test.setTimeout(240000)
-
-  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
-  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
 
   const realRegistrationTab = await openVirtualAddressesGuide(page)
   await selectTab(realRegistrationTab)

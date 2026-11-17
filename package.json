@@ -41,7 +41,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "@wagmi/core": "3.6.5",
     "abitype": "^1.2.4",
-    "accounts": "1.0.0-alpha.20261116025252-85382d1",
+    "accounts": "1.0.0-alpha.20261117205014-0fb6232",
     "hono": "^4.13.16",
     "mermaid": "^11.17.2",
     "minisearch": "7.2.0",

@@ -1,5 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { funding, viem } from 'accounts/plugins'
+import * as test from 'accounts/test'
 import { tempoId } from 'accounts/wagmi'
 import * as React from 'react'
 import {
@@ -26,7 +27,6 @@ import {
 } from 'wagmi'
 import { demoWalletAuthorization } from './lib/demo-wallet-authorization'
 import { passkey } from './lib/passkeyConnector'
-import { e2eDialog, e2eSessionStore } from './lib/tempo-id'
 
 const feeToken = '0x20c0000000000000000000000000000000000001' as const
 
@@ -65,27 +65,29 @@ export function getConfig(options: getConfig.Options = {}) {
   const wallet = tempoId({
     // In a browser, the page's origin is the client ID. Prerendering has no page, and never signs in.
     ...(typeof window === 'undefined' ? { clientId: 'https://docs.tempo.xyz' } : {}),
-    // E2E tests can't sign in with Tempo ID's dialog, so they seed a session in this store.
-    ...(e2e ? { store: e2eSessionStore() } : {}),
+    // An E2E build signs in with `accounts/test`, whose access key can make any call, so a test
+    // needs no new access key for each contract. Tempo ID refuses such an access key on a page.
     // The guides request a bounded access key at sign-in. Pages that move real funds request a
     // short-lived access key that only sends mainnet stablecoins, up to 100 of each: its limits
     // scope each token's transfer and transferWithMemo. The Routes tester requests an access key
     // scoped to each batch's contracts before it sends.
-    accessKey: accessKey
-      ? demoWalletAuthorization()
-      : {
-          expiry: '1h',
-          limits: (['USDC.e', 'ousd', 'pathUSD', 'usdt0', 'EURC.e'] as const).map((token) => ({
-            limit: '100',
-            token,
-          })),
-        },
+    accessKey: e2e
+      ? { expiry: '1h', scopes: 'any' }
+      : accessKey
+        ? demoWalletAuthorization()
+        : {
+            expiry: '1h',
+            limits: (['USDC.e', 'ousd', 'pathUSD', 'usdt0', 'EURC.e'] as const).map((token) => ({
+              limit: '100',
+              token,
+            })),
+          },
     plugins: [
       // The public sponsor pays testnet fees. Other chains pay their own.
       viem({ chain: tempoModerato, relay: 'https://sponsor.moderato.tempo.xyz' }),
       funding(),
-      // E2E tests sign in with a seeded session, since they can't use Tempo ID's dialog.
-      ...(e2e ? [e2eDialog()] : []),
+      // E2E tests can't use Tempo ID's dialog, so `accounts/test` signs in with a local account.
+      ...(e2e ? [test.dialog()] : []),
     ],
   })
   return createConfig({
