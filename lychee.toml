@@ -35,6 +35,7 @@ exclude = [
   "^http://www\\.w3\\.org/2000/svg$",
   # POST-only AI search endpoint referenced in vocs.config.ts.
   "^https://tempo\\.xyz/developers/api/search$",
+  "^https://tempo\\.com/developers/api/search$",
   # MPP service roots expose paid API routes rather than browser landing pages.
   "^https://[a-z0-9-]+\\.mpp\\.paywithlocus\\.com/?$",
   "^https://api\\.auto\\.exchange/?$",
