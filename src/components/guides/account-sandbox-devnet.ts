@@ -997,22 +997,15 @@ export function createDevnetAdapter(
     const next = { owners, threshold: account.committed.threshold }
     if (sameConfig(next, session.config)) return undefined
     const approvers = updateApprovers(session, account)
-    const receipt = await client.writeContractSync({
+    const result = await Tempo.Actions.accounts.updateConfigSync(client, {
       account: signingAccount(session, localAccounts(approvers)),
-      ...Tempo.Actions.accounts.updateConfig.call({
-        currentConfig: session.config,
-        nextConfig: next,
-      }),
-      throwOnReceiptRevert: true,
+      currentConfig: session.config,
+      nextConfig: next,
     })
-    // viem takes the last event: a first update also logs the account's version-0 registration.
-    let log: ReturnType<typeof Tempo.Actions.accounts.updateConfig.extractEvent>
-    try {
-      log = Tempo.Actions.accounts.updateConfig.extractEvent(receipt.logs)
-    } catch {
+    if (!('config' in result) || !result.config)
       throw new DevnetRejection('invalid-config', 'Devnet recorded no configuration update.')
-    }
-    session.config = Tempo.AccountConfig.from(log.args)
+    const { config, receipt } = result
+    session.config = config
     session.lastUpdate = receipt.transactionHash
     return receipt.transactionHash
   }
