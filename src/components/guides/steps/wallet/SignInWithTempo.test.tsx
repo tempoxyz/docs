@@ -37,7 +37,7 @@ vi.mock('wagmi', () => ({
 }))
 
 vi.mock('../../../../wagmi.config', () => ({
-  useTempoWalletConnector: () => state.config?.connectors.find((item) => item.id === 'xyz.tempo'),
+  useTempoIdConnector: () => state.config?.connectors.find((item) => item.id === 'tempoId'),
 }))
 
 vi.mock('~icons/lucide/picture-in-picture-2', () => ({ default: () => null }))
@@ -66,7 +66,7 @@ beforeEach(() => {
   state.config = createConfig({
     chains: [tempoModerato],
     connectors: [
-      localConnector('xyz.tempo', '0x0000000000000000000000000000000000000001'),
+      localConnector('tempoId', '0x0000000000000000000000000000000000000001'),
       localConnector('webAuthn', '0x0000000000000000000000000000000000000002'),
     ],
     multiInjectedProviderDiscovery: false,
@@ -107,7 +107,7 @@ async function clickConnect() {
   await state.operation
 }
 
-describe('Tempo Wallet connection across account demos', () => {
+describe('Tempo connection across account demos', () => {
   test('reactivates a retained wallet after creating a passkey account', async () => {
     const config = testConfig()
     const [wallet, passkey] = config.connectors
@@ -117,7 +117,7 @@ describe('Tempo Wallet connection across account demos', () => {
 
     await clickConnect()
 
-    expect(getConnection(config).connector?.id).toBe('xyz.tempo')
+    expect(getConnection(config).connector?.id).toBe('tempoId')
     expect(getConnections(config)).toHaveLength(2)
     expect(state.connect).not.toHaveBeenCalled()
     expect(state.disconnect).not.toHaveBeenCalled()
@@ -131,11 +131,8 @@ describe('Tempo Wallet connection across account demos', () => {
 
     await clickConnect()
 
-    expect(getConnection(config).connector?.id).toBe('xyz.tempo')
-    expect(getConnections(config).map((item) => item.connector.id)).toEqual([
-      'webAuthn',
-      'xyz.tempo',
-    ])
+    expect(getConnection(config).connector?.id).toBe('tempoId')
+    expect(getConnections(config).map((item) => item.connector.id)).toEqual(['webAuthn', 'tempoId'])
     expect(state.disconnect).not.toHaveBeenCalled()
     expect(renderedStep().completed).toBe(true)
   })

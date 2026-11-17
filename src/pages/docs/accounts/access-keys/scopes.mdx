@@ -5,13 +5,11 @@ description: Restrict an access key to the contracts, functions, and recipients 
 ---
 
 import { Card, Cards } from 'vocs'
-import AdminAccessKeysT14 from '../../../../snippets/admin-access-keys-t14.mdx'
 
 # Scopes
 
 Restricts an access key to the contracts, functions, and recipients its task needs.
 
-<AdminAccessKeysT14 />
 
 ## Overview
 
@@ -48,7 +46,7 @@ A key scoped to `transfer` can't call `transferWithMemo(address,uint256,bytes32)
 
 ## Change Scopes
 
-Enough signers to reach the threshold, or an [admin key](/docs/accounts/access-keys/admin-access-keys), change a key's scopes without revoking it. Call `setAllowedCalls` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain), Tempo's built-in contract that stores access keys. For each contract you pass, it replaces that contract's rules and leaves the others alone. List every rule you want to keep.
+Enough signers to reach the threshold change a key's scopes without revoking it. Call `setAllowedCalls` on the [Account Keychain](/docs/protocol/transactions/AccountKeychain), Tempo's built-in contract that stores access keys. For each contract you pass, it replaces that contract's rules and leaves the others alone. List every rule you want to keep.
 
 Add a second recipient to the key from `access-keys.ts`, the example in [Authorize an access key](/docs/accounts/access-keys#authorize-an-access-key), and allow `transferWithMemo`. List both functions, because the call replaces the stablecoin's rules. The example uses a configurable account, so `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). With a single-key account, `setAllowedCalls` works the same on mainnet and testnet.
 
@@ -103,7 +101,6 @@ To read a key's current scopes, call `getAllowedCalls(account, keyId)`. It retur
 - Scopes check only the calls the key signs directly. A contract the key can call makes any calls of its own. An allowed factory contract can deploy contracts, even though the key can't deploy one itself. Allow only contracts you trust.
 - A limited access key can't change scopes, including its own.
 - `setAllowedCalls` reverts with [`InvalidCallScope`](/docs/protocol/transactions/AccountKeychain#error-invalidcallscope) when its list of contracts is empty, or on a zero address or a duplicate entry.
-- `setAllowedCalls` and `removeAllowedCalls` revert with [`InvalidKeyId`](/docs/protocol/transactions/AccountKeychain#error-invalidkeyid) on an admin key, which has no scopes.
 
 Specification: [Account Keychain call scopes](/docs/protocol/transactions/AccountKeychain#call-scope-enforcement).
 

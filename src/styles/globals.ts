@@ -108,6 +108,17 @@ fontFace({
   fontDisplay: 'swap',
 })
 
+// Tempo ID's sign-in dialog (accounts/plugins, dialog.signIn) is a modal <dialog> that the
+// browser centers with its default margin: auto, which Vocs' reset (vocs_base) removes. Its own
+// unlayered styles still set the bottom sheet's margin on narrow screens.
+global({
+  '@layer components': {
+    'dialog[data-tempo-id-dialog]': {
+      margin: 'auto',
+    },
+  },
+})
+
 global({
   '@layer utilities': {
     ':root': {

@@ -95,8 +95,6 @@ const interactiveDescriptions: Record<string, string> = {
     'In the interactive web page, create a private-key account on the Tempo Accounts devnet, fund it from the faucet, and pay 1 AlphaUSD with it. Then upgrade it in place to a configurable account with the original key and a new backup key as signers and a threshold of 2. A payment signed by the original key alone is rejected, and a payment approved by both signers succeeds. The address and balance stay the same. Each step is a real devnet transaction.',
   AccountSandbox:
     'In the interactive web page, create a Tempo account on the Tempo Accounts devnet from its first signer: a passkey or a generated private key. Then get test funds, add signers, set weights and the threshold, authorize access keys with limits, and send payments. Every change is a real devnet transaction, so the page must be able to reach Tempo Accounts devnet.',
-  AdminKeyDemo:
-    'In the interactive web page, create or connect a testnet passkey account, authorize an admin key, inspect its onchain status, and revoke it.',
   SupportedRoutesTable:
     'The interactive page lists every route in the live directory, read from GET https://api.tempo.xyz/v1/routes, ' +
     "with each route's source and destination asset, funding methods, and whether fee coverage (1:1 delivery) is available. " +
@@ -105,7 +103,7 @@ const interactiveDescriptions: Record<string, string> = {
     'Open the interactive Routes demo (Try a route) at /docs/routes/test. Choose source and destination assets, ' +
     'get a quote (without a key, routes that support subsidies preview 1:1 delivery from a quote-only demo organization), ' +
     'add an API key to create the transfer or deposit address, ' +
-    'sign with Tempo Wallet (Tempo sources) or a browser wallet, and track delivery. ' +
+    'sign with Tempo (Tempo sources) or a browser wallet, and track delivery. ' +
     'The demo sends API requests directly to api.tempo.xyz; API keys stay in tab memory.',
   ConnectWallet: 'Connect a wallet in the interactive web page.',
   GuideDemo:
@@ -164,7 +162,7 @@ const demoStepLabels: Record<string, string> = {
   SendTokensWithinZone: 'Send tokens within zone',
   SetFeeToken: 'Set fee token',
   SetSupplyCap: 'Set supply cap',
-  SignInWithTempo: 'Connect Tempo Wallet',
+  SignInWithTempo: 'Sign in with Tempo',
   SwapAcrossZones: 'Swap across zones',
   VirtualAddressesFastDemo: 'Virtual addresses fast demo',
   VirtualAddressesLiveDemo: 'Virtual addresses live demo',

@@ -1037,31 +1037,33 @@ For a complete TypeScript quickstart, save the following as `first-payment.mts` 
 
 ### Browser wallet setup
 
-Install `accounts@0.18.4` and `viem`. Save this as `connection.ts`; call `connectAccount` from a user action such as a Connect button.
+Install `accounts@alpha` and `viem`. Save this as `connection.ts`; call `connectAccount` from a user action such as a Connect button. `walletClient` signs with the access key the user approves at sign-in.
 
 ```ts [connection.ts]
-import { Provider } from 'accounts'
+import { Accounts } from 'accounts'
+import { viem } from 'accounts/plugins'
 import { tempoModerato } from 'viem/chains'
-import { createClient, custom } from 'viem/tempo'
+import { createClient } from 'viem/tempo'
 
-export const provider = Provider.create({
-  chains: [tempoModerato],
-  testnet: true,
+export const accounts = Accounts.create({
+  // Each sign-in requests an access key that sends up to 100 AlphaUSD for a day.
+  accessKey: () => ({
+    expiry: '1d',
+    limits: [{ limit: '100', token: 'alphaUSD' }],
+  }),
+  chain: 'testnet',
+  plugins: [viem()],
 })
 
-export const walletClient = createClient({
-  chain: tempoModerato,
-  transport: custom(provider),
-})
+export const walletClient = accounts.viem
 
 export const publicClient = createClient({
   chain: tempoModerato,
 })
 
 export async function connectAccount() {
-  const [address] = await provider.request({
-    method: 'eth_requestAccounts',
-  })
+  const session = await accounts.dialog.signIn()
+  const address = session.accessKey?.account
   if (!address) throw new Error('No account was selected')
   return address
 }

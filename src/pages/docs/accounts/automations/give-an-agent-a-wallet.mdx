@@ -92,7 +92,7 @@ Fit all three bounds to the agent's task. Leaving one out removes that check.
 - [`scopes`](/docs/accounts/access-keys/scopes) lists the only calls the key can make. Without `recipients`, the key could pay any address.
 - [`expiry`](/docs/accounts/access-keys/expiry) is when the key stops working.
 
-Never give an agent an [admin access key](/docs/accounts/access-keys/admin-access-keys). It has no budget, scopes, or expiry, and it can authorize more keys. The agent could spend the whole balance.
+Never give an agent a key without a budget, scopes, and expiry. The agent could spend the whole balance.
 
 ### Let the Agent Pay
 

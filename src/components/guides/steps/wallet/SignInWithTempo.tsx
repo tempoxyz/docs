@@ -2,7 +2,7 @@
 
 import { useConnect, useConnection, useConnections, useSwitchConnection } from 'wagmi'
 import LucidePictureInPicture2 from '~icons/lucide/picture-in-picture-2'
-import { useTempoWalletConnector } from '../../../../wagmi.config'
+import { useTempoIdConnector } from '../../../../wagmi.config'
 import { Button, Logout, Step, TempoMarkBoxed, useHydrated } from '../../Demo'
 import * as form from '../../form.recipes'
 import type { DemoStepProps } from '../types'
@@ -15,8 +15,8 @@ export function SignInWithTempo(props: DemoStepProps) {
   const connect = useConnect()
   const switchConnection = useSwitchConnection()
   const hydrated = useHydrated()
-  const connector = useTempoWalletConnector()
-  const connected = Boolean(address && activeConnector?.id === 'xyz.tempo')
+  const connector = useTempoIdConnector()
+  const connected = Boolean(address && activeConnector?.id === 'tempoId')
 
   return (
     <Step
@@ -41,20 +41,20 @@ export function SignInWithTempo(props: DemoStepProps) {
             onClick={() => {
               connect.reset()
               switchConnection.reset()
-              const existing = connections.find((item) => item.connector.id === 'xyz.tempo')
+              const existing = connections.find((item) => item.connector.id === 'tempoId')
               if (existing) switchConnection.mutate({ connector: existing.connector })
               else connect.connect({ connector })
             }}
             type="button"
           >
             <TempoMarkBoxed className={ui.tempoMarkBoxed().className} />
-            Connect Tempo Wallet
+            Sign in with Tempo
           </Button>
         )
       }
       error={connect.error || switchConnection.error}
       number={stepNumber}
-      title="Connect Tempo Wallet."
+      title="Sign in with Tempo."
     />
   )
 }

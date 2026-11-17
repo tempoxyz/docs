@@ -25,8 +25,8 @@
  * - `mipd` enables Multi Injected Provider Discovery (auto-detects browser
  *   extension wallets like MetaMask). Implies `interactive`. Only needed on
  *   pages where users connect external wallets.
- * - `accessKey: false` connects Tempo Wallet without the guides' bounded access key: signing
- *   in only shares the address, and the wallet approves each transaction. Wallet connections, and
+ * - `accessKey: false` signs in with Tempo ID without the guides' testnet access key. It requests a
+ *   short-lived access key that sends only mainnet stablecoins, up to 100 of each. Connections, and
  *   the addresses in them, last only for the tab. Use it on pages that move real funds.
  */
 

@@ -1,14 +1,21 @@
+// @ts-nocheck
+// Type-checked against accounts@alpha. Pages that include it say to install accounts@alpha.
+// biome-ignore-all assist/source/organizeImports: each region publishes its own imports
 import { Mppx, tempo } from 'mppx/client'
 import type { Account } from 'viem'
 // [!region wallet-config]
+import { tempoId } from 'accounts/wagmi'
 import { tempo as tempoMainnet } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { getConnectorClient } from 'wagmi/actions'
-import { tempoWallet } from 'wagmi/connectors'
 
 export const mppConfig = createConfig({
   chains: [tempoMainnet],
-  connectors: [tempoWallet()],
+  connectors: [
+    // Each sign-in requests an access key that spends up to 10 OUSD for a day.
+    // List the token each service charges in: the access key can't spend any other.
+    tempoId({ accessKey: { expiry: '1d', limits: [{ limit: '10', token: 'ousd' }] } }),
+  ],
   transports: { [tempoMainnet.id]: http() },
 })
 // [!endregion wallet-config]

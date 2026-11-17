@@ -73,7 +73,7 @@ test('Zones demos complete using an isolated faucet-funded passkey', async ({ pa
         const { getConfig } = await import(configModule)
         return getConfig().connectors.map((connector: { id: string }) => connector.id)
       })
-      expect(connectorIds).toEqual(expect.arrayContaining(['xyz.tempo', 'webAuthn']))
+      expect(connectorIds).toEqual(expect.arrayContaining(['tempoId', 'webAuthn']))
 
       await page.getByRole('button', { name: 'Sign up', exact: true }).first().click()
       await expect(page.getByRole('button', { name: 'Sign out', exact: true }).first()).toBeVisible(

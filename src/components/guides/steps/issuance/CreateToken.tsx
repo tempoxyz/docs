@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useConnection, useConnectionEffect } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
+import { allowTokens } from '../../../../lib/tempo-id'
 import { useDemoContext } from '../../../DemoContext'
 import { Button, ExplorerLink, Login, Step } from '../../Demo'
 import * as form from '../../form.recipes'
@@ -12,7 +13,7 @@ import * as ui from './CreateToken.recipes'
 
 export function CreateToken(props: DemoStepProps) {
   const { stepNumber, last = false } = props
-  const { address } = useConnection()
+  const { address, connector } = useConnection()
   const { setData } = useDemoContext()
   const { data: balance, refetch: balanceRefetch } = Hooks.token.useGetBalance({
     account: address,
@@ -20,9 +21,21 @@ export function CreateToken(props: DemoStepProps) {
   })
   const create = Hooks.token.useCreateSync({
     mutation: {
-      onSettled(data) {
+      async onSettled(data): Promise<void> {
         balanceRefetch()
         if (data) {
+          // Add the new token to Tempo's access key, which the next steps sign with. Without it the
+          // next steps can't call the token, so a refusal resets the step to create another.
+          const allowed = connector
+            ? await allowTokens(connector, [data.token]).then(
+                () => true,
+                () => false,
+              )
+            : true
+          if (!allowed) {
+            create.reset()
+            return
+          }
           setData('tokenAddress', data.token)
           setData('tokenReceipt', data.receipt)
         }

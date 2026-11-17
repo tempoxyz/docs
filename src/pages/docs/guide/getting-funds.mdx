@@ -60,42 +60,44 @@ codex exec "Read https://tempo.xyz/skills/wallet/SKILL.md and fund my Tempo Wall
 
 ## Open funding with the Accounts SDK
 
-Use the Accounts SDK to open Tempo Wallet's funding interface from an **Add funds** button. The wallet handles the funding flow; your application connects the account and requests `wallet_deposit`.
+Use the [Accounts SDK](https://accounts.tempo.xyz) to open Tempo's funding page from an **Add funds** button. Tempo handles the funding flow; your application signs the user in and calls `accounts.funding.open`.
 
 :::::steps
 
 ### Install the Accounts SDK
 
 ```bash
-pnpm add --save-exact accounts@0.18.4 viem
+pnpm add accounts@alpha viem
 ```
 
 ### Add a funding button
 
-This React example connects Tempo Wallet and opens funding for the selected account on mainnet:
+This React example signs the user in with Tempo and opens funding for their Tempo Account on mainnet:
 
 ```tsx [AddFundsButton.tsx]
-import { Provider } from 'accounts'
+import { Accounts } from 'accounts'
 import { useState } from 'react'
-import { numberToHex } from 'viem'
-import { tempo } from 'viem/chains'
 
-const provider = Provider.create({ chains: [tempo] })
+const accounts = Accounts.create()
 
 export function AddFundsButton() {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string>()
 
+  // Each click opens one Tempo page, since a second popup has no user gesture left.
   async function addFunds() {
     setPending(true)
     setError(undefined)
     try {
-      const [address] = await provider.request({ method: 'eth_requestAccounts' })
-      if (!address) throw new Error('Connect a Tempo Wallet account first.')
-      await provider.request({
-        method: 'wallet_deposit',
-        params: [{ address, chainId: numberToHex(tempo.id) }],
-      })
+      // The funding page needs a session. Without one, this click signs in, and the next adds funds.
+      if (!(await accounts.session.get())) {
+        await accounts.dialog.signIn()
+        return
+      }
+      const result = await accounts.funding.open()
+      if (result?.status === 'received') {
+        // Refresh balances. See "Confirm funds have arrived".
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not open funding.')
     } finally {
@@ -106,7 +108,7 @@ export function AddFundsButton() {
   return (
     <div>
       <button type="button" disabled={pending} onClick={addFunds}>
-        {pending ? 'Check Tempo Wallet…' : 'Add funds'}
+        {pending ? 'Check Tempo…' : 'Add funds'}
       </button>
       {error && <p role="alert">{error}</p>}
     </div>
@@ -114,13 +116,11 @@ export function AddFundsButton() {
 }
 ```
 
-Omit `intent` to let the user choose a funding method. To prefer Apple Pay where available, add `intent: 'applePay'` to the parameter object. `intent: 'crypto'` prefers funding with crypto. These are preferences; method availability varies by user.
-
-You can also prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol or contract address. The user reviews and confirms the funding request in the wallet.
+Call `funding.open` from the click handler, since the browser blocks a popup opened outside a user gesture. You can prefill `amount` as a human-readable string, such as `'50'`, and `token` as a supported token symbol, such as `'USDC.e'`. The user reviews and confirms the funding request on Tempo's funding page.
 
 ### Confirm funds have arrived
 
-A resolved `wallet_deposit` request doesn't mean the account is funded. Fiat funding can complete asynchronously, and the response's `receipts` field may be absent. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
+A resolved `funding.open` call doesn't mean the account is funded. Fiat funding can complete asynchronously, after the funding page closes. Refresh [balances and activity](/docs/guide/payments/accept-a-payment#read-balances), and [verify incoming transfers](/docs/guide/payments/accept-a-payment) before crediting funds in your application's records.
 
 :::::
 

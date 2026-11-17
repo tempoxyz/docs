@@ -1,29 +1,24 @@
 import type { ReactElement } from 'react'
-import { numberToHex } from 'viem'
-import { tempo, tempoModerato } from 'viem/chains'
+import { tempo } from 'viem/chains'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { DepositToTempoWallet } from './DepositToTempoWallet'
 
 const state = vi.hoisted(() => ({
   connection: {
     address: '0x0000000000000000000000000000000000000001',
-    connector: { id: 'xyz.tempo' },
+    connector: { id: 'tempoId' },
     status: 'connected',
   },
-  chainId: 4217 as number,
-  request: vi.fn(),
-  switchChainAsync: vi.fn(),
-  getProvider: vi.fn(),
+  open: vi.fn(),
+  getInstance: vi.fn(),
   operation: Promise.resolve() as Promise<unknown>,
 }))
 
 vi.mock('wagmi', () => ({
-  useChainId: () => state.chainId,
   useConnection: () => state.connection,
-  useSwitchChain: () => ({ switchChainAsync: state.switchChainAsync }),
 }))
 vi.mock('../../../../wagmi.config', () => ({
-  useTempoWalletConnector: () => ({ id: 'xyz.tempo', getProvider: state.getProvider }),
+  useTempoIdConnector: () => ({ id: 'tempoId', getInstance: state.getInstance }),
 }))
 vi.mock('@tanstack/react-query', () => ({
   useMutation: ({ mutationFn }: { mutationFn: () => Promise<unknown> }) => ({
@@ -39,11 +34,9 @@ vi.mock('../../Demo', () => ({ Button: () => null, Step: () => null }))
 beforeEach(() => {
   vi.clearAllMocks()
   state.connection.status = 'connected'
-  state.connection.connector.id = 'xyz.tempo'
-  state.getProvider.mockResolvedValue({ request: state.request })
-  state.request.mockResolvedValue({})
-  state.switchChainAsync.mockResolvedValue({})
-  state.chainId = tempo.id
+  state.connection.connector.id = 'tempoId'
+  state.getInstance.mockResolvedValue({ funding: { open: state.open } })
+  state.open.mockResolvedValue({ status: 'closed' })
 })
 
 function renderStep() {
@@ -52,30 +45,13 @@ function renderStep() {
   }
 }
 
-test('opens funding through the live connector when the saved connection has no methods', async () => {
+test('opens Tempo funding for mainnet', async () => {
   const step = renderStep()
   expect(step.actions.props.disabled).toBe(false)
   step.actions.props.onClick()
   await state.operation
-  expect(state.getProvider).toHaveBeenCalledOnce()
-  expect(state.request).toHaveBeenCalledWith({
-    method: 'wallet_deposit',
-    params: [{ address: state.connection.address, chainId: numberToHex(tempo.id) }],
-  })
-})
-
-test('funds on mainnet and switches back to the chain the guides use', async () => {
-  state.chainId = tempoModerato.id
-  const order: string[] = []
-  state.switchChainAsync.mockImplementation(async ({ chainId }: { chainId: number }) => {
-    order.push(`switch:${chainId}`)
-  })
-  state.request.mockImplementation(async () => {
-    order.push('deposit')
-  })
-  renderStep().actions.props.onClick()
-  await state.operation
-  expect(order).toEqual([`switch:${tempo.id}`, 'deposit', `switch:${tempoModerato.id}`])
+  expect(state.getInstance).toHaveBeenCalledOnce()
+  expect(state.open).toHaveBeenCalledWith({ chainId: tempo.id })
 })
 
 test.each([
@@ -87,8 +63,8 @@ test.each([
   const step = renderStep()
   expect(step.actions.props.disabled).toBe(true)
   step.actions.props.onClick()
-  await expect(state.operation).rejects.toThrow('Connect Tempo Wallet')
-  expect(state.request).not.toHaveBeenCalled()
+  await expect(state.operation).rejects.toThrow('Sign in with Tempo')
+  expect(state.open).not.toHaveBeenCalled()
 })
 
 test('does not fund a different active wallet', async () => {
@@ -96,6 +72,6 @@ test('does not fund a different active wallet', async () => {
   const step = renderStep()
   expect(step.actions.props.disabled).toBe(true)
   step.actions.props.onClick()
-  await expect(state.operation).rejects.toThrow('Connect Tempo Wallet')
-  expect(state.request).not.toHaveBeenCalled()
+  await expect(state.operation).rejects.toThrow('Sign in with Tempo')
+  expect(state.open).not.toHaveBeenCalled()
 })

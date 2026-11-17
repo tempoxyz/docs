@@ -8,7 +8,6 @@ ogImage: /og/2026-q4/og_2026-q4_docs_accounts-keys_title-f5_v02.png
 import { Card, Cards } from 'vocs'
 import { AccountDiagram } from '../../../components/AccountDiagram'
 import ConfigurableAccountsT14 from '../../../snippets/configurable-accounts-t14.mdx'
-import AdminAccessKeysT14 from '../../../snippets/admin-access-keys-t14.mdx'
 
 <span id="keys-and-signing" />
 <span id="keys-and-permissions" />
@@ -17,7 +16,6 @@ import AdminAccessKeysT14 from '../../../snippets/admin-access-keys-t14.mdx'
 
 Every Tempo EVM account is either a single-key account or a configurable account.
 
-<AdminAccessKeysT14 />
 
 ## Overview
 
@@ -62,7 +60,7 @@ An [access key](/docs/accounts/access-keys) is an extra key that signs for the a
 
 The [Account Keychain](/docs/development/account-keychain), a contract built into Tempo (a precompile), stores every account's access keys. It enforces those limits on each transaction they sign.
 
-The account itself authorizes and revokes access keys, through its root key or owners whose weights reach the threshold. An [admin access key](/docs/development/account-keychain#admin-access-keys) can too. It has no limits, so store it as carefully as a root or owner key. Access keys, admin or not, never count toward a threshold.
+The account itself authorizes and revokes access keys, through its root key or owners whose weights reach the threshold. Access keys never count toward a threshold.
 
 ## Tempo Transaction Signature Types
 

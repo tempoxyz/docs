@@ -7,7 +7,7 @@ export function AccountsSignIn() {
   const account = useConnection()
   const connect = useConnect()
   const disconnect = useDisconnect()
-  const connector = useTempoWalletConnector()
+  const connector = useTempoIdConnector()
 
   if (!connector) return null
 
@@ -37,7 +37,7 @@ export function AccountsSignIn() {
   )
 }
 
-function useTempoWalletConnector() {
+function useTempoIdConnector() {
   const connectors = useConnectors()
-  return connectors.find((c: { id: string }) => c.id === 'xyz.tempo')
+  return connectors.find((c: { id: string }) => c.id === 'tempoId')
 }

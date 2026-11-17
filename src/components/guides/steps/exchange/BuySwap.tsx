@@ -2,7 +2,7 @@
 
 import { formatUnits, parseUnits } from 'viem'
 import { Actions } from 'viem/tempo'
-import { useConnection, useConnectionEffect, useSendCallsSync } from 'wagmi'
+import { useConnection, useConnectionEffect, useSendTransactionSync } from 'wagmi'
 import { Hooks } from 'wagmi/tempo'
 import { Button, ExplorerLink } from '../../Demo'
 import * as form from '../../form.recipes'
@@ -34,7 +34,7 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
   // Calculate 0.5% slippage tolerance
   const maxAmountIn = quote ? (quote * 1005n + 999n) / 1000n : 0n
 
-  const sendCalls = useSendCallsSync({
+  const sendTransaction = useSendTransactionSync({
     mutation: {
       onSuccess: () => {
         onSuccess?.()
@@ -44,7 +44,7 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
 
   useConnectionEffect({
     onDisconnect() {
-      sendCalls.reset()
+      sendTransaction.reset()
     },
   })
 
@@ -62,20 +62,20 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
       <div {...ui.buySwapLayout2()}>
         <h3 {...ui.buySwapHeading()}>Buy 10 AlphaUSD with BetaUSD</h3>
         <Button
-          variant={sendCalls.isSuccess ? 'default' : 'accent'}
-          disabled={!address || !quote || sendCalls.isPending}
+          variant={sendTransaction.isSuccess ? 'default' : 'accent'}
+          disabled={!address || !quote || sendTransaction.isPending}
           onClick={() => {
-            sendCalls.sendCallsSync({
+            sendTransaction.sendTransactionSync({
               calls,
             })
           }}
           type="button"
           className={form.actionButton().className}
         >
-          {sendCalls.isPending ? 'Buying...' : 'Buy'}
+          {sendTransaction.isPending ? 'Buying...' : 'Buy'}
         </Button>
       </div>
-      {sendCalls.error && <div {...ui.buySwapLayout3()}>{sendCalls.error.message}</div>}
+      {sendTransaction.error && <div {...ui.buySwapLayout3()}>{sendTransaction.error.message}</div>}
       {quote && address && (
         <div {...ui.buySwapLayout4()}>
           <div {...ui.buySwapLayout5()}>
@@ -85,8 +85,8 @@ export function BuySwap({ onSuccess }: { onSuccess?: () => void }) {
               {tokenInMetadata?.name}
             </span>
           </div>
-          {sendCalls.isSuccess && sendCalls.data && (
-            <ExplorerLink hash={sendCalls.data.receipts?.at(0)?.transactionHash as `0x${string}`} />
+          {sendTransaction.isSuccess && sendTransaction.data && (
+            <ExplorerLink hash={sendTransaction.data.transactionHash} />
           )}
         </div>
       )}

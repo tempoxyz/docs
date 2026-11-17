@@ -5,12 +5,6 @@ import { formatUnits, type Hex } from 'viem'
 import { tempoModerato } from 'viem/chains'
 import { Actions, WebAuthnP256 } from 'viem/tempo'
 import { Container } from '../Container'
-import {
-  adminKeyCredentialError,
-  adminKeyDemoEnvironment,
-  parseAdminKeyDemoSession,
-  serializeAdminKeyDemoSession,
-} from './admin-key-demo'
 import { Button, Step, StringFormatter, useCopyToClipboard, useHydrated } from './Demo'
 import * as ui from './EarnDepositDemo.recipes'
 import {
@@ -25,6 +19,12 @@ import {
   verifyEarnDemoDeposit,
   verifyEarnDemoVault,
 } from './earn-deposit-demo'
+import {
+  parsePasskeyDemoSession,
+  passkeyCredentialError,
+  passkeyDemoEnvironment,
+  serializePasskeyDemoSession,
+} from './passkey-demo'
 
 type Position = Awaited<ReturnType<ReturnType<typeof createEarnDemoClient>['earn']['getPosition']>>
 type Action = 'check' | 'create' | 'fund' | 'approve' | 'deposit' | 'withdraw'
@@ -41,7 +41,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
   const [available, setAvailable] = React.useState(false)
   const [redeemAvailable, setRedeemAvailable] = React.useState(false)
   const [environment, setEnvironment] =
-    React.useState<ReturnType<typeof adminKeyDemoEnvironment>>(null)
+    React.useState<ReturnType<typeof passkeyDemoEnvironment>>(null)
   const [position, setPosition] = React.useState<Position | null>(null)
   const [quote, setQuote] = React.useState<{
     shares: bigint
@@ -62,7 +62,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
     let current = true
     mounted.current = true
     setEnvironment(
-      adminKeyDemoEnvironment(
+      passkeyDemoEnvironment(
         location.href,
         window.isSecureContext,
         Boolean(window.PublicKeyCredential && navigator.credentials?.create),
@@ -70,7 +70,7 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
     )
     try {
       setSession(
-        parseAdminKeyDemoSession(localStorage.getItem(earnDemoStorageKey), location.hostname),
+        parsePasskeyDemoSession(localStorage.getItem(earnDemoStorageKey), location.hostname),
       )
     } catch {
       /* Storage is checked before account creation. */
@@ -176,11 +176,11 @@ export function EarnDepositDemo({ mode = 'deposit' }: { mode?: 'deposit' | 'with
       rpId,
       userId: crypto.getRandomValues(new Uint8Array(32)),
     }).catch((cause: unknown) => {
-      throw new Error(adminKeyCredentialError(cause))
+      throw new Error(passkeyCredentialError(cause))
     })
     const next = { credential: { id: credential.id, publicKey: credential.publicKey }, rpId }
     try {
-      localStorage.setItem(earnDemoStorageKey, serializeAdminKeyDemoSession(next))
+      localStorage.setItem(earnDemoStorageKey, serializePasskeyDemoSession(next))
     } catch {
       throw new Error('Allow browser storage so this demo can restore your test account.')
     }

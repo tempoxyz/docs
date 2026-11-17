@@ -2172,6 +2172,11 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/accounts/access-keys/admin-access-keys",
+      "destination": "/developers/docs/accounts/access-keys",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/accounts/guides/identity-provider",
       "destination": "/developers/docs/accounts/apps/self-custodial-wallets",
       "permanent": true

@@ -1,5 +1,6 @@
 import { selectTab } from './helpers'
 import { expect, type Locator, type Page, test } from './live'
+import { seedTempoIdSession } from './tempo-id'
 
 async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
   let lastError: unknown
@@ -31,78 +32,61 @@ async function openVirtualAddressesGuide(page: Page): Promise<Locator> {
 test('virtual addresses guide signs in and starts master registration', async ({ page }) => {
   test.setTimeout(240000)
 
-  const client = await page.context().newCDPSession(page)
-  await client.send('WebAuthn.enable')
-  const { authenticatorId } = await client.send('WebAuthn.addVirtualAuthenticator', {
-    options: {
-      protocol: 'ctap2',
-      transport: 'internal',
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-    },
+  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
+  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
+
+  const realRegistrationTab = await openVirtualAddressesGuide(page)
+  await selectTab(realRegistrationTab)
+
+  const signInButton = page.getByRole('button', { name: 'Sign in with Tempo' }).first()
+  await expect(signInButton).toBeVisible({ timeout: 90000 })
+  await signInButton.click()
+
+  await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
+    timeout: 30000,
   })
+  await expect(page.getByText('Connected Tempo Account')).toBeVisible()
 
-  try {
-    const realRegistrationTab = await openVirtualAddressesGuide(page)
-    await selectTab(realRegistrationTab)
+  const registerButton = page.getByRole('button', { name: 'Register master id' }).first()
+  await expect(registerButton).toBeVisible()
+  await registerButton.click()
 
-    const passkeySignUpButton = page.getByRole('button', { name: 'Sign up' }).first()
-    await expect(passkeySignUpButton).toBeVisible({ timeout: 90000 })
-    await passkeySignUpButton.click()
+  await expect
+    .poll(
+      async () => {
+        if (await page.getByRole('button', { name: 'Mining salt…' }).first().isVisible()) {
+          return 'mining'
+        }
+        if (await page.getByRole('button', { name: 'Check Tempo…' }).first().isVisible()) {
+          return 'confirm'
+        }
+        if (await page.getByRole('button', { name: 'Registering…' }).first().isVisible()) {
+          return 'registering'
+        }
+        if (await page.getByText('registration tx:').isVisible()) return 'registered'
+        return null
+      },
+      {
+        timeout: 30000,
+      },
+    )
+    .not.toBeNull()
 
-    await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
-      timeout: 30000,
-    })
-
-    await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({
-      timeout: 30000,
-    })
-    await expect(page.getByText('Connected passkey account')).toBeVisible()
-
-    const registerButton = page.getByRole('button', { name: 'Register master id' }).first()
-    await expect(registerButton).toBeVisible()
-    await registerButton.click()
-
-    await expect
-      .poll(
-        async () => {
-          if (await page.getByRole('button', { name: 'Mining salt…' }).first().isVisible()) {
-            return 'mining'
-          }
-          if (await page.getByRole('button', { name: 'Confirm passkey…' }).first().isVisible()) {
-            return 'confirm'
-          }
-          if (await page.getByRole('button', { name: 'Registering…' }).first().isVisible()) {
-            return 'registering'
-          }
-          if (await page.getByText('registration tx:').isVisible()) return 'registered'
-          return null
-        },
-        {
-          timeout: 30000,
-        },
-      )
-      .not.toBeNull()
-
-    await expect
-      .poll(
-        async () => {
-          if (await page.getByText('hashes tried:').isVisible()) return 'mining'
-          if (
-            await page
-              .getByText('Waiting for the registration transaction to be confirmed.')
-              .isVisible()
-          ) {
-            return 'found'
-          }
-          if (await page.getByText('registration tx:').isVisible()) return 'registered'
-          return null
-        },
-        { timeout: 30000 },
-      )
-      .not.toBeNull()
-  } finally {
-    await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId }).catch(() => {})
-  }
+  await expect
+    .poll(
+      async () => {
+        if (await page.getByText('hashes tried:').isVisible()) return 'mining'
+        if (
+          await page
+            .getByText('Waiting for the registration transaction to be confirmed.')
+            .isVisible()
+        ) {
+          return 'found'
+        }
+        if (await page.getByText('registration tx:').isVisible()) return 'registered'
+        return null
+      },
+      { timeout: 30000 },
+    )
+    .not.toBeNull()
 })

@@ -1,41 +1,24 @@
-import { ProviderRequest } from 'accounts'
+import { Permissions } from 'accounts'
+import { tempoModerato } from 'viem/chains'
 import { describe, expect, it } from 'vitest'
 import { demoWalletAuthorization } from './demo-wallet-authorization'
 
 describe('demo wallet authorization', () => {
-  it('passes the wallet request validator with bounded scopes and spending limits', () => {
-    const authorization = demoWalletAuthorization()
-    const request = JSON.parse(
-      JSON.stringify(
-        {
-          method: 'wallet_connect',
-          params: [{ capabilities: { authorizeAccessKey: authorization } }],
-        },
-        (_, value) => (typeof value === 'bigint' ? `0x${value.toString(16)}` : value),
-      ),
-    )
-    expect(() => ProviderRequest.parse(request)).not.toThrow()
-    expect(authorization.limits).toHaveLength(5)
-    expect(authorization.limits.every(({ limit }) => limit === 500_000_000n)).toBe(true)
-    expect(authorization.scopes.length).toBeGreaterThan(0)
-    expect(authorization.expiry).toBeGreaterThan(Math.floor(Date.now() / 1000))
-    expect(authorization.expiry).toBeLessThanOrEqual(Math.floor(Date.now() / 1000) + 86400)
+  it('resolves to bounded scopes and spending limits', () => {
+    const resolved = Permissions.resolve(demoWalletAuthorization(), { chainId: tempoModerato.id })
+    expect(resolved.limits).toHaveLength(5)
+    expect(resolved.limits?.every(({ limit }) => limit === 500_000_000n)).toBe(true)
+    expect(resolved.scopes).toHaveLength(10)
+    const now = Math.floor(Date.now() / 1000)
+    expect(resolved.expiry).toBeGreaterThan(now)
+    expect(resolved.expiry).toBeLessThanOrEqual(now + 86400 + 1)
   })
 
-  it('reproduces the reported failure when scopes are omitted', () => {
-    const request = {
-      method: 'wallet_connect',
-      params: [
-        {
-          capabilities: {
-            authorizeAccessKey: {
-              expiry: 100,
-              limits: [{ token: '0x20c0000000000000000000000000000000000001', limit: '0x1' }],
-            },
-          },
-        },
-      ],
-    }
-    expect(() => ProviderRequest.parse(request)).toThrow('scopes: Expected array')
+  it('adds a created token once, with a limit and a scope', () => {
+    const token = '0x20C0000000000000000000000000000000000AbC'
+    const authorization = demoWalletAuthorization([token, token.toLowerCase() as `0x${string}`])
+    expect(authorization.limits).toHaveLength(6)
+    expect(authorization.scopes).toHaveLength(11)
+    expect(authorization.scopes.some((s) => s.address === token.toLowerCase())).toBe(true)
   })
 })

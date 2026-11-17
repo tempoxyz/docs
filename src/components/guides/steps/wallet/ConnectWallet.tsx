@@ -23,23 +23,20 @@ import * as ui from './ConnectWallet.recipes'
 
 export function ConnectWallet(props: DemoStepProps) {
   const { stepNumber = 1 } = props
-  const isE2E = import.meta.env.VITE_E2E === 'true'
   const connections = useConnections()
   const connect = useConnect()
   const disconnect = useDisconnect()
   const connectors = useConnectors()
   const [connectError, setConnectError] = React.useState<Error | null>(null)
   const fundableConnectors = React.useMemo(
-    () => filterSupportedFundableWalletConnectors(connectors, { includeWebAuthn: isE2E }),
+    () => filterSupportedFundableWalletConnectors(connectors),
     [connectors],
   )
   const switchChain = useSwitchChain()
   const chains = useChains()
   const [copied, copyToClipboard] = useCopyToClipboard()
 
-  const walletConnection = connections.find((c) =>
-    isFundableWalletConnector(c.connector, { includeWebAuthn: isE2E }),
-  )
+  const walletConnection = connections.find((c) => isFundableWalletConnector(c.connector))
   const walletAddress = walletConnection?.accounts[0]
   const walletConnector = walletConnection?.connector
   const isSupported = chains.some((c) => c.id === walletConnection?.chainId)
@@ -52,12 +49,7 @@ export function ConnectWallet(props: DemoStepProps) {
       setConnectError(null)
       try {
         await disconnect.disconnectAsync().catch(() => {})
-        await connect.connectAsync({
-          connector,
-          ...(isE2E && connector.id === 'webAuthn'
-            ? { capabilities: { method: 'register' as const, name: 'Tempo Docs' } }
-            : {}),
-        })
+        await connect.connectAsync({ connector })
       } catch (error) {
         setConnectError(error instanceof Error ? error : new Error('Failed to connect wallet.'))
       }
