@@ -343,7 +343,8 @@ export type TempoCall = { to: `0x${string}`; data: `0x${string}`; value: bigint 
 /**
  * The access key a Routes batch needs from Tempo ID. The Routes API picks the contracts a batch
  * calls, such as an approval and a router, so no access key can name them at sign-in. This one
- * scopes every contract the batch calls, and limits the source token to the amount plus 1% for fees.
+ * scopes every contract the batch calls, and limits the source token to the amount plus 1%, plus
+ * `feeLimit` for a network fee paid in the source token, since account-paid fees spend the limit.
  * The network fee can come from another stablecoin, such as for a EURC.e source, so each of
  * `feeTokens` gets `feeLimit` too.
  */
@@ -371,6 +372,7 @@ export function routesAccessKey(options: {
   feeTokens?: readonly `0x${string}`[]
   feeLimit?: bigint
 }) {
+  const feeLimit = options.feeLimit ?? 1_000_000n
   const source = options.token.toLowerCase()
   const feeTokens = [
     ...new Set((options.feeTokens ?? []).map((t) => t.toLowerCase() as `0x${string}`)),
@@ -382,8 +384,11 @@ export function routesAccessKey(options: {
     chainId: options.chainId,
     expiry: '1h',
     limits: [
-      { token: options.token, limit: options.amount + options.amount / 100n + 1n },
-      ...feeTokens.map((token) => ({ token, limit: options.feeLimit ?? 1_000_000n })),
+      {
+        token: options.token,
+        limit: options.amount + options.amount / 100n + 1n + feeLimit,
+      },
+      ...feeTokens.map((token) => ({ token, limit: feeLimit })),
     ],
     scopes: addresses.map((address) => ({ address })),
   } as const

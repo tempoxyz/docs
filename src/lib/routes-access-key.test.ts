@@ -14,7 +14,8 @@ describe('routesAccessKey', () => {
       amount: 1_000_000n,
     })
     expect(key.scopes).toEqual([{ address: token.toLowerCase() }, { address: router }])
-    expect(key.limits).toEqual([{ token, limit: 1_010_001n }])
+    // The amount, 1%, and the default 1-unit network-fee budget.
+    expect(key.limits).toEqual([{ token, limit: 2_010_001n }])
     expect(Permissions.resolve(key, { chainId: 4217 }).scopes).toHaveLength(2)
   })
 
