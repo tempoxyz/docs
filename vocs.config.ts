@@ -54,9 +54,9 @@ const changelog = Changelog.from({
           .replace(/<details\b[^>]*>/gi, '')
           .replace(/<\/details>/gi, '')
           .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n')
-          .replace(/\]\(https:\/\/tempo\.xyz\/developers\//g, '](/')
-          .replace(/<https:\/\/tempo\.xyz\/developers(\/[^>]+)>/g, '[$1]($1)')
-          .replace(/(?<![\w/"'(])https:\/\/tempo\.xyz\/developers(\/[^\s<>)\]]+)/g, '[$1]($1)')
+          .replace(/\]\(https:\/\/tempo\.(?:com|xyz)\/developers\//g, '](/')
+          .replace(/<https:\/\/tempo\.(?:com|xyz)\/developers(\/[^>]+)>/g, '[$1]($1)')
+          .replace(/(?<![\w/"'(])https:\/\/tempo\.(?:com|xyz)\/developers(\/[^\s<>)\]]+)/g, '[$1]($1)')
 
         return {
           ...release,
