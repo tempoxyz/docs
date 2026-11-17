@@ -1011,7 +1011,10 @@ export function createDevnetAdapter(
       }),
       throwOnReceiptRevert: true,
     })
-    const [log] = parseEventLogs({ abi: configUpdatedAbi, logs: receipt.logs, strict: true })
+    // An account's first update also records its initial config first, so take the newest event.
+    const log = parseEventLogs({ abi: configUpdatedAbi, logs: receipt.logs, strict: true })
+      .filter((item) => isAddressEqual(item.args.account, session.address))
+      .at(-1)
     if (!log)
       throw new DevnetRejection('invalid-config', 'Devnet recorded no configuration update.')
     session.config = Tempo.AccountConfig.from(log.args)
