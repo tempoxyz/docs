@@ -60,19 +60,21 @@ type MarkdownNode = {
 type MarkdownContext = {
   getSnippet: (fileName: string) => string | undefined
   openApi?: Ir
-  routes?: TestRoute[]
+  routes?: RouteDirectory
 }
+
+type RouteDirectory = { source: string; routes: TestRoute[] }
 
 type MarkdownOptions = {
   loadOpenApi?: () => Promise<Ir>
-  loadRoutes?: () => Promise<TestRoute[]>
+  loadRoutes?: () => Promise<RouteDirectory | undefined>
 }
 
 const openApiSpecs = new Map<string, Promise<Ir>>()
 const markdownParser = unified().use(remarkParse)
 const openApiSpecUrl = 'https://api.tempo.xyz/openapi.json'
 const routesDirectoryUrl = 'https://api.tempo.xyz/v1/routes'
-let routesDirectory: Promise<TestRoute[] | undefined> | undefined
+const routesDirectories = new Map<string, Promise<RouteDirectory | undefined>>()
 const presentationOnlyElements = new Set([
   'meta',
   'script',
@@ -211,37 +213,57 @@ function contains(node: MarkdownNode, name: string): boolean {
 }
 
 /**
- * Reads the complete public route directory once per build so the Markdown export lists every
- * route. Returns undefined when the API is unreachable; the page then keeps only its description.
+ * Reads the complete public route directory once per build and source so the Markdown export
+ * lists every route. Returns undefined when the API is unreachable; the page then keeps only its
+ * description. Only successful reads are cached.
  */
-function loadMarkdownRoutes() {
-  routesDirectory ??= (async () => {
-    try {
-      const routes: TestRoute[] = []
-      let cursor: string | null = null
-      for (let page = 0; page < 20; page++) {
-        const url = new URL(process.env.ROUTES_DIRECTORY_URL ?? routesDirectoryUrl)
-        url.searchParams.set('limit', '50')
-        if (cursor) url.searchParams.set('cursor', cursor)
-        const response = await fetch(url, { signal: AbortSignal.timeout(15_000) })
-        if (!response.ok) throw new Error(`GET ${url} returned ${response.status}`)
-        const parsed = directorySchema.parse(await response.json())
-        routes.push(...parsed.data)
-        cursor = parsed.nextCursor
-        if (!cursor) return routes
-      }
-      throw new Error('The route directory has more than 20 pages.')
-    } catch (error) {
-      console.warn(`[markdown] Could not read the route directory: ${String(error)}`)
-      return undefined
-    }
-  })()
-  return routesDirectory.then((routes) => routes ?? [])
+async function loadMarkdownRoutes(): Promise<RouteDirectory | undefined> {
+  const source = process.env.ROUTES_DIRECTORY_URL ?? routesDirectoryUrl
+  let directory = routesDirectories.get(source)
+  if (!directory) {
+    directory = fetchRouteDirectory(source)
+    routesDirectories.set(source, directory)
+  }
+  const result = await directory.catch((error: unknown) => {
+    routesDirectories.delete(source)
+    throw error
+  })
+  // Retry on the next page instead of caching an unreachable API for the whole process.
+  if (!result) routesDirectories.delete(source)
+  return result
 }
 
-function renderSupportedRoutes(routes: TestRoute[] | undefined): MarkdownNode[] {
+/**
+ * Throws when the directory answers with an error status, an unexpected shape or too many
+ * pages, so a broken API fails the build. Only an unreachable API or a timeout falls back.
+ */
+async function fetchRouteDirectory(source: string): Promise<RouteDirectory | undefined> {
+  const routes: TestRoute[] = []
+  let cursor: string | null = null
+  for (let page = 0; page < 20; page++) {
+    const url = new URL(source)
+    url.searchParams.set('limit', '50')
+    if (cursor) url.searchParams.set('cursor', cursor)
+    let response: Response
+    try {
+      response = await fetch(url, { signal: AbortSignal.timeout(15_000) })
+    } catch (error) {
+      console.warn(`[markdown] Could not reach the route directory at ${source}: ${String(error)}`)
+      return undefined
+    }
+    if (!response.ok) throw new Error(`GET ${url} returned ${response.status}`)
+    const parsed = directorySchema.parse(await response.json())
+    routes.push(...parsed.data)
+    cursor = parsed.nextCursor
+    if (!cursor) return { source, routes }
+  }
+  throw new Error(`The route directory at ${source} has more than 20 pages.`)
+}
+
+function renderSupportedRoutes(directory: RouteDirectory | undefined): MarkdownNode[] {
   const description = markdownNodes(interactiveDescriptions.SupportedRoutesTable)
-  if (!routes?.length) return description
+  if (!directory?.routes.length) return description
+  const { routes, source } = directory
   const asset = (route: TestRoute, side: 'source' | 'destination') =>
     `${route[`${side}Token`].symbol} on ${route[`${side}Chain`].name}`
   const items = routes
@@ -264,9 +286,9 @@ function renderSupportedRoutes(routes: TestRoute[] | undefined): MarkdownNode[] 
   return [
     ...description,
     paragraph([
-      text(
-        `The directory listed ${routes.length} routes when this page was built. Call GET https://api.tempo.xyz/v1/routes for the current list.`,
-      ),
+      text(`The directory listed ${routes.length} routes when this page was built. Call `),
+      inlineCode(`GET ${source}`),
+      text(' for the current list.'),
     ]),
     {
       type: 'list',

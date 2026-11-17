@@ -45,15 +45,20 @@ Token rules.
         .use(remarkParse)
         .use(remarkMdx)
         .use(plainMarkdownComponents, {
-          loadRoutes: async () => [
-            route('eip155:1/usdt-eip155:4217/ousd', 'USDT', 'Ethereum', false),
-            route('eip155:1/ousd-eip155:4217/ousd', 'OUSD', 'Ethereum', true),
-          ],
+          loadRoutes: async () => ({
+            source: 'https://routes.example/v1/routes',
+            routes: [
+              route('eip155:1/usdt-eip155:4217/ousd', 'USDT', 'Ethereum', false),
+              route('eip155:1/ousd-eip155:4217/ousd', 'OUSD', 'Ethereum', true),
+            ],
+          }),
         })
         .use(remarkStringify)
         .process('## Available routes\n\n<SupportedRoutesTable />'),
     )
-    expect(output).toContain('The directory listed 2 routes when this page was built.')
+    expect(output).toContain(
+      'The directory listed 2 routes when this page was built. Call `GET https://routes.example/v1/routes` for the current list.',
+    )
     expect(output).toContain(
       '* OUSD on Ethereum to OUSD on Tempo: deposit address; fee coverage available. Route ID `eip155:1/ousd-eip155:4217/ousd`',
     )
@@ -64,12 +69,51 @@ Token rules.
     expect(output).not.toContain('<SupportedRoutesTable')
   })
 
+  test('fails the build when the route directory answers with an error or a bad shape', async () => {
+    const source = 'https://routes.example/errors'
+    vi.stubEnv('ROUTES_DIRECTORY_URL', source)
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('{}', { status: 500 }))
+      .mockResolvedValueOnce(Response.json({ data: [{ id: 'x' }], nextCursor: null }))
+    vi.stubGlobal('fetch', fetch)
+    try {
+      await expect(renderRoutesPage()).rejects.toThrow('returned 500')
+      await expect(renderRoutesPage()).rejects.toThrow()
+      expect(fetch).toHaveBeenCalledTimes(2)
+    } finally {
+      vi.unstubAllGlobals()
+      vi.unstubAllEnvs()
+    }
+  })
+
+  test('falls back when the route directory is unreachable and retries on the next page', async () => {
+    const source = 'https://routes.example/unreachable'
+    vi.stubEnv('ROUTES_DIRECTORY_URL', source)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const fetch = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('fetch failed'))
+      .mockResolvedValueOnce(Response.json({ data: [], nextCursor: null }))
+    vi.stubGlobal('fetch', fetch)
+    try {
+      expect(await renderRoutesPage()).toContain('The interactive page lists every route')
+      expect(warn).toHaveBeenCalled()
+      await renderRoutesPage()
+      expect(fetch).toHaveBeenCalledTimes(2)
+    } finally {
+      warn.mockRestore()
+      vi.unstubAllGlobals()
+      vi.unstubAllEnvs()
+    }
+  })
+
   test('keeps the supported routes description when the directory is unavailable', async () => {
     const output = String(
       await unified()
         .use(remarkParse)
         .use(remarkMdx)
-        .use(plainMarkdownComponents, { loadRoutes: async () => [] })
+        .use(plainMarkdownComponents, { loadRoutes: async () => undefined })
         .use(remarkStringify)
         .process('<SupportedRoutesTable />'),
     )
@@ -737,6 +781,17 @@ async function render(source: string) {
       .use(plainMarkdownComponents, { loadOpenApi: async () => fixtureOpenApi })
       .use(remarkStringify)
       .process(source),
+  )
+}
+
+async function renderRoutesPage() {
+  return String(
+    await unified()
+      .use(remarkParse)
+      .use(remarkMdx)
+      .use(plainMarkdownComponents)
+      .use(remarkStringify)
+      .process('<SupportedRoutesTable />'),
   )
 }
 
