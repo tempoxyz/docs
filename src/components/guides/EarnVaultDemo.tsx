@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { publicAssetPath } from '../../lib/public-asset-path'
 import { Container } from '../Container'
 import { Button, Step, useCopyToClipboard, useHydrated } from './Demo'
 import * as ui from './EarnVaultDemo.recipes'
@@ -93,7 +94,7 @@ export function EarnVaultDemo() {
         footer={
           <div {...ui.earnVaultDemoLayout()}>
             <span>No wallet connection required.</span>
-            <a href="/docs/api/earn" {...ui.earnVaultDemoLink()}>
+            <a href={publicAssetPath('/docs/api/earn')} {...ui.earnVaultDemoLink()}>
               API reference
             </a>
           </div>

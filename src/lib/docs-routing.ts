@@ -15,8 +15,13 @@ export const developerSurfaceRedirects = [
   { source: '/performance', destination: '/docs/protocol/blockspace/overview' },
 ] as const satisfies readonly DocsRouteContract[]
 
-export function docsRouteDestination(destination: string, _environment = process.env.VERCEL_ENV) {
-  return destination
+// The public site proxies `/developers/*` here with the mount stripped and passes `Location`
+// through unchanged, so a root-relative destination would leave the mount and take the public
+// site's own redirect back into it. Production names the canonical URL so each retired route
+// lands in one hop; previews serve the docs at their own root.
+export function docsRouteDestination(destination: string, environment = process.env.VERCEL_ENV) {
+  if (environment !== 'production' || !destination.startsWith('/')) return destination
+  return `${canonicalDevelopersOrigin}${destination === '/' ? '' : destination}`
 }
 
 // These routes are evaluated in three places: Vocs for native route traffic,

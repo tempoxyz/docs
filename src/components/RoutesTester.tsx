@@ -31,6 +31,7 @@ import {
   WalletSendError,
   waitForEvmCall,
 } from '../lib/evm-wallets'
+import { publicAssetPath } from '../lib/public-asset-path'
 import { agentInstructions } from '../lib/routes-agent-instructions'
 import {
   type ApiRequest,
@@ -336,7 +337,7 @@ export function RoutesTester() {
           <p {...noteStyle()}>
             This route needs a {selected.sourceChain.name} wallet to sign transfers, which this demo
             cannot do. Use the{' '}
-            <a href="/docs/routes/transfers" {...accentLink()}>
+            <a href={publicAssetPath('/docs/routes/transfers')} {...accentLink()}>
               Transfers API
             </a>{' '}
             from your integration.
@@ -1776,7 +1777,7 @@ function ReferenceLink({ id, href }: { id: string; href: string }) {
   const [copied, copy] = Demo.useCopyToClipboard()
   return (
     <a
-      href={href}
+      href={publicAssetPath(href)}
       target="_blank"
       rel="noreferrer"
       title="Open in the API reference. The ID is copied to paste as the id parameter."

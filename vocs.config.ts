@@ -16,6 +16,7 @@ import { demoteMarkdownHeadings } from './src/lib/markdown-headings'
 import { plainMarkdownComponents } from './src/lib/markdown-output'
 import { transformMarkdownOutput } from './src/lib/markdown-output-transform'
 import { renderMermaid } from './src/lib/markdown-renderers'
+import { collapseRedirectChains } from './src/lib/redirect-chains'
 import { annotateRoutesAvailability } from './src/lib/routes-openapi'
 import { loadTempoOpenApi } from './src/lib/tempo-openapi'
 
@@ -31,6 +32,10 @@ const tempoChangelog = cacheChangelog(
   Changelog.github({ prereleases: true, repo: 'tempoxyz/tempo' }),
   { name: 'tempoxyz/tempo' },
 )
+
+// Release notes render as plain Markdown links, outside Waku's router, so production keeps the
+// public mount that the router would otherwise add.
+const releaseNoteMount = process.env.VERCEL_ENV === 'production' ? '/developers' : ''
 
 const changelog = Changelog.from({
   ...tempoChangelog,
@@ -54,11 +59,14 @@ const changelog = Changelog.from({
           .replace(/<details\b[^>]*>/gi, '')
           .replace(/<\/details>/gi, '')
           .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary>/gi, '\n\n#### $1\n\n')
-          .replace(/\]\(https:\/\/tempo\.(?:com|xyz)\/developers\//g, '](/')
-          .replace(/<https:\/\/tempo\.(?:com|xyz)\/developers(\/[^>]+)>/g, '[$1]($1)')
+          .replace(/\]\(https:\/\/tempo\.(?:com|xyz)\/developers\//g, `](${releaseNoteMount}/`)
+          .replace(
+            /<https:\/\/tempo\.(?:com|xyz)\/developers(\/[^>]+)>/g,
+            `[$1](${releaseNoteMount}$1)`,
+          )
           .replace(
             /(?<![\w/"'(])https:\/\/tempo\.(?:com|xyz)\/developers(\/[^\s<>)\]]+)/g,
-            '[$1]($1)',
+            `[$1](${releaseNoteMount}$1)`,
           )
 
         return {
@@ -1381,7 +1389,7 @@ export default defineConfig({
       link: '/',
     },
   ],
-  redirects: [
+  redirects: collapseRedirectChains([
     ...blogMigrationRedirects.map((redirect) => ({ ...redirect, status: 301 as const })),
     {
       source: '/docs/resources/partners.md',
@@ -2103,12 +2111,13 @@ export default defineConfig({
       destination: '/docs/protocol/zones',
       status: 301,
     },
-  ].map((redirect) => ({
-    ...redirect,
-    // Vercel serves these redirects at root; the public site owns its proxy mount.
-    destination: docsRouteDestination(redirect.destination),
-    status: 301 as const,
-  })),
+  ])
+    // Each retired route answers with its final page, named at the public mount in production.
+    .map((redirect) => ({
+      ...redirect,
+      destination: docsRouteDestination(redirect.destination),
+      status: 301 as const,
+    })),
   codeHighlight: {
     engine: 'highlights',
     langAlias: {

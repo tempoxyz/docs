@@ -79,9 +79,11 @@ function findHostRedirectIndex(source: string, host: string) {
   )
 }
 
+// Vercel's redirects name the public mount, so a proxied request lands on its final URL in one
+// hop instead of leaving the mount first.
 function developersProxyDestination(destination: string) {
   if (URL.canParse(destination)) return destination
-  return `/developers${destination === '/' ? '' : destination}`
+  return `${canonicalDevelopersOrigin}${destination === '/' ? '' : destination}`
 }
 
 describe('docs routing redirects', () => {
@@ -125,17 +127,19 @@ describe('docs routing redirects', () => {
     })
   })
 
-  it('keeps Vercel redirects root-relative in production and preview', () => {
-    expect(docsRouteDestination('/', 'production')).toBe('/')
+  it('names the public mount in production and stays on preview hosts', () => {
+    expect(docsRouteDestination('/', 'production')).toBe(canonicalDevelopersOrigin)
     expect(docsRouteDestination('/', 'preview')).toBe('/')
-    expect(docsRouteDestination('/docs/api', 'production')).toBe('/docs/api')
+    expect(docsRouteDestination('/docs/api', 'production')).toBe(
+      `${canonicalDevelopersOrigin}/docs/api`,
+    )
     expect(docsRouteDestination('/docs/api', 'preview')).toBe('/docs/api')
     expect(docsRouteDestination('https://tempo.com/learn/stablecoin-payroll/', 'production')).toBe(
       'https://tempo.com/learn/stablecoin-payroll/',
     )
   })
 
-  it('keeps retired documentation redirects on the deployment host', async () => {
+  it('sends retired documentation routes to their final public URL in production', async () => {
     vi.stubEnv('VERCEL_ENV', 'production')
     vi.resetModules()
     try {
@@ -146,19 +150,16 @@ describe('docs routing redirects', () => {
       expect(productionRedirects).toHaveLength(vocsRedirects.length)
       for (const redirect of productionRedirects) {
         expect(redirect.status, redirect.source).toBe(301)
-        if (!URL.canParse(redirect.destination)) {
-          expect(redirect.destination).toMatch(/^\//)
-          expect(redirect.destination).not.toMatch(/^\/developers(?:\/|$)/)
-        }
+        expect(URL.canParse(redirect.destination), redirect.source).toBe(true)
       }
       expect(productionRedirects).toContainEqual({
         source: '/docs/guide',
-        destination: '/docs/quickstart/integrate-tempo',
+        destination: `${canonicalDevelopersOrigin}/docs/quickstart/integrate-tempo`,
         status: 301,
       })
       expect(productionRedirects).toContainEqual({
         source: '/docs/protocol/tip20-rewards',
-        destination: '/docs/protocol/upgrades/t7#deprecate-tip-20-rewards',
+        destination: `${canonicalDevelopersOrigin}/docs/protocol/upgrades/t7#deprecate-tip-20-rewards`,
         status: 301,
       })
     } finally {
@@ -200,7 +201,7 @@ describe('docs routing redirects', () => {
     for (const prefix of ['', '/developers']) {
       for (const source of ['/docs/ecosystem/assets', '/docs/partners/assets']) {
         expect(findRedirect(`${prefix}${source}`)).toMatchObject({
-          destination: `${prefix}/docs/partners/stablecoins`,
+          destination: `${canonicalDevelopersOrigin}/docs/partners/stablecoins`,
           permanent: true,
         })
       }
@@ -370,10 +371,12 @@ describe('docs routing redirects', () => {
     ['/developer-tools/indexer', '/docs/api/indexer-api'],
     ['/hosted-services', '/docs/api'],
     ['/hosted-services/:path*', '/docs/api'],
-  ])('redirects %s to %s', (source, destination) => {
+  ])('redirects %s to %s at the public mount', (source, destination) => {
     expect(findRedirect(source)).toMatchObject({
       source,
-      destination,
+      destination: developersProxyDestination(
+        destination.replace(/^\/developers(?=\/|$)/, '') || '/',
+      ),
       permanent: true,
     })
   })

@@ -460,6 +460,14 @@ function rewriteNode(
   if (node.name === 'TidxQuery' && node.attributes?.some((attribute) => attribute.name === 'sql'))
     return renderTidxQuery(node)
   if (node.name === 'Badge') return renderBadge(node)
+  // Waku's router link: its `to` is the page path, the same as a plain anchor's href.
+  if (node.name === 'Link' && stringAttribute(node, 'to') !== undefined) {
+    node.name = 'a'
+    node.attributes = node.attributes?.map((attribute) =>
+      attribute.name === 'to' ? { ...attribute, name: 'href' } : attribute,
+    )
+    return renderHtmlLink(node, headingDepth, context)
+  }
   if (node.name === 'Callout') return renderCallout(node, headingDepth, context)
   if (
     node.name === 'DocsLinkButton' ||
