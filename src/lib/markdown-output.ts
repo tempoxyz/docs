@@ -13,6 +13,7 @@ import { groupPath } from '../../node_modules/vocs/dist/internal/openapi/route.j
 import { codeSamples } from '../../node_modules/vocs/dist/internal/openapi/sample.js'
 import { tempoAgentSetupCommands } from './ai-install-commands'
 import { docsLinkCards } from './docs-link-cards'
+import { directorySchema, type TestRoute } from './routes-test'
 import { loadTempoOpenApi } from './tempo-openapi'
 import { type TidxNetwork, tidxNetworks } from './tidx-networks'
 
@@ -59,13 +60,19 @@ type MarkdownNode = {
 type MarkdownContext = {
   getSnippet: (fileName: string) => string | undefined
   openApi?: Ir
+  routes?: TestRoute[]
 }
 
-type MarkdownOptions = { loadOpenApi?: () => Promise<Ir> }
+type MarkdownOptions = {
+  loadOpenApi?: () => Promise<Ir>
+  loadRoutes?: () => Promise<TestRoute[]>
+}
 
 const openApiSpecs = new Map<string, Promise<Ir>>()
 const markdownParser = unified().use(remarkParse)
 const openApiSpecUrl = 'https://api.tempo.xyz/openapi.json'
+const routesDirectoryUrl = 'https://api.tempo.xyz/v1/routes'
+let routesDirectory: Promise<TestRoute[] | undefined> | undefined
 const presentationOnlyElements = new Set([
   'meta',
   'script',
@@ -192,8 +199,86 @@ export function plainMarkdownComponents(options: MarkdownOptions = {}) {
       const [badge] = children.splice(metadata, 1)
       children.splice(heading, 0, badge)
     }
-    rewriteChildren(tree, 1, { getSnippet, openApi })
+    const routes = contains(tree, 'SupportedRoutesTable')
+      ? await (options.loadRoutes ?? loadMarkdownRoutes)()
+      : undefined
+    rewriteChildren(tree, 1, { getSnippet, openApi, routes })
   }
+}
+
+function contains(node: MarkdownNode, name: string): boolean {
+  return node.name === name || (node.children ?? []).some((child) => contains(child, name))
+}
+
+/**
+ * Reads the complete public route directory once per build so the Markdown export lists every
+ * route. Returns undefined when the API is unreachable; the page then keeps only its description.
+ */
+function loadMarkdownRoutes() {
+  routesDirectory ??= (async () => {
+    try {
+      const routes: TestRoute[] = []
+      let cursor: string | null = null
+      for (let page = 0; page < 20; page++) {
+        const url = new URL(process.env.ROUTES_DIRECTORY_URL ?? routesDirectoryUrl)
+        url.searchParams.set('limit', '50')
+        if (cursor) url.searchParams.set('cursor', cursor)
+        const response = await fetch(url, { signal: AbortSignal.timeout(15_000) })
+        if (!response.ok) throw new Error(`GET ${url} returned ${response.status}`)
+        const parsed = directorySchema.parse(await response.json())
+        routes.push(...parsed.data)
+        cursor = parsed.nextCursor
+        if (!cursor) return routes
+      }
+      throw new Error('The route directory has more than 20 pages.')
+    } catch (error) {
+      console.warn(`[markdown] Could not read the route directory: ${String(error)}`)
+      return undefined
+    }
+  })()
+  return routesDirectory.then((routes) => routes ?? [])
+}
+
+function renderSupportedRoutes(routes: TestRoute[] | undefined): MarkdownNode[] {
+  const description = markdownNodes(interactiveDescriptions.SupportedRoutesTable)
+  if (!routes?.length) return description
+  const asset = (route: TestRoute, side: 'source' | 'destination') =>
+    `${route[`${side}Token`].symbol} on ${route[`${side}Chain`].name}`
+  const items = routes
+    .map((route) => {
+      const methods = [
+        route.capabilities.transfer?.modes.length && 'transfer',
+        route.capabilities.depositAddress && 'deposit address',
+      ].filter(Boolean)
+      const covered = route.subsidies?.depositAddress || route.subsidies?.transfer
+      return {
+        label: `${asset(route, 'source')} to ${asset(route, 'destination')}`,
+        line: [
+          methods.length ? methods.join(', ') : 'no funding methods',
+          covered ? 'fee coverage available' : 'no fee coverage',
+        ].join('; '),
+        id: route.id,
+      }
+    })
+    .sort((a, b) => a.label.localeCompare(b.label))
+  return [
+    ...description,
+    paragraph([
+      text(
+        `The directory listed ${routes.length} routes when this page was built. Call GET https://api.tempo.xyz/v1/routes for the current list.`,
+      ),
+    ]),
+    {
+      type: 'list',
+      ordered: false,
+      spread: false,
+      children: items.map(({ label, line, id }) => ({
+        type: 'listItem',
+        spread: false,
+        children: [paragraph([text(`${label}: ${line}. Route ID `), inlineCode(id)])],
+      })),
+    },
+  ]
 }
 
 function containsOpenApi(node: MarkdownNode): boolean {
@@ -363,6 +448,7 @@ function rewriteNode(
     return renderLinkButton(node)
   if (node.name === 'OpenApi.Endpoints' || node.name === 'OpenApi.Playground')
     return renderOpenApi(node, headingDepth, context.openApi)
+  if (node.name === 'SupportedRoutesTable') return renderSupportedRoutes(context.routes)
   if (node.name && interactiveDescriptions[node.name])
     return markdownNodes(interactiveDescriptions[node.name])
 

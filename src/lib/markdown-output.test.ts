@@ -27,6 +27,56 @@ Token rules.
     expect(output).not.toContain('<Badge')
   })
 
+  test('lists every route from the directory in the supported routes export', async () => {
+    const route = (id: string, source: string, sourceChain: string, subsidized: boolean) => ({
+      id,
+      sourceChain: { id: 'eip155:1', name: sourceChain, addressFormat: 'hex' },
+      destinationChain: { id: 'eip155:4217', name: 'Tempo', addressFormat: 'hex' },
+      sourceToken: { tokenKey: `${id}/source`, symbol: source, decimals: 6 },
+      destinationToken: { tokenKey: `${id}/destination`, symbol: 'OUSD', decimals: 6 },
+      capabilities: {
+        depositAddress: true,
+        transfer: subsidized ? null : { modes: ['exactSource' as const] },
+      },
+      subsidies: { depositAddress: subsidized },
+    })
+    const output = String(
+      await unified()
+        .use(remarkParse)
+        .use(remarkMdx)
+        .use(plainMarkdownComponents, {
+          loadRoutes: async () => [
+            route('eip155:1/usdt-eip155:4217/ousd', 'USDT', 'Ethereum', false),
+            route('eip155:1/ousd-eip155:4217/ousd', 'OUSD', 'Ethereum', true),
+          ],
+        })
+        .use(remarkStringify)
+        .process('## Available routes\n\n<SupportedRoutesTable />'),
+    )
+    expect(output).toContain('The directory listed 2 routes when this page was built.')
+    expect(output).toContain(
+      '* OUSD on Ethereum to OUSD on Tempo: deposit address; fee coverage available. Route ID `eip155:1/ousd-eip155:4217/ousd`',
+    )
+    expect(output).toContain(
+      '* USDT on Ethereum to OUSD on Tempo: transfer, deposit address; no fee coverage.',
+    )
+    expect(output.indexOf('OUSD on Ethereum')).toBeLessThan(output.indexOf('USDT on Ethereum'))
+    expect(output).not.toContain('<SupportedRoutesTable')
+  })
+
+  test('keeps the supported routes description when the directory is unavailable', async () => {
+    const output = String(
+      await unified()
+        .use(remarkParse)
+        .use(remarkMdx)
+        .use(plainMarkdownComponents, { loadRoutes: async () => [] })
+        .use(remarkStringify)
+        .process('<SupportedRoutesTable />'),
+    )
+    expect(output).toContain('The interactive page lists every route in the live directory')
+    expect(output).not.toContain('The directory listed')
+  })
+
   test('exports setup card descriptions and destinations for agents', async () => {
     const output = await render('## Set up your project\n\n<DocsSetupCards />')
     expect(output).toContain('### Connect to Tempo')
