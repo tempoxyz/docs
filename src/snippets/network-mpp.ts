@@ -1,14 +1,19 @@
+// @ts-nocheck
+// Type-checked against accounts@alpha, which the site's own demos don't use yet.
+import { tempoId } from 'accounts/wagmi'
 import { Mppx, tempo } from 'mppx/client'
 import type { Account } from 'viem'
 // [!region wallet-config]
 import { tempo as tempoMainnet } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
 import { getConnectorClient } from 'wagmi/actions'
-import { tempoWallet } from 'wagmi/connectors'
 
 export const mppConfig = createConfig({
   chains: [tempoMainnet],
-  connectors: [tempoWallet()],
+  connectors: [
+    // Each sign-in requests an access key that spends up to 10 USDC.e for a day.
+    tempoId({ accessKey: { expiry: '1d', limits: [{ limit: '10', token: 'USDC.e' }] } }),
+  ],
   transports: { [tempoMainnet.id]: http() },
 })
 // [!endregion wallet-config]

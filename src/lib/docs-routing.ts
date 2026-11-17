@@ -40,7 +40,7 @@ export const proxiedLegacyDocsRoutes = [
   },
   {
     source: '/docs/guide/use-accounts/embed-passkeys',
-    destination: 'https://accounts.tempo.xyz/docs/adapters/webauthn',
+    destination: '/docs/accounts/authentication',
   },
   {
     source: '/docs/guide/use-accounts/add-funds',

@@ -3,12 +3,15 @@
 // biome-ignore-all format: snippet
 
 // [!region setup]
+import { tempoId } from 'accounts/wagmi'
 import { tempo } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
-import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
-  connectors: [tempoWallet()],
+  connectors: [
+    // Each sign-in requests an access key that spends up to 100 OUSD for a day.
+    tempoId({ accessKey: { expiry: '1d', limits: [{ limit: '100', token: 'ousd' }] } }),
+  ],
   chains: [tempo],
   multiInjectedProviderDiscovery: false,
   transports: {
@@ -19,17 +22,17 @@ export const config = createConfig({
 // [!endregion setup]
 
 // [!region withFeePayer]
+import { viem } from 'accounts/plugins'
+import { tempoId } from 'accounts/wagmi'
 import { tempoModerato } from 'viem/chains'
 import { createConfig, http } from 'wagmi'
-import { tempoWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   connectors: [
-    tempoWallet({
-      feePayer: {
-        precedence: 'user-first',
-        url: 'https://sponsor.moderato.tempo.xyz',
-      },
+    tempoId({
+      accessKey: { expiry: '1d', limits: [{ limit: '100', token: 'ousd' }] },
+      // Moderato's public sponsor co-signs each transaction as the fee payer.
+      plugins: [viem({ relay: 'https://sponsor.moderato.tempo.xyz' })],
     }),
   ],
   chains: [tempoModerato],

@@ -201,7 +201,7 @@ Once the [revocation](/docs/accounts/access-keys/revocation) lands, Tempo reject
 
 ## Authorize in the Browser
 
-When the account key is a Privy embedded wallet the user unlocks in your app, use the [Accounts SDK](https://accounts.tempo.xyz/docs). It signs the authorization through Privy's `secp256k1_sign`. Its Privy adapter needs `@privy-io/react-auth` 3.25.0 or later. Mount `PrivyAccountsBridge` from `accounts/react/privy` under Privy's `PrivyProvider`. Then ask the provider to authorize the holder's key.
+When the account key is a Privy embedded wallet the user unlocks in your app, use version 0 of the Accounts SDK (`accounts@0.19.1`). Version 1 (`accounts@alpha`) holds only an access key and has [no Privy or Turnkey adapter](https://accounts.tehq.dev/docs/guides/migration#removed-adapters). Version 0 signs the authorization through Privy's `secp256k1_sign`. Its Privy adapter needs `@privy-io/react-auth` 3.25.0 or later. Mount `PrivyAccountsBridge` from `accounts/react/privy` under Privy's `PrivyProvider`. Then ask the provider to authorize the holder's key.
 
 ```ts [connect.ts]
 import { parseUnits, toHex } from 'viem'
