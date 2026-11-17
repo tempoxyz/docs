@@ -66,7 +66,9 @@ export function getConfig(options: getConfig.Options = {}) {
     // In a browser, the page's origin is the client ID. Prerendering has no page, and never signs in.
     ...(typeof window === 'undefined' ? { clientId: 'https://docs.tempo.xyz' } : {}),
     // The guides request a bounded access key at sign-in. Pages that move real funds request a
-    // short-lived access key that only sends mainnet stablecoins, up to 100 of each.
+    // short-lived access key that only sends mainnet stablecoins, up to 100 of each: its limits
+    // scope each token's transfer and transferWithMemo. The Routes tester requests an access key
+    // scoped to each batch's contracts before it sends.
     accessKey: accessKey
       ? demoWalletAuthorization()
       : {

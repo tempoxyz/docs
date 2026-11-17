@@ -338,6 +338,28 @@ export function assertSufficientBalance(options: {
   )
 }
 export type TempoCall = { to: `0x${string}`; data: `0x${string}`; value: bigint }
+
+/**
+ * The access key a Routes batch needs from Tempo ID. The Routes API picks the contracts a batch
+ * calls, such as an approval and a router, so no access key can name them at sign-in. This one
+ * scopes every contract the batch calls, and limits the source token to the amount plus 1% for fees.
+ */
+export function routesAccessKey(options: {
+  chainId: number
+  calls: readonly Pick<TempoCall, 'to'>[]
+  token: `0x${string}`
+  amount: bigint
+}) {
+  const addresses = [
+    ...new Set([options.token, ...options.calls.map((c) => c.to)].map((a) => a.toLowerCase())),
+  ] as `0x${string}`[]
+  return {
+    chainId: options.chainId,
+    expiry: '1h',
+    limits: [{ token: options.token, limit: options.amount + options.amount / 100n + 1n }],
+    scopes: addresses.map((address) => ({ address })),
+  } as const
+}
 export type TempoSendCalls = (parameters: {
   calls: TempoCall[]
   chainId: number

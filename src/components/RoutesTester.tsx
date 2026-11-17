@@ -46,6 +46,7 @@ import {
   RoutesApiError,
   requestUrl,
   retryOn,
+  routesAccessKey,
   SourceRevertedError,
   sourceActionSchema,
   submitTempoCalls,
@@ -94,7 +95,7 @@ import {
 } from '../lib/tron-wallets'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
-import { tempoChainIds, useTempoIdConnector } from '../wagmi.config'
+import { tempoChainIds, tempoIdConnectorId, useTempoIdConnector } from '../wagmi.config'
 import { type ApiCall, ApiLog, CopyButton } from './ApiLog'
 import { Container } from './Container'
 import * as Demo from './guides/Demo'
@@ -791,7 +792,28 @@ function RouteLifecycle({
       let hash: string
       try {
         hash = await submitTempoCalls(
-          (parameters) => sendCalls.mutateAsync({ ...parameters, chainId }),
+          async (parameters) => {
+            // Tempo ID's access key can call only the contracts it names, and the Routes API picks
+            // this batch's contracts. So the reader approves an access key for this batch first.
+            if (tempoWallet?.id === tempoIdConnectorId && sourceTokenAddress) {
+              const instance = await (
+                tempoWallet as unknown as {
+                  getInstance(): Promise<{
+                    dialog: { signIn(p: { accessKey: unknown }): Promise<unknown> }
+                  }>
+                }
+              ).getInstance()
+              await instance.dialog.signIn({
+                accessKey: routesAccessKey({
+                  chainId,
+                  calls: parameters.calls,
+                  token: sourceTokenAddress,
+                  amount: requiredSource,
+                }),
+              })
+            }
+            return sendCalls.mutateAsync({ ...parameters, chainId })
+          },
           {
             chainId,
             sender,
