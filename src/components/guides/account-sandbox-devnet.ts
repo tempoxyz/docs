@@ -1,6 +1,6 @@
 /**
  * Devnet adapter for the account sandbox. It sends the sandbox's actions as real transactions on
- * the internal t14-checkpoint devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
+ * the internal stack-mdtgf devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
  * configurable access keys (TIP-1111).
  *
  * - Only real signing runs on devnet. Passkeys are real WebAuthn passkeys, so creating and signing
@@ -29,7 +29,6 @@ import {
   isAddressEqual,
   keccak256,
   parseAbi,
-  parseEventLogs,
   toHex,
 } from 'viem'
 import { generatePrivateKey } from 'viem/accounts'
@@ -256,11 +255,6 @@ export const needsFunds = 'Get test funds first: transactions need fees.'
 const nativeMultisig: Address = '0xAACC000000000000000000000000000000000000'
 const upgradeAbi = parseAbi([
   'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
-])
-// viem's `Abis.nativeMultisig` still names this event `MultisigConfigUpdated`, so
-// `accounts.updateConfigSync` can't find it. Remove once viem ships the renamed ABI.
-const configUpdatedAbi = parseAbi([
-  'event ConfigurableAccountConfigUpdated(address indexed account, bytes32 salt, uint64 version, uint8 threshold, (address owner, uint8 weight)[] owners)',
 ])
 
 /** The configuration salt Tempo assigns an account upgraded in place. */
@@ -1003,18 +997,15 @@ export function createDevnetAdapter(
     const next = { owners, threshold: account.committed.threshold }
     if (sameConfig(next, session.config)) return undefined
     const approvers = updateApprovers(session, account)
-    const receipt = await client.writeContractSync({
+    const result = await Tempo.Actions.accounts.updateConfigSync(client, {
       account: signingAccount(session, localAccounts(approvers)),
-      ...Tempo.Actions.accounts.updateConfig.call({
-        currentConfig: session.config,
-        nextConfig: next,
-      }),
-      throwOnReceiptRevert: true,
+      currentConfig: session.config,
+      nextConfig: next,
     })
-    const [log] = parseEventLogs({ abi: configUpdatedAbi, logs: receipt.logs, strict: true })
-    if (!log)
+    if (!('config' in result) || !result.config)
       throw new DevnetRejection('invalid-config', 'Devnet recorded no configuration update.')
-    session.config = Tempo.AccountConfig.from(log.args)
+    const { config, receipt } = result
+    session.config = config
     session.lastUpdate = receipt.transactionHash
     return receipt.transactionHash
   }
