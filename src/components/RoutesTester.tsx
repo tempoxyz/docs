@@ -47,6 +47,7 @@ import {
   requestUrl,
   retryOn,
   routesAccessKey,
+  routesFeeTokens,
   SourceRevertedError,
   sourceActionSchema,
   submitTempoCalls,
@@ -792,28 +793,7 @@ function RouteLifecycle({
       let hash: string
       try {
         hash = await submitTempoCalls(
-          async (parameters) => {
-            // Tempo ID's access key can call only the contracts it names, and the Routes API picks
-            // this batch's contracts. So the reader approves an access key for this batch first.
-            if (tempoWallet?.id === tempoIdConnectorId && sourceTokenAddress) {
-              const instance = await (
-                tempoWallet as unknown as {
-                  getInstance(): Promise<{
-                    dialog: { signIn(p: { accessKey: unknown }): Promise<unknown> }
-                  }>
-                }
-              ).getInstance()
-              await instance.dialog.signIn({
-                accessKey: routesAccessKey({
-                  chainId,
-                  calls: parameters.calls,
-                  token: sourceTokenAddress,
-                  amount: requiredSource,
-                }),
-              })
-            }
-            return sendCalls.mutateAsync({ ...parameters, chainId })
-          },
+          (parameters) => sendCalls.mutateAsync({ ...parameters, chainId }),
           {
             chainId,
             sender,
@@ -836,6 +816,28 @@ function RouteLifecycle({
                   throw new Error(`${ExecutionError.parse(e).message} Nothing was sent.`)
                 },
               ),
+            // Tempo ID's access key can call only the contracts it names, and the Routes API picks
+            // this batch's contracts. So the reader approves an access key for this batch before
+            // anything is sent.
+            authorize: async (batch) => {
+              if (tempoWallet?.id !== tempoIdConnectorId || !sourceTokenAddress) return
+              const instance = await (
+                tempoWallet as unknown as {
+                  getInstance(): Promise<{
+                    dialog: { signIn(p: { accessKey: unknown }): Promise<unknown> }
+                  }>
+                }
+              ).getInstance()
+              await instance.dialog.signIn({
+                accessKey: routesAccessKey({
+                  chainId,
+                  calls: batch,
+                  token: sourceTokenAddress,
+                  amount: requiredSource,
+                  feeTokens: routesFeeTokens(chainId),
+                }),
+              })
+            },
             onBroadcast: () => setUncertain(true),
             onHash: (submitted) => {
               setHashes([submitted])

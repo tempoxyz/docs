@@ -1,3 +1,4 @@
+import { Permissions } from 'accounts'
 import { formatUnits } from 'viem'
 import { z } from 'zod'
 import { developersApiPath } from '../marketing/app/_lib/developersPaths'
@@ -343,20 +344,47 @@ export type TempoCall = { to: `0x${string}`; data: `0x${string}`; value: bigint 
  * The access key a Routes batch needs from Tempo ID. The Routes API picks the contracts a batch
  * calls, such as an approval and a router, so no access key can name them at sign-in. This one
  * scopes every contract the batch calls, and limits the source token to the amount plus 1% for fees.
+ * The network fee can come from another stablecoin, such as for a EURC.e source, so each of
+ * `feeTokens` gets `feeLimit` too.
  */
+/** The USD stablecoins that can pay a Routes batch's network fee on a Tempo chain, by address. */
+export function routesFeeTokens(chainId: number): `0x${string}`[] {
+  return (['USDC.e', 'pathUSD', 'usdt0', 'ousd'] as const).flatMap((token) => {
+    try {
+      const { limits } = Permissions.resolve(
+        { expiry: '1h', limits: [{ limit: '1', token }] },
+        { chainId },
+      )
+      return limits?.map((l) => l.token) ?? []
+    } catch {
+      // The token has no deployment on this chain.
+      return []
+    }
+  })
+}
+
 export function routesAccessKey(options: {
   chainId: number
   calls: readonly Pick<TempoCall, 'to'>[]
   token: `0x${string}`
   amount: bigint
+  feeTokens?: readonly `0x${string}`[]
+  feeLimit?: bigint
 }) {
+  const source = options.token.toLowerCase()
+  const feeTokens = [
+    ...new Set((options.feeTokens ?? []).map((t) => t.toLowerCase() as `0x${string}`)),
+  ].filter((t) => t !== source)
   const addresses = [
     ...new Set([options.token, ...options.calls.map((c) => c.to)].map((a) => a.toLowerCase())),
   ] as `0x${string}`[]
   return {
     chainId: options.chainId,
     expiry: '1h',
-    limits: [{ token: options.token, limit: options.amount + options.amount / 100n + 1n }],
+    limits: [
+      { token: options.token, limit: options.amount + options.amount / 100n + 1n },
+      ...feeTokens.map((token) => ({ token, limit: options.feeLimit ?? 1_000_000n })),
+    ],
     scopes: addresses.map((address) => ({ address })),
   } as const
 }
@@ -379,6 +407,8 @@ export async function submitTempoCalls(
     readBalance: () => Promise<bigint>
     /** Rejects when the batch would revert, before the wallet opens. */
     simulate: (calls: TempoCall[]) => Promise<unknown>
+    /** Gets the wallet's approval for the batch, such as an access key, before anything is sent. */
+    authorize?: (calls: TempoCall[]) => Promise<unknown>
     onHash: (hash: string) => void
     onBroadcast?: () => void
   },
@@ -394,6 +424,7 @@ export async function submitTempoCalls(
     value: BigInt(value),
   }))
   await options.simulate(calls)
+  await options.authorize?.(calls)
   options.onBroadcast?.()
   const result = await sendCalls({
     calls,
