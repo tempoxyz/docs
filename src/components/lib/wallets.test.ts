@@ -11,7 +11,7 @@ const connectors = [
   { id: 'injected', name: 'Injected Wallet' },
   { id: 'io.metamask', name: 'MetaMask' },
   { id: 'webAuthn', name: 'Passkey' },
-  { id: 'xyz.tempo', name: 'Tempo Wallet' },
+  { id: 'tempoId', name: 'Tempo ID' },
   { id: 'app.phantom', name: 'Phantom' },
   { id: 'injected', name: 'Injected Wallet Duplicate' },
 ] as Connector[]
@@ -21,7 +21,7 @@ describe('isFundableWalletConnector', () => {
     ['injected', true],
     ['io.metamask', true],
     ['webAuthn', false],
-    ['xyz.tempo', true],
+    ['tempoId', true],
   ])('returns %s fundable wallet status as %s', (connectorId, expected) => {
     expect(isFundableWalletConnector({ id: connectorId })).toBe(expected)
   })
@@ -36,7 +36,7 @@ describe('isBrowserWalletConnectorId', () => {
     ['injected', true],
     ['io.metamask', true],
     ['webAuthn', false],
-    ['xyz.tempo', false],
+    ['tempoId', false],
   ])('returns %s browser wallet status as %s', (connectorId, expected) => {
     expect(isBrowserWalletConnectorId(connectorId)).toBe(expected)
   })
@@ -63,7 +63,7 @@ describe('filterSupportedFundableWalletConnectors', () => {
   it('keeps supported faucet-fundable wallets by default', () => {
     expect(
       filterSupportedFundableWalletConnectors(connectors).map((connector) => connector.id),
-    ).toEqual(['injected', 'io.metamask', 'xyz.tempo'])
+    ).toEqual(['injected', 'io.metamask', 'tempoId'])
   })
 
   it('allows WebAuthn only when requested for e2e', () => {
@@ -71,6 +71,6 @@ describe('filterSupportedFundableWalletConnectors', () => {
       filterSupportedFundableWalletConnectors(connectors, { includeWebAuthn: true }).map(
         (connector) => connector.id,
       ),
-    ).toEqual(['injected', 'io.metamask', 'webAuthn', 'xyz.tempo'])
+    ).toEqual(['injected', 'io.metamask', 'webAuthn', 'tempoId'])
   })
 })

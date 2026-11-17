@@ -1,4 +1,4 @@
-import type { WebAuthnCeremony } from 'accounts'
+import type { WebAuthnCeremony } from 'accounts-v0'
 import { Bytes } from 'ox'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { Authentication, Registration } from 'webauthx/server'

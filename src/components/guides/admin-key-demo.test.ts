@@ -64,8 +64,9 @@ describe('admin-key demo account records', () => {
 describe('admin-key onchain status', () => {
   function client(isAdmin: boolean, isRevoked: boolean) {
     return {
+      account: { address: '0x0000000000000000000000000000000000000001' as const },
+      readContract: vi.fn().mockResolvedValue(isAdmin),
       accessKey: {
-        isAdmin: vi.fn().mockResolvedValue(isAdmin),
         getMetadata: vi.fn().mockResolvedValue({ isRevoked }),
         authorizeSync: vi.fn(),
         revokeSync: vi.fn(),
@@ -79,15 +80,19 @@ describe('admin-key onchain status', () => {
     [false, true, 'revoked'],
   ])('distinguishes an unused key from a permanently revoked key', async (isAdmin, isRevoked, status) => {
     const backend = client(isAdmin, isRevoked)
-    expect(await readAdminKeyDemoStatus(backend, keyAddress)).toBe(status)
+    // biome-ignore lint/suspicious/noExplicitAny: a partial client.
+    expect(await readAdminKeyDemoStatus(backend as any, keyAddress)).toBe(status)
     expect(backend.accessKey.authorizeSync).not.toHaveBeenCalled()
     expect(backend.accessKey.revokeSync).not.toHaveBeenCalled()
   })
 
   it('does not report an inactive key when a status read fails', async () => {
     const backend = client(false, false)
-    backend.accessKey.isAdmin.mockRejectedValue(new Error('RPC unavailable'))
-    await expect(readAdminKeyDemoStatus(backend, keyAddress)).rejects.toThrow('RPC unavailable')
+    backend.readContract.mockRejectedValue(new Error('RPC unavailable'))
+    // biome-ignore lint/suspicious/noExplicitAny: a partial client.
+    await expect(readAdminKeyDemoStatus(backend as any, keyAddress)).rejects.toThrow(
+      'RPC unavailable',
+    )
   })
 })
 

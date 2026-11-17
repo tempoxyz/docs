@@ -15,7 +15,7 @@ import { assertUnexpired, SourceRevertedError } from './routes-execution'
 // connector for every wallet that announces itself through EIP-6963.
 
 // The docs' own Tempo SDK announces its providers too. They only sign on Tempo.
-const docsConnectors = new Set(['xyz.tempo', 'com.injectedwallet', 'webAuthn'])
+const docsConnectors = new Set(['tempoId', 'com.injectedwallet', 'webAuthn'])
 
 /** The browser wallets wagmi found, for the reader to choose from. */
 export function useEvmWallets(): readonly Connector[] {

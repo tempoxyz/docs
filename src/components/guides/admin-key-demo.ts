@@ -1,6 +1,6 @@
-import { type Address, type Hex, isAddress } from 'viem'
+import { type Address, type Hex, isAddress, zeroHash } from 'viem'
 import { tempoModerato } from 'viem/chains'
-import { Account, createClient } from 'viem/tempo'
+import { Abis, Account, Addresses, createClient } from 'viem/tempo'
 
 export const adminKeyDemoStorageKey = 'tempo-docs:admin-key-demo:v1'
 export const adminKeyDemoFeeToken = '0x20c0000000000000000000000000000000000001'
@@ -108,17 +108,41 @@ export function createAdminKeyDemoClient(session: AdminKeyDemoSession) {
 
 export type AdminKeyDemoStatus = 'unregistered' | 'active' | 'revoked'
 
+/**
+ * Viem 2.57.18 and later drop admin access keys, which T14 retires, so the demo calls the Account
+ * Keychain precompile directly.
+ */
+const keychain = { address: Addresses.accountKeychain, abi: Abis.accountKeychain } as const
+
+/** The precompile's signature type for a P256 key. */
+const p256SignatureType = 1
+
+/** Authorizes `key` as an admin access key of the client's account. */
+export async function authorizeAdminKeyDemoKey(
+  client: Pick<ReturnType<typeof createAdminKeyDemoClient>, 'writeContractSync'>,
+  key: Address,
+) {
+  return await client.writeContractSync({
+    ...keychain,
+    functionName: 'authorizeAdminKey',
+    args: [key, p256SignatureType, zeroHash],
+  })
+}
+
 export async function readAdminKeyDemoStatus(
   client: {
-    accessKey: Pick<
-      ReturnType<typeof createAdminKeyDemoClient>['accessKey'],
-      'isAdmin' | 'getMetadata'
-    >
+    account: { address: Address }
+    accessKey: Pick<ReturnType<typeof createAdminKeyDemoClient>['accessKey'], 'getMetadata'>
+    readContract: ReturnType<typeof createAdminKeyDemoClient>['readContract']
   },
   key: Address,
 ): Promise<AdminKeyDemoStatus> {
   const [isAdmin, metadata] = await Promise.all([
-    client.accessKey.isAdmin({ accessKey: key }),
+    client.readContract({
+      ...keychain,
+      functionName: 'isAdminKey',
+      args: [client.account.address, key],
+    }),
     client.accessKey.getMetadata({ accessKey: key }),
   ])
   if (metadata.isRevoked) return 'revoked'

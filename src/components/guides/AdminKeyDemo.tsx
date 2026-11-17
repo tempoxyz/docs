@@ -13,6 +13,7 @@ import {
   adminKeyDemoEnvironment,
   adminKeyDemoFeeToken,
   adminKeyDemoStorageKey,
+  authorizeAdminKeyDemoKey,
   createAdminKeyDemoClient,
   parseAdminKeyDemoSession,
   readAdminKeyDemoStatus,
@@ -148,10 +149,7 @@ export function AdminKeyDemo() {
     const next = { ...session, key }
     // Keep the public key ID even if the transaction result is interrupted.
     save(next)
-    const { receipt } = await client.accessKey.authorizeSync({
-      accessKey: { address: key.address, type: 'p256' },
-      admin: true,
-    })
+    const receipt = await authorizeAdminKeyDemoKey(client, key.address)
     save({ ...next, key: { ...key, authorizationHash: receipt.transactionHash } })
     const nextStatus = await readAdminKeyDemoStatus(client, key.address)
     if (mounted.current) setStatus(nextStatus)

@@ -1,4 +1,4 @@
-import { WebAuthnCeremony } from 'accounts'
+import { WebAuthnCeremony } from 'accounts-v0'
 
 /**
  * Tempo's hosted key service uses the accounts SDK's registration and login API.

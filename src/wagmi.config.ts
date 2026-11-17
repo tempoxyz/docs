@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
-import { tempoWallet, webAuthn } from '@wagmi/core/tempo'
-import { Storage } from 'accounts'
+import { funding, viem } from 'accounts/plugins'
+import { tempoId } from 'accounts/wagmi'
+import { Storage } from 'accounts-v0'
 import * as React from 'react'
 import {
   base,
@@ -25,6 +26,7 @@ import {
   webSocket,
 } from 'wagmi'
 import { demoWalletAuthorization } from './lib/demo-wallet-authorization'
+import { passkey } from './lib/passkeyConnector'
 import * as WebAuthnCeremony from './lib/webAuthnCeremony.ts'
 
 const feeToken = '0x20c0000000000000000000000000000000000001' as const
@@ -55,22 +57,32 @@ export const webAuthnRpId = rpId
 
 /** EVM networks Routes transfers start from, so browser wallets can switch to and send on them. */
 export const routesSourceChains = [mainnet, base, polygon, bsc, monad, hyperEvm] as const
-/** Chains the docs reach through Tempo Wallet and the Tempo accounts SDK. */
+/** Chains the docs reach through Tempo ID and the Tempo accounts SDK. */
 export const tempoChainIds: ReadonlySet<number> = new Set([chain.id, tempo.id])
 
 export function getConfig(options: getConfig.Options = {}) {
   const { multiInjectedProviderDiscovery = false, accessKey = true } = options
-  const wallet = tempoWallet({
-    // The guides authorize a bounded access key on connect. Without one, connecting only signs in
-    // with a passkey and shares the address, and each transaction is approved in Tempo Wallet.
-    ...(accessKey ? { accessKey: { authorize: demoWalletAuthorization } } : {}),
-    feePayer: {
-      precedence: 'user-first',
-      url: 'https://sponsor.moderato.tempo.xyz',
-    },
+  const wallet = tempoId({
+    // In a browser, the page's origin is the client ID. Prerendering has no page, and never signs in.
+    ...(typeof window === 'undefined' ? { clientId: 'https://docs.tempo.xyz' } : {}),
+    // The guides request a bounded access key at sign-in. Pages that move real funds request a
+    // short-lived access key that only sends mainnet stablecoins, up to 100 of each.
+    accessKey: accessKey
+      ? demoWalletAuthorization()
+      : {
+          expiry: '1h',
+          limits: (['USDC.e', 'ousd', 'pathUSD', 'usdt0', 'EURC.e'] as const).map((token) => ({
+            limit: '100',
+            token,
+          })),
+        },
+    plugins: [
+      // The public sponsor pays testnet fees. Other chains pay their own.
+      viem({ chain: tempoModerato, relay: 'https://sponsor.moderato.tempo.xyz' }),
+      funding(),
+    ],
   })
-  // Both connectors default to the accounts SDK's `tempo` store. Sharing it lets Tempo Wallet read
-  // the passkey account and reconnect with it, so the passkey account keeps its own store.
+  // The passkey connector keeps its own accounts v0 store, apart from Tempo ID's session.
   const passkeyStorage =
     typeof window === 'undefined'
       ? Storage.memory({ key: 'tempo-docs-passkey' })
@@ -81,14 +93,15 @@ export function getConfig(options: getConfig.Options = {}) {
     batch: {
       multicall: false,
     },
-    chains: [chain, tempo, ...routesSourceChains],
+    // Tempo ID's connector starts on the first chain: testnet for the guides, mainnet for pages
+    // that move real funds.
+    chains: accessKey
+      ? [chain, tempo, ...routesSourceChains]
+      : [tempo, chain, ...routesSourceChains],
     connectors:
       import.meta.env.VITE_E2E === 'true'
-        ? [webAuthn({ storage: passkeyStorage }), wallet]
-        : [
-            wallet,
-            webAuthn({ ceremony: WebAuthnCeremony.keys({ rpId }), storage: passkeyStorage }),
-          ],
+        ? [passkey({ storage: passkeyStorage }), wallet]
+        : [wallet, passkey({ ceremony: WebAuthnCeremony.keys({ rpId }), storage: passkeyStorage })],
     multiInjectedProviderDiscovery,
     storage: createStorage<Record<string, unknown>>({
       // Pages that move real funds keep wallet connections, and the addresses in them, for the
@@ -133,8 +146,9 @@ export function getConfig(options: getConfig.Options = {}) {
 export namespace getConfig {
   export type Options = Partial<Pick<CreateConfigParameters, 'multiInjectedProviderDiscovery'>> & {
     /**
-     * Authorize the guides' bounded access key when Tempo Wallet connects, and save wallet
-     * connections across visits. Defaults to true; pages that move real funds set it to false.
+     * Request the guides' bounded testnet access key when Tempo ID signs in, and save wallet
+     * connections across visits. Defaults to true. Pages that move real funds set it to false,
+     * which requests a short-lived mainnet access key instead.
      */
     accessKey?: boolean
   }
@@ -144,11 +158,14 @@ export type Config = ReturnType<typeof getConfig>
 
 export const queryClient = new QueryClient()
 
-export function useTempoWalletConnector() {
+/** The connector ID of Tempo ID, from `accounts/wagmi`. */
+export const tempoIdConnectorId = 'tempoId'
+
+export function useTempoIdConnector() {
   const connectors = useConnectors()
   return React.useMemo(
     // biome-ignore lint/style/noNonNullAssertion: _
-    () => connectors.find((c: { id: string }) => c.id === 'xyz.tempo')!,
+    () => connectors.find((c: { id: string }) => c.id === tempoIdConnectorId)!,
     [connectors],
   )
 }

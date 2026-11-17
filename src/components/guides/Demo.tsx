@@ -22,7 +22,7 @@ import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import LucideWalletCards from '~icons/lucide/wallet-cards'
 import { usePostHogTracking } from '../../lib/posthog'
 import { button } from '../../styles/controls'
-import { useTempoWalletConnector, useWebAuthnConnector } from '../../wagmi.config'
+import { useTempoIdConnector, useWebAuthnConnector } from '../../wagmi.config'
 import { Badge } from '../Badge'
 import { Container as ParentContainer } from '../Container'
 import { CopyIconSwap } from '../CopyIconSwap'
@@ -174,7 +174,7 @@ export function Container(
 
     if (source === 'webAuthn') {
       const webAuthnConnection = connections.find(
-        (c) => c.connector.id === 'webAuthn' || c.connector.id === 'xyz.tempo',
+        (c) => c.connector.id === 'webAuthn' || c.connector.id === 'tempoId',
       )
       return webAuthnConnection?.accounts[0]
     }
@@ -423,7 +423,7 @@ export function Login() {
   const connect = useConnect()
   const disconnect = useDisconnect()
   const hydrated = useHydrated()
-  const tempoWallet = useTempoWalletConnector()
+  const tempoWallet = useTempoIdConnector()
   const webAuthn = useWebAuthnConnector()
   const isE2E = import.meta.env.VITE_E2E === 'true'
   const connector = isE2E ? webAuthn : tempoWallet

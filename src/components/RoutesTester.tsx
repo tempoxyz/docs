@@ -1,7 +1,8 @@
 'use client'
 
 import { Button } from '@tempoxyz/ds'
-import { ExecutionError } from 'accounts'
+// Parses Viem's execution errors. accounts v1 has no such helper.
+import { ExecutionError } from 'accounts-v0'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import {
   BaseError,
@@ -93,7 +94,7 @@ import {
 } from '../lib/tron-wallets'
 import { inherited } from '../styles/inherited'
 import { style, vars as tokens } from '../styles/theme'
-import { tempoChainIds, useTempoWalletConnector } from '../wagmi.config'
+import { tempoChainIds, useTempoIdConnector } from '../wagmi.config'
 import { type ApiCall, ApiLog, CopyButton } from './ApiLog'
 import { Container } from './Container'
 import * as Demo from './guides/Demo'
@@ -438,7 +439,7 @@ function RouteLifecycle({
   const quoteReady = useRef(false)
   const inFlight = useRef(false)
   const sourceChainId = /^eip155:(\d+)$/.exec(route.sourceChain.id)?.[1]
-  // Tempo sources sign with Tempo Wallet; the other configured EVM networks use browser wallets.
+  // Tempo sources sign with Tempo ID; the other configured EVM networks use browser wallets.
   const chains = useChains()
   const tempoChainId = chains.find(
     (c) => tempoChainIds.has(c.id) && c.id === Number(sourceChainId),
@@ -447,10 +448,10 @@ function RouteLifecycle({
   const connection = useConnection()
   const connect = useConnect()
   const disconnect = useDisconnect()
-  const tempoWallet = useTempoWalletConnector()
+  const tempoWallet = useTempoIdConnector()
   const sendCalls = useSendCallsSync()
   const tempoClient = useClient({ chainId: tempoChainId })
-  // Each source network signs with its own kind of wallet: Tempo Wallet (the Tempo accounts SDK)
+  // Each source network signs with its own kind of wallet: Tempo ID (the Tempo accounts SDK)
   // on Tempo, and the reader's choice of browser wallet everywhere else.
   const family = tempoChainId
     ? 'tempo'
@@ -486,7 +487,7 @@ function RouteLifecycle({
             : []
   const walletName =
     family === 'tempo'
-      ? 'Tempo Wallet'
+      ? 'Tempo ID'
       : family === 'evm'
         ? evmWallet?.name
         : family === 'tron'
@@ -1099,7 +1100,7 @@ function RouteLifecycle({
   )
   const amountToken =
     isTransfer && mode === 'exactDestination' ? route.destinationToken : route.sourceToken
-  // Every address field can be filled from a wallet on its network: Tempo Wallet (the Tempo
+  // Every address field can be filled from a wallet on its network: Tempo ID (the Tempo
   // accounts SDK) on Tempo, wagmi's browser wallets on other EVM networks, and Tron, Solana, and
   // Stellar wallets on theirs. Connecting only shares an address; nothing is signed.
   const [connectedAddresses, setConnectedAddresses] = useState<Record<string, string>>({})
@@ -1115,7 +1116,7 @@ function RouteLifecycle({
         ? [
             {
               id: tempoWallet.id,
-              name: 'Tempo Wallet',
+              name: 'Tempo ID',
               connect: async () =>
                 tempoAccount ??
                 (await connect.connectAsync({ connector: tempoWallet, chainId: tempoChain.id }))
