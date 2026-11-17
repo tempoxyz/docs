@@ -29,7 +29,6 @@ import {
   isAddressEqual,
   keccak256,
   parseAbi,
-  parseEventLogs,
   toHex,
 } from 'viem'
 import { generatePrivateKey } from 'viem/accounts'
@@ -256,11 +255,6 @@ export const needsFunds = 'Get test funds first: transactions need fees.'
 const nativeMultisig: Address = '0xAACC000000000000000000000000000000000000'
 const upgradeAbi = parseAbi([
   'function upgradeAccount(uint8 threshold, (address owner, uint8 weight)[] owners) returns (bytes32)',
-])
-// viem's `Abis.nativeMultisig` still names this event `MultisigConfigUpdated`, so
-// `accounts.updateConfigSync` can't find it. Remove once viem ships the renamed ABI.
-const configUpdatedAbi = parseAbi([
-  'event ConfigurableAccountConfigUpdated(address indexed account, bytes32 salt, uint64 version, uint8 threshold, (address owner, uint8 weight)[] owners)',
 ])
 
 /** The configuration salt Tempo assigns an account upgraded in place. */
@@ -1011,12 +1005,13 @@ export function createDevnetAdapter(
       }),
       throwOnReceiptRevert: true,
     })
-    // An account's first update also records its initial config first, so take the newest event.
-    const log = parseEventLogs({ abi: configUpdatedAbi, logs: receipt.logs, strict: true })
-      .filter((item) => isAddressEqual(item.args.account, session.address))
-      .at(-1)
-    if (!log)
+    // viem takes the last event: a first update also logs the account's version-0 registration.
+    let log: ReturnType<typeof Tempo.Actions.accounts.updateConfig.extractEvent>
+    try {
+      log = Tempo.Actions.accounts.updateConfig.extractEvent(receipt.logs)
+    } catch {
       throw new DevnetRejection('invalid-config', 'Devnet recorded no configuration update.')
+    }
     session.config = Tempo.AccountConfig.from(log.args)
     session.lastUpdate = receipt.transactionHash
     return receipt.transactionHash
