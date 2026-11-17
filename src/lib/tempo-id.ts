@@ -5,7 +5,7 @@ import { demoWalletAuthorization } from './demo-wallet-authorization'
 
 type Instance = {
   dialog: { signIn(parameters: { accessKey: Permissions.Permissions }): Promise<unknown> }
-  funding: { open(parameters: { chainId: number }): Promise<unknown> }
+  funding: { open(): Promise<unknown> }
   session: Pick<Accounts.Accounts['session'], 'get'>
 }
 

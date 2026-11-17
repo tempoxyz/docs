@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import { tempo } from 'viem/chains'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { DepositToTempoWallet } from './DepositToTempoWallet'
 
@@ -45,13 +44,13 @@ function renderStep() {
   }
 }
 
-test('opens Tempo funding for mainnet', async () => {
+test('opens Tempo funding on testnet', async () => {
   const step = renderStep()
   expect(step.actions.props.disabled).toBe(false)
   step.actions.props.onClick()
   await state.operation
   expect(state.getInstance).toHaveBeenCalledOnce()
-  expect(state.open).toHaveBeenCalledWith({ chainId: tempo.id })
+  expect(state.open).toHaveBeenCalledWith()
 })
 
 test.each([
