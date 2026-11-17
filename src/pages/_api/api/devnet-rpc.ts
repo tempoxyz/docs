@@ -2,8 +2,7 @@
 // Its public endpoint sits behind the shared `previews` API key, which must stay server-side,
 // and HTTPS pages can't call the Tailscale-only HTTP endpoint. Without a key (local dev on the
 // tailnet), it forwards to the Tailscale RPC instead.
-const publicUpstream =
-  process.env.DEVNET_RPC_URL ?? 'https://rpc-stack-mdtgf.devnet.tempoxyz.dev'
+const publicUpstream = process.env.DEVNET_RPC_URL ?? 'https://rpc-stack-mdtgf.devnet.tempoxyz.dev'
 const tailnetUpstream = 'http://stack-mdtgf-nodes-rpc-service.tail388b2e.ts.net:8545'
 
 const maxRequestBytes = 256 * 1024
@@ -73,7 +72,6 @@ function isAllowedCall(call: unknown) {
   if (params !== undefined && !Array.isArray(params)) return false
   return allowedMethods.has(method) || allowedPrefixes.some((prefix) => method.startsWith(prefix))
 }
-
 
 function failure(status: number, message: string) {
   return Response.json(
