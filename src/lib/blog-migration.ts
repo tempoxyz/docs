@@ -1,5 +1,5 @@
 /** The website must deploy these posts before the docs redirects are released. */
-export const engineeringBlogUrl = 'https://tempo.xyz/blog/?channel=engineering'
+export const engineeringBlogUrl = 'https://tempo.com/blog/?channel=engineering'
 
 // Keep original files and public/blog assets for rollback and inbound media links.
 export const migratedBlogSlugs = [
@@ -20,15 +20,15 @@ const blogAliases = [
 export const blogMigrationRedirects = [
   { source: '/blog', destination: engineeringBlogUrl },
   ...['/blog.md', '/blog/index.md', '/assets/md/blog.md', '/assets/md/blog/index.md'].map(
-    (source) => ({ source, destination: 'https://tempo.xyz/blog.md' }),
+    (source) => ({ source, destination: 'https://tempo.com/blog.md' }),
   ),
   ...blogAliases.flatMap(([sourceSlug, destinationSlug]) =>
     [`/blog/${sourceSlug}`, `/blog/${sourceSlug}.md`, `/assets/md/blog/${sourceSlug}.md`].map(
       (source) => ({
         source,
         destination: source.endsWith('.md')
-          ? `https://tempo.xyz/blog/${destinationSlug}.md`
-          : `https://tempo.xyz/blog/${destinationSlug}/`,
+          ? `https://tempo.com/blog/${destinationSlug}.md`
+          : `https://tempo.com/blog/${destinationSlug}/`,
       }),
     ),
   ),

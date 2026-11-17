@@ -130,8 +130,8 @@ describe('docs routing redirects', () => {
     expect(docsRouteDestination('/', 'preview')).toBe('/')
     expect(docsRouteDestination('/docs/api', 'production')).toBe('/docs/api')
     expect(docsRouteDestination('/docs/api', 'preview')).toBe('/docs/api')
-    expect(docsRouteDestination('https://tempo.xyz/learn/stablecoin-payroll/', 'production')).toBe(
-      'https://tempo.xyz/learn/stablecoin-payroll/',
+    expect(docsRouteDestination('https://tempo.com/learn/stablecoin-payroll/', 'production')).toBe(
+      'https://tempo.com/learn/stablecoin-payroll/',
     )
   })
 
@@ -279,12 +279,12 @@ describe('docs routing redirects', () => {
 
   describe.each(['docs.tempo.xyz', 'next.docs.tempo.xyz'])('canonical redirects for %s', (host) => {
     it.each([
-      ['/', 'https://tempo.xyz/developers'],
-      ['/developers', 'https://tempo.xyz/developers'],
-      ['/docs', 'https://tempo.xyz/developers'],
-      ['/developers/docs', 'https://tempo.xyz/developers'],
-      ['/developers/:path*', 'https://tempo.xyz/developers/:path*'],
-      ['/:path*', 'https://tempo.xyz/developers/:path*'],
+      ['/', 'https://tempo.com/developers'],
+      ['/developers', 'https://tempo.com/developers'],
+      ['/docs', 'https://tempo.com/developers'],
+      ['/developers/docs', 'https://tempo.com/developers'],
+      ['/developers/:path*', 'https://tempo.com/developers/:path*'],
+      ['/:path*', 'https://tempo.com/developers/:path*'],
     ])('redirects %s to %s', (source, destination) => {
       expect(findHostRedirect(source, host)).toMatchObject({
         source,

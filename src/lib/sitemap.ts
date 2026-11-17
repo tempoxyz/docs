@@ -28,7 +28,7 @@ export function finalizeSitemap(
     Array.from(withoutTemplates.matchAll(LOCATION_PATTERN), ([, location]) => location),
   )
 
-  // Marketing and blog pages now live on tempo.xyz, not the docs mount.
+  // Marketing and blog pages now live on tempo.com, not the docs mount.
   const docsIndexUrl = Array.from(existingLocations).find((location) =>
     /\/(?:get-started|docs\/api)\/?$/.test(location),
   )

@@ -8,7 +8,7 @@ on:
       canonical_origin:
         description: Canonical Tempo origin to test
         required: true
-        default: https://tempo.xyz
+        default: https://tempo.com
       legacy_origin:
         description: Legacy docs origin to test
         required: true
@@ -25,7 +25,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      DOCS_ROUTING_SMOKE_CANONICAL_ORIGIN: ${{ inputs.canonical_origin || 'https://tempo.xyz' }}
+      DOCS_ROUTING_SMOKE_CANONICAL_ORIGIN: ${{ inputs.canonical_origin || 'https://tempo.com' }}
       DOCS_ROUTING_SMOKE_LEGACY_ORIGIN: ${{ inputs.legacy_origin || 'https://docs.tempo.xyz' }}
     steps:
       - name: Secure runner

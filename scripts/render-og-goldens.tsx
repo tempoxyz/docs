@@ -68,7 +68,7 @@ export async function goldenResponse(testCase: (typeof goldenCases)[number]): Pr
     section: testCase.section,
     subsection: testCase.subsection,
   })
-  return createOgResponse(new Request(`https://tempo.xyz/api/og?${query}`), {
+  return createOgResponse(new Request(`https://tempo.com/api/og?${query}`), {
     hbSetFont,
     pilatFont,
     background,

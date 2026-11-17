@@ -83,21 +83,21 @@ describe('AI documentation navigation', () => {
   it('uses canonical Markdown links under the production mount', () => {
     const output = canonicalizeGeneratedDeveloperLinks(
       renderAiIndex(input),
-      'https://tempo.xyz/developers/docs',
+      'https://tempo.com/developers/docs',
     )
-    expect(output).toContain('(https://tempo.xyz/developers/docs/earn/integrate.md)')
-    expect(output).toContain('(https://tempo.xyz/developers/get-started.md)')
-    expect(output).toContain('(https://tempo.xyz/developers/llms.txt)')
-    expect(output).toContain('(https://tempo.xyz/developers/SKILL.md)')
-    expect(output).toContain('(https://tempo.xyz/developers/index.md)')
-    expect(markdownRoute('https://tempo.xyz/developers/docs/sdk/index.md')).toBe('/docs/sdk')
+    expect(output).toContain('(https://tempo.com/developers/docs/earn/integrate.md)')
+    expect(output).toContain('(https://tempo.com/developers/get-started.md)')
+    expect(output).toContain('(https://tempo.com/developers/llms.txt)')
+    expect(output).toContain('(https://tempo.com/developers/SKILL.md)')
+    expect(output).toContain('(https://tempo.com/developers/index.md)')
+    expect(markdownRoute('https://tempo.com/developers/docs/sdk/index.md')).toBe('/docs/sdk')
     expect(markdownRoute('/developers/docs/sdk/')).toBe('/docs/sdk')
   })
 
   it('keeps the published skill aligned with every visible navigation home', () => {
     const skill = readFileSync('SKILL.md', 'utf8')
     for (const { label, href } of aiDocsSections)
-      expect(skill).toContain(`[${label}](https://tempo.xyz/developers${href}.md)`)
+      expect(skill).toContain(`[${label}](https://tempo.com/developers${href}.md)`)
     expect(skill).toContain('Earn is in beta')
     expect(skill).toContain('Routes is in beta')
     expect(skill).toContain('Zones is live on Mainnet')

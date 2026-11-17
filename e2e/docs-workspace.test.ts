@@ -13,7 +13,7 @@ const utilityLabels = ['API reference', 'Partners']
 const externalTools = [
   ['MPP', 'https://mpp.dev/'],
   ['Mercator', 'https://mercator.sh/'],
-  ['Tempo Console', 'https://tempo.xyz/console'],
+  ['Tempo Console', 'https://tempo.com/console'],
   ['Tempo Wallet', 'https://wallet.tempo.xyz/'],
 ] as const
 
@@ -325,7 +325,7 @@ test('product availability lives in overview callouts, not navigation labels', a
     const article = page.locator('article[data-v-content]')
     await expect(article.getByRole('heading', { level: 1 })).not.toContainText(/beta|preview/i)
     await expect(article).toContainText(status)
-    await expect(article.locator('a[href="https://tempo.xyz/contact"]').first()).toBeVisible()
+    await expect(article.locator('a[href="https://tempo.com/contact"]').first()).toBeVisible()
     await expect(
       page
         .getByRole('navigation', { name: 'Documentation sections', exact: true })

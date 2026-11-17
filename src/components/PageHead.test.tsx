@@ -52,11 +52,11 @@ function imageMeta(html: string, name: string): string[] {
 
 describe('PageHead images', () => {
   test.each([
-    ['production', 'https://tempo.xyz/developers'],
+    ['production', 'https://tempo.com/developers'],
     ['preview', ''],
   ])('emits one custom OG and X image in %s', (_environment, base) => {
     mocks.config.baseUrl = base || undefined
-    const image = 'https://tempo.xyz/developers/og-docs.png'
+    const image = 'https://tempo.com/developers/og-docs.png'
     const html = renderToStaticMarkup(
       <PageHead
         title="Tempo Zones"

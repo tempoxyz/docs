@@ -21,7 +21,7 @@ To connect directly, you need a Tempo account, RPC access, and the sandbox conne
 
 Use `zoneModerato(6)` or `zoneModerato(7)` from `viem/tempo/zones` for these examples. They need `viem@2.54.6`, which matches the sandbox's portal and outbox interfaces. Install it with `pnpm add viem@2.54.6`.
 
-Get [RPC access from Tempo](https://tempo.xyz/contact) before connecting to the shared endpoints directly. The server-side example reads the operator-provided HTTP `Authorization` header from `ZONE_RPC_AUTHORIZATION`. This endpoint access is separate from the signed `X-Authorization-Token`. The Zone RPC requires that token even for chain metadata reads.
+Get [RPC access from Tempo](https://tempo.com/contact) before connecting to the shared endpoints directly. The server-side example reads the operator-provided HTTP `Authorization` header from `ZONE_RPC_AUTHORIZATION`. This endpoint access is separate from the signed `X-Authorization-Token`. The Zone RPC requires that token even for chain metadata reads.
 
 The example signs that token with an ephemeral account for metadata reads. Use your actual account when reading private balances. Confirm that the endpoint's `eth_chainId` matches the sandbox chain ID before signing.
 

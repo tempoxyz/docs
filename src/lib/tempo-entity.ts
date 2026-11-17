@@ -1,4 +1,4 @@
-export const TEMPO_ORIGIN = 'https://tempo.xyz'
+export const TEMPO_ORIGIN = 'https://tempo.com'
 export const TEMPO_DEVELOPERS_ORIGIN = `${TEMPO_ORIGIN}/developers`
 export const TEMPO_ORGANIZATION_ID = `${TEMPO_ORIGIN}/#organization`
 export const TEMPO_WEBSITE_ID = `${TEMPO_ORIGIN}/#website`

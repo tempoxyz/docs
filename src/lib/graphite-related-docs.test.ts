@@ -6,7 +6,7 @@ import {
   relatedDocsForRoute,
 } from './graphite-related-docs'
 
-const source = 'https://tempo.xyz/developers/docs/guide/payments/send-a-payment'
+const source = 'https://tempo.com/developers/docs/guide/payments/send-a-payment'
 
 describe('parseGraphiteRelatedDocs', () => {
   it('keeps all valid related and random links in response order', () => {
@@ -18,12 +18,12 @@ describe('parseGraphiteRelatedDocs', () => {
               type: 'related',
               title: 'Accept a payment',
               description: 'Accept stablecoin payments.',
-              url: 'https://tempo.xyz/developers/docs/guide/payments/accept-a-payment',
+              url: 'https://tempo.com/developers/docs/guide/payments/accept-a-payment',
             },
             {
               type: 'random',
               title: 'Tempo transactions',
-              url: 'https://tempo.xyz/developers/docs/protocol/transactions',
+              url: 'https://tempo.com/developers/docs/protocol/transactions',
             },
           ],
         },
@@ -58,42 +58,42 @@ describe('parseGraphiteRelatedDocs', () => {
             {
               type: 'related',
               title: 'Wrong protocol',
-              url: 'http://tempo.xyz/developers/docs/wrong-protocol',
+              url: 'http://tempo.com/developers/docs/wrong-protocol',
             },
             {
               type: 'related',
               title: 'Marketing page',
-              url: 'https://tempo.xyz/developers/blog/post',
+              url: 'https://tempo.com/developers/blog/post',
             },
             {
               type: 'other',
               title: 'Unknown type',
-              url: 'https://tempo.xyz/developers/docs/unknown-type',
+              url: 'https://tempo.com/developers/docs/unknown-type',
             },
             {
               type: 'related',
               title: 'Valid',
-              url: 'https://tempo.xyz/developers/docs/tools',
+              url: 'https://tempo.com/developers/docs/tools',
             },
             {
               type: 'random',
               title: 'Duplicate',
-              url: 'https://tempo.xyz/developers/docs/tools/',
+              url: 'https://tempo.com/developers/docs/tools/',
             },
             {
               type: 'related',
               title: ' ',
-              url: 'https://tempo.xyz/developers/docs/no-title',
+              url: 'https://tempo.com/developers/docs/no-title',
             },
             {
               type: 'related',
               title: 'x'.repeat(241),
-              url: 'https://tempo.xyz/developers/docs/oversized-title',
+              url: 'https://tempo.com/developers/docs/oversized-title',
             },
             {
               type: 'related',
               title: 'Control\u0000character',
-              url: 'https://tempo.xyz/developers/docs/control-character',
+              url: 'https://tempo.com/developers/docs/control-character',
             },
           ],
         },
@@ -117,7 +117,7 @@ describe('parseGraphiteRelatedDocs', () => {
               type: 'related',
               title: 'Documentation home',
               description: 'x'.repeat(501),
-              url: 'https://tempo.xyz/developers/docs',
+              url: 'https://tempo.com/developers/docs',
             },
           ],
         },
@@ -144,9 +144,9 @@ describe('docs URL normalization', () => {
   })
 
   it('builds only canonical public docs URLs', () => {
-    expect(canonicalDocsUrl('/docs/tools')).toBe('https://tempo.xyz/developers/docs/tools')
+    expect(canonicalDocsUrl('/docs/tools')).toBe('https://tempo.com/developers/docs/tools')
     expect(canonicalDocsUrl('/developers/docs/tools')).toBe(
-      'https://tempo.xyz/developers/docs/tools',
+      'https://tempo.com/developers/docs/tools',
     )
     expect(canonicalDocsUrl('/blog')).toBeUndefined()
   })

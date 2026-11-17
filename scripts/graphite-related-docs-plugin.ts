@@ -5,6 +5,7 @@ import { type Config, OpenApi, resolveConfig } from 'vocs/config'
 import {
   canonicalDocsUrl,
   GRAPHITE_RELATED_DOCS_ENDPOINT,
+  LEGACY_TEMPO_ORIGIN,
   normalizeDocsRoutePath,
   PUBLIC_DOCS_PREFIX,
   parseGraphiteRelatedDocs,
@@ -202,7 +203,14 @@ async function buildRelatedDocsManifest(rootDirectory: string): Promise<RelatedD
       return
     }
 
-    const result = await fetchRelatedDocs(sourceUrl)
+    let result = await fetchRelatedDocs(sourceUrl)
+    // Graphite may still index docs under the pre-move origin: retry there before accepting no links.
+    if (result.ok && result.links.length === 0) {
+      await waitForStart()
+      const legacyResult = await fetchRelatedDocs(legacyDocsUrl(sourceUrl))
+      // A throttled or failed legacy lookup counts as a failure, so the empty result is never cached.
+      if (legacyResult.retryableFailure || legacyResult.links.length > 0) result = legacyResult
+    }
     if (result.ok) successfulRequests += 1
     if (result.retryableFailure) {
       consecutiveFailures += 1
@@ -267,10 +275,10 @@ async function discoverSitemapDocsUrls(): Promise<string[]> {
       try {
         const url = new URL(rawUrl)
         if (
-          url.origin === TEMPO_ORIGIN &&
+          (url.origin === TEMPO_ORIGIN || url.origin === LEGACY_TEMPO_ORIGIN) &&
           (url.pathname === PUBLIC_DOCS_PREFIX || url.pathname.startsWith(`${PUBLIC_DOCS_PREFIX}/`))
         ) {
-          urls.push(`${url.origin}${url.pathname}${url.search}`)
+          urls.push(`${TEMPO_ORIGIN}${url.pathname}${url.search}`)
         }
       } catch {
         // Ignore invalid sitemap entries.
@@ -280,6 +288,11 @@ async function discoverSitemapDocsUrls(): Promise<string[]> {
   } catch {
     return []
   }
+}
+
+function legacyDocsUrl(sourceUrl: string): string {
+  const url = new URL(sourceUrl)
+  return `${LEGACY_TEMPO_ORIGIN}${url.pathname}${url.search}`
 }
 
 function fetchRelatedDocs(sourceUrl: string): Promise<FetchResult> {

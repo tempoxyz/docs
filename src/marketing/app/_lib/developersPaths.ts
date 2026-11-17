@@ -15,7 +15,7 @@ export function developersPath(path: string): string {
 
 /**
  * A same-origin path to this site's own API routes. Production serves the site both on
- * developers.tempo.xyz and under tempo.xyz/developers, so the browser uses the mount the current
+ * developers.tempo.xyz and under tempo.com/developers, so the browser uses the mount the current
  * page came from; server rendering falls back to the deployment's mount.
  */
 export function developersApiPath(path: string): string {

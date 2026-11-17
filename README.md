@@ -2,7 +2,7 @@
 <br>
 
 <p align="center">
-  <a href="https://tempo.xyz">
+  <a href="https://tempo.com">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="/public/lockup-dark.svg">
       <img alt="tempo lockup" src="/public/lockup-light.svg" width="auto" height="80">
@@ -17,7 +17,7 @@
 
 This repository contains documentation for the Tempo blockchain, including the Protocol Specifications, Litepaper, and Getting Started guides.
 
-[tempo.xyz/developers](https://tempo.xyz/developers)
+[tempo.com/developers](https://tempo.com/developers)
 
 ## Usage
 
@@ -56,11 +56,11 @@ CI uploads the same gallery as `og-image-goldens`. See the
 
 ## Routing and redirects
 
-The canonical public documentation URL is [`https://tempo.xyz/developers`](https://tempo.xyz/developers). This repository serves the docs application, while the Tempo web application proxies that public mount to this deployment.
+The canonical public documentation URL is [`https://tempo.com/developers`](https://tempo.com/developers). This repository serves the docs application, while the Tempo web application proxies that public mount to this deployment.
 
 ```mermaid
 flowchart LR
-  Legacy["docs.tempo.xyz\nnext.docs.tempo.xyz"] -->|"301"| Canonical["tempo.xyz/developers"]
+  Legacy["docs.tempo.xyz\nnext.docs.tempo.xyz"] -->|"301"| Canonical["tempo.com/developers"]
   Canonical -->|"Tempo web proxy"| Edge["Docs Vercel edge"]
   Edge -->|"redirects and RSC rewrites"| Vocs["Vocs /docs routes"]
   Vocs --> Pages["Documentation pages"]
@@ -70,7 +70,7 @@ flowchart LR
 
 | Surface | Owner | Purpose |
 | --- | --- | --- |
-| `tempo.xyz/developers/*` | Tempo web | Canonical public mount and proxy to this deployment. |
+| `tempo.com/developers/*` | Tempo web | Canonical public mount and proxy to this deployment. |
 | `docs.tempo.xyz` and `next.docs.tempo.xyz` | `vercel.json` | Permanent redirects to the canonical public URL. |
 | Native `/docs/*` paths | `vocs.config.ts` | Page-level redirects after a request reaches Vocs. |
 | Proxied `/developers/docs/*` paths | `vercel.json` | Compatibility redirects that must run before Vocs. |

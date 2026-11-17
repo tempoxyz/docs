@@ -88,7 +88,7 @@ test('shows a vault lookup failure and retries without enabling actions or sendi
   await expectActionsDisabled(demo)
   await expect(demo.getByRole('link', { name: 'Contact Tempo', exact: true })).toHaveAttribute(
     'href',
-    'https://tempo.xyz/contact',
+    'https://tempo.com/contact',
   )
   for (const request of requests) {
     expect(request.method).toBe('GET')

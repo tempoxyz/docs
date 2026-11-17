@@ -14,7 +14,7 @@ export function normalizeRscFetchUrl(url: string, currentHref: string, origin: s
 export const normalizeProxiedRscFetch = `
 (() => {
   if (
-    window.location.hostname === 'tempo.xyz' &&
+    ['tempo.com', 'tempo.xyz'].includes(window.location.hostname) &&
     window.location.pathname === '/developers'
   ) {
     window.history.replaceState(

@@ -33,7 +33,7 @@ export function docsStructuredDataHead(
   { frontmatter }: DocsStructuredDataContext,
 ): DocsHeadTags | undefined {
   const pagePath = path.startsWith('/') ? path : `/${path}`
-  const developersUrl = 'https://tempo.xyz/developers'
+  const developersUrl = 'https://tempo.com/developers'
   // Pages set a root-relative share image in frontmatter `ogImage`. Generated
   // API reference pages have no source file, so their images are listed here.
   const apiReferenceImages = [
@@ -116,8 +116,8 @@ export function docsStructuredDataHead(
     }
 
   const docsUrl = developersUrl
-  const organizationId = 'https://tempo.xyz/#organization'
-  const websiteId = 'https://tempo.xyz/#website'
+  const organizationId = 'https://tempo.com/#organization'
+  const websiteId = 'https://tempo.com/#website'
   const entityDescription =
     'Tempo is a payments-first Layer 1 blockchain built for stablecoin payments, global payouts, agentic payments, and enterprise settlement.'
   const url = `${developersUrl}${pagePath === '/' ? '' : pagePath}`
@@ -148,12 +148,12 @@ export function docsStructuredDataHead(
         '@type': 'Corporation',
         '@id': organizationId,
         name: 'Tempo',
-        url: 'https://tempo.xyz',
+        url: 'https://tempo.com',
         logo: {
           '@type': 'ImageObject',
-          '@id': 'https://tempo.xyz/#logo',
-          url: 'https://tempo.xyz/apple-touch-icon.png',
-          contentUrl: 'https://tempo.xyz/apple-touch-icon.png',
+          '@id': 'https://tempo.com/#logo',
+          url: 'https://tempo.com/apple-touch-icon.png',
+          contentUrl: 'https://tempo.com/apple-touch-icon.png',
           width: 180,
           height: 180,
         },
@@ -180,7 +180,7 @@ export function docsStructuredDataHead(
         '@type': 'WebSite',
         '@id': websiteId,
         name: 'Tempo',
-        url: 'https://tempo.xyz',
+        url: 'https://tempo.com',
         description: entityDescription,
         publisher: { '@id': organizationId },
       },
@@ -200,7 +200,7 @@ export function docsStructuredDataHead(
         ? [
             {
               '@type': 'WebAPI',
-              '@id': 'https://tempo.xyz/developers/docs/api#webapi',
+              '@id': 'https://tempo.com/developers/docs/api#webapi',
               name: 'Tempo API',
               alternateName: ['Tempo Fee Payer API', 'Tempo Routes API'],
               ...(description ? { description } : {}),
