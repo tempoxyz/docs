@@ -5,7 +5,7 @@ description: Find tokenized Treasuries and yield-bearing assets on Tempo, with i
 ogImage: /og/2026-q4/og_2026-q4_docs_partners-rwas_title-image_v02.jpg
 ---
 
-import { partnerLogo, partnerLogoOndo, partnerLogoFigure, partnerLogoHastra, partnerLogoTenbin, partnerLogoSecuritize, partnerLogoMaple, partnerLogoEthena } from '../../../components/PartnerLogos.styles'
+import { partnerLogo, partnerLogoOndo, partnerLogoFigure, partnerLogoHastra, partnerLogoTenbin, partnerLogoSecuritize, partnerLogoMaple, partnerLogoEthena, partnerLogoReProtocol } from '../../../components/PartnerLogos.styles'
 
 # RWAs
 
@@ -39,6 +39,10 @@ Find real-world assets (RWAs), including tokenized Treasuries, funds, credit, an
 
 [Tenbin](https://docs.tenbinlabs.xyz/) issues tBRL, tMXN, and tGLD, which track the Brazilian real, the Mexican peso, and gold, backed by USDC and hedged with futures. Their staked versions, stBRL, stMXN, and stGLD, earn rewards only in Tenbin's staking vaults on Ethereum. The tokens move between Ethereum and Tempo over Chainlink CCIP. Tenbin's assets aren't available to U.S. persons; follow [Tenbin's documentation](https://docs.tenbinlabs.xyz/) for eligibility, minting, and redemption.
 
+## <span className={`partner-logo partner-logo--re-protocol ${partnerLogo().className + ' ' + partnerLogoReProtocol().className}`} aria-hidden="true" />Re Protocol
+
+[Re Protocol's reUSD](https://re.xyz/) is a US dollar token that earns a return from regulated reinsurance. It's minted against stablecoin deposits and is available only to eligible non-U.S. investors; follow [Re Protocol's documentation](https://docs.re.xyz/) for eligibility, minting, and redemption.
+
 ## Mainnet contracts
 
 These tokens appear in the [Tempo mainnet token registry](https://tokenlist.tempo.xyz/list/4217), on chain ID `4217`.
@@ -51,5 +55,6 @@ These tokens appear in the [Tempo mainnet token registry](https://tokenlist.temp
 | PRIME | [`0x20c00000000000000000000058d0b8b2cfdb358c`](https://explore.tempo.xyz/address/0x20c00000000000000000000058d0b8b2cfdb358c) |
 | syrupUSDC | [`0x20c0000000000000000000008191667423f70e67`](https://explore.tempo.xyz/address/0x20c0000000000000000000008191667423f70e67) |
 | sUSDe | [`0x20c000000000000000000000bd95bfb69fbe6ce3`](https://explore.tempo.xyz/address/0x20c000000000000000000000bd95bfb69fbe6ce3) |
+| reUSD | [`0x20c000000000000000000000383a23bacb546ab9`](https://explore.tempo.xyz/address/0x20c000000000000000000000383a23bacb546ab9) |
 
 Identify each asset by its contract address; the issuer sets eligibility, transfer rules, and redemption. Use the [token list API](/docs/quickstart/tokenlist) to read metadata, or [Earn](/docs/earn) to explore vault integrations.

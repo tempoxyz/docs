@@ -564,6 +564,10 @@ export const partnerLogoEthena = style({
   backgroundImage: 'url("/assets/partners/directory/ethena.svg")',
 })
 
+export const partnerLogoReProtocol = style({
+  backgroundImage: 'url("/assets/partners/directory/re-protocol.svg")',
+})
+
 export const partnerLogoDwellir = style({
   width: '84px',
   backgroundImage: 'url("/assets/partners/directory/dwellir.svg")',
