@@ -20,7 +20,7 @@ import {
   useConnection,
   useDisconnect,
   useReadContract,
-  useSendCallsSync,
+  useSendTransactionSync,
 } from 'wagmi'
 import { cx } from 'zyzz'
 import {
@@ -450,7 +450,23 @@ function RouteLifecycle({
   const connect = useConnect()
   const disconnect = useDisconnect()
   const tempoWallet = useTempoIdConnector()
-  const sendCalls = useSendCallsSync()
+  // Tempo runs a batch's calls atomically in one transaction, which the Tempo account's access key
+  // signs. Its wallet has no `wallet_sendCalls`, so the batch goes through `sendTransaction`.
+  const sendTransaction = useSendTransactionSync()
+  const sendCalls = {
+    // Fee sponsorship applies only on testnet, so a Routes source pays its own fees.
+    async mutateAsync(parameters: {
+      calls: { to: `0x${string}`; data?: `0x${string}`; value?: bigint }[]
+      chainId: number
+      capabilities?: { feePayer: false }
+    }) {
+      const receipt = await sendTransaction.mutateAsync({
+        calls: parameters.calls,
+        chainId: parameters.chainId as typeof tempo.id,
+      })
+      return { status: receipt.status, receipts: [receipt] }
+    },
+  }
   const tempoClient = useClient({ chainId: tempoChainId })
   // Each source network signs with its own kind of wallet: Tempo ID (the Tempo accounts SDK)
   // on Tempo, and the reader's choice of browser wallet everywhere else.
