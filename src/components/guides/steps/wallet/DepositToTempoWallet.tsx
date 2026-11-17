@@ -21,8 +21,10 @@ export function DepositToTempoWallet(props: DemoStepProps) {
     async mutationFn() {
       if (!isTempoId || !connector) throw new Error('Sign in with Tempo before adding funds.')
       const instance = await getTempoIdInstance(connector)
-      // The guides run on testnet, so open the deposit page for mainnet funds.
-      await instance.funding.open({ chainId: tempo.id })
+      // The guides sign in on testnet, so open the deposit page for mainnet funds. A Tempo Account
+      // has one address on every chain. Pass it, since Tempo shares an account's other chains only
+      // with its own apps, so the SDK can't read it on mainnet for this site.
+      await instance.funding.open({ address, chainId: tempo.id })
     },
   })
 

@@ -51,7 +51,10 @@ test('opens Tempo funding for mainnet', async () => {
   step.actions.props.onClick()
   await state.operation
   expect(state.getInstance).toHaveBeenCalledOnce()
-  expect(state.open).toHaveBeenCalledWith({ chainId: tempo.id })
+  expect(state.open).toHaveBeenCalledWith({
+    address: state.connection.address,
+    chainId: tempo.id,
+  })
 })
 
 test.each([
