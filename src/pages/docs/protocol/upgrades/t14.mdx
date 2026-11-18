@@ -119,6 +119,6 @@ Integrations that touch upgraded accounts need these changes:
 | Payment channels and MPP sessions | Deposits made before the upgrade still settle but can't be topped up, so close channels first if they need more funds. An upgraded account can't sign its own vouchers under T14. Set a separate single-key `authorizedSigner` until [TIP-1166](https://tips.sh/1166) in T15. |
 | Zones | Revoke access keys on each Zone separately. |
 
-Upgrade while the original key is still trusted, since a compromised key can race the upgrade. If it may be compromised, revoke access keys and allowances in the upgrade transaction, following the [account upgrade checklist](/docs/accounts/account-configuration/account-upgrade).
+For more details on upgrading your account, see the [account upgrade checklist](/docs/accounts/account-configuration/account-upgrade).
 
 Read the [specification](https://tips.sh/1113).
