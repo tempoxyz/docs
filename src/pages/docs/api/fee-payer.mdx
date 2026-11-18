@@ -54,7 +54,7 @@ The key's environment picks the network. A production key (`tempo:sk:...`) spons
 
 ### Point your client at the fee payer
 
-The hosted fee payer is a JSON-RPC relay at `https://api.tempo.xyz/rpc/sponsor`. It fills, sponsors, and broadcasts Tempo Transactions. Pass your key in the `key` search parameter and wrap your transport with Viem's [`withRelay`](https://viem.sh/tempo/transports/withRelay).
+The hosted fee payer is a JSON-RPC relay at `https://api.tempo.xyz/rpc/sponsor`. It fills, sponsors, and broadcasts Tempo Transactions. Send your key in the `tempo-api-key` header and wrap your transport with Viem's [`withRelay`](https://viem.sh/tempo/transports/withRelay).
 
 :::code-group
 
@@ -66,7 +66,9 @@ const client = createClient({
   testnet: true,
   transport: withRelay( // [!code focus]
     http(), // default transport // [!code focus]
-    http('https://api.tempo.xyz/rpc/sponsor?key=tempo_sandbox:sk:...'), // relay transport // [!code focus]
+    http('https://api.tempo.xyz/rpc/sponsor', { // relay transport // [!code focus]
+      fetchOptions: { headers: { 'tempo-api-key': 'tempo_sandbox:sk:...' } }, // [!code focus]
+    }), // [!code focus]
   ), // [!code focus]
 })
 ```
