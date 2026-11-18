@@ -1,0 +1,61 @@
+---
+title: "Routes API"
+seoTitle: "Routes API Overview | Tempo Docs"
+description: Quote, create, and track cross-chain stablecoin transfers and reusable deposit addresses into and out of Tempo with the Routes API.
+---
+
+import { Card, Cards } from 'vocs'
+
+# Routes API
+
+Move stablecoins between Tempo and other networks from your backend. Quote a route, create a transfer or a deposit address, and track it until the funds are delivered.
+
+:::warning
+Routes is in beta. [Contact Tempo](https://tempo.com/contact) to discuss access and the routes your application needs.
+:::
+
+<Cards>
+  <Card
+    title="Supported routes"
+    description="List the chain and token pairs your key can use, and how to create each."
+    to="/docs/api/routes/routes"
+    icon="lucide:map"
+  />
+  <Card
+    title="Deposits"
+    description="Create reusable deposit addresses, quote deposits, and read deposits detected at an address."
+    to="/docs/api/routes/deposit-addresses"
+    icon="lucide:inbox"
+  />
+  <Card
+    title="Transfers"
+    description="Quote and create wallet-signed transfers, register source transactions, and read transfer status."
+    to="/docs/api/routes/transfers"
+    icon="lucide:arrow-left-right"
+  />
+  <Card
+    title="Exchange"
+    description="Quote and execute swaps on Tempo's built-in stablecoin exchange, and read pairs, orders, and fills."
+    to="/docs/api/exchange"
+    icon="lucide:repeat"
+  />
+</Cards>
+
+## Choose a flow
+
+<Cards>
+  <Card
+    title="Transfer"
+    description="Your user's wallet signs the source transaction. Quote, create, then track the transfer."
+    to="/docs/routes/transfers"
+    icon="lucide:wallet"
+  />
+  <Card
+    title="Deposit address"
+    description="The sender pays from any wallet or exchange. Create a reusable address and track its deposits."
+    to="/docs/routes/deposits"
+    icon="lucide:qr-code"
+  />
+</Cards>
+
+[Set up Routes](/docs/routes/api-setup) walks through your first quote and create call.
