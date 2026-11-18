@@ -81,6 +81,8 @@ app.get('/resource',
 
 Each tab uses the framework-specific `mppx` instance from the server quickstart. `amount` is in the configured token's decimal units. Follow [One-time payments](/docs/guide/machine-payments/one-time-payments) for a complete service.
 
+If you already sell over x402, the [Tempo x402 facilitator](/docs/guide/machine-payments/x402-facilitator) pays you on Tempo with no change for buyers.
+
 The server returns a `402 Payment Required` challenge. The client authorizes payment and retries; the server verifies it before returning the resource and receipt. Inspect an endpoint's HTTP challenge without paying:
 
 ```bash [API (HTTP)]

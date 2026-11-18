@@ -819,6 +819,7 @@ export default defineConfig({
           { text: 'Introduction', link: '/docs/agents' },
           { text: 'Pay for an API', link: '/docs/guide/machine-payments/client' },
           { text: 'Accept API payments', link: '/docs/guide/machine-payments/server' },
+          { text: 'Tempo x402 facilitator', link: '/docs/guide/machine-payments/x402-facilitator' },
           { text: 'Pay with the CLI', link: '/docs/guide/machine-payments/agent' },
           { text: 'Find services', link: '/docs/guide/machine-payments/discover-services' },
           { text: 'Use Mercator', link: '/docs/guide/mercator' },
