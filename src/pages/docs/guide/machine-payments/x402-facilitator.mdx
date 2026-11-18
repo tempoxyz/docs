@@ -35,13 +35,14 @@ Your server calls the facilitator's `verify` and `settle` endpoints like any x40
     Seller-->>Buyer: 402 Payment Required
     Buyer->>Seller: Retry with signed USDC
     Seller->>Tempo: Verify and settle
-    Note over Tempo: Settle USDC on Base, send OUSD on Tempo
-    Tempo-->>Seller: Base and Tempo hashes
+    Note over Tempo: Settle USDC on Base
+    Tempo-->>Seller: Base hash, payout pending
     Seller-->>Buyer: Resource
+    Note over Tempo: Base block safe: send OUSD on Tempo
 `} />
 
 - **Base settlement.** Every payment goes to one Tempo deposit address on Base, `extra.payTo` in `GET /v1/x402/supported`.
-- **Tempo payout.** Tempo then sends the same amount in OUSD to the address in `extra.tempoSettlement`.
+- **Tempo payout.** Minutes later, after Base marks the settlement's block safe from reorgs, Tempo sends the same amount in OUSD to the address in `extra.tempoSettlement`.
 - **One payout per payment.** No batching. A retried settle returns the same result and never pays twice.
 - **No fee today.** Tempo pays each payout's network fee and holds no balance for you.
 
@@ -341,7 +342,7 @@ app.listen(4021)
 Settle waits for the Base receipt, then returns a standard x402 settle response:
 
 - `transaction` is the Base settlement hash.
-- `extensions.tempoSettlement` is the Tempo payout. It's usually still `pending`: Tempo pays out once Base marks the settlement's block safe from reorgs, which takes minutes.
+- `extensions.tempoSettlement` is the Tempo payout. It's usually still `pending`: Tempo sends it after Base marks the settlement's block safe from reorgs, which takes minutes.
 
 ```json
 {
@@ -370,7 +371,7 @@ curl https://api.tempo.xyz/v1/x402/payouts/<PAYOUT_ID> \
   --header "tempo-api-key: $TEMPO_API_KEY"
 ```
 
-- `status` goes `pending`, `submitted` (broadcast on Tempo), then `confirmed`. `transaction` is the Tempo hash once set, and it never changes.
+- `status` goes `pending`, `submitted` (broadcast on Tempo), then `confirmed`. After it's set, `transaction` is the Tempo hash and never changes.
 - `GET /v1/x402/settlements/<BASE_HASH>` returns the same payout by its Base hash.
 - If settle answers `settlement_pending`, retry it with the same payload. It never pays twice.
 
@@ -384,7 +385,7 @@ All endpoints live under `https://api.tempo.xyz/v1/x402`. `GET /supported` is pu
 | --- | --- |
 | `GET /supported` | Lists the schemes served. Each kind's `extra` carries the deposit address in `payTo`. |
 | `POST /verify` | Checks an x402 payment without settling it. Takes the standard x402 facilitator body. |
-| `POST /settle` | Settles the payment on Base and sends the Tempo payout. Returns both hashes. |
+| `POST /settle` | Settles the payment on Base and queues the Tempo payout. Returns the Base hash and the payout. |
 | `GET /payouts/{id}` | Returns a payout by `payoutId`. `status` is `pending`, `submitted`, `confirmed`, or `failed`. |
 | `GET /settlements/{transaction}` | Returns the same payout, looked up by its Base settlement hash. |
 
