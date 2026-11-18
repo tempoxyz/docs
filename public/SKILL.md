@@ -21,7 +21,7 @@ All links below use the canonical docs mount at `https://tempo.com/developers`.
 | [Earn](https://tempo.com/developers/docs/earn.md) | Choose a vault, deposit stablecoins, read positions, or withdraw. Earn is in beta; check access on the introduction page. |
 | [Routes](https://tempo.com/developers/docs/routes.md) | Accept cross-network deposits, quote transfers, or track delivery. Routes is in beta; check access on the introduction page. |
 | [Zones](https://tempo.com/developers/docs/zones.md) | Connect to a Zone and work with private balances, deposits, or withdrawals. Zones is live on Mainnet; check how to set up a Zone on the introduction page. |
-| [Machine Payments](https://tempo.com/developers/docs/agents.md) | Pay for APIs, accept API payments, discover services, or integrate MPP. |
+| [Machine Payments](https://tempo.com/developers/docs/agents.md) | Pay for APIs, accept API payments over MPP or x402, discover services, or integrate MPP. |
 | [Tempo EVM](https://tempo.com/developers/docs/development.md) | Build wallet support, manage signing keys, send or receive payments and reconcile deposits, use transactions and fees, issue TIP-20 Tokens, deploy contracts, exchange stablecoins, run nodes, or read protocol specifications and changelog. |
 | [API reference](https://tempo.com/developers/docs/api.md) | Find Tempo API endpoints by product, authentication, Console management endpoints, JSON-RPC, and the indexer. |
 | [Partners](https://tempo.com/developers/docs/partners.md) | Find third-party wallets, bridges, RPC infrastructure, data services, and integrations. |
