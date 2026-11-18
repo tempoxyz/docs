@@ -557,9 +557,9 @@ error SignerConfigChanged(address signer);
 error SaltNotSignerCommitment(address signer, bytes32 commitment);
 ```
 
-**`verifyVoucher`** runs the same signature checks as `settle` and `close` against the channel's opening commitment, and charges the same gas as the voucher check in `settle`. It doesn't compare `cumulativeAmount` with the deposit or settled amount: read those with `getChannel`. Payees can call it to check a voucher before serving, without reimplementing the configurable-account rules. Alternatively, when `OpeningCommitmentRecorded` was emitted for the channel, check that the voucher's configuration hashes to `descriptor.salt`, which needs no state read.
+**`verifyVoucher`** runs the same signature checks as `settle` and `close` against the channel's opening commitment, and charges the same gas as the voucher check in `settle`. It doesn't compare `cumulativeAmount` with the deposit or settled amount: read those with `getChannel`. Payees can call it to check a voucher before serving, without reimplementing the configurable-account rules. Alternatively, when `OpeningCommitmentRecorded` was emitted for the channel, check the voucher without a state read by applying every `settle` check yourself: the signature is a `0x05` configurable-account signature, its account is the signer, its configuration hashes to `descriptor.salt`, and its owner signatures over the voucher digest reach the threshold. A configuration that hashes to `salt` proves nothing about the voucher on its own, because the configuration is public.
 
-**`OpeningCommitmentRecorded`** shows which signer configuration signs for a channel, so indexers should index it. Comparing it with the account's latest `ConfigurableAccountConfigUpdated` or `AccountUpgraded` event finds channels opened under an old configuration.
+**`OpeningCommitmentRecorded`** shows which signer configuration signs for a channel. Index it in indexers. Comparing it with the account's latest `ConfigurableAccountConfigUpdated` or `AccountUpgraded` event finds channels opened under an old configuration.
 
 <span id="channel-reserve-errors" />
 
@@ -573,7 +573,7 @@ error SaltNotSignerCommitment(address signer, bytes32 commitment);
 
 A zero `topUp` still succeeds in each case and cancels a pending close request.
 
-**Close channels before migrating.** Payers should close their open channels before becoming a configurable account, whether by [upgrading a single-key account](/docs/accounts/account-configuration/account-upgrade) or by registering a configuration for an address that had none. A channel opened before the migration has a zero opening commitment: the account's current owners can never sign its vouchers, and a nonzero `topUp` reverts with `RootKeyRetired`. Wallets should offer to close these channels as part of the migration and reopen them afterwards with the commitment as `salt`.
+**Close channels before migrating.** Close open channels before a payer becomes a configurable account, whether by [upgrading a single-key account](/docs/accounts/account-configuration/account-upgrade) or by registering a configuration for an address that had none. A channel opened before the migration has a zero opening commitment: its vouchers can still be signed only by the original key or the version-0 configuration that derives the address, never by a configuration the account registers or rotates to, and a nonzero `topUp` reverts with `RootKeyRetired`. In wallets, offer to close these channels as part of the migration and reopen them afterwards with the commitment as `salt`.
 
 
 ## TIP20Factory

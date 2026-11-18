@@ -1,12 +1,12 @@
 ---
 title: "T15 Network Upgrade"
 seoTitle: "T15 Network Upgrade | Tempo Docs"
-description: T15 lets configurable accounts sign their own payment-channel vouchers, checked against the account configuration fixed when the channel opens. More T15 features will be added to this page.
+description: T15 lets configurable accounts sign their own payment-channel vouchers, checked against the account configuration fixed when the channel opens.
 ---
 
 # T15 Network Upgrade
 
-T15 lets [configurable accounts](/docs/development/configurable-accounts) sign their own payment-channel vouchers with their signers. This page covers the T15 features specified so far.
+T15 lets [configurable accounts](/docs/development/configurable-accounts) sign their own payment-channel vouchers with their signers.
 
 :::warning[T15 status]
 T15 isn't scheduled yet: it has no testnet or mainnet activation date, and its scope may still change. This page covers only [TIP-1166](https://tips.sh/1166) so far. Other T15 features will be added as they're specified.
@@ -38,11 +38,9 @@ Under T14, `open` rejects a voucher signer that is a configurable account, so co
 - **Opening commitment fixed for the channel's lifetime:** `open` emits `OpeningCommitmentRecorded(channelId, signer, commitment)`. `settle` and `close` check vouchers against that opening commitment, never the signer's current configuration.
 - **`0x05` vouchers only:** a channel with a nonzero opening commitment accepts only `0x05` configurable-account voucher signatures whose configuration hashes to the commitment and whose owner signatures reach the threshold. Primitive signatures from the retired root key are rejected.
 - **Top-ups after a configuration change:** a nonzero `topUp` reverts with `SignerConfigChanged(signer)` if the signer's configuration changed since `open`, or with `RootKeyRetired(signer)` if the channel opened without a commitment and the signer now has one. A zero `topUp` still cancels a close request.
-- **`verifyVoucher` view:** returns whether `settle` and `close` would accept a voucher signature for a channel, without reimplementing the configurable-account rules.
+- **`verifyVoucher` view:** returns whether `settle` and `close` would accept a voucher signature for a channel, without reimplementing the configurable-account rules. [TIP-1166](https://tips.sh/1166) and the [channel reserve reference](/docs/protocol/tip20/spec#configurable-voucher-signers) define all of these rules.
 
 No existing method, event, or the `channelId` formula changes, and channels still use one storage slot. Existing channels behave as before.
-
-Read the [specification](https://tips.sh/1166) and the [channel reserve reference](/docs/protocol/tip20/spec#configurable-voucher-signers).
 
 ## Integration impact
 

@@ -244,13 +244,11 @@ const res = await fetch('http://localhost:3000/api/sessions/photo')
 
 ## Configurable account payers
 
-Under T14, a [configurable account](/docs/development/configurable-accounts) can't sign its own vouchers: set a separate single-key `authorizedSigner` for its channels. From [T15](/docs/protocol/upgrades/t15), which isn't scheduled yet, [TIP-1166](https://tips.sh/1166) lets the account's signers sign vouchers:
+Under T14, a [configurable account](/docs/development/configurable-accounts) can't sign its own vouchers: set a separate single-key `authorizedSigner` for its channels. From [T15](/docs/protocol/upgrades/t15), which isn't scheduled yet, [TIP-1166](https://tips.sh/1166) lets the account's signers sign vouchers under the [channel reserve rules](/docs/protocol/tip20/spec#configurable-voucher-signers), which list the [errors](/docs/protocol/tip20/spec#channel-reserve-errors) to handle:
 
 - **Payers:** open the channel with the signer's configuration commitment as `salt`, keep that configuration until the channel closes, and sign vouchers with it. If the signer's configuration changes, the channel still settles but can't be topped up: close it and open a new one.
-- **Servers:** before serving, check a voucher with the reserve's `verifyVoucher` view, or check that its configuration hashes to `descriptor.salt` when the channel emitted `OpeningCommitmentRecorded` at open.
-- **Migrating to a configurable account:** close open channels first, then reopen them afterwards. The account's current owners can't sign vouchers for a channel opened before the migration, and it can't be topped up.
-
-See the [channel reserve reference](/docs/protocol/tip20/spec#configurable-voucher-signers) for the rules and [errors](/docs/protocol/tip20/spec#channel-reserve-errors).
+- **Servers:** before serving, check a voucher with the reserve's `verifyVoucher` view. To skip the state read when the channel emitted `OpeningCommitmentRecorded` at open, apply every `settle` check yourself: a `0x05` signature whose account is the signer, whose configuration hashes to `descriptor.salt`, and whose owner signatures over the voucher digest reach the threshold.
+- **Migrating to a configurable account:** close open channels first, then reopen them afterwards. A channel opened before the migration accepts vouchers only from the original key or version-0 configuration, never from a configuration registered later, and it can't be topped up.
 
 ## Next steps for pay-as-you-go payments
 
