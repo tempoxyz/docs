@@ -341,7 +341,7 @@ app.listen(4021)
 Settle waits for the Base receipt, then returns a standard x402 settle response:
 
 - `transaction` is the Base settlement hash.
-- `extensions.tempoSettlement` is the Tempo payout. It's usually still `pending`: Tempo pays out once the Base block is final, which takes minutes.
+- `extensions.tempoSettlement` is the Tempo payout. It's usually still `pending`: Tempo pays out once Base marks the settlement's block safe from reorgs, which takes minutes.
 
 ```json
 {
@@ -398,14 +398,19 @@ Verify and settle answer HTTP `200` for payment-level refusals, with `isValid: f
 | Reason | Meaning |
 | --- | --- |
 | `payto_not_deposit_address` | `payTo` isn't the deposit address from `GET /supported`. |
-| `missing_tempo_settlement` | `extra.tempoSettlement` is missing or isn't a valid Tempo address. |
+| `missing_tempo_settlement` | `extra.tempoSettlement` is missing, isn't a valid Tempo address, or is the zero or deposit address. |
+| `payout_address_unresolved` | `tempoSettlement` is a virtual address with no registered master. |
+| `amount_below_minimum` | The amount is zero. |
 | `amount_above_maximum` | The amount is above the maximum per payment that Tempo sets. |
 | `insufficient_tempo_liquidity` | Tempo can't fund the payout right now. Nothing is charged on Base; retry later. |
 | `screen_rejected` | The payer or payout address failed address screening. |
+| `screening_unavailable` | Screening couldn't run. Nothing is charged; retry later. |
+| `invalid_payload` | The payment doesn't carry exactly one authorization for its scheme. |
+| `unsupported_scheme`, `unsupported_network`, `unsupported_asset` | The payment isn't `exact` USDC on Base, as `GET /supported` lists. |
 | `payment_conflict` | The same payment was already sent with different terms or by another organization. |
-| `settlement_pending` | Rare: Base hasn't returned the receipt yet. Retry settle with the same payload; it never pays twice. |
+| `settlement_pending` | Rare: Base doesn't hold the settlement yet. Retry settle with the same payload; it never pays twice. |
 
-Refusals that come from the x402 signature or Base state use the x402 SDK's reasons.
+Refusals that come from the x402 signature or Base state use the x402 SDK's reasons. An upstream failure answers `unexpected_verify_error` or `unexpected_settle_error`.
 
 ## Tempo x402 facilitator FAQ
 
