@@ -12,6 +12,22 @@ import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 Sell over [x402](https://x402.org) on Base and get paid in stablecoins on Tempo, with no change for buyers.
 
+## Tempo x402 facilitator networks
+
+Buyers pay on these networks:
+
+| Network | Chain ID | Token | Schemes |
+| --- | --- | --- | --- |
+| Base mainnet | `eip155:8453` | USDC (`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`) | `exact` (EIP-3009 or Permit2) |
+
+Tempo pays you out on these networks:
+
+| Network | Chain ID | Token |
+| --- | --- | --- |
+| Tempo mainnet | `eip155:4217` | [OUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000006a37da5c996874be) (`0x20c0000000000000000000006a37da5c996874be`) |
+
+Payouts match the Base amount at par: USDC and OUSD both use 6 decimals. `GET /v1/x402/supported` lists what the facilitator accepts right now.
+
 ## How the Tempo x402 facilitator works
 
 The facilitator is a hosted x402 facilitator in the Tempo API. Your server calls its `verify` and `settle` endpoints like any other x402 facilitator. Buyers keep paying USDC on Base with any x402 client.
@@ -211,15 +227,6 @@ curl https://api.tempo.xyz/v1/x402/settlements/<BASE_HASH> \
 ```
 
 :::::
-
-## Tempo x402 facilitator networks
-
-| Side | Network | Asset |
-| --- | --- | --- |
-| Buyer pays | Base mainnet (`eip155:8453`) | USDC, `exact` scheme (EIP-3009 or Permit2) |
-| You receive | Tempo mainnet (`eip155:4217`) | [OUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000006a37da5c996874be) (`0x20c0000000000000000000006a37da5c996874be`) |
-
-Amounts carry over at par in base units. USDC and OUSD both use 6 decimals, so a `$0.01` price pays `10000` base units of OUSD.
 
 ## Tempo x402 facilitator API
 
