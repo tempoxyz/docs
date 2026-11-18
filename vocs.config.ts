@@ -1053,6 +1053,11 @@ export default defineConfig({
             collapsed: false,
             items: [
               {
+                text: 'T15',
+                badge: { text: 'Planned', variant: 'note' as const },
+                link: '/docs/protocol/upgrades/t15',
+              },
+              {
                 text: 'T14',
                 badge: { text: 'Planned', variant: 'note' as const },
                 link: '/docs/protocol/upgrades/t14',
