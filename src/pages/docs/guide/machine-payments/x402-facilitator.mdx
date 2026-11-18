@@ -1,56 +1,48 @@
 ---
 title: Tempo x402 facilitator
 seoTitle: Tempo x402 Facilitator | Tempo Docs
-description: Keep selling over x402 on Base and receive each payment as OUSD on Tempo, with no change for buyers.
+description: Keep selling over x402 and receive each payment as OUSD on Tempo, with no change for buyers.
 ---
 
-import { Card, Cards } from 'vocs'
+import { Card, Cards, Tab, Tabs } from 'vocs'
 
 import { MermaidDiagram } from '../../../../components/MermaidDiagram'
 
 # Tempo x402 facilitator
 
-Sell over [x402](https://x402.org) on Base and get paid in stablecoins on Tempo, with no change for buyers.
+Sell over [x402](https://x402.org) and get paid in stablecoins on Tempo, with no change for buyers.
 
-## Tempo x402 facilitator networks
+## Supported payment networks
 
-Buyers pay on these networks:
+| Direction | Network | Chain ID | Token | Schemes |
+| --- | --- | --- | --- | --- |
+| Pay in | Base mainnet | `eip155:8453` | [USDC](https://basescan.org/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913) | `exact` (EIP-3009 or Permit2) |
+| Pay out | Tempo mainnet | `eip155:4217` | [OUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000006a37da5c996874be) | — |
 
-| Network | Chain ID | Token | Schemes |
-| --- | --- | --- | --- |
-| Base mainnet | `eip155:8453` | [USDC](https://basescan.org/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913) | `exact` (EIP-3009 or Permit2) |
-
-Tempo pays you out on these networks:
-
-| Network | Chain ID | Token |
-| --- | --- | --- |
-| Tempo mainnet | `eip155:4217` | [OUSD](https://explore.tempo.xyz/address/0x20c0000000000000000000006a37da5c996874be) |
-
-Payouts match the Base amount at par: USDC and OUSD both use 6 decimals. `GET /v1/x402/supported` lists what the facilitator accepts right now.
+- Payouts match the pay-in amount at par: USDC and OUSD both use 6 decimals.
+- `GET /v1/x402/supported` lists what the facilitator accepts right now.
 
 ## How the Tempo x402 facilitator works
 
-The facilitator is a hosted x402 facilitator in the Tempo API. Your server calls its `verify` and `settle` endpoints like any other x402 facilitator. Buyers keep paying USDC on Base with any x402 client.
+Your server calls the facilitator's `verify` and `settle` endpoints like any x402 facilitator. Buyers keep paying with any x402 client.
 
 <MermaidDiagram chart={`sequenceDiagram
-    participant Buyer as Buyer (x402 client)
+    participant Buyer
     participant Seller as Your server
-    participant Tempo as Tempo x402 facilitator
+    participant Tempo as Tempo facilitator
     Buyer->>Seller: Request resource
     Seller-->>Buyer: 402 Payment Required
-    Buyer->>Seller: Retry with signed USDC payment
+    Buyer->>Seller: Retry with signed USDC
     Seller->>Tempo: Verify and settle
-    Note over Tempo: Settle USDC on Base
-    Note over Tempo: Send OUSD on Tempo
-    Tempo-->>Seller: Base hash + Tempo payout hash
+    Note over Tempo: Settle USDC on Base, send OUSD on Tempo
+    Tempo-->>Seller: Base and Tempo hashes
     Seller-->>Buyer: Resource
 `} />
 
-- **Base settlement.** Every payment pays one Tempo deposit address on Base. `GET /v1/x402/supported` returns it as `extra.payTo`.
-- **Tempo payout.** After the Base settlement, Tempo sends the same amount in OUSD to the address in `extra.tempoSettlement`.
-- **One payout per payment.** Tempo sends one Tempo transfer per payment and never batches. A retried settle returns the same result and never pays twice.
-
-The facilitator charges no fee today, and Tempo pays each payout's network fee. Tempo holds no balance for you.
+- **Base settlement.** Every payment goes to one Tempo deposit address on Base, `extra.payTo` in `GET /v1/x402/supported`.
+- **Tempo payout.** Tempo then sends the same amount in OUSD to the address in `extra.tempoSettlement`.
+- **One payout per payment.** No batching. A retried settle returns the same result and never pays twice.
+- **No fee today.** Tempo pays each payout's network fee and holds no balance for you.
 
 ## Accept x402 payments on Tempo
 
@@ -58,17 +50,19 @@ The facilitator charges no fee today, and Tempo pays each payout's network fee. 
 
 ### Create an API key
 
-Create a production API key in [Tempo Console](https://tempo.com/console?to=/:org/api-keys) with the `mpp:write` scope. Keep it on your server. Send it in the `tempo-api-key` header or as `Authorization: Bearer`.
+Create a production API key in [Tempo Console](https://tempo.com/console?to=/:org/api-keys) with the `mpp:write` scope.
+
+- Keep it on your server.
+- Send it in the `tempo-api-key` header or as `Authorization: Bearer`.
+- Sandbox keys get `403 production_api_key_required`.
 
 ```bash [Terminal]
 export TEMPO_API_KEY="tempo:sk:..."
 ```
 
-Sandbox keys can't verify or settle Base mainnet payments. The facilitator refuses them with `403 production_api_key_required`.
-
 ### Register your payout address
 
-Register each Tempo address that receives payouts. Verify and settle refuse a `tempoSettlement` address your organization didn't register.
+Register each Tempo address that receives payouts. Verify and settle refuse unregistered addresses.
 
 ```bash [Terminal]
 curl https://api.tempo.xyz/v1/x402/payout-addresses \
@@ -77,13 +71,21 @@ curl https://api.tempo.xyz/v1/x402/payout-addresses \
   --data '{ "address": "<TEMPO_PAYOUT_ADDRESS>", "label": "Main payouts" }'
 ```
 
-Registering an address again returns the existing registration. Use any Tempo address you control, such as a deposit address from a payment provider.
+- Registering an address again returns the existing registration.
+- Use any Tempo address you control, such as a payment provider's deposit address.
 
 ### Point your x402 middleware at Tempo
 
-Install the x402 SDK for your framework:
+Set the facilitator URL to `https://api.tempo.xyz/v1/x402`, send your API key on each call, and add `tempoSettlement` to `extra`:
+
+<Tabs stateKey="x402-facilitator-sdk">
+<Tab title="x402 SDK">
 
 ::::code-group
+
+```bash [Next.js]
+npm i @x402/core @x402/evm @x402/next
+```
 
 ```bash [Hono]
 npm i @x402/core @x402/evm @x402/hono hono
@@ -95,9 +97,43 @@ npm i @x402/core @x402/evm @x402/express express
 
 ::::
 
-Set the facilitator URL to `https://api.tempo.xyz/v1/x402`, send your API key on each call, and add `tempoSettlement` to `extra`:
-
 ::::code-group
+
+```ts [Next.js]
+import { HTTPFacilitatorClient, x402ResourceServer } from '@x402/core/server'
+import { ExactEvmScheme } from '@x402/evm/exact/server'
+import { withX402 } from '@x402/next'
+import { NextResponse } from 'next/server'
+
+const network = 'eip155:8453' // Base mainnet
+const headers = { 'tempo-api-key': process.env.TEMPO_API_KEY! }
+
+const facilitator = new HTTPFacilitatorClient({
+  createAuthHeaders: async () => ({ settle: headers, supported: headers, verify: headers }),
+  url: 'https://api.tempo.xyz/v1/x402',
+})
+
+// Tempo's deposit address on Base
+const { kinds } = await facilitator.getSupported()
+const payTo = kinds.find((kind) => kind.network === network && kind.scheme === 'exact')
+  ?.extra?.payTo as string
+
+const server = new x402ResourceServer(facilitator).register(network, new ExactEvmScheme())
+
+export const GET = withX402(
+  async () => NextResponse.json({ forecast: 'sunny' }),
+  {
+    accepts: {
+      extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
+      network,
+      payTo,
+      price: '$0.01',
+      scheme: 'exact',
+    },
+  },
+  server,
+)
+```
 
 ```ts [Hono]
 import { HTTPFacilitatorClient, x402ResourceServer } from '@x402/core/server'
@@ -109,14 +145,14 @@ const network = 'eip155:8453' // Base mainnet
 const headers = { 'tempo-api-key': process.env.TEMPO_API_KEY! }
 
 const facilitator = new HTTPFacilitatorClient({
+  createAuthHeaders: async () => ({ settle: headers, supported: headers, verify: headers }),
   url: 'https://api.tempo.xyz/v1/x402',
-  createAuthHeaders: async () => ({ verify: headers, settle: headers, supported: headers }),
 })
 
-// Every payment goes to Tempo's deposit address on Base.
+// Tempo's deposit address on Base
 const { kinds } = await facilitator.getSupported()
-const payTo = kinds.find((kind) => kind.scheme === 'exact' && kind.network === network)!
-  .extra!.payTo as string
+const payTo = kinds.find((kind) => kind.network === network && kind.scheme === 'exact')
+  ?.extra?.payTo as string
 
 const server = new x402ResourceServer(facilitator).register(network, new ExactEvmScheme())
 
@@ -127,11 +163,11 @@ app.use(
     {
       'GET /weather': {
         accepts: {
-          scheme: 'exact',
-          price: '$0.01',
+          extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
           network,
           payTo,
-          extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
+          price: '$0.01',
+          scheme: 'exact',
         },
       },
     },
@@ -154,14 +190,14 @@ const network = 'eip155:8453' // Base mainnet
 const headers = { 'tempo-api-key': process.env.TEMPO_API_KEY! }
 
 const facilitator = new HTTPFacilitatorClient({
+  createAuthHeaders: async () => ({ settle: headers, supported: headers, verify: headers }),
   url: 'https://api.tempo.xyz/v1/x402',
-  createAuthHeaders: async () => ({ verify: headers, settle: headers, supported: headers }),
 })
 
-// Every payment goes to Tempo's deposit address on Base.
+// Tempo's deposit address on Base
 const { kinds } = await facilitator.getSupported()
-const payTo = kinds.find((kind) => kind.scheme === 'exact' && kind.network === network)!
-  .extra!.payTo as string
+const payTo = kinds.find((kind) => kind.network === network && kind.scheme === 'exact')
+  ?.extra?.payTo as string
 
 const server = new x402ResourceServer(facilitator).register(network, new ExactEvmScheme())
 
@@ -172,11 +208,11 @@ app.use(
     {
       'GET /weather': {
         accepts: {
-          scheme: 'exact',
-          price: '$0.01',
+          extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
           network,
           payTo,
-          extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
+          price: '$0.01',
+          scheme: 'exact',
         },
       },
     },
@@ -193,11 +229,126 @@ app.listen(4021)
 
 ::::
 
-The middleware answers unpaid requests with `402 Payment Required` and settles paid ones through Tempo. Verify refuses any `payTo` other than the deposit address with `payto_not_deposit_address`.
+</Tab>
+<Tab title="mppx">
+
+Needs the next `mppx` release after 0.20.1.
+
+```bash [Terminal]
+npm i mppx
+```
+
+::::code-group
+
+```ts [Next.js]
+import { Mppx, evm } from 'mppx/nextjs'
+
+const facilitator = {
+  headers: { 'tempo-api-key': process.env.TEMPO_API_KEY! },
+  url: 'https://api.tempo.xyz/v1/x402',
+}
+
+const mppx = Mppx.create({
+  methods: [
+    evm.charge({
+      currency: evm.assets.base.USDC,
+      // Tempo's deposit address on Base
+      recipient: await evm.facilitatorPayTo(facilitator, { network: 'eip155:8453' }),
+      x402: {
+        extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
+        facilitator,
+      },
+    }),
+  ],
+  secretKey: process.env.MPP_SECRET_KEY!,
+})
+
+export const GET = mppx.evm.charge({ amount: '0.01' })(() =>
+  Response.json({ forecast: 'sunny' }),
+)
+```
+
+```ts [Hono]
+import { Hono } from 'hono'
+import { Mppx, evm } from 'mppx/hono'
+
+const facilitator = {
+  headers: { 'tempo-api-key': process.env.TEMPO_API_KEY! },
+  url: 'https://api.tempo.xyz/v1/x402',
+}
+
+const mppx = Mppx.create({
+  methods: [
+    evm.charge({
+      currency: evm.assets.base.USDC,
+      // Tempo's deposit address on Base
+      recipient: await evm.facilitatorPayTo(facilitator, { network: 'eip155:8453' }),
+      x402: {
+        extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
+        facilitator,
+      },
+    }),
+  ],
+  secretKey: process.env.MPP_SECRET_KEY!,
+})
+
+const app = new Hono()
+
+app.get('/weather', mppx.evm.charge({ amount: '0.01' }), (c) =>
+  c.json({ forecast: 'sunny' }),
+)
+
+export default app
+```
+
+```ts [Express]
+import express from 'express'
+import { Mppx, evm } from 'mppx/express'
+
+const facilitator = {
+  headers: { 'tempo-api-key': process.env.TEMPO_API_KEY! },
+  url: 'https://api.tempo.xyz/v1/x402',
+}
+
+const mppx = Mppx.create({
+  methods: [
+    evm.charge({
+      currency: evm.assets.base.USDC,
+      // Tempo's deposit address on Base
+      recipient: await evm.facilitatorPayTo(facilitator, { network: 'eip155:8453' }),
+      x402: {
+        extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
+        facilitator,
+      },
+    }),
+  ],
+  secretKey: process.env.MPP_SECRET_KEY!,
+})
+
+const app = express()
+
+app.get('/weather', mppx.evm.charge({ amount: '0.01' }), (req, res) => {
+  res.json({ forecast: 'sunny' })
+})
+
+app.listen(4021)
+```
+
+::::
+
+</Tab>
+</Tabs>
+
+- The middleware answers unpaid requests with `402 Payment Required`.
+- It settles paid requests through Tempo.
+- Verify refuses any other `payTo` with `payto_not_deposit_address`.
 
 ### Check the payout
 
-Settle returns a standard x402 settle response. `transaction` is the Base settlement hash, and `extensions.tempoSettlement` is the Tempo payout:
+Settle returns a standard x402 settle response:
+
+- `transaction` is the Base settlement hash.
+- `extensions.tempoSettlement` is the Tempo payout.
 
 ```json
 {
@@ -219,7 +370,9 @@ Settle returns a standard x402 settle response. `transaction` is the Base settle
 }
 ```
 
-`status` is `submitted` once the Tempo transaction is broadcast. Settle doesn't wait for the Tempo receipt, and the payout hash never changes. Look up the payout by the Base hash to see it reach `confirmed`:
+- `status` is `submitted` once the Tempo transaction is broadcast.
+- Settle doesn't wait for the Tempo receipt, and the payout hash never changes.
+- Look up the payout by the Base hash to see it reach `confirmed`:
 
 ```bash [Terminal]
 curl https://api.tempo.xyz/v1/x402/settlements/<BASE_HASH> \
