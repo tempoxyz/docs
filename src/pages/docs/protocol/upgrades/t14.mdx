@@ -91,7 +91,7 @@ Read the [specification](https://tips.sh/1152).
 - **Account upgrades:** the upgrade call only exists once T14 activates on a network. Sent earlier, the transaction still pays its fee but leaves the account unchanged, so send upgrades only after activation.
 - **Signature parsing:** accounts with multiple signers sign with the [`0x05` multisig signature](/docs/development/configurable-accounts#multisig-signature-format). Viem builds and reads it. If you parse or verify Tempo transaction signatures yourself, handle this type. It isn't valid as a fee payer signature, in subblock transactions, or in authorization lists.
 - **New configurable accounts:** a derived address for a new configurable account exists only on Tempo and its Zones. Funds sent to it on another chain are lost. Warn users not to share it for other chains.
-- **Contracts that check signatures from configurable accounts:** single-key accounts are unchanged. A registered or upgraded account answers ERC-1271 `isValidSignature`. Contracts can also call `verifyConfigurableAccount` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). Upgraded accounts follow [extra signature rules](#upgrade-impact).
+- **Contracts that check signatures from configurable accounts:** single-key accounts are unchanged. A configurable account answers ERC-1271 `isValidSignature`. Contracts can also call `verifyConfigurableAccount` on the [signature verifier precompile](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract). Configurable accounts follow [extra signature rules](#upgrade-impact).
 - **Validators:** check your fee recipient and endpoint formats against the [validator and consensus changes](#validator-and-consensus-changes).
 
 <span id="upgrade-impact" />
@@ -107,16 +107,16 @@ An [account upgrade](/docs/accounts/account-configuration/account-upgrade) turns
 - **What carries over:** the address, balances, allowances including Permit2, and access keys. Admin keys granted before T14 keep spending without limits until revoked.
 - **Who can upgrade:** accounts without code, an EIP-7702 delegation, or existing signers.
 
-Integrations that touch upgraded accounts need these changes:
+Integrations that touch configurable accounts need these changes:
 
 | Integration | What to do |
 |---|---|
 | Wallets | Send the upgrade after T14 activates. A fee payer can sponsor it. Before the user confirms, show the signers, threshold, and every access key that carries over. Warn that the original key still controls the address on other EVM chains. |
 | Error handling | Treat `RootKeyRetired` as "this key was upgraded", not an invalid signature. Rebuild the account from its [saved configuration](/docs/development/configurable-accounts#keep-the-current-configuration). |
-| Fee sponsors | Upgraded accounts can be sponsored but can't sponsor others. Keep a single-key fee payer. |
-| TIP-20 `permit` | Upgraded accounts can't sign it. Permits signed before the upgrade also fail, so relayers should drop queued ones. Batch an `approve` instead. |
+| Fee sponsors | Configurable accounts can be sponsored but can't sponsor others. Keep a single-key fee payer. |
+| TIP-20 `permit` | Configurable accounts can't sign it. Permits signed before the upgrade also fail, so relayers should drop queued ones. Batch an `approve` instead. |
 | Signature verifiers | Permit2 and OpenZeppelin `SignatureChecker` v5.1+ need no change. Code that tries `ecrecover` first still accepts the original key. That includes `SignatureChecker` before v5.1, SIWE and TIP-1053 sign-in, signed orders, and ERC-2612 permits on non-TIP-20 tokens. Check for code or call `getConfigCommitment` first. |
-| Payment channels and MPP sessions | Deposits made before the upgrade still settle but can't be topped up, so close channels first if they need more funds. An upgraded account can't sign its own vouchers under T14. Set a separate single-key `authorizedSigner` until [TIP-1166](https://tips.sh/1166) in T15. |
+| Payment channels and MPP sessions | Deposits made before the upgrade still settle but can't be topped up, so close channels first if they need more funds. A configurable account can't sign its own vouchers under T14. Set a separate single-key `authorizedSigner` until [TIP-1166](https://tips.sh/1166) in T15. |
 | Zones | Revoke access keys on each Zone separately. |
 
 For more details on upgrading your account, see the [account upgrade checklist](/docs/accounts/account-configuration/account-upgrade).
