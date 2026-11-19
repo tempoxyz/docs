@@ -44,7 +44,7 @@ For `ZoneFactory.createZone`, addresses must be unique across `allowedAccounts`,
 
 ## Updated gas pricing
 
-The precompile input charge rises from 6 to 30 gas per 32-byte word, rounded up over the full calldata including the selector. Below 1 KiB, the increase is at most 768 gas, excluding duplicate-check charges.
+The precompile input charge rises from 6 to 30 gas per 32-byte word, rounded up over the full calldata including the selector. It applies to every direct call to a Tempo precompile. A DELEGATECALL or CALLCODE to one reverts with `DelegateCallNotAllowed()` before the charge and consumes no gas. Below 1 KiB, the increase is at most 768 gas, excluding duplicate-check charges.
 
 Estimate gas on the target network and update fixed limits. See [TIP-1100](https://tips.sh/1100).
 
