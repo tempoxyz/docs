@@ -135,15 +135,18 @@ npm i mppx hono
 import { Hono } from 'hono'
 import { Mppx, evm } from 'mppx/hono'
 
+const facilitator = 'https://api.tempo.xyz/v1/x402'
+
 const mppx = Mppx.create({
   methods: [
     evm.charge({
       currency: evm.assets.base.USDC,
       // [!code hl:start]
-      // No recipient: read from the facilitator's payTo and refreshed every 5 minutes
+      // Tempo's deposit address on Base, read from GET /supported at startup
+      recipient: await evm.facilitatorPayTo(facilitator, { network: 'eip155:8453' }),
       x402: {
         extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
-        facilitator: 'https://api.tempo.xyz/v1/x402',
+        facilitator,
         headers: { 'tempo-api-key': process.env.TEMPO_API_KEY! },
         routeBinding: 'resource', // accept any x402 client
       },
@@ -167,6 +170,7 @@ pip install "pympp[x402]" uvicorn
 ```
 
 ```python [main.py]
+import asyncio
 import os
 
 from fastapi import FastAPI, Request
@@ -189,7 +193,8 @@ mpp = Mpp(
     methods=evm.charge(
         currency=BASE_USDC,
         # [!code hl:start]
-        # No recipient: read from the facilitator's payTo and refreshed every 5 minutes
+        # Tempo's deposit address on Base, read from GET /supported at startup
+        recipient=asyncio.run(evm.facilitator_pay_to(facilitator, network="eip155:8453")),
         facilitator=facilitator,
         x402_extra={"tempoSettlement": os.environ["TEMPO_PAYOUT_ADDRESS"]},
         route_binding="resource",  # accept any x402 client
@@ -209,7 +214,7 @@ async def weather(request: Request, credential: Credential, receipt: Receipt) ->
 </Tab>
 </Tabs>
 
-- `payTo` is Tempo's deposit address on Base, from the public `GET /v1/x402/supported`. `tempoX402()`, and an `mppx` or `pympp` charge without `recipient`, read it for you and refresh it every 5 minutes, so a new deposit address needs no redeploy.
+- `payTo` is Tempo's deposit address on Base, from the public `GET /v1/x402/supported`. `tempoX402()`, `evm.facilitatorPayTo()` and `facilitator_pay_to()` read it for you when the server starts, so there's no address to copy into your environment.
 - A route can pay out to its own address, such as a platform's seller: `tempo.route({ price: '$0.10', payoutAddress: seller.tempoAddress })`.
 - `mppx` and `pympp` need `routeBinding: 'resource'` (`route_binding="resource"`) to accept buyers that use the x402 SDK.
 
