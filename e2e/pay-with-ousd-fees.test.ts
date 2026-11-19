@@ -1,11 +1,7 @@
 import { expectDemoSuccess, getDemoStep } from './helpers'
 import { expect, test } from './live'
-import { seedTempoIdSession } from './tempo-id'
 
 test('send a payment with OUSD fees', async ({ page }) => {
-  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
-  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
-
   await page.goto('/docs/guide/payments/pay-fees-in-any-stablecoin')
   await page.getByRole('button', { name: 'Sign in' }).first().click()
   await expect(page.getByRole('button', { name: 'Sign out' }).first()).toBeVisible({

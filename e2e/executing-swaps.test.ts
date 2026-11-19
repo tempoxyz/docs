@@ -1,12 +1,8 @@
 import { expectDemoSuccess } from './helpers'
 import { expect, test } from './live'
-import { seedTempoIdSession } from './tempo-id'
 
 test('executing swaps', async ({ page }) => {
   test.setTimeout(180000)
-
-  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
-  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
 
   await page.goto('/docs/guide/stablecoin-dex/executing-swaps')
 

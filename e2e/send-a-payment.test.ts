@@ -1,12 +1,8 @@
 import { expectDemoSuccess, getDemoStep } from './helpers'
 import { expect, test } from './live'
-import { seedTempoIdSession } from './tempo-id'
 
 test('send a payment from the quickstart', async ({ page }) => {
   test.setTimeout(120000)
-
-  // Sign in to Tempo ID with a seeded session, since a test can't use its dialog.
-  await seedTempoIdSession(page.context(), { baseURL: test.info().project.use.baseURL ?? '' })
 
   await page.goto('/get-started/quickstart')
 
