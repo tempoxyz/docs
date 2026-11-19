@@ -14,8 +14,7 @@ but we still highly recommend to follow the recommended specifications. This wil
 Validators must run execution state on local NVMe / direct-attached storage. Network-attached volumes (EBS, GCP Persistent Disk, Azure Managed Disk, NAS, SAN) are **not supported** for execution.
 :::
 
-Consensus state can live on a lower performance volume (for example, EBS), but execution state needs NVMe storage.
-If you want to separate them, use `--datadir` for execution data and `--consensus.datadir` for consensus data.
+Keep consensus state on local storage as well. Network-attached volumes are not recommended for consensus data. See [validator failover](/docs/guide/node/validator-failover) for the recommended failover setup.
 
 ## RPC Node
 

@@ -162,7 +162,7 @@ The set can change in any finalized block, not only at epoch boundaries: validat
 |------|-------------|
 | `--telemetry-url <URL>` | Unified metrics and logs export. See [Telemetry endpoint](#telemetry-endpoint) below for details. **We ask all validators to configure this so we can support troubleshooting.** |
 | `--telemetry-metrics-interval <DURATION>` | Interval for pushing metrics (default: `10s`). |
-| `--consensus.datadir <PATH>` | Store consensus data on a separate volume (e.g., AWS EBS) while keeping execution state on high-performance local disks. Migrate by copying `<datadir>/consensus` to the new location. |
+| `--consensus.datadir <PATH>` | Store consensus data in a separate local directory. Network-attached volumes are not recommended; see [validator failover](/docs/guide/node/validator-failover). Migrate by copying `<datadir>/consensus` to the new location. |
 | `--consensus.secret <PATH>` | Read the encrypted signing-key secret from a FIFO, process-substitution path, or regular file. Prefer FIFO or process substitution so the secret is streamed just in time and kept out of the process environment. |
 | `--txpool.filter <ADDRESSES_OR_FILE>` | Reject transactions whose sender or direct call target matches an operator-supplied address list. See [Transaction address filtering](#transaction-address-filtering). |
 
