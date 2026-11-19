@@ -54,149 +54,68 @@ export MPP_SECRET_KEY=$(openssl rand -hex 32) # mppx and pympp only
 
 ### Point your middleware at Tempo
 
-Set the facilitator to `https://api.tempo.xyz/v1/x402` with your API key, pay to Tempo's deposit address, and name your payout address in `extra.tempoSettlement`.
+Use `tempoX402()` from `mppx` with the x402 SDK. It points the SDK at `https://api.tempo.xyz/v1/x402` with your API key, pays to Tempo's deposit address, and names your payout address in `extra.tempoSettlement`.
 
-<Tabs stateKey="x402-facilitator-sdk">
-<Tab title="x402 SDK">
-
-::::code-group
-
-```bash [Next.js]
-npm i @x402/core @x402/evm @x402/next
+```bash [Terminal]
+npm i mppx @x402/core @x402/evm @x402/hono hono
 ```
 
-```bash [Hono]
-npm i @x402/core @x402/evm @x402/hono hono
-```
-
-```bash [Express]
-npm i @x402/core @x402/evm @x402/express express
-```
-
-::::
-
-::::code-group
-
-```ts [Next.js]
-import { HTTPFacilitatorClient, x402ResourceServer } from '@x402/core/server'
-import { ExactEvmScheme } from '@x402/evm/exact/server'
-import { withX402 } from '@x402/next'
-import { NextResponse } from 'next/server'
-
-const network = 'eip155:8453' // Base mainnet
-// [!code hl:start]
-const headers = { 'tempo-api-key': process.env.TEMPO_API_KEY! }
-
-const facilitator = new HTTPFacilitatorClient({
-  createAuthHeaders: async () => ({ settle: headers, verify: headers }),
-  url: 'https://api.tempo.xyz/v1/x402',
-})
-// [!code hl:end]
-
-const server = new x402ResourceServer(facilitator).register(network, new ExactEvmScheme())
-
-// Tempo's deposit address on Base, read from GET /supported when the middleware starts
-const payTo = () => server.getSupportedKind(2, network, 'exact')?.extra?.payTo as string // [!code hl]
-
-export const GET = withX402(
-  async () => NextResponse.json({ forecast: 'sunny' }),
-  {
-    accepts: {
-      extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! }, // [!code hl]
-      network,
-      payTo,
-      price: '$0.01',
-      scheme: 'exact',
-    },
-  },
-  server,
-)
-```
-
-```ts [Hono]
-import { HTTPFacilitatorClient, x402ResourceServer } from '@x402/core/server'
-import { ExactEvmScheme } from '@x402/evm/exact/server'
+```ts [server.ts]
 import { paymentMiddleware } from '@x402/hono'
 import { Hono } from 'hono'
+import { tempoX402 } from 'mppx/x402/tempo'
 
-const network = 'eip155:8453' // Base mainnet
-// [!code hl:start]
-const headers = { 'tempo-api-key': process.env.TEMPO_API_KEY! }
-
-const facilitator = new HTTPFacilitatorClient({
-  createAuthHeaders: async () => ({ settle: headers, verify: headers }),
-  url: 'https://api.tempo.xyz/v1/x402',
-})
-// [!code hl:end]
-
-const server = new x402ResourceServer(facilitator).register(network, new ExactEvmScheme())
-
-// Tempo's deposit address on Base, read from GET /supported when the middleware starts
-const payTo = () => server.getSupportedKind(2, network, 'exact')?.extra?.payTo as string // [!code hl]
+const tempo = tempoX402() // reads TEMPO_API_KEY and TEMPO_PAYOUT_ADDRESS // [!code hl]
 
 const app = new Hono()
 
-app.use(
-  paymentMiddleware(
-    {
-      'GET /weather': {
-        accepts: {
-          extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! }, // [!code hl]
-          network,
-          payTo,
-          price: '$0.01',
-          scheme: 'exact',
-        },
-      },
-    },
-    server,
-  ),
-)
+app.use(paymentMiddleware({ 'GET /weather': tempo.route({ price: '$0.01' }) }, tempo.server)) // [!code hl]
 
 app.get('/weather', (c) => c.json({ forecast: 'sunny' }))
 
 export default app
 ```
 
-```ts [Express]
-import { HTTPFacilitatorClient, x402ResourceServer } from '@x402/core/server'
-import { ExactEvmScheme } from '@x402/evm/exact/server'
+Using another framework or SDK:
+
+<Tabs stateKey="x402-facilitator-sdk">
+<Tab title="Next.js">
+
+```bash [Terminal]
+npm i mppx @x402/core @x402/evm @x402/next
+```
+
+```ts [app/weather/route.ts]
+import { withX402 } from '@x402/next'
+import { tempoX402 } from 'mppx/x402/tempo'
+import { NextResponse } from 'next/server'
+
+const tempo = tempoX402()
+
+export const GET = withX402(
+  async () => NextResponse.json({ forecast: 'sunny' }),
+  tempo.route({ price: '$0.01' }), // [!code hl]
+  tempo.server,
+)
+```
+
+</Tab>
+<Tab title="Express">
+
+```bash [Terminal]
+npm i mppx @x402/core @x402/evm @x402/express express
+```
+
+```ts [server.ts]
 import { paymentMiddleware } from '@x402/express'
 import express from 'express'
+import { tempoX402 } from 'mppx/x402/tempo'
 
-const network = 'eip155:8453' // Base mainnet
-// [!code hl:start]
-const headers = { 'tempo-api-key': process.env.TEMPO_API_KEY! }
-
-const facilitator = new HTTPFacilitatorClient({
-  createAuthHeaders: async () => ({ settle: headers, verify: headers }),
-  url: 'https://api.tempo.xyz/v1/x402',
-})
-// [!code hl:end]
-
-const server = new x402ResourceServer(facilitator).register(network, new ExactEvmScheme())
-
-// Tempo's deposit address on Base, read from GET /supported when the middleware starts
-const payTo = () => server.getSupportedKind(2, network, 'exact')?.extra?.payTo as string // [!code hl]
+const tempo = tempoX402()
 
 const app = express()
 
-app.use(
-  paymentMiddleware(
-    {
-      'GET /weather': {
-        accepts: {
-          extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! }, // [!code hl]
-          network,
-          payTo,
-          price: '$0.01',
-          scheme: 'exact',
-        },
-      },
-    },
-    server,
-  ),
-)
+app.use(paymentMiddleware({ 'GET /weather': tempo.route({ price: '$0.01' }) }, tempo.server)) // [!code hl]
 
 app.get('/weather', (req, res) => {
   res.json({ forecast: 'sunny' })
@@ -204,8 +123,6 @@ app.get('/weather', (req, res) => {
 
 app.listen(4021)
 ```
-
-::::
 
 </Tab>
 <Tab title="mppx">
@@ -225,6 +142,7 @@ const mppx = Mppx.create({
     evm.charge({
       currency: evm.assets.base.USDC,
       // [!code hl:start]
+      // Tempo's deposit address on Base, read from GET /supported at startup
       recipient: await evm.facilitatorPayTo(facilitator, { network: 'eip155:8453' }),
       x402: {
         extra: { tempoSettlement: process.env.TEMPO_PAYOUT_ADDRESS! },
@@ -249,13 +167,12 @@ export default app
 
 ```bash [Terminal]
 pip install "pympp[x402]" uvicorn
-export TEMPO_DEPOSIT_ADDRESS=$(curl -s https://api.tempo.xyz/v1/x402/supported \
-  | jq -r '[.kinds[] | select(.network == "eip155:8453")][0].extra.payTo')
 ```
 
 ```python [main.py]
 import os
 
+import httpx
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -265,18 +182,24 @@ from mpp.methods.evm import server as evm
 from mpp.server import Mpp, pay
 from mpp.x402 import HttpFacilitator
 
+FACILITATOR_URL = "https://api.tempo.xyz/v1/x402"
+
 # [!code hl:start]
 facilitator = HttpFacilitator(
-    "https://api.tempo.xyz/v1/x402",
+    FACILITATOR_URL,
     headers={"tempo-api-key": os.environ["TEMPO_API_KEY"]},
 )
+
+# Tempo's deposit address on Base, read from GET /supported at startup
+kinds = httpx.get(f"{FACILITATOR_URL}/supported").raise_for_status().json()["kinds"]
+deposit_address = next(k["extra"]["payTo"] for k in kinds if k["network"] == "eip155:8453")
 # [!code hl:end]
 
 mpp = Mpp(
     methods=evm.charge(
         currency=BASE_USDC,
         # [!code hl:start]
-        recipient=os.environ["TEMPO_DEPOSIT_ADDRESS"],  # payTo from /supported
+        recipient=deposit_address,
         facilitator=facilitator,
         x402_extra={"tempoSettlement": os.environ["TEMPO_PAYOUT_ADDRESS"]},
         route_binding="resource",  # accept any x402 client
@@ -296,7 +219,8 @@ async def weather(request: Request, credential: Credential, receipt: Receipt) ->
 </Tab>
 </Tabs>
 
-- `payTo` is Tempo's deposit address on Base, from the public `GET /v1/x402/supported`.
+- `payTo` is Tempo's deposit address on Base, from the public `GET /v1/x402/supported`. `tempoX402()` and `evm.facilitatorPayTo()` read it for you when the server starts (`facilitator_pay_to()` does the same from async code in Python), so there's no address to copy into your environment.
+- A route can send its payout to its own address, such as a platform's seller: `tempo.route({ price: '$0.10', payoutAddress: seller.tempoAddress })`.
 - `mppx` and `pympp` need `routeBinding: 'resource'` (`route_binding="resource"`) to accept buyers that use the x402 SDK.
 
 :::::
