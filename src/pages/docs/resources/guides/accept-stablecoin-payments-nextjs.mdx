@@ -1,0 +1,209 @@
+---
+title: "Accept stablecoin payments in Next.js"
+seoTitle: "Accept Stablecoin Payments in Next.js | Tempo Docs"
+description: "Create an invoice with a payment reference, verify the stablecoin transfer in a Next.js route handler, and mark the invoice paid once."
+---
+
+[Guides](/docs/resources/guides) / [Plan stablecoin payment acceptance](/docs/resources/guides/how-to-accept-stablecoin-payments) / Next.js
+
+# Accept stablecoin payments in Next.js
+
+This guide adds stablecoin invoice payments to a Next.js App Router project. One route handler creates an invoice with an onchain payment reference, and a second verifies the customer's transfer before marking the invoice paid. Payments on Tempo settle onchain in under a second, so the customer can see the invoice marked paid right after they pay.
+
+The examples use AlphaUSD on Moderato testnet and [Viem](/docs/sdk/typescript), which includes Tempo support.
+
+::::steps
+
+## Install Viem
+
+```bash [Terminal]
+npm install viem
+```
+
+## Configure the Tempo client
+
+Set `TEMPO_RECIPIENT` to an address you control. Customers pay this address, and the verifier only accepts transfers to it.
+
+```ts [lib/tempo.ts]
+import { tempoModerato } from 'viem/chains'
+import { createClient } from 'viem/tempo'
+
+// Moderato testnet. Use `tempo` from 'viem/chains' for mainnet.
+export const chain = tempoModerato
+export const client = createClient({ chain })
+
+// AlphaUSD on Moderato. On mainnet, use the stablecoin you accept.
+export const token = '0x20c0000000000000000000000000000000000001'
+
+export const recipient = process.env.TEMPO_RECIPIENT as `0x${string}`
+if (!recipient) throw new Error('Set TEMPO_RECIPIENT to your receiving address')
+```
+
+This example keeps invoices in memory. Replace the store with your database.
+
+```ts [lib/invoices.ts]
+// In-memory store for the example. Use your database in production.
+export type Invoice = {
+  id: string
+  amount: string // decimal string, such as '25.00'
+  status: 'open' | 'paid'
+  eventKey?: string
+}
+
+const db = globalThis as unknown as {
+  invoices?: Map<string, Invoice>
+  eventKeys?: Set<string>
+}
+export const invoices = (db.invoices ??= new Map())
+export const eventKeys = (db.eventKeys ??= new Set())
+```
+
+## Create an invoice with a payment reference
+
+The route returns everything the customer needs to pay: network, token, recipient, amount, and a 32-byte memo that carries the invoice ID onchain. See [payment references](/docs/guide/payments/transfer-memos) for the memo encoding.
+
+```ts [app/api/invoices/route.ts]
+import { toHex } from 'viem'
+import { chain, recipient, token } from '@/lib/tempo'
+import { invoices } from '@/lib/invoices'
+
+export async function POST(request: Request) {
+  const { amount } = await request.json()
+
+  // The invoice ID becomes the onchain memo, so keep it under 32 bytes.
+  const id = `INV-${Date.now()}`
+  invoices.set(id, { id, amount, status: 'open' })
+
+  return Response.json({
+    id,
+    chainId: chain.id,
+    token,
+    recipient,
+    amount,
+    memo: toHex(id, { size: 32 }),
+  })
+}
+```
+
+## Verify the payment and mark the invoice paid
+
+The customer's wallet or your checkout sends the transaction hash to this route. The handler checks the confirmed receipt instead of trusting the client: the memo must match the invoice, the funds must reach your address, and each transfer can pay only one invoice.
+
+```ts [app/api/invoices/[id]/verify/route.ts]
+import { parseEventLogs, parseUnits, toHex, type Hash } from 'viem'
+import { Abis } from 'viem/tempo'
+import { chain, client, recipient, token } from '@/lib/tempo'
+import { eventKeys, invoices } from '@/lib/invoices'
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+  const { hash } = (await request.json()) as { hash: Hash }
+
+  const invoice = invoices.get(id)
+  if (!invoice) return Response.json({ error: 'Unknown invoice' }, { status: 404 })
+  if (invoice.status === 'paid') return Response.json(invoice)
+
+  const receipt = await client.waitForTransactionReceipt({ hash })
+  if (receipt.status !== 'success') {
+    return Response.json({ error: 'Transaction failed' }, { status: 400 })
+  }
+
+  const amount = parseUnits(invoice.amount, 6)
+  const memo = toHex(id, { size: 32 })
+  const logs = receipt.logs.filter((log) => log.address.toLowerCase() === token)
+
+  // 1. Find the transfer that carries this invoice's memo.
+  const payment = parseEventLogs({ abi: Abis.tip20, eventName: 'TransferWithMemo', logs })
+    .find((log) =>
+      log.args.to.toLowerCase() === recipient.toLowerCase() &&
+      log.args.amount === amount &&
+      log.args.memo === memo,
+    )
+  if (!payment) return Response.json({ error: 'No matching payment' }, { status: 400 })
+
+  // 2. Confirm the funds were delivered to your address.
+  const delivery = parseEventLogs({ abi: Abis.tip20, eventName: 'Transfer', logs })
+    .find((log) =>
+      log.args.from.toLowerCase() === payment.args.from.toLowerCase() &&
+      log.args.to.toLowerCase() === recipient.toLowerCase() &&
+      log.args.amount === amount,
+    )
+  if (!delivery) return Response.json({ error: 'Payment not delivered' }, { status: 400 })
+
+  // 3. Record each transfer once, so a replayed hash can't pay twice.
+  const eventKey = `${chain.id}:${receipt.transactionHash}:${delivery.logIndex}`
+  if (eventKeys.has(eventKey)) {
+    return Response.json({ error: 'Payment already used' }, { status: 409 })
+  }
+  eventKeys.add(eventKey)
+  invoices.set(id, { ...invoice, status: 'paid', eventKey })
+
+  return Response.json(invoices.get(id))
+}
+```
+
+In production, save the event key and the invoice status in one database transaction, with a unique constraint on the event key.
+
+## Pay a test invoice
+
+Fund a payer account with AlphaUSD from the [faucet](/docs/quickstart/faucet) and set `PAYER_PRIVATE_KEY` to its key. Start the app with `npm run dev`, then run this script with `npx tsx pay-invoice.ts`. It creates an invoice, pays it with the memo, and asks the app to verify it.
+
+```ts [pay-invoice.ts]
+import { parseUnits } from 'viem'
+import { tempoModerato } from 'viem/chains'
+import { Account, createClient } from 'viem/tempo'
+
+const client = createClient({
+  account: Account.fromSecp256k1(process.env.PAYER_PRIVATE_KEY as `0x${string}`),
+  chain: tempoModerato,
+  feeToken: '0x20c0000000000000000000000000000000000001',
+})
+
+const invoice = await fetch('http://localhost:3000/api/invoices', {
+  method: 'POST',
+  body: JSON.stringify({ amount: '25.00' }),
+}).then((res) => res.json())
+
+const { receipt } = await client.token.transferSync({
+  token: invoice.token,
+  to: invoice.recipient,
+  amount: parseUnits(invoice.amount, 6),
+  memo: invoice.memo,
+})
+
+const result = await fetch(`http://localhost:3000/api/invoices/${invoice.id}/verify`, {
+  method: 'POST',
+  body: JSON.stringify({ hash: receipt.transactionHash }),
+}).then((res) => res.json())
+
+console.log(result)
+// { id: 'INV-…', amount: '25.00', status: 'paid', eventKey: '42431:0x…:29' }
+```
+
+In a browser checkout, send the same transfer with the Wagmi `Hooks.token.useTransferSync` hook. See [Browser payments](/docs/guide/payments/send-a-payment/browser).
+
+::::
+
+## Go to mainnet
+
+- Change `tempoModerato` to `tempo` in `lib/tempo.ts`.
+- Set `token` to the mainnet stablecoin you accept. Find contract addresses in [Stablecoins on Tempo](/get-started/stablecoins).
+- Store invoices and event keys in your database.
+- To credit payments without waiting for the customer to report a hash, subscribe to [webhooks](/docs/api/webhooks) or watch transfers to your address as shown in [Receive payments](/docs/guide/payments/accept-a-payment#detect-payments).
+
+## Next.js payment questions
+
+### Does the customer need to report the transaction hash?
+
+No. This guide uses the hash because it is the shortest path to a working checkout. A backend can also find payments by watching `TransferWithMemo` events to the recipient address, or by receiving [webhooks](/docs/api/webhooks), and then run the same checks.
+
+### Can customers get a dedicated deposit address instead of a memo?
+
+Yes. [Customer deposit addresses](/docs/guide/payments/virtual-addresses) give each customer an address that credits your account, so the payer doesn't need to attach a memo.
+
+### Who pays the network fee?
+
+The payer pays the fee in a supported stablecoin. To cover it for your customers, [sponsor fees](/docs/api/fee-payer) from your backend.
