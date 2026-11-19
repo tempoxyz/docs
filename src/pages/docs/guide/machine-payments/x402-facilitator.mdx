@@ -170,9 +170,9 @@ pip install "pympp[x402]" uvicorn
 ```
 
 ```python [main.py]
-import asyncio
 import os
 
+import httpx
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -182,19 +182,24 @@ from mpp.methods.evm import server as evm
 from mpp.server import Mpp, pay
 from mpp.x402 import HttpFacilitator
 
+FACILITATOR_URL = "https://api.tempo.xyz/v1/x402"
+
 # [!code hl:start]
 facilitator = HttpFacilitator(
-    "https://api.tempo.xyz/v1/x402",
+    FACILITATOR_URL,
     headers={"tempo-api-key": os.environ["TEMPO_API_KEY"]},
 )
+
+# Tempo's deposit address on Base, read from GET /supported at startup
+kinds = httpx.get(f"{FACILITATOR_URL}/supported").raise_for_status().json()["kinds"]
+deposit_address = next(k["extra"]["payTo"] for k in kinds if k["network"] == "eip155:8453")
 # [!code hl:end]
 
 mpp = Mpp(
     methods=evm.charge(
         currency=BASE_USDC,
         # [!code hl:start]
-        # Tempo's deposit address on Base, read from GET /supported at startup
-        recipient=asyncio.run(evm.facilitator_pay_to(facilitator, network="eip155:8453")),
+        recipient=deposit_address,
         facilitator=facilitator,
         x402_extra={"tempoSettlement": os.environ["TEMPO_PAYOUT_ADDRESS"]},
         route_binding="resource",  # accept any x402 client
@@ -214,7 +219,7 @@ async def weather(request: Request, credential: Credential, receipt: Receipt) ->
 </Tab>
 </Tabs>
 
-- `payTo` is Tempo's deposit address on Base, from the public `GET /v1/x402/supported`. `tempoX402()`, `evm.facilitatorPayTo()` and `facilitator_pay_to()` read it for you when the server starts, so there's no address to copy into your environment.
+- `payTo` is Tempo's deposit address on Base, from the public `GET /v1/x402/supported`. `tempoX402()` and `evm.facilitatorPayTo()` read it for you when the server starts (`facilitator_pay_to()` does the same from async code in Python), so there's no address to copy into your environment.
 - A route can send its payout to its own address, such as a platform's seller: `tempo.route({ price: '$0.10', payoutAddress: seller.tempoAddress })`.
 - `mppx` and `pympp` need `routeBinding: 'resource'` (`route_binding="resource"`) to accept buyers that use the x402 SDK.
 
