@@ -215,7 +215,7 @@ async def weather(request: Request, credential: Credential, receipt: Receipt) ->
 </Tabs>
 
 - `payTo` is Tempo's deposit address on Base, from the public `GET /v1/x402/supported`. `tempoX402()`, `evm.facilitatorPayTo()` and `facilitator_pay_to()` read it for you when the server starts, so there's no address to copy into your environment.
-- A route can pay out to its own address, such as a platform's seller: `tempo.route({ price: '$0.10', payoutAddress: seller.tempoAddress })`.
+- A route can send its payout to its own address, such as a platform's seller: `tempo.route({ price: '$0.10', payoutAddress: seller.tempoAddress })`.
 - `mppx` and `pympp` need `routeBinding: 'resource'` (`route_binding="resource"`) to accept buyers that use the x402 SDK.
 
 :::::
