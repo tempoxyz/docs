@@ -258,7 +258,7 @@ This TIP requires exactly 6 replacements of `isAuthorized` calls:
 |----------|---------|--------------|
 | TIP-20 `_mint` | `isAuthorized(to)` | `isAuthorizedMintRecipient(to)` |
 | TIP-20 `burnBlocked` | `isAuthorized(from)` | `isAuthorizedSender(from)` |
-| DEX `cancelStaleOrder` | `isAuthorized(maker)` | `isAuthorizedSender(maker)` |
+| DEX `cancelStaleOrder` | `isAuthorized(maker)` | `isAuthorizedSender(maker)` on escrow and `isAuthorizedRecipient(maker)` on payout |
 | Fee payer `can_fee_payer_transfer` | `isAuthorized(fee_payer)` | `isAuthorizedSender(fee_payer)` |
 
 #### Core Authorization Logic
@@ -324,16 +324,19 @@ function burnBlocked(address from, uint256 amount) external {
 
 #### Cancel Stale Order
 
-The `cancelStaleOrder` function checks sender authorization on the token locked by the maker for the order, since if the order is filled, the maker will have to send that token:
+The `cancelStaleOrder` function checks sender authorization on the escrow token and recipient authorization on the payout token, as required by [TIP-1046](https://tips.sh/1046). An order is stale if either check fails:
 
 ```solidity
 function cancelStaleOrder(uint128 orderId) external {
     Order order = orders[orderId];
     address token = order.isBid() ? book.quote : book.base;
     uint64 policyId = TIP20(token).transferPolicyId();
+    address payoutToken = order.isBid() ? book.base : book.quote;
+    uint64 payoutPolicyId = TIP20(payoutToken).transferPolicyId();
     
     // Order is stale if maker can no longer send the token locked for the order
-    if (TIP403_REGISTRY.isAuthorizedSender(policyId, order.maker())) {
+    if (TIP403_REGISTRY.isAuthorizedSender(policyId, order.maker()) &&
+        TIP403_REGISTRY.isAuthorizedRecipient(payoutPolicyId, order.maker())) {
         revert OrderNotStale();
     }
     
@@ -376,7 +379,7 @@ This TIP is fully backward compatible:
 
 6. **Built-in Policy Compatibility**: Compound policies MAY reference built-in policies (0 = always-reject, 1 = always-allow) as any of their constituent policies.
 
-7. **Non-existent Policy Revert**: All authorization functions (`isAuthorized`, `isAuthorizedSender`, `isAuthorizedRecipient`, `isAuthorizedMintRecipient`) MUST revert with `PolicyNotFound()` when called with a policy ID that does not exist. Built-in policies (0 and 1) always exist and are exempt from this check.
+7. **Non-existent Policy Revert**: All authorization functions (`isAuthorized`, `isAuthorizedSender`, `isAuthorizedRecipient`, `isAuthorizedMintRecipient`) MUST revert with `PolicyNotFound()` when called with a policy ID that does not exist, except for `ReceivePolicyGuard` (`0xb10c000000000000000000000000000000000000`), which [TIP-1028](https://tips.sh/1028) always authorizes before any policy lookup. Built-in policies (0 and 1) always exist and are exempt from this check.
 
 ### Test Cases
 

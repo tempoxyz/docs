@@ -69,7 +69,9 @@ The precompile MUST use the same verification logic as Tempo transaction signatu
 
 #### Keychain Signature Rejection
 
-The precompile MUST reject signatures with a Keychain type prefix (`0x03` or `0x04`). Keychain signatures are multi-step, stateful verification flows that cannot be reduced to a single pure cryptographic check. Thus, if a Keychain prefix is detected, the precompile MUST revert with `InvalidFormat()`.
+`recover` and `verify` MUST reject signatures with a Keychain type prefix (`0x03` or `0x04`). Keychain signatures are multi-step, stateful verification flows that cannot be reduced to a single pure cryptographic check. Thus, if a Keychain prefix is detected, `recover` and `verify` MUST revert with `InvalidFormat()`.
+
+At T6, [TIP-1049](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1049.md) added `verifyKeychain` and `verifyKeychainAdmin`. They accept V2 Keychain signatures (`0x04`) and check the recovered access key against the AccountKeychain precompile. They revert with `InvalidFormat()` on V1 Keychain signatures (`0x03`).
 
 Contracts that need to verify Keychain-based signatures can do so by composing this precompile with the AccountKeychain precompile: first, use the AccountKeychain precompile to resolve and validate the access key for the account, then use this precompile to verify the inner signature against the resolved key. This two-step pattern separates key management (stateful, account-scoped) from cryptographic verification (stateless, type-scoped), allowing each precompile to remain single-purpose.
 

@@ -30,6 +30,10 @@ The parameters defined in this TIP represent the initial mainnet configuration a
 
 ## Specification
 
+:::info[Activated parameter updates]
+[TIP-1046](https://tips.sh/1046) (T4) removes validator subblocks and their shared gas reservation: `shared_gas_limit` is `0`, and `general_gas_limit` is `30,000,000`. [TIP-1067](https://tips.sh/1067) (T7) replaces the fixed base fee with a utilization-based controller targeting `10,000,000` gas per block, bounded from `600,000,000` to `12,000,000,000` attodollars per gas. These rules supersede the initial parameter values and fixed-base-fee requirements below.
+:::
+
 ### Base Fee
 
 **Value**: `2 × 10^10` attodollars (20 billion attodollars per gas)

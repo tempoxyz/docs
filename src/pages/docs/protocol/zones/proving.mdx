@@ -18,7 +18,7 @@ Zone settlement queues accepted withdrawals for processing on Tempo. The statele
 
 ## Implementation Status
 
-The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. In the current Tempo source, its approved enclave measurements are unset, so it rejects Nitro proofs.
+The Zones Solidity reference verifier still returns `true` without checking execution. Tempo also implements a native Nitro attestation verifier activated by T13. The current Tempo source pins approved T13 enclave measurements. Nitro proofs MUST match those measurements and pass attestation and batch-binding checks.
 
 During rollout, T13 also accepts the `NoProof` mode. This mode keeps the quorum and continuity checks but skips attestation. A later upgrade removes it. Before relying on execution-proof enforcement, check the network's active hardfork, verifier, and approved enclave measurements.
 
@@ -112,9 +112,9 @@ The SPF can replay an open Zone tip without withdrawal finalization. Settlement 
 
 ### Validation Deployment Modes
 
-On a sequencer, `--sequencer.enable-prover` requires `--sequencer.prover-address HOST:PORT`. The sequencer waits for the remote prover's successful batch result and nonempty Nitro attestation before submission. It collects the settlement certificate in parallel.
+On a sequencer, `--sequencer.enable-prover` requires a prover address for the active Tempo hardfork, currently `--sequencer.prover-address T13=HOST:PORT`. The sequencer waits for the remote prover's successful batch result and nonempty Nitro attestation before submission. It collects the settlement certificate in parallel.
 
-On an `rpc_only` follower, the same flag enables observational validation. Without a remote address, this runs in-process. A follower's observational results don't control settlement. The unconfigured sequencer compatibility path submits empty proof bytes. It can't satisfy an enforcing verifier.
+`--sequencer.enable-prover` requires a sequencer and is rejected on `rpc_only` followers. The unconfigured sequencer compatibility path submits empty proof bytes. It can't satisfy an enforcing verifier.
 
 The remote service runs inside AWS Nitro Enclaves over AF_VSOCK. After replay, it places the canonical batch digest in a Nitro attestation document's `user_data`. It returns `BatchOutput` with a proof bundle. The bundle sets `verifierConfig = 0x01` and the raw COSE/CBOR document as `proof`.
 
