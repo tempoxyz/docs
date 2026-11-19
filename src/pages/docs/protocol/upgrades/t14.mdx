@@ -116,7 +116,7 @@ Integrations that touch configurable accounts need these changes:
 | Fee sponsors | Configurable accounts can be sponsored but can't sponsor others. Keep a single-key fee payer. |
 | TIP-20 `permit` | Configurable accounts can't sign it. Permits signed before the upgrade also fail, so relayers should drop queued ones. Batch an `approve` instead. |
 | Signature verifiers | Permit2 and OpenZeppelin `SignatureChecker` v5.1+ need no change. Code that tries `ecrecover` first still accepts the original key. That includes `SignatureChecker` before v5.1, SIWE and TIP-1053 sign-in, signed orders, and ERC-2612 permits on non-TIP-20 tokens. Check for code or call `getConfigCommitment` first. |
-| Payment channels and MPP sessions | Deposits made before the upgrade still settle but can't be topped up, so close channels first if they need more funds. A configurable account can't sign its own vouchers under T14. Set a separate single-key `authorizedSigner` until [TIP-1166](https://tips.sh/1166) in T15. |
+| Payment channels and MPP sessions | Deposits made before the upgrade still settle but can't be topped up, so close channels first if they need more funds. A configurable account can't sign its own vouchers under T14. Set a separate single-key `authorizedSigner` until [TIP-1166](https://tips.sh/1166) in [T15](/docs/protocol/upgrades/t15). |
 | Zones | Revoke access keys on each Zone separately. |
 
 For more details on upgrading your account, see the [account upgrade checklist](/docs/accounts/account-configuration/account-upgrade).

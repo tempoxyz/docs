@@ -530,6 +530,51 @@ The enshrined `TIP20ChannelReserve` precompile at [`0x4D505000000000000000000000
 
 See [TIP-1095](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1095.md) for the operation-specific authorization rules and the [channel lifecycle](/docs/protocol/upgrades/t5#enshrined-tip-20-reserve-channel) for descriptors and vouchers.
 
+<span id="configurable-voucher-signers" />
+
+#### Configurable voucher signers (T15)
+
+From [T15](/docs/protocol/upgrades/t15), the voucher signer (`authorizedSigner` if nonzero, otherwise `payer`) can be a [configurable account](/docs/development/configurable-accounts). These rules come from [TIP-1166](https://tips.sh/1166) and apply only once T15 activates, which isn't scheduled yet. Before T15, a configurable account can't sign vouchers: set a separate single-key `authorizedSigner`.
+
+- **Salt rule:** `open` reads the signer's configuration commitment from state as it is when the call executes. If it is nonzero, `descriptor.salt` MUST equal it, or `open` reverts with `SaltNotSignerCommitment`. That commitment becomes the channel's opening commitment, and `open` emits `OpeningCommitmentRecorded`. If the signer has no commitment, the opening commitment is zero and `salt` stays payer-chosen.
+- **Voucher checks:** `settle` and `close` check vouchers against the opening commitment, never the signer's current configuration, so a later configuration change can't void a voucher the payee holds. A channel with a nonzero opening commitment accepts only `0x05` configurable-account signatures whose account is the signer, whose configuration hashes to the opening commitment, and whose owner signatures reach the threshold. Primitive and Keychain (`0x03`, `0x04`) signatures are rejected. On a channel with a zero opening commitment, a primitive signature must recover to the signer, and a `0x05` signature must use a version-0 configuration that derives the signer's address. A failed check reverts with `InvalidSignature`.
+- **One channel per transaction:** because the salt can't vary, a payer can open only one channel per payee, operator, token, and configurable signer in a transaction. A second reverts with `ChannelAlreadyExists`.
+
+```solidity
+/// Emitted by open when the signer has a nonzero configuration commitment.
+event OpeningCommitmentRecorded(bytes32 indexed channelId, address indexed signer, bytes32 commitment);
+
+/// Returns whether settle and close would accept a voucher signature for a channel.
+/// Reverts with ChannelNotFound if the channel doesn't exist. Doesn't check
+/// cumulativeAmount against the channel's deposit or settled amount.
+function verifyVoucher(ChannelDescriptor calldata descriptor, uint96 cumulativeAmount, bytes calldata signature)
+    external
+    view
+    returns (bool valid);
+
+error RootKeyRetired(address account);
+error SignerConfigChanged(address signer);
+error SaltNotSignerCommitment(address signer, bytes32 commitment);
+```
+
+**`verifyVoucher`** runs the same signature checks as `settle` and `close` against the channel's opening commitment, and charges the same gas as the voucher check in `settle`. It doesn't compare `cumulativeAmount` with the deposit or settled amount: read those with `getChannel`. Payees can call it to check a voucher before serving, without reimplementing the configurable-account rules. Alternatively, when `OpeningCommitmentRecorded` was emitted for the channel, check the voucher without a state read by applying every `settle` check yourself: the signature is a `0x05` configurable-account signature, its account is the signer, its configuration hashes to `descriptor.salt`, and its owner signatures over the voucher digest reach the threshold. A configuration that hashes to `salt` proves nothing about the voucher on its own, because the configuration is public.
+
+**`OpeningCommitmentRecorded`** shows which signer configuration signs for a channel. Index it in indexers. Comparing it with the account's latest `ConfigurableAccountConfigUpdated` or `AccountUpgraded` event finds channels opened under an old configuration.
+
+<span id="channel-reserve-errors" />
+
+#### Channel reserve errors for configurable signers
+
+| Error | When | What to do |
+|---|---|---|
+| `SaltNotSignerCommitment(signer, commitment)` | `open` with a signer whose configuration commitment is nonzero and differs from `salt`. | Retry `open` with `salt` set to the returned `commitment`, the signer's current configuration commitment. |
+| `SignerConfigChanged(signer)` | Nonzero `topUp` on a channel whose signer changed its configuration since `open`. | Close the channel and open a new one under the current configuration with its commitment as `salt`. Vouchers signed under the opening configuration still settle. |
+| `RootKeyRetired(signer)` | Nonzero `topUp` on a channel opened with a zero opening commitment whose signer has since gained a configuration commitment, by upgrading or registering one. | Close the channel and reopen it with the new commitment as `salt`. Until it closes, only the original key or version-0 configuration can sign its vouchers. |
+
+A zero `topUp` still succeeds in each case and cancels a pending close request.
+
+**Close channels before migrating.** Close open channels before a payer becomes a configurable account, whether by [upgrading a single-key account](/docs/accounts/account-configuration/account-upgrade) or by registering a configuration for an address that had none. A channel opened before the migration has a zero opening commitment: its vouchers can still be signed only by the original key or the version-0 configuration that derives the address, never by a configuration the account registers or rotates to, and a nonzero `topUp` reverts with `RootKeyRetired`. In wallets, offer to close these channels as part of the migration and reopen them afterwards with the commitment as `salt`.
+
 
 ## TIP20Factory
 The `TIP20Factory` contract is the canonical entrypoint for creating new TIP-20 tokens on Tempo. The factory derives deterministic deployment addresses using a caller-provided salt, combined with the caller's address, under a fixed 12-byte TIP-20 prefix. The resulting address is predictable; if it is already occupied, creation reverts rather than overwriting the existing token. The `TIP20Factory` precompile is deployed at `0x20Fc000000000000000000000000000000000000`.

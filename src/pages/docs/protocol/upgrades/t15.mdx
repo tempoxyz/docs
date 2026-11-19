@@ -1,0 +1,55 @@
+---
+title: "T15 Network Upgrade"
+seoTitle: "T15 Network Upgrade | Tempo Docs"
+description: T15 lets configurable accounts sign their own payment-channel vouchers, checked against the account configuration fixed when the channel opens.
+---
+
+# T15 Network Upgrade
+
+T15 lets [configurable accounts](/docs/development/configurable-accounts) sign their own payment-channel vouchers with their signers.
+
+:::warning[T15 status]
+T15 isn't scheduled yet: it has no testnet or mainnet activation date, and its scope may still change. This page covers only [TIP-1166](https://tips.sh/1166) so far. Other T15 features will be added as they're specified.
+:::
+
+## Timeline
+
+| Network | Status | Activation date (UTC) | Unix timestamp |
+|---------|--------|-----------------------|----------------|
+| Testnet | Not scheduled | To be announced | To be announced |
+| Mainnet | Not scheduled | To be announced | To be announced |
+
+<span id="overview" />
+
+## T15 overview
+
+- **Configurable account voucher signers:** a configurable account can sign vouchers for a [TIP-20 channel reserve](/docs/protocol/tip20/spec#payment-channel-reserve) channel with its signers, instead of through a separate single-key `authorizedSigner`. Vouchers are checked against the configuration in force when the channel opened, so a later signer rotation can't void vouchers the payee already holds.
+- **Other T15 features:** to be added.
+
+<span id="features" />
+
+## T15 features
+
+### Configurable account voucher signers
+
+Under T14, `open` rejects a voucher signer that is a configurable account, so configurable payers need a separate single-key `authorizedSigner`. From T15, the voucher signer (`authorizedSigner` if set, otherwise `payer`) can be a configurable account:
+
+- **Salt is the configuration commitment:** if the signer has a nonzero configuration commitment when `open` executes, the channel descriptor's `salt` must equal it. Otherwise `open` reverts with `SaltNotSignerCommitment(signer, commitment)`. Signers without a commitment keep choosing `salt` freely.
+- **Opening commitment fixed for the channel's lifetime:** `open` emits `OpeningCommitmentRecorded(channelId, signer, commitment)`. `settle` and `close` check vouchers against that opening commitment, never the signer's current configuration.
+- **`0x05` vouchers only:** a channel with a nonzero opening commitment accepts only `0x05` configurable-account voucher signatures whose configuration hashes to the commitment and whose owner signatures reach the threshold. Primitive signatures from the retired root key are rejected.
+- **Top-ups after a configuration change:** a nonzero `topUp` reverts with `SignerConfigChanged(signer)` if the signer's configuration changed since `open`, or with `RootKeyRetired(signer)` if the channel opened without a commitment and the signer now has one. A zero `topUp` still cancels a close request.
+- **`verifyVoucher` view:** returns whether `settle` and `close` would accept a voucher signature for a channel, without reimplementing the configurable-account rules. [TIP-1166](https://tips.sh/1166) and the [channel reserve reference](/docs/protocol/tip20/spec#configurable-voucher-signers) define all of these rules.
+
+No existing method, event, or the `channelId` formula changes, and channels still use one storage slot. Existing channels behave as before.
+
+## Integration impact
+
+| Integration | What to do |
+|---|---|
+| Configurable payers, SDKs, and wallets | Open with the signer's configuration commitment as `salt` instead of a random value. Keep each channel's opening configuration until the channel closes, and sign vouchers with `0x05` using it. |
+| Payees and operators | When `OpeningCommitmentRecorded` was emitted at open, check that a voucher's configuration hashes to `descriptor.salt` before serving, or call `verifyVoucher`. |
+| Indexers | Index `OpeningCommitmentRecorded`. |
+| Error handling | Handle `SaltNotSignerCommitment`, `SignerConfigChanged`, and `RootKeyRetired` as described in the [channel reserve reference](/docs/protocol/tip20/spec#channel-reserve-errors). |
+| Accounts migrating to a configurable account | Close open channels first, then reopen them afterwards with the commitment as `salt`. A channel opened before the migration can't be signed for by the account's current owners and can't be topped up. |
+
+Because the salt can't vary, a payer can open only one channel per payee, operator, token, and configurable signer in a transaction. A second open in the same transaction reverts with `ChannelAlreadyExists`.
