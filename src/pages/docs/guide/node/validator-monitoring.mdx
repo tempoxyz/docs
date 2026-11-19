@@ -107,9 +107,9 @@ The dashboard uses these template variables:
 | --- | --- |
 | `datasource` | Prometheus datasource |
 | `loki_ds` | Loki datasource (for log-based panels) |
-| `network_name` | Filter by network/validator job name |
+| `instance` | Validator to display, selected from the values of the Prometheus `job` label on `reth_info` |
 
-Make sure your Prometheus is scraping metrics from your validator's metrics endpoint (default: `localhost:8001/metrics`).
+Scrape your validator's execution metrics (`--metrics`, for example `localhost:9000/metrics`) and consensus metrics (default: `localhost:8001/metrics`) under the same Prometheus `job`, so both appear under one `instance`. The log-based panel matches Loki streams whose `instance` label starts with that same value.
 
 ## Log management
 
