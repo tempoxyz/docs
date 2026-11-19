@@ -339,7 +339,7 @@ app.listen(4021)
 
 ### Check the payout
 
-Settle waits for the Base receipt, then returns a standard x402 settle response:
+Settle waits up to 20 seconds for the Base receipt, then returns a standard x402 settle response. If Base holds the settlement but hasn't mined it by then, settle still answers success:
 
 - `transaction` is the Base settlement hash.
 - `extensions.tempoSettlement` is the Tempo payout. It's usually still `pending`: Tempo sends it after Base marks the settlement's block safe from reorgs, which takes minutes.
@@ -390,7 +390,7 @@ All endpoints live under `https://api.tempo.xyz/v1/x402`. `GET /supported` is pu
 | `GET /settlements/{transaction}` | Returns the same payout, looked up by its Base settlement hash. |
 
 - **Limits.** No minimum: any amount above 0. Tempo sets the maximum per payment.
-- **Rate limits.** Settle is rate-limited per API key. Over the limit, it answers `429` with `Retry-After`.
+- **Rate limits.** Settle allows 50 requests per second per API key. Over the limit, it answers `429` with `Retry-After`.
 
 ## x402 payment refusals
 
@@ -409,7 +409,7 @@ Verify and settle answer HTTP `200` for payment-level refusals, with `isValid: f
 | `invalid_payload` | The payment doesn't carry exactly one authorization for its scheme. |
 | `unsupported_scheme`, `unsupported_network`, `unsupported_asset` | The payment isn't `exact` USDC on Base, as `GET /supported` lists. |
 | `payment_conflict` | The same payment was already sent with different terms or by another organization. |
-| `settlement_pending` | Rare: Base doesn't hold the settlement yet. Retry settle with the same payload; it never pays twice. |
+| `settlement_pending` | Rare: Base doesn't hold the settlement transaction. Retry settle with the same payload; it never pays twice. |
 
 Refusals that come from the x402 signature or Base state use the x402 SDK's reasons. An upstream failure answers `unexpected_verify_error` or `unexpected_settle_error`.
 
