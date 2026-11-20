@@ -30,7 +30,7 @@ bun add mppx viem
 
 ### Set up an `Mppx` charge instance
 
-[Set `MPP_SECRET_KEY`](/docs/guide/machine-payments/server#set-the-server-secret) before starting the server.
+[Set `MPP_SECRET_KEY`](/docs/guide/machine-payments/server#set-the-server-secret) before starting the server. In production, also pass a shared [replay-protection store](/docs/guide/machine-payments/server#configure-replay-protection); without one, the server throws at startup. For Next.js, add [`serverExternalPackages: ['mppx']`](/docs/guide/machine-payments/server#use-mppx-with-nextjs) to `next.config.ts`.
 
 Set up an `Mppx` instance with the `tempo` method.
 
@@ -38,12 +38,14 @@ Set up an `Mppx` instance with the `tempo` method.
 - `currency` is the token address for payments (in this case, `OUSD`).
 
 ```ts
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 ```
@@ -55,12 +57,14 @@ Add payment verification using `mppx.charge` as route middleware. The handler on
 :::code-group
 
 ```ts [Next.js]
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/nextjs'
 
 const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 
@@ -74,6 +78,7 @@ export const GET =
 
 ```ts [Hono]
 import { Hono } from 'hono'
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/hono'
 
 const app = new Hono()
@@ -82,6 +87,7 @@ const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 
@@ -97,6 +103,7 @@ app.get(
 
 ```ts [Express]
 import express from 'express'
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/express'
 
 const app = express()
@@ -105,6 +112,7 @@ const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 
@@ -119,12 +127,14 @@ app.get(
 ```
 
 ```ts [Fetch API]
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 

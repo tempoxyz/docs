@@ -67,17 +67,19 @@ bun add mppx viem
 
 ### Set up an `Mppx` streaming instance
 
-[Set `MPP_SECRET_KEY`](/docs/guide/machine-payments/server#set-the-server-secret) before starting the server.
+[Set `MPP_SECRET_KEY`](/docs/guide/machine-payments/server#set-the-server-secret) before starting the server. In production, also pass a shared [replay-protection store](/docs/guide/machine-payments/server#configure-replay-protection); without one, the server throws at startup. For Next.js, add [`serverExternalPackages: ['mppx']`](/docs/guide/machine-payments/server#use-mppx-with-nextjs) to `next.config.ts`.
 
 Configure `tempo.session` directly with `sse: true` to enable SSE support for this session method.
 
 ```ts
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo.session({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
     sse: true,
   })],
 })
@@ -88,12 +90,14 @@ const mppx = Mppx.create({
 Use the standard `Request` / `Response` handler below in a Fetch-compatible server. For Next.js, export it as `GET`. The generator charges each word before sending it; the title is unmetered metadata.
 
 ```ts
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo.session({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
     sse: true,
   })],
 })
