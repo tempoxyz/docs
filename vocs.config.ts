@@ -821,6 +821,11 @@ export default defineConfig({
           { text: 'Accept API payments', link: '/docs/guide/machine-payments/server' },
           { text: 'Tempo x402 facilitator', link: '/docs/guide/machine-payments/x402-facilitator' },
           { text: 'Pay with the CLI', link: '/docs/guide/machine-payments/agent' },
+          {
+            text: 'Headless testnet quickstart',
+            link: '/docs/guide/machine-payments/headless-testnet',
+            badge: { text: 'Proposed', variant: 'note' as const },
+          },
           { text: 'Find services', link: '/docs/guide/machine-payments/discover-services' },
           { text: 'Use Mercator', link: '/docs/guide/mercator' },
         ],
