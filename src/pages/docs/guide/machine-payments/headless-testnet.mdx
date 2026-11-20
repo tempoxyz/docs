@@ -1,0 +1,203 @@
+---
+title: "Headless testnet quickstart for agents"
+seoTitle: "Headless Agent Testnet Quickstart | Tempo Docs"
+description: A testnet path an agent can run end to end from a shell, with no browser and no person. Create keys, fund them from the faucet, set a spending limit, pay for one API call with MPP, and verify the payment.
+---
+
+# Headless testnet quickstart for agents
+
+:::warning[Proposal]
+This page is a docs proposal. Steps 1 to 5 run on Tempo testnet today. Sections marked **Proposed, not live** describe product changes that don't exist yet, so their commands won't work.
+:::
+
+Every step on this page is a command an agent can run from a shell. No step opens a browser, asks a person to approve, or needs an RPC key.
+
+The path uses two keys. The **owner key** holds the funds. The **agent key** is an [access key](/docs/accounts/automations/give-an-agent-a-wallet) the owner authorizes with a daily spending limit. The agent pays with the agent key, and the network rejects any payment over the limit.
+
+## Before you start
+
+You need [Foundry](https://getfoundry.sh) for `cast`, Node.js 20 or later, and `jq`.
+
+| Item | Testnet value |
+| --- | --- |
+| RPC | `https://rpc.moderato.tempo.xyz` (public, no key) |
+| Chain ID | `42431` |
+| Explorer | [explore.testnet.tempo.xyz](https://explore.testnet.tempo.xyz) |
+| Test stablecoin | pathUSD, `0x20c0000000000000000000000000000000000000` |
+| Paid test endpoint | `https://mpp.dev/api/ping/paid` (0.1 pathUSD a call) |
+
+See [connection details](/docs/quickstart/connection-details) and the [faucet](/docs/quickstart/faucet) for the full list.
+
+:::::steps
+
+### Create the owner key and the agent key
+
+```bash
+cast wallet new --json > owner.json
+cast wallet new --json > agent.json
+chmod 600 owner.json agent.json
+OWNER=$(jq -r '.data[0].address' owner.json)
+echo "owner: $OWNER"
+```
+
+These are testnet keys. Keep the files out of version control and never print the private keys.
+
+### Fund the owner from the faucet
+
+Call the faucet API. It sends test stablecoins, including pathUSD, to the address.
+
+```bash
+curl -s -X POST https://tempo.com/developers/api/faucet \
+  -H "Content-Type: application/json" \
+  -d "{\"address\": \"$OWNER\"}"
+```
+
+The faucet is also an RPC method:
+
+```bash
+cast rpc tempo_fundAddress "$OWNER" --rpc-url https://rpc.moderato.tempo.xyz
+```
+
+Check the pathUSD balance. pathUSD has 6 decimals.
+
+```bash
+cast call 0x20c0000000000000000000000000000000000000 \
+  "balanceOf(address)(uint256)" "$OWNER" \
+  --rpc-url https://rpc.moderato.tempo.xyz
+# 1000000000000 [1e12]
+```
+
+### Authorize the agent key with a spending limit
+
+Install the SDKs:
+
+```bash
+npm install viem mppx
+```
+
+Save this as `pay.mjs`. It authorizes the agent key for one day with a limit of 1 pathUSD a day, scoped to pathUSD transfers, then pays for one request with that key.
+
+```js
+import { readFileSync } from 'node:fs'
+import { parseUnits } from 'viem'
+import { Account, Expiry, createClient } from 'viem/tempo'
+import { Mppx, tempo } from 'mppx/client'
+import { Receipt } from 'mppx'
+
+const key = (file) => JSON.parse(readFileSync(file, 'utf8')).data[0].private_key
+const client = createClient({ testnet: true }) // public testnet RPC, no key
+const pathUsd = '0x20c0000000000000000000000000000000000000'
+
+const owner = Account.fromSecp256k1(key('owner.json'))
+const agent = Account.fromSecp256k1(key('agent.json'), { access: owner.address })
+
+// The owner authorizes the agent key: 1 pathUSD a day, for one day, pathUSD transfers only.
+const { receipt: authorization } = await client.accessKey.authorizeSync({
+  account: owner,
+  accessKey: { accessKeyAddress: agent.accessKeyAddress, keyType: 'secp256k1' },
+  expiry: Expiry.days(1),
+  limits: [{ token: pathUsd, limit: parseUnits('1', 6), period: 86_400 }],
+  scopes: [
+    { address: pathUsd, selector: 'transfer(address,uint256)' },
+    { address: pathUsd, selector: 'transferWithMemo(address,uint256,bytes32)' },
+  ],
+})
+console.log('authorized', authorization.transactionHash, authorization.status)
+
+const limit = () =>
+  client.accessKey.getRemainingLimit({
+    account: owner.address,
+    accessKey: agent.accessKeyAddress,
+    token: pathUsd,
+  })
+console.log('remaining before', (await limit()).remaining)
+
+// The agent pays for one request with its own key.
+const mppx = Mppx.create({
+  methods: [tempo({ account: agent, getClient: () => client })],
+  polyfill: false,
+})
+const response = await mppx.fetch('https://mpp.dev/api/ping/paid')
+console.log(response.status, await response.text())
+console.log('receipt', Receipt.fromResponse(response))
+console.log('remaining after', (await limit()).remaining)
+```
+
+### Make one paid call
+
+```bash
+node pay.mjs
+```
+
+The endpoint answers `402 Payment Required`, `mppx` pays the challenge with the agent key, and the retry returns `200`. Output from a testnet run:
+
+```
+authorized 0x212978ab6eac8ad5c0005a0441d626f1f4df9f3023c6090252d9823c4f219006 success
+remaining before 1000000n
+200 tm! thanks for paying
+receipt {
+  fundingCurrency: '0x20c0000000000000000000000000000000000000',
+  method: 'tempo',
+  reference: '0xa701fda1deeda37f537ddaeeb7a0edcf455b73540b8a44cef71812f728f3f9cd',
+  status: 'success',
+  timestamp: '2026-11-20T13:43:54.433Z'
+}
+remaining after 900000n
+```
+
+The remaining limit dropped by 0.1 pathUSD, the price of the call.
+
+### Verify the payment
+
+The receipt's `reference` is the transaction hash. Check it onchain:
+
+```bash
+cast receipt <REFERENCE> --rpc-url https://rpc.moderato.tempo.xyz --json | jq '{status, blockNumber}'
+# { "status": "0x1", "blockNumber": "0x2b0424c" }
+```
+
+Or open `https://explore.testnet.tempo.xyz/tx/<REFERENCE>`.
+
+:::::
+
+## Pay with the CLI and a key
+
+The [Tempo CLI](/docs/cli/request) can pay with a private key instead of a logged-in wallet. Set `TEMPO_PRIVATE_KEY` and the CLI signs payments with that key, without a browser:
+
+```bash
+export TEMPO_PRIVATE_KEY=$(jq -r '.data[0].private_key' owner.json)
+tempo request --network testnet --dry-run https://mpp.dev/api/ping/paid
+tempo request --network testnet --max-spend 1 https://mpp.dev/api/ping/paid
+```
+
+`--dry-run` returns the price without paying. `--max-spend` caps what this command can spend. It is a client-side cap: the key pays from its own balance, and no onchain limit applies. For a limit the network enforces, use an access key as in step 3.
+
+## Proposed, not live
+
+The steps above work today with `cast` and the SDKs. These changes would let an agent do the same with the Tempo CLI alone, and use more of the platform on testnet. Command names here are placeholders.
+
+:::warning[Proposed, not live: headless testnet wallet in the CLI]
+Today `tempo wallet login` asks a person to approve in a browser. Proposed: a testnet-only flow that creates a local wallet and agent key with no browser, for example `tempo wallet login --network testnet --headless`.
+:::
+
+:::warning[Proposed, not live: CLI faucet]
+Today `tempo wallet fund` opens add-funds flows in the wallet app. Proposed: on testnet, it calls the faucet and returns the transaction hashes, for example `tempo wallet fund --network testnet --format json`.
+:::
+
+:::warning[Proposed, not live: CLI spending limits without a browser]
+Proposed: authorize an agent key with an onchain daily limit from the CLI on testnet, for example `tempo wallet keys create --network testnet --limit 1 --period 1d`, matching step 3.
+:::
+
+:::warning[Proposed, not live: maintained testnet services]
+Proposed: `tempo wallet services --network testnet` lists paid testnet endpoints that Tempo maintains and monitors, so agents don't depend on a single demo endpoint.
+:::
+
+:::warning[Proposed, not live: Mercator on testnet without browser sign-in]
+Today [Mercator](/docs/guide/mercator) needs a browser sign-in. Proposed: a testnet API key an agent can create from the CLI or an API call, so it can call Mercator tools on testnet with no person involved.
+:::
+
+## Next steps
+
+- [Give an agent a wallet](/docs/accounts/automations/give-an-agent-a-wallet): budgets, expiry, scopes and revocation in detail.
+- [Pay for an API](/docs/guide/machine-payments/client): use `mppx` in an app.
+- [Accept API payments](/docs/guide/machine-payments/server): charge agents per request.
