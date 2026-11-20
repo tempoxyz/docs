@@ -23,6 +23,73 @@ export MPP_SECRET_KEY="$(openssl rand -base64 32)"
 
 Store this value in your deployment's secret manager and reuse it across server instances. It is separate from the account's signing key.
 
+## Configure replay protection
+
+`mppx` records every credential it accepts in a store, so the same credential can't be accepted twice. `tempo()`, `tempo.charge()`, `tempo.session()` and `tempo.subscription()` all take a `store` option.
+
+If you leave `store` out, `mppx` falls back to an in-memory store and logs a warning during local development. It throws at startup instead when `NODE_ENV` is `production`, on Cloudflare Workers, or when it detects a multi-instance host (Vercel, AWS Lambda, Netlify, Fly.io, Cloud Run, Render, Railway, Heroku or Deno Deploy). An in-memory store only covers one process, so another instance could accept the same credential again.
+
+For local development and tests, pass the in-memory store explicitly:
+
+```ts
+import { Store } from 'mppx'
+import { Mppx, tempo } from 'mppx/server'
+
+const mppx = Mppx.create({
+  methods: [tempo({
+    currency: '0x20c0000000000000000000006a37da5c996874be',
+    recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // [!code hl]
+  })],
+})
+```
+
+In production, pass a store that every instance shares and that writes atomically. `Store.postgres()` works with `pg`, `@neondatabase/serverless`, `@vercel/postgres`, Supabase and PGlite, and creates its `mppx_store` table on first use:
+
+```bash
+npm install pg
+```
+
+```ts
+import { Store } from 'mppx'
+import { Mppx, tempo } from 'mppx/server'
+import { Pool } from 'pg'
+
+const store = Store.postgres(new Pool({ connectionString: process.env.DATABASE_URL })) // [!code hl]
+
+const mppx = Mppx.create({
+  methods: [tempo({
+    currency: '0x20c0000000000000000000006a37da5c996874be',
+    recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store, // [!code hl]
+  })],
+})
+```
+
+Other atomic stores:
+
+- `Store.sqlite()` for `node:sqlite`, `better-sqlite3` or `bun:sqlite` on a single host, and `Store.sql()` for any other Postgres or SQLite driver.
+- `Store.d1()` and `Store.durableObject()` on Cloudflare.
+- `Store.redis()`, `Store.upstash()` and `Store.cloudflare()` when the client you pass also has an atomic `update` method. A client with only `get`, `set` and `del` produces a store that these methods don't accept.
+
+The `// use a shared store in production` comments in the examples on this page mark where to pass it.
+
+## Use mppx with Next.js
+
+`mppx` loads some integrations, such as MCP, on demand. Turbopack tries to bundle those imports and `next build` fails with `Module not found: Can't resolve '@modelcontextprotocol/sdk/types.js'`. Keep `mppx` out of the server bundle in `next.config.ts`:
+
+```ts [next.config.ts]
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  serverExternalPackages: ['mppx'], // [!code hl]
+}
+
+export default nextConfig
+```
+
+`mppx/nextjs` requires Next.js 16.2.6 or later.
+
 ## MPP server framework middleware
 
 Use the framework-specific middleware from `mppx` to integrate payment into your server. Each middleware handles the `402` challenge/credential flow and attaches receipts automatically.
@@ -30,12 +97,14 @@ Use the framework-specific middleware from `mppx` to integrate payment into your
 :::code-group
 
 ```ts [Next.js]
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/nextjs'
 
 const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 
@@ -46,6 +115,7 @@ export const GET =
 
 ```ts [Hono]
 import { Hono } from 'hono'
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/hono'
 
 const app = new Hono()
@@ -54,6 +124,7 @@ const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 
@@ -66,6 +137,7 @@ app.get(
 
 ```ts [Express]
 import express from 'express'
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/express'
 
 const app = express()
@@ -74,6 +146,7 @@ const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 
@@ -102,12 +175,14 @@ mppx.charge({
 If you prefer full control over the payment flow, use `mppx/server` directly with the Fetch API.
 
 ```ts
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/server'
 
 const mppx = Mppx.create({
   methods: [tempo({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 
@@ -158,6 +233,7 @@ Your server handles both modes automatically — no configuration required. The 
 To sponsor gas fees for pull-mode clients, pass a `feePayer` account to `tempo()`:
 
 ```ts
+import { Store } from 'mppx'
 import { Mppx, tempo } from 'mppx/server'
 import { Account } from 'viem/tempo'
 
@@ -166,6 +242,7 @@ const mppx = Mppx.create({
     currency: '0x20c0000000000000000000006a37da5c996874be',
     feePayer: Account.fromSecp256k1('0x...'),
     recipient: '0xa726a1CD723409074DF9108A2187cfA19899aCF8',
+    store: Store.memory(), // use a shared store in production
   })],
 })
 ```
