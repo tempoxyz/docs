@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload OG image review gallery
         if: ${{ !cancelled() && matrix.target == 'check' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: og-image-goldens
           path: test-results/og-goldens/
@@ -203,7 +203,7 @@ jobs:
 
       - name: Upload app for E2E
         if: matrix.target == 'e2e-build'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-dist-${{ github.run_attempt }}
           path: dist/
@@ -240,7 +240,7 @@ jobs:
           TEMPO_RPC_API_KEY: ${{ secrets.TEMPO_RPC_API_KEY }}
 
       - name: Upload test results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() && matrix.target == 'e2e' }}
         with:
           name: playwright-report-${{ matrix.shard }}
