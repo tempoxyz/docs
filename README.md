@@ -115,3 +115,17 @@ shall be dual licensed as above, without any additional terms or conditions.
 ## Generated Markdown
 
 See [Maintaining generated Markdown](./MARKDOWN.md) for component renderers, validation modes, temporary overrides, and deployment verification.
+
+## Network identity source
+
+`pnpm dev` and `pnpm build:site` (also called by `pnpm build`) run
+`pnpm sync:network-identities` before compiling pages. The script reads mainnet
+and testnet trust anchors from `tempoxyz/tempo`’s `main` branch and generates
+`src/snippets/network-identities.json` and `.txt`. The upgrades page uses the JSON
+for epoch labels; shared snippet regions supply keys and troubleshooting commands,
+including Markdown exports. Fetch or validation failures stop the command.
+
+The deployed values reflect the last docs build, not a live chain query or a
+guarantee that a tagged binary already includes them. Rebuild the docs after
+updating the identities in Tempo. Run the sync command to refresh the checked-in
+snapshot independently.
