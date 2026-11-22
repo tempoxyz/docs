@@ -5,6 +5,7 @@ import {
   getActiveDocsSection,
   normalizeDocsSectionPath,
 } from './docs-sections'
+import { renderStartBuildingMarkdown, showsStartBuilding } from './start-building'
 
 export const aiDocsDescription =
   'Build stablecoin products with Accounts, Earn, Routes, Zones, and Machine Payments, or build on Tempo EVM. Find API references, SDKs, CLI tools, and partner integrations.'
@@ -128,7 +129,10 @@ export function renderAiIndex(content: string) {
   return `${lines.join('\n').trim()}\n`
 }
 
-/** A short breadcrumb makes a page useful even when retrieved without the index. */
+/**
+ * A short breadcrumb makes a page useful even when retrieved without the index.
+ * The page ends with the Start building steps its HTML footer shows.
+ */
 export function renderAiPage(content: string, route: string) {
   if (content.startsWith(aiDocsContextMarker)) return content
   const pageRoute = markdownRoute(route)
@@ -139,7 +143,10 @@ export function renderAiPage(content: string, route: string) {
   const sandbox = pageRoute.startsWith('/docs/guide/private-zones')
     ? '> Earlier testnet sandbox: use [Zones](/docs/zones.md) for current Mainnet deployments.\n'
     : ''
-  return `${aiDocsContextMarker}\n> Source: [${pageRoute}](${markdownHref(pageRoute)})\n${context}\n${sandbox}> [Documentation index](/llms.txt) · [Docs skill](/SKILL.md)\n\n${aiDocsNotice()}\n${content}`
+  const body = showsStartBuilding(pageRoute)
+    ? `${content.trimEnd()}\n\n${renderStartBuildingMarkdown()}\n`
+    : content
+  return `${aiDocsContextMarker}\n> Source: [${pageRoute}](${markdownHref(pageRoute)})\n${context}\n${sandbox}> [Documentation index](/llms.txt) · [Docs skill](/SKILL.md)\n\n${aiDocsNotice()}\n${body}`
 }
 
 /** Reuse the per-page exports so full-context downloads retain page provenance. */

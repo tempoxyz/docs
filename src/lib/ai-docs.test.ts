@@ -9,6 +9,7 @@ import {
   renderAiPage,
 } from './ai-docs'
 import { canonicalizeGeneratedDeveloperLinks } from './canonical-developer-links'
+import { renderStartBuildingMarkdown } from './start-building'
 
 const input = `# Tempo Docs
 
@@ -78,6 +79,15 @@ describe('AI documentation navigation', () => {
     expect(renderAiPage(source, '/docs/guide/private-zones/deposit-to-a-zone')).toContain(
       '> Earlier testnet sandbox:',
     )
+  })
+
+  it('ends guide pages with the Start building steps, but not the entry pages', () => {
+    const output = renderAiPage('# Deposit\n\nContent.\n', '/docs/earn/integrate')
+    expect(output.endsWith(`Content.\n\n${renderStartBuildingMarkdown()}\n`)).toBe(true)
+    expect(output.match(/\*\*Start building on Tempo\*\*/g)).toHaveLength(1)
+    expect(output).toContain('[quickstart](/get-started/quickstart)')
+    for (const route of ['/index', '/get-started'])
+      expect(renderAiPage('# Start\n\nContent.', route)).not.toContain('Start building on Tempo')
   })
 
   it('uses canonical Markdown links under the production mount', () => {
