@@ -89,7 +89,7 @@ The precompile MUST enforce strict size limits on the `signature` argument **bef
 
 The precompile MUST charge gas and verify sufficient gas is available **before** performing any cryptographic verification. The precompile MUST revert with out-of-gas if the call has insufficient gas for the signature type.
 
-All calls pay the standard Tempo precompile calldata cost of 6 gas per 32-byte word (rounded up) on the full ABI-encoded input, consistent with all other Tempo precompiles. The verification gas per signature type is in-line with the [Tempo Transaction Signature Gas Schedule](/docs/protocol/transactions/spec-tempo-transaction#signature-verification-gas-schedule):
+All calls pay 30 gas per 32-byte word (rounded up) on the full ABI-encoded input, including the selector. [TIP-1100](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1100.md) sets this input charge. The verification gas per signature type is in-line with the [Tempo Transaction Signature Gas Schedule](/docs/protocol/transactions/spec-tempo-transaction#signature-verification-gas-schedule):
 
 | Type | Verification Gas |
 |------|-----------------|
