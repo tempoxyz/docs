@@ -16,7 +16,7 @@ import { Badge } from '../../../../components/Badge'
 
 ## Abstract
 
-This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be less than the `gas_limit`. Non-payment transactions must consume at most `general_gas_limit`, a new field added to the header. Once that budget is exhausted, no more non-payment transactions can be included.
+This specification introduces a second consensus gas constraint for **non-payment** transactions. Transactions are classified as either payments or non-payments based solely on their transaction data, without requiring any access to blockchain state. For a block to be valid, total `gas_used` by the block must be at most the `gas_limit`. Non-payment transactions must consume at most `general_gas_limit`, a new field added to the header. Once that budget is exhausted, no more non-payment transactions can be included.
 
 ## Motivation
 
