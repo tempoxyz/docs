@@ -73,7 +73,7 @@ The precompile uses a `keyId` (address) to uniquely identify each access key for
 - `keys[account][keyId]` → Packed `AuthorizedKey` struct (signature type, expiry, enforce_limits, is_revoked, is_admin)
 - `spendingLimits[keccak256(account || keyId)][token]` → `SpendingLimitState { remaining, max, period, periodEnd }`
 - `keyScopes[keccak256(account || keyId)]` → Tree of `(target, selector, recipients)` allowlists used during call-scope checks
-- `transactionKey` → Transient storage for the key ID that signed the current transaction (slot 0)
+- `transactionKey` → Transient storage for the key ID that signed the current transaction (slot 4)
 
 **AuthorizedKey Storage Layout (packed into single slot):**
 - byte 0: signature_type (u8)
