@@ -271,6 +271,10 @@ Existing nonce streams and new nonce streams have different costs. New streams c
 
 ### Transaction Validation
 
+#### Call Validation
+
+- Every call MUST have `value = 0`; nonzero native value transfers are invalid.
+
 #### Signature Validation
 1. Determine type from signature format:
    - 65 bytes (no type identifier) = secp256k1
@@ -669,7 +673,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 **Scope:** Direct TIP-20 transfers and approval increases are tracked, along with account-paid fees and token pulls by approved protocol precompiles. T12 additionally tracks `burnAt` when burning the transaction originator's tokens.
 - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls)
 - When a contract makes transfers on behalf of the user, spending limits do NOT apply (e.g., `transferFrom()`)
-- Native value transfers are NOT limited
+- Native value transfers are unsupported: every Tempo call MUST have `value = 0`
 - NFT transfers are NOT limited
 - Other asset types are NOT limited
 
