@@ -274,6 +274,8 @@ Existing nonce streams and new nonce streams have different costs. New streams c
 #### Call Validation
 
 - Every call MUST have `value = 0`; nonzero native value transfers are invalid.
+- At most one call MAY use `to = Create`, and it MUST be the first call in the batch.
+- Creation calls are invalid when `aa_authorization_list` is nonempty or the transaction uses an access key.
 
 #### Signature Validation
 1. Determine type from signature format:
