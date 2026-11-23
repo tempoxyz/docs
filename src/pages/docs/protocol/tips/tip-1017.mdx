@@ -108,6 +108,10 @@ interface IValidatorConfigV2 {
     /// @notice Ed25519 signature verification failed.
     error InvalidSignature();
 
+    error InvalidSignatureFormat();
+
+    error InvalidOwner();
+
     /// @notice Contract is not initialized.
     error NotInitialized();
 
