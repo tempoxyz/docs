@@ -64,6 +64,120 @@ export function aiDocsNotice() {
   ].join('\n')
 }
 
+type QuickReferenceSource = { label: string; route: string; values: readonly string[] }
+
+/**
+ * Values agents look up most often, so the index alone answers common setup questions.
+ * `ai-docs.test.ts` checks each value against the source page it links to.
+ */
+export const aiQuickReference: readonly {
+  text: string
+  sources: readonly QuickReferenceSource[]
+}[] = [
+  {
+    text: 'Networks: Tempo Mainnet uses chain ID `4217` and RPC `https://rpc.tempo.xyz`. Tempo Testnet (Moderato) uses chain ID `42431` and RPC `https://rpc.moderato.tempo.xyz`.',
+    sources: [
+      {
+        label: 'Network details',
+        route: '/docs/quickstart/connection-details',
+        values: ['4217', 'https://rpc.tempo.xyz', '42431', 'https://rpc.moderato.tempo.xyz'],
+      },
+    ],
+  },
+  {
+    text: 'Fees: Tempo has no native gas token. Transactions pay fees in a USD TIP-20 stablecoin, chosen per transaction with `feeToken`.',
+    sources: [
+      {
+        label: 'Fee tokens',
+        route: '/docs/accounts/fees/fee-tokens',
+        values: ['no separate gas token', 'feeToken'],
+      },
+    ],
+  },
+  {
+    text: 'Testnet funds: send `POST https://tempo.com/developers/api/faucet` with `{"address": "<ADDRESS>"}`, or call the `tempo_fundAddress` RPC method on Testnet.',
+    sources: [
+      {
+        label: 'Faucet',
+        route: '/docs/quickstart/faucet',
+        values: ['https://tempo.com/developers/api/faucet', 'tempo_fundAddress'],
+      },
+    ],
+  },
+  {
+    text: 'Stablecoins: TIP-20 tokens use 6 decimals. On Mainnet, OUSD is `0x20c0000000000000000000006a37da5c996874be` and pathUSD is `0x20c0000000000000000000000000000000000000`. On Testnet, AlphaUSD is `0x20c0000000000000000000000000000000000001`.',
+    sources: [
+      { label: 'Stablecoins', route: '/get-started/stablecoins', values: ['6 decimal'] },
+      {
+        label: 'OUSD',
+        route: '/docs/guide/ousd',
+        values: [
+          '0x20c0000000000000000000006a37da5c996874be',
+          '0x20c0000000000000000000000000000000000000',
+        ],
+      },
+      {
+        label: 'Faucet tokens',
+        route: '/docs/quickstart/faucet',
+        values: ['0x20c0000000000000000000000000000000000001'],
+      },
+    ],
+  },
+  {
+    text: 'SDKs: TypeScript uses `viem` (`viem/tempo`) and `wagmi` (`wagmi/tempo`). The Tempo API client is `tapimo` and the MPP SDK is `mppx`. Python uses `pytempo`, Go `github.com/tempoxyz/tempo-go`, Rust `tempo-alloy`, and Foundry `tempo-std`.',
+    sources: [
+      {
+        label: 'SDKs',
+        route: '/docs/sdk',
+        values: [
+          'viem/tempo',
+          'wagmi/tempo',
+          'tapimo',
+          'mppx',
+          'pytempo',
+          'github.com/tempoxyz/tempo-go',
+          'tempo-alloy',
+          'tempo-std',
+        ],
+      },
+    ],
+  },
+  {
+    text: 'Tempo API: `https://api.tempo.xyz/v1`. Many reads need no key. Send a key as `tempo-api-key: tempo:sk:...` or `Authorization: Bearer tempo:sk:...`.',
+    sources: [
+      {
+        label: 'Authentication',
+        route: '/docs/api/authentication',
+        values: ['https://api.tempo.xyz/v1', 'tempo-api-key', 'Authorization: Bearer'],
+      },
+    ],
+  },
+  {
+    text: 'CLI: install with `curl -fsSL https://tempo.com/install | bash`.',
+    sources: [
+      {
+        label: 'Tempo CLI',
+        route: '/docs/cli',
+        values: ['curl -fsSL https://tempo.com/install | bash'],
+      },
+    ],
+  },
+]
+
+function renderQuickReference() {
+  return [
+    '### Quick reference',
+    '',
+    'Common values, each linked to the page that owns it. Read that page before writing code.',
+    '',
+    ...aiQuickReference.map(
+      ({ text, sources }) =>
+        `- ${text} See ${sources.map(({ label, route }) => `[${label}](${markdownHref(route)})`).join(', ')}.`,
+    ),
+    '',
+  ]
+}
+
 function sectionDescription(section: DocsSection) {
   const description = sectionDescriptions[section.id]
   if (!description) throw new Error(`Missing AI routing description for ${section.label}`)
@@ -85,6 +199,7 @@ export function renderAiIndex(content: string) {
     aiDocsNotice(),
     '[Docs skill](/SKILL.md) · [Full documentation](/llms-full.txt)',
     '',
+    ...renderQuickReference(),
   ]
   const append = (items: AiIndexEntry[]) => {
     for (const entry of items) {
