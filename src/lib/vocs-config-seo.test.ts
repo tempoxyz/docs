@@ -32,7 +32,9 @@ describe('vocs.config docs SEO controls', () => {
   })
 
   test('every authored SEO title names Tempo', () => {
-    const missing = globSync('src/pages/**/*.{md,mdx}').filter((file) => {
+    const pages = globSync('src/pages/**/*.{md,mdx}')
+    expect(pages.length).toBeGreaterThan(100)
+    const missing = pages.filter((file) => {
       const match = /^seoTitle:\s*["']?(.+?)["']?\s*$/m.exec(readFileSync(file, 'utf8'))
       return match !== null && !match[1].includes('Tempo')
     })
