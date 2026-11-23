@@ -83,7 +83,7 @@ Available on faucet-enabled testnet endpoints only. Mints test stablecoins to th
 |------|------|-------------|
 | `address` | `Address` | Recipient address |
 
-**Returns:** `B256[]` — array of transaction hashes, one per token minted.
+**Returns:** `B256[]` — array of transaction hashes, one per batch of up to 32 token mints.
 
 ```bash
 cast rpc tempo_fundAddress 0xYOUR_ADDRESS \
