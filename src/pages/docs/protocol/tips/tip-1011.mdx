@@ -12,7 +12,7 @@ ogImage: /og/2026-q4/og_2026-q4_docs_protocol-tips-tip-1011_title-f5_v02.png
 # TIP-1011: Enhanced Access Key Permissions
 
 :::info[Versioned proposal]
-This TIP records the enhanced-permissions proposal. Later upgrades change key authorization to the `KeyRestrictions` tuple and add admin keys. Use the [Account Keychain reference](/docs/protocol/transactions/AccountKeychain) for the current ABI.
+This TIP records the enhanced-permissions proposal. Later upgrades change key authorization to the `KeyRestrictions` tuple and add admin keys. Use the [Account Keychain reference](/docs/protocol/transactions/AccountKeychain) for the current ABI. The gas rules below use T4 storage-creating row counts and T7 intrinsic storage pricing.
 :::
 
 ## Abstract
@@ -410,16 +410,18 @@ Per-transaction scoped-call matching for access-key transactions is not charged 
 
 Definitions:
 
-1. `SSTORE_SET = sstore_set_without_load_cost`.
+1. `SSTORE_SET = 250,000` gas per new authorization storage slot: the 5,000-gas residual plus the 245,000-gas creditable component. Intrinsic authorization charges both components.
 2. `S` = number of targets with configured call scope.
 3. `K` = total selector rules across all configured targets.
 4. `C` = total selector rules with a non-empty `recipients` list.
 5. `W` = total recipient entries across all constrained selector rules.
-Scoped-call storage writes counted for intrinsic gas:
+6. `P` = number of targets with nonempty selector rules.
+
+Storage-creating rows counted for intrinsic gas:
 
 1. Restricted-mode marker: `1` slot when `allowed_calls` is `Some(...)`.
-2. Each target scope writes `3` slots: target-set length, target-set value, and target-set position.
-3. Each selector rule writes `3` slots: selector-set length, selector-set value, and selector-set position.
+2. Nonempty scopes create one target-set length slot and two slots per target: value and position.
+3. Each target with selector rules creates one selector-set length slot and two slots per selector: value and position.
 4. Each recipient-constrained selector writes `1` additional slot for recipient-set length.
 5. Each recipient entry writes `2` slots: recipient-set value and recipient-set position.
 
@@ -429,10 +431,10 @@ gas_key_authorization_new = gas_key_authorization_existing
 
 scope_slots = 0                    if allowed_calls is None
             = 1                    if allowed_calls is Some([])   // explicit restricted-mode marker
-            = 1 + 3*S + 3*K + C + 2*W    if allowed_calls is Some(scopes)
+            = 2 + 2*S + 2*K + P + C + 2*W    if allowed_calls is Some(nonempty scopes)
 ```
 
-Justification for `1 + 3*S + 3*K + C + 2*W`: `1` stores restricted mode, each target scope materializes as three set writes, each selector rule materializes as three set writes, each constrained selector writes one recipient-set length slot, and each recipient writes two set-membership slots.
+The two fixed slots store restricted mode and the target-set length. Target and selector values and positions each consume two slots. Each selector set and constrained recipient set adds one length slot; each recipient adds two membership slots. Repeated length updates do not create additional storage.
 
 #### Rounded Helper Overhead
 
