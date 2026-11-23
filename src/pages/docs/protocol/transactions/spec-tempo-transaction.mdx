@@ -766,7 +766,11 @@ The following is encoding pseudocode, not a runnable SDK example. Helper names s
      chain_id: 42431, // Moderato testnet
      nonce: await getNonce(account),
      nonce_key: 0,
-     calls: [{ to: recipient, value: 0, input: "0x" }],
+     calls: [{
+       to: USDG_ADDRESS,
+       value: 0,
+       input: encodeCall("transfer", [TRUSTED_RECIPIENT, 1000000])
+     }],
      gas_limit: 200000,
      max_fee_per_gas: 1000000000,
      max_priority_fee_per_gas: 1000000000,
