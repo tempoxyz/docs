@@ -112,7 +112,7 @@ A withdrawal fails if the token transfer or callback reverts. Causes include run
 - The withdrawal is **popped unconditionally** from the queue, even on failure.
 - A new deposit is enqueued carrying the fallback nonce. The inbox resolves it and attempts to mint to the Zone recipient.
 - The withdrawal fee isn't refunded on a failed delivery.
-- If policy or a pause blocks the bounce-back mint, the inbox records a pending refund. The recipient can call `ZoneInbox.claimRefund(token)` once minting is permitted.
+- If policy blocks the bounce-back mint, the inbox records a pending refund. The recipient can call `ZoneInbox.claimRefund(token)` once minting is permitted.
 
 Delivery failures don't block subsequent withdrawals. Processing can still wait for deposit-queue capacity. The T13 portal limits outstanding deposits and reserves capacity for callback deposits and bounce-backs. Refund claims remain subject to the applicable token and account restrictions.
 

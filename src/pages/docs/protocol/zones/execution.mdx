@@ -22,7 +22,7 @@ Inside the Zone, fixed system contracts handle token movement. `ZoneInbox` mints
 
 Zones use the same fee units and gas accounting as [Tempo transaction fees](/docs/protocol/fees/spec-fee). A transaction selects its fee token through `feeToken`. The token must be enabled by the portal admin and initialized, meaning a Zone block has processed its enablement. If `feeToken` is omitted, the Zone uses the default token set when the Zone was created.
 
-On Tempo, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the user's fee token into the validator's preferred stablecoin. The Zone fee manager (`ZoneFeeManager`) skips that conversion and collects the selected token directly. So a Zone fee token doesn't need to be USD-denominated, as Tempo fee tokens must be. The token's pause state and [TIP-403](/docs/protocol/tip403/spec) transfer policy still apply.
+On Tempo, the [Fee AMM](/docs/protocol/fees/spec-fee-amm) converts the user's fee token into the validator's preferred stablecoin. The Zone fee manager (`ZoneFeeManager`) skips that conversion and collects the selected token directly. So a Zone fee token doesn't need to be USD-denominated, as Tempo fee tokens must be. The [TIP-403](/docs/protocol/tip403/spec) transfer policy still applies. Under T13, a token's Tempo pause flag isn't mirrored into Zone execution. A pause still blocks token transfers on Tempo, including portal deposits and withdrawal delivery.
 
 ## Deposit Fees
 
