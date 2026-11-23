@@ -106,7 +106,7 @@ pub fn prove_zone_batch(
 3. **Recompute Commitments:** Rebuild state roots and canonical Tempo-format Zone headers. Then read deposit progress, enabled-token progress, and withdrawal batch commitments from the resulting state.
 4. **Validate the Anchor:** Match the final Tempo checkpoint to the public inputs, directly or through the supplied ancestry headers.
 
-The SPF can replay an open Zone tip without withdrawal finalization. Settlement policy imposes its batch boundaries separately.
+The SPF requires each batch to end at a full block's withdrawal finalization boundary. It rejects an open tip without finalization.
 
 <span id="deployment-modes" />
 
