@@ -137,7 +137,7 @@ All other event topics, such as system, role, and configuration events, are filt
 |--------|--------|-------------|
 | `zone_getAuthorizationTokenInfo` | Any authenticated | Returns the authenticated account address and token expiry |
 | `zone_getZoneInfo` | Any authenticated | Returns `zoneId`, `zoneTokens`, `sequencers`, `chainId`, `tempoBlockNumber`, `isAccessEnforced`, and `isGatewayOpen` |
-| `zone_getEncryptionKey` | Any authenticated | Returns the portal’s active encryption key from finalized Tempo state |
+| `zone_getEncryptionKey` | Any authenticated | Returns the portal’s active encryption key at the current Tempo head |
 
 `zone_getDepositStatus` isn't implemented. For settlement progress, compare a deposit’s number from `DepositMade` with `ZonePortal.lastProcessedDepositNumber()` on Tempo.
 
