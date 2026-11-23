@@ -48,6 +48,7 @@ After an identity rotation, this section and the release table below list the ne
 
 | Release | Date | Network | Description | Priority |
 |---------|------|---------|-------------|----------|
+| [tempo/v1.19.0](https://github.com/tempoxyz/tempo/releases/tag/tempo%2Fv1.19.0) | Nov 19, 2026 | Testnet + Mainnet | Required for [T14](/docs/protocol/upgrades/t14): configurable accounts, admin access key removal, and validator, consensus, and Zone Portal rules. T14 activates on testnet on November 24, 2026 and on mainnet on December 8, 2026, both at 15:00 UTC. Images are verified with GitHub build-provenance attestations instead of Cosign signatures. | <Badge variant="red">Required</Badge> |
 | [tempo/v1.18.4](https://github.com/tempoxyz/tempo/releases/tag/tempo%2Fv1.18.4) | Nov 16, 2026 | Testnet + Mainnet | Maintenance release with an EVM execution fix. Does not activate a network upgrade. Operators on v1.18.3 should upgrade; v1.18.2 needs no action. | <Badge variant="yellow">Recommended</Badge> |
 | [tempo/v1.18.3](https://github.com/tempoxyz/tempo/releases/tag/tempo%2Fv1.18.3) | Nov 12, 2026 | Testnet + Mainnet | Maintenance release with reliability fixes for consensus, block building, the transaction pool, and RPC. Superseded by tempo/v1.18.4. | <Badge variant="gray">Superseded</Badge> |
 | [tempo/v1.18.2](https://github.com/tempoxyz/tempo/releases/tag/tempo%2Fv1.18.2) | Nov 6, 2026 | Testnet + Mainnet | Maintenance release with security and reliability fixes for consensus, block execution, and RPC. Does not activate a network upgrade. High priority for validators, recommended for RPC nodes. | <Badge variant="yellow">Recommended</Badge> |
@@ -93,6 +94,22 @@ After an identity rotation, this section and the release table below list the ne
 | [v1.0.1](https://github.com/tempoxyz/tempo/releases/tag/v1.0.1) | Jan 19, 2026 | Testnet + Mainnet | Fixes a sync bug and adds resumable snapshot downloads with `tempo download`. | <Badge variant="yellow">Recommended</Badge> |
 | [v1.0.0](https://github.com/tempoxyz/tempo/releases/tag/v1.0.0) | Jan 16, 2026 | Mainnet | Mainnet genesis release. | <Badge variant="red">Required</Badge> |
 
+## T15
+
+| | |
+|---|---|
+| **Scope** | Configurable account voucher signers for payment channels; other features to be added as they're specified |
+| **TIPs** | [Configurable voucher signers](https://tips.sh/1166) |
+| **Details** | [T15 network upgrade](/docs/protocol/upgrades/t15) |
+| **Release** | Not yet published |
+| **Testnet** | Planned: December 8, 2026 (target) |
+| **Mainnet** | Planned: December 15, 2026 (target) |
+| **Priority** | <Badge variant="red">Required</Badge> |
+
+T15 is planned but not yet scheduled. Activation times and timestamps are set when the T15 release is published. This section lists the release then. Node operators will need to run it before each network's activation to stay synced.
+
+---
+
 ## T14
 
 | | |
@@ -100,12 +117,12 @@ After an identity rotation, this section and the release table below list the ne
 | **Scope** | Configurable accounts (weighted signers and a threshold at one address, in-place upgrades, and use as access keys, also on Zones), removal of admin access keys, validator and consensus rules, paused Zone Portals, and batch call gas |
 | **TIPs** | [T14 meta-TIP](https://github.com/tempoxyz/tempo/blob/main/tips/tip-1152.md), [Configurable accounts](https://tips.sh/1107), [Configurable accounts as access keys](https://tips.sh/1111), [Single-key account upgrade](https://tips.sh/1113), [Remove admin access keys](https://tips.sh/1137), [Configurable accounts on Zones](https://tips.sh/1154) |
 | **Details** | [T14 network upgrade](/docs/protocol/upgrades/t14) |
-| **Release** | Not yet published |
+| **Release** | [tempo/v1.19.0](https://github.com/tempoxyz/tempo/releases/tag/tempo%2Fv1.19.0) |
 | **Testnet** | Scheduled: November 24, 2026 at 15:00 UTC (`1795532400`) |
 | **Mainnet** | Scheduled: December 8, 2026 at 15:00 UTC (`1796742000`) |
 | **Priority** | <Badge variant="red">Required</Badge> |
 
-T14 is scheduled for testnet and mainnet. Node operators must run the T14 release before each network's activation timestamp to stay synced. This section lists the release once it's published.
+T14 is scheduled for testnet and mainnet and supported by [tempo/v1.19.0](https://github.com/tempoxyz/tempo/releases/tag/tempo%2Fv1.19.0), published on November 19, 2026. Node operators must run it before each network's activation timestamp to stay synced.
 
 ---
 
