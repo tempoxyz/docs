@@ -90,7 +90,7 @@ The registry's internal `get_policy_data()` now reverts with `PolicyNotFound` fo
 
 **PR**: [#2528](https://github.com/tempoxyz/tempo/pull/2528) *(merged)* · **Author**: @legion2002
 
-An access key's spending limit also covers the fees its transactions pay. After execution, `transfer_fee_post_tx()` refunds the fee for unused gas. On T2, it also adds the refunded amount back to the spending limit. Previously, the full maximum fee stayed deducted from the spending limit, regardless of gas used.
+An access key's spending limit also covers the fees its transactions pay. After execution, `transfer_fee_post_tx()` refunds the fee for unused gas. From T1C, it also adds the refunded amount back to the spending limit. Previously, the full maximum fee stayed deducted from the spending limit, regardless of gas used.
 
 ### 11. Tick spacing checks on DEX price conversion functions
 
