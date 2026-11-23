@@ -1,3 +1,4 @@
+import { globSync, readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import vocsConfig from '../../vocs.config'
 
@@ -25,9 +26,17 @@ describe('vocs.config docs SEO controls', () => {
         'Send a Stablecoin Payment on Tempo | Docs',
       ),
     ).toBe('Send a Stablecoin Payment on Tempo | Docs')
-    expect(titleFor('/', 'Build on Tempo', 'Tempo Developer Docs: APIs, SDKs & Guides')).toBe(
-      'Tempo Developer Docs: APIs, SDKs & Guides',
-    )
+    expect(
+      titleFor('/', 'Build on Tempo', 'Tempo Docs: Stablecoin Payments APIs, SDKs & Guides'),
+    ).toBe('Tempo Docs: Stablecoin Payments APIs, SDKs & Guides')
+  })
+
+  test('every authored SEO title names Tempo', () => {
+    const missing = globSync('src/pages/**/*.{md,mdx}').filter((file) => {
+      const match = /^seoTitle:\s*["']?(.+?)["']?\s*$/m.exec(readFileSync(file, 'utf8'))
+      return match !== null && !match[1].includes('Tempo')
+    })
+    expect(missing).toEqual([])
   })
 
   test('uses Tempo Docs title suffix for docs pages', () => {
