@@ -25,9 +25,9 @@ describe('vocs.config docs SEO controls', () => {
         'Send a Stablecoin Payment on Tempo | Docs',
       ),
     ).toBe('Send a Stablecoin Payment on Tempo | Docs')
-    expect(titleFor('/', 'Build on Tempo', 'Tempo Developer Docs: APIs, SDKs & Guides')).toBe(
-      'Tempo Developer Docs: APIs, SDKs & Guides',
-    )
+    expect(
+      titleFor('/', 'Build on Tempo', 'Tempo Docs: Stablecoin Payments APIs, SDKs & Guides'),
+    ).toBe('Tempo Docs: Stablecoin Payments APIs, SDKs & Guides')
   })
 
   test('uses Tempo Docs title suffix for docs pages', () => {
