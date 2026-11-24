@@ -103,7 +103,7 @@ To keep the address instead, [upgrade the account in place](/docs/accounts/accou
 
 ## Connect a User's Wallet
 
-If a user already has a Tempo Account, sign them in with Tempo through the [Accounts SDK](https://accounts.tempo.xyz). Tempo holds the account's keys, and your app receives the user's address and an access key that signs within the limits the user approves. Tempo sends transactions through its own RPC endpoint, not your testnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
+If a user already has a Tempo Account, sign them in with Tempo through the [Accounts SDK](https://accounts.tempo.xyz). Tempo holds the account's keys, and your app receives the user's address and an access key that signs within the limits the user approves. Tempo sends transactions through its own RPC endpoint, not your own client. The demo and code run on testnet, whose stablecoins have no value.
 
 <Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
   <SignInWithTempo stepNumber={1} />
