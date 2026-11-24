@@ -1598,6 +1598,28 @@
       "permanent": true
     },
     {
+      "source": "/guide/use-accounts",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.com/developers/docs/accounts",
+      "permanent": true
+    },
+    {
+      "source": "/guide/use-accounts/embed-passkeys",
+      "has": [
+        {
+          "type": "host",
+          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+        }
+      ],
+      "destination": "https://tempo.com/developers/docs/accounts/authentication/passkeys",
+      "permanent": true
+    },
+    {
       "source": "/guide/use-accounts/add-funds",
       "has": [
         {
@@ -1895,7 +1917,7 @@
       "permanent": true
     },
     {
-      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)",
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners|agents|earn|routes|zones|network|development|payments)",
       "has": [
         {
           "type": "host",
@@ -1906,7 +1928,7 @@
       "permanent": true
     },
     {
-      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*",
+      "source": "/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|agents|earn|routes|zones|network|development|resources|payments)/:path*",
       "has": [
         {
           "type": "host",
@@ -2137,8 +2159,13 @@
       "permanent": true
     },
     {
+      "source": "/guide/use-accounts",
+      "destination": "https://tempo.com/developers/docs/accounts",
+      "permanent": true
+    },
+    {
       "source": "/guide/use-accounts/embed-passkeys",
-      "destination": "https://accounts.tempo.xyz/docs/adapters/webauthn",
+      "destination": "https://tempo.com/developers/docs/accounts/authentication/passkeys",
       "permanent": true
     },
     {
@@ -2437,8 +2464,13 @@
       "permanent": true
     },
     {
+      "source": "/developers/docs/guide/use-accounts",
+      "destination": "https://tempo.com/developers/docs/accounts",
+      "permanent": true
+    },
+    {
       "source": "/developers/docs/guide/use-accounts/embed-passkeys",
-      "destination": "https://accounts.tempo.xyz/docs/adapters/webauthn",
+      "destination": "https://tempo.com/developers/docs/accounts/authentication/passkeys",
       "permanent": true
     },
     {

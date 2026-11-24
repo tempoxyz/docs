@@ -1,0 +1,13 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Tempo",
+  "description": "Tempo, the stablecoin payments blockchain: APIs, SDKs, CLI, Accounts, Earn, Routes, Zones, Machine Payments (MPP) and Tempo EVM",
+  "folders": ["src/pages"],
+  "excludeFolders": ["src/pages/_api"],
+  "excludeFiles": ["AGENTS.md", "MARKDOWN.md"],
+  "rules": [
+    "Tempo here is the stablecoin payments blockchain at tempo.com, not Grafana Tempo (tracing) or FormKit Tempo (dates).",
+    "Docs are canonical at https://tempo.com/developers; tempo.xyz and docs.tempo.xyz redirect there.",
+    "For the Machine Payments Protocol in TypeScript use the mppx package; for Tempo chain access use viem's tempo chain definitions."
+  ]
+}

@@ -98,7 +98,7 @@ test('keeps one route title through docs and OpenAPI client navigation', async (
 
   await page.locator('a[href="/docs/api/transactions"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transactions\/?$/)
-  await expectSingleTitle(page, 'Tempo Transactions API Reference | Docs')
+  await expectSingleTitle(page, 'Tempo Transactions API Reference | Tempo Docs')
 
   await page.locator('a[href="/docs/api/transfers"]:visible').first().click()
   await page.waitForURL(/\/docs\/api\/transfers\/?$/)

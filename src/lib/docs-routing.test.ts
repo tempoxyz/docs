@@ -41,7 +41,7 @@ const redirects = vercelConfig.redirects.filter((redirect) => !redirect.has)
 const hostRedirects = vercelConfig.redirects.filter((redirect) => redirect.has)
 const vocsRedirects = vocsConfig.redirects as VocsRedirect[]
 const legacySectionPathSource =
-  '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*'
+  '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|agents|earn|routes|zones|network|development|resources|payments)/:path*'
 
 function findRedirect(source: string) {
   return redirects.find((redirect) => redirect.source === source)
@@ -314,11 +314,11 @@ describe('docs routing redirects', () => {
 
     it.each([
       [
-        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners)',
+        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|changelog|partners|agents|earn|routes|zones|network|development|payments)',
         `${canonicalDevelopersOrigin}/docs/:section`,
       ],
       [
-        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools)/:path*',
+        '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|agents|earn|routes|zones|network|development|resources|payments)/:path*',
         `${canonicalDevelopersOrigin}/docs/:section/:path*`,
       ],
     ])('redirects legacy section %s to %s before the host catch-all', (source, destination) => {
