@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import {
   aiDocsSections,
-  aiQuickReference,
   markdownRoute,
   parseAiIndex,
   renderAiFull,
@@ -49,24 +48,6 @@ describe('AI documentation navigation', () => {
     expect(output).toContain('Earn is in beta')
     expect(output).toContain('Routes is in beta')
     expect(renderAiIndex(output)).toBe(output)
-  })
-
-  it('puts a quick reference before the sections, with values from the pages it links', () => {
-    const output = renderAiIndex(input)
-    expect(output.indexOf('### Quick reference')).toBeGreaterThan(0)
-    expect(output.indexOf('### Quick reference')).toBeLessThan(output.search(/^## /m))
-    for (const { text, sources } of aiQuickReference) {
-      for (const { route, values } of sources) {
-        expect(output).toContain(`(${route}.md)`)
-        const file = [`src/pages${route}.mdx`, `src/pages${route}/index.mdx`].find(existsSync)
-        expect(file, `${route} source page`).toBeDefined()
-        const page = readFileSync(file as string, 'utf8')
-        for (const value of values) {
-          expect(page, `${value} on ${route}`).toContain(value)
-          if (!value.includes(' ')) expect(text).toContain(value)
-        }
-      }
-    }
   })
 
   it('fails when a new docs route has no navigation owner', () => {

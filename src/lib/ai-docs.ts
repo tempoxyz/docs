@@ -68,7 +68,7 @@ type QuickReferenceSource = { label: string; route: string; values: readonly str
 
 /**
  * Values agents look up most often, so the index alone answers common setup questions.
- * `ai-docs.test.ts` checks each value against the source page it links to.
+ * `values` lists what each entry takes from the source page it links to.
  */
 export const aiQuickReference: readonly {
   text: string
