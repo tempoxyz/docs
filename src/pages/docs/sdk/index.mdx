@@ -11,6 +11,19 @@ import { Cards, Card } from 'vocs'
 
 Use the TypeScript SDK with Viem or Wagmi, or choose a client for your application’s language.
 
+| Language | Package | Install | Use it for |
+| --- | --- | --- | --- |
+| TypeScript | `viem`, imported from `viem/tempo` | `npm install viem` | Reads, transactions, and Tempo actions in scripts and servers |
+| TypeScript (React) | `wagmi`, imported from `wagmi/tempo` | [Wagmi setup](https://wagmi.sh/tempo) | Wallet-connected React apps |
+| TypeScript | `tapimo` | `pnpm add tapimo` | Typed client for the [Tempo API](/docs/api) |
+| TypeScript | `mppx` | `npm install mppx viem` | Paying for and charging for APIs with [Machine Payments](/docs/agents) |
+| Python | `pytempo` | `pip install pytempo` | web3.py extension for Tempo Transactions |
+| Go | `github.com/tempoxyz/tempo-go` | `go get github.com/tempoxyz/tempo-go` | RPC client, signer, and Tempo Transactions |
+| Rust | `tempo-alloy` | [Rust setup](/docs/sdk/rust) | Alloy network type and Tempo actions |
+| Solidity | Foundry with `tempo-std` | `foundryup`, then `forge install tempoxyz/tempo-std` | Building, testing, and deploying contracts |
+
+Each language page pins tested versions and shows a first transaction.
+
 <Cards>
   <Card
     description="Build on Tempo using TypeScript"
