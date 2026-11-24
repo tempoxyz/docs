@@ -1060,7 +1060,7 @@ export default defineConfig({
               },
               {
                 text: 'T14',
-                badge: { text: 'Planned', variant: 'note' as const },
+                badge: { text: 'Testnet', variant: 'info' as const },
                 link: '/docs/protocol/upgrades/t14',
               },
               {
