@@ -11,7 +11,7 @@ import {
   type Signer,
   setThreshold,
 } from './account-sandbox'
-import type { DevnetCallOptions } from './account-sandbox-devnet'
+import type { TestnetCallOptions } from './account-sandbox-testnet'
 import {
   asOneUpdate,
   consume,
@@ -45,7 +45,7 @@ function stepHeadings(guide: GuideId) {
 }
 
 // ---------------------------------------------------------------------------
-// A test double for devnet: the engine's own edits, with made-up addresses and hashes. It checks
+// A test double for testnet: the engine's own edits, with made-up addresses and hashes. It checks
 // that steps hand the adapter the keys they made earlier.
 
 type Fake = GuideContext & {
@@ -60,7 +60,7 @@ function fakeContext(): Fake {
   const accounts = new Map<string, SandboxAccount>()
   const preparedUses: string[] = []
 
-  function addressFor(signer: Signer, options: DevnetCallOptions | undefined) {
+  function addressFor(signer: Signer, options: TestnetCallOptions | undefined) {
     const known = signerAddresses.get(signer.id)
     if (known) return known
     const prepared = options?.prepared?.signer?.(signer)
@@ -73,7 +73,7 @@ function fakeContext(): Fake {
   }
 
   const knownKeys = new Set<string>()
-  function noteKeys(account: SandboxAccount, options: DevnetCallOptions | undefined) {
+  function noteKeys(account: SandboxAccount, options: TestnetCallOptions | undefined) {
     for (const key of account.accessKeys) {
       if (knownKeys.has(key.id)) continue
       knownKeys.add(key.id)
@@ -92,14 +92,14 @@ function fakeContext(): Fake {
       async sync(previous, nextAccount, options) {
         for (const signer of configuredSigners(nextAccount)) addressFor(signer, options)
         noteKeys(nextAccount, options)
-        // Like devnet, creating the account sends nothing: the address comes from v0.
+        // Like testnet, creating the account sends nothing: the address comes from v0.
         if (!isCreated(previous)) {
           const address = next(40)
-          return { account: record({ ...nextAccount, address, balance: 0, devnet: {} }) }
+          return { account: record({ ...nextAccount, address, balance: 0, testnet: {} }) }
         }
         if (previous.balance <= 0) throw new Error('Get test funds first.')
         return {
-          account: record({ ...nextAccount, address: previous.address, devnet: {} }),
+          account: record({ ...nextAccount, address: previous.address, testnet: {} }),
           hash: next(64),
         }
       },

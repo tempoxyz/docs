@@ -12,7 +12,7 @@ The Account Keychain holds each account's access keys and checks every transacti
 
 Access keys are extra keys that sign for an account, and they are live on mainnet and testnet. An access key works within its spending limits, expiry, and scopes. The Account Keychain is a precompile, a contract built into Tempo, at `0xAAAAAAAA00000000000000000000000000000000`. To build with access keys, start with the [Access keys](/docs/accounts/access-keys) guide.
 
-Both [account types](/docs/accounts/keys) use access keys. A [single-key account](/docs/development/single-key-accounts) is controlled by one root key, the key its address derives from. A [configurable account](/docs/development/configurable-accounts) is controlled by owner keys, whose weights must reach a threshold to approve. Configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), a separate test network, until [T14](/docs/protocol/upgrades/t14), the planned upgrade that brings them to testnet and mainnet.
+Both [account types](/docs/accounts/keys) use access keys. A [single-key account](/docs/development/single-key-accounts) is controlled by one root key, the key its address derives from. A [configurable account](/docs/development/configurable-accounts) is controlled by owner keys, whose weights must reach a threshold to approve. Configurable accounts run on [testnet](/docs/accounts/create#connect-to-testnet) now. [T14](/docs/protocol/upgrades/t14) brings them to mainnet on December 8, 2026.
 
 <AccountDiagram
   name="keychain"
@@ -28,7 +28,7 @@ Each access key has a signature type, the `signatureType` value you pass when yo
 | secp256k1 | `0` | The key's address |
 | P-256 | `1` | The key's address |
 | WebAuthn | `2` | The address derived from the passkey's public key |
-| Configurable account | `3` | The account's address. Its owners sign for it. Devnet until T14 ([TIP-1111](https://tips.sh/1111)). |
+| Configurable account | `3` | The account's address. Its owners sign for it. Testnet until T14 reaches mainnet ([TIP-1111](https://tips.sh/1111)). |
 
 ## Access key restrictions
 

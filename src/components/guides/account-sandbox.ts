@@ -2,7 +2,7 @@ import { thisDevice, thisDevicePasskey } from './this-device'
 /**
  * Rules engine for the account sandbox. Pure functions only: no React and no network.
  *
- * The rules follow the configurable-account TIPs that run on the Tempo Accounts devnet:
+ * The rules follow the configurable-account TIPs that run on the Tempo testnet:
  * - TIP-1114: 1–48 owners, weights 1–255, total weight at most 255, threshold 1–255 and
  *   reachable with at most eight owner signatures. Signatures stop at the threshold.
  * - TIP-1107 and TIP-1109: updates increment the version, keep the address, and keep access keys.
@@ -10,8 +10,8 @@ import { thisDevice, thisDevicePasskey } from './this-device'
  *   configurable account can be another account's access key. The sandbox doesn't model admin
  *   access keys (TIP-1049).
  *
- * `AccountSandboxAdapter.submit` is the boundary a devnet adapter replaces.
- * `account-sandbox-devnet.ts` sends the same actions as real transactions.
+ * `AccountSandboxAdapter.submit` is the boundary a testnet adapter replaces.
+ * `account-sandbox-testnet.ts` sends the same actions as real transactions.
  */
 
 export const sandboxLimits = {
@@ -93,7 +93,7 @@ export type Signer = {
   addedIn: number | null
   /** How approval summaries refer to this signer. */
   phrase?: { list: string; solo: string }
-  /** A `private-key` signer's generated key, for the reader to copy once and for devnet to sign. */
+  /** A `private-key` signer's generated key, for the reader to copy once and for testnet to sign. */
   privateKey?: string
 }
 
@@ -333,7 +333,7 @@ export type AccessKey = {
   recipients: 'any' | 'approved'
   status: 'active' | 'revoked' | 'expired'
   delegate?: AccessKeyDelegate
-  /** A `private-key` key's generated key, for the reader to copy once and for devnet to sign. */
+  /** A `private-key` key's generated key, for the reader to copy once and for testnet to sign. */
   privateKey?: string
 }
 
@@ -506,11 +506,11 @@ export type SandboxAccount = {
   notice: string | null
   serial: number
   identity: { local: string; domain: string }
-  /** Set once a network adapter has created this account on the devnet. */
-  devnet?: DevnetState
+  /** Set once a network adapter has created this account on the testnet. */
+  testnet?: TestnetState
 }
 
-export type DevnetState = {
+export type TestnetState = {
   /** The latest configuration or access-key transaction. */
   lastHash?: string
 }
@@ -1172,7 +1172,7 @@ function signersById(account: SandboxAccount, ids: readonly string[] = []) {
     .filter((signer): signer is Signer => Boolean(signer))
 }
 
-/** The boundary the devnet adapter implements. `simulatedAdapter` runs `applyAction`, for tests. */
+/** The boundary the testnet adapter implements. `simulatedAdapter` runs `applyAction`, for tests. */
 export type AccountSandboxAdapter = {
   network: string
   submit(
@@ -1181,7 +1181,7 @@ export type AccountSandboxAdapter = {
   ): Promise<{ account: SandboxAccount; result: ActionResult }>
 }
 
-/** Applies actions locally with no network. Tests only: the sandbox runs on devnet. */
+/** Applies actions locally with no network. Tests only: the sandbox runs on testnet. */
 export const simulatedAdapter: AccountSandboxAdapter = {
   network: 'Simulated',
   submit: async (account, request) => applyAction(account, request),
@@ -1335,7 +1335,7 @@ function createAccount(account: SandboxAccount, first: Signer): SandboxAccount {
   ).join('')
   const genesis = { threshold: 1, owners: [{ id: signer.id, weight: 1 }], nonce }
   // This address stands in for TIP-1110's derivation, so it varies with the signer and the
-  // account. Devnet derives the real one from the signer's real key.
+  // account. Testnet derives the real one from the signer's real key.
   const address = deriveAddress(
     `${account.presetId}:${signer.kind}:${signer.subject ?? ''}:${nonce}`,
     genesis,

@@ -83,13 +83,13 @@ A hardware wallet also holds one private key, so its account is a single-key acc
 
 ### Move to a New Account
 
-For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication). To move off a browser wallet, a user sends the funds to a new account. Its key is a passkey or device key. On mainnet or testnet, that's a [single-key account](/docs/development/single-key-accounts). On the devnet, it's a [configurable account](/docs/accounts/create) with that key as its first signer.
+For accounts you create for your users, prefer a [passkey or device key](/docs/accounts/authentication). To move off a browser wallet, a user sends the funds to a new account. Its key is a passkey or device key. On mainnet, that's a [single-key account](/docs/development/single-key-accounts). On testnet, it's a [configurable account](/docs/accounts/create) with that key as its first signer.
 
 <span id="upgrade-an-existing-address-in-place" />
 
 ### Upgrade in Place
 
-To keep the address instead, [upgrade the account in place](/docs/accounts/account-configuration/account-upgrade). The upgrade adds signers, such as backup signers, at the same address. Until T14, upgrades run only on the devnet. The original key signs it as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions.
+To keep the address instead, [upgrade the account in place](/docs/accounts/account-configuration/account-upgrade). The upgrade adds signers, such as backup signers, at the same address. Upgrades run on testnet now and on mainnet from T14 on December 8, 2026. The original key signs it as a Tempo Transaction, so the wallet holding that key must support Tempo Transactions.
 
 <span id="let-the-provider-run-login-services" />
 <span id="integrate-accounts" />
@@ -103,7 +103,7 @@ To keep the address instead, [upgrade the account in place](/docs/accounts/accou
 
 ## Connect a User's Wallet
 
-If a user already has a Tempo Account, sign them in with Tempo through the [Accounts SDK](https://accounts.tempo.xyz). Tempo holds the account's keys, and your app receives the user's address and an access key that signs within the limits the user approves. Tempo sends transactions through its own RPC endpoint, not your devnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
+If a user already has a Tempo Account, sign them in with Tempo through the [Accounts SDK](https://accounts.tempo.xyz). Tempo holds the account's keys, and your app receives the user's address and an access key that signs within the limits the user approves. Tempo sends transactions through its own RPC endpoint, not your testnet client. The demo and code run on Moderato testnet, whose stablecoins have no value.
 
 <Demo.Container name="Connect Tempo Wallet" footerVariant="balances" tokens={[Demo.alphaUsd]} showRestart={false}>
   <SignInWithTempo stepNumber={1} />
@@ -144,6 +144,6 @@ Call `connect` from a click handler, since the popup fallback of `dialog.signIn`
 <Cards>
   <Card title="Add Tempo to Your Wallet" description="Use for adding the networks, stablecoin balances, fee tokens, and Tempo Transactions to a wallet." to="/docs/accounts/wallets/add-tempo-to-your-wallet" />
   <Card title="Signing Methods" description="Covers passkeys, device keys, and private keys." to="/docs/accounts/authentication" />
-  <Card title="Account Upgrade" description="Use for adding signers to an existing address. Devnet until T14." to="/docs/accounts/account-configuration/account-upgrade" />
+  <Card title="Account Upgrade" description="Use for adding signers to an existing address. Testnet until T14 reaches mainnet." to="/docs/accounts/account-configuration/account-upgrade" />
   <Card title="Wallet Partners" description="Covers wallets that support Tempo." to="/docs/partners/wallets" />
 </Cards>

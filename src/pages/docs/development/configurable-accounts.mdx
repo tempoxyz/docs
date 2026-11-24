@@ -39,7 +39,7 @@ Tempo stores only a 32-byte hash of the configuration, not the owners themselves
 
 ## Configurable account address
 
-The address is the last 20 bytes of a hash of the version-0 configuration, with no chain ID ([TIP-1107](https://tips.sh/1107)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold an EIP-7702 delegation or deployed contract code. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The address is the last 20 bytes of a hash of the version-0 configuration, with no chain ID ([TIP-1107](https://tips.sh/1107)). You know it before the account ever transacts, and it can receive stablecoins right away. It can't hold an EIP-7702 delegation or deployed contract code. `client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 ::::code-group
 
@@ -67,7 +67,7 @@ export const saved = { address: account.address, config: account.config } // [!c
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
@@ -142,7 +142,7 @@ saved.config = AccountConfig.update(saved.config, nextConfig) // [!code hl]
 
 Viem sorts the new owners and signs with `finance` and `operations`, whose weights reach the current threshold of 2. `AccountConfig.update` builds version 1 with the same salt. Save it after the transaction succeeds, then [rebuild the account](#keep-the-current-configuration) before the next action. [Configuration updates](/docs/accounts/account-configuration/configuration-updates#add-a-signer) walks through a full update.
 
-Viem 2.57.5's `updateConfigSync` expects the old event name and throws after a successful devnet update. Use `writeContractSync` as above until Viem supports `ConfigurableAccountConfigUpdated`.
+Viem 2.57.5's `updateConfigSync` expects the old event name and throws after a successful testnet update. Use `writeContractSync` as above until Viem supports `ConfigurableAccountConfigUpdated`.
 
 <span id="read-the-current-configuration" />
 
@@ -224,7 +224,7 @@ An unregistered account verifies against its version-0 configuration, and the ch
 
 ## Native multisig precompile
 
-The native multisig precompile is at `0xAACC000000000000000000000000000000000000` on the devnet. Viem's `Actions.accounts.updateConfig.call` builds calls to it, and `getConfigCommitment` reads its stored configuration hash.
+The native multisig precompile is at `0xAACC000000000000000000000000000000000000` on testnet. Viem's `Actions.accounts.updateConfig.call` builds calls to it, and `getConfigCommitment` reads its stored configuration hash.
 
 | Function | Purpose |
 | --- | --- |

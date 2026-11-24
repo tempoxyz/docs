@@ -47,7 +47,7 @@ Your servers and wallet providers never hold the device key. Anyone who unlocks 
 
 <P256KeyDemo />
 
-The demo makes the device key its own account on the Tempo Accounts devnet to show signing without a prompt. Reload the page and the key is still there.
+The demo makes the device key its own account on testnet to show signing without a prompt. Reload the page and the key is still there.
 
 In your app, add the key to the customer's account as an access key instead. The device creates the key. The customer's passkey authorizes it for up to 500 OUSD a day for 30 days. The first payment carries that authorization.
 
@@ -55,7 +55,7 @@ On mainnet and testnet today, a device key can be an access key on a single-key 
 
 <ConfigurableAccountsT14 />
 
-This example uses a configurable account with the passkey as its signer. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer).
+This example uses a configurable account with the passkey as its signer. `client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet). In `device-key.ts`, `account` is the customer's funded account, built as in [Passkeys](/docs/accounts/authentication/passkeys#create-a-passkey-signer).
 
 ::::code-group
 
@@ -64,7 +64,7 @@ import { parseUnits } from 'viem'
 import { Account, Expiry, WebCryptoP256 } from 'viem/tempo'
 import { client } from './client'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 // Non-extractable. Save keyPair in IndexedDB so it survives a reload.
@@ -81,7 +81,7 @@ const keyAuthorization = await client.accessKey.signAuthorization({ // [!code hl
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::

@@ -19,7 +19,7 @@ An account upgrade turns a single-key account into a configurable account at the
 
 <ConfigurableAccountsT14 />
 
-Until T14, the upgrade transaction does nothing on mainnet or testnet. It succeeds and charges its fee, but the original key still approves alone. Tempo rejects transactions from the configurable account.
+On mainnet, until T14 activates there on December 8, 2026, the upgrade transaction does nothing. It succeeds and charges its fee, but the original key still approves alone. Tempo rejects transactions from the configurable account.
 
 <UpgradeAccountDemo />
 
@@ -53,20 +53,20 @@ In any setup, the signers left after losing any one must still reach the thresho
 
 ## Send the Upgrade
 
-The original key signs a transaction with a top-level `upgradeAccount(threshold, owners)` call on Tempo's built-in multisig contract. Call it with `writeContractSync`, and stop unless the client is on the devnet. Set `feeToken` to the stablecoin that pays the fee. Without it, Viem sends a standard Ethereum transaction, and the upgrade reverts with `PrimitiveRootRequired`.
+The original key signs a transaction with a top-level `upgradeAccount(threshold, owners)` call on Tempo's built-in multisig contract. Call it with `writeContractSync`, and stop unless the client is on testnet. Set `feeToken` to the stablecoin that pays the fee. Without it, Viem sends a standard Ethereum transaction, and the upgrade reverts with `PrimitiveRootRequired`.
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+`client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 ::::code-group
 
 ```ts [upgrade.ts]
 import { concat, keccak256, parseAbi, toHex } from 'viem'
-import { tempoDevnet } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { Account, Addresses } from 'viem/tempo'
 import { client } from './client'
 
 // Mainnet and testnet accept the transaction but don't upgrade the account.
-if (client.chain.id !== tempoDevnet.id) throw new Error('Account upgrades run only on the Tempo Accounts devnet.') // [!code hl]
+if (client.chain.id !== tempoModerato.id) throw new Error('Account upgrades run on testnet until T14 reaches mainnet.') // [!code hl]
 
 // The key that controls the account today
 const original = Account.fromSecp256k1(process.env.PRIVATE_KEY as `0x${string}`)
@@ -83,7 +83,7 @@ const account = Account.fromConfig({ // [!code hl]
 }) // [!code hl]
 const { owners, threshold } = account.config
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const token = '0x20c0000000000000000000000000000000000001'
 
 await client.writeContractSync({ // [!code hl]
@@ -101,7 +101,7 @@ await client.writeContractSync({ // [!code hl]
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::

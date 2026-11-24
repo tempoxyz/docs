@@ -68,7 +68,7 @@ Create a wallet for the user with your provider. Wrap it as a Viem account that 
 
 Give the [passkey](/docs/accounts/authentication/passkeys), the provider's key, and the backup key weight 1 each, with a [threshold](/docs/accounts/policies/signing-thresholds) of 2.
 
-The backup is a second passkey on another device, or a hardware key. The user sets it up during onboarding, and the account lists it by address. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The backup is a second passkey on another device, or a hardware key. The user sets it up during onboarding, and the account lists it by address. `client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 ::::code-group
 
@@ -91,7 +91,7 @@ export const account = Account.fromConfig({
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
@@ -115,10 +115,10 @@ import { parseUnits } from 'viem'
 import { account } from './account'
 import { client } from './client'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const token = '0x20c0000000000000000000000000000000000001'
 
-await client.faucet.fundSync({ account: account.address }) // devnet test stablecoins
+await client.faucet.fundSync({ account: account.address }) // testnet test stablecoins
 await client.token.transferSync({ account, amount: parseUnits('1', 6), to: recipient, token }) // [!code hl]
 ```
 

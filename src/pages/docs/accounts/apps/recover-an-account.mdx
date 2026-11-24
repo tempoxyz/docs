@@ -87,7 +87,7 @@ At version 0, `openAccount` derives the address from the original configuration.
 
 The update swaps the lost passkey for the new one at the same weight. Viem signs it with both attached keys, and their weights of 1 each reach the threshold of 2.
 
-`client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+`client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 ::::code-group
 
@@ -129,7 +129,7 @@ saved.config = AccountConfig.update(saved.config, nextConfig) // [!code hl]
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::

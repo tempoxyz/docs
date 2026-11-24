@@ -26,7 +26,7 @@ An access key signs transactions from an account's address and pays from its bal
 
 An access key holds no funds itself. The account stores only the key's address, type, and bounds, never its private key.
 
-Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address). Until T14, access keys on a configurable account run only on the Tempo Accounts devnet.
+Access keys work on mainnet and testnet with a [single-key account](/docs/accounts/how-it-works#address). Access keys on a configurable account run on testnet now and reach mainnet with [T14](/docs/protocol/upgrades/t14) on December 8, 2026.
 
 <span id="access-keys-and-signers" />
 <span id="choose-the-authority-to-delegate" />
@@ -84,7 +84,7 @@ Give each device, service, agent, or team its own key, so you can revoke one wit
 | A customer's browser or phone | A P-256 [device key](/docs/accounts/authentication/device-keys) the device can't export, or a WebAuthn [passkey](/docs/accounts/authentication/passkeys) |
 | Your backend or an [AI agent](/docs/accounts/automations/give-an-agent-a-wallet) | A P-256 key it generates, or a secp256k1 key in your [KMS or HSM](/docs/accounts/automations/pay-out-from-a-backend#keep-the-key-in-your-kms) |
 | A wallet | A secp256k1 key |
-| A [team](/docs/accounts/custodians/team-multisig) | A configurable account, whose own signers and threshold approve as the key. Devnet until [T14](/docs/protocol/upgrades/t14). |
+| A [team](/docs/accounts/custodians/team-multisig) | A configurable account, whose own signers and threshold approve as the key. Testnet until [T14](/docs/protocol/upgrades/t14) reaches mainnet. |
 
 ## Try It
 
@@ -106,7 +106,7 @@ Enough signers to reach the threshold sign a key authorization. It's a message t
 
 This example takes the first path. A new account's signer gives a payout key 10 OUSD for one hour, payable to one recipient.
 
-`account.ts` is the configurable account with one signer from [Create an account](/docs/accounts/create#create-an-account-in-code). The [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) funds it. `client.ts` connects to the Tempo Accounts devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). To run the example on the Moderato testnet with a single-key account, set `account` to that signer. Then connect `client` to [testnet](/docs/quickstart/connection-details#testnet).
+`account.ts` is the configurable account with one signer from [Create an account](/docs/accounts/create#create-an-account-in-code). The [testnet faucet](/docs/accounts/create#fund-an-account-on-testnet) funds it. `client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet). To run the example with a single-key account, set `account` to that signer. It also runs on mainnet when you connect `client` to [mainnet](/docs/quickstart/connection-details#mainnet).
 
 ::::code-group
 
@@ -117,7 +117,7 @@ import { account } from './account'
 import { client } from './client'
 
 export { account }
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 export const stablecoin = '0x20c0000000000000000000000000000000000001'
 export const recipient = process.env.TEMPO_RECIPIENT as `0x${string}`
 
@@ -140,7 +140,7 @@ await client.token.transferSync({
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::

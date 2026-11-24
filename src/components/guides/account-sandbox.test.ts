@@ -532,7 +532,7 @@ describe('access keys', () => {
 })
 
 describe('start from scratch', () => {
-  // Devnet's faucet funds a new account; these checks fund it directly.
+  // Testnet's faucet funds a new account; these checks fund it directly.
   const pay = (account: SandboxAccount, signerIds: string[]) =>
     evaluateAction(isCreated(account) ? { ...account, balance: 100 } : account, {
       action: { type: 'payment', amount: 50 },

@@ -30,11 +30,11 @@ The address is the last 20 bytes of `keccak256(x ‖ y)`, the hash of the root k
 | P-256 | `Account.fromP256(privateKey)` |
 | WebAuthn (passkey) | `Account.fromWebAuthnP256(credential)` |
 
-Because the key fixes the address, you can't replace the root key: a new key is a new address. To change keys and keep the address, [upgrade to a configurable account](#upgrade-to-a-configurable-account). A [configurable account](/docs/development/configurable-accounts) is one address controlled by weighted owner keys. Configurable accounts run only on the [Tempo Accounts devnet](/docs/accounts/create#connect-to-the-devnet), a test network, until [T14](/docs/protocol/upgrades/t14), the planned upgrade that brings them to testnet and mainnet.
+Because the key fixes the address, you can't replace the root key: a new key is a new address. To change keys and keep the address, [upgrade to a configurable account](#upgrade-to-a-configurable-account). A [configurable account](/docs/development/configurable-accounts) is one address controlled by weighted owner keys. Configurable accounts run on [testnet](/docs/accounts/create#connect-to-testnet) now. [T14](/docs/protocol/upgrades/t14) brings them to mainnet on December 8, 2026.
 
 ## Signing with the root key
 
-The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. The example sends 10 test stablecoins from the account to `RECIPIENT`. Set `ROOT_KEY` to the account's private key. Its `client.ts` is a Viem client for the Tempo Accounts devnet, whose RPC needs the `TEMPO_DEVNET_RPC_KEY` from [Connect to the devnet](/docs/accounts/create#connect-to-the-devnet).
+The root key signs transactions directly, in the [signature format](/docs/accounts/keys#tempo-transaction-signature-types) for its key type. The example sends 10 test stablecoins from the account to `RECIPIENT`. Set `ROOT_KEY` to the account's private key. Its `client.ts` is a Viem client for [testnet](/docs/accounts/create#connect-to-testnet), whose public RPC needs no key.
 
 On mainnet or Moderato, Tempo's testnet, which need no RPC key, use `createClient({ chain: tempo })` or `createClient({ chain: tempoModerato })` instead, with the chain from `viem/chains`, and pay network fees in that network's stablecoins, since Tempo has no native gas token. [Network details](/docs/quickstart/connection-details) lists both networks.
 
@@ -45,7 +45,7 @@ import { parseUnits } from 'viem'
 import { Account } from 'viem/tempo'
 import { client } from './client'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 const account = Account.fromSecp256k1(process.env.ROOT_KEY as `0x${string}`) // [!code hl]
 
@@ -58,7 +58,7 @@ await client.token.transferSync({ // [!code hl]
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
@@ -75,11 +75,11 @@ An upgrade turns a single-key account into a [configurable account](/docs/develo
 
 <ConfigurableAccountsT14 />
 
-The upgrade ([TIP-1113](https://tips.sh/1113)) takes effect only on the Tempo Accounts devnet until T14. On mainnet or testnet, the upgrade transaction does nothing. It succeeds and charges its fee, but the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
+The upgrade ([TIP-1113](https://tips.sh/1113)) takes effect on testnet now and on mainnet once T14 activates there on December 8, 2026. On mainnet until then, the upgrade transaction does nothing. It succeeds and charges its fee, but the root key still approves alone. For a walkthrough with a demo that runs in your browser, follow [Account upgrade](/docs/accounts/account-configuration/account-upgrade).
 
 | Property | Rule |
 | --- | --- |
-| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, a contract built into the devnet at `0xAACC000000000000000000000000000000000000` |
+| Call | `upgradeAccount(threshold, owners)` on the native multisig precompile, a contract built into testnet at `0xAACC000000000000000000000000000000000000` |
 | Signed by | The root key, directly. Access keys can't upgrade. A [fee payer](/docs/accounts/fees/fee-sponsorship) can sponsor it. |
 | Transaction | `upgradeAccount` is a top-level call, anywhere in a batch, with no EIP-7702 authorization list. Calls after it see the new owners. |
 | Eligible accounts | No contract code, no EIP-7702 delegation, and no configuration yet |

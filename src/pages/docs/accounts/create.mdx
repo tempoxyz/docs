@@ -1,7 +1,7 @@
 ---
 title: "Create an Account"
 seoTitle: "Create a Tempo Account with a Passkey, Device Key, or Private Key | Tempo Docs"
-description: Create a single-key Tempo account with a passkey on testnet, with no API call or transaction, then try configurable accounts with several signers on the Tempo Accounts devnet.
+description: Create a single-key Tempo account with a passkey on testnet, with no API call or transaction, then try configurable accounts with several signers on testnet.
 interactive: true
 ogImage: /og/2026-q4/og_2026-q4_docs_accounts-create_title-f5_v02.png
 ---
@@ -55,7 +55,7 @@ A single-key account can't change its key. Losing the key loses the account. Rea
 
 <ConfigurableAccountsT14 />
 
-A configurable account's signers can change while its address stays the same. Add a backup key, rotate keys, or require several approvals. Pick a first signer in the sandbox to create one on the devnet.
+A configurable account's signers can change while its address stays the same. Add a backup key, rotate keys, or require several approvals. Pick a first signer in the sandbox to create one on testnet.
 
 <AccountSandbox />
 
@@ -90,15 +90,16 @@ export const account = Account.fromConfig({ address: 'infer', owners: [signer] }
 
 For a passkey or device key, use [that signer](/docs/accounts/authentication) instead. To create a second account from the same key, pass a different 32-byte `salt`. If you already have a single-key account, [upgrade it in place](/docs/accounts/account-configuration/account-upgrade) to keep its address.
 
-## Connect to the Devnet
+<span id="connect-to-the-devnet" />
 
-The Accounts examples connect to the Tempo Accounts devnet, a test network that runs configurable accounts. The demos on these pages run against it with no setup.
+## Connect to Testnet
 
-Your own app needs an RPC key to reach the devnet. [Contact us](https://tempo.com/contact) for one, and set it as the `TEMPO_DEVNET_RPC_KEY` environment variable.
+The Accounts examples and demos run on testnet, where [T14](/docs/protocol/upgrades/t14) is live. Configurable accounts reach mainnet with T14 on December 8, 2026. Testnet's public RPC needs no key. Your own app connects with the `tempoModerato` chain from Viem and a default `http()` transport, as in `client.ts` below.
 
 <span id="fund-an-account-on-devnet" />
+<span id="fund-an-account-on-testnet" />
 
-To fund the address, call the devnet faucet, which sends test stablecoins, including pathUSD:
+To fund the address, call the testnet faucet, which sends test stablecoins, including pathUSD:
 
 ::::code-group
 
@@ -110,12 +111,12 @@ await client.faucet.fundSync({ account: account.address }) // [!code hl]
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
 
-On Moderato testnet, the [testnet faucet](/docs/accounts/fund#get-test-funds) sends test funds. In production, [onramps and other chains](/docs/accounts/fund) fund the address.
+The [funding page](/docs/accounts/fund#get-test-funds) lists other ways to get test funds. In production, [onramps and other chains](/docs/accounts/fund) fund the address.
 
 ## Next Steps
 

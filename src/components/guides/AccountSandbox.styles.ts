@@ -93,7 +93,7 @@ export const accountSandbox = style({
       content: '" · "',
       whiteSpace: 'pre',
     },
-    // While a devnet request runs: the status after the address and the balance pulse, and the
+    // While a testnet request runs: the status after the address and the balance pulse, and the
     // locked cards dim.
     '& :is(.as-badge, .as-balance)[data-pending="true"]': {
       animation: `${pulseMotion} 1.4s ease-in-out infinite`,
@@ -778,9 +778,9 @@ export const accountSandbox = style({
       textOverflow: 'ellipsis',
     },
 
-    // Shown instead of the sandbox when this page can't reach devnet.
+    // Shown instead of the sandbox when this page can't reach testnet.
     '& .as-gate': {
-      // design-exception: reserves the empty builder's height so the page doesn't jump when devnet connects.
+      // design-exception: reserves the empty builder's height so the page doesn't jump when testnet connects.
       minHeight: '238px !custom',
       display: 'grid',
       placeItems: 'center',

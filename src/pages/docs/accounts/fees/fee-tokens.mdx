@@ -36,14 +36,14 @@ The default covers every transaction the account pays the fee for. That includes
 
 Its final fallback tries pathUSD, then OUSD. OUSD is tried only when pathUSD cannot cover the maximum fee. This fallback does not override an explicit token, a stored preference, or a token inferred from the transaction.
 
-In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run only on the Tempo Accounts devnet until T14. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)). The examples pay fees in its faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
+In the code, `account` is a funded configurable account from [Create an account](/docs/accounts/create#create-an-account-from-a-signing-key). Configurable accounts run on testnet until T14 reaches mainnet. `client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet). The examples pay fees in its faucet's test stablecoins. A single-key account on mainnet or testnet sets and overrides its fee token the same way, with that network's stablecoins.
 
 ::::code-group
 
 ```ts [set-fee-token.ts]
 import { client } from './client'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const otherStablecoin = '0x20c0000000000000000000000000000000000002'
 
 const { receipt } = await client.fee.setUserTokenSync({ // [!code hl]
@@ -55,7 +55,7 @@ const { receipt } = await client.fee.setUserTokenSync({ // [!code hl]
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
@@ -77,7 +77,7 @@ Pass `feeToken` to pay one transaction's fee in a different stablecoin. It outra
 import { parseUnits } from 'viem'
 import { client } from './client'
 
-// Two test stablecoins on the devnet
+// Two test stablecoins on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 const otherStablecoin = '0x20c0000000000000000000000000000000000002'
 

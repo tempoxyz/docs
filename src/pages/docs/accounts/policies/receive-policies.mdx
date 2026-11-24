@@ -75,9 +75,9 @@ A held payment looks like a success. The token still emits its usual `Transfer` 
   <ReceivePolicyDemo />
 </Demo.Container>
 
-The demo and the steps in this section run on the Tempo Accounts devnet. The steps set the same policy in code: accept only one stablecoin, from any sender, and let the receiver claim held payments. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+The demo and the steps in this section run on testnet. The steps set the same policy in code: accept only one stablecoin, from any sender, and let the receiver claim held payments. `client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
-`account` is the receiving account, such as one from [Create an account](/docs/accounts/create). `receiver` is its address. `stablecoin` is `0x20c0000000000000000000000000000000000001`, a test stablecoin on the devnet. Fund the receiver from the [devnet faucet](/docs/accounts/create#fund-an-account-on-devnet) first, because each transaction pays a network fee.
+`account` is the receiving account, such as one from [Create an account](/docs/accounts/create). `receiver` is its address. `stablecoin` is `0x20c0000000000000000000000000000000000001`, a test stablecoin on testnet. Fund the receiver from the [testnet faucet](/docs/accounts/create#fund-an-account-on-testnet) first, because each transaction pays a network fee.
 
 The steps use Viem. From Wagmi, create the allowlist with `Hooks.policy.useCreateSync` from `wagmi/tempo`. Make the other calls with `useWriteContract` or `useReadContract`, using `Abis` and `Addresses` from `viem/tempo`. From the CLI, call the TIP-403 registry at `0x403c000000000000000000000000000000000000` with `cast`:
 
@@ -108,7 +108,7 @@ const { policyId: tokenPolicyId } = await client.policy.createSync({
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::

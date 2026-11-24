@@ -1,21 +1,21 @@
 /**
- * Devnet reads and local key work for the guide demos (`GuideChain`): inferred addresses,
- * access-key limits, and generated private keys. Import it dynamically, like the devnet
+ * Testnet reads and local key work for the guide demos (`GuideChain`): inferred addresses,
+ * access-key limits, and generated private keys. Import it dynamically, like the testnet
  * adapter, so it stays out of production bundles.
  */
 import type { Hex } from 'viem'
 import { generatePrivateKey, privateKeyToAddress } from 'viem/accounts'
 import * as Tempo from 'viem/tempo'
-import { devnetRpcUrl, devnetToken, unitsToUsd } from './account-sandbox-devnet'
+import { testnetRpcUrl, testnetToken, unitsToUsd } from './account-sandbox-testnet'
 import type { GuideChain } from './guide-demo-scripts'
 
 type Address = `0x${string}`
 
 export function createGuideChain(options: { rpcUrl?: string } = {}): GuideChain {
   const client = Tempo.createClient({
-    chain: Tempo.Chain.devnet,
-    feeToken: devnetToken,
-    transport: Tempo.http(options.rpcUrl ?? devnetRpcUrl, { retryCount: 0 }),
+    chain: Tempo.Chain.testnet,
+    feeToken: testnetToken,
+    transport: Tempo.http(options.rpcUrl ?? testnetRpcUrl, { retryCount: 0 }),
   })
   const { Account } = Tempo
 
@@ -32,7 +32,7 @@ export function createGuideChain(options: { rpcUrl?: string } = {}): GuideChain 
       const { remaining } = await client.accessKey.getRemainingLimit({
         account: account as Address,
         accessKey: keyId as Address,
-        token: devnetToken,
+        token: testnetToken,
       })
       return unitsToUsd(remaining)
     },

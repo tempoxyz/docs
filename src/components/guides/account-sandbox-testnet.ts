@@ -1,25 +1,25 @@
 /**
- * Devnet adapter for the account sandbox. It sends the sandbox's actions as real transactions on
- * the internal stack-mdtgf devnet, which runs configurable accounts (TIP-1107 to TIP-1114) and
- * configurable access keys (TIP-1111).
+ * Testnet adapter for the account sandbox. It sends the sandbox's actions as real transactions on
+ * Tempo testnet, which runs configurable accounts (TIP-1107 to TIP-1114) and configurable access
+ * keys (TIP-1111) since T14.
  *
- * - Only real signing runs on devnet. Passkeys are real WebAuthn passkeys, so creating and signing
+ * - Only real signing runs on testnet. Passkeys are real WebAuthn passkeys, so creating and signing
  *   with one prompts for Touch ID or Face ID. Device keys are non-extractable WebCrypto P-256 keys
  *   where the page can make them (HTTPS and localhost), and sign without a prompt. Other keys are
  *   generated in this browser and held in memory for this page session.
  * - Access keys the reader adds are real: a generated private key (shown once), "This browser" (a
  *   non-extractable WebCrypto key that signs silently), and "This [device]" (a platform passkey
  *   that asks on each payment). Example keys that presets load stay in-memory keys.
- * - Each account gets one funded devnet account per page session, keyed by preset and local
+ * - Each account gets one funded testnet account per page session, keyed by preset and local
  *   address, so every sandbox showing the same preset shares it. Calls diff the sandbox's applied
  *   configuration against the on-chain state, so any sandbox can act on the shared account. Custom
  *   accounts (not presets) work the same way.
  * - Nothing is simulated: every signer is a private key, a device key, or a passkey that signs
  *   for real.
  *
- * Pages reach the devnet through the docs site's `/api/devnet-rpc` proxy (see `devnet-network.ts`).
+ * Pages call testnet's public RPC directly (see `testnet-network.ts`).
  * Import this module dynamically so it stays out of production bundles; demos that only need the
- * RPC URL or token import `devnet-network.ts` instead.
+ * RPC URL or token import `testnet-network.ts` instead.
  */
 import {
   concat,
@@ -58,7 +58,7 @@ import {
   signerKinds,
   upgradeLegacyAccount,
 } from './account-sandbox'
-import { devnetChainId, devnetRpcUrl, devnetTailnetRpcUrl, devnetToken } from './devnet-network'
+import { testnetChainId, testnetExplorerUrl, testnetRpcUrl, testnetToken } from './testnet-network'
 
 // ---------------------------------------------------------------------------
 // viem
@@ -83,19 +83,19 @@ const {
 } = Tempo
 const { getCommitment } = AccountConfig
 
-export { devnetChainId, devnetRpcUrl, devnetTailnetRpcUrl, devnetToken }
+export { testnetChainId, testnetExplorerUrl, testnetRpcUrl, testnetToken }
 
-const devnetChainIdHex = '0x7a56'
+const testnetChainIdHex = '0xa5bf'
 const tokenDecimals = 6
 const unitsPerUsd = 10 ** tokenDecimals
 /** Gas estimation rejects configurable delegates, so team-account keys send a fixed limit. */
 const delegateGas = 1_500_000n
 
-function createDevnetClient(rpcUrl: string) {
+function createTestnetClient(rpcUrl: string) {
   return Tempo.createClient({
-    chain: Tempo.Chain.devnet,
-    feeToken: devnetToken,
-    // Concurrent calls share one request: each trip to the devnet goes through a remote proxy.
+    chain: Tempo.Chain.testnet,
+    feeToken: testnetToken,
+    // Concurrent calls share one request.
     transport: http(rpcUrl, { batch: true, retryCount: 0 }),
   })
 }
@@ -103,11 +103,11 @@ function createDevnetClient(rpcUrl: string) {
 // ---------------------------------------------------------------------------
 // Probe
 
-/** True when this page can reach the devnet: an `http:` page and chain ID 31318. */
-export async function checkDevnet(
+/** True when this page can reach testnet: chain ID 42431. */
+export async function checkTestnet(
   options: { url?: string; timeoutMs?: number; fetch?: typeof globalThis.fetch } = {},
 ): Promise<boolean> {
-  const { url = devnetRpcUrl, timeoutMs = 8_000, fetch: fetchFn = globalThis.fetch } = options
+  const { url = testnetRpcUrl, timeoutMs = 8_000, fetch: fetchFn = globalThis.fetch } = options
   if (!fetchFn) return false
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
@@ -120,7 +120,7 @@ export async function checkDevnet(
     })
     if (!response.ok) return false
     const body = (await response.json()) as { result?: unknown }
-    return body.result === devnetChainIdHex
+    return body.result === testnetChainIdHex
   } catch {
     return false
   } finally {
@@ -130,9 +130,9 @@ export async function checkDevnet(
 
 let probed: Promise<boolean> | undefined
 
-/** `checkDevnet`, once per page. */
-export function probeDevnet() {
-  probed ??= checkDevnet()
+/** `checkTestnet`, once per page. */
+export function probeTestnet() {
+  probed ??= checkTestnet()
   return probed
 }
 
@@ -147,19 +147,19 @@ export function unitsToUsd(units: bigint) {
   return Number(units) / unitsPerUsd
 }
 
-export type DevnetKeyType = 'secp256k1' | 'p256' | 'webAuthn'
+export type TestnetKeyType = 'secp256k1' | 'p256' | 'webAuthn'
 
-/** The key each signer kind uses on devnet. */
-export function devnetKeyType(kind: SignerKind): DevnetKeyType {
+/** The key each signer kind uses on testnet. */
+export function testnetKeyType(kind: SignerKind): TestnetKeyType {
   const { scheme } = signerKinds[kind]
   if (scheme === 'webauthn') return 'webAuthn'
   if (scheme === 'p256') return 'p256'
   return 'secp256k1'
 }
 
-export type DevnetPrompt = 'create-passkey' | 'approve-passkey'
+export type TestnetPrompt = 'create-passkey' | 'approve-passkey'
 
-export const devnetPromptLabels: Record<DevnetPrompt, string> = {
+export const testnetPromptLabels: Record<TestnetPrompt, string> = {
   'create-passkey': 'Create the passkey in your browser…',
   'approve-passkey': 'Approve with your passkey…',
 }
@@ -167,7 +167,7 @@ export const devnetPromptLabels: Record<DevnetPrompt, string> = {
 /** A key made before the step that adds it: a signer's address, or an access key's ID. */
 export type PreparedKey = { address: Address }
 
-export type DevnetCallOptions = {
+export type TestnetCallOptions = {
   /**
    * Keys made earlier with `prepareSigner` or `prepareAccessKey`. A signer or access key that
    * maps to one uses it instead of making a new key.
@@ -177,7 +177,7 @@ export type DevnetCallOptions = {
     accessKey?(key: AccessKey): PreparedKey | undefined
   }
   /** Fires before each WebAuthn prompt, then with `null` once it settles. */
-  onPrompt?: (prompt: DevnetPrompt | null) => void
+  onPrompt?: (prompt: TestnetPrompt | null) => void
 }
 
 /** A signer's key slot. Kind is part of it, so two sandboxes can't reuse a key across kinds. */
@@ -211,10 +211,10 @@ export function authorizationParameters(
   return {
     ...(key.expiresInDays ? { expiry: now + key.expiresInDays * Period.days(1) } : {}),
     limits: [
-      { token: devnetToken, limit: usdToUnits(key.limit), period: periodSeconds[key.period] },
+      { token: testnetToken, limit: usdToUnits(key.limit), period: periodSeconds[key.period] },
     ],
     scopes: [
-      Scopes.tip20(devnetToken).transfer(
+      Scopes.tip20(testnetToken).transfer(
         key.recipients === 'approved' ? { recipients: [recipient] } : undefined,
       ),
     ],
@@ -238,7 +238,7 @@ export function sameConfig(a: ConfigShape, b: ConfigShape) {
 
 /**
  * Pick current signers that reach `threshold`, as the sandbox does. Skips lost signers when it
- * can; every devnet key is held here, so a lost signer still signs when nothing else reaches it.
+ * can; every testnet key is held here, so a lost signer still signs when nothing else reaches it.
  */
 export function chooseQuorum(candidates: readonly Signer[], threshold: number) {
   const usable = candidates.filter((signer) => !signer.lost && !signer.revoked)
@@ -279,7 +279,7 @@ export function upgradeConfig(
   }
 }
 
-/** Whether going from `previous` to `next` changes what devnet holds: signers or access keys. */
+/** Whether going from `previous` to `next` changes what testnet holds: signers or access keys. */
 export function sendsTransaction(previous: SandboxAccount, next: SandboxAccount) {
   const state = (account: SandboxAccount) =>
     JSON.stringify([
@@ -290,10 +290,10 @@ export function sendsTransaction(previous: SandboxAccount, next: SandboxAccount)
   return state(previous) !== state(next)
 }
 
-export type DevnetFailure = { code: FailureCode; message: string }
+export type TestnetFailure = { code: FailureCode; message: string }
 
 /** WebAuthn errors arrive as a DOMException somewhere in the `cause` chain. */
-function webAuthnFailure(error: unknown): DevnetFailure | null {
+function webAuthnFailure(error: unknown): TestnetFailure | null {
   const seen = new Set<unknown>()
   let cause = error
   while (cause instanceof Error && !seen.has(cause)) {
@@ -317,50 +317,50 @@ function errorText(error: unknown) {
   return [details, shortMessage, message].filter(Boolean).join('\n')
 }
 
-/** Map a devnet or viem error to the engine's failure codes. */
-export function mapDevnetError(error: unknown): DevnetFailure {
-  if (error instanceof DevnetRejection) return { code: error.code, message: error.message }
+/** Map a testnet or viem error to the engine's failure codes. */
+export function mapTestnetError(error: unknown): TestnetFailure {
+  if (error instanceof TestnetRejection) return { code: error.code, message: error.message }
   const passkey = webAuthnFailure(error)
   if (passkey) return passkey
   const text = errorText(error)
   const rules: [RegExp, FailureCode, string][] = [
-    [/SpendingLimitExceeded/, 'key-limit', 'Over its limit on devnet.'],
-    [/CallNotAllowed/, 'recipient-not-allowed', 'Not an approved recipient on devnet.'],
-    [/KeyAlreadyRevoked/, 'key-revoked', 'Revoked on devnet.'],
-    [/KeyExpired/, 'key-expired', 'Expired on devnet.'],
-    [/KeyNotFound/, 'key-revoked', 'Not authorized on devnet.'],
+    [/SpendingLimitExceeded/, 'key-limit', 'Over its limit on testnet.'],
+    [/CallNotAllowed/, 'recipient-not-allowed', 'Not an approved recipient on testnet.'],
+    [/KeyAlreadyRevoked/, 'key-revoked', 'Revoked on testnet.'],
+    [/KeyExpired/, 'key-expired', 'Expired on testnet.'],
+    [/KeyNotFound/, 'key-revoked', 'Not authorized on testnet.'],
     [
       /Local owners do not meet the threshold/,
       'insufficient-weight',
-      'Below the devnet threshold.',
+      'Below the testnet threshold.',
     ],
-    [/commitment mismatch/i, 'invalid-config', 'Config is out of sync with devnet.'],
+    [/commitment mismatch/i, 'invalid-config', 'Config is out of sync with testnet.'],
     [
       /insufficient (balance|funds)|InsufficientBalance/i,
       'insufficient-balance',
-      'Not enough on devnet.',
+      'Not enough on testnet.',
     ],
     [
       /fetch failed|Failed to fetch|HTTP request failed|timed? ?out|NetworkError/i,
       'network-error',
-      'Devnet unreachable.',
+      'Testnet unreachable.',
     ],
   ]
   for (const [pattern, code, message] of rules) if (pattern.test(text)) return { code, message }
   const reason = (text.split('\n')[0] ?? '')
     .replace(/^(Revm error: |execution reverted: ?)/i, '')
     .slice(0, 80)
-  return { code: 'network-error', message: reason ? `Devnet: ${reason}` : 'Devnet error.' }
+  return { code: 'network-error', message: reason ? `Testnet: ${reason}` : 'Testnet error.' }
 }
 
-/** A devnet action the adapter refused or that failed, with the sandbox's failure code. */
-export class DevnetRejection extends Error {
+/** A testnet action the adapter refused or that failed, with the sandbox's failure code. */
+export class TestnetRejection extends Error {
   constructor(
     readonly code: FailureCode,
     message: string,
   ) {
     super(message)
-    this.name = 'DevnetRejection'
+    this.name = 'TestnetRejection'
   }
 }
 
@@ -380,7 +380,7 @@ export function rebaseOnto(
     ...next,
     address: prepared.address,
     balance: prepared.balance,
-    devnet: prepared.devnet,
+    testnet: prepared.testnet,
     log: [
       ...added.map((entry, index) => ({ ...entry, id: start + added.length - index })),
       ...prepared.log,
@@ -389,7 +389,7 @@ export function rebaseOnto(
 }
 
 /**
- * Sandboxes showing the same preset share a devnet account. Custom accounts get their own, and so
+ * Sandboxes showing the same preset share a testnet account. Custom accounts get their own, and so
  * does each account created from scratch: two can start with the same kind of first signer.
  */
 export function sessionKey(account: Pick<SandboxAccount, 'presetId' | 'address' | 'genesis'>) {
@@ -440,7 +440,7 @@ function committedSigners(account: SandboxAccount) {
 // ---------------------------------------------------------------------------
 // Sessions
 
-/** A signer's devnet key, held in this page. */
+/** A signer's testnet key, held in this page. */
 type OwnerKey = {
   id: string
   kind: SignerKind
@@ -485,11 +485,11 @@ type Session = {
 
 /** The running call's options. Calls run one at a time per session. */
 type Prompts = {
-  current?: DevnetCallOptions['onPrompt']
-  prepared?: DevnetCallOptions['prepared']
+  current?: TestnetCallOptions['onPrompt']
+  prepared?: TestnetCallOptions['prepared']
 }
 
-function setPrompts(prompts: Prompts, options: DevnetCallOptions) {
+function setPrompts(prompts: Prompts, options: TestnetCallOptions) {
   prompts.current = options.onPrompt
   prompts.prepared = options.prepared
 }
@@ -580,58 +580,58 @@ export function revokeKeyCall(keyId: Address) {
 }
 
 /** A session's public state: no keys. */
-export type DevnetSessionInfo = {
+export type TestnetSessionInfo = {
   address: Address
   config: ChainConfig
   recipient: Address
   keys: { id: string; keyId: Address; revoked: boolean; team: boolean }[]
 }
 
-export type DevnetAdapter = Omit<AccountSandboxAdapter, 'submit'> & {
-  network: 'Devnet'
+export type TestnetAdapter = Omit<AccountSandboxAdapter, 'submit'> & {
+  network: 'Testnet'
   probe(): Promise<boolean>
-  /** A devnet account this page created, by preset ID or devnet address. */
-  inspect(presetIdOrAddress: string): Promise<DevnetSessionInfo | undefined>
+  /** A testnet account this page created, by preset ID or testnet address. */
+  inspect(presetIdOrAddress: string): Promise<TestnetSessionInfo | undefined>
   /**
-   * Create, or reuse, the account's funded devnet account. Passkey signers get real passkeys.
-   * Throws a `DevnetRejection` when the account is blocked, a passkey is cancelled, or devnet is
+   * Create, or reuse, the account's funded testnet account. Passkey signers get real passkeys.
+   * Throws a `TestnetRejection` when the account is blocked, a passkey is cancelled, or testnet is
    * unreachable.
    */
-  prepare(account: SandboxAccount, options?: DevnetCallOptions): Promise<SandboxAccount>
-  /** Apply the committed configuration and access keys of `next` on devnet. Never throws. */
+  prepare(account: SandboxAccount, options?: TestnetCallOptions): Promise<SandboxAccount>
+  /** Apply the committed configuration and access keys of `next` on testnet. Never throws. */
   sync(
     previous: SandboxAccount,
     next: SandboxAccount,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<{ account: SandboxAccount; hash?: string }>
   /** Check `request` as the sandbox does, then send it. Never throws. */
   submit(
     account: SandboxAccount,
     request: ActionRequest,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<{ account: SandboxAccount; result: ActionResult }>
   /**
    * Make a signer's key now, before the step that adds it: a passkey prompts to be created here.
-   * Pass the result back through `options.prepared.signer`. Throws a `DevnetRejection`.
+   * Pass the result back through `options.prepared.signer`. Throws a `TestnetRejection`.
    */
   prepareSigner(
     signer: Pick<Signer, 'kind' | 'name' | 'privateKey'>,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<PreparedKey>
   /**
    * Make an access key now, before any account exists: a WebCrypto pair, a device passkey, a
    * private key, or a team account (`key.delegate`) with generated members. It binds to an account
    * when it's authorized. Pass the result back through `options.prepared.accessKey`.
    */
-  prepareAccessKey(key: AccessKey, options?: DevnetCallOptions): Promise<PreparedKey>
+  prepareAccessKey(key: AccessKey, options?: TestnetCallOptions): Promise<PreparedKey>
   /**
-   * Get test funds from the devnet faucet (`tempo_fundAddress`): test pathUSD, AlphaUSD, BetaUSD, and
-   * ThetaUSD. Accounts start with none, and transactions need fees. Creates the devnet account first
+   * Get test funds from the testnet faucet (`tempo_fundAddress`): test pathUSD, AlphaUSD, BetaUSD, and
+   * ThetaUSD. Accounts start with none, and transactions need fees. Creates the testnet account first
    * if needed. Never throws.
    */
   fund(
     account: SandboxAccount,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<{ account: SandboxAccount; hash?: string }>
   /**
    * Upgrade a plain key account in place (`upgradeAccount` on the native multisig), signed by its
@@ -639,11 +639,11 @@ export type DevnetAdapter = Omit<AccountSandboxAdapter, 'submit'> & {
    */
   upgrade(
     account: SandboxAccount,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<{ account: SandboxAccount; hash?: string }>
 }
 
-export function createDevnetAdapter(
+export function createTestnetAdapter(
   options: {
     rpcUrl?: string
     /**
@@ -652,10 +652,10 @@ export function createDevnetAdapter(
      */
     passkeys?: 'browser' | 'headless'
   } = {},
-): DevnetAdapter {
+): TestnetAdapter {
   const { passkeys = 'browser' } = options
-  const client = createDevnetClient(options.rpcUrl ?? devnetRpcUrl)
-  /** By `sessionKey` before preparing, and by devnet address after. */
+  const client = createTestnetClient(options.rpcUrl ?? testnetRpcUrl)
+  /** By `sessionKey` before preparing, and by testnet address after. */
   const sessions = new Map<string, Promise<Session>>()
   const rpId = globalThis.location?.hostname ?? 'localhost'
   /** Keys made with `prepareSigner` and `prepareAccessKey`, by lowercase address. */
@@ -667,7 +667,7 @@ export function createDevnetAdapter(
   }
 
   /** Show a prompt for the length of one WebAuthn call. */
-  async function prompted<T>(prompts: Prompts, prompt: DevnetPrompt, run: () => Promise<T>) {
+  async function prompted<T>(prompts: Prompts, prompt: TestnetPrompt, run: () => Promise<T>) {
     prompts.current?.(prompt)
     try {
       return await run()
@@ -685,7 +685,7 @@ export function createDevnetAdapter(
           rpId,
         })
       if (!globalThis.navigator?.credentials || !globalThis.PublicKeyCredential)
-        throw new DevnetRejection('network-error', 'This browser can’t create a passkey.')
+        throw new TestnetRejection('network-error', 'This browser can’t create a passkey.')
       const credential = await WebAuthnP256.createCredential({
         label,
         rpId,
@@ -697,7 +697,7 @@ export function createDevnetAdapter(
 
   /** A passkey signer. Each signature prompts for Touch ID or Face ID, in the call using it. */
   async function createPasskey(signer: Pick<Signer, 'name'>, prompts: Prompts) {
-    const passkey = await makePasskey(`Tempo Accounts devnet · ${signer.name}`, prompts)
+    const passkey = await makePasskey(`Tempo testnet · ${signer.name}`, prompts)
     const prompter = { prompts }
     const account = {
       ...passkey,
@@ -713,7 +713,10 @@ export function createDevnetAdapter(
     if (!prepared) return makeOwner(signer, prompts)
     const material = preparedOwners.get(prepared.address.toLowerCase())
     if (!material)
-      throw new DevnetRejection('unknown-signer', 'That signer’s key wasn’t prepared on this page.')
+      throw new TestnetRejection(
+        'unknown-signer',
+        'That signer’s key wasn’t prepared on this page.',
+      )
     // A prepared passkey prompts in the call that uses it now.
     if (material.prompter) material.prompter.prompts = prompts
     return material
@@ -723,7 +726,7 @@ export function createDevnetAdapter(
     signer: Pick<Signer, 'kind' | 'name' | 'privateKey'>,
     prompts: Prompts,
   ): Promise<OwnerMaterial> {
-    const type = devnetKeyType(signer.kind)
+    const type = testnetKeyType(signer.kind)
     const held = (account: OwnerAccount) => ({ address: account.address as Address, account })
     // A secp256k1 signer with a generated key signs with it: the key the reader was shown, or one
     // a guide demo generated and holds.
@@ -742,11 +745,11 @@ export function createDevnetAdapter(
 
   function ownerFor(session: Session, signer: Pick<Signer, 'id' | 'kind'>) {
     const owner = session.owners.get(ownerKeyId(signer))
-    if (!owner) throw new DevnetRejection('unknown-signer', 'That signer isn’t on devnet.')
+    if (!owner) throw new TestnetRejection('unknown-signer', 'That signer isn’t on testnet.')
     return owner
   }
 
-  /** The signer's devnet key, created on first use. New passkeys prompt here. */
+  /** The signer's testnet key, created on first use. New passkeys prompt here. */
   async function ensureOwner(session: Session, signer: Signer) {
     const id = ownerKeyId(signer)
     const existing = session.owners.get(id)
@@ -808,7 +811,7 @@ export function createDevnetAdapter(
       }
       candidates.push({ ...signer, weight, revoked: false })
     }
-    // Same order as the sandbox, so devnet signs with the approvers its history names.
+    // Same order as the sandbox, so testnet signs with the approvers its history names.
     const position = (signer: Signer) => {
       const index = account.signers.findIndex((item) => item.id === signer.id)
       return index < 0 ? Number.POSITIVE_INFINITY : index
@@ -816,7 +819,7 @@ export function createDevnetAdapter(
     candidates.sort((a, b) => position(a) - position(b))
     const quorum = chooseQuorum(candidates, session.config.threshold)
     if (!quorum)
-      throw new DevnetRejection('insufficient-weight', 'No devnet keys reach the threshold.')
+      throw new TestnetRejection('insufficient-weight', 'No testnet keys reach the threshold.')
     return quorum.map((signer) => ownerFor(session, signer))
   }
 
@@ -845,7 +848,7 @@ export function createDevnetAdapter(
     }
     if (key.kind === 'browser') {
       if (!globalThis.crypto?.subtle)
-        throw new DevnetRejection('network-error', 'This browser can’t create a WebCrypto key.')
+        throw new TestnetRejection('network-error', 'This browser can’t create a WebCrypto key.')
       const keyPair = await WebCryptoP256.createKeyPair()
       return {
         address: Account.fromWebCryptoP256(keyPair).address as Address,
@@ -855,7 +858,7 @@ export function createDevnetAdapter(
     if (key.kind === 'device') {
       // `fromWebAuthnP256` makes a root account, so its signature is wrapped in an access key for
       // the account. Each payment asks for Touch ID or Face ID.
-      const root = await makePasskey(`Tempo Accounts devnet · ${key.name} access key`, prompts)
+      const root = await makePasskey(`Tempo testnet · ${key.name} access key`, prompts)
       return {
         address: root.address as Address,
         bind: (parent, use) =>
@@ -890,7 +893,7 @@ export function createDevnetAdapter(
       ? preparedAccessKeys.get(prepared.address.toLowerCase())
       : await makeAccessKey(key, session.prompts)
     if (!material)
-      throw new DevnetRejection('no-approver', 'That access key wasn’t prepared on this page.')
+      throw new TestnetRejection('no-approver', 'That access key wasn’t prepared on this page.')
     if ('team' in material) return { spec, revoked: false, team: material.team }
     // Bound now, to the account authorizing it.
     return { spec, revoked: false, key: material.bind(session.address, session.prompts) }
@@ -929,7 +932,7 @@ export function createDevnetAdapter(
   async function readBalance(session: Session) {
     const { amount } = await client.token.getBalance({
       account: session.address,
-      token: devnetToken,
+      token: testnetToken,
       decimals: tokenDecimals,
     })
     session.balance = unitsToUsd(amount)
@@ -945,7 +948,7 @@ export function createDevnetAdapter(
         const { remaining } = await client.accessKey.getRemainingLimit({
           account: session.address,
           accessKey: keyIdOf(entry),
-          token: devnetToken,
+          token: testnetToken,
         })
         const spent = Math.max(0, Math.round((key.limit - unitsToUsd(remaining)) * 100) / 100)
         return spent === key.spent ? key : { ...key, spent }
@@ -960,7 +963,7 @@ export function createDevnetAdapter(
       ...account,
       address: session.address,
       balance: session.balance,
-      devnet: { lastHash: hash ?? account.devnet?.lastHash },
+      testnet: { lastHash: hash ?? account.testnet?.lastHash },
       // The creation entry was written with the local stand-in address; show the real one.
       log: account.log.map((entry) =>
         entry.title.startsWith('Created account') && entry.detail?.startsWith('Address ')
@@ -972,7 +975,7 @@ export function createDevnetAdapter(
 
   function withLock<T>(
     session: Session,
-    options: DevnetCallOptions,
+    options: TestnetCallOptions,
     run: () => Promise<T>,
   ): Promise<T> {
     const locked = async () => {
@@ -1003,7 +1006,7 @@ export function createDevnetAdapter(
       nextConfig: next,
     })
     if (!('config' in result) || !result.config)
-      throw new DevnetRejection('invalid-config', 'Devnet recorded no configuration update.')
+      throw new TestnetRejection('invalid-config', 'Testnet recorded no configuration update.')
     const { config, receipt } = result
     session.config = config
     session.lastUpdate = receipt.transactionHash
@@ -1063,7 +1066,7 @@ export function createDevnetAdapter(
 
   async function createSession(
     account: SandboxAccount,
-    options: DevnetCallOptions,
+    options: TestnetCallOptions,
   ): Promise<Session> {
     const prompts: Prompts = {}
     setPrompts(prompts, options)
@@ -1134,7 +1137,7 @@ export function createDevnetAdapter(
     return session
   }
 
-  function ensureSession(account: SandboxAccount, options: DevnetCallOptions) {
+  function ensureSession(account: SandboxAccount, options: TestnetCallOptions) {
     const existing =
       sessions.get((account.address ?? '').toLowerCase()) ?? sessions.get(sessionKey(account))
     if (existing) return existing
@@ -1171,26 +1174,26 @@ export function createDevnetAdapter(
           session.legacy && plainKey ? plainKey : signingAccount(session, localAccounts(keys)),
         amount,
         to,
-        token: devnetToken,
+        token: testnetToken,
       })
       return receipt.transactionHash
     }
     const entry = session.keys.get(approver.keyId)
     if (!entry || entry.revoked)
-      throw new DevnetRejection('key-revoked', 'Not authorized on devnet.')
+      throw new TestnetRejection('key-revoked', 'Not authorized on testnet.')
     if (entry.team) {
       // A fixed gas limit skips estimation, so check the limit first rather than revert on chain.
       const { remaining } = await client.accessKey.getRemainingLimit({
         account: session.address,
         accessKey: entry.team.address,
-        token: devnetToken,
+        token: testnetToken,
       })
-      if (amount > remaining) throw new DevnetRejection('key-limit', 'Over its limit on devnet.')
+      if (amount > remaining) throw new TestnetRejection('key-limit', 'Over its limit on testnet.')
       const { receipt } = await client.token.transferSync({
         account: teamSigner(session, entry, approver.memberIds ?? []),
         amount,
         to,
-        token: devnetToken,
+        token: testnetToken,
         gas: delegateGas,
       })
       return receipt.transactionHash
@@ -1199,14 +1202,14 @@ export function createDevnetAdapter(
       account: entry.key as AccessKeyAccount,
       amount,
       to,
-      token: devnetToken,
+      token: testnetToken,
     })
     return receipt.transactionHash
   }
 
   /**
    * The access key `request` pays with, when its first payment can also authorize it in one
-   * transaction: a key on the account that devnet hasn't authorized yet, with a quorum to sign its
+   * transaction: a key on the account that testnet hasn't authorized yet, with a quorum to sign its
    * authorization. Team accounts authorize on their own.
    */
   function firstKeyPayment(session: Session, account: SandboxAccount, request: ActionRequest) {
@@ -1247,7 +1250,7 @@ export function createDevnetAdapter(
       account: accessKey,
       amount,
       to,
-      token: devnetToken,
+      token: testnetToken,
       keyAuthorization,
     })
     const hash = receipt.transactionHash
@@ -1256,12 +1259,12 @@ export function createDevnetAdapter(
     return hash
   }
 
-  /** Let devnet's recipient scope reject a payment the sandbox already refused. */
+  /** Let testnet's recipient scope reject a payment the sandbox already refused. */
   async function confirmRecipientRejection(
     session: Session,
     account: SandboxAccount,
     request: ActionRequest,
-  ): Promise<DevnetFailure | null> {
+  ): Promise<TestnetFailure | null> {
     if (request.approver.type !== 'access-key') return null
     const entry = session.keys.get(request.approver.keyId)
     if (!entry?.key || entry.revoked) return null
@@ -1269,26 +1272,26 @@ export function createDevnetAdapter(
       await sendPayment(session, account, { ...request, recipient: 'new' })
       return null
     } catch (error) {
-      const failure = mapDevnetError(error)
+      const failure = mapTestnetError(error)
       return failure.code === 'recipient-not-allowed' ? failure : null
     }
   }
 
-  /** Run `make` with a call's options, and report failures as a `DevnetRejection`. */
-  async function preparing<T>(options: DevnetCallOptions, make: (prompts: Prompts) => Promise<T>) {
+  /** Run `make` with a call's options, and report failures as a `TestnetRejection`. */
+  async function preparing<T>(options: TestnetCallOptions, make: (prompts: Prompts) => Promise<T>) {
     const prompts: Prompts = {}
     setPrompts(prompts, options)
     try {
       return await make(prompts)
     } catch (error) {
-      const { code, message } = mapDevnetError(error)
-      throw new DevnetRejection(code, message)
+      const { code, message } = mapTestnetError(error)
+      throw new TestnetRejection(code, message)
     }
   }
 
-  const adapter: DevnetAdapter = {
-    network: 'Devnet',
-    probe: probeDevnet,
+  const adapter: TestnetAdapter = {
+    network: 'Testnet',
+    probe: probeTestnet,
 
     async upgrade(account, options = {}) {
       if (!account.legacy) return { account }
@@ -1296,7 +1299,7 @@ export function createDevnetAdapter(
       try {
         session = await ensureSession(account, options)
       } catch (error) {
-        return { account: { ...account, notice: mapDevnetError(error).message } }
+        return { account: { ...account, notice: mapTestnetError(error).message } }
       }
       if (session.balance <= 0)
         return { account: { ...decorate(session, account), notice: needsFunds } }
@@ -1304,7 +1307,7 @@ export function createDevnetAdapter(
         try {
           // The original key signs: it's the account until the upgrade, then its first owner.
           const [original] = localAccounts([...session.owners.values()])
-          if (!original) throw new DevnetRejection('unknown-signer', 'That key isn’t on devnet.')
+          if (!original) throw new TestnetRejection('unknown-signer', 'That key isn’t on testnet.')
           const owners = [{ owner: original.address as Address, weight: 1 }]
           const receipt = await client.writeContractSync({
             account: original,
@@ -1316,7 +1319,7 @@ export function createDevnetAdapter(
           const config = upgradeConfig(session.address, owners, 1)
           const commitment = await client.accounts.getConfigCommitment({ account: session.address })
           if (commitment.toLowerCase() !== getCommitment(config).toLowerCase())
-            throw new DevnetRejection('invalid-config', 'Devnet recorded another configuration.')
+            throw new TestnetRejection('invalid-config', 'Testnet recorded another configuration.')
           session.config = config
           session.legacy = false
           session.lastUpdate = receipt.transactionHash
@@ -1334,7 +1337,7 @@ export function createDevnetAdapter(
           }
         } catch (error) {
           return {
-            account: { ...decorate(session, account), notice: mapDevnetError(error).message },
+            account: { ...decorate(session, account), notice: mapTestnetError(error).message },
           }
         }
       })
@@ -1345,30 +1348,30 @@ export function createDevnetAdapter(
       let prepared: SandboxAccount
       let session: Session
       try {
-        prepared = account.devnet ? account : await adapter.prepare(account, options)
+        prepared = account.testnet ? account : await adapter.prepare(account, options)
         session = await ensureSession(prepared, options)
       } catch (error) {
-        return { account: { ...account, notice: mapDevnetError(error).message } }
+        return { account: { ...account, notice: mapTestnetError(error).message } }
       }
       return withLock(session, options, async () => {
         try {
           const receipts = await client.faucet.fundSync({ account: session.address })
           const hash = (
             receipts.find((receipt) =>
-              receipt.logs.some((log) => isAddressEqual(log.address, devnetToken)),
+              receipt.logs.some((log) => isAddressEqual(log.address, testnetToken)),
             ) ?? receipts[0]
           )?.transactionHash
           await readBalance(session)
           const next = appendLog(prepared, {
             kind: 'event',
             title: `Got test funds · ${formatBalance(session.balance)}`,
-            detail: 'Devnet faucet · test stablecoins',
+            detail: 'Testnet faucet · test stablecoins',
             hash,
           })
           return { account: decorate(session, next), hash }
         } catch (error) {
           return {
-            account: { ...decorate(session, prepared), notice: mapDevnetError(error).message },
+            account: { ...decorate(session, prepared), notice: mapTestnetError(error).message },
           }
         }
       })
@@ -1407,16 +1410,16 @@ export function createDevnetAdapter(
     },
 
     async prepare(account, options = {}) {
-      if (!isCreated(account)) throw new DevnetRejection('not-created', notCreatedNotice)
+      if (!isCreated(account)) throw new TestnetRejection('not-created', notCreatedNotice)
       let session: Session
       try {
         session = await ensureSession(account, options)
       } catch (error) {
-        const { code, message } = mapDevnetError(error)
-        throw new DevnetRejection(code, message)
+        const { code, message } = mapTestnetError(error)
+        throw new TestnetRejection(code, message)
       }
       return withLock(session, options, async () => {
-        // Bringing devnet up to date sends transactions, which need test funds first. A plain key
+        // Bringing testnet up to date sends transactions, which need test funds first. A plain key
         // account has nothing on chain to bring up to date until it upgrades.
         let changed = false
         if (session.balance > 0 && !session.legacy) {
@@ -1424,11 +1427,11 @@ export function createDevnetAdapter(
           const keys = await syncKeys(session, account)
           changed = Boolean(configHash || keys.length)
         }
-        const next = account.devnet
+        const next = account.testnet
           ? account
           : appendLog(account, {
               kind: 'event',
-              title: `On devnet · ${shortAddress(session.address)}`,
+              title: `On testnet · ${shortAddress(session.address)}`,
               detail: session.balance > 0 ? undefined : 'No funds yet',
             })
         // Independent reads run together, so the batched transport sends them as one request.
@@ -1449,14 +1452,14 @@ export function createDevnetAdapter(
           const account = await adapter.prepare(next, options)
           return { account, hash: account.log.find((entry) => entry.hash)?.hash }
         } catch (error) {
-          return { account: { ...previous, notice: mapDevnetError(error).message } }
+          return { account: { ...previous, notice: mapTestnetError(error).message } }
         }
       }
       let session: Session
       try {
         session = await ensureSession(previous, options)
       } catch (error) {
-        return { account: { ...previous, notice: mapDevnetError(error).message } }
+        return { account: { ...previous, notice: mapTestnetError(error).message } }
       }
       if (session.legacy && sendsTransaction(previous, next))
         return { account: { ...decorate(session, previous), notice: notUpgradedNotice } }
@@ -1485,7 +1488,7 @@ export function createDevnetAdapter(
           return { account: decorate(session, spent, hash), hash }
         } catch (error) {
           return {
-            account: { ...decorate(session, previous), notice: mapDevnetError(error).message },
+            account: { ...decorate(session, previous), notice: mapTestnetError(error).message },
           }
         }
       })
@@ -1498,7 +1501,7 @@ export function createDevnetAdapter(
       try {
         session = await ensureSession(account, options)
       } catch (error) {
-        return { account, result: { ok: false, ...mapDevnetError(error) } }
+        return { account, result: { ok: false, ...mapTestnetError(error) } }
       }
       if (session.balance <= 0)
         return {
@@ -1520,7 +1523,7 @@ export function createDevnetAdapter(
         } catch (error) {
           return {
             account: decorate(session, account),
-            result: { ok: false, ...mapDevnetError(error) },
+            result: { ok: false, ...mapTestnetError(error) },
           }
         }
         const checked = evaluateAction(account, request)
@@ -1557,7 +1560,7 @@ export function createDevnetAdapter(
           const result: ActionResult = {
             ...checked,
             hash,
-            // Fees count against a key's limit, so report what devnet says is left.
+            // Fees count against a key's limit, so report what testnet says is left.
             ...(key && {
               message: `${key.name} · ${formatUsd(remainingLimit(key))} USD left this ${key.period}`,
             }),
@@ -1566,7 +1569,7 @@ export function createDevnetAdapter(
         } catch (error) {
           return {
             account: decorate(session, account),
-            result: { ok: false, ...mapDevnetError(error) },
+            result: { ok: false, ...mapTestnetError(error) },
           }
         }
       })
@@ -1575,10 +1578,10 @@ export function createDevnetAdapter(
   return adapter
 }
 
-let shared: DevnetAdapter | undefined
+let shared: TestnetAdapter | undefined
 
-/** One adapter per page, so every sandbox reuses each preset's devnet account. */
-export function getDevnetAdapter() {
-  shared ??= createDevnetAdapter()
+/** One adapter per page, so every sandbox reuses each preset's testnet account. */
+export function getTestnetAdapter() {
+  shared ??= createTestnetAdapter()
   return shared
 }

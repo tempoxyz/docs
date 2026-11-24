@@ -41,7 +41,7 @@ export const code = style({
   display: 'block',
   wordBreak: 'break-all',
 })
-/** An address or transaction hash with a copy button. This devnet has no public explorer. */
+/** An address or transaction hash with a copy button. */
 export const copyValue = style({
   marginTop: tokens.spacing['1'],
   display: 'flex',
