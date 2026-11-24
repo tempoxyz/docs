@@ -123,26 +123,28 @@ Send a payment using the standard `transfer` function. The Solidity examples are
 
     ```python [example.py]
     from eth_abi import encode
+    from eth_account import Account
     from pytempo import Call, TempoTransaction
     from provider import w3, account
 
     TRANSFER_SELECTOR = bytes.fromhex("a9059cbb")
     ALPHA_USD = "0x20c0000000000000000000000000000000000001"
+    recipient = Account.create().address  # replace with your recipient's address
 
     data = TRANSFER_SELECTOR + encode( # [!code hl]
         ["address", "uint256"], # [!code hl]
-        ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000], # [!code hl]
+        [recipient, 100_000_000], # [!code hl]
     ) # [!code hl]
+    call = Call.create(to=ALPHA_USD, data="0x" + data.hex()) # [!code hl]
+    draft = TempoTransaction.create(calls=(call,))
 
     tx = TempoTransaction.create(
         chain_id=w3.eth.chain_id,
-        gas_limit=100_000,
+        gas_limit=w3.eth.estimate_gas(draft.to_estimate_gas_request(account.address)),
         max_fee_per_gas=w3.eth.gas_price * 2,
         max_priority_fee_per_gas=w3.eth.gas_price,
         nonce=w3.eth.get_transaction_count(account.address),
-        calls=(
-            Call.create(to=ALPHA_USD, data="0x" + data.hex()), # [!code hl]
-        ),
+        calls=(call,),
     )
 
     signed_tx = tx.sign(account.key.hex())
@@ -377,28 +379,30 @@ Include a memo for payment reconciliation and tracking. Use a short invoice or o
 
     ```python [example.py]
     from eth_abi import encode
+    from eth_account import Account
     from pytempo import Call, TempoTransaction
     from provider import w3, account
 
-    TRANSFER_WITH_MEMO_SELECTOR = bytes.fromhex("76a8ee59")
+    TRANSFER_WITH_MEMO_SELECTOR = bytes.fromhex("95777d59")
     ALPHA_USD = "0x20c0000000000000000000000000000000000001"
+    recipient = Account.create().address  # replace with your recipient's address
 
     memo = b"INV-12345" + b"\x00" * 23  # right-pad to 32 bytes # [!code hl]
 
     data = TRANSFER_WITH_MEMO_SELECTOR + encode( # [!code hl]
         ["address", "uint256", "bytes32"], # [!code hl]
-        ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000, memo], # [!code hl]
+        [recipient, 100_000_000, memo], # [!code hl]
     ) # [!code hl]
+    call = Call.create(to=ALPHA_USD, data="0x" + data.hex())
+    draft = TempoTransaction.create(calls=(call,))
 
     tx = TempoTransaction.create(
         chain_id=w3.eth.chain_id,
-        gas_limit=100_000,
+        gas_limit=w3.eth.estimate_gas(draft.to_estimate_gas_request(account.address)),
         max_fee_per_gas=w3.eth.gas_price * 2,
         max_priority_fee_per_gas=w3.eth.gas_price,
         nonce=w3.eth.get_transaction_count(account.address),
-        calls=(
-            Call.create(to=ALPHA_USD, data="0x" + data.hex()),
-        ),
+        calls=(call,),
     )
 
     signed_tx = tx.sign(account.key.hex())
@@ -681,11 +685,14 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
 
     ```python [example.py]
     from eth_abi import encode
+    from eth_account import Account
     from pytempo import Call, TempoTransaction
     from provider import w3, account
 
     TRANSFER_SELECTOR = bytes.fromhex("a9059cbb")
     ALPHA_USD = "0x20c0000000000000000000000000000000000001"
+    recipient1 = Account.create().address  # replace with your recipients' addresses
+    recipient2 = Account.create().address
 
     def build_transfer(to: str, amount: int) -> str:
         data = TRANSFER_SELECTOR + encode(
@@ -693,22 +700,24 @@ Send several payments as calls in one transaction. If a call reverts, the whole 
         )
         return "0x" + data.hex()
 
+    calls = ( # [!code hl]
+        Call.create(to=ALPHA_USD, data=build_transfer(recipient1, 100_000_000)), # [!code hl]
+        Call.create(to=ALPHA_USD, data=build_transfer(recipient2, 50_000_000)), # [!code hl]
+    ) # [!code hl]
+
+    # Estimate every call in the batch, not only the first.
+    gas_limit = w3.eth.estimate_gas({
+        "from": account.address,
+        "calls": [{"to": ALPHA_USD, "data": "0x" + c.data.hex(), "value": "0x0"} for c in calls],
+    })
+
     tx = TempoTransaction.create(
         chain_id=w3.eth.chain_id,
-        gas_limit=200_000,
+        gas_limit=gas_limit,
         max_fee_per_gas=w3.eth.gas_price * 2,
         max_priority_fee_per_gas=w3.eth.gas_price,
         nonce=w3.eth.get_transaction_count(account.address),
-        calls=( # [!code hl]
-            Call.create( # [!code hl]
-                to=ALPHA_USD, # [!code hl]
-                data=build_transfer("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb", 100_000_000), # [!code hl]
-            ), # [!code hl]
-            Call.create( # [!code hl]
-                to=ALPHA_USD, # [!code hl]
-                data=build_transfer("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", 50_000_000), # [!code hl]
-            ), # [!code hl]
-        ), # [!code hl]
+        calls=calls,
     )
 
     signed_tx = tx.sign(account.key.hex())
@@ -981,7 +990,7 @@ Amounts use six decimal places: `1_000_000n` is one AlphaUSD. The client signs w
 
 ### Python client
 
-Install the typed SDK with `python -m pip install pytempo==0.6.1 requests`. Set `TEMPO_PRIVATE_KEY`, `TEMPO_RECIPIENT`, and `TEMPO_GAS_LIMIT` before running a payment. The gas limit is your cap for the calls you submit; estimate for your actual transaction instead of assuming every payment has the same cost.
+Install the typed SDK with `python -m pip install pytempo==0.7.0 requests`. Set `TEMPO_PRIVATE_KEY`, `TEMPO_RECIPIENT`, and `TEMPO_GAS_LIMIT` before running a payment. The gas limit is your cap for the calls you submit; estimate for your actual transaction instead of assuming every payment has the same cost.
 
 Save this as `payment_setup.py`. It exposes `w3`, `account`, `private_key`, `recipient`, `alpha_usd`, and `transaction_options()` for the examples. The function refreshes the nonce and fee fields each time you build a transaction.
 

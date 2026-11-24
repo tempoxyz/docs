@@ -158,19 +158,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 from pytempo import TempoTransaction
 from pytempo.contracts import TIP20, ALPHA_USD, BETA_USD
 
+transfer = TIP20(ALPHA_USD).transfer(
+    to="0x742d35cc6634c0532925a3b844bc9e7595f0bebb",
+    amount=100_000_000,
+)
+draft = TempoTransaction.create(calls=(transfer,))
+
 tx = TempoTransaction.create(
     chain_id=w3.eth.chain_id,
-    gas_limit=100_000,
+    gas_limit=w3.eth.estimate_gas(draft.to_estimate_gas_request(account.address)),
     max_fee_per_gas=w3.eth.gas_price * 2,
     max_priority_fee_per_gas=w3.eth.gas_price,
     nonce=w3.eth.get_transaction_count(account.address),
     fee_token=BETA_USD, # [!code ++]
-    calls=(
-        TIP20(ALPHA_USD).transfer(
-            to="0x742d35cc6634c0532925a3b844bc9e7595f0bebb",
-            amount=100_000_000,
-        ),
-    ),
+    calls=(transfer,),
 )
 ```
 
@@ -574,15 +575,16 @@ from pytempo import TempoTransaction
 from pytempo.contracts import FeeManager, ALPHA_USD
 from provider import w3, account
 
+call = FeeManager.set_user_token(token=ALPHA_USD) # [!code hl]
+draft = TempoTransaction.create(calls=(call,))
+
 tx = TempoTransaction.create(
     chain_id=w3.eth.chain_id,
-    gas_limit=100_000,
+    gas_limit=w3.eth.estimate_gas(draft.to_estimate_gas_request(account.address)),
     max_fee_per_gas=w3.eth.gas_price * 2,
     max_priority_fee_per_gas=w3.eth.gas_price,
     nonce=w3.eth.get_transaction_count(account.address),
-    calls=(
-        FeeManager.set_user_token(ALPHA_USD), # [!code hl]
-    ),
+    calls=(call,),
 )
 
 signed_tx = tx.sign(account.key.hex())
