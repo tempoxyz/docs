@@ -96,7 +96,7 @@ function createTestnetClient(rpcUrl: string) {
     chain: Tempo.Chain.testnet,
     feeToken: testnetToken,
     // Concurrent calls share one request.
-    transport: http(rpcUrl, { batch: true, retryCount: 0 }),
+    transport: http(rpcUrl, { batch: { batchSize: 5 }, retryCount: 0 }),
   })
 }
 

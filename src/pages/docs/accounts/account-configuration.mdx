@@ -53,7 +53,7 @@ A configuration update doesn't touch access keys or token approvals. A device ke
 
 ## Watch Changes
 
-Each [configuration update](/docs/development/configurable-accounts#configuration-updates) emits `ConfigurableAccountConfigUpdated` with the account, its new version, threshold, and signer list. Registration emits it too, with version 0. The public indexer doesn't cover testnet. Read the event with Viem's `getContractEvents` from a testnet client. The testnet RPC searches at most 100,000 blocks per request.
+Each [configuration update](/docs/development/configurable-accounts#configuration-updates) emits `ConfigurableAccountConfigUpdated` with the account, its new version, threshold, and signer list. Registration emits it too, with version 0. Read the event with Viem's `getContractEvents` from a testnet client. The testnet RPC searches at most 100,000 blocks per request.
 
 ```ts [watch-signers.ts]
 import { parseAbiItem } from 'viem'

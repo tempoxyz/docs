@@ -164,7 +164,7 @@ Mppx.create({ methods: [tempo({ account: agentKey, getClient: () => client })] }
 const response = await fetch(paidUrl) // [!code hl]
 ```
 
-Without `getClient`, mppx has no RPC for testnet and the request fails. If Tempo rejects the payment for the key's bounds, the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
+`getClient` makes mppx pay through the same testnet client. If Tempo rejects the payment for the key's bounds, the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
 
 The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds. To test, run your own [MPP server](/docs/guide/machine-payments/server) on testnet. In its `tempo()` method, set `currency` to the `stablecoin` address. Pass `chainId: 42431` and `getClient: () => client`.
 
