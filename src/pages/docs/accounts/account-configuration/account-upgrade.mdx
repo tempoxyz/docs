@@ -65,7 +65,7 @@ import { tempoModerato } from 'viem/chains'
 import { Account, Addresses } from 'viem/tempo'
 import { client } from './client'
 
-// Mainnet and testnet accept the transaction but don't upgrade the account.
+// Until T14 activates on mainnet, mainnet accepts the transaction but doesn't upgrade the account.
 if (client.chain.id !== tempoModerato.id) throw new Error('Account upgrades run on testnet until T14 reaches mainnet.') // [!code hl]
 
 // The key that controls the account today

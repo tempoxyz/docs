@@ -58,7 +58,7 @@ type Environment =
 
 let loaded: Promise<Modules> | undefined
 
-/** Loaded only on `http:` pages, so the viem previews stay out of production pages. */
+/** Loaded on first use, so the adapter stays out of the initial page bundle. */
 function loadModules() {
   loaded ??= Promise.all([
     import('./account-sandbox-testnet'),

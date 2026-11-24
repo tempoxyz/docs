@@ -132,7 +132,7 @@ export function AccountSandbox(props: AccountSandboxProps) {
 type TestnetModule = typeof import('./account-sandbox-testnet')
 let testnetModule: Promise<TestnetModule> | undefined
 
-/** Loaded only on `http:` pages, so the viem preview stays out of production pages. */
+/** Loaded on first use, so the adapter stays out of the initial page bundle. */
 function loadTestnet() {
   testnetModule ??= import('./account-sandbox-testnet')
   return testnetModule

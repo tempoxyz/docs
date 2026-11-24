@@ -9,7 +9,5 @@ import type { Address } from 'viem'
 /** Testnet's public RPC. It needs no key and allows calls from any origin. */
 export const testnetRpcUrl = 'https://rpc.moderato.tempo.xyz'
 export const testnetChainId = 42_431
-/** Testnet's block explorer. */
-export const testnetExplorerUrl = 'https://explore.testnet.tempo.xyz'
 /** AlphaUSD pays for every payment and every fee. */
 export const testnetToken: Address = '0x20c0000000000000000000000000000000000001'

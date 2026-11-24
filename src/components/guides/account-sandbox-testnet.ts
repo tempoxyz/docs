@@ -58,7 +58,7 @@ import {
   signerKinds,
   upgradeLegacyAccount,
 } from './account-sandbox'
-import { testnetChainId, testnetExplorerUrl, testnetRpcUrl, testnetToken } from './testnet-network'
+import { testnetChainId, testnetRpcUrl, testnetToken } from './testnet-network'
 
 // ---------------------------------------------------------------------------
 // viem
@@ -83,7 +83,7 @@ const {
 } = Tempo
 const { getCommitment } = AccountConfig
 
-export { testnetChainId, testnetExplorerUrl, testnetRpcUrl, testnetToken }
+export { testnetChainId, testnetRpcUrl, testnetToken }
 
 const testnetChainIdHex = '0xa5bf'
 const tokenDecimals = 6
