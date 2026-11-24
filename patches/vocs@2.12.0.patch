@@ -1,3 +1,16 @@
+diff --git a/dist/internal/markdown-negotiation.js b/dist/internal/markdown-negotiation.js
+index ac29613f0dca43ec6e5ecd49b51b91fb5e1a2571..a49a67a0d648d4854d290e8cd289d3497653c0c7 100644
+--- a/dist/internal/markdown-negotiation.js
++++ b/dist/internal/markdown-negotiation.js
+@@ -12,6 +12,8 @@ export const aiUserAgents = [
+     'ChatGPT-User/2.0',
+     'anthropic-ai',
+     'ClaudeBot',
++    'Claude-User',
++    'Claude-SearchBot',
+     'claude-web',
+     'PerplexityBot',
+     'Perplexity-User',
 diff --git a/dist/internal/openapi/query-presets.d.ts b/dist/internal/openapi/query-presets.d.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..71e7b6c96d989ce78589f6d62058ab2d0221ed48
@@ -502,6 +515,19 @@ index 0ef0a76d89d887bd13d6e03f23de6a7d313a1576..a95044623fd08f7001018e046e7b56c0
  }
 -//# sourceMappingURL=PlaygroundStandalone.js.map
 \ No newline at end of file
+diff --git a/src/internal/markdown-negotiation.ts b/src/internal/markdown-negotiation.ts
+index 4e262c6c90cbd298486ea49cebc6b707654b001b..4f8f58ecdeb654f78125b109996d06233f84d4c7 100644
+--- a/src/internal/markdown-negotiation.ts
++++ b/src/internal/markdown-negotiation.ts
+@@ -13,6 +13,8 @@ export const aiUserAgents = [
+   'ChatGPT-User/2.0',
+   'anthropic-ai',
+   'ClaudeBot',
++  'Claude-User',
++  'Claude-SearchBot',
+   'claude-web',
+   'PerplexityBot',
+   'Perplexity-User',
 diff --git a/src/internal/openapi/query-presets.ts b/src/internal/openapi/query-presets.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..e6f2075e910a21847a353e3de0c7b725de256196
