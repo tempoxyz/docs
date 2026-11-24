@@ -17,10 +17,10 @@ type SigningAccount = Parameters<Demo['client']['token']['transferSync']>[0]['ac
 const multisig: Address = '0xAACC000000000000000000000000000000000000'
 const threshold = 2
 
-/** Loaded only after the devnet answers, so viem's Tempo modules stay off pages that can't use it. */
+/** Loaded only after the testnet answers, so viem's Tempo modules stay off pages that can't use it. */
 async function loadDemo() {
-  const devnet = await import('./account-sandbox-devnet')
-  if (!(await devnet.probeDevnet())) return null
+  const testnet = await import('./account-sandbox-testnet')
+  if (!(await testnet.probeTestnet())) return null
   const [viem, accounts, Tempo] = await Promise.all([
     import('viem'),
     import('viem/accounts'),
@@ -28,11 +28,11 @@ async function loadDemo() {
   ])
   return {
     client: Tempo.createClient({
-      chain: Tempo.Chain.devnet,
-      feeToken: devnet.devnetToken,
-      transport: Tempo.http(devnet.devnetRpcUrl, { retryCount: 0 }),
+      chain: Tempo.Chain.testnet,
+      feeToken: testnet.testnetToken,
+      transport: Tempo.http(testnet.testnetRpcUrl, { retryCount: 0 }),
     }),
-    token: devnet.devnetToken,
+    token: testnet.testnetToken,
     fromSecp256k1: (privateKey: Hex) => Tempo.Account.fromSecp256k1(privateKey),
     fromConfig: Tempo.Account.fromConfig,
     generatePrivateKey: accounts.generatePrivateKey,
@@ -47,7 +47,7 @@ async function loadDemo() {
 
 /**
  * Start with a plain private-key account, fund it, then upgrade it in place to a configurable
- * account with two signers. Every step is a real transaction on the Tempo Accounts devnet.
+ * account with two signers. Every step is a real transaction on the Tempo testnet.
  */
 export function UpgradeAccountDemo() {
   const [preview, setPreview] = React.useState<Demo | null | undefined>(undefined)
@@ -108,11 +108,11 @@ export function UpgradeAccountDemo() {
   async function fund() {
     if (!preview || !original) return
     await preview.client.faucet.fundSync({ account: original.address })
-    return { message: 'Funded from the devnet faucet.', ok: true }
+    return { message: 'Funded from the testnet faucet.', ok: true }
   }
 
   async function pay(account: SigningAccount) {
-    if (!preview) throw new Error('Devnet isn’t ready.')
+    if (!preview) throw new Error('Testnet isn’t ready.')
     const { receipt } = await preview.client.token.transferSync({
       account,
       amount: 1_000_000n,
@@ -193,11 +193,11 @@ export function UpgradeAccountDemo() {
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Upgrade a private-key account</span>}
-      footer="Real devnet transactions. The test keys live in this page’s memory only."
+      footer="Real testnet transactions. The test keys live in this page’s memory only."
     >
       {preview === null ? (
         <p {...ui.accountDemoMuted()} role="status">
-          This demo runs on the Tempo Accounts devnet, which this page can’t reach.
+          This demo runs on the Tempo testnet, which this page can’t reach.
         </p>
       ) : (
         <div
@@ -342,7 +342,7 @@ export function UpgradeAccountDemo() {
   )
 }
 
-/** Devnet has no public explorer, so show the hash itself. */
+/** The transaction hash itself, with a copy button. */
 function ResultLine({ result }: { result: Result | undefined }) {
   if (!result) return null
   return (

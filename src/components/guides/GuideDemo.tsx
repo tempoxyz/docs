@@ -39,11 +39,11 @@ const localIcons: Record<LocalIcon, typeof LucideSmartphone> = {
 }
 
 // ---------------------------------------------------------------------------
-// Environment: devnet and WebCrypto
+// Environment: testnet and WebCrypto
 
 type Modules = {
-  devnet: typeof import('./account-sandbox-devnet')
-  chain: typeof import('./guide-demo-devnet')
+  testnet: typeof import('./account-sandbox-testnet')
+  chain: typeof import('./guide-demo-testnet')
 }
 
 type Environment =
@@ -58,11 +58,12 @@ type Environment =
 
 let loaded: Promise<Modules> | undefined
 
-/** Loaded only on `http:` pages, so the viem previews stay out of production pages. */
+/** Loaded on first use, so the adapter stays out of the initial page bundle. */
 function loadModules() {
-  loaded ??= Promise.all([import('./account-sandbox-devnet'), import('./guide-demo-devnet')]).then(
-    ([devnet, chain]) => ({ devnet, chain }),
-  )
+  loaded ??= Promise.all([
+    import('./account-sandbox-testnet'),
+    import('./guide-demo-testnet'),
+  ]).then(([testnet, chain]) => ({ testnet, chain }))
   return loaded
 }
 
@@ -77,7 +78,7 @@ function useEnvironment(): Environment {
     let active = true
     loadModules()
       .then(async (modules) => {
-        if (!(await modules.devnet.probeDevnet())) {
+        if (!(await modules.testnet.probeTestnet())) {
           if (active) setEnvironment({ status: 'offline' })
           return
         }
@@ -89,7 +90,7 @@ function useEnvironment(): Environment {
             modules,
             live,
             context: {
-              adapter: modules.devnet.getDevnetAdapter(),
+              adapter: modules.testnet.getTestnetAdapter(),
               chain: modules.chain.createGuideChain(),
             },
           })
@@ -107,7 +108,7 @@ function useEnvironment(): Environment {
 
 type Entry = { state: DemoState; outcome?: StepOutcome }
 
-/** A guide's steps, run on the Tempo Accounts devnet with your own signers. */
+/** A guide's steps, run on the Tempo testnet with your own signers. */
 export function GuideDemo({ guide }: { guide: GuideId }) {
   // A page can outlive its demo while it's being replaced.
   const script = guideScripts[guide] as DemoScript | undefined
@@ -120,9 +121,7 @@ function Demo({ guide, script }: { guide: GuideId; script: DemoScript }) {
   return (
     <Container
       headerLeft={
-        <span {...guideDemoNetwork({ className: 'as-network' })}>
-          Runs on the Tempo Accounts devnet
-        </span>
+        <span {...guideDemoNetwork({ className: 'as-network' })}>Runs on the Tempo testnet</span>
       }
     >
       {environment.status === 'ready' ? (
@@ -131,8 +130,8 @@ function Demo({ guide, script }: { guide: GuideId; script: DemoScript }) {
         <div {...accountSandbox({ className: 'account-sandbox' })}>
           <p className="as-gate" role="status">
             {environment.status === 'checking'
-              ? 'Connecting to the Tempo Accounts devnet…'
-              : 'This demo runs on the Tempo Accounts devnet, which this page can’t reach.'}
+              ? 'Connecting to the Tempo testnet…'
+              : 'This demo runs on the Tempo testnet, which this page can’t reach.'}
           </p>
         </div>
       )}
@@ -174,8 +173,8 @@ function Runner(props: {
   )
 
   function context(): GuideContext {
-    const working = 'Sending to devnet…'
-    const labels = modules.devnet.devnetPromptLabels
+    const working = 'Sending to testnet…'
+    const labels = modules.testnet.testnetPromptLabels
     return {
       ...environment.context,
       options: { onPrompt: (next) => setBusy(next ? labels[next] : working) },
@@ -184,14 +183,14 @@ function Runner(props: {
 
   async function run(action: DemoAction, from: DemoState, index: number) {
     setError(null)
-    setBusy('Sending to devnet…')
+    setBusy('Sending to testnet…')
     try {
       const outcome = await action.run(from, context())
       setHistory((items) => [...items, { state: outcome.state, outcome }])
     } catch (cause) {
       setError({
         index,
-        message: cause instanceof Error ? cause.message : 'Devnet unreachable.',
+        message: cause instanceof Error ? cause.message : 'Testnet unreachable.',
       })
     } finally {
       setBusy(null)

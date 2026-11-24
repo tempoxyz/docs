@@ -62,8 +62,8 @@ import {
   signerKinds,
   signerStatus,
 } from './account-sandbox'
-import type { DevnetAdapter, DevnetCallOptions } from './account-sandbox-devnet'
 import { type AccountDiff, diffAccounts } from './account-sandbox-diff'
+import type { TestnetAdapter, TestnetCallOptions } from './account-sandbox-testnet'
 import { thisDevice, thisDevicePasskey } from './this-device'
 
 const signerIcons: Record<SignerKind, typeof LucideFingerprint> = {
@@ -88,7 +88,7 @@ const keyIcons: Record<AccessKeyKind, typeof LucideFingerprint> = {
 
 const paymentAmount = 50
 
-/** Just over a key's remaining limit, rounded up to the next $100, so devnet rejects it. */
+/** Just over a key's remaining limit, rounded up to the next $100, so testnet rejects it. */
 function overLimitAmount(key: AccessKey) {
   return Math.floor(remainingLimit(key) / 100) * 100 + 100
 }
@@ -102,7 +102,7 @@ export type AccountSandboxProps = {
 }
 
 /**
- * Create the reader's account on the Tempo Accounts devnet: it starts with no signers, and the first one the
+ * Create the reader's account on the Tempo testnet: it starts with no signers, and the first one the
  * reader adds creates it. Every signer, key, and payment is real there; nothing is simulated.
  */
 export function AccountSandbox(props: AccountSandboxProps) {
@@ -117,8 +117,8 @@ export function AccountSandbox(props: AccountSandboxProps) {
         <div {...accountSandbox({ className: 'account-sandbox' })} data-variant={variant}>
           <p className="as-gate" role="status">
             {network.checking
-              ? 'Connecting to the Tempo Accounts devnet…'
-              : 'Creating an account here needs the Tempo Accounts devnet, which this page can’t reach.'}
+              ? 'Connecting to the Tempo testnet…'
+              : 'Creating an account here needs the Tempo testnet, which this page can’t reach.'}
           </p>
         </div>
       )}
@@ -129,35 +129,35 @@ export function AccountSandbox(props: AccountSandboxProps) {
 // ---------------------------------------------------------------------------
 // Network
 
-type DevnetModule = typeof import('./account-sandbox-devnet')
-let devnetModule: Promise<DevnetModule> | undefined
+type TestnetModule = typeof import('./account-sandbox-testnet')
+let testnetModule: Promise<TestnetModule> | undefined
 
-/** Loaded only on `http:` pages, so the viem preview stays out of production pages. */
-function loadDevnet() {
-  devnetModule ??= import('./account-sandbox-devnet')
-  return devnetModule
+/** Loaded on first use, so the adapter stays out of the initial page bundle. */
+function loadTestnet() {
+  testnetModule ??= import('./account-sandbox-testnet')
+  return testnetModule
 }
 
 type Network = ReturnType<typeof useNetwork>
 
 /**
- * Tempo Accounts devnet, once this page can reach it. Each account is created on devnet with its first
+ * Tempo testnet, once this page can reach it. Each account is created on testnet with its first
  * signer, then reused by every instance on the page that shows it.
  */
 function useNetwork() {
-  const [devnet, setDevnet] = React.useState<{
-    adapter: DevnetAdapter
-    module: DevnetModule
+  const [testnet, setTestnet] = React.useState<{
+    adapter: TestnetAdapter
+    module: TestnetModule
   } | null>(null)
   const [checking, setChecking] = React.useState(true)
   const [status, setStatus] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     let active = true
-    loadDevnet()
+    loadTestnet()
       .then(async (module) => {
-        if (!(await module.probeDevnet())) return
-        if (active) setDevnet({ adapter: module.getDevnetAdapter(), module })
+        if (!(await module.probeTestnet())) return
+        if (active) setTestnet({ adapter: module.getTestnetAdapter(), module })
       })
       .catch(() => undefined)
       .finally(() => active && setChecking(false))
@@ -168,53 +168,53 @@ function useNetwork() {
 
   /** Show `label` while `run` works, and passkey prompts while they're open. */
   async function track<T>(
-    live: NonNullable<typeof devnet>,
+    live: NonNullable<typeof testnet>,
     label: string,
-    run: (options: DevnetCallOptions) => Promise<T>,
+    run: (options: TestnetCallOptions) => Promise<T>,
   ) {
     setStatus(label)
     try {
       return await run({
-        onPrompt: (prompt) => setStatus(prompt ? live.module.devnetPromptLabels[prompt] : label),
+        onPrompt: (prompt) => setStatus(prompt ? live.module.testnetPromptLabels[prompt] : label),
       })
     } finally {
       setStatus(null)
     }
   }
 
-  async function prepare(live: NonNullable<typeof devnet>, account: SandboxAccount) {
-    if (account.devnet) return account
-    return track(live, 'Creating account on devnet…', (options) =>
+  async function prepare(live: NonNullable<typeof testnet>, account: SandboxAccount) {
+    if (account.testnet) return account
+    return track(live, 'Creating account on testnet…', (options) =>
       live.adapter.prepare(account, options),
     )
   }
 
-  function failure(live: NonNullable<typeof devnet>, error: unknown) {
-    return error instanceof live.module.DevnetRejection ? error.message : 'Devnet unreachable.'
+  function failure(live: NonNullable<typeof testnet>, error: unknown) {
+    return error instanceof live.module.TestnetRejection ? error.message : 'Testnet unreachable.'
   }
 
   return {
-    ready: Boolean(devnet),
+    ready: Boolean(testnet),
     checking,
     status,
     /**
-     * Apply an edit on devnet. The first signer creates the account there; later edits send their
+     * Apply an edit on testnet. The first signer creates the account there; later edits send their
      * updates.
      */
     async commit(previous: SandboxAccount, next: SandboxAccount) {
-      if (!devnet)
-        return { before: previous, after: { ...previous, notice: 'Devnet unreachable.' } }
-      const live = devnet
+      if (!testnet)
+        return { before: previous, after: { ...previous, notice: 'Testnet unreachable.' } }
+      const live = testnet
       try {
         if (!isCreated(previous)) {
-          const after = await track(live, 'Creating account on devnet…', (options) =>
+          const after = await track(live, 'Creating account on testnet…', (options) =>
             live.adapter.prepare(next, options),
           )
           return { before: previous, after }
         }
         const before = await prepare(live, previous)
         const draft = before === previous ? next : live.module.rebaseOnto(previous, next, before)
-        const { account } = await track(live, 'Updating devnet…', (options) =>
+        const { account } = await track(live, 'Updating testnet…', (options) =>
           live.adapter.sync(before, draft, options),
         )
         return { before, after: account }
@@ -222,10 +222,11 @@ function useNetwork() {
         return { before: previous, after: { ...previous, notice: failure(live, error) } }
       }
     },
-    /** Get test funds from the devnet faucet. Creates the account on devnet first if needed. */
+    /** Get test funds from the testnet faucet. Creates the account on testnet first if needed. */
     async fund(account: SandboxAccount) {
-      if (!devnet) return { before: account, after: { ...account, notice: 'Devnet unreachable.' } }
-      const live = devnet
+      if (!testnet)
+        return { before: account, after: { ...account, notice: 'Testnet unreachable.' } }
+      const live = testnet
       const { account: after, hash } = await track(live, 'Getting test funds…', (options) =>
         live.adapter.fund(account, options),
       )
@@ -233,26 +234,27 @@ function useNetwork() {
     },
     /** Upgrade a plain key account in place, at the same address. */
     async upgrade(account: SandboxAccount) {
-      if (!devnet) return { before: account, after: { ...account, notice: 'Devnet unreachable.' } }
-      const live = devnet
-      const { account: after, hash } = await track(live, 'Upgrading on devnet…', (options) =>
+      if (!testnet)
+        return { before: account, after: { ...account, notice: 'Testnet unreachable.' } }
+      const live = testnet
+      const { account: after, hash } = await track(live, 'Upgrading on testnet…', (options) =>
         live.adapter.upgrade(account, options),
       )
       return { before: account, after, hash }
     },
     async submit(account: SandboxAccount, request: ActionRequest) {
-      if (!devnet) {
+      if (!testnet) {
         const result: ActionResult = {
           ok: false,
           code: 'network-error',
-          message: 'Devnet unreachable.',
+          message: 'Testnet unreachable.',
         }
         return { before: account, account, result }
       }
-      const live = devnet
+      const live = testnet
       try {
         const before = await prepare(live, account)
-        const outcome = await track(live, 'Sending on devnet…', (options) =>
+        const outcome = await track(live, 'Sending on testnet…', (options) =>
           live.adapter.submit(before, request, options),
         )
         return { before, ...outcome }
@@ -268,17 +270,17 @@ function useNetwork() {
   }
 }
 
-/** The network after the address, or what devnet is doing right now. */
+/** The network after the address, or what testnet is doing right now. */
 function networkBadge(network: Network, account: SandboxAccount) {
   if (network.status) return network.status
-  return account.devnet ? 'devnet' : undefined
+  return account.testnet ? 'testnet' : undefined
 }
 
-/** On devnet, keys described as hardware or held by a provider are keys in this browser. */
+/** On testnet, keys described as hardware or held by a provider are keys in this browser. */
 const browserKeyKinds = new Set<SignerKind>(['hardware', 'wallet-provider', 'recovery-provider'])
 
 /**
- * What a signer is on devnet. Example keys are keys in this browser and example passkeys are real
+ * What a signer is on testnet. Example keys are keys in this browser and example passkeys are real
  * passkeys on this device, whatever the example calls them.
  */
 function signerDetail(signer: Signer) {
@@ -324,14 +326,14 @@ function configRow(changes: string): Pick<LedgerRow, 'title' | 'detail'> {
 
 /**
  * History as a ledger: a short event name, a detail only when it adds something, and the hash.
- * The account's own creation steps before devnet (no signers yet, on devnet) aren't events.
+ * The account's own creation steps before testnet (no signers yet, on testnet) aren't events.
  */
 function ledgerRow(entry: LogEntry, account: SandboxAccount): LedgerRow | null {
   const base = { id: entry.id, ...(entry.hash ? { hash: entry.hash } : {}) }
   const { title, detail } = entry
   if (entry.kind === 'preset') return detail === 'No signers yet' ? null : { ...base, title }
   if (entry.kind === 'event') {
-    if (title.startsWith('On devnet')) return null
+    if (title.startsWith('On testnet')) return null
     if (title.startsWith('Got test funds'))
       return { ...base, title: 'Funded', detail: title.split(' · ')[1] }
     return { ...base, title, detail }
@@ -364,7 +366,7 @@ function ledgerRow(entry: LogEntry, account: SandboxAccount): LedgerRow | null {
   return { ...base, title }
 }
 
-/** A transaction hash with a copy button. This devnet has no public explorer. */
+/** A transaction hash with a copy button. */
 export function TxHash({ hash }: { hash: string }) {
   return (
     <span className="as-tx">
@@ -550,7 +552,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
       ? secret.value
       : null
   /** Transactions need fees, so a created account needs test funds before it can act. */
-  const funded = Boolean(account.devnet) && account.balance > 0
+  const funded = Boolean(account.testnet) && account.balance > 0
   /** A generated private-key access key, shown once while it's on the account. */
   const [keySecret, setKeySecret] = React.useState<{ id: string; value: string } | null>(null)
   const shownKeySecret =
@@ -582,7 +584,7 @@ function Playground(props: { network: Network; showLog: boolean; variant: 'full'
       setBefore(before)
       setAccount(after)
       // A new account gets test funds right away, since every later change needs a fee.
-      if (!isCreated(account) && isCreated(after) && after.devnet && after.balance === 0) {
+      if (!isCreated(account) && isCreated(after) && after.testnet && after.balance === 0) {
         try {
           const funded = await network.fund(after)
           setBefore(funded.before)
@@ -855,7 +857,7 @@ export function AccountState(props: {
   account: SandboxAccount
   health: AccountHealth
   diff?: AccountDiff | undefined
-  /** Shown after the address, such as `devnet`. */
+  /** Shown after the address, such as `testnet`. */
   badge?: string | undefined
   /** Notices as short labels, such as `No backup signer`. Errors stay whole. */
   terse?: boolean | undefined
@@ -864,7 +866,7 @@ export function AccountState(props: {
   edit?: AccountEdit | undefined
   /** A generated private key by signer or key id, shown once on its card. */
   secrets?: Record<string, string> | undefined
-  /** A devnet request is running, such as getting test funds. */
+  /** A testnet request is running, such as getting test funds. */
   pending?: boolean | undefined
 }) {
   const { account, health, diff, badge, terse, onAddBackup, edit, secrets, pending } = props
@@ -884,7 +886,7 @@ export function AccountState(props: {
               {badge && (
                 <span
                   className="as-badge"
-                  data-network={account.devnet ? 'devnet' : undefined}
+                  data-network={account.testnet ? 'testnet' : undefined}
                   data-pending={pending || undefined}
                 >
                   {badge}
@@ -1071,7 +1073,7 @@ function PayPanel(props: {
   const owners = configuredSigners(account).filter((signer) => !signer.lost)
   const keys = account.accessKeys.filter((key) => key.status !== 'revoked')
   const payingKey = payer.type === 'key' ? keys.find((key) => key.id === payer.id) : undefined
-  // Signers pay $50. A key also offers an amount over its remaining limit, which devnet rejects.
+  // Signers pay $50. A key also offers an amount over its remaining limit, which testnet rejects.
   const amounts = payingKey ? [paymentAmount, overLimitAmount(payingKey)] : [paymentAmount]
   const amount = amounts.includes(chosenAmount) ? chosenAmount : paymentAmount
   const action = { type: 'payment' as const, amount }
@@ -1229,7 +1231,7 @@ function PayPanel(props: {
   )
 }
 
-/** On devnet, keys the reader adds say how they sign. */
+/** On testnet, keys the reader adds say how they sign. */
 function keyDetail(key: AccessKey) {
   if (key.kind === 'private-key') return 'secp256k1 · test key'
   if (key.kind === 'browser') return 'WebCrypto · this browser'

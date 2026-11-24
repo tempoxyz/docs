@@ -15,7 +15,7 @@ Set up one Tempo account that three approvers share, where any two must approve 
 
 A team multisig is one account whose payments need approvals from several people. It's for stablecoins your team holds together, such as a company's funds or a shared budget. No single person or key moves them.
 
-Here you create a multisig account on the Tempo Accounts devnet. Its three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself. Neither one stolen key nor your own backend can pay without a second approver.
+Here you create a multisig account on testnet. Its three signers are keys held by finance, operations, and a controller. Tempo checks the approvals itself. Neither one stolen key nor your own backend can pay without a second approver.
 
 <span id="treasury-model" />
 
@@ -25,7 +25,7 @@ Each approver's signer has a weight of 1, and the [threshold](/docs/accounts/pol
 
 ## Setup
 
-`client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+`client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 :::::steps
 
@@ -61,16 +61,16 @@ const multisig = Account.fromConfig({ // [!code hl]
 // Save with your multisig record.
 const saved = { address: multisig.address, config: multisig.config } // [!code hl]
 
-await client.faucet.fundSync({ account: saved.address }) // devnet test stablecoins
+await client.faucet.fundSync({ account: saved.address }) // testnet test stablecoins
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
 
-`address: 'infer'` computes the address from the first signers and threshold. Creating the multisig sends nothing. Tempo records the multisig with its first transaction. The address can receive stablecoins before then. On the devnet, the [faucet](/docs/accounts/create#fund-an-account-on-devnet) sends it test stablecoins. The multisig pays transaction fees from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
+`address: 'infer'` computes the address from the first signers and threshold. Creating the multisig sends nothing. Tempo records the multisig with its first transaction. The address can receive stablecoins before then. On testnet, the [faucet](/docs/accounts/create#fund-an-account-on-testnet) sends it test stablecoins. The multisig pays transaction fees from its own balance unless a [fee payer](/docs/accounts/fees/fee-sponsorship) sponsors them.
 
 Tempo stores only a hash of the configuration (signers, weights, threshold, salt, and version). The hash is enough to check approvals, but not to tell your app who the signers are. Save the address and configuration with your multisig record. The configuration contains bigints, so [encode it with `AccountConfig.toRpc`](/docs/development/configurable-accounts#keep-the-current-configuration). The address stays the same when signers change. Every approval is built from the saved configuration.
 
@@ -83,7 +83,7 @@ To pay, rebuild the multisig from its saved record and attach the keys of the ap
 ```ts [multisig.ts]
 import { isAddressEqual, parseUnits } from 'viem'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 // Placeholder: the vendor's address
 const vendor = env('VENDOR_ADDRESS')

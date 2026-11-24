@@ -66,7 +66,7 @@ export const accountDemoHash = style({
   color: tokens.color.gray10,
 })
 
-// A transaction hash with a copy button. The devnet has no public explorer.
+// A transaction hash with a copy button.
 export const accountDemoTx = style({
   display: 'inline-flex',
   alignItems: 'center',

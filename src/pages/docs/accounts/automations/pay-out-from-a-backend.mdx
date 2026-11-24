@@ -22,7 +22,7 @@ The account's signers, your approvers or your customer's, approve an [access key
 <span id="backend-services" />
 <span id="automations" />
 
-The demo and the code run on the Tempo Accounts devnet, a test network whose stablecoins have no value. The demo's customer account is a configurable account whose one signer is a device key in this browser. On mainnet and testnet, a single-key account authorizes a payout key the same way. Its key can be the customer's passkey.
+The demo and the code run on testnet, a test network whose stablecoins have no value. The demo's customer account is a configurable account whose one signer is a device key in this browser. On mainnet and testnet, a single-key account authorizes a payout key the same way. Its key can be the customer's passkey.
 
 <GuideDemo guide="backend-automation" />
 
@@ -33,7 +33,7 @@ The code pays out a test stablecoin. You supply the undefined names:
 - `payoutKeyAddress` is the KMS key's address.
 - `kms`, `kmsKeyId`, and `kmsPublicKey` are your KMS client, key ID, and public key.
 
-`client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+`client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 ## Setup
 
@@ -50,7 +50,7 @@ import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
 import { client } from '../client'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 await client.accessKey.authorizeSync({
@@ -67,7 +67,7 @@ await client.accessKey.authorizeSync({
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
@@ -104,7 +104,7 @@ import { parseUnits, stringToHex } from 'viem'
 import { client } from '../client'
 import { payoutKey } from './payout-key'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 
 await client.token.transferSync({ // [!code hl]

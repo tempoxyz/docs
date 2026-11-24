@@ -28,11 +28,11 @@ Tempo enforces those bounds on every transaction, whatever the agent decides to 
 <span id="ai-agents" />
 <span id="authorize-the-agents-task" />
 
-The demo and the code run on the Tempo Accounts devnet and pay in a test stablecoin. The demo's account is a single-key account. An agent key works the same way from one on mainnet and testnet. Until [T14](/docs/protocol/upgrades/t14), a configurable account can authorize an agent key only on the devnet. The demo uses smaller bounds than the code: 10 a day, a one-hour expiry, and `transfer` to any address.
+The demo and the code run on testnet and pay in a test stablecoin. The demo's account is a single-key account. An agent key works the same way from one on mainnet and testnet. A configurable account can authorize an agent key on testnet now, and on mainnet once [T14](/docs/protocol/upgrades/t14) activates there on December 8, 2026. The demo uses smaller bounds than the code: 10 a day, a one-hour expiry, and `transfer` to any address.
 
 <AccessKeyDemo />
 
-`client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+`client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 ## Setup
 
@@ -56,7 +56,7 @@ const agentKeyAddress = agentKey.accessKeyAddress // [!code hl]
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
@@ -68,7 +68,7 @@ import { parseUnits } from 'viem'
 import { Expiry } from 'viem/tempo'
 import { client } from './client'
 
-// A test stablecoin on the devnet
+// A test stablecoin on testnet
 const stablecoin = '0x20c0000000000000000000000000000000000001'
 // the addresses the agent may pay
 const merchants = [merchant]
@@ -152,21 +152,21 @@ scopes: [
 ],
 ```
 
-For a [payment session](/docs/guide/machine-payments/pay-as-you-go), also scope its payment-channel calls. In the agent, pass the key and the devnet `client` to the [MPP client](/docs/guide/machine-payments/client). `Mppx.create` patches `fetch` to pay each `402` and retry the request.
+For a [payment session](/docs/guide/machine-payments/pay-as-you-go), also scope its payment-channel calls. In the agent, pass the key and testnet `client` to the [MPP client](/docs/guide/machine-payments/client). `Mppx.create` patches `fetch` to pay each `402` and retry the request.
 
 ```ts [agent.ts]
 import { Mppx, tempo } from 'mppx/client'
 import { client } from './client'
 
-// pays on the devnet
+// pays on testnet
 Mppx.create({ methods: [tempo({ account: agentKey, getClient: () => client })] }) // [!code hl]
 
 const response = await fetch(paidUrl) // [!code hl]
 ```
 
-Without `getClient`, mppx has no RPC for the devnet and the request fails. If Tempo rejects the payment for the key's bounds, the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
+`getClient` makes mppx pay through the same testnet client. If Tempo rejects the payment for the key's bounds, the request fails without paying. A terminal agent can use [`tempo request`](/docs/guide/machine-payments/agent) instead.
 
-The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds. To test, run your own [MPP server](/docs/guide/machine-payments/server) on the devnet. In its `tempo()` method, set `currency` to the `stablecoin` address. Pass `chainId: 31318` and `getClient: () => client`.
+The paid APIs in [Find services](/docs/guide/machine-payments/discover-services) charge real funds. To test, run your own [MPP server](/docs/guide/machine-payments/server) on testnet. In its `tempo()` method, set `currency` to the `stablecoin` address. Pass `chainId: 42431` and `getClient: () => client`.
 
 <span id="watch-spending" />
 

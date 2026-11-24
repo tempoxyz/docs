@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { type Address, type Hex, parseUnits } from 'viem'
-import { tempoDevnet } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { Account, createClient, http, WebCryptoP256 } from 'viem/tempo'
 import LucideCheck from '~icons/lucide/check'
 import LucideCopy from '~icons/lucide/copy'
@@ -10,17 +10,17 @@ import { Container } from '../Container'
 import * as ui from './AccountDemo.recipes'
 import { shortHash } from './account-sandbox'
 import { Button, FAKE_RECIPIENT, Step, StringFormatter, useCopyToClipboard } from './Demo'
-import { devnetRpcUrl, devnetToken } from './devnet-network'
+import { testnetRpcUrl, testnetToken } from './testnet-network'
 
-const token = devnetToken
+const token = testnetToken
 const dailyLimit = parseUnits('10', 6)
 const payment = parseUnits('2', 6)
 const overspend = parseUnits('20', 6)
-/** The Tempo Accounts devnet, reached through the docs site's RPC proxy. */
+/** Tempo testnet, through its public RPC. */
 const network = {
-  chain: tempoDevnet,
+  chain: tempoModerato,
   feeToken: token,
-  transport: http(devnetRpcUrl, { retryCount: 0 }),
+  transport: http(testnetRpcUrl, { retryCount: 0 }),
 }
 
 type Action = 'create' | 'fund' | 'authorize' | 'pay' | 'overspend' | 'revoke'
@@ -32,7 +32,7 @@ async function createAccessKey(access: Address) {
 type Result = { hash?: Hex; message: string; ok: boolean }
 type KeyPair = Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
 
-/** Authorizes, uses, and revokes a limited access key with real devnet transactions. */
+/** Authorizes, uses, and revokes a limited access key with real testnet transactions. */
 export function AccessKeyDemo() {
   const [ready, setReady] = React.useState(false)
   /** Why this browser can't make WebCrypto keys, or `null` when it can. */
@@ -83,7 +83,7 @@ export function AccessKeyDemo() {
   }, [client])
 
   React.useEffect(() => {
-    refresh().catch(() => setError('Could not read devnet status.'))
+    refresh().catch(() => setError('Could not read testnet status.'))
   }, [refresh])
 
   async function run(action: Action, work: () => Promise<Result | undefined>) {
@@ -171,7 +171,7 @@ export function AccessKeyDemo() {
   return (
     <Container
       headerLeft={<span {...ui.accountDemoTitle()}>Try an access key</span>}
-      headerRight={<span {...ui.accountDemoMuted()}>Tempo Accounts devnet</span>}
+      headerRight={<span {...ui.accountDemoMuted()}>Tempo testnet</span>}
       footer="A separate test account. Both keys live in this tab’s memory and are gone on reload."
     >
       <div {...ui.accountDemoSteps()} data-testid="access-key-demo" aria-busy={pending !== null}>
@@ -307,7 +307,7 @@ function ResultLine({ result }: { result: Result | undefined }) {
   )
 }
 
-/** A transaction hash with a copy button. The devnet has no public explorer. */
+/** A transaction hash with a copy button. */
 function TxHash({ hash }: { hash: Hex }) {
   const [copied, copy] = useCopyToClipboard()
   const Icon = copied ? LucideCheck : LucideCopy

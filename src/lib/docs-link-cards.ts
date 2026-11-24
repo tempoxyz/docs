@@ -47,7 +47,7 @@ export const docsLinkCards = {
   accounts: [
     {
       title: 'Create an account',
-      description: 'Build an account from its first signer on devnet.',
+      description: 'Build an account from its first signer on testnet.',
       icon: 'wallet',
       links: [['Create an account', '/docs/accounts/create']],
     },

@@ -17,24 +17,24 @@ import {
   accessKeySpec,
   attachHash,
   authorizationParameters,
-  checkDevnet,
+  checkTestnet,
   chooseQuorum,
-  createDevnetAdapter,
-  DevnetRejection,
-  devnetKeyType,
-  devnetToken,
+  createTestnetAdapter,
   isForeignCommitment,
-  mapDevnetError,
+  mapTestnetError,
   needsFunds,
   rebaseOnto,
   sameConfig,
   sendsTransaction,
   sessionKey,
+  TestnetRejection,
+  testnetKeyType,
+  testnetToken,
   unitsToUsd,
   upgradeConfig,
   upgradeSalt,
   usdToUnits,
-} from './account-sandbox-devnet'
+} from './account-sandbox-testnet'
 
 function signer(id: string, kind: SignerKind, weight: number, lost = false): Signer {
   return {
@@ -64,10 +64,10 @@ describe('units', () => {
   })
 })
 
-describe('devnetKeyType', () => {
+describe('testnetKeyType', () => {
   it('uses each signer kind’s scheme', () => {
     const types = Object.fromEntries(
-      (Object.keys(signerKinds) as SignerKind[]).map((kind) => [kind, devnetKeyType(kind)]),
+      (Object.keys(signerKinds) as SignerKind[]).map((kind) => [kind, testnetKeyType(kind)]),
     )
     expect(types).toEqual({
       'private-key': 'secp256k1',
@@ -87,17 +87,17 @@ describe('authorizationParameters', () => {
     const parameters = authorizationParameters(key('payout'), recipient, 1_000)
     expect(parameters).not.toHaveProperty('expiry')
     expect(parameters.limits).toEqual([
-      { token: devnetToken, limit: 10_000_000_000n, period: 86_400 },
+      { token: testnetToken, limit: 10_000_000_000n, period: 86_400 },
     ])
     expect(parameters.scopes).toEqual([
-      { address: devnetToken, selector: '0xa9059cbb', recipients: [recipient] },
+      { address: testnetToken, selector: '0xa9059cbb', recipients: [recipient] },
     ])
   })
 
   it('maps expiry and weekly periods, and leaves any-recipient keys open', () => {
     const phone = authorizationParameters(key('iphone'), recipient, 1_000)
     expect(phone.expiry).toBe(1_000 + 30 * 86_400)
-    expect(phone.scopes).toEqual([{ address: devnetToken, selector: '0xa9059cbb' }])
+    expect(phone.scopes).toEqual([{ address: testnetToken, selector: '0xa9059cbb' }])
     expect(authorizationParameters(key('bill-pay'), recipient).limits[0].period).toBe(604_800)
   })
 
@@ -159,7 +159,7 @@ describe('chooseQuorum', () => {
     expect(ids(chooseQuorum(owners, 2))).toEqual(['finance', 'operations'])
   })
 
-  it('falls back to lost signers, since this page holds every devnet key', () => {
+  it('falls back to lost signers, since this page holds every testnet key', () => {
     const owners = [signer('finance', 'hardware', 1), signer('cfo', 'passkey', 2, true)]
     expect(ids(chooseQuorum(owners, 2))).toEqual(['cfo'])
   })
@@ -169,8 +169,8 @@ describe('chooseQuorum', () => {
   })
 })
 
-describe('devnet adapter refusals', () => {
-  // Nothing here reaches a network: missing WebAuthn and unreachable devnet fail first.
+describe('testnet adapter refusals', () => {
+  // Nothing here reaches a network: missing WebAuthn and unreachable testnet fail first.
   const unreachable = 'http://127.0.0.1:9'
   const pay: ActionRequest = {
     action: { type: 'payment', amount: 50 },
@@ -178,24 +178,24 @@ describe('devnet adapter refusals', () => {
   }
 
   it('fails passkey signers when the browser has no WebAuthn', async () => {
-    const adapter = createDevnetAdapter({ rpcUrl: unreachable })
+    const adapter = createTestnetAdapter({ rpcUrl: unreachable })
     await expect(adapter.prepare(loadPreset('team-treasury'))).rejects.toThrow(
       'This browser can’t create a passkey.',
     )
   })
 
-  it('reports an unreachable devnet as a rejection', async () => {
-    const adapter = createDevnetAdapter({ rpcUrl: unreachable, passkeys: 'headless' })
+  it('reports an unreachable testnet as a rejection', async () => {
+    const adapter = createTestnetAdapter({ rpcUrl: unreachable, passkeys: 'headless' })
     const created = addSigner(loadPreset('from-scratch'), 'private-key', {
       privateKey: `0x${'33'.repeat(32)}`,
     })
     const rejection = adapter.prepare(created)
-    await expect(rejection).rejects.toThrow(DevnetRejection)
-    await expect(rejection).rejects.toThrow('Devnet unreachable.')
+    await expect(rejection).rejects.toThrow(TestnetRejection)
+    await expect(rejection).rejects.toThrow('Testnet unreachable.')
   })
 
   it('refuses an account with no signers yet', async () => {
-    const adapter = createDevnetAdapter({ rpcUrl: unreachable, passkeys: 'headless' })
+    const adapter = createTestnetAdapter({ rpcUrl: unreachable, passkeys: 'headless' })
     const empty = loadPreset('from-scratch')
     await expect(adapter.prepare(empty)).rejects.toThrow(
       'Add the first signer to create the account.',
@@ -209,16 +209,16 @@ describe('devnet adapter refusals', () => {
   })
 
   it('creates the account when the first signer is added, or explains why not', async () => {
-    const adapter = createDevnetAdapter({ rpcUrl: unreachable, passkeys: 'headless' })
+    const adapter = createTestnetAdapter({ rpcUrl: unreachable, passkeys: 'headless' })
     const empty = loadPreset('from-scratch')
     const synced = await adapter.sync(empty, addSigner(empty, 'passkey'))
-    // Creating means funding, which needs devnet: it keeps the empty account and says why.
+    // Creating means funding, which needs testnet: it keeps the empty account and says why.
     expect(synced.account.address).toBeNull()
-    expect(synced.account.notice).toBe('Devnet unreachable.')
+    expect(synced.account.notice).toBe('Testnet unreachable.')
   })
 })
 
-describe('mapDevnetError', () => {
+describe('mapTestnetError', () => {
   it.each([
     [
       {
@@ -226,12 +226,12 @@ describe('mapDevnetError', () => {
           'execution reverted: Account keychain error: SpendingLimitExceeded(SpendingLimitExceeded)',
       },
       'key-limit',
-      'Over its limit on devnet.',
+      'Over its limit on testnet.',
     ],
     [
       { details: 'execution reverted: Account keychain error: CallNotAllowed(CallNotAllowed)' },
       'recipient-not-allowed',
-      'Not an approved recipient on devnet.',
+      'Not an approved recipient on testnet.',
     ],
     [
       {
@@ -239,50 +239,52 @@ describe('mapDevnetError', () => {
           'Revm error: keychain validation failed: AccountKeychainError(KeyAlreadyRevoked(KeyAlreadyRevoked))',
       },
       'key-revoked',
-      'Revoked on devnet.',
+      'Revoked on testnet.',
     ],
     [
       { details: 'execution reverted: Account keychain error: KeyNotFound(KeyNotFound)' },
       'key-revoked',
-      'Not authorized on devnet.',
+      'Not authorized on testnet.',
     ],
     [
       new Error('multisig configuration commitment mismatch'),
       'invalid-config',
-      'Config is out of sync with devnet.',
+      'Config is out of sync with testnet.',
     ],
     [
       new Error('Local owners do not meet the threshold.'),
       'insufficient-weight',
-      'Below the devnet threshold.',
+      'Below the testnet threshold.',
     ],
-    [new TypeError('fetch failed'), 'network-error', 'Devnet unreachable.'],
+    [new TypeError('fetch failed'), 'network-error', 'Testnet unreachable.'],
   ])('maps %o', (error, code, message) => {
-    expect(mapDevnetError(error)).toEqual({ code, message })
+    expect(mapTestnetError(error)).toEqual({ code, message })
   })
 
   it('maps WebAuthn errors anywhere in the cause chain', () => {
     const dom = (name: string) => Object.assign(new Error(name), { name })
-    expect(mapDevnetError(new Error('create failed', { cause: dom('NotAllowedError') }))).toEqual({
+    expect(mapTestnetError(new Error('create failed', { cause: dom('NotAllowedError') }))).toEqual({
       code: 'no-approver',
       message: 'Passkey cancelled.',
     })
-    expect(mapDevnetError(dom('NotSupportedError'))).toEqual({
+    expect(mapTestnetError(dom('NotSupportedError'))).toEqual({
       code: 'network-error',
       message: 'This browser can’t create a passkey.',
     })
-    expect(mapDevnetError(new DevnetRejection('key-limit', 'Over its limit on devnet.'))).toEqual({
+    expect(
+      mapTestnetError(new TestnetRejection('key-limit', 'Over its limit on testnet.')),
+    ).toEqual({
       code: 'key-limit',
-      message: 'Over its limit on devnet.',
+      message: 'Over its limit on testnet.',
     })
   })
 
   it('keeps the first line of anything else', () => {
     expect(
-      mapDevnetError({ details: 'Revm error: primitive root key retired for account 0x52\nmore' }),
+      mapTestnetError({ details: 'Revm error: primitive root key retired for account 0x52\nmore' }),
     ).toEqual({
       code: 'network-error',
-      message: 'Devnet: primitive root key retired for account 0x52',
+      message: 'Testnet: primitive root key retired for account 0x52',
     })
   })
 })
@@ -307,18 +309,18 @@ describe('log helpers', () => {
       ...previous,
       address: '0x00000000000000000000000000000000000000cc',
       balance: 1_000_000,
-      devnet: { standInLogins: false, lastHash: '0x01' },
-      log: [{ id: 2, kind: 'event' as const, title: 'On devnet' }, ...previous.log],
+      testnet: { standInLogins: false, lastHash: '0x01' },
+      log: [{ id: 2, kind: 'event' as const, title: 'On testnet' }, ...previous.log],
     }
     const rebased = rebaseOnto(previous, next, prepared)
     expect(rebased.threshold).toBe(3)
     expect(rebased.committed.threshold).toBe(3)
     expect(rebased.address).toBe(prepared.address)
     expect(rebased.balance).toBe(1_000_000)
-    expect(rebased.devnet).toBe(prepared.devnet)
+    expect(rebased.testnet).toBe(prepared.testnet)
     expect(rebased.log.map((entry) => [entry.id, entry.title])).toEqual([
       [3, 'Config v1 · Threshold 2 → 3'],
-      [2, 'On devnet'],
+      [2, 'On testnet'],
       [1, previous.log[0].title],
     ])
   })
@@ -338,28 +340,28 @@ describe('log helpers', () => {
   })
 })
 
-describe('checkDevnet', () => {
+describe('checkTestnet', () => {
   const reply = (body: unknown, ok = true) =>
     vi.fn(async () => ({ ok, json: async () => body }) as Response)
 
-  it('is true only for chain ID 31318', async () => {
-    expect(await checkDevnet({ fetch: reply({ result: '0x7a56' }) })).toBe(true)
-    expect(await checkDevnet({ fetch: reply({ result: '0x1' }) })).toBe(false)
-    expect(await checkDevnet({ fetch: reply({}, false) })).toBe(false)
+  it('is true only for chain ID 42431', async () => {
+    expect(await checkTestnet({ fetch: reply({ result: '0xa5bf' }) })).toBe(true)
+    expect(await checkTestnet({ fetch: reply({ result: '0x1' }) })).toBe(false)
+    expect(await checkTestnet({ fetch: reply({}, false) })).toBe(false)
   })
 
   it('is false when the request fails or times out', async () => {
     const failing = vi.fn(async () => {
       throw new TypeError('fetch failed')
     })
-    expect(await checkDevnet({ fetch: failing })).toBe(false)
+    expect(await checkTestnet({ fetch: failing })).toBe(false)
     const hanging = vi.fn(
       (_url: string | URL | Request, init?: RequestInit) =>
         new Promise<Response>((_, reject) =>
           init?.signal?.addEventListener('abort', () => reject(new Error('aborted'))),
         ),
     )
-    expect(await checkDevnet({ fetch: hanging, timeoutMs: 5 })).toBe(false)
+    expect(await checkTestnet({ fetch: hanging, timeoutMs: 5 })).toBe(false)
   })
 })
 
@@ -373,7 +375,7 @@ describe('access keys the reader adds', () => {
     expect(accessKeyTemplateName(loadPreset('team-treasury'), 'device')).toBe(names[2])
   })
 
-  it('keeps a private key’s generated key for devnet to sign with', () => {
+  it('keeps a private key’s generated key for testnet to sign with', () => {
     const privateKey = `0x${'11'.repeat(32)}`
     const added = addAccessKey(loadPreset('team-treasury'), 'private-key', { privateKey })
     expect(added.accessKeys.at(-1)).toMatchObject({
@@ -381,7 +383,7 @@ describe('access keys the reader adds', () => {
       kind: 'private-key',
       privateKey,
     })
-    // The key isn't part of the grant, so it never changes what devnet authorizes.
+    // The key isn't part of the grant, so it never changes what testnet authorizes.
     const { privateKey: _, ...grant } = added.accessKeys.at(-1) as AccessKey
     expect(accessKeySpec(added.accessKeys.at(-1) as AccessKey)).toBe(accessKeySpec(grant))
   })
@@ -418,20 +420,20 @@ describe('salt collisions', () => {
 })
 
 describe('keys prepared before the step that adds them', () => {
-  // Nothing here reaches devnet: preparing makes keys only.
-  const adapter = () => createDevnetAdapter({ rpcUrl: 'http://127.0.0.1:9', passkeys: 'headless' })
+  // Nothing here reaches testnet: preparing makes keys only.
+  const adapter = () => createTestnetAdapter({ rpcUrl: 'http://127.0.0.1:9', passkeys: 'headless' })
   const privateKey = `0x${'66'.repeat(32)}` as const
 
   it('prepares signers', async () => {
-    const devnet = adapter()
+    const testnet = adapter()
     const { privateKeyToAddress } = await import('viem/accounts')
     expect(
-      await devnet.prepareSigner({ kind: 'private-key', name: 'Private key', privateKey }),
+      await testnet.prepareSigner({ kind: 'private-key', name: 'Private key', privateKey }),
     ).toEqual({ address: privateKeyToAddress(privateKey) })
-    const passkey = await devnet.prepareSigner({ kind: 'passkey', name: 'Passkey' })
+    const passkey = await testnet.prepareSigner({ kind: 'passkey', name: 'Passkey' })
     expect(passkey.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
     const prompts: unknown[] = []
-    await devnet.prepareSigner(
+    await testnet.prepareSigner(
       { kind: 'passkey', name: 'Passkey' },
       { onPrompt: (prompt) => prompts.push(prompt) },
     )
@@ -439,24 +441,24 @@ describe('keys prepared before the step that adds them', () => {
   })
 
   it('fails a passkey when the browser has no WebAuthn', async () => {
-    const devnet = createDevnetAdapter({ rpcUrl: 'http://127.0.0.1:9' })
-    await expect(devnet.prepareSigner({ kind: 'passkey', name: 'Passkey' })).rejects.toThrow(
+    const testnet = createTestnetAdapter({ rpcUrl: 'http://127.0.0.1:9' })
+    await expect(testnet.prepareSigner({ kind: 'passkey', name: 'Passkey' })).rejects.toThrow(
       'This browser can’t create a passkey.',
     )
   })
 
   it('prepares access keys before any account exists', async () => {
-    const devnet = adapter()
+    const testnet = adapter()
     const { privateKeyToAddress } = await import('viem/accounts')
     const keyFor = (template: keyof typeof accessKeyTemplates, extra = {}) => ({
       ...key(template),
       ...extra,
     })
-    expect(await devnet.prepareAccessKey(keyFor('private-key', { privateKey }))).toEqual({
+    expect(await testnet.prepareAccessKey(keyFor('private-key', { privateKey }))).toEqual({
       address: privateKeyToAddress(privateKey),
     })
     for (const template of ['browser', 'device', 'team', 'payout'] as const)
-      expect((await devnet.prepareAccessKey(keyFor(template))).address).toMatch(
+      expect((await testnet.prepareAccessKey(keyFor(template))).address).toMatch(
         /^0x[0-9a-fA-F]{40}$/,
       )
   })
@@ -476,7 +478,7 @@ describe('test funds', () => {
   })
 
   it('needs a created account to fund', async () => {
-    const adapter = createDevnetAdapter({ rpcUrl: 'http://127.0.0.1:9', passkeys: 'headless' })
+    const adapter = createTestnetAdapter({ rpcUrl: 'http://127.0.0.1:9', passkeys: 'headless' })
     const funded = await adapter.fund(loadPreset('from-scratch'))
     expect(funded.hash).toBeUndefined()
     expect(funded.account.notice).toBe('Add the first signer to create the account.')

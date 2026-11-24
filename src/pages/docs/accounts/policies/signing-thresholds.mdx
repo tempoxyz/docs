@@ -107,7 +107,7 @@ Before each transaction, rebuild the account from the latest saved record. The e
 
 A configuration update raises the configuration's version. After it succeeds, save `AccountConfig.update(saved.config, nextConfig)`. Tempo checks every later transaction against the new hash. An account built from the old configuration fails with `multisig configuration commitment mismatch`.
 
-When the keys on one device reach the threshold, attach them and send the transaction as usual. Here the customer's passkey reaches the threshold alone, so the payment runs in the customer's browser. `client.ts` connects to the devnet ([set up the devnet key](/docs/accounts/create#connect-to-the-devnet)).
+When the keys on one device reach the threshold, attach them and send the transaction as usual. Here the customer's passkey reaches the threshold alone, so the payment runs in the customer's browser. `client.ts` connects to [testnet](/docs/accounts/create#connect-to-testnet).
 
 ::::code-group
 
@@ -118,7 +118,7 @@ await client.token.transferSync({ account: openAccount([passkey]), amount, to, t
 ```
 
 ```ts [client.ts]
-// [!include ~/snippets/accounts-devnet.ts:client]
+// [!include ~/snippets/accounts-testnet.ts:client]
 ```
 
 ::::
@@ -163,7 +163,7 @@ A configuration update works the same way. Put `Actions.accounts.updateConfig.ca
 
 ## Verify in a Contract
 
-A registered account answers ERC-1271 `isValidSignature`, so Permit2 and other contracts that check signatures that way accept its signers' approvals unchanged. A contract can also call `verifyConfigurableAccount` directly. It's on the [signature verifier](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. Like configurable accounts, `verifyConfigurableAccount` exists only on the devnet until T14. On mainnet and testnet, the call reverts with `UnknownFunctionSelector`.
+A registered account answers ERC-1271 `isValidSignature`, so Permit2 and other contracts that check signatures that way accept its signers' approvals unchanged. A contract can also call `verifyConfigurableAccount` directly. It's on the [signature verifier](/docs/development/configurable-accounts#verify-owner-approvals-in-a-contract), a contract built into Tempo at `0x5165300000000000000000000000000000000000`. Like configurable accounts, `verifyConfigurableAccount` exists on testnet now and reaches mainnet with T14. On mainnet until then, the call reverts with `UnknownFunctionSelector`.
 
 ```solidity [ApprovalCheck.sol]
 // SPDX-License-Identifier: MIT

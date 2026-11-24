@@ -1,12 +1,12 @@
 /**
- * Guide demos: one script per guide, run on the Tempo Accounts devnet with the reader's own signers. Each
- * step's title matches the guide's step heading. Steps that change the account send real devnet
+ * Guide demos: one script per guide, run on the Tempo testnet with the reader's own signers. Each
+ * step's title matches the guide's step heading. Steps that change the account send real testnet
  * transactions and return their hashes; the others do a real local action (create a key) or
  * read Tempo.
  *
  * No React and no network code here: steps act through `GuideContext`, which `GuideDemo` builds
- * from the devnet adapter and `guide-demo-devnet.ts`, and which the verification script builds the
- * same way. Only types come from the devnet module, so production bundles stay free of the viem
+ * from the testnet adapter and `guide-demo-testnet.ts`, and which the verification script builds the
+ * same way. Only types come from the testnet module, so production bundles stay free of the viem
  * previews.
  */
 import {
@@ -34,7 +34,7 @@ import {
   signerKinds,
   usableSigners,
 } from './account-sandbox'
-import type { DevnetCallOptions, DevnetSessionInfo, PreparedKey } from './account-sandbox-devnet'
+import type { PreparedKey, TestnetCallOptions, TestnetSessionInfo } from './account-sandbox-testnet'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -71,31 +71,31 @@ export type DemoState = {
   held: Held
 }
 
-/** What the adapter does for a guide. `GuideDemo` passes the devnet adapter. */
+/** What the adapter does for a guide. `GuideDemo` passes the testnet adapter. */
 export type GuideAdapter = {
   sync(
     previous: SandboxAccount,
     next: SandboxAccount,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<{ account: SandboxAccount; hash?: string }>
   submit(
     account: SandboxAccount,
     request: ActionRequest,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<{ account: SandboxAccount; result: ActionResult }>
-  inspect(address: string): Promise<DevnetSessionInfo | undefined>
+  inspect(address: string): Promise<TestnetSessionInfo | undefined>
   prepareSigner(
     signer: Pick<Signer, 'kind' | 'name' | 'privateKey'>,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<PreparedKey>
-  /** Test funds from the devnet faucet. New accounts have none, and transactions need fees. */
+  /** Test funds from the testnet faucet. New accounts have none, and transactions need fees. */
   fund(
     account: SandboxAccount,
-    options?: DevnetCallOptions,
+    options?: TestnetCallOptions,
   ): Promise<{ account: SandboxAccount; hash?: string }>
 }
 
-/** Reads and local key work on devnet (`guide-demo-devnet.ts`). */
+/** Reads and local key work on testnet (`guide-demo-testnet.ts`). */
 export type GuideChain = {
   /** The address `Account.fromConfig({ address: 'infer' })` derives for this configuration. */
   inferAddress(config: {
@@ -112,7 +112,7 @@ export type GuideContext = {
   adapter: GuideAdapter
   chain: GuideChain
   /** Prepared keys and prompts for the adapter's calls. */
-  options: DevnetCallOptions
+  options: TestnetCallOptions
 }
 
 export type StepOutcome = {
@@ -133,7 +133,7 @@ export type DemoAction = {
   run: (state: DemoState, ctx: GuideContext) => Promise<StepOutcome>
 }
 
-/** What a demo needs live: devnet always, plus WebCrypto for a device key that's an access key. */
+/** What a demo needs live: testnet always, plus WebCrypto for a device key that's an access key. */
 export type Need = 'webcrypto'
 
 export type DemoScript = {
@@ -350,8 +350,8 @@ function hashes(...entries: [string, string | undefined][]) {
   return entries.flatMap(([label, hash]) => (hash ? [{ label, hash }] : []))
 }
 
-/** Which devnet keys a call may use: keys made in earlier steps. */
-export function callOptions(state: DemoState, ctx: GuideContext): DevnetCallOptions {
+/** Which testnet keys a call may use: keys made in earlier steps. */
+export function callOptions(state: DemoState, ctx: GuideContext): TestnetCallOptions {
   const { held } = state
   return {
     ...ctx.options,
@@ -376,7 +376,7 @@ export function consume(held: Held, previous: SandboxAccount, next: SandboxAccou
   }
 }
 
-/** Send an edit to devnet: the adapter applies the new configuration and access keys. */
+/** Send an edit to testnet: the adapter applies the new configuration and access keys. */
 export async function update(
   state: DemoState,
   ctx: GuideContext,
@@ -391,7 +391,7 @@ export async function update(
   }
 }
 
-/** Pay with an access key on devnet. */
+/** Pay with an access key on testnet. */
 export async function payWithKey(
   state: DemoState,
   ctx: GuideContext,
@@ -606,7 +606,7 @@ const recover: DemoScript = {
       action: () => 'Replace the device key',
       run: async (state, ctx) => {
         const info = await ctx.adapter.inspect(addressOf(state.account))
-        if (!info) throw new DemoError('This page didn’t create that account on devnet.')
+        if (!info) throw new DemoError('This page didn’t create that account on testnet.')
         const lost = configuredSigners(state.account).find((signer) => signer.lost)
         if (!lost) throw new DemoError('No lost signer to replace.')
         const approvers = nextApprovers(state.account)
@@ -662,7 +662,7 @@ const deviceKeyAccount = (title: string): DemoAction => ({
     const created = await createAccount(state, ctx, 'device')
     return {
       state: created.state,
-      result: `Created ${short(addressOf(created.state.account))} with a device key on this browser as its only signer. The devnet faucet funded it.`,
+      result: `Created ${short(addressOf(created.state.account))} with a device key on this browser as its only signer. The testnet faucet funded it.`,
       hashes: hashes(['Faucet', created.hash]),
     }
   },

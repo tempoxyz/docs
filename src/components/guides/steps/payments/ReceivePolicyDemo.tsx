@@ -9,7 +9,7 @@ import {
   type TransactionReceipt,
 } from 'viem'
 import { generatePrivateKey } from 'viem/accounts'
-import { tempoDevnet } from 'viem/chains'
+import { tempoModerato } from 'viem/chains'
 import { Abis, Account, Actions, Addresses, createClient, http } from 'viem/tempo'
 import LucideCheck from '~icons/lucide/check'
 import LucideCopy from '~icons/lucide/copy'
@@ -18,14 +18,14 @@ import { alphaUsd, betaUsd } from '../../tokens'
 import * as ui from './ReceivePolicyDemo.recipes'
 
 const amount = 1_000_000n
-/** Runs on the Tempo Accounts devnet through the docs' RPC proxy, loaded on first use. */
+/** Runs on Tempo testnet, loaded on first use. */
 async function newClient() {
-  const { devnetRpcUrl } = await import('../../account-sandbox-devnet')
+  const { testnetRpcUrl } = await import('../../account-sandbox-testnet')
   return createClient({
     account: Account.fromSecp256k1(generatePrivateKey()),
-    chain: tempoDevnet,
+    chain: tempoModerato,
     feeToken: alphaUsd,
-    transport: http(devnetRpcUrl),
+    transport: http(testnetRpcUrl),
   })
 }
 type DemoClient = Awaited<ReturnType<typeof newClient>>
@@ -211,9 +211,9 @@ export function ReceivePolicyDemo() {
   return (
     <div {...ui.receivePolicyDemoLayout()} data-testid="receive-policy-demo">
       <p {...ui.receivePolicyDemoDescription()}>
-        Tempo Accounts devnet · temporary account · 1 token per payment. Both payments go to this
-        account; AlphaUSD stays available, while BetaUSD moves into the guard until recovered.
-        Reloading discards this test account's signing key.
+        Tempo testnet · temporary account · 1 token per payment. Both payments go to this account;
+        AlphaUSD stays available, while BetaUSD moves into the guard until recovered. Reloading
+        discards this test account's signing key.
       </p>
       <Step
         number={1}
@@ -348,7 +348,7 @@ export function ReceivePolicyDemo() {
   )
 }
 
-/** A transaction hash with a copy button. This devnet has no public explorer. */
+/** A transaction hash with a copy button. */
 function TxHash({ hash }: { hash: Hash }) {
   return <CopyValue label="Transaction" name="transaction hash" value={hash} />
 }
