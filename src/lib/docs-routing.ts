@@ -43,9 +43,10 @@ export const proxiedLegacyDocsRoutes = [
     source: '/docs/api/routes/quotes',
     destination: '/docs/api/routes/transfers#quoteroutestransfer',
   },
+  { source: '/docs/guide/use-accounts', destination: '/docs/accounts' },
   {
     source: '/docs/guide/use-accounts/embed-passkeys',
-    destination: 'https://accounts.tempo.xyz/docs/adapters/webauthn',
+    destination: '/docs/accounts/authentication/passkeys',
   },
   {
     source: '/docs/guide/use-accounts/add-funds',
@@ -180,6 +181,11 @@ export const legacyDocsHostRoutes = [
   {
     source: '/network-upgrades',
     destination: `${canonicalDevelopersOrigin}/docs/guide/node/network-upgrades`,
+  },
+  { source: '/guide/use-accounts', destination: `${canonicalDevelopersOrigin}/docs/accounts` },
+  {
+    source: '/guide/use-accounts/embed-passkeys',
+    destination: `${canonicalDevelopersOrigin}/docs/accounts/authentication/passkeys`,
   },
   {
     source: '/guide/use-accounts/add-funds',
@@ -330,6 +336,21 @@ export const routingSmokeCases = {
     {
       path: '/accounts/server/handler.relay',
       expectedLocation: `${canonicalDevelopersOrigin}/docs/api/fee-payer`,
+      expectedFinalStatus: 200,
+    },
+    {
+      path: '/guide/use-accounts/embed-passkeys',
+      expectedLocation: `${canonicalDevelopersOrigin}/docs/accounts/authentication/passkeys`,
+      expectedFinalStatus: 200,
+    },
+    {
+      path: '/zones/connect',
+      expectedLocation: `${canonicalDevelopersOrigin}/docs/zones/connect`,
+      expectedFinalStatus: 200,
+    },
+    {
+      path: '/earn',
+      expectedLocation: `${canonicalDevelopersOrigin}/docs/earn`,
       expectedFinalStatus: 200,
     },
     {
