@@ -69,7 +69,7 @@ const updates = await client.getContractEvents({ // [!code hl]
       'event ConfigurableAccountConfigUpdated(address indexed account, bytes32 salt, uint64 version, uint8 threshold, (address owner, uint8 weight)[] owners)', // [!code hl]
     ), // [!code hl]
   ], // [!code hl]
-  address: Addresses.nativeMultisig,
+  address: Addresses.configurableAccount,
   eventName: 'ConfigurableAccountConfigUpdated', // [!code hl]
   args: { account: account.address },
   fromBlock: latestBlock - 99_999n,
