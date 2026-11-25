@@ -7,7 +7,7 @@ export const tempoPluginInstallCommands = {
 /** Agent-specific setup paths shared by the homepage and header. */
 export const tempoAgentSetupCommands = {
   ...tempoPluginInstallCommands,
-  amp: 'amp mcp add tempo https://mcp.tempo.xyz',
+  amp: 'amp mcp add tempo https://tempo.com/api/mcp/',
   skills: 'npx skills add tempoxyz/plugins --skill docs',
-  mcp: 'https://mcp.tempo.xyz',
+  mcp: 'https://tempo.com/api/mcp/',
 } as const

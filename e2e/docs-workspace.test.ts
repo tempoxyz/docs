@@ -33,7 +33,7 @@ const homeAgentSetups = [
   },
   {
     label: 'Amp',
-    command: 'amp mcp add tempo https://mcp.tempo.xyz',
+    command: 'amp mcp add tempo https://tempo.com/api/mcp/',
     instruction: /MCP/,
     install: /^Install Amp/,
   },
@@ -45,7 +45,7 @@ const homeAgentSetups = [
   },
   {
     label: 'MCP',
-    command: 'https://mcp.tempo.xyz',
+    command: 'https://tempo.com/api/mcp/',
     instruction: /HTTP MCP server/i,
     install: null,
   },

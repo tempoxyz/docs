@@ -38,7 +38,7 @@ Use current Zones pages before the earlier `/docs/guide/private-zones` sandbox w
 
 ## Find and read the evidence
 
-Prefer the hosted MCP server at `https://mcp.tempo.xyz` when available:
+Prefer the hosted MCP server at `https://tempo.com/api/mcp/` when available:
 
 | Tool | Use it to… |
 | --- | --- |
