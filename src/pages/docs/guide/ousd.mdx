@@ -49,6 +49,8 @@ OUSD is also listed in the [Tempo token list](/docs/quickstart/tokenlist).
 | **pathUSD** | Root quote token on the Stablecoin DEX and the protocol's first fallback fee token | Routing between stablecoins. Most users never need to hold it directly. |
 | **USDC.e** | USDC bridged from other chains through Stargate | Bringing USDC to Tempo from another chain, before swapping to OUSD |
 
+pathUSD is the root quote token on the Stablecoin DEX: swaps between USD stablecoins route through it. It is also the first token the protocol's [fee fallback](/docs/protocol/fees/spec-fee#ordered-fallback-from-t13) tries, before OUSD.
+
 pathUSD and USDC.e remain fully supported. Existing integrations that use them keep working without changes.
 
 ## Move to OUSD from USDC.e or pathUSD

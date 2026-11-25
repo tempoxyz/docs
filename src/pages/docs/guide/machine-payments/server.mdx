@@ -13,6 +13,12 @@ import { Card, Cards } from 'vocs'
 
 Add payment verification to an API endpoint. Use the `mppx` middleware for your framework, or call `mppx/server` with the Fetch API.
 
+Every server needs three settings:
+
+- **`MPP_SECRET_KEY`**: a secret that authenticates payment challenges.
+- **`currency`**: the TIP-20 token to charge in, such as [OUSD](/docs/guide/ousd) (`0x20c0000000000000000000006a37da5c996874be`) on Tempo Mainnet.
+- **`recipient`**: the address that receives payments.
+
 ## Set the server secret
 
 `Mppx.create()` requires a server secret to authenticate payment challenges. Generate one before starting the server:

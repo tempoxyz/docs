@@ -43,6 +43,8 @@ const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
 With Tempo, you can also use passkey or WebCrypto signing.
 :::
 
+Pass this account to the Tempo method as `tempo({ account })`, or on each request as shown in [per-request payer accounts](#use-per-request-payer-accounts). `Mppx.create` takes no top-level `account`.
+
 ### Create the MPP payment handler
 
 Call `Mppx.create` at startup. This polyfills `fetch` to automatically handle `402` payment challenges.
