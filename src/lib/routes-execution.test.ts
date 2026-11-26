@@ -151,6 +151,10 @@ it('falls back to the docs quote proxy while the API still requires a key', asyn
     .mockResolvedValueOnce(
       Response.json({ error: { code: 'routes_not_allowed' }, requestId: 'r' }, { status: 403 }),
     )
+    .mockResolvedValueOnce(missing())
+    .mockResolvedValueOnce(
+      new Response('<!DOCTYPE html><title>Page not found</title>', { status: 404 }),
+    )
   vi.stubGlobal('fetch', fetcher)
   const quote = quoteRequest(route, { ...input, method: 'depositAddress' })
   await executeRoutesRequest(quote, '')
@@ -171,6 +175,9 @@ it('falls back to the docs quote proxy while the API still requires a key', asyn
   })
   await expect(executeRoutesRequest(quote, '')).rejects.toThrow(
     'The docs demo key cannot quote this route. Add your project API key to quote this route. (routes_not_allowed · request r)',
+  )
+  await expect(executeRoutesRequest(quote, '')).rejects.toThrow(
+    'The docs demo quote service is unavailable. Add your project API key to quote. (quote_proxy_unavailable)',
   )
 })
 it('runs deposit quote, creation, paginated discovery and individual status reads', async () => {
