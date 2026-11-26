@@ -405,7 +405,9 @@ This enables node recovery and late joining without historical account state.
 
 ### Migration from V1
 
-On networks that start directly with V2 (no V1 state), the V2 precompile is initialized at genesis. `initializeIfMigrated` reverts with `EmptyV1ValidatorSet` when the V1 validator count is zero.
+On networks that start directly with V2 (no V1 state), the V2 precompile is initialized at genesis. Calling `initializeIfMigrated()` after initialization reverts with `AlreadyInitialized`.
+
+For an uninitialized V2 with no owner set, migration first reads the V1 validator set. An empty V1 set reverts with `EmptyV1ValidatorSet`.
 
 Because `SSTORE` cost is high under TIP-1000, migration is done one validator at a time to reduce out-of-gas risk on large sets.
 
