@@ -219,7 +219,7 @@ Each authorization in the list:
 **Implementation Note:** Nonces are stored in the storage of a designated precompile at address `0x4E4F4E4345000000000000000000000000000000` (ASCII hex for "NONCE"), as there is currently no clean way to extend account state in Reth.
 
 **Storage Layout at 0x4E4F4E4345:**
-- Storage key: `keccak256(abi.encode(account_address, nonce_key))`
+- Storage key: `keccak256(abi.encode(nonce_key, keccak256(abi.encode(account_address, 0))))` (Solidity nested mapping at slot 0)
 - Storage value: `nonce` (uint64)
 
 Note: Protocol Nonce key (0), is directly stored in the account state, just like normal transaction types.
@@ -257,12 +257,15 @@ interface INonce {
 
 #### Precompile Implementation
 
-The precompile contract maintains a single storage mapping:
+The precompile contract maintains the nonce mapping and expiring-nonce replay storage:
 
 ```solidity
 contract Nonce is INonce {
     /// @dev Mapping from account -> nonce key -> nonce value
-    mapping(address => mapping(uint256 => uint64)) private nonces;
+    mapping(address => mapping(uint256 => uint64)) private nonces;            // slot 0
+    mapping(bytes32 => uint64) private expiringNonceSeen;                     // slot 1: replay hash => expiry
+    mapping(uint32 => bytes32) private expiringNonceRing;                     // slot 2: circular buffer of replay hashes
+    uint32 private expiringNonceRingPtr;                                      // slot 3: circular buffer position
 }
 ```
 
@@ -271,6 +274,12 @@ contract Nonce is INonce {
 Existing nonce streams and new nonce streams have different costs. New streams create storage; protocol nonce zero can also incur first-account costs. See [nonce gas accounting](#nonce-key-gas-schedule), and use `eth_estimateGas` against the target network rather than assuming the pre-launch 22,100-gas storage cost.
 
 ### Transaction Validation
+
+#### Call Validation
+
+- Every call MUST have `value = 0`; nonzero native value transfers are invalid.
+- At most one call MAY use `to = Create`, and it MUST be the first call in the batch.
+- Creation calls are invalid when `aa_authorization_list` is nonempty or the transaction uses an access key.
 
 #### Signature Validation
 1. Determine type from signature format:
@@ -406,7 +415,7 @@ fee_payer_hash = keccak256(0x78 || rlp([  // Note: 0x78 magic byte
   - Fee payer defaults to sender address (self-paid transaction)
 
 **Token Preference:**
-- When `fee_token` is `Some(address)`, this overrides any account/validator-level preferences
+- When `fee_token` is `Some(address)`, this overrides the fee payer's account-level preference; it doesn't change the validator's token preference, which still sets the token the validator receives
 - Validation ensures the token is a valid TIP-20 token with sufficient balance/liquidity
 - Failures reject the transaction before execution (see Token Preferences spec)
 
@@ -564,7 +573,7 @@ chain_id = u64 (MUST equal the executing chain ID; zero is not a wildcard)
 key_type = 0 (Secp256k1) | 1 (P256) | 2 (WebAuthn)
 key_id = Address (derived from the public key)
 expiry = Option<NonZeroU64> (nonzero unix timestamp, None = never expires; omitted expiry is translated to u64::MAX when the protocol calls the precompile)
-limits = Option<Vec<[token, limit, period]>> (None = unlimited spending; period = 0 means one-time)
+limits = Option<Vec<[token, limit, period?]>> (None = unlimited spending; omitted period means one-time)
 allowed_calls = Option<Vec<[target, [[selector, [recipient, ...]], ...]]>> (None = unrestricted; Some([]) = scoped deny-all)
 witness = Option<bytes32> (app-defined witness digest)
 is_admin = Option<bool> (true provisions an admin access key)
@@ -573,17 +582,17 @@ account = Option<Address> (required when an admin access key signs the authoriza
 
 **Signed Format:**
 
-The signed format (`SignedKeyAuthorization`) includes all fields with the `signature` appended:
+The signed format (`SignedKeyAuthorization`) is a two-item list of the unsigned authorization list and the `signature`:
 
 ```
-signed_key_authorization = rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?, signature])
+signed_key_authorization = rlp([[chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?], signature])
 ```
 
 The `signature` is a `PrimitiveSignature` (secp256k1, P256, or WebAuthn) signed by the root key or an active admin access key.
 
 Note: `expiry`, `limits`, `allowed_calls`, `witness`, `is_admin`, and `account` use RLP trailing field semantics — they can be omitted entirely when None.
 
-When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` must be omitted or empty because admin keys are only for key management. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
+When `is_admin` is `true`, `expiry`, `limits`, and `allowed_calls` MUST be absent (`None`); present empty lists (`Some([])`) are invalid because admin keys are unrestricted: no spending limits, call scopes, or expiry apply to them. When an admin access key signs the authorization, `account` must be present and must equal the account being modified.
 
 :::warning[Expiry encoding]
 For `key_authorization`, the canonical non-expiring encoding omits `expiry` (`None`).
@@ -618,7 +627,8 @@ When a TempoTransaction is received, the protocol:
    - The Root Key or an active admin access key MUST sign:
      - The `key_authorization` digest: `keccak256(rlp([chain_id, key_type, key_id, expiry?, limits?, allowed_calls?, witness?, is_admin?, account?]))`
    - If an admin access key signs the authorization, the `account` field must be present and must equal the account being modified
-   - Access Key (being authorized) CAN sign the same tx which it is authorized in.
+   - If an admin access key signs the authorization, the transaction MUST be signed by that same admin access key with the same signature type; the Access Key being authorized cannot sign it
+   - If the Root Key signs the authorization, the Access Key (being authorized) CAN sign the same tx which it is authorized in.
    - This enables "authorize and use" in a single transaction
 
 3. **Sets transaction context**
@@ -629,6 +639,7 @@ When a TempoTransaction is received, the protocol:
 4. **Validates Key Authorization** (for Access Keys)
    - Queries precompile: `getKey(account, keyId)` returns `KeyInfo`
    - Checks key is active (not revoked)
+   - Checks the inner signature type equals the key's stored `key_type` (P256 and WebAuthn are distinct), otherwise rejects with `SignatureTypeMismatch`; a key authorized in the same transaction must have `key_type` matching the inner signature type
    - Checks expiry: `current_timestamp < expiry`; non-expiring keys are stored with `expiry = u64::MAX`
    - Rejects transaction if validation fails
 
@@ -668,7 +679,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 **Scope:** Direct TIP-20 transfers and approval increases are tracked, along with account-paid fees and token pulls by approved protocol precompiles. T12 additionally tracks `burnAt` when burning the transaction originator's tokens.
 - Spending limits only apply when `msg.sender == tx.origin` (direct EOA calls)
 - When a contract makes transfers on behalf of the user, spending limits do NOT apply (e.g., `transferFrom()`)
-- Native value transfers are NOT limited
+- Native value transfers are unsupported: every Tempo call MUST have `value = 0`
 - NFT transfers are NOT limited
 - Other asset types are NOT limited
 
@@ -684,7 +695,7 @@ The protocol tracks and enforces spending limits for TIP20 token transfers:
 
 **Root Key Behavior:** Spending limit checks are skipped entirely (no limits apply)
 
-**Recurring Limits:** When a `TokenLimit.period` is non-zero, the limit recurs. `remaining` rolls over to `max` once `current_timestamp >= periodEnd`, and `periodEnd` advances by `period`. Callers observe rollover state via `getRemainingLimitWithPeriod`.
+**Recurring Limits:** When a `TokenLimit.period` is non-zero, the limit recurs. `remaining` rolls over to `max` once `current_timestamp >= periodEnd`, and `periodEnd` advances by the smallest whole number of `period`s that puts it after `current_timestamp`. Callers observe rollover state via `getRemainingLimitWithPeriod`.
 
 **Limit Updates:**
 - Limits deplete as tokens are spent
@@ -754,15 +765,22 @@ The following is encoding pseudocode, not a runnable SDK example. Helper names s
    ```
 
 4. **Build TempoTransaction**
+
+   Estimate gas for the complete request, including `key_authorization`, using the intended access key's signature type. Populate `estimatedGasLimit`, `estimatedMaxFeePerGas`, and `estimatedMaxPriorityFeePerGas` from current RPC estimates before signing.
+
    ```typescript
    const tx = {
      chain_id: 42431, // Moderato testnet
      nonce: await getNonce(account),
      nonce_key: 0,
-     calls: [{ to: recipient, value: 0, input: "0x" }],
-     gas_limit: 200000,
-     max_fee_per_gas: 1000000000,
-     max_priority_fee_per_gas: 1000000000,
+     calls: [{
+       to: USDG_ADDRESS,
+       value: 0,
+       input: encodeCall("transfer", [TRUSTED_RECIPIENT, 1000000])
+     }],
+     gas_limit: estimatedGasLimit,
+     max_fee_per_gas: estimatedMaxFeePerGas,
+     max_priority_fee_per_gas: estimatedMaxPriorityFeePerGas,
      key_authorization: {
        authorization: keyAuth,
        signature: rootSignature  // Root Key's signature on authDigest
@@ -916,7 +934,7 @@ Different signature types incur different base transaction costs to reflect thei
 |----------------|---------------|-------------|-----------|
 | **secp256k1** | 21,000 | Standard | Includes 3,000 gas for ecrecover precompile |
 | **P256** | 26,000 | 21,000 + 5,000 | Base 21k + additional 5k for P256 verification |
-| **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for clientDataJSON) | Base P256 cost plus variable cost for clientDataJSON based on size |
+| **WebAuthn** | 26,000 + variable data cost | 26,000 + (calldata gas for `authenticatorData \|\| clientDataJSON`) | Base P256 cost plus variable cost for the concatenated WebAuthn data |
 | **Keychain** | Inner signature + 3,000 | primitive_sig_cost + 3,000 | Inner signature cost + key validation overhead (2,100 SLOAD + 900 buffer) |
 
 **Rationale:**

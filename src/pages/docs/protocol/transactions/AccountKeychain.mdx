@@ -44,7 +44,7 @@ Access Keys are secondary signing keys authorized by an account's Root Key or an
   - Limits can be updated by the Root Key or an active admin access key via `updateSpendingLimit()`. An update resets `remaining` and `max` to `newLimit` but preserves the configured `period` and current `periodEnd`.
   - Spending limits cover direct TIP-20 transfers, increases in approvals, fee payments by the account, and token pulls by approved protocol precompiles. T12 also charges `burnAt` when it burns the transaction originator's tokens.
   - Direct token-call enforcement applies when `msg.sender == tx.origin`; protocol fee and implicit-approval paths enforce their own checks against the account.
-  - Native value transfers and `transferFrom()` are NOT limited
+  - `transferFrom()` is NOT limited. Tempo Transactions reject nonzero call `value`, so native value transfers are unsupported.
 - **Call Scopes**: An Access Key is either unrestricted (`allowAnyCalls = true`) or restricted to an explicit allowlist of `(target, selector, recipients)` tuples. An empty allowlist with `allowAnyCalls = false` means scoped deny-all.
 - **No transaction-level creation**: An access-key transaction cannot include a creation call (`TxKind::Create`). This does not prohibit `CREATE` or `CREATE2` inside a permitted factory call.
 - **Privilege Restrictions**: Limited access keys cannot authorize new keys or modify their own limits or scopes. Admin access keys can manage keys, but cannot carry spending limits, call scopes, or expiry.
@@ -77,7 +77,7 @@ The precompile uses a `keyId` (address) to uniquely identify each access key for
 - `keys[account][keyId]` → Packed `AuthorizedKey` struct (signature type, expiry, enforce_limits, is_revoked, is_admin)
 - `spendingLimits[keccak256(account || keyId)][token]` → `SpendingLimitState { remaining, max, period, periodEnd }`
 - `keyScopes[keccak256(account || keyId)]` → Tree of `(target, selector, recipients)` allowlists used during call-scope checks
-- `transactionKey` → Transient storage for the key ID that signed the current transaction (slot 0)
+- `transactionKey` → Transient storage for the key ID that signed the current transaction (slot 4)
 
 **AuthorizedKey Storage Layout (packed into single slot):**
 - byte 0: signature_type (u8)
@@ -326,6 +326,7 @@ Burning a witness does not revoke keys already authorized with it; use `revokeKe
 **Requirements:**
 - MUST be called by the Root Key or an active admin access key
 - `keyId` MUST exist and not be revoked
+- `keyId` MUST not be expired (reverts with `KeyExpired`)
 - `keyId` MUST not be an admin access key, because admin keys do not carry call scopes (reverts with `InvalidKeyId`)
 
 ### View Behavior

@@ -108,6 +108,10 @@ interface IValidatorConfigV2 {
     /// @notice Ed25519 signature verification failed.
     error InvalidSignature();
 
+    error InvalidSignatureFormat();
+
+    error InvalidOwner();
+
     /// @notice Contract is not initialized.
     error NotInitialized();
 
@@ -151,10 +155,10 @@ interface IValidatorConfigV2 {
         address validatorAddress;
         string ingress;
         string egress;
+        address feeRecipient;
         uint64 index;
         uint64 addedAtHeight;
         uint64 deactivatedAtHeight;
-        address feeRecipient;
     }
 
     /// @notice Get active validators.
@@ -186,7 +190,7 @@ interface IValidatorConfigV2 {
 
     /// @notice Get next epoch configured for a fresh DKG ceremony.
     /// @return epoch Epoch number, or `0` if none is scheduled.
-    function getNextFullDkgCeremony() external view returns (uint64);
+    function getNextNetworkIdentityRotationEpoch() external view returns (uint64);
 
     /// @notice Add a new validator (owner only)
     /// @dev Requires Ed25519 signature over a unique digest generated from inputs. 
@@ -255,7 +259,7 @@ interface IValidatorConfigV2 {
 
     /// @notice Set next fresh DKG ceremony epoch (owner only).
     /// @param epoch Epoch where ceremony runs (`epoch + 1` uses new polynomial).
-    function setNextFullDkgCeremony(uint64 epoch) external;
+    function setNetworkIdentityRotationEpoch(uint64 epoch) external;
 
     /// @notice Migrate one validator by V1 index (owner only).
     /// @param idx V1 validator index.
@@ -401,7 +405,9 @@ This enables node recovery and late joining without historical account state.
 
 ### Migration from V1
 
-On networks that start directly with V2 (no V1 state), `initializeIfMigrated` can be called immediately when the V1 validator count is zero.
+On networks that start directly with V2 (no V1 state), the V2 precompile is initialized at genesis. Calling `initializeIfMigrated()` after initialization reverts with `AlreadyInitialized`.
+
+For an uninitialized V2 with no owner set, migration first reads the V1 validator set. An empty V1 set reverts with `EmptyV1ValidatorSet`.
 
 Because `SSTORE` cost is high under TIP-1000, migration is done one validator at a time to reduce out-of-gas risk on large sets.
 
@@ -478,5 +484,5 @@ Unit tests should cover all control-flow branches in added functions, including 
 2. **Initialized once**: The `initialized` flag can only transition from `false` to `true`, never back.
 3. **Migration completion gate**: Each V1 index must be processed exactly once (migrated or skipped), and `initializeIfMigrated()` stays blocked until all indices are processed.
 4. **Skipped-index counter monotonicity**: `migrationSkippedCount` is monotonically non-decreasing and may only change during `migrateValidator`.
-5. **DKG continuity at initialization**: On successful `initializeIfMigrated`, `getNextFullDkgCeremony()` in V2 equals the value read from V1 at that moment.
+5. **DKG continuity at initialization**: On successful `initializeIfMigrated`, `getNextNetworkIdentityRotationEpoch()` in V2 equals the value read from V1 at that moment.
 6. **Owner bootstrap during migration**: If V2 owner is unset on first migration call, owner is copied from V1 exactly once and then used for all migration authorization checks.
