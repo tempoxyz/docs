@@ -761,6 +761,9 @@ The following is encoding pseudocode, not a runnable SDK example. Helper names s
    ```
 
 4. **Build TempoTransaction**
+
+   Estimate gas for the complete request, including `key_authorization`, using the intended access key's signature type. Populate `estimatedGasLimit`, `estimatedMaxFeePerGas`, and `estimatedMaxPriorityFeePerGas` from current RPC estimates before signing.
+
    ```typescript
    const tx = {
      chain_id: 42431, // Moderato testnet
@@ -771,9 +774,9 @@ The following is encoding pseudocode, not a runnable SDK example. Helper names s
        value: 0,
        input: encodeCall("transfer", [TRUSTED_RECIPIENT, 1000000])
      }],
-     gas_limit: 200000,
-     max_fee_per_gas: 1000000000,
-     max_priority_fee_per_gas: 1000000000,
+     gas_limit: estimatedGasLimit,
+     max_fee_per_gas: estimatedMaxFeePerGas,
+     max_priority_fee_per_gas: estimatedMaxPriorityFeePerGas,
      key_authorization: {
        authorization: keyAuth,
        signature: rootSignature  // Root Key's signature on authDigest
