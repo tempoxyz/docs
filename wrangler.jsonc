@@ -4,7 +4,7 @@
   "main": "worker/index.ts",
   "account_id": "ba6ee3674b03f08481e57ff9992c601e",
   "compatibility_date": "2026-10-23",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public", "enable_request_signal"],
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "tempo-docs.tehq.net", "custom_domain": true }],

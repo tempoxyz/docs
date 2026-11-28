@@ -60,7 +60,7 @@ describe('Routes quote proxy', () => {
       'https://api.tempo.xyz/v1/routes/deposit-addresses/quote?amount=1000000&sourceChain=eip155%3A8453&subsidize=true',
     )
     expect(init?.headers).toEqual({ 'tempo-api-key': 'docs-key' })
-    expect(init?.redirect).toBe('error')
+    expect(init?.redirect).toBe('manual')
   })
 
   test.each([

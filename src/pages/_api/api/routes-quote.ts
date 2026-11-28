@@ -64,9 +64,13 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const response = await fetch(target, {
       headers: { 'tempo-api-key': key },
-      redirect: 'error',
+      redirect: 'manual',
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(15_000)]),
     })
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel()
+      throw new Error('Unexpected quote service redirect')
+    }
     return new Response(await response.text(), {
       status: response.status,
       headers: {

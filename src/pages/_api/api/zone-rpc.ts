@@ -71,9 +71,13 @@ export async function POST(request: Request): Promise<Response> {
       method: 'POST',
       headers,
       body,
-      redirect: 'error',
+      redirect: 'manual',
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(15_000)]),
     })
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel()
+      throw new Error('Unexpected Zone RPC redirect')
+    }
     const responseBody = await readLimitedBody(response.body, maxResponseBytes)
     return new Response(responseBody || null, {
       status: response.status,
