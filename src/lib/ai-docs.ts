@@ -58,7 +58,7 @@ export function parseAiIndex(content: string): AiIndexEntry[] {
 
 export function aiDocsNotice() {
   return [
-    '> Tempo MCP: Use `search`, `find_pages`, `read_page`, and `code` at `https://mcp.tempo.xyz` for Tempo and related documentation.',
+    '> Tempo MCP: Use `search`, `find_pages`, `read_page`, and `code` at `https://tempo.com/api/mcp/` for Tempo and related documentation.',
     '> If an indexed page is missing or reflects an older site, read this site’s [documentation index](/llms.txt) and Markdown pages directly.',
     '',
   ].join('\n')

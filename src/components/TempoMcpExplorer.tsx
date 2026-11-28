@@ -7,7 +7,7 @@ import LucideRotateCcw from '~icons/lucide/rotate-ccw'
 import { Container } from './Container'
 import * as ui from './TempoMcpExplorer.recipes'
 
-const MCP_ENDPOINT = 'https://mcp.tempo.xyz'
+const MCP_ENDPOINT = 'https://tempo.com/api/mcp/'
 const DEFAULT_SOURCE = 'tempo'
 
 const TOOLS = [

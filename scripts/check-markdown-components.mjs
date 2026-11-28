@@ -33,7 +33,7 @@ for (const file of generatedFiles) {
   if (hiddenFallback) hiddenChangelogFallbacks.push(file)
   parsedContents.push({ file, content: maskedContent })
   if (
-    !content.includes('https://mcp.tempo.xyz') ||
+    !content.includes('https://tempo.com/api/mcp/') ||
     !content.includes('`search`') ||
     !content.includes('`find_pages`') ||
     !content.includes('`read_page`') ||

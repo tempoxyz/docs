@@ -90,26 +90,29 @@ function authoredH1(source: string): string | undefined {
 }
 
 describe('docs SEO metadata', () => {
-  test('keeps audited page titles, H1s, and SEO titles aligned', () => {
-    const auditedPages = docsFiles()
-      .map((file) => ({ file, source: fs.readFileSync(file, 'utf8') }))
-      .filter(
-        ({ file, source }) =>
-          /^seoTitle:/m.test(source) && path.relative(docsRoot, file) !== 'api/reference.mdx',
-      )
+  const auditedPages = docsFiles()
+    .map((file) => ({
+      file,
+      page: path.relative(docsRoot, file),
+      source: fs.readFileSync(file, 'utf8'),
+    }))
+    .filter(({ page, source }) => /^seoTitle:/m.test(source) && page !== 'api/reference.mdx')
 
+  test('covers the audited pages', () => {
     expect(auditedPages.length).toBeGreaterThanOrEqual(115)
+  })
 
-    for (const { file, source } of auditedPages) {
-      const title = frontmatterString(source, 'title')
-      const seoTitle = frontmatterString(source, 'seoTitle')
+  // Give each page its own timeout instead of timing the whole documentation corpus.
+  test.each(auditedPages)('aligns titles, H1s, and SEO titles for $page', ({ file, source }) => {
+    const title = frontmatterString(source, 'title')
+    const seoTitle = frontmatterString(source, 'seoTitle')
+    const h1 = authoredH1(source)
 
-      expect(title, file).toBeTruthy()
-      expect(authoredH1(source), file).toBe(title)
-      expect(seoTitle, file).toBeTruthy()
-      expect(seoTitle, file).not.toContain('—')
-      expect(authoredH1(source), file).not.toContain('—')
-    }
+    expect(title, file).toBeTruthy()
+    expect(h1, file).toBe(title)
+    expect(seoTitle, file).toBeTruthy()
+    expect(seoTitle, file).not.toContain('—')
+    expect(h1, file).not.toContain('—')
   })
 
   test('keeps jxom-authored API metadata outside the audit rewrite', () => {

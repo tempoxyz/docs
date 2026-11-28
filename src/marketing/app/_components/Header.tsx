@@ -133,7 +133,7 @@ const developersMenu: MegaMenuData = {
 
 const TEMPO_AI_GUIDE_URL = developersPath('/docs/guide/using-tempo-with-ai')
 const TEMPO_PLUGIN_URL = `${TEMPO_AI_GUIDE_URL}#install-tempo-plugins`
-const TEMPO_MCP_URL = 'https://mcp.tempo.xyz'
+const TEMPO_MCP_URL = 'https://tempo.com/api/mcp/'
 
 type MenuItem = { label: string; href: string; mega?: MegaMenuData }
 

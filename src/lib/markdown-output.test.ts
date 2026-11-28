@@ -212,7 +212,7 @@ Read the account's transfer history.
     const output = await render('<DocsHomeAgent />')
     expect(output).toContain('codex plugin add docs@tempo')
     expect(output).toContain('claude plugin install docs@tempo')
-    expect(output).toContain('amp mcp add tempo https://mcp.tempo.xyz')
+    expect(output).toContain('amp mcp add tempo https://tempo.com/api/mcp/')
     expect(output).toContain('npx skills add tempoxyz/plugins --skill docs')
     expect(output).toContain('[All setup options](/docs/guide/using-tempo-with-ai)')
     expect(output).not.toContain('test payment')
@@ -310,7 +310,7 @@ Read the account's transfer history.
 
 Status: <Badge variant="red">Required</Badge>
 
-<DocsLinkButton href="https://mcp.tempo.xyz">Open MCP server</DocsLinkButton>
+<DocsLinkButton href="https://tempo.com/api/mcp/">Open MCP server</DocsLinkButton>
 `)
 
     expect(output).toContain('```mermaid')
@@ -318,7 +318,7 @@ Status: <Badge variant="red">Required</Badge>
     expect(output).toContain('> **Note**')
     expect(output).toContain('All RPC nodes are trustless.')
     expect(output).toContain('Status: **Required**')
-    expect(output).toContain('[Open MCP server](https://mcp.tempo.xyz)')
+    expect(output).toContain('[Open MCP server](https://tempo.com/api/mcp/)')
     expect(output).not.toMatch(/<\/?[A-Z]/)
   })
 
