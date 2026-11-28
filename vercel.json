@@ -2020,12 +2020,12 @@
     },
     {
       "source": "/accounts",
-      "destination": "https://accounts.tempo.xyz",
+      "destination": "https://accounts.tempo.com",
       "permanent": true
     },
     {
       "source": "/accounts/:path*",
-      "destination": "https://accounts.tempo.xyz/:path*",
+      "destination": "https://accounts.tempo.com/:path*",
       "permanent": true
     },
     {
