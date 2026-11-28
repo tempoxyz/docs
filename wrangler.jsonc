@@ -7,7 +7,15 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": false,
   "preview_urls": false,
-  "routes": [{ "pattern": "tempo-docs.tehq.net", "custom_domain": true }],
+  // Terraform attaches the zone routes. The deploy broker verifies them.
+  "routes": [
+    { "pattern": "tempo-docs.tehq.net", "custom_domain": true },
+    { "pattern": "developers.tempo.xyz/*", "zone_id": "d19d54c633395f37d140e83be2d2f73e" },
+    { "pattern": "docs.tempo.xyz/*", "zone_id": "d19d54c633395f37d140e83be2d2f73e" },
+    { "pattern": "faucet.tempo.xyz/*", "zone_id": "d19d54c633395f37d140e83be2d2f73e" },
+    { "pattern": "mainnet.docs.tempo.xyz/*", "zone_id": "d19d54c633395f37d140e83be2d2f73e" },
+    { "pattern": "next.docs.tempo.xyz/*", "zone_id": "d19d54c633395f37d140e83be2d2f73e" }
+  ],
   "observability": { "enabled": true },
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "rules": [{ "type": "Data", "globs": ["**/*.otf", "**/*.png", "**/*.gz"], "fallthrough": true }],
