@@ -81,7 +81,7 @@ describe('sandbox Zone RPC proxy', () => {
     expect(new Headers(init?.headers).get('authorization')).toBe(
       `Basic ${Buffer.from('eng:docs-key').toString('base64')}`,
     )
-    expect(init?.redirect).toBe('error')
+    expect(init?.redirect).toBe('manual')
     expect(init?.signal).toBeInstanceOf(AbortSignal)
     expect(await response.text()).toBe(body)
     expect(response.headers.get('cache-control')).toBe('no-store')
