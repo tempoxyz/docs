@@ -58,6 +58,27 @@ CI uploads the same gallery as `og-image-goldens`. See the
 
 The canonical public documentation URL is [`https://tempo.com/developers`](https://tempo.com/developers). This repository serves the docs application, while the Tempo web application proxies that public mount to this deployment.
 
+### Cloudflare staging
+
+Tempo's deploy broker deploys `tempo-docs` to `tempo-prd` on main. The
+staging domain is [`tempo-docs.tehq.net`](https://tempo-docs.tehq.net), reachable
+from the tailnet. Use `pnpm build:cloudflare` and `pnpm exec wrangler dev` to
+check the same assets and API handlers locally.
+
+Set the Vercel production values for `INDEXSUPPLY_API_KEY`,
+`ROUTES_QUOTE_API_KEY`, `SLACK_FEEDBACK_WEBHOOK`, and `ZONE_RPC_BASIC_AUTH`
+as Worker secrets. Semantic search uses `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN` both at build time and as runtime bindings.
+
+The GitHub Actions secret `DOCS_CLOUDFLARE_BUILD_ENV` accepts one `NAME=value`
+per line. Add the semantic search credentials there to build the Vocs index.
+Add `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`, and `VITE_GA_MEASUREMENT_ID`
+there for analytics. Vite includes these analytics settings in public client
+assets. Redeploy from main after updating build settings.
+
+Run `pnpm exec tsx scripts/smoke-cloudflare.ts https://tempo-docs.tehq.net`
+from the tailnet before changing the Tempo web proxy's origin.
+
 ```mermaid
 flowchart LR
   Legacy["docs.tempo.xyz\nnext.docs.tempo.xyz"] -->|"301"| Canonical["tempo.com/developers"]

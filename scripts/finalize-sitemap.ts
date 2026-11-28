@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { deployEnvironment } from '../src/lib/deploy-environment.ts'
 import { finalizeSitemap } from '../src/lib/sitemap.ts'
 
 const distSitemapPath = path.resolve('dist/public/sitemap.xml')
@@ -57,7 +58,7 @@ await writeFinalizedSitemap(vercelSitemapPath, openApiRouteSlugs)
 if (wroteDistSitemap) process.exit(0)
 
 const canSkipMissingSitemap =
-  process.env.VITE_E2E === 'true' || process.env.VERCEL_ENV !== 'production'
+  process.env.VITE_E2E === 'true' || deployEnvironment() !== 'production'
 
 if (canSkipMissingSitemap) process.exit(0)
 

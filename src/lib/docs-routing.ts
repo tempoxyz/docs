@@ -1,3 +1,5 @@
+import { deployEnvironment } from './deploy-environment'
+
 export type DocsRouteContract = {
   source: string
   destination: string
@@ -19,7 +21,7 @@ export const developerSurfaceRedirects = [
 // through unchanged, so a root-relative destination would leave the mount and take the public
 // site's own redirect back into it. Production names the canonical URL so each retired route
 // lands in one hop; previews serve the docs at their own root.
-export function docsRouteDestination(destination: string, environment = process.env.VERCEL_ENV) {
+export function docsRouteDestination(destination: string, environment = deployEnvironment()) {
   if (environment !== 'production' || !destination.startsWith('/')) return destination
   return `${canonicalDevelopersOrigin}${destination === '/' ? '' : destination}`
 }
