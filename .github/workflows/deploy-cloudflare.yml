@@ -26,8 +26,6 @@ jobs:
       artifact-name: tempo-docs
       build-command: NODE_OPTIONS=--max-old-space-size=6144 pnpm build:cloudflare
       wrangler-config: wrangler.jsonc
-      build-cache-paths: node_modules/.cache/vocs
-      build-cache-key-files: patches/vocs@2.12.0.patch
     secrets:
       build-environment: ${{ secrets.DOCS_CLOUDFLARE_BUILD_ENV }}
 
