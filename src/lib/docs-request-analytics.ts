@@ -6,7 +6,7 @@ export async function trackDocsRequest(
   startedAt: number,
   { key, host }: { key?: string; host?: string },
 ) {
-  if (!key) return
+  if (!key || (status >= 300 && status < 400 && status !== 304)) return
   const path = new URL(request.url).pathname
   const userAgent = request.headers.get('user-agent') ?? ''
   const classification = classifyDocsRequest({
@@ -14,15 +14,17 @@ export async function trackDocsRequest(
     userAgent,
     referer: request.headers.get('referer') ?? request.headers.get('referrer') ?? undefined,
   })
-  if (!classification.shouldTrack) return
+  if (!classification.shouldTrack || classification.surface === 'other') return
 
   const { agent_family, agent_kind, match_source, referer_host, surface } = classification
   const distinctId = agent_family
     ? `docs:${agent_family}:${agent_kind ?? 'unknown'}`
     : `docs:${match_source}:${surface}`
-  const posthogHost = host?.startsWith('https://') ? host : 'https://us.i.posthog.com'
+  const posthogHost = URL.parse(host || 'https://us.i.posthog.com')
+  if (!posthogHost || !['https:', 'http:'].includes(posthogHost.protocol)) return
   try {
-    const response = await fetch(`${posthogHost.replace(/\/$/, '')}/capture/`, {
+    posthogHost.pathname = `${posthogHost.pathname.replace(/\/$/, '')}/capture/`
+    const response = await fetch(posthogHost, {
       body: JSON.stringify({
         api_key: key,
         distinct_id: distinctId,
