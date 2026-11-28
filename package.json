@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import=tsx --import=./scripts/native-json-imports.mjs node_modules/vite/bin/vite.js",
     "build": "node scripts/guard-vocs-config.mjs && pnpm run check:types && pnpm run build:site",
+    "build:cloudflare": "DOCS_DEPLOY_ENV=production pnpm run build:site && DOCS_DEPLOY_ENV=production tsx scripts/prepare-cloudflare.ts",
     "build:site": "pnpm run check:styles && vite build && node --experimental-strip-types scripts/finalize-sitemap.ts",
     "check": "biome check --write --unsafe . && pnpm run check:styles",
     "check:anchors": "node --experimental-strip-types scripts/check-internal-anchors.ts",
@@ -47,6 +48,7 @@
     "minisearch": "7.2.0",
     "monaco-editor": "^0.55.1",
     "ox": "0.14.54",
+    "path-to-regexp": "6.3.0",
     "posthog-js": "^1.393.5",
     "posthog-node": "^5.38.5",
     "prool": "^0.2.4",
@@ -87,7 +89,8 @@
     "typescript": "^6.0.3",
     "vite": "~8.1.6",
     "vite-plugin-mkcert": "^2.1.0",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "wrangler": "4.155.0"
   },
   "devEngines": {
     "runtime": {

@@ -1,0 +1,52 @@
+name: Deploy Cloudflare Docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: deploy-cloudflare-docs
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      actions: write
+      artifact-metadata: write
+      attestations: write
+      contents: read
+      id-token: write
+    uses: tempoxyz/gh-actions/.github/workflows/cloudflare-deploy-broker-build.yml@17f31bd87aa328218ba40bf54b04fc7ef3dd457e # 2026-11-27T22-14-34Z-17f31bd8
+    with:
+      artifact-name: tempo-docs
+      build-command: NODE_OPTIONS=--max-old-space-size=6144 pnpm build:cloudflare
+      wrangler-config: wrangler.jsonc
+      build-cache-paths: node_modules/.cache/vocs
+      build-cache-key-files: patches/vocs@2.12.0.patch
+      timeout-minutes: 20
+    secrets:
+      build-environment: ${{ secrets.DOCS_CLOUDFLARE_BUILD_ENV }}
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      id-token: write
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@35019557465e3c38ee3468be171771fd73577584 # 2026-10-20T06-22-38Z-35019557
+
+      - name: Deploy Worker
+        uses: tempoxyz/gh-actions/actions/cloudflare-deploy-broker@17f31bd87aa328218ba40bf54b04fc7ef3dd457e # 2026-11-27T22-14-34Z-17f31bd8
+        with:
+          deployment-id: tempo-docs
+          artifact-id: ${{ needs.build.outputs.artifact-id }}
+          archive-digest: ${{ needs.build.outputs.archive-digest }}
+          module-digest: ${{ needs.build.outputs.module-digest }}

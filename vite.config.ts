@@ -8,6 +8,7 @@ import { zyzz } from 'zyzz/vite'
 import { graphiteRelatedDocsPlugin } from './scripts/graphite-related-docs-plugin'
 import { vocsSkipLinkPlugin } from './scripts/vocs-skip-link-plugin'
 import { vocsWithZyzz } from './scripts/zyzz-mdx-resources'
+import { deployEnvironment } from './src/lib/deploy-environment'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -21,7 +22,8 @@ export default defineConfig(({ mode }) => {
     // Gzip-size reporting compresses every output just for the build log.
     build: { reportCompressedSize: !process.env.CI },
     define: {
-      'import.meta.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV ?? ''),
+      'import.meta.env.DOCS_DEPLOY_ENV': JSON.stringify(deployEnvironment() ?? ''),
+      'import.meta.env.DOCS_VERCEL': Boolean(process.env.VERCEL),
     },
     plugins: [
       // Example regions are not complete modules. Keep server tooling out of
@@ -38,6 +40,7 @@ export default defineConfig(({ mode }) => {
           'playwright.zones.config.ts',
           'playwright.production.config.ts',
           'vocs.config.ts',
+          'worker/**',
         ],
         script: false,
       }),
@@ -88,7 +91,7 @@ function developersProxyBasePath(): Plugin {
       })
     },
     configEnvironment(name) {
-      if (process.env.VERCEL_ENV !== 'production') return
+      if (deployEnvironment() !== 'production') return
       // tempo.com (and the legacy tempo.xyz host) strips /developers before requests reach Waku,
       // so the server routes at root. Prerendered HTML is read at the public mount, so its links
       // carry /developers; the browser picks the mount from the host it runs on. The deployment

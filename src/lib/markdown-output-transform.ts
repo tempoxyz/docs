@@ -2,11 +2,12 @@ import type { MarkdownOutputTransform } from 'vocs'
 import { renderAiIndex, renderAiPage } from './ai-docs'
 import { resolveBaseUrl } from './base-url'
 import { canonicalizeGeneratedDeveloperLinks } from './canonical-developer-links'
+import { deployEnvironment } from './deploy-environment'
 
 /** Add product context before Vocs assembles, validates, and hashes every export. */
 export const transformMarkdownOutput: MarkdownOutputTransform = ({ index, pages }) => {
   const canonical = (content: string) =>
-    process.env.VERCEL_ENV === 'production'
+    deployEnvironment() === 'production'
       ? canonicalizeGeneratedDeveloperLinks(content, `${resolveBaseUrl()}/docs`)
       : content
   return {

@@ -1,9 +1,11 @@
-import { Changelog, defineConfig, Embedding, Reranker, Retriever } from 'vocs/config'
+import { Changelog, defineConfig } from 'vocs/config'
 import { aiDocsDescription } from './src/lib/ai-docs'
 import { resolveBaseUrl } from './src/lib/base-url'
 import { blogMigrationRedirects } from './src/lib/blog-migration'
 import { cacheChangelog } from './src/lib/changelog-cache'
 import { rehypeCompactShikiStyles } from './src/lib/compact-shiki-styles'
+import { deployEnvironment } from './src/lib/deploy-environment'
+import { docsRetriever } from './src/lib/docs-ai-retriever'
 import {
   developerSurfaceRedirects,
   docsRouteDestination,
@@ -35,7 +37,7 @@ const tempoChangelog = cacheChangelog(
 
 // Release notes render as plain Markdown links, outside Waku's router, so production keeps the
 // public mount that the router would otherwise add.
-const releaseNoteMount = process.env.VERCEL_ENV === 'production' ? '/developers' : ''
+const releaseNoteMount = deployEnvironment() === 'production' ? '/developers' : ''
 
 const changelog = Changelog.from({
   ...tempoChangelog,
@@ -240,24 +242,14 @@ export default defineConfig({
     // Preview deploys skip the AI search index: they don't need it, and a bad
     // Cloudflare token would otherwise fail every PR preview build.
     retriever:
-      process.env.CLOUDFLARE_API_TOKEN && process.env.VERCEL_ENV !== 'preview'
-        ? Retriever.local({
-            embedding: Embedding.cloudflare(),
+      process.env.CLOUDFLARE_API_TOKEN && deployEnvironment() !== 'preview'
+        ? docsRetriever(
             // Production pages are served behind the tempo.com `/developers`
             // proxy; the default origin-relative endpoint escapes the prefix.
-            endpoint:
-              process.env.VERCEL_ENV === 'production'
-                ? 'https://tempo.com/developers/api/search'
-                : undefined,
-            hybrid: true,
-            reranker: Reranker.cloudflare(),
-            sources: [
-              { url: 'https://viem.sh/llms.txt', label: 'viem' },
-              { url: 'https://wagmi.sh/llms.txt', label: 'wagmi' },
-              { url: 'https://mpp.dev/llms.txt', label: 'mpp' },
-              { url: 'https://accounts.tempo.com/llms.txt', label: 'accounts' },
-            ],
-          })
+            deployEnvironment() === 'production'
+              ? 'https://tempo.com/developers/api/search'
+              : undefined,
+          )
         : undefined,
   },
   search: {

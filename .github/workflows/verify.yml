@@ -192,6 +192,20 @@ jobs:
         if: matrix.target == 'production'
         run: pnpm run check:markdown
 
+      - name: Smoke-test Cloudflare Worker
+        if: matrix.target == 'production'
+        env:
+          DOCS_DEPLOY_ENV: production
+        run: |
+          pnpm exec tsx scripts/prepare-cloudflare.ts
+          pnpm exec wrangler dev --ip 127.0.0.1 --port 8787 > "$RUNNER_TEMP/docs-worker.log" 2>&1 &
+          worker_pid=$!
+          trap 'kill "$worker_pid" 2>/dev/null || true' EXIT
+          if ! pnpm exec tsx scripts/smoke-cloudflare.ts http://127.0.0.1:8787; then
+            cat "$RUNNER_TEMP/docs-worker.log"
+            exit 1
+          fi
+
       - name: Build app for E2E
         if: matrix.target == 'e2e-build'
         run: node scripts/guard-vocs-config.mjs && pnpm run build:site

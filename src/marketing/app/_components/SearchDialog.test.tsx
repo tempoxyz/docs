@@ -10,7 +10,7 @@ describe('searchResultHref', () => {
   })
 
   it('keeps Vocs search paths unchanged outside production', async () => {
-    vi.stubEnv('VERCEL_ENV', 'preview')
+    vi.stubEnv('DOCS_DEPLOY_ENV', 'preview')
     const { searchResultHref } = await import('./SearchDialog')
 
     expect(searchResultHref('/docs/guide/payments#send-a-payment')).toBe(
@@ -19,7 +19,7 @@ describe('searchResultHref', () => {
   })
 
   it('routes production search results through the public developers mount', async () => {
-    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.stubEnv('DOCS_DEPLOY_ENV', 'production')
     const { searchResultHref } = await import('./SearchDialog')
 
     expect(searchResultHref('/docs/guide/payments#send-a-payment')).toBe(

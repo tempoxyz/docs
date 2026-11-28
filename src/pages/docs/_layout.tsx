@@ -80,8 +80,12 @@ export default function DocsLayout(
         )}
         {pageSettled && (
           <>
-            <SpeedInsights route={props.path} />
-            <Analytics />
+            {import.meta.env.DOCS_VERCEL && (
+              <>
+                <SpeedInsights route={props.path} />
+                <Analytics />
+              </>
+            )}
             <GoogleAnalytics />
             <PostHogSetup />
           </>

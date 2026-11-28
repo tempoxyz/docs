@@ -11,7 +11,7 @@ export async function createOgResponse(
     pilatFont,
     background,
   }: {
-    wasmModule: ArrayBuffer
+    wasmModule: ArrayBuffer | WebAssembly.Module
     hbSetFont: ArrayBuffer
     pilatFont: ArrayBuffer
     background: ArrayBuffer

@@ -7,7 +7,7 @@ describe('developersPath', () => {
   })
 
   it('uses root-relative paths outside production deployments', async () => {
-    vi.stubEnv('VERCEL_ENV', 'preview')
+    vi.stubEnv('DOCS_DEPLOY_ENV', 'preview')
     const { developersPath } = await import('./developersPaths')
 
     expect(developersPath('/')).toBe('/')
@@ -17,7 +17,7 @@ describe('developersPath', () => {
   })
 
   it('uses the developers mount in production deployments', async () => {
-    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.stubEnv('DOCS_DEPLOY_ENV', 'production')
     const { developersPath } = await import('./developersPaths')
 
     expect(developersPath('/')).toBe('/developers')
@@ -41,7 +41,7 @@ describe('developersApiPath', () => {
     ['https://tempo.com/developersx/docs', '/api/routes-quote'],
     ['http://localhost:5173/docs/routes/test', '/api/routes-quote'],
   ])('follows the mount the page was served from: %s', async (page, expected) => {
-    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.stubEnv('DOCS_DEPLOY_ENV', 'production')
     vi.stubGlobal('location', new URL(page))
     const { developersApiPath } = await import('./developersPaths')
 
@@ -49,7 +49,7 @@ describe('developersApiPath', () => {
   })
 
   it('uses the deployment mount without a page', async () => {
-    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.stubEnv('DOCS_DEPLOY_ENV', 'production')
     const { developersApiPath } = await import('./developersPaths')
 
     expect(developersApiPath('/api/zone-rpc?zone=1')).toBe('/developers/api/zone-rpc?zone=1')

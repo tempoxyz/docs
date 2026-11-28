@@ -8,7 +8,7 @@ function normalizedPath(path: string): string {
 export function developersPath(path: string): string {
   const normalized = normalizedPath(path)
 
-  if (import.meta.env.VERCEL_ENV !== 'production') return normalized
+  if (import.meta.env.DOCS_DEPLOY_ENV !== 'production') return normalized
   if (normalized === '/') return DEVELOPERS_BASE_PATH
   return `${DEVELOPERS_BASE_PATH}${normalized}`
 }
@@ -22,7 +22,7 @@ export function developersApiPath(path: string): string {
   const normalized = normalizedPath(path)
   const mounted =
     typeof location === 'undefined'
-      ? import.meta.env.VERCEL_ENV === 'production'
+      ? import.meta.env.DOCS_DEPLOY_ENV === 'production'
       : location.pathname === DEVELOPERS_BASE_PATH ||
         location.pathname.startsWith(`${DEVELOPERS_BASE_PATH}/`)
   return mounted ? `${DEVELOPERS_BASE_PATH}${normalized}` : normalized

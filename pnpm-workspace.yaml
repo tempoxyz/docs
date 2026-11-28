@@ -26,6 +26,7 @@ onlyBuiltDependencies:
   - es5-ext
   - esbuild
   - vue-demi
+  - workerd
 
 overrides:
   # Keep transitive vocs on the same patched release as the root.

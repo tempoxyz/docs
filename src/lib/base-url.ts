@@ -1,9 +1,12 @@
+import { deployEnvironment } from './deploy-environment'
+
 export function resolveBaseUrl(): string {
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') return ''
+  const environment = deployEnvironment()
+  if (environment && environment !== 'production') return ''
   if (URL.canParse(process.env.VITE_BASE_URL ?? '')) {
     return (process.env.VITE_BASE_URL as string).replace(/\/$/, '')
   }
-  if (process.env.VERCEL_ENV === 'production') return 'https://tempo.com/developers'
+  if (environment === 'production') return 'https://tempo.com/developers'
   const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   if (productionUrl) return `https://${productionUrl}`
   return ''

@@ -115,8 +115,12 @@ export default function MarketingRoute({
       {children}
       {analyticsReady && (
         <Suspense fallback={null}>
-          <SpeedInsights route={route} />
-          <Analytics />
+          {import.meta.env.DOCS_VERCEL && (
+            <>
+              <SpeedInsights route={route} />
+              <Analytics />
+            </>
+          )}
           <GoogleAnalytics />
           <PostHogSetup site="developers" />
         </Suspense>
