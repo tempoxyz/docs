@@ -28,7 +28,6 @@ jobs:
       wrangler-config: wrangler.jsonc
       build-cache-paths: node_modules/.cache/vocs
       build-cache-key-files: patches/vocs@2.12.0.patch
-      timeout-minutes: 20
     secrets:
       build-environment: ${{ secrets.DOCS_CLOUDFLARE_BUILD_ENV }}
 
