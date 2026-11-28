@@ -1356,7 +1356,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/assets/md/index.md",
@@ -1367,7 +1367,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/index.md",
@@ -1393,7 +1393,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers",
@@ -1404,7 +1404,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers",
@@ -1415,7 +1415,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers",
@@ -1426,7 +1426,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers",
@@ -1437,7 +1437,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/:path*",
@@ -1448,7 +1448,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/bridge-layerzero",
@@ -1459,7 +1459,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/bridge-relay",
@@ -1470,7 +1470,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/node/network-upgrades",
@@ -1481,7 +1481,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/protocol/transactions/AccountKeychain",
@@ -1492,7 +1492,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/partners",
@@ -1503,7 +1503,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1514,7 +1514,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/indexer-api",
@@ -1525,7 +1525,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/partners/join",
@@ -1536,7 +1536,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/partners/join",
@@ -1547,7 +1547,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/partners/join",
@@ -1558,7 +1558,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/partners/join",
@@ -1569,7 +1569,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/node/network-upgrades",
@@ -1580,7 +1580,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api",
@@ -1591,7 +1591,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api",
@@ -1602,7 +1602,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/accounts",
@@ -1613,7 +1613,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/accounts/authentication/passkeys",
@@ -1624,7 +1624,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/getting-funds",
@@ -1635,7 +1635,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/tempo-transaction#access-keys",
@@ -1646,7 +1646,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/tempo-transaction#batch-calls",
@@ -1657,7 +1657,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1668,7 +1668,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/guide/tempo-transaction#scheduled-transactions",
@@ -1679,7 +1679,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/protocol/transactions/spec-tempo-transaction#signature-types",
@@ -1690,7 +1690,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1701,7 +1701,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1712,7 +1712,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1723,7 +1723,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1734,7 +1734,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1745,7 +1745,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/api/fee-payer",
@@ -1756,7 +1756,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/accounts/policies/receive-policies",
@@ -1767,7 +1767,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/accounts/policies/receive-policies",
@@ -1778,7 +1778,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/learn/blockchain-payments/",
@@ -1789,7 +1789,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/learn/stablecoin-payments/",
@@ -1800,7 +1800,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/learn/global-payouts/",
@@ -1811,7 +1811,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/learn/microtransactions/",
@@ -1822,7 +1822,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/learn/stablecoin-payroll/",
@@ -1833,7 +1833,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/learn/cross-border-payments/",
@@ -1844,7 +1844,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/learn/tokenized-deposits/",
@@ -1855,7 +1855,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tips.sh/1028",
@@ -1866,7 +1866,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/quickstart/integrate-tempo",
@@ -1877,7 +1877,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/quickstart/integrate-tempo",
@@ -1888,7 +1888,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/cli/wallet",
@@ -1899,7 +1899,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/sdk",
@@ -1910,7 +1910,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/partners",
@@ -1921,7 +1921,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/:section",
@@ -1932,7 +1932,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/docs/:section/:path*",
@@ -1943,7 +1943,7 @@
       "has": [
         {
           "type": "host",
-          "value": "^(?:next\\.)?docs\\.tempo\\.xyz$"
+          "value": "^(?:(?:mainnet|next)\\.)?docs\\.tempo\\.xyz$"
         }
       ],
       "destination": "https://tempo.com/developers/:path*",

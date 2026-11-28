@@ -40,6 +40,7 @@ describe('public assets on the docs deployment host', () => {
 const redirects = vercelConfig.redirects.filter((redirect) => !redirect.has)
 const hostRedirects = vercelConfig.redirects.filter((redirect) => redirect.has)
 const vocsRedirects = vocsConfig.redirects as VocsRedirect[]
+const legacyDocsHosts = ['docs.tempo.xyz', 'mainnet.docs.tempo.xyz', 'next.docs.tempo.xyz']
 const legacySectionPathSource =
   '/:section(api|guide|quickstart|protocol|sdk|cli|wallet|tools|ecosystem|developer-tools|agents|earn|routes|zones|network|development|resources|payments)/:path*'
 
@@ -236,7 +237,7 @@ describe('docs routing redirects', () => {
         (redirect) => redirect.source === '/developers/docs/protocol/tips' && !redirect.has,
       )
 
-      for (const host of ['docs.tempo.xyz', 'next.docs.tempo.xyz']) {
+      for (const host of legacyDocsHosts) {
         expect(firstTipRedirect).toBeLessThan(findHostRedirectIndex('/developers/:path*', host))
         expect(firstTipRedirect).toBeLessThan(findHostRedirectIndex('/:path*', host))
       }
@@ -278,7 +279,7 @@ describe('docs routing redirects', () => {
     })
   })
 
-  describe.each(['docs.tempo.xyz', 'next.docs.tempo.xyz'])('canonical redirects for %s', (host) => {
+  describe.each(legacyDocsHosts)('canonical redirects for %s', (host) => {
     it.each([
       ['/', 'https://tempo.com/developers'],
       ['/developers', 'https://tempo.com/developers'],
