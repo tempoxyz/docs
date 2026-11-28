@@ -1,0 +1,123 @@
+---
+title: "Send stablecoin payouts with Python"
+seoTitle: "Send Stablecoin Payouts with Python | Tempo Docs"
+description: "Pay a list of recipients from a CSV file in one Tempo transaction with the Python SDK, with a payment reference on every transfer."
+---
+
+[Guides](/docs/resources/guides) / [Plan global payouts](/docs/resources/guides/global-payouts) / Python
+
+# Send stablecoin payouts with Python
+
+This guide pays every recipient in a CSV file with one Tempo transaction, using the [Tempo Python SDK](/docs/sdk/python) for web3.py. Each transfer carries a payment reference, such as a payout ID, so recipients and your ledger can match it. The batch settles onchain in under a second, and if any transfer fails, the whole batch reverts.
+
+The examples use AlphaUSD on Moderato testnet and require Python 3.10 or later.
+
+::::steps
+
+## Install the Python SDK
+
+```bash [Terminal]
+python -m pip install pytempo==0.6.1
+```
+
+## Prepare the payout file
+
+Each row has the recipient address, the amount in dollars, and a reference of up to 32 bytes.
+
+```csv [payouts.csv]
+address,amount,reference
+0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbb,125.50,PAY-2026-11-001
+0x70997970C51812dc3A010C7d01b50e0d17dc79C8,80,PAY-2026-11-002
+```
+
+## Send the batch
+
+Fund a sender account with AlphaUSD from the [faucet](/docs/quickstart/faucet) and set `TEMPO_PRIVATE_KEY` to its key. The script turns each row into a `transferWithMemo` call, estimates gas for the batch, and sends all calls in one [Tempo Transaction](/docs/guide/tempo-transaction).
+
+```python [payouts.py]
+import csv
+import os
+from decimal import Decimal
+
+from web3 import Web3
+from pytempo import TempoTransaction
+from pytempo.contracts import ALPHA_USD, TIP20
+
+w3 = Web3(Web3.HTTPProvider("https://rpc.moderato.tempo.xyz"))
+account = w3.eth.account.from_key(os.environ["TEMPO_PRIVATE_KEY"])
+token = TIP20(ALPHA_USD)
+
+
+def memo(reference: str) -> bytes:
+    data = reference.encode("utf-8")
+    if len(data) > 32:
+        raise ValueError(f"Reference longer than 32 bytes: {reference}")
+    return data.ljust(32, b"\x00")
+
+
+calls = []
+with open("payouts.csv", newline="") as f:
+    for row in csv.DictReader(f):
+        calls.append(
+            token.transfer_with_memo(
+                to=Web3.to_checksum_address(row["address"]),
+                amount=int(Decimal(row["amount"]) * 10**6),  # 6 decimals
+                memo=memo(row["reference"]),
+            )
+        )
+
+# Transfers to new addresses cost more gas, so estimate the whole batch.
+estimate = w3.provider.make_request(
+    "eth_estimateGas",
+    [{
+        "from": account.address,
+        "calls": [{"to": w3.to_hex(c.to), "data": w3.to_hex(c.data), "value": "0x0"} for c in calls],
+    }],
+)
+if "error" in estimate:
+    raise RuntimeError(estimate["error"])
+gas_limit = int(int(estimate["result"], 16) * 1.2)  # 20% headroom
+
+tx = TempoTransaction.create(
+    chain_id=w3.eth.chain_id,
+    gas_limit=gas_limit,
+    max_fee_per_gas=w3.eth.gas_price * 2,
+    max_priority_fee_per_gas=w3.eth.gas_price,
+    nonce=w3.eth.get_transaction_count(account.address),
+    fee_token=ALPHA_USD,
+    calls=tuple(calls),
+)
+signed = tx.sign(account.key.hex())
+tx_hash = w3.eth.send_raw_transaction(signed.encode())
+receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+if receipt.status != 1:
+    raise RuntimeError(f"Payout batch failed: {w3.to_hex(tx_hash)}")
+
+print(f"Paid {len(calls)} recipients in {w3.to_hex(tx_hash)} (gas used: {receipt.gasUsed})")
+```
+
+Run it with `python payouts.py`. Look up the hash in the [testnet explorer](https://explore.testnet.tempo.xyz) to see each transfer and its memo.
+
+::::
+
+## Run payouts in production
+
+- Store the transaction hash with each payout ID before you mark payouts as sent.
+- Split large files into batches of a few hundred transfers. One transaction can't exceed the block gas limit.
+- Keep amounts as `Decimal` or integer base units. Floats round incorrectly for money.
+- For recipients who want local currency in a bank account, use a payout provider. See [Fund accounts and pay out](/docs/resources/guides/funding-and-payouts).
+- On mainnet, connect to a mainnet RPC endpoint and use the stablecoin you hold. Find contract addresses in [Stablecoins on Tempo](/get-started/stablecoins).
+
+## Python payout questions
+
+### What does a payout batch cost?
+
+The batch pays one network fee in the stablecoin set with `fee_token`, and a standard transfer costs less than a cent. See [Understanding transaction fees](/docs/protocol/fees) for the current base fee.
+
+### What happens if one transfer fails?
+
+The whole batch reverts, and no recipient is paid. For example, a [receive policy](/docs/accounts/policies/receive-policies) can reject a transfer. Fix the row and send the batch again. To send transfers as independent transactions instead, use [parallel transactions](/docs/guide/payments/send-parallel-transactions).
+
+### Can recipients see the payout reference?
+
+Yes. The memo is part of the `TransferWithMemo` event, so wallets, explorers, and the recipient's own reconciliation can read it.

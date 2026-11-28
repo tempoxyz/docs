@@ -1,0 +1,129 @@
+---
+title: "Charge for an API with MPP in Express"
+seoTitle: "Charge for an API in Express with MPP | Tempo Docs"
+description: "Charge per request for an Express route with the mppx middleware, settle stablecoin payments on Tempo, and test with a paying client."
+---
+
+[Guides](/docs/resources/guides) / [HTTP 402 Payment Required](/docs/resources/guides/402-payment-required) / Express
+
+# Charge for an API with MPP in Express
+
+This guide charges $0.01 per request for an Express route with the [Machine Payments Protocol](/docs/agents) (MPP). The `mppx` middleware answers unpaid requests with HTTP `402 Payment Required`, verifies the client's stablecoin payment on Tempo, and then runs your handler. Clients and agents pay inside the request, with no account signup or API key.
+
+The examples use OUSD on Moderato testnet.
+
+::::steps
+
+## Install mppx
+
+```bash [Terminal]
+npm install express mppx viem
+```
+
+## Set the server secret and recipient
+
+`mppx` signs payment challenges with a server secret. Generate one, and set `TEMPO_RECIPIENT` to the address that receives payments.
+
+```bash [Terminal]
+export MPP_SECRET_KEY="$(openssl rand -base64 32)"
+export TEMPO_RECIPIENT=<YOUR_ADDRESS>
+```
+
+Store `MPP_SECRET_KEY` in your secret manager and use the same value on every server instance.
+
+## Add a paid route
+
+Pass `mppx.charge()` as route middleware. The handler runs only after the payment is verified, and the response carries a `Payment-Receipt` header.
+
+```ts [server.ts]
+import express from 'express'
+import { Mppx, tempo } from 'mppx/express'
+
+const recipient = process.env.TEMPO_RECIPIENT as `0x${string}`
+if (!recipient) throw new Error('Set TEMPO_RECIPIENT to the address that receives payments')
+
+const app = express()
+
+const mppx = Mppx.create({
+  methods: [
+    tempo({
+      currency: '0x20c0000000000000000000006a37da5c996874be', // OUSD
+      recipient,
+      testnet: true, // Moderato testnet. Remove for mainnet.
+    }),
+  ],
+})
+
+// Free route
+app.get('/health', (req, res) => {
+  res.json({ ok: true })
+})
+
+// Paid route: $0.01 per request
+app.get(
+  '/api/forecast',
+  mppx.charge({ amount: '0.01', description: 'Weather forecast' }),
+  (req, res) => {
+    res.json({ city: 'Lisbon', forecast: 'Sunny, 22°C' })
+  },
+)
+
+app.listen(3000, () => console.log('Listening on http://localhost:3000'))
+```
+
+Start the server with `npx tsx server.ts`. A request without payment returns the challenge:
+
+```bash [Terminal]
+curl -i http://localhost:3000/api/forecast
+# HTTP/1.1 402 Payment Required
+# www-authenticate: Payment id="…", realm="localhost", method="tempo", intent="charge", …
+```
+
+## Pay from a client
+
+Fund a payer account with OUSD from the [faucet](/docs/quickstart/faucet) and set `PAYER_PRIVATE_KEY` to its key. `mppx.fetch` reads the `402` challenge, pays it, and retries the request.
+
+```ts [client.ts]
+import { Receipt } from 'mppx'
+import { Mppx, tempo } from 'mppx/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount(process.env.PAYER_PRIVATE_KEY as `0x${string}`)
+
+const mppx = Mppx.create({
+  polyfill: false,
+  methods: [tempo({ account, allowedChainIds: [42431] })], // Moderato testnet
+})
+
+const response = await mppx.fetch('http://localhost:3000/api/forecast')
+console.log(response.status, await response.json())
+// 200 { city: 'Lisbon', forecast: 'Sunny, 22°C' }
+
+const receipt = Receipt.fromResponse(response)
+console.log(receipt.status, receipt.reference)
+// success 0x…
+```
+
+Agents with the [Tempo CLI](/docs/cli/request) can call the same route with `tempo request`.
+
+::::
+
+## Go to mainnet
+
+- Remove `testnet: true` from `tempo()`, and set `allowedChainIds: [4217]` on clients.
+- Set `realm` in `Mppx.create()` or the `MPP_REALM` variable to your public domain when the server sits behind a proxy. See [MPP payment realm](/docs/guide/machine-payments/server#mpp-payment-realm).
+- To pay clients' network fees, pass a `feePayer` account to `tempo()`. See [MPP fee sponsorship](/docs/guide/machine-payments/server#mpp-fee-sponsorship).
+
+## Express MPP questions
+
+### Can different routes charge different prices?
+
+Yes. Pass a different `amount` to each `mppx.charge()` call. You can also override `currency` and `recipient` per route.
+
+### How do I bill high-frequency calls without a transaction per request?
+
+Use a payment session. The client opens a channel once and signs vouchers for each request. See [pay-as-you-go payments](/docs/guide/machine-payments/pay-as-you-go).
+
+### Does this work with other Node.js frameworks?
+
+Yes. `mppx` ships middleware for [Next.js](/docs/resources/guides/charge-for-an-api-nextjs), Hono, and Elysia, and `mppx/server` works with any Fetch API server. See [Accept payments for an API](/docs/guide/machine-payments/server).
